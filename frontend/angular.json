@@ -3,7 +3,7 @@
   "version": 1,
   "newProjectRoot": "projects",
   "projects": {
-    "MEPhI-Olymp": {
+    "org-mephi": {
       "projectType": "application",
       "schematics": {
         "@schematics/angular:component": {
@@ -83,12 +83,12 @@
         "serve": {
           "builder": "@angular-devkit/build-angular:dev-server",
           "options": {
-            "browserTarget": "MEPhI-Olymp:build"
+            "browserTarget": "org-mephi:build"
           },
           "configurations": {
             "hmr": {
               "hmr": true,
-              "browserTarget": "MEPhI-Olymp:build:hmr"
+              "browserTarget": "org-mephi:build:hmr"
             }
           },
           "defaultConfiguration": "hmr"
@@ -114,5 +114,5 @@
       }
     }
   },
-  "defaultProject": "MEPhI-Olymp"
+  "defaultProject": "org-mephi"
 }
