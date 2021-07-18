@@ -1,4 +1,19 @@
-.bi {
-  vertical-align: -.125em;
-  fill: currentColor;
+.home-link {
+  display: block;
+  padding: 15px 0;
+  padding-left: 160px;
+  text-decoration: none;
+  overflow: hidden;
+  background: transparent url('../../../assets/mephi-logo.png') 0 0 no-repeat;
+}
+
+.site-title {
+  display: block;
+  padding: 5px 0;
+  padding-left: 18px;
+  color: #0055bb;
+  font-size: 20px;
+  line-height: 23px;
+  text-transform: uppercase;
+  border-left: 1px solid #0055bb;
 }

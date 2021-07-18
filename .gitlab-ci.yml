@@ -1,5 +1,6 @@
 stages:
   - build
+  - deploy
 
 
 build-frontend:
@@ -8,7 +9,18 @@ build-frontend:
   script:
     - 'yarn --cwd frontend install'
     - 'yarn --cwd frontend build'
-  when: manual
   artifacts:
     paths:
       - frontend/dist
+  when: manual
+
+pages:
+  stage: deploy
+  script:
+    - mkdir .public
+    - cp -r frontend/dist .public
+    - mv .public public
+  artifacts:
+    paths:
+      - public
+  when: manual
