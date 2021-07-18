@@ -2,7 +2,7 @@
 
 [[_TOC_]]
 
-### Работа с Git
+### Правила работы с Git
 
 1. **Основа - [GitLab Flow](https://docs.gitlab.com/ee/topics/gitlab_flow.html#production-branch-with-gitlab-flow)**
 1. Задачи ставятся в [Gitlab issues](https://gitlab.com/temikmax/org-mephi-2.0/-/issues).
@@ -14,7 +14,8 @@
 1. Все изменения в основную ветку можно добавить только через [merge request](https://gitlab.com/temikmax/org-mephi-2.0/-/merge_requests) из веток `frontend` и `backend`
    * Закрыть merge request можно только с согласованием `Owner`, `Maintainer` от команды `frontend` и `Maintainer` от команды `backend`
 
-### Задача считается закрытой, если
+### Правила закрытия задач
+Задача считается закрытой, если
 1. Написан код и тесты
 1. Пройдены тесты на сервере
 1. Пройдено *Code Review*
@@ -36,7 +37,7 @@
 #### Язык
 Английский. Простое настоящее время (Present Simple).
 
-#### Возможные типы коммитов
+#### Типы коммитов
 - `add` - добавление новой функциональности
 - `fix` - исправление бага
 - `style` - исправление опечаток и форматирования
@@ -51,17 +52,17 @@
 
 # Frontend code of conduct
 
-### Работа с Git
+### Участники команды
+1. [Артем Чернышов](https://gitlab.com/ache) - Maintainer
+1. [Анита Баландина](https://gitlab.com/anita-balandina) - Developer
+1. Марина Петрова - Дизайнер
+
+### Правила работы с Git
 1. Пушить напрямую в ветку разработки frontend запрещено
 1. Каждая задача реализуется в отдельной рабочей ветке
 1. Рабочие ветки создаются в [Gitlab issues](https://gitlab.com/temikmax/org-mephi-2.0/-/issues) путём создания [merge request](https://gitlab.com/temikmax/org-mephi-2.0/-/merge_requests) в **ветку разработки frontend** 
 1. Все изменения в ветку разработки frontend можно добавить только через [merge request](https://gitlab.com/temikmax/org-mephi-2.0/-/merge_requests)
     * Закрыть merge request можно только с согласованием `Maintainer` от команды `frontend`
-
-### Участники команды
-1. [Артем Чернышов](https://gitlab.com/ache) - Maintainer
-1. [Анита Баландина](https://gitlab.com/anita-balandina) - Developer
-1. Марина Петрова - Дизайнер
 
 ### Инструменты разработки
 - [JetBrains WebStorm 2021.1](https://www.jetbrains.com/webstorm/)
