@@ -1,0 +1,14 @@
+stages:
+  - build
+
+
+build-frontend:
+  image: node:lts-slim
+  stage: build
+  script:
+    - 'yarn --cwd frontend install'
+    - 'yarn --cwd frontend build'
+  when: manual
+  artifacts:
+    paths:
+      - frontend/dist
