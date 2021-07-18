@@ -1,2 +1,5 @@
 export * from './registerType'
 export * from './userRegister'
+export * from './registerResult'
+export * from './authResult'
+export * from './userAuth'

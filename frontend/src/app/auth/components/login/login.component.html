@@ -1,27 +1,54 @@
-<main class="form-signin">
-    <form>
-        <div class="row justify-content-center">
-            <div class="col-4">
-                <h1 class="h3 mb-3 fw-normal">Авторизация участников</h1>
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-6">
+            <h2>Авторизация участников</h2>
+            <div *ngIf="!authResult || !authResult.isSuccessful">
                 <div class="form-floating">
-                    <input type="email" class="form-control" id="floatingInput" placeholder="name@example.com">
-                    <label for="floatingInput">Электронная почта</label>
+                    <input type="email" class="form-control" required email placeholder="name@example.com"
+                           [(ngModel)]="userAuth.email" #email="ngModel" name="email">
+                    <label>Электронная почта</label>
+                    <div *ngIf="email.invalid && (email.dirty || email.touched)"
+                         class="alert alert-danger">
+                        <div *ngIf="email.errors?.required">
+                            Поле обязательно для заполнения
+                        </div>
+                        <div *ngIf="email.errors?.email">
+                            Невалидный e-mail
+                        </div>
+                    </div>
                 </div>
+                <br/>
                 <div class="form-floating">
-                    <input type="password" class="form-control" id="floatingPassword" placeholder="Password">
-                    <label for="floatingPassword">Пароль</label>
+                    <input type="password" class="form-control" placeholder="Пароль" required
+                           [(ngModel)]="userAuth.password" #password="ngModel" name="password">
+                    <label>Пароль</label>
+                    <div *ngIf="password.invalid && (password.dirty || password.touched)"
+                         class="alert alert-danger">
+                        <div *ngIf="password.errors?.required">
+                            Поле обязательно для заполнения
+                        </div>
+                    </div>
                 </div>
-                <button class="w-100 btn btn-lg btn-primary" type="submit">Войти</button>
-                <p class="mt-5 mb-3 text-muted">Если у Вас еще нет учетной записи, вы можете создать её,
-                    воспользовавшись процедурой регистрации.
-                </p>
-                <p class="mb-3 text-muted">
-                    Забыли пароль?
-                </p>
-                <p class="text-muted">
-                    Не пришло письмо для активации учетной записи?
-                </p>
+                <br/>
+                <button class="w-100 btn btn-lg btn-primary" type="submit" [disabled]="!isValid()" (click)="auth()">
+                    Войти
+                </button>
             </div>
+
+            <div *ngIf="authResult?.isSuccessful" class="alert alert-success">
+                Вы успешно вошли в систему
+            </div>
+
+
+            <p class="mt-5 mb-3 text-muted">Если у Вас еще нет учетной записи, вы можете создать её,
+                воспользовавшись <a href="/register">процедурой регистрации</a>.
+            </p>
+            <p class="mb-3 text-muted">
+                Забыли пароль?
+            </p>
+            <p class="text-muted">
+                Не пришло письмо для активации учетной записи?
+            </p>
         </div>
-    </form>
-</main>
+    </div>
+</div>

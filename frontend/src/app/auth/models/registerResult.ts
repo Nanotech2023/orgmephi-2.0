@@ -1,5 +1,6 @@
-export interface RegisterResult
+import { AuthResult } from '@/auth/models/authResult'
+
+
+export interface RegisterResult extends AuthResult
 {
-    isSuccessful: boolean
-    error: string | null
 }
