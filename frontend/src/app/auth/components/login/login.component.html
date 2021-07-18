@@ -1,0 +1,54 @@
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-6">
+            <h2 class="mt-5 mb-5">Авторизация участников</h2>
+            <div *ngIf="!authResult || !authResult.isSuccessful">
+                <div class="form-floating">
+                    <input type="email" class="form-control" required email placeholder="name@example.com"
+                           [(ngModel)]="userAuth.email" #email="ngModel" name="email">
+                    <label>Электронная почта</label>
+                    <div *ngIf="email.invalid && (email.dirty || email.touched)"
+                         class="alert alert-danger">
+                        <div *ngIf="email.errors?.required">
+                            Поле обязательно для заполнения
+                        </div>
+                        <div *ngIf="email.errors?.email">
+                            Невалидный e-mail
+                        </div>
+                    </div>
+                </div>
+                <br/>
+                <div class="form-floating">
+                    <input type="password" class="form-control" placeholder="Пароль" required
+                           [(ngModel)]="userAuth.password" #password="ngModel" name="password">
+                    <label>Пароль</label>
+                    <div *ngIf="password.invalid && (password.dirty || password.touched)"
+                         class="alert alert-danger">
+                        <div *ngIf="password.errors?.required">
+                            Поле обязательно для заполнения
+                        </div>
+                    </div>
+                </div>
+                <br/>
+                <button class="w-100 btn btn-lg btn-primary" type="submit" [disabled]="!isValid()" (click)="auth()">
+                    Войти
+                </button>
+            </div>
+
+            <div *ngIf="authResult?.isSuccessful" class="alert alert-success">
+                Вы успешно вошли в систему
+            </div>
+
+            <p class="mt-5 mb-3 text-muted">Если у Вас еще нет учетной записи, вы можете создать её, воспользовавшись
+                <a href="/register">процедурой регистрации</a>
+            </p>
+            <p class="mb-3 text-muted">
+                <a href="/register">Забыли пароль?</a>
+            </p>
+            <p class="text-muted">
+                <a href="/register">Не пришло письмо для активации учетной записи?</a>
+            </p>
+
+        </div>
+    </div>
+</div>

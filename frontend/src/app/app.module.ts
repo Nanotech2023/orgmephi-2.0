@@ -1,11 +1,10 @@
 import { NgModule } from '@angular/core'
-import { BrowserModule } from '@angular/platform-browser'
 import { AppRoutingModule } from '@/app-routing.module'
 import { AppComponent } from '@/app.component'
 import { LayoutModule } from '@/layout/layout.module'
-import { AboutModule } from '@/about/about.module'
-import { FeedbacksModule } from '@/feedbacks/feedbacks.module'
 import { OlympiadsModule } from '@/olympiads/olympiads.module'
+import { SharedModule } from '@/shared/shared.module'
+import { AuthModule } from '@/auth/auth.module'
 
 
 @NgModule( {
@@ -13,12 +12,11 @@ import { OlympiadsModule } from '@/olympiads/olympiads.module'
         AppComponent
     ],
     imports: [
-        BrowserModule,
+        SharedModule,
         LayoutModule,
-        AboutModule,
-        FeedbacksModule,
+        AuthModule,
         OlympiadsModule,
-        AppRoutingModule
+        AppRoutingModule,
     ],
     providers: [],
     bootstrap: [ AppComponent ]

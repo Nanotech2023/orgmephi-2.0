@@ -1,23 +1,23 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing'
 
-import { FooterComponent } from './footer.component'
+import { RegisterComponent } from './register.component'
 
 
-describe( 'FooterComponent', () =>
+describe( 'RegisterComponent', () =>
 {
-    let component: FooterComponent
-    let fixture: ComponentFixture<FooterComponent>
+    let component: RegisterComponent
+    let fixture: ComponentFixture<RegisterComponent>
 
     beforeEach( async () =>
     {
         await TestBed.configureTestingModule( {
-            declarations: [ FooterComponent ]
+            declarations: [ RegisterComponent ]
         } ).compileComponents()
     } )
 
     beforeEach( () =>
     {
-        fixture = TestBed.createComponent( FooterComponent )
+        fixture = TestBed.createComponent( RegisterComponent )
         component = fixture.componentInstance
         fixture.detectChanges()
     } )
