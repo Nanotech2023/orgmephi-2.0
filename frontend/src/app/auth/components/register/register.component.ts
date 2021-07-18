@@ -1,5 +1,5 @@
-import { Component, OnInit } from '@angular/core'
-import { RegisterType, RegisterTypeEnum, RegisterTypes, UserRegister, validateUser } from '@/auth/models'
+import { Component } from '@angular/core'
+import { RegisterType, RegisterTypeEnum, RegisterTypes, UserRegister, validateUser, Agreements } from '@/auth/models'
 import { AuthService } from '@/auth/services/auth.service'
 import { RegisterResult } from '@/auth/models/registerResult'
 
@@ -9,10 +9,12 @@ import { RegisterResult } from '@/auth/models/registerResult'
     templateUrl: './register.component.html',
     styleUrls: [ './register.component.scss' ]
 } )
-export class RegisterComponent implements OnInit
+export class RegisterComponent
 {
-    registerUser: UserRegister
+    agreements: string[] = Agreements
     registerTypes: RegisterType[] = RegisterTypes
+
+    registerUser: UserRegister
     selectedRegisterType: RegisterType | null
     hasRegisterNumber: boolean
     agreementAccepted: boolean
@@ -21,16 +23,7 @@ export class RegisterComponent implements OnInit
 
     constructor( private service: AuthService )
     {
-        this.registerUser = {
-            registerNumber: '',
-            activationCode: '',
-            email: '',
-            password: '',
-            name: '',
-            lastName: '',
-            birthDate: null,
-            surname: ''
-        }
+        this.registerUser = service.createEmptyUser()
         this.agreementAccepted = false
         this.selectedRegisterType = null
         this.hasRegisterNumber = false
@@ -38,26 +31,22 @@ export class RegisterComponent implements OnInit
         this.registrationCompleted = false
     }
 
-    ngOnInit(): void
-    {
-    }
-
-    selectRegisterType( registerType: RegisterType )
+    selectRegisterType( registerType: RegisterType ): void
     {
         this.selectedRegisterType = registerType
     }
 
-    isAvailable()
+    isAvailable(): boolean
     {
         return this.selectedRegisterType !== null && this.selectedRegisterType?.value == RegisterTypeEnum.schoolOlymp
     }
 
-    isValid()
+    isValid(): boolean
     {
         return validateUser( this.registerUser ) && this.agreementAccepted
     }
 
-    register()
+    register(): void
     {
         this.registerResult = this.service.register( this.registerUser )
         this.registrationCompleted = true

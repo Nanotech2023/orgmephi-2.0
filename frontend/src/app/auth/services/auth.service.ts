@@ -14,8 +14,7 @@ export class AuthService
     {
     }
 
-    //TODO return observable
-    register( user: UserRegister ): RegisterResult
+    auth( user: UserAuth ): AuthResult
     {
         return {
             error: null,
@@ -23,7 +22,21 @@ export class AuthService
         }
     }
 
-    auth( user: UserAuth ): AuthResult
+    createEmptyUser(): UserRegister
+    {
+        return {
+            registerNumber: '',
+            activationCode: '',
+            email: '',
+            password: '',
+            name: '',
+            lastName: '',
+            birthDate: null,
+            surname: ''
+        }
+    }
+
+    register( user: UserRegister ): RegisterResult
     {
         return {
             error: null,

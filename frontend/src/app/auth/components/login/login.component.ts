@@ -28,8 +28,9 @@ export class LoginComponent
         this.authResult = this.service.auth( this.userAuth )
     }
 
-    isValid()
+    isValid(): boolean
     {
-        return this.userAuth.password && this.userAuth.email
+        // TODO enforce email regex check
+        return !!( this.userAuth.password && this.userAuth.email )
     }
 }

@@ -1,7 +1,7 @@
 <div class="container">
     <div class="row justify-content-center">
         <div class="col-6">
-            <h2>Авторизация участников</h2>
+            <h2 class="mt-5 mb-5">Авторизация участников</h2>
             <div *ngIf="!authResult || !authResult.isSuccessful">
                 <div class="form-floating">
                     <input type="email" class="form-control" required email placeholder="name@example.com"
@@ -39,16 +39,16 @@
                 Вы успешно вошли в систему
             </div>
 
-
-            <p class="mt-5 mb-3 text-muted">Если у Вас еще нет учетной записи, вы можете создать её,
-                воспользовавшись <a href="/register">процедурой регистрации</a>.
+            <p class="mt-5 mb-3 text-muted">Если у Вас еще нет учетной записи, вы можете создать её, воспользовавшись
+                <a href="/register">процедурой регистрации</a>
             </p>
             <p class="mb-3 text-muted">
-                Забыли пароль?
+                <a href="/register">Забыли пароль?</a>
             </p>
             <p class="text-muted">
-                Не пришло письмо для активации учетной записи?
+                <a href="/register">Не пришло письмо для активации учетной записи?</a>
             </p>
+
         </div>
     </div>
 </div>

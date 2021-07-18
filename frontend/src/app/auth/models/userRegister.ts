@@ -11,7 +11,8 @@ export interface UserRegister
 }
 
 
-export function validateUser( user: UserRegister )
+// TODO enforce email regex check and password security policy
+export function validateUser( user: UserRegister ): boolean
 {
-    return user.birthDate && user.surname && user.lastName && user.name && user.email && user.password
+    return !!( user.birthDate && user.surname && user.lastName && user.name && user.email && user.password )
 }

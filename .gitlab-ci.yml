@@ -3,19 +3,23 @@ stages:
   - deploy
 
 
+
 build-frontend:
   image: node:lts-slim
   stage: build
-  script:
+  before_script:
     - 'yarn --cwd frontend install'
-    - 'yarn --cwd frontend build'
+  script:
+    - 'yarn --cwd frontend run build'
   artifacts:
     paths:
       - frontend/dist
   when: manual
 
+
 pages:
   stage: deploy
+  needs: [ 'build-frontend' ]
   script:
     - mkdir .public
     - cp -r frontend/dist .public
