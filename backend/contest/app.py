@@ -1,3 +1,4 @@
+from flask_migrate import Migrate
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 
@@ -7,6 +8,7 @@ app = Flask(__name__)
 # TODO: Put actual database URI
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.sqlite'
 db = SQLAlchemy(app)
+migrate = Migrate(app, db)
 
 if __name__ == "__main__":
 
