@@ -26,7 +26,7 @@
         <div class="form-group row">
             <label class="col-sm-4 col-form-label">Пол <span class="accent_red">*</span>:</label>
             <div class="col-sm-4">
-                <select class="form-control" required [(ngModel)]="participant.gender"
+                <select class="form-select" required [(ngModel)]="participant.gender"
                         name="email">
                     <option *ngFor="let gender of genderOptions" [ngValue]="gender"
                             [selected]="participant.gender == gender">
@@ -39,7 +39,7 @@
         <div class="form-group row">
             <label class="col-sm-4 col-form-label">Гражданство <span class="accent_red">*</span>:</label>
             <div class="col-sm-4">
-                <select class="form-control" required [(ngModel)]="participant.country"
+                <select class="form-select" required [(ngModel)]="participant.country"
                         name="email">
                     <option *ngFor="let country of countriesList" [ngValue]="country"
                             [selected]="participant.country == country">

@@ -7,6 +7,8 @@ import { HttpClient } from '@angular/common/http'
 } )
 export class ParticipantService
 {
+    regions = [ 'Москва', 'Санкт-Петербург' ]
+
     constructor( private http: HttpClient )
     {
     }
@@ -14,6 +16,14 @@ export class ParticipantService
     //TODO observable
     getCountriesList(): string[]
     {
-        return [ "Россия", "Белорусь" ]
+        return [ "Россия", "Беларусь" ]
+    }
+
+    getRegions( name: string )
+    {
+        if ( !name || !name?.length )
+            return []
+
+        return this.regions.filter( item => item.toLocaleLowerCase().includes( name.toLocaleLowerCase() ) )
     }
 }
