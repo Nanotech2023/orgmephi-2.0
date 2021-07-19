@@ -1,1 +1,90 @@
-<p>participant-registration-form-education works!</p>
+<div class="container">
+    <fieldset class="form-group">
+        <legend>Выпускающее образовательное учреждение</legend>
+        <div class="form-group row">
+            <label class="col-sm-4 col-form-label">Регион <span class="accent_red">*</span>:</label>
+            <div class="col-sm-4">
+                <input class="form-control" type="text" required [(ngModel)]="participant.education.region"
+                       (input)="getFilteredRegions()"
+                       #region="ngModel" (focusout)="showRegionSuggest=false"/>
+                <ul *ngIf="showRegionSuggest">
+                    <li class="suggest" *ngFor="let region of filteredRegions" [value]="region"
+                        (click)="setRegion(region)">{{ region }}</li>
+                </ul>
+                <div *ngIf="region.invalid && (region.dirty || region.touched)"
+                     class="alert alert-danger">
+                    <div *ngIf="region.errors?.required">
+                        Поле обязательно для заполнения
+                    </div>
+                </div>
+            </div>
+        </div>
+        <br/>
+        <div class="form-group row">
+            <label class="col-sm-4 col-form-label">Населенный пункт <span class="accent_red">*</span>:</label>
+            <div class="col-sm-4">
+                <input class="form-control" type="text" required [(ngModel)]="participant.education.city"
+                       (input)="getFilteredCities()"
+                       #city="ngModel" (focusout)="showCitySuggest=false"/>
+                <ul *ngIf="showCitySuggest">
+                    <li class="suggest" *ngFor="let city of filteredCities" [value]="city"
+                        (click)="setCity(city)">{{ city }}</li>
+                </ul>
+                <div *ngIf="city.invalid && (city.dirty || city.touched)"
+                     class="alert alert-danger">
+                    <div *ngIf="city.errors?.required">
+                        Поле обязательно для заполнения
+                    </div>
+                </div>
+            </div>
+        </div>
+        <br/>
+        <div class="form-group row">
+            <label class="col-sm-4 col-form-label">Тип образовательного учреждения:</label>
+            <div class="col-sm-4">
+                <select class="form-select" required [(ngModel)]="participant.education.type"
+                        name="email">
+                    <option class="suggest" *ngFor="let type of educationTypes" [ngValue]="type"
+                            [selected]="participant.education.type == type">
+                        {{type}}
+                    </option>
+                </select>
+            </div>
+        </div>
+        <br/>
+        <div class="form-group row">
+            <label class="col-sm-4 col-form-label">Номер образовательного учреждения (если есть)</label>
+            <div class="col-sm-4">
+                <input class="form-control" type="number" min="0"
+                       [(ngModel)]="participant.education.number"
+                       #number="ngModel">
+                <div *ngIf="number.invalid && (number.dirty || number.touched)"
+                     class="alert alert-danger">
+                    <div *ngIf="number?.errors?.min">
+                        Введено некорректное значение
+                    </div>
+                </div>
+            </div>
+        </div>
+        <br/>
+        <div class="form-group row">
+            <label class="col-sm-4 col-form-label">Название образовательного учреждения (если есть)</label>
+            <div class="col-sm-4">
+                <input class="form-control" type="text" [(ngModel)]="participant.education.name">
+            </div>
+        </div>
+        <br/>
+        <div class="form-group row">
+            <label class="col-sm-4 col-form-label">Являюсь учащимся:</label>
+            <div class="col-sm-4">
+                <select class="form-select" required [(ngModel)]="participant.education.class"
+                        name="email">
+                    <option class="suggest" *ngFor="let class of classes" [ngValue]="class"
+                            [selected]="participant.education.class == class">
+                        {{class}}-го класса
+                    </option>
+                </select>
+            </div>
+        </div>
+    </fieldset>
+</div>

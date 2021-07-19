@@ -2,6 +2,7 @@ import { Gender } from '@/users/models/participant/gender'
 import { DocumentType, ForeignPassport, RussianPassport } from '@/users/models/participant/documents'
 import { ForeignResidence, RussianResidence } from '@/users/models/participant/residence'
 import { SpecialConditions } from '@/users/models/participant/specialConditions'
+import { Education, emptyEducation } from '@/users/models/participant/education'
 
 
 export interface ParticipantRegister
@@ -20,6 +21,7 @@ export interface ParticipantRegister
     isRussianResident: boolean
     residence: ForeignResidence | RussianResidence | null
     specialConditions: SpecialConditions | null
+    education: Education
 }
 
 
@@ -37,5 +39,6 @@ export const emptyParticipant: ParticipantRegister = {
     document: null,
     isRussianResident: true,
     residence: null,
-    specialConditions: null
+    specialConditions: null,
+    education: emptyEducation
 }
