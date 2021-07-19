@@ -1,76 +1,140 @@
 from backend.contest.app import db
 
-from sqlalchemy import Identity, ForeignKey
-from sqlalchemy.types import Boolean, BIGINT
+from sqlalchemy import Identity, ForeignKey, CheckConstraint
+from sqlalchemy.types import Boolean
+from sqlalchemy.types import BLOB
 
 # Constants
 
-CONTEST_DESCRIPTION_SIZE = 200
-CONTEST_RULES_SIZE = 200
-CONTEST_WINNING_CONDITION_SIZE = 200
-NEXT_STAGE_CONDITION_SIZE = 200
 DEFAULT_VISIBILITY = False
-CONTEST_TEMPLATE_LINK = 200
 
-# TODO
-# Что является заданием? Ссылка куда-то?
-CONTEST_TASK_LINK = 200
-
-
-class Contest(db.Model):
-    __tablename__ = 'contest'
-
-    contest_id = db.Column(BIGINT(), Identity(start=0), primary_key=True)
-    type = db.Column(db.String(50))
-
-    __mapper_args__ = {
-        'polymorphic_identity': 'contest',
-        'polymorphic_on': type
-    }
-
-
-class Simple_contest(db.Model):
-    __tablename__ = 'simple_contest'
-
-    contest_id = db.Column(BIGINT(), ForeignKey('contest.contest_id'), Identity(start=0), primary_key=True)
-    description = db.Column(db.String(CONTEST_DESCRIPTION_SIZE))
-    rules = db.Column(db.String(CONTEST_RULES_SIZE))
-    task = db.Column(db.String(CONTEST_TASK_LINK))
-    winning_condition = db.Column(db.String(CONTEST_WINNING_CONDITION_SIZE))
-    certificate_template = db.Column(db.String(CONTEST_TEMPLATE_LINK))
-    visibility = db.Column(Boolean(), default=DEFAULT_VISIBILITY)
-
-    __mapper_args__ = {
-        'polymorphic_identity': 'simple_contest'
-    }
+# Contest models
 
 
 class Composite_contest(db.Model):
+    """
+    Contest model
+    """
     __tablename__ = 'composite_contest'
 
-    contest_id = db.Column(BIGINT(), ForeignKey('contest.contest_id'), Identity(start=0), primary_key=True)
-    description = db.Column(db.String(CONTEST_DESCRIPTION_SIZE))
+    contest_id = db.Column(db.Integer, ForeignKey('contest.contest_id'), Identity(start=0), primary_key=True)
+    description = db.Column(db.Text)
+    rules = db.Column(db.Text)
+    # TODO task = db.Column(db.String(CONTEST_TASK_LINK))
+    winning_condition = db.Column(db.Text)
+    certificate_template = db.Column(db.Text)
     visibility = db.Column(Boolean(), default=DEFAULT_VISIBILITY)
-
-    __mapper_args__ = {
-        'polymorphic_identity': 'composite_contest'
-    }
 
 
 class Contest_stage(db.Model):
-    __tablename__ = 'stage'
+    """
+    Model "Contest stage"
+    """
+    __tablename__ = 'contest_stage'
 
-    stage_id = db.Column(BIGINT(), Identity(start=0), primary_key=True)
-    contest_id = db.Column(BIGINT(), ForeignKey('composite_contest.contest_id'), primary_key=True)
-    next_stage_condition = db.Column(db.String(NEXT_STAGE_CONDITION_SIZE))
+    stage_id = db.Column(db.Integer, Identity(start=0), primary_key=True)
+    stage_name = db.Column(db.Text, primary_key=True)
+    composite_contest_id = db.Column(db.Integer, ForeignKey('composite_contest.contest_id'), primary_key=True)
+    next_stage_condition = db.Column(db.Text)
 
 
-class Contests_in_stage(db.Model):
+class Contests_in_Stage(db.Model):
+    """
+    Model "Contest in Composite stage"
+    """
     __tablename__ = 'contests_in_stage'
 
-    stage_id = db.Column(BIGINT(), ForeignKey('stage.stage_id'), primary_key=True)
-    parent_contest_id = db.Column(BIGINT(), ForeignKey('stage.contest_id'), primary_key=True)
-    contest_id = db.Column(BIGINT(), ForeignKey('contest.contest_id'), primary_key=True)
+    stage_id = db.Column(db.Integer, ForeignKey('contest_stage.contest_id'), primary_key=True)
+    contest_id = db.Column(db.Integer, ForeignKey('composite_contest.contest_id'), primary_key=True)
+
+
+class Contests_in_Composite_contest(db.Model):
+    """
+    Model "Contest in Composite stage"
+    """
+    __tablename__ = 'contests_in_composite_contest'
+
+    composite_contest_id = db.Column(db.Integer, ForeignKey('composite_contest.contest_id'), primary_key=True)
+    contest_id = db.Column(db.Integer, ForeignKey('composite_contest.contest_id'), primary_key=True)
+
+
+# Tasks models
+
+class Task_variant(db.Model):
+    """
+    Model "Variant of the task"
+    """
+
+    __tablename__ = 'task_variant'
+
+    variant_id = db.Column(db.Integer, Identity(start=0), primary_key=True)
+    variant_number = db.Column(db.Integer)
+    variant_description = db.Column(db.Text)
+
+
+class Task_in_variant(db.Model):
+    """
+    Model "Task in variant"
+
+    :param task_type: "Plain", "Range", "Multiply"
+    """
+    __tablename__ = 'task_in_variant'
+
+    variant_id = db.Column(db.Integer, ForeignKey('task_variant.variant_id'), primary_key=True)
+    task_type = db.Column(db.String)
+    task_id = db.Column(db.Integer, primary_key=True)
+
+    __table_args__ = (
+        CheckConstraint(task_type in ["Plain", "Range", "Multiply"], name='check_bar_positive'),
+        {})
+
+
+class Plain_Task(db.Model):
+    """
+    Model "Task with Plain Text"
+    """
+    __tablename__ = 'plain_task'
+
+    task_id = db.Column(db.Integer, Identity(start=0), primary_key=True)
+    num_of_task = db.Column(db.Integer)
+    image_of_task = db.Column(BLOB)
+    recommended_answer = db.Column(db.Text)
+
+
+class Range_Task(db.Model):
+    """
+    Model "Task with Range"
+    """
+    __tablename__ = 'range_task'
+
+    task_id = db.Column(db.Integer, Identity(start=0), primary_key=True)
+    num_of_task = db.Column(db.Integer)
+    image_of_task = db.Column(BLOB)
+    start_value = db.Column(db.Text)
+    end_value = db.Column(db.Text)
+
+
+class Multiply_Task(db.Model):
+    """
+    Model "Task with multiply choice"
+    """
+    __tablename__ = 'multiply_task'
+
+    task_id = db.Column(db.Integer, Identity(start=0), primary_key=True)
+    num_of_task = db.Column(db.Integer)
+    image_of_task = db.Column(BLOB)
+    recommended_answer = db.Column(db.Text)
+
+
+class Answers_in_Multiply_Task(db.Model):
+    """
+    Model "Task with multiply choice"
+    """
+    __tablename__ = 'answers_in_multiply_task'
+
+    task_id = db.Column(db.Integer, ForeignKey('multiply_task.task_id'), primary_key=True)
+    suggested_answer = db.Column(db.Integer, primary_key=True)
+
 
 
 """
