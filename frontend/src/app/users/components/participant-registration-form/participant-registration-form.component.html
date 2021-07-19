@@ -1,0 +1,14 @@
+<div class="container">
+    <fieldset class="form-group">
+        <legend>Личные данные</legend>
+        <div class="form-group row">
+            <label class="col-sm-4 col-form-label">E-mail <span class="accent_red">*</span>:</label>
+            <div class="col-sm-4">
+                <input class="form-control"  disabled type="email" email required [(ngModel)]="participant.email"
+                       #email="ngModel"
+                       name="email">
+            </div>
+        </div>
+        <br/>
+    </fieldset>
+</div>
