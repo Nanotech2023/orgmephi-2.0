@@ -7,8 +7,6 @@ import { LayoutModule } from '@/layout/layout.module'
 import { AuthModule } from '@/auth/auth.module'
 import { OlympiadsModule } from '@/olympiads/olympiads.module'
 import { AppRoutingModule } from '@/app-routing.module'
-import { reducers } from '@/reducers'
-import { AppEffects } from '@/reducers/app.effects'
 import { environment } from '@environments/environment'
 import { AppComponent } from '@/app.component'
 import { UsersModule } from '@/users/users.module'
@@ -25,8 +23,8 @@ import { UsersModule } from '@/users/users.module'
         OlympiadsModule,
         UsersModule,
         AppRoutingModule,
-        StoreModule.forRoot( reducers ),
-        EffectsModule.forRoot( [ AppEffects ] ),
+        StoreModule.forRoot( {} ),
+        EffectsModule.forRoot( [] ),
         environment.production ? [] : StoreDevtoolsModule.instrument()
     ],
     providers: [],

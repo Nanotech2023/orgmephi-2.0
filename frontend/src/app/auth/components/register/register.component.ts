@@ -1,7 +1,9 @@
 import { Component } from '@angular/core'
 import { RegisterType, RegisterTypeEnum, RegisterTypes, UserRegister, validateUser, Agreements } from '@/auth/models'
+import { AuthActions, AuthSelectors, AuthState } from '@/auth/store'
+import { Store } from '@ngrx/store'
+import { Observable } from 'rxjs'
 import { AuthService } from '@/auth/services/auth.service'
-import { RegisterResult } from '@/auth/models/registerResult'
 
 
 @Component( {
@@ -14,21 +16,20 @@ export class RegisterComponent
     agreements: string[] = Agreements
     registerTypes: RegisterType[] = RegisterTypes
 
-    registerUser: UserRegister
+    registerAttempt: UserRegister
+    isRegistered$: Observable<boolean>
+
     selectedRegisterType: RegisterType | null
     hasRegisterNumber: boolean
     agreementAccepted: boolean
-    registerResult: RegisterResult | null
-    registrationCompleted: boolean
 
-    constructor( private service: AuthService )
+    constructor( private readonly store: Store<AuthState.State>, private readonly service: AuthService )
     {
-        this.registerUser = service.createEmptyUser()
+        this.registerAttempt = this.service.createEmptyUser()
+        this.isRegistered$ = this.store.select( AuthSelectors.selectIsRegistered )
         this.agreementAccepted = false
         this.selectedRegisterType = null
         this.hasRegisterNumber = false
-        this.registerResult = null
-        this.registrationCompleted = false
     }
 
     selectRegisterType( registerType: RegisterType ): void
@@ -41,14 +42,13 @@ export class RegisterComponent
         return this.selectedRegisterType !== null && this.selectedRegisterType?.value == RegisterTypeEnum.schoolOlymp
     }
 
-    isValid(): boolean
+    isValid( registerUser: UserRegister ): boolean
     {
-        return validateUser( this.registerUser ) && this.agreementAccepted
+        return validateUser( registerUser ) && this.agreementAccepted
     }
 
-    register(): void
+    register( registerUser: UserRegister ): void
     {
-        this.registerResult = this.service.register( this.registerUser )
-        this.registrationCompleted = true
+        this.store.dispatch( AuthActions.registerAttempt( { registration: registerUser } ) )
     }
 }
