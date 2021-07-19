@@ -13,6 +13,8 @@ export interface ParticipantRegister
     birthDate: Date | null
     gender: Gender
     birthPlace: string
+    country: string
+    phoneNumber: string
     documentType: DocumentType
     document: RussianPassport | ForeignPassport | null
     isRussianResident: boolean
@@ -29,6 +31,8 @@ export const emptyParticipant: ParticipantRegister = {
     birthDate: null,
     gender: Gender.male,
     birthPlace: '',
+    country: 'Россия',
+    phoneNumber: '',
     documentType: DocumentType.russianPassport,
     document: null,
     isRussianResident: true,

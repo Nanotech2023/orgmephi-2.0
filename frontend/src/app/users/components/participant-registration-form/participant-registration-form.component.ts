@@ -1,5 +1,7 @@
 import { Component, OnInit } from '@angular/core'
-import { emptyParticipant, ParticipantRegister } from '@/users/models/participant'
+import { emptyParticipant, Gender, ParticipantRegister } from '@/users/models/participant'
+import { ParticipantService } from '@/users/services/participant.service'
+import { ValidationErrors } from '@angular/forms'
 
 
 @Component( {
@@ -11,14 +13,16 @@ export class ParticipantRegistrationFormComponent implements OnInit
 {
 
     participant: ParticipantRegister
+    genderOptions: Gender[] = [ Gender.male, Gender.female ]
+    countriesList: string[] = []
 
-    constructor()
+    constructor( private service: ParticipantService )
     {
         this.participant = emptyParticipant
     }
 
     ngOnInit(): void
     {
+        this.countriesList = this.service.getCountriesList()
     }
-
 }
