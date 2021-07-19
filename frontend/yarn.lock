@@ -1128,6 +1128,39 @@
     merge-source-map "^1.1.0"
     schema-utils "^2.7.0"
 
+"@ngrx/effects@^12.2.0":
+  version "12.2.0"
+  resolved "https://registry.yarnpkg.com/@ngrx/effects/-/effects-12.2.0.tgz#833f16339d8397905df5a30cf491b1afaa957b7b"
+  integrity sha512-TyXsUnUWiK7k9qq+Upw7NsvnOtxw1txvAjYhVI3PHLuiDyCtvcrpWHliKC/vsAiINJSytaUdVJu+wCQe3J/z4A==
+  dependencies:
+    tslib "^2.0.0"
+
+"@ngrx/entity@^12.2.0":
+  version "12.2.0"
+  resolved "https://registry.yarnpkg.com/@ngrx/entity/-/entity-12.2.0.tgz#304ba81e594096150e67c1bcf449927f3110d414"
+  integrity sha512-/J/TRF8I3veWpzKGaTGj7bWzvrL96ATK5Ye7GcIUU/4p8j7uHfdUgn8N5yfWp1Sch+lConh/YPc30bcAPAXqaA==
+  dependencies:
+    tslib "^2.0.0"
+
+"@ngrx/router-store@^12.2.0":
+  version "12.2.0"
+  resolved "https://registry.yarnpkg.com/@ngrx/router-store/-/router-store-12.2.0.tgz#0de6caf5988ce4bb741fd53b68f119e579ed52f7"
+  integrity sha512-PLZBP7TPgp3dnpxMUAx2zGF8o117hV7PXqUfKPEatMYLh8isEjE6pmV6LiCdc9XhMIBkaXXhrnLIHSgc5uUCEQ==
+  dependencies:
+    tslib "^2.0.0"
+
+"@ngrx/schematics@^12.2.0":
+  version "12.2.0"
+  resolved "https://registry.yarnpkg.com/@ngrx/schematics/-/schematics-12.2.0.tgz#09b0b36b8479adfee4997ee8721abbf582c09bff"
+  integrity sha512-SYgZekBW3jeHQ6FiknFzU9/ayNc8JT0Q4zvpwrFBThbf3hjLAv5W3oARHqObK51T+4KZf2g7QJB2DniJl6rtcw==
+
+"@ngrx/store-devtools@^12.2.0":
+  version "12.2.0"
+  resolved "https://registry.yarnpkg.com/@ngrx/store-devtools/-/store-devtools-12.2.0.tgz#dc0a32458e0f69080d05e881ce03a9768b92c599"
+  integrity sha512-R8GBVk1zki/IRl022v2LRWEx1yCS4xQdP1mpK5sbfY+yuxDouY3wkgT02Wb225TJthm9DE6xJOaXu5maHqgUHg==
+  dependencies:
+    tslib "^2.0.0"
+
 "@ngrx/store@^12.2.0":
   version "12.2.0"
   resolved "https://registry.yarnpkg.com/@ngrx/store/-/store-12.2.0.tgz#3b413d95e1b311ea8598f6eaee3cc7ae890f8619"
@@ -1215,6 +1248,11 @@
     infer-owner "^1.0.4"
     node-gyp "^7.1.0"
     read-package-json-fast "^2.0.1"
+
+"@popperjs/core@2.9.2":
+  version "2.9.2"
+  resolved "https://registry.yarnpkg.com/@popperjs/core/-/core-2.9.2.tgz#adea7b6953cbb34651766b0548468e743c6a2353"
+  integrity sha512-VZMYa7+fXHdwIq1TDhSXoVmSPEGM/aa+6Aiq3nVVJ9bXr24zScr+NlKFKC3iPljA7ho/GAZr+d2jOf5GIRC30Q==
 
 "@schematics/angular@12.1.1":
   version "12.1.1"

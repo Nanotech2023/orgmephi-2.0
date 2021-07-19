@@ -20,8 +20,8 @@
     - `backend`
 1. Пушить напрямую в `master`
 1. Все изменения в `master` можно добавить только через `MR` из веток `frontend` и `backend`
-   * Закрыть `MR` можно только с согласованием `Owner`, `Maintainer` от команды `frontend` и `Maintainer` от команды `backend`
-   * 
+    * Название `Merge {{ source_branch }} to master {{ текущая_дата }}`
+    * Закрыть `MR` можно только с согласованием `Owner`, `Maintainer` от команды `frontend` и `Maintainer` от команды `backend`
 
 ### Правила закрытия задач
 Задача считается закрытой, если:
@@ -75,7 +75,7 @@
     * Закрыть `MR` можно только с согласованием `Maintainer` или `Developer` от команды `frontend`
     * При согласовании `MR` следует руководствоваться [Инженерными практиками Google для Code Review](https://tproger.ru/translations/code-review-a-la-google/)
 1. При появлении изменений в `master` необходимо в срочном порядке создать `MR` из `master` в `frontend`
-    * Название `Merge master to frontend {{ текущая дата }}`
+    * Название `Merge master to frontend {{ текущая_дата }}`
     * Закрыть `MR` можно только с согласованием `Maintainer` от команды `frontend`
     * Конфликты необходимо разрешать в пользу `master`
 

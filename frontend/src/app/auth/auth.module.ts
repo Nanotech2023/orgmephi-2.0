@@ -4,11 +4,14 @@ import { LoginComponent } from './components/login/login.component'
 import { SharedModule } from '@/shared/shared.module'
 
 
+const COMPONENTS = [
+    RegisterComponent,
+    LoginComponent
+]
+
+
 @NgModule( {
-    declarations: [
-        RegisterComponent,
-        LoginComponent
-    ],
+    declarations: COMPONENTS,
     imports: [
         SharedModule
     ]
