@@ -16,8 +16,12 @@ def create_app(test_config=None):
 
 
 def init_db():
+    from orgmephi_user.models import populate_role, populate_university, populate_country
     db.init_app(current_app)
     db.create_all()
+    populate_role()
+    populate_university()
+    populate_country()
 
 
 app = create_app()
