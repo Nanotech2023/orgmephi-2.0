@@ -1,4 +1,4 @@
-from backend.contest.app import db
+from app import db
 
 from sqlalchemy import Identity, ForeignKey, CheckConstraint
 from sqlalchemy.types import Boolean
@@ -7,6 +7,7 @@ from sqlalchemy.types import BLOB
 # Constants
 
 DEFAULT_VISIBILITY = False
+
 
 # Contest models
 
@@ -17,7 +18,7 @@ class Composite_contest(db.Model):
     """
     __tablename__ = 'composite_contest'
 
-    contest_id = db.Column(db.Integer, ForeignKey('contest.contest_id'), Identity(start=0), primary_key=True)
+    contest_id = db.Column(db.Integer, Identity(start=0), primary_key=True)
     description = db.Column(db.Text, nullable=False)
     rules = db.Column(db.Text, nullable=False)
     # TODO task = db.Column(db.String(CONTEST_TASK_LINK))
@@ -44,7 +45,7 @@ class Contests_in_Stage(db.Model):
     """
     __tablename__ = 'contests_in_stage'
 
-    stage_id = db.Column(db.Integer, ForeignKey('contest_stage.contest_id'), primary_key=True)
+    stage_id = db.Column(db.Integer, ForeignKey('contest_stage.stage_id'), primary_key=True)
     contest_id = db.Column(db.Integer, ForeignKey('composite_contest.contest_id'), primary_key=True)
 
 
@@ -136,7 +137,6 @@ class Answers_in_Multiply_Task(db.Model):
     suggested_answer = db.Column(db.Integer, primary_key=True)
 
 
-
 """
 Возможные запросы:
 - Создавать, редактировать, удалять и предоставлять доступ к карточке конкурса; 
@@ -149,4 +149,14 @@ class Answers_in_Multiply_Task(db.Model):
 - Редактировать структуру конкурсного мероприятия, добавлять и удалять этапы, изменять видимость конкурса
 - Загружать шаблоны и отправлять на печатать дипломы и сертификаты. 
 
+"""
+"""
+from sqlalchemy_schemadisplay import create_schema_graph
+from sqlalchemy import MetaData
+
+if __name__ == "__main__":
+    db.create_all()
+
+    graph = create_schema_graph(metadata=MetaData('sqlite:///database.sqlite'))
+    graph.write_png('my_erd.png')
 """
