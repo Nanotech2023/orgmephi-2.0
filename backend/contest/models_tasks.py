@@ -21,7 +21,7 @@ class Composite_contest(db.Model):
     contest_id = db.Column(db.Integer, Identity(start=0), primary_key=True)
     description = db.Column(db.Text, nullable=False)
     rules = db.Column(db.Text, nullable=False)
-    # TODO task = db.Column(db.String(CONTEST_TASK_LINK))
+    task_variant = db.Column(db.Integer, ForeignKey('task_variant.variant_id'))
     winning_condition = db.Column(db.Text, nullable=False)
     certificate_template = db.Column(db.Text, nullable=True)
     visibility = db.Column(Boolean(), default=DEFAULT_VISIBILITY, nullable=False)
