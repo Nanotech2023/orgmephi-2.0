@@ -236,6 +236,90 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/errorResponse'
+  /role:
+    get:
+      summary: Get the role of the current user
+      security:
+        - cookieJWTAuth: [ ]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/userRole'
+  /role/{id}:
+    get:
+      summary: Get the role of another user
+      description: Get the role of another user, only for admins and creators
+      security:
+        - cookieJWTAuth: [ ]
+      parameters:
+        - in: path
+          description: Id of the user
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/userRole'
+        '403':
+          description: Invalid role of current user
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+        '404':
+          description: User not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+    post:
+      summary: Set the role of any user
+      description: Get the role of another user, only for admins
+      security:
+        - cookieJWTAuth: [ ]
+      parameters:
+        - in: path
+          description: Id of the user
+          name: id
+          required: true
+          schema:
+            type: integer
+        - in: header
+          name: X-CSRF-TOKEN
+          schema:
+            type: string
+          required: true
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/userRole'
+      responses:
+        200:
+          description: OK
+        '403':
+          description: Invalid role of current user
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+        404:
+          description: User not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+
+
 
 
   /info/universities:
@@ -448,3 +532,10 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/commonUserInfo'
+    userRole:
+      title: 'Role of a user'
+      required:
+        - role
+      properties:
+        role:
+          $ref: '#/components/schemas/roleType'
