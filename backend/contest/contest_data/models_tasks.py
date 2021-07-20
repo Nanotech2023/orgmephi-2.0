@@ -1,6 +1,6 @@
 """File with models description for contests and tasks management."""
 
-from backend.contest.contest_data.app import db
+from contest_data.app import db
 from datetime import datetime
 
 # Constants

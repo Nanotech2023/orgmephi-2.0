@@ -1,12 +1,12 @@
 """File with models description for response management."""
 
-from app import db
+from contest_data.app import db
 from sqlalchemy import Identity, BLOB, CheckConstraint
 from datetime import datetime
 
 RESPONSE_STATUS_SIZE = 15
 APPEAL_MESSAGE_SIZE = 4000
-RESPONSE_ANSWER_SIZE = 250  # TODO узнать у Миши.
+RESPONSE_ANSWER_SIZE = 250
 IDENTITY_START = 0
 DEFAULT_MARK_VALUE = 0
 
