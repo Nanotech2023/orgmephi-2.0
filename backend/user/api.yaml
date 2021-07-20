@@ -42,7 +42,7 @@ paths:
             Set-Cookie:
               schema:
                 type: string
-                example: access_token_cookie=eyJ0eXAi...; Path=/
+                example: access_token_cookie=eyJ0eXAi...; Path=/; HttpOnly
           content:
             application/json:
               schema:
@@ -88,6 +88,155 @@ paths:
       responses:
         '200':
           description: OK
+  /user:
+    get:
+      summary: Get common info for current user
+      security:
+        - cookieJWTAuth: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/commonUserInfo'
+  /user/by-id/{id}:
+    get:
+      summary: Get common info for a different user
+      description: Get info about any user by its id, only for admins and creators
+      security:
+        - cookieJWTAuth: [ ]
+      parameters:
+        - in: path
+          description: Id of the user
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/commonUserInfo'
+        '403':
+          description: Invalid role of current user
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+        '404':
+          description: User not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+
+  /user/by-name/{name}:
+    get:
+      summary: Get common info for a different user
+      description: Get info about any user by its username, only for admins and creators
+      security:
+        - cookieJWTAuth: [ ]
+      parameters:
+        - in: path
+          description: Username of the user
+          name: name
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/commonUserInfo'
+        '403':
+          description: Invalid role of current user
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+        '404':
+          description: User not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+  /user/by-role/{role}:
+    get:
+      summary: Get common info for different users
+      description: Get info about any user by its role, only for admins and creators
+      security:
+        - cookieJWTAuth: [ ]
+      parameters:
+        - in: path
+          description: Role of the user
+          name: name
+          required: true
+          schema:
+            $ref: '#/components/schemas/roleType'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/userList'
+        '403':
+          description: Invalid role of current user
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+  /user/by-type/{type}:
+    get:
+      summary: Get common info for different users
+      description: Get info about any user by its type, only for admins and creators
+      security:
+        - cookieJWTAuth: [ ]
+      parameters:
+        - in: path
+          description: Type of the user
+          name: type
+          required: true
+          schema:
+            $ref: '#/components/schemas/userType'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/userList'
+        '403':
+          description: Invalid role of current user
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+  /user/all:
+    get:
+      summary: Get common info for all users
+      description: Get info about all users, only for admins and creators
+      security:
+        - cookieJWTAuth: [ ]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/userList'
+        '403':
+          description: Invalid role of current user
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+
 
   /info/universities:
     get:
@@ -138,9 +287,7 @@ components:
         personal_info:
           $ref: '#/components/schemas/personalInfo'
         register_type:
-          title: 'User type'
-          type: string
-          enum: ['PreUniversity', 'Enrollee', 'School', 'University']
+          $ref: '#/components/schemas/userType'
         student_info:
           $ref: '#/components/schemas/studentInfo'
         register_confirm:
@@ -268,3 +415,36 @@ components:
         old_password:
           type: string
           format: password
+    commonUserInfo:
+      title: 'Common user info'
+      required:
+        - id
+        - username
+        - role
+        - type
+      properties:
+        id:
+          type: integer
+        username:
+          type: string
+        role:
+          $ref: '#/components/schemas/roleType'
+        type:
+          $ref: '#/components/schemas/userType'
+    roleType:
+      title: 'User role'
+      type: string
+      enum: ['Admin', 'Creator', 'Participant', 'System']
+    userType:
+      title: 'User type'
+      type: string
+      enum: [ 'PreUniversity', 'Enrollee', 'School', 'University', 'Internal' ]
+    userList:
+      title: 'List of users'
+      required:
+        - users
+      properties:
+        users:
+          type: array
+          items:
+            $ref: '#/components/schemas/commonUserInfo'
