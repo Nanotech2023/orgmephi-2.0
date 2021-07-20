@@ -1,9 +1,5 @@
 from app import db
 
-from sqlalchemy import Identity, ForeignKey, CheckConstraint
-from sqlalchemy.types import Boolean
-from sqlalchemy.types import BLOB
-
 # Constants
 
 DEFAULT_VISIBILITY = False
@@ -12,73 +8,73 @@ DEFAULT_VISIBILITY = False
 # Contest models
 
 
-class Composite_contest(db.Model):
+class CompositeContest(db.Model):
     """
     Contest model
     """
     __tablename__ = 'composite_contest'
 
-    contest_id = db.Column(db.Integer, Identity(start=0), primary_key=True)
+    contest_id = db.Column(db.Integer, autoincrement=True, primary_key=True)
     description = db.Column(db.Text, nullable=False)
     rules = db.Column(db.Text, nullable=False)
-    variant_id = db.Column(db.Integer, ForeignKey('task_variant.variant_id'))
+    variant_id = db.Column(db.Integer, db.ForeignKey('task_variant.variant_id'))
     winning_condition = db.Column(db.Text, nullable=False)
     certificate_template = db.Column(db.Text, nullable=True)
-    visibility = db.Column(Boolean(), default=DEFAULT_VISIBILITY, nullable=False)
+    visibility = db.Column(db.Boolean, default=DEFAULT_VISIBILITY, nullable=False)
     __table_args__ = {'extend_existing': True}
 
 
-class Contest_stage(db.Model):
+class ContestStage(db.Model):
     """
     Model "Contest stage"
     """
     __tablename__ = 'contest_stage'
 
-    stage_id = db.Column(db.Integer, Identity(start=0), primary_key=True)
-    stage_name = db.Column(db.Text)
-    composite_contest_id = db.Column(db.Integer, ForeignKey('composite_contest.contest_id'), primary_key=True)
+    stage_id = db.Column(db.Integer, autoincrement=True, primary_key=True)
+    stage_name = db.Column(db.String(50), index=True)
+    composite_contest_id = db.Column(db.Integer, db.ForeignKey('composite_contest.contest_id'), primary_key=True)
     next_stage_condition = db.Column(db.Text, nullable=False)
     __table_args__ = {'extend_existing': True}
 
 
-class Contests_in_Stage(db.Model):
+class ContestsInStage(db.Model):
     """
     Model "Contest in Composite stage"
     """
     __tablename__ = 'contests_in_stage'
 
-    stage_id = db.Column(db.Integer, ForeignKey('contest_stage.stage_id'), primary_key=True)
-    contest_id = db.Column(db.Integer, ForeignKey('composite_contest.contest_id'), primary_key=True)
+    stage_id = db.Column(db.Integer, db.ForeignKey('contest_stage.stage_id'), primary_key=True)
+    contest_id = db.Column(db.Integer, db.ForeignKey('composite_contest.contest_id'), primary_key=True)
     __table_args__ = {'extend_existing': True}
 
 
-class Contests_in_Composite_contest(db.Model):
+class ContestsInCompositeContest(db.Model):
     """
     Model "Contest in Composite stage"
     """
     __tablename__ = 'contests_in_composite_contest'
 
-    composite_contest_id = db.Column(db.Integer, ForeignKey('composite_contest.contest_id'), primary_key=True)
-    contest_id = db.Column(db.Integer, ForeignKey('composite_contest.contest_id'), primary_key=True)
+    composite_contest_id = db.Column(db.Integer, db.ForeignKey('composite_contest.contest_id'), primary_key=True)
+    contest_id = db.Column(db.Integer, db.ForeignKey('composite_contest.contest_id'), primary_key=True)
     __table_args__ = {'extend_existing': True}
 
 
 # Tasks models
 
-class Task_variant(db.Model):
+class TaskVariant(db.Model):
     """
     Model "Variant of the task"
     """
 
     __tablename__ = 'task_variant'
 
-    variant_id = db.Column(db.Integer, Identity(start=0), primary_key=True)
+    variant_id = db.Column(db.Integer, autoincrement=True, primary_key=True)
     variant_number = db.Column(db.Integer)
     variant_description = db.Column(db.Text)
     __table_args__ = {'extend_existing': True}
 
 
-class Task_in_variant(db.Model):
+class TaskInVariant(db.Model):
     """
     Model "Task in variant"
 
@@ -86,63 +82,64 @@ class Task_in_variant(db.Model):
     """
     __tablename__ = 'task_in_variant'
 
-    variant_id = db.Column(db.Integer, ForeignKey('task_variant.variant_id'), primary_key=True)
-    task_type = db.Column(db.String, nullable=False)
-    task_id = db.Column(db.Integer, primary_key=True)
+    variant_id = db.Column(db.Integer, db.ForeignKey('task_variant.variant_id'), primary_key=True)
+    task_id = db.Column(db.Integer, db.ForeignKey('base_task.task_id'), primary_key=True)
 
-    __table_args__ = (
-        CheckConstraint(task_type in ["Plain", "Range", "Multiply"], name='check_bar_positive'),
-        {'extend_existing': True})
+    __table_args__ = {'extend_existing': True}
 
 
-class Plain_Task(db.Model):
+class Task(db.Model):
+    """
+    Model "Base"
+    """
+    __tablename__ = 'base_task'
+    task_id = db.Column(db.Integer, autoincrement=True, primary_key=True)
+    num_of_task = db.Column(db.Integer, nullable=False)
+    image_of_task = db.Column(db.BLOB, nullable=False)
+
+
+class PlainTask(db.Model):
     """
     Model "Task with Plain Text"
     """
     __tablename__ = 'plain_task'
 
-    task_id = db.Column(db.Integer, Identity(start=0), primary_key=True)
-    num_of_task = db.Column(db.Integer, nullable=False)
-    image_of_task = db.Column(BLOB, nullable=False)
+    task_id = db.Column(db.Integer, db.ForeignKey('base_task.task_id'), primary_key=True)
     recommended_answer = db.Column(db.Text, nullable=False)
     __table_args__ = {'extend_existing': True}
 
 
-class Range_Task(db.Model):
+class RangeTask(db.Model):
     """
     Model "Task with Range"
     """
     __tablename__ = 'range_task'
 
-    task_id = db.Column(db.Integer, Identity(start=0), primary_key=True)
-    num_of_task = db.Column(db.Integer, nullable=False)
-    image_of_task = db.Column(BLOB, nullable=False)
+    task_id = db.Column(db.Integer, db.ForeignKey('base_task.task_id'), primary_key=True)
     start_value = db.Column(db.Text, nullable=False)
     end_value = db.Column(db.Text, nullable=False)
     __table_args__ = {'extend_existing': True}
 
 
-class Multiply_Task(db.Model):
+class MultipleChoiceTask(db.Model):
     """
-    Model "Task with multiply choice"
+    Model "Task with multiple choice"
     """
-    __tablename__ = 'multiply_task'
+    __tablename__ = 'multiple_task'
 
-    task_id = db.Column(db.Integer, Identity(start=0), primary_key=True)
-    num_of_task = db.Column(db.Integer, nullable=False)
-    image_of_task = db.Column(BLOB, nullable=False)
-    recommended_answer = db.Column(db.Text, nullable=False)
+    task_id = db.Column(db.Integer, db.ForeignKey('base_task.task_id'), primary_key=True)
+    recommended_answer = db.Column(db.String(50), nullable=False)
     __table_args__ = {'extend_existing': True}
 
 
-class Answers_in_Multiply_Task(db.Model):
+class AnswersInMultipleChoiceTask(db.Model):
     """
-    Model "Task with multiply choice"
+    Model "Task with multiple choice"
     """
-    __tablename__ = 'answers_in_multiply_task'
+    __tablename__ = 'answers_in_multiple_task'
 
-    task_id = db.Column(db.Integer, ForeignKey('multiply_task.task_id'), primary_key=True)
-    suggested_answer = db.Column(db.Integer, primary_key=True)
+    task_id = db.Column(db.Integer, db.ForeignKey('multiply_task.task_id'), primary_key=True)
+    answer = db.Column(db.String(50), primary_key=True)
     __table_args__ = {'extend_existing': True}
 
 
@@ -162,13 +159,5 @@ class Answers_in_Multiply_Task(db.Model):
 # debug
 
 
-def generate_er():
-    from sqlalchemy_schemadisplay import create_schema_graph
-    from sqlalchemy import MetaData
-    graph = create_schema_graph(metadata=MetaData('sqlite:///database.sqlite'))
-    graph.write_png('my_erd.png')
-
-
-if __name__ == "__main__":
+#if __name__ == "__main__":
     # db.create_all()
-    generate_er()
