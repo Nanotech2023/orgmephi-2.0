@@ -12,7 +12,6 @@ def test_one(flask_init):
     re = Response.query.all()
     print(re[0].user_id)
     assert len(re) == 1
-    print(db.engine.table_names())
     re = Response.query.all()
     for p in re:
         db.session.delete(p)
