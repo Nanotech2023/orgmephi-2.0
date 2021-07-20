@@ -1,5 +1,12 @@
 from orgmephi_user import db
 from datetime import datetime
+import enum
+
+
+class RoleEnum(enum.Enum):
+    user = 1
+    creator = 2
+    admin = 3
 
 
 def _populate_table(table, values):
@@ -17,27 +24,12 @@ class User(db.Model):
     id = db.Column(db.Integer, autoincrement=True, primary_key=True)
     username = db.Column(db.String, index=True, nullable=False, unique=True)
     password_hash = db.Column(db.String, nullable=False)
-    role = db.Column(db.Integer, db.ForeignKey('role.id'), nullable=False)
+    role = db.Column(db.Enum(RoleEnum), nullable=False)
     registration_date = db.Column(db.DateTime, default=datetime.utcnow)
     tmppassword_hash = db.Column(db.String)
 
     user_id = db.Column(db.Integer, db.ForeignKey('user_info.id'), nullable=False)
     student_id = db.Column(db.Integer, db.ForeignKey('student_info.id'))
-
-
-_roles = ['User', 'Creator', 'Admin']
-_roles_maxlen = len(max(_roles, key=len))
-
-
-class Role(db.Model):
-    __table_name__ = 'role'
-
-    id = db.Column(db.Integer, autoincrement=True, primary_key=True)
-    name = db.Column(db.String(_roles_maxlen), nullable=False, unique=True)
-
-
-def populate_role():
-    return _populate_table(Role, _roles)
 
 
 class UserInfo(db.Model):
