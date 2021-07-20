@@ -71,14 +71,9 @@ paths:
   /reset:
     post:
       summary: Reset password for current user
-      parameters:
-        - in: header
-          name: X-CSRF-TOKEN
-          schema:
-            type: string
-          required: true
       security:
         - cookieJWTAuth: []
+        - CSRFToken: []
       requestBody:
         required: true
         content:
@@ -284,6 +279,7 @@ paths:
       description: Get the role of another user, only for admins
       security:
         - cookieJWTAuth: [ ]
+        - CSRFToken: [ ]
       parameters:
         - in: path
           description: Id of the user
@@ -291,11 +287,6 @@ paths:
           required: true
           schema:
             type: integer
-        - in: header
-          name: X-CSRF-TOKEN
-          schema:
-            type: string
-          required: true
       requestBody:
         required: true
         content:
@@ -433,6 +424,26 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/getCountriesResponse'
+  /preregister:
+    post:
+      summary: Register an unconfirmed user with a one-time password
+      description: Register an unconfirmed user with a one-time password, creators and admins only
+      security:
+        - cookieJWTAuth: [ ]
+        - CSRFToken: [ ]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/registerConfirm'
+        '403':
+          description: Invalid role of current user
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
 
 
 components:
@@ -442,6 +453,11 @@ components:
       type: apiKey
       in: cookie
       name: access_token_cookie
+    CSRFToken:
+      description: CSRF token
+      type: apiKey
+      in: header
+      name: X-CSRF-TOKEN
   schemas:
     errorResponse:
       title: 'Error response'
@@ -545,10 +561,11 @@ components:
     authCredentials:
       title: 'Authentication credentials'
       required:
-        - username #Email for external users, username for MEPhI students
+        - username
         - password
       properties:
-        email:
+        username:
+          description: Email for external users, username for MEPhI students, number for unconfirmed users
           type: string
         password:
           type: string
@@ -614,7 +631,7 @@ components:
     userType:
       title: 'User type'
       type: string
-      enum: [ 'PreUniversity', 'Enrollee', 'School', 'University', 'Internal' ]
+      enum: [ 'PreUniversity', 'Enrollee', 'School', 'University', 'Internal', 'PreRegister' ]
     userList:
       title: 'List of users'
       required:
