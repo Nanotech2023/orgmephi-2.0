@@ -1,5 +1,5 @@
 """File with models description for contests and tasks management."""
-from app import db
+from backend.contest.contest_data.app import db
 
 # Constants
 
@@ -48,7 +48,7 @@ class ContestStage(db.Model):
 
     stage_id = db.Column(db.Integer, autoincrement=True, primary_key=True)
     stage_name = db.Column(db.String(50), index=True)
-    composite_contest_id = db.Column(db.Integer, db.ForeignKey('composite_contest.contest_id'), primary_key=True)
+    composite_contest_id = db.Column(db.Integer, db.ForeignKey('composite_contest.contest_id'))
     next_stage_condition = db.Column(db.Text, nullable=False)
     __table_args__ = {'extend_existing': True}
 
@@ -128,7 +128,7 @@ class Task(db.Model):
     __tablename__ = 'base_task'
     task_id = db.Column(db.Integer, autoincrement=True, primary_key=True)
     num_of_task = db.Column(db.Integer, nullable=False)
-    image_of_task = db.Column(db.LargeBinary, nullable=False)
+    # image_of_task = db.Column(db.LargeBinary, nullable=True) #TODO
     __table_args__ = {'extend_existing': True}
 
 
@@ -189,7 +189,7 @@ class AnswersInMultipleChoiceTask(db.Model):
 
     __tablename__ = 'answers_in_multiple_task'
 
-    task_id = db.Column(db.Integer, db.ForeignKey('multiply_task.task_id'), primary_key=True)
+    task_id = db.Column(db.Integer, db.ForeignKey('multiple_task.task_id'), primary_key=True)
     answer = db.Column(db.String(50), primary_key=True)
     __table_args__ = {'extend_existing': True}
 
