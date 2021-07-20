@@ -7,13 +7,14 @@ info:
 paths:
   /register:
     post:
+      summary: Register a new user
       requestBody:
         required: true
         content:
           application/json:
             schema:
               $ref: '#/components/schemas/registration'
-      summary: Registers a new user.
+      security: []
       responses:
         '200':
           description: OK
@@ -26,13 +27,14 @@ paths:
                 $ref: '#/components/schemas/errorResponse'
   /auth:
     post:
+      summary: Authenticate a user
       requestBody:
         required: true
         content:
           application/json:
             schema:
               $ref: '#/components/schemas/authentication'
-      summary: Authenticates a user.
+      security: []
       responses:
         '200':
           description: OK
@@ -40,7 +42,7 @@ paths:
             Set-Cookie:
               schema:
                 type: string
-                example: access_token_cookie=eyJ0eXAi...
+                example: access_token_cookie=eyJ0eXAi...; Path=/
           content:
             application/json:
               schema:
@@ -53,6 +55,20 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/errorResponse'
+  /logout:
+    post:
+      summary: Logout current user
+      security:
+        - cookieJWTAuth: []
+      responses:
+        '200':
+          description: OK
+          headers:
+            Set-Cookie:
+              schema:
+                type: string
+                example: access_token_cookie=deleted; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT
+
   /info/universities:
     get:
       summary: Get known university list
@@ -63,8 +79,24 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/getUniversitiesResponse'
+  /info/countries:
+    get:
+      summary: Get known country list
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/getCountriesResponse'
 
 components:
+  securitySchemes:
+    cookieJWTAuth:
+      description: Authentication with JWT stored in cookies
+      type: apiKey
+      in: cookie
+      name: access_token_cookie
   schemas:
     errorResponse:
       title: 'Error response'
@@ -192,6 +224,15 @@ components:
         - university_list
       properties:
         university_list:
+          type: array
+          items:
+            type: string
+    getCountriesResponse:
+      title: 'Get country list response'
+      required:
+        - country_list
+      properties:
+        country_list:
           type: array
           items:
             type: string
