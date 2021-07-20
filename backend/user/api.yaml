@@ -114,6 +114,29 @@ paths:
       responses:
         '200':
           description: OK
+  /reset/{id}:
+    post:
+      summary: Reset password for another user
+      description: Reset password for another user, admins only
+      security:
+        - cookieJWTAuth: [ ]
+        - CSRFToken: [ ]
+      parameters:
+        - in: path
+          description: Id of the user
+          name: id
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/resetPasswordAdmin'
+      responses:
+        '200':
+          description: OK
   /user:
     get:
       summary: Get common info for current user
@@ -409,6 +432,40 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/errorResponse'
+    patch:
+      summary: Set personal info for a user
+      description: Set personal info about any user by its id, only for admins
+      security:
+        - cookieJWTAuth: [ ]
+        - CSRFToken: [ ]
+      parameters:
+        - in: path
+          description: Id of the user
+          name: id
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/personalInfoUpdate'
+      responses:
+        '200':
+          description: OK
+        '403':
+          description: Invalid role of current user
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+        '404':
+          description: User not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
   /user/university:
     get:
       summary: Get university student info for current user
@@ -429,7 +486,7 @@ paths:
                 $ref: '#/components/schemas/errorResponse'
   /user/by-id/{id}/university:
     get:
-      summary: Get university student  info for a different user
+      summary: Get university student info for a different user
       description: Get university student info about any user by its id, only for admins and creators
       security:
         - cookieJWTAuth: [ ]
@@ -447,6 +504,40 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/studentInfo'
+        '403':
+          description: Invalid role of current user
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+        '404':
+          description: User not found or is not a university student
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+    patch:
+      summary: Set university student info for a user
+      description: Set university student info about any user by its id, only for admins
+      security:
+        - cookieJWTAuth: [ ]
+        - CSRFToken: [ ]
+      parameters:
+        - in: path
+          description: Id of the user
+          name: id
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/studentInfoUpdate'
+      responses:
+        '200':
+          description: OK
         '403':
           description: Invalid role of current user
           content:
@@ -839,6 +930,19 @@ components:
         date_of_birth:
           type: string
           format: date
+    personalInfoUpdate:
+      title: 'Update request for personal info'
+      description: Set fields that should be changed
+      properties:
+        first_name:
+          type: string
+        second_name:
+          type: string
+        middle_name:
+          type: string
+        date_of_birth:
+          type: string
+          format: date
     studentInfo:
       title: 'Student info'
       required:
@@ -849,6 +953,26 @@ components:
         - citizenship
         - region
         - city
+      properties:
+        phone_number:
+          type: string
+        university:
+          type: string
+        grade:
+          type: integer
+          minimum: 1
+          maximum: 5
+        university_country:
+          type: string
+        citizenship:
+          type: string
+        region:
+          type: string
+        city:
+          type: string
+    studentInfoUpdate:
+      title: 'Update request for student info'
+      description: Set fields that should be changed
       properties:
         phone_number:
           type: string
@@ -933,6 +1057,14 @@ components:
           type: string
           format: password
         old_password:
+          type: string
+          format: password
+    resetPasswordAdmin:
+      title: 'Reset password request for admins'
+      required:
+        - new_password
+      properties:
+        new_password:
           type: string
           format: password
     commonUserInfo:
