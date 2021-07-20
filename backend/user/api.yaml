@@ -1,0 +1,123 @@
+openapi: 3.0.0
+info:
+  title: User service API
+  description: API description in Markdown.
+  version: 1.0.0
+
+paths:
+  /register:
+    post:
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Registration'
+      summary: Registers a new user.
+      responses:
+        '200':
+          description: OK
+        #4xx type errors, TODO: specify exact error codes
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+components:
+  schemas:
+    ErrorResponse:
+      title: 'Error response'
+      description: 'Common response with error message'
+      required:
+        - errorMsg
+      properties:
+        errorMsg:
+          type: string
+    Registration:
+      title: 'Registration info'
+      required:
+        - authInfo
+        - personalInfo
+        - registerType
+      properties:
+        authInfo:
+          $ref: '#/components/schemas/authInfo'
+        personalInfo:
+          $ref: '#/components/schemas/personalInfo'
+        registerType:
+          title: 'User type'
+          type: string
+          enum: ['PreUniversity', 'Enrollee', 'School', 'University']
+        studentInfo:
+          $ref: '#/components/schemas/studentInfo'
+        registerConfirm:
+          $ref: '#/components/schemas/registerConfirm'
+    authInfo:
+      title: 'Authentication info'
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+        password:
+          type: string
+          format: password
+    personalInfo:
+      title: 'Personal info'
+      required:
+        - firstName
+        - secondName
+        - middleName
+        - dateOfBirth
+      properties:
+        firstName:
+          type: string
+        secondName:
+          type: string
+        middleName:
+          type: string
+        dateOfBirth:
+          type: string
+          format: date
+    studentInfo:
+      title: 'Student info'
+      required:
+        - phoneNumber
+        - university
+        - grade
+        - universityCountry
+        - citizenship
+        - region
+        - city
+      properties:
+        phoneNumber:
+          type: string
+        university:
+          type: string
+        grade:
+          type: integer
+          minimum: 1
+          maximum: 5
+        universityCountry:
+          type: string
+        citizenship:
+          type: string
+        region:
+          type: string
+        city:
+          type: string
+    registerConfirm:
+      title: 'Confirm registration info'
+      description: 'Used to register with a one-time password'
+      required:
+        - registrationNumber
+        - oneTimePassword
+      properties:
+        registrationNumber:
+          type: string
+        oneTimePassword:
+          type: string
+          format: password
