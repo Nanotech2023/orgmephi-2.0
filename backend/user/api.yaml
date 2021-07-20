@@ -68,6 +68,26 @@ paths:
               schema:
                 type: string
                 example: access_token_cookie=deleted; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT
+  /reset:
+    post:
+      summary: Reset password for current user
+      parameters:
+        - in: header
+          name: X-CSRF-TOKEN
+          schema:
+            type: string
+          required: true
+      security:
+        - cookieJWTAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/resetPassword'
+      responses:
+        '200':
+          description: OK
 
   /info/universities:
     get:
@@ -236,3 +256,15 @@ components:
           type: array
           items:
             type: string
+    resetPassword:
+      title: 'Reset password request'
+      required:
+        - new_password
+        - old_password
+      properties:
+        new_password:
+          type: string
+          format: password
+        old_password:
+          type: string
+          format: password
