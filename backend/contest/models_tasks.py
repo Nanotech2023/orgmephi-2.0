@@ -1,3 +1,4 @@
+"""File with models description for contests and tasks management."""
 from app import db
 
 # Constants
@@ -10,8 +11,17 @@ DEFAULT_VISIBILITY = False
 
 class CompositeContest(db.Model):
     """
-    Contest model
+    Class describing a Composite contest model.
+
+    contest_id: id of contest
+    description: description of the contest
+    rules: rules of the contest
+    variant_id: variant connected with current contest
+    winning_condition: winning condition
+    certificate_template: contest certificate template
+    visibility: visibility of the contest
     """
+
     __tablename__ = 'composite_contest'
 
     contest_id = db.Column(db.Integer, autoincrement=True, primary_key=True)
@@ -26,8 +36,14 @@ class CompositeContest(db.Model):
 
 class ContestStage(db.Model):
     """
-    Model "Contest stage"
+    Class describing a Stage model.
+
+    stage_id: id of the stage
+    stage_name: name of the stage
+    composite_contest_id: if of the composite contest
+    next_stage_condition: condition to pass to the next stage
     """
+
     __tablename__ = 'contest_stage'
 
     stage_id = db.Column(db.Integer, autoincrement=True, primary_key=True)
@@ -39,8 +55,11 @@ class ContestStage(db.Model):
 
 class ContestsInStage(db.Model):
     """
-    Model "Contest in Composite stage"
+    Class describing a Contests In Stage model.
+
+    ///
     """
+
     __tablename__ = 'contests_in_stage'
 
     stage_id = db.Column(db.Integer, db.ForeignKey('contest_stage.stage_id'), primary_key=True)
@@ -50,8 +69,11 @@ class ContestsInStage(db.Model):
 
 class ContestsInCompositeContest(db.Model):
     """
-    Model "Contest in Composite stage"
+    Class describing a Contests In Composite Contest model.
+
+    ///
     """
+
     __tablename__ = 'contests_in_composite_contest'
 
     composite_contest_id = db.Column(db.Integer, db.ForeignKey('composite_contest.contest_id'), primary_key=True)
@@ -63,7 +85,11 @@ class ContestsInCompositeContest(db.Model):
 
 class TaskVariant(db.Model):
     """
-    Model "Variant of the task"
+    Class describing a Task variant model.
+
+    variant_id: id of the variant
+    variant_number: id of the variant number
+    variant_description: description of the variant
     """
 
     __tablename__ = 'task_variant'
@@ -76,10 +102,12 @@ class TaskVariant(db.Model):
 
 class TaskInVariant(db.Model):
     """
-    Model "Task in variant"
+    Class describing a Task in variant model.
 
-    :param task_type: "Plain", "Range", "Multiply"
+    variant_id: id of the variant
+    task_id: id of the task
     """
+
     __tablename__ = 'task_in_variant'
 
     variant_id = db.Column(db.Integer, db.ForeignKey('task_variant.variant_id'), primary_key=True)
@@ -90,18 +118,28 @@ class TaskInVariant(db.Model):
 
 class Task(db.Model):
     """
-    Model "Base"
+    Class describing a Base Task model.
+
+    task_id: id of the task
+    num_of_task: number of the task
+    image_of_task: image file
     """
+
     __tablename__ = 'base_task'
     task_id = db.Column(db.Integer, autoincrement=True, primary_key=True)
     num_of_task = db.Column(db.Integer, nullable=False)
-    image_of_task = db.Column(db.BLOB, nullable=False)
+    image_of_task = db.Column(db.LargeBinary, nullable=False)
+    __table_args__ = {'extend_existing': True}
 
 
 class PlainTask(db.Model):
     """
-    Model "Task with Plain Text"
+    Class describing a Task with plain text model.
+
+    task_id: id of the task
+    recommended_answer: recommended for student answer
     """
+
     __tablename__ = 'plain_task'
 
     task_id = db.Column(db.Integer, db.ForeignKey('base_task.task_id'), primary_key=True)
@@ -111,8 +149,13 @@ class PlainTask(db.Model):
 
 class RangeTask(db.Model):
     """
-    Model "Task with Range"
+    Class describing a Task with range model.
+
+    task_id: id of the task
+    start_value: start value of the range of the answer
+    end_value: end value of the range of the answer
     """
+
     __tablename__ = 'range_task'
 
     task_id = db.Column(db.Integer, db.ForeignKey('base_task.task_id'), primary_key=True)
@@ -123,19 +166,27 @@ class RangeTask(db.Model):
 
 class MultipleChoiceTask(db.Model):
     """
-    Model "Task with multiple choice"
+    Class describing a Task with multiple choice model.
+
+    task_id: id of the task
+    correct_answer: correct answer
     """
+
     __tablename__ = 'multiple_task'
 
     task_id = db.Column(db.Integer, db.ForeignKey('base_task.task_id'), primary_key=True)
-    recommended_answer = db.Column(db.String(50), nullable=False)
+    correct_answer = db.Column(db.String(50), nullable=False)
     __table_args__ = {'extend_existing': True}
 
 
 class AnswersInMultipleChoiceTask(db.Model):
     """
-    Model "Task with multiple choice"
+    Class describing a Multiple answers for the task model.
+
+    task_id: id of the task
+    answer: possible answer
     """
+
     __tablename__ = 'answers_in_multiple_task'
 
     task_id = db.Column(db.Integer, db.ForeignKey('multiply_task.task_id'), primary_key=True)
