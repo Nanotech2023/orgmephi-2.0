@@ -18,6 +18,10 @@ paths:
       responses:
         '200':
           description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/commonUserInfo'
         #4xx type errors, TODO: specify exact error codes
         '400':
           description: Bad request
@@ -211,6 +215,32 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/errorResponse'
+  /user/by-group/{id}:
+    get:
+      summary: Get common info for different users
+      description: Get info about any user by their group, only for admins and creators
+      security:
+        - cookieJWTAuth: [ ]
+      parameters:
+        - in: path
+          description: ID of the group
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/userList'
+        '403':
+          description: Invalid role of current user
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
   /user/all:
     get:
       summary: Get common info for all users
@@ -274,9 +304,9 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/errorResponse'
-    post:
+    put:
       summary: Set the role of any user
-      description: Get the role of another user, only for admins
+      description: Set the role of another user, only for admins
       security:
         - cookieJWTAuth: [ ]
         - CSRFToken: [ ]
@@ -320,7 +350,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/personalInfo'
-  /user/personal/by-id/{id}:
+  /user/by-id/{id}/personal:
     get:
       summary: Get personal info for a different user
       description: Get personal info about any user by its id, only for admins and creators
@@ -371,7 +401,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/errorResponse'
-  /user/university/by-id/{id}:
+  /user/by-id/{id}/university:
     get:
       summary: Get university student  info for a different user
       description: Get university student info about any user by its id, only for admins and creators
@@ -444,6 +474,279 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/errorResponse'
+  /user/groups:
+    get:
+      summary: Get groups for current user
+      security:
+        - cookieJWTAuth: [ ]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/groupList'
+  /user/by-id/{id}/groups:
+    get:
+      summary: Get groups for a different user
+      description: Get group list for any user by its id, only for admins and creators
+      security:
+        - cookieJWTAuth: [ ]
+      parameters:
+        - in: path
+          description: Id of the user
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/groupList'
+        '403':
+          description: Invalid role of current user
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+        '404':
+          description: User not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+  /user/by-id/{id}/groups/add:
+    post:
+      summary: Assign a user to a group
+      description: Assign a user to a group, only for admins and creators
+      security:
+        - cookieJWTAuth: [ ]
+        - CSRFToken: [ ]
+      parameters:
+        - in: path
+          description: Id of the user
+          name: id
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/updateGroups'
+      responses:
+        '200':
+          description: OK
+        '403':
+          description: Invalid role of current user
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+        '404':
+          description: User or group not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+  /user/by-id/{id}/groups/remove:
+    post:
+      summary: Remove a user from a group
+      description: Remove a user from a group, only for admins and creators
+      security:
+        - cookieJWTAuth: [ ]
+        - CSRFToken: [ ]
+      parameters:
+        - in: path
+          description: Id of the user
+          name: id
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/updateGroups'
+      responses:
+        '200':
+          description: OK
+        '403':
+          description: Invalid role of current user
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+        '404':
+          description: User or group not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+
+  /group/all:
+    get:
+      summary: Get all groups
+      description: Get all group list, only for admins and creators
+      security:
+        - cookieJWTAuth: [ ]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/groupList'
+        '403':
+          description: Invalid role of current user
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+  /group/by-id/{id}:
+    get:
+      summary: Get any group
+      description: Get any group, only for admins and creators
+      security:
+        - cookieJWTAuth: [ ]
+      parameters:
+        - in: path
+          description: Id of the group
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/groupType'
+        '403':
+          description: Invalid role of current user
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+        '404':
+          description: Group not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+  /group/by-name/{name}:
+    get:
+      summary: Get any group
+      description: Get any group, only for admins and creators
+      security:
+        - cookieJWTAuth: [ ]
+      parameters:
+        - in: path
+          description: Name of the group
+          name: name
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/groupType'
+        '403':
+          description: Invalid role of current user
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+        '404':
+          description: Group not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+  /group/add:
+    post:
+      summary: Add a group
+      description: Add a group, only for admins and creators
+      security:
+        - cookieJWTAuth: [ ]
+        - CSRFToken: [ ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/addGroup'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/groupType'
+        '403':
+          description: Invalid role of current user
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+        '404':
+          description: Group not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+        409:
+          description: Group already exists
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+  /group/by-id/{id}/delete:
+    post:
+      summary: Delete a group
+      description: Add a group, only for admins and creators
+      security:
+        - cookieJWTAuth: [ ]
+        - CSRFToken: [ ]
+      parameters:
+        - in: path
+          description: ID of the group
+          name: id
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/addGroup'
+      responses:
+        '200':
+          description: OK
+        '403':
+          description: Invalid role of current user
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+        '404':
+          description: Group not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+
+
 
 
 components:
@@ -648,3 +951,36 @@ components:
       properties:
         role:
           $ref: '#/components/schemas/roleType'
+    groupType:
+      title: 'User group'
+      required:
+        - id
+        - name
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+    groupList:
+      title: 'List of user groups'
+      required:
+        - groups
+      properties:
+        groups:
+          type: array
+          items:
+            $ref: '#/components/schemas/groupType'
+    updateGroups:
+      title: 'Change groups request'
+      required:
+        - group_id
+      properties:
+        group_id:
+          type: integer
+    addGroup:
+      title: 'Add group request'
+      required:
+        - name
+      properties:
+        name:
+          type: string
