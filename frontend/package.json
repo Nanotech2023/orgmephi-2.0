@@ -5,6 +5,7 @@
     "ng": "ng",
     "build": "ng build",
     "debug": "ng serve --configuration hmr --hmr",
+    "production": "lite-server --baseDir=\"dist\"",
     "test": "ng test"
   },
   "private": true,
@@ -41,6 +42,7 @@
     "karma-coverage": "~2.0.3",
     "karma-jasmine": "~4.0.0",
     "karma-jasmine-html-reporter": "^1.5.0",
+    "lite-server": "^2.6.1",
     "typescript": "~4.3.2"
   }
 }

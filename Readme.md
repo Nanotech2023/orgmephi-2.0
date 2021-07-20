@@ -91,6 +91,8 @@
     - Необходимо установить зависимости Node.js 
 - `yarn --cwd frontend build` - собирает production версию в папку `frontend/dist`
     - Необходимо установить зависимости Node.js
+- `yarn --cwd frontend production` - запускает production версию из папку `frontend/dist` по адресу `http://localhost:3000`
+    - Необходимо установить зависимости Node.js и собрать production версию
 
 
 
