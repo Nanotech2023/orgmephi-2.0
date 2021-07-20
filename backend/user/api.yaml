@@ -12,7 +12,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Registration'
+              $ref: '#/components/schemas/registration'
       summary: Registers a new user.
       responses:
         '200':
@@ -23,38 +23,67 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/components/schemas/errorResponse'
+  /auth:
+    post:
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/authentication'
+      summary: Authenticates a user.
+      responses:
+        '200':
+          description: OK
+          headers:
+            Set-Cookie:
+              schema:
+                type: string
+                example: access_token_cookie=eyJ0eXAi...
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/authResponse'
+
+        #4xx type errors, TODO: specify exact error codes
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
 
 components:
   schemas:
-    ErrorResponse:
+    errorResponse:
       title: 'Error response'
       description: 'Common response with error message'
       required:
-        - errorMsg
+        - error_msg
       properties:
-        errorMsg:
+        error_msg:
           type: string
-    Registration:
-      title: 'Registration info'
+    registration:
+      title: 'Registration request info'
       required:
-        - authInfo
-        - personalInfo
-        - registerType
+        - auth_info
+        - personal_info
+        - register_type
       properties:
-        authInfo:
-          $ref: '#/components/schemas/authInfo'
-        personalInfo:
+        auth_info:
+          $ref: '#/components/schemas/registerAuthInfo'
+        personal_info:
           $ref: '#/components/schemas/personalInfo'
-        registerType:
+        register_type:
           title: 'User type'
           type: string
           enum: ['PreUniversity', 'Enrollee', 'School', 'University']
-        studentInfo:
+        student_info:
           $ref: '#/components/schemas/studentInfo'
-        registerConfirm:
+        register_confirm:
           $ref: '#/components/schemas/registerConfirm'
-    authInfo:
+    registerAuthInfo:
       title: 'Authentication info'
       required:
         - email
@@ -68,32 +97,32 @@ components:
     personalInfo:
       title: 'Personal info'
       required:
-        - firstName
-        - secondName
-        - middleName
-        - dateOfBirth
+        - first_name
+        - second_name
+        - middle_name
+        - date_of_birth
       properties:
-        firstName:
+        first_name:
           type: string
-        secondName:
+        second_name:
           type: string
-        middleName:
+        middle_name:
           type: string
-        dateOfBirth:
+        date_of_birth:
           type: string
           format: date
     studentInfo:
       title: 'Student info'
       required:
-        - phoneNumber
+        - phone_number
         - university
         - grade
-        - universityCountry
+        - university_country
         - citizenship
         - region
         - city
       properties:
-        phoneNumber:
+        phone_number:
           type: string
         university:
           type: string
@@ -101,7 +130,7 @@ components:
           type: integer
           minimum: 1
           maximum: 5
-        universityCountry:
+        university_country:
           type: string
         citizenship:
           type: string
@@ -113,11 +142,37 @@ components:
       title: 'Confirm registration info'
       description: 'Used to register with a one-time password'
       required:
-        - registrationNumber
-        - oneTimePassword
+        - registration_number
+        - one_time_password
       properties:
-        registrationNumber:
+        registration_number:
           type: string
-        oneTimePassword:
+        one_time_password:
           type: string
           format: password
+    authentication:
+      title: 'Authentication request info'
+      required:
+        - auth_credentials
+      properties:
+        auth_credentials:
+          $ref: '#/components/schemas/authCredentials'
+    authCredentials:
+      title: 'Authentication credentials'
+      required:
+        - username #Email for external users, username for MEPhI students
+        - password
+      properties:
+        email:
+          type: string
+        password:
+          type: string
+          format: password
+    authResponse:
+      title: 'Authentication response'
+      required:
+        - csrf_access_token
+      properties:
+        csrf_access_token:
+          title: CSRF token
+          type: string
