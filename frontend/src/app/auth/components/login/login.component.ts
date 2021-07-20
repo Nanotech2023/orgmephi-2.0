@@ -1,7 +1,11 @@
-import { Component } from '@angular/core'
+import { Component, OnInit } from '@angular/core'
 import { AuthService } from '@/auth/services/auth.service'
 import { UserAuth } from '@/auth/models/userAuth'
 import { AuthResult } from '@/auth/models'
+import { Store } from '@ngrx/store'
+import { AuthActions, AuthSelectors, AuthState } from '@/auth/store'
+import { Observable } from 'rxjs'
+import { selectAuthResult } from '@/auth/store/auth.selectors'
 
 
 @Component( {
@@ -9,28 +13,32 @@ import { AuthResult } from '@/auth/models'
     templateUrl: './login.component.html',
     styleUrls: [ './login.component.scss' ]
 } )
-export class LoginComponent
+export class LoginComponent implements OnInit
 {
-    userAuth: UserAuth
-    authResult: AuthResult | null
+    loginAttemptUser: UserAuth
+    authResult$!: Observable<AuthResult>
 
-    constructor( private service: AuthService )
+    constructor( private readonly store: Store<AuthState.State> )
     {
-        this.userAuth = {
+        this.loginAttemptUser = {
             email: '',
             password: ''
         }
-        this.authResult = null
     }
 
-    auth(): void
+    ngOnInit(): void
     {
-        this.authResult = this.service.auth( this.userAuth )
+        this.authResult$ = this.store.select( AuthSelectors.selectAuthResult )
     }
 
-    isValid(): boolean
+    login( loginAttemptUser: UserAuth ): void
+    {
+        this.store.dispatch( AuthActions.loginAttempt( { user: loginAttemptUser } ) )
+    }
+
+    isValid( loginAttemptUser: UserAuth ): boolean
     {
         // TODO enforce email regex check
-        return !!( this.userAuth.password && this.userAuth.email )
+        return !!( loginAttemptUser.password && loginAttemptUser.email )
     }
 }

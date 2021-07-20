@@ -22,7 +22,7 @@ pages:
   needs: [ 'build-frontend' ]
   script:
     - mkdir .public
-    - cp -r frontend/dist .public
+    - cp -r frontend/dist/* .public
     - mv .public public
   artifacts:
     paths:

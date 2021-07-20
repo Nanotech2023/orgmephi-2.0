@@ -11,162 +11,168 @@
     </fieldset>
 
     <div *ngIf="isAvailable(); else notSupported">
-        <div *ngIf="!registrationCompleted">
-            <fieldset class="form-group">
-                <legend>Данные для подтверждения регистрации</legend>
-                <div class="form-check">
-                    <label class="form-check-label">
-                        <input type="checkbox" class="form-check-input" name="have_reg_data"
-                               [(ngModel)]="hasRegisterNumber"
-                               style="position: relative; vertical-align: top">
-                        У меня есть регистрационный номер и код активации, полученные на олимпиаде
-                    </label>
-                </div>
-                <br/>
-                <div class="form-group row" id="have_id" *ngIf="hasRegisterNumber">
-                    <label class="col-sm-4 col-form-label">Регистрационный номер</label>
-                    <div class="col-sm-4">
-                        <input class="form-control" type="text" [(ngModel)]="registerUser.registerNumber">
-                    </div>
-                </div>
-                <br/>
-                <div class="form-group row" *ngIf="hasRegisterNumber">
-                    <label class="col-sm-4 col-form-label">Код активации (вводится с учетом
-                        регистра и только латинскими буквами)</label>
-                    <div class="col-sm-4">
-                        <input class="form-control" type="text" [(ngModel)]="registerUser.activationCode">
-                    </div>
-                </div>
-            </fieldset>
+        <ng-container *ngIf="isRegistered$ | async as registerResult; else registrationForm">
+            <div class="alert alert-success" *ngIf="registerResult">
+                Регистрация успешно завершена
+            </div>
+        </ng-container>
 
-            <fieldset class="form-group">
-                <legend>Данные для авторизации в Системе</legend>
-                <div class="form-group row">
-                    <label class="col-sm-4 col-form-label">E-mail <span class="accent_red">*</span>:</label>
-                    <div class="col-sm-4">
-                        <input class="form-control" type="email" email required [(ngModel)]="registerUser.email"
-                               #email="ngModel"
-                               name="email">
-                        <div *ngIf="email.invalid && (email.dirty || email.touched)"
-                             class="alert alert-danger">
-                            <div *ngIf="email.errors?.required">
-                                Поле обязательно для заполнения
-                            </div>
-                            <div *ngIf="email.errors?.email">
-                                Невалидный e-mail
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <br/>
-                <div class="form-group row">
-                    <label class="col-sm-4 col-form-label">Пароль <span class="accent_red">*</span>:</label>
-                    <div class="col-sm-4">
-                        <input class="form-control" type="password" required minlength="6" #password="ngModel"
-                               name="password"
-                               [(ngModel)]="registerUser.password">
-                        <div *ngIf="password.invalid && (password.dirty || password.touched)"
-                             class="alert alert-danger">
-                            <div *ngIf="password.errors?.required">
-                                Поле обязательно для заполнения
-                            </div>
-                            <div *ngIf="password.errors?.minlength">
-                                Пароль должен содержать не менее 6-ти символов
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </fieldset>
-
-            <fieldset>
-                <legend>Личная информация о пользователе</legend>
-                <div class="form-group row">
-                    <label class="col-sm-4 col-form-label">Имя <span class="accent_red">*</span>:</label>
-                    <div class="col-sm-4">
-                        <input class="form-control" type="text" required [(ngModel)]="registerUser.name" #name="ngModel"
-                               name="name">
-                        <div *ngIf="name.invalid && (name.dirty || name.touched)"
-                             class="alert alert-danger">
-                            <div *ngIf="name.errors?.required">
-                                Поле обязательно для заполнения
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <br/>
-                <div class="form-group row">
-                    <label class="col-sm-4 col-form-label">Фамилия <span class="accent_red">*</span>:</label>
-                    <div class="col-sm-4">
-                        <input class="form-control" type="text" required [(ngModel)]="registerUser.surname"
-                               #surname="ngModel"
-                               name="surname">
-                        <div *ngIf="surname.invalid && (surname.dirty || surname.touched)"
-                             class="alert alert-danger">
-                            <div *ngIf="surname.errors?.required">
-                                Поле обязательно для заполнения
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <br/>
-                <div class="form-group row">
-                    <label class="col-sm-4 col-form-label">Отчество <span class="accent_red">*</span>:</label>
-                    <div class="col-sm-4">
-                        <input class="form-control" type="text" required [(ngModel)]="registerUser.lastName"
-                               #lastName="ngModel"
-                               name="lastName">
-                        <div *ngIf="lastName.invalid && (lastName.dirty || lastName.touched)"
-                             class="alert alert-danger">
-                            <div *ngIf="lastName.errors?.required">
-                                Поле обязательно для заполнения
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <br/>
-                <div class="form-group row">
-                    <label class="col-sm-4 col-form-label">Дата рождения <span class="accent_red">*</span>:</label>
-                    <div class="col-sm-4">
-                        <input class="form-control" type="date" required [(ngModel)]="registerUser.birthDate"
-                               #birthDate="ngModel"
-                               name="birthDate">
-                        <div *ngIf="birthDate.invalid && (birthDate.dirty || birthDate.touched)"
-                             class="alert alert-danger">
-                            <div *ngIf="birthDate.errors?.required">
-                                Поле обязательно для заполнения
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </fieldset>
-
-            <fieldset>
-                <legend>Соглашения</legend>
-                <div class="form-check">
-                    <label class="form-check-label">
-                        <input type="checkbox" class="form-check-input" required [(ngModel)]="agreementAccepted"
-                               style="position: relative; vertical-align: top">
-                        <p *ngFor="let agreement of agreements">
-                            {{ agreement }}
-                        </p>
-                    </label>
-                </div>
-            </fieldset>
-            <br/>
-            <button type="submit" class="btn btn-primary" [disabled]="!isValid()" (click)="register()">
-                Зарегистрироваться
-            </button>
-        </div>
     </div>
 
-    <div class="alert alert-success" *ngIf="registerResult && registerResult?.isSuccessful">
-        Регистрация успешно завершена
-    </div>
 
     <ng-template #notSupported>
         <div *ngIf="selectedRegisterType" class="alert alert-warning" role="alert">
             Данный тип регистрации временно недоступен
         </div>
+    </ng-template>
+
+    <ng-template #registrationForm>
+        <fieldset class="form-group">
+            <legend>Данные для подтверждения регистрации</legend>
+            <div class="form-check">
+                <label class="form-check-label">
+                    <input type="checkbox" class="form-check-input" name="have_reg_data"
+                           [(ngModel)]="hasRegisterNumber"
+                           style="position: relative; vertical-align: top">
+                    У меня есть регистрационный номер и код активации, полученные на олимпиаде
+                </label>
+            </div>
+            <br/>
+            <div class="form-group row" id="have_id" *ngIf="hasRegisterNumber">
+                <label class="col-sm-4 col-form-label">Регистрационный номер</label>
+                <div class="col-sm-4">
+                    <input class="form-control" type="text" [(ngModel)]="registerAttempt.registerNumber">
+                </div>
+            </div>
+            <br/>
+            <div class="form-group row" *ngIf="hasRegisterNumber">
+                <label class="col-sm-4 col-form-label">Код активации (вводится с учетом
+                    регистра и только латинскими буквами)</label>
+                <div class="col-sm-4">
+                    <input class="form-control" type="text" [(ngModel)]="registerAttempt.activationCode">
+                </div>
+            </div>
+        </fieldset>
+
+        <fieldset class="form-group">
+            <legend>Данные для авторизации в Системе</legend>
+            <div class="form-group row">
+                <label class="col-sm-4 col-form-label">E-mail <span class="accent_red">*</span>:</label>
+                <div class="col-sm-4">
+                    <input class="form-control" type="email" email required [(ngModel)]="registerAttempt.email"
+                           #email="ngModel"
+                           name="email">
+                    <div *ngIf="email.invalid && (email.dirty || email.touched)"
+                         class="alert alert-danger">
+                        <div *ngIf="email.errors?.required">
+                            Поле обязательно для заполнения
+                        </div>
+                        <div *ngIf="email.errors?.email">
+                            Невалидный e-mail
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <br/>
+            <div class="form-group row">
+                <label class="col-sm-4 col-form-label">Пароль <span class="accent_red">*</span>:</label>
+                <div class="col-sm-4">
+                    <input class="form-control" type="password" required minlength="6" #password="ngModel"
+                           name="password"
+                           [(ngModel)]="registerAttempt.password">
+                    <div *ngIf="password.invalid && (password.dirty || password.touched)"
+                         class="alert alert-danger">
+                        <div *ngIf="password.errors?.required">
+                            Поле обязательно для заполнения
+                        </div>
+                        <div *ngIf="password.errors?.minlength">
+                            Пароль должен содержать не менее 6-ти символов
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </fieldset>
+
+        <fieldset>
+            <legend>Личная информация о пользователе</legend>
+            <div class="form-group row">
+                <label class="col-sm-4 col-form-label">Имя <span class="accent_red">*</span>:</label>
+                <div class="col-sm-4">
+                    <input class="form-control" type="text" required [(ngModel)]="registerAttempt.name"
+                           #name="ngModel"
+                           name="name">
+                    <div *ngIf="name.invalid && (name.dirty || name.touched)"
+                         class="alert alert-danger">
+                        <div *ngIf="name.errors?.required">
+                            Поле обязательно для заполнения
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <br/>
+            <div class="form-group row">
+                <label class="col-sm-4 col-form-label">Фамилия <span class="accent_red">*</span>:</label>
+                <div class="col-sm-4">
+                    <input class="form-control" type="text" required [(ngModel)]="registerAttempt.surname"
+                           #surname="ngModel"
+                           name="surname">
+                    <div *ngIf="surname.invalid && (surname.dirty || surname.touched)"
+                         class="alert alert-danger">
+                        <div *ngIf="surname.errors?.required">
+                            Поле обязательно для заполнения
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <br/>
+            <div class="form-group row">
+                <label class="col-sm-4 col-form-label">Отчество <span class="accent_red">*</span>:</label>
+                <div class="col-sm-4">
+                    <input class="form-control" type="text" required [(ngModel)]="registerAttempt.lastName"
+                           #lastName="ngModel"
+                           name="lastName">
+                    <div *ngIf="lastName.invalid && (lastName.dirty || lastName.touched)"
+                         class="alert alert-danger">
+                        <div *ngIf="lastName.errors?.required">
+                            Поле обязательно для заполнения
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <br/>
+            <div class="form-group row">
+                <label class="col-sm-4 col-form-label">Дата рождения <span class="accent_red">*</span>:</label>
+                <div class="col-sm-4">
+                    <input class="form-control" type="date" required [(ngModel)]="registerAttempt.birthDate"
+                           #birthDate="ngModel"
+                           name="birthDate">
+                    <div *ngIf="birthDate.invalid && (birthDate.dirty || birthDate.touched)"
+                         class="alert alert-danger">
+                        <div *ngIf="birthDate.errors?.required">
+                            Поле обязательно для заполнения
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </fieldset>
+
+        <fieldset>
+            <legend>Соглашения</legend>
+            <div class="form-check">
+                <label class="form-check-label">
+                    <input type="checkbox" class="form-check-input" required [(ngModel)]="agreementAccepted"
+                           style="position: relative; vertical-align: top">
+                    <p *ngFor="let agreement of agreements">
+                        {{ agreement }}
+                    </p>
+                </label>
+            </div>
+        </fieldset>
+        <br/>
+        <button type="submit" class="btn btn-primary" [disabled]="!isValid(registerAttempt)"
+                (click)="register(registerAttempt)">
+            Зарегистрироваться
+        </button>
     </ng-template>
 </div>
 
