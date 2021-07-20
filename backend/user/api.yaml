@@ -132,7 +132,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/errorResponse'
-
   /user/by-name/{name}:
     get:
       summary: Get common info for a different user
@@ -318,9 +317,101 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/errorResponse'
+  /user/personal:
+    get:
+      summary: Get personal info for current user
+      security:
+        - cookieJWTAuth: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/personalInfo'
+  /user/personal/by-id/{id}:
+    get:
+      summary: Get personal info for a different user
+      description: Get personal info about any user by its id, only for admins and creators
+      security:
+        - cookieJWTAuth: [ ]
+      parameters:
+        - in: path
+          description: Id of the user
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/personalInfo'
+        '403':
+          description: Invalid role of current user
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+        '404':
+          description: User not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
 
-
-
+  /user/university:
+    get:
+      summary: Get university student info for current user
+      security:
+        - cookieJWTAuth: [ ]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/studentInfo'
+        404:
+          description: User is not a university student
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+  /user/university/by-id/{id}:
+    get:
+      summary: Get university student  info for a different user
+      description: Get university student info about any user by its id, only for admins and creators
+      security:
+        - cookieJWTAuth: [ ]
+      parameters:
+        - in: path
+          description: Id of the user
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/studentInfo'
+        '403':
+          description: Invalid role of current user
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+        '404':
+          description: User not found or is not a university student
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
 
   /info/universities:
     get:
@@ -342,6 +433,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/getCountriesResponse'
+
 
 components:
   securitySchemes:
