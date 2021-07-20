@@ -18,12 +18,12 @@ class Composite_contest(db.Model):
     __tablename__ = 'composite_contest'
 
     contest_id = db.Column(db.Integer, ForeignKey('contest.contest_id'), Identity(start=0), primary_key=True)
-    description = db.Column(db.Text)
-    rules = db.Column(db.Text)
+    description = db.Column(db.Text, nullable=False)
+    rules = db.Column(db.Text, nullable=False)
     # TODO task = db.Column(db.String(CONTEST_TASK_LINK))
-    winning_condition = db.Column(db.Text)
-    certificate_template = db.Column(db.Text)
-    visibility = db.Column(Boolean(), default=DEFAULT_VISIBILITY)
+    winning_condition = db.Column(db.Text, nullable=False)
+    certificate_template = db.Column(db.Text, nullable=True)
+    visibility = db.Column(Boolean(), default=DEFAULT_VISIBILITY, nullable=False)
 
 
 class Contest_stage(db.Model):
@@ -33,9 +33,9 @@ class Contest_stage(db.Model):
     __tablename__ = 'contest_stage'
 
     stage_id = db.Column(db.Integer, Identity(start=0), primary_key=True)
-    stage_name = db.Column(db.Text, primary_key=True)
+    stage_name = db.Column(db.Text)
     composite_contest_id = db.Column(db.Integer, ForeignKey('composite_contest.contest_id'), primary_key=True)
-    next_stage_condition = db.Column(db.Text)
+    next_stage_condition = db.Column(db.Text, nullable=False)
 
 
 class Contests_in_Stage(db.Model):
@@ -81,7 +81,7 @@ class Task_in_variant(db.Model):
     __tablename__ = 'task_in_variant'
 
     variant_id = db.Column(db.Integer, ForeignKey('task_variant.variant_id'), primary_key=True)
-    task_type = db.Column(db.String)
+    task_type = db.Column(db.String, nullable=False)
     task_id = db.Column(db.Integer, primary_key=True)
 
     __table_args__ = (
@@ -96,9 +96,9 @@ class Plain_Task(db.Model):
     __tablename__ = 'plain_task'
 
     task_id = db.Column(db.Integer, Identity(start=0), primary_key=True)
-    num_of_task = db.Column(db.Integer)
-    image_of_task = db.Column(BLOB)
-    recommended_answer = db.Column(db.Text)
+    num_of_task = db.Column(db.Integer, nullable=False)
+    image_of_task = db.Column(BLOB, nullable=False)
+    recommended_answer = db.Column(db.Text, nullable=False)
 
 
 class Range_Task(db.Model):
@@ -108,10 +108,10 @@ class Range_Task(db.Model):
     __tablename__ = 'range_task'
 
     task_id = db.Column(db.Integer, Identity(start=0), primary_key=True)
-    num_of_task = db.Column(db.Integer)
-    image_of_task = db.Column(BLOB)
-    start_value = db.Column(db.Text)
-    end_value = db.Column(db.Text)
+    num_of_task = db.Column(db.Integer, nullable=False)
+    image_of_task = db.Column(BLOB, nullable=False)
+    start_value = db.Column(db.Text, nullable=False)
+    end_value = db.Column(db.Text, nullable=False)
 
 
 class Multiply_Task(db.Model):
@@ -121,9 +121,9 @@ class Multiply_Task(db.Model):
     __tablename__ = 'multiply_task'
 
     task_id = db.Column(db.Integer, Identity(start=0), primary_key=True)
-    num_of_task = db.Column(db.Integer)
-    image_of_task = db.Column(BLOB)
-    recommended_answer = db.Column(db.Text)
+    num_of_task = db.Column(db.Integer, nullable=False)
+    image_of_task = db.Column(BLOB, nullable=False)
+    recommended_answer = db.Column(db.Text, nullable=False)
 
 
 class Answers_in_Multiply_Task(db.Model):
