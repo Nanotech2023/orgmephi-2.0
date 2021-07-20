@@ -53,6 +53,16 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/errorResponse'
+  /info/universities:
+    get:
+      summary: Get known university list
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/getUniversitiesResponse'
 
 components:
   schemas:
@@ -176,3 +186,12 @@ components:
         csrf_access_token:
           title: CSRF token
           type: string
+    getUniversitiesResponse:
+      title: 'Get university list response'
+      required:
+        - university_list
+      properties:
+        university_list:
+          type: array
+          items:
+            type: string
