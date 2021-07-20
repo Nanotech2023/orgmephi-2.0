@@ -25,6 +25,7 @@ class Composite_contest(db.Model):
     winning_condition = db.Column(db.Text, nullable=False)
     certificate_template = db.Column(db.Text, nullable=True)
     visibility = db.Column(Boolean(), default=DEFAULT_VISIBILITY, nullable=False)
+    __table_args__ = {'extend_existing': True}
 
 
 class Contest_stage(db.Model):
@@ -37,6 +38,7 @@ class Contest_stage(db.Model):
     stage_name = db.Column(db.Text)
     composite_contest_id = db.Column(db.Integer, ForeignKey('composite_contest.contest_id'), primary_key=True)
     next_stage_condition = db.Column(db.Text, nullable=False)
+    __table_args__ = {'extend_existing': True}
 
 
 class Contests_in_Stage(db.Model):
@@ -47,6 +49,7 @@ class Contests_in_Stage(db.Model):
 
     stage_id = db.Column(db.Integer, ForeignKey('contest_stage.stage_id'), primary_key=True)
     contest_id = db.Column(db.Integer, ForeignKey('composite_contest.contest_id'), primary_key=True)
+    __table_args__ = {'extend_existing': True}
 
 
 class Contests_in_Composite_contest(db.Model):
@@ -57,6 +60,7 @@ class Contests_in_Composite_contest(db.Model):
 
     composite_contest_id = db.Column(db.Integer, ForeignKey('composite_contest.contest_id'), primary_key=True)
     contest_id = db.Column(db.Integer, ForeignKey('composite_contest.contest_id'), primary_key=True)
+    __table_args__ = {'extend_existing': True}
 
 
 # Tasks models
@@ -71,6 +75,7 @@ class Task_variant(db.Model):
     variant_id = db.Column(db.Integer, Identity(start=0), primary_key=True)
     variant_number = db.Column(db.Integer)
     variant_description = db.Column(db.Text)
+    __table_args__ = {'extend_existing': True}
 
 
 class Task_in_variant(db.Model):
@@ -87,7 +92,7 @@ class Task_in_variant(db.Model):
 
     __table_args__ = (
         CheckConstraint(task_type in ["Plain", "Range", "Multiply"], name='check_bar_positive'),
-        {})
+        {'extend_existing': True})
 
 
 class Plain_Task(db.Model):
@@ -100,6 +105,7 @@ class Plain_Task(db.Model):
     num_of_task = db.Column(db.Integer, nullable=False)
     image_of_task = db.Column(BLOB, nullable=False)
     recommended_answer = db.Column(db.Text, nullable=False)
+    __table_args__ = {'extend_existing': True}
 
 
 class Range_Task(db.Model):
@@ -113,6 +119,7 @@ class Range_Task(db.Model):
     image_of_task = db.Column(BLOB, nullable=False)
     start_value = db.Column(db.Text, nullable=False)
     end_value = db.Column(db.Text, nullable=False)
+    __table_args__ = {'extend_existing': True}
 
 
 class Multiply_Task(db.Model):
@@ -125,6 +132,7 @@ class Multiply_Task(db.Model):
     num_of_task = db.Column(db.Integer, nullable=False)
     image_of_task = db.Column(BLOB, nullable=False)
     recommended_answer = db.Column(db.Text, nullable=False)
+    __table_args__ = {'extend_existing': True}
 
 
 class Answers_in_Multiply_Task(db.Model):
@@ -135,6 +143,7 @@ class Answers_in_Multiply_Task(db.Model):
 
     task_id = db.Column(db.Integer, ForeignKey('multiply_task.task_id'), primary_key=True)
     suggested_answer = db.Column(db.Integer, primary_key=True)
+    __table_args__ = {'extend_existing': True}
 
 
 """
@@ -148,15 +157,18 @@ class Answers_in_Multiply_Task(db.Model):
 - Редактирование описания и метаинформацию конкурсов и этапов
 - Редактировать структуру конкурсного мероприятия, добавлять и удалять этапы, изменять видимость конкурса
 - Загружать шаблоны и отправлять на печатать дипломы и сертификаты. 
-
 """
-"""
-from sqlalchemy_schemadisplay import create_schema_graph
-from sqlalchemy import MetaData
 
-if __name__ == "__main__":
-    db.create_all()
+# debug
 
+
+def generate_er():
+    from sqlalchemy_schemadisplay import create_schema_graph
+    from sqlalchemy import MetaData
     graph = create_schema_graph(metadata=MetaData('sqlite:///database.sqlite'))
     graph.write_png('my_erd.png')
-"""
+
+
+if __name__ == "__main__":
+    # db.create_all()
+    generate_er()
