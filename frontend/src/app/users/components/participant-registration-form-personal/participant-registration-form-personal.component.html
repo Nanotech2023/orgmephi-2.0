@@ -1,11 +1,38 @@
 <div class="container">
-    <fieldset class="form-group">
+    <fieldset class="form-group" *ngIf="user$ | async as user">
         <legend>Личные данные</legend>
         <div class="form-group row">
-            <label class="col-sm-4 col-form-label">E-mail <span class="accent_red">*</span>:</label>
+            <label class="col-sm-4 col-form-label">E-mail:</label>
             <div class="col-sm-4">
-                <input class="form-control" disabled type="email" email required [(ngModel)]="participant.email"
-                       name="email">
+                <input class="form-control" disabled type="email" [value]="user.email">
+            </div>
+        </div>
+        <br/>
+        <div class="form-group row">
+            <label class="col-sm-4 col-form-label">Имя:</label>
+            <div class="col-sm-4">
+                <input class="form-control" disabled type="text" [value]="user.name">
+            </div>
+        </div>
+        <br/>
+        <div class="form-group row">
+            <label class="col-sm-4 col-form-label">Фамилия:</label>
+            <div class="col-sm-4">
+                <input class="form-control" disabled type="text" [value]="user.surname">
+            </div>
+        </div>
+        <br/>
+        <div class="form-group row">
+            <label class="col-sm-4 col-form-label">Отчество:</label>
+            <div class="col-sm-4">
+                <input class="form-control" disabled type="text" [value]="user.lastName">
+            </div>
+        </div>
+        <br/>
+        <div class="form-group row">
+            <label class="col-sm-4 col-form-label">Дата рождения:</label>
+            <div class="col-sm-4">
+                <input class="form-control" disabled type="date" [value]="user.birthDate">
             </div>
         </div>
         <br/>
