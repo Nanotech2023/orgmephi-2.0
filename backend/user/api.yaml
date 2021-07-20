@@ -29,6 +29,33 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/errorResponse'
+  /register/internal:
+    post:
+      summary: Register an internal user
+      description: Register an internal user, admin only
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/registerAuthInfo'
+      security:
+        - cookieJWTAuth: [ ]
+        - CSRFToken: [ ]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/commonUserInfo'
+        #4xx type errors, TODO: specify exact error codes
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
   /auth:
     post:
       summary: Authenticate a user
@@ -382,7 +409,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/errorResponse'
-
   /user/university:
     get:
       summary: Get university student info for current user
@@ -433,7 +459,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/errorResponse'
-
   /info/universities:
     get:
       summary: Get known university list
@@ -588,7 +613,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/errorResponse'
-
   /group/all:
     get:
       summary: Get all groups
@@ -675,7 +699,7 @@ paths:
   /group/add:
     post:
       summary: Add a group
-      description: Add a group, only for admins and creators
+      description: Add a group, only for admins
       security:
         - cookieJWTAuth: [ ]
         - CSRFToken: [ ]
@@ -713,7 +737,7 @@ paths:
   /group/by-id/{id}/delete:
     post:
       summary: Delete a group
-      description: Add a group, only for admins and creators
+      description: Add a group, only for admins
       security:
         - cookieJWTAuth: [ ]
         - CSRFToken: [ ]
