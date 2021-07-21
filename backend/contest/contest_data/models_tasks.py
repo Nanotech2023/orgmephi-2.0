@@ -17,7 +17,6 @@ class CompositeContest(db.Model):
     contest_id: id of contest
     description: description of the contest
     rules: rules of the contest
-    variant_id: variant connected with current contest
     winning_condition: winning condition
     laureate_condition: laureate condition
     certificate_template: contest certificate template
@@ -29,7 +28,6 @@ class CompositeContest(db.Model):
     contest_id = db.Column(db.Integer, autoincrement=True, primary_key=True)
     description = db.Column(db.Text, nullable=False)
     rules = db.Column(db.Text, nullable=False)
-    variant_id = db.Column(db.Integer, db.ForeignKey('task_variant.variant_id'))
     winning_condition = db.Column(db.Text, nullable=False)
     laureate_condition = db.Column(db.Text, nullable=False)
     certificate_template = db.Column(db.Text, nullable=True)
@@ -41,6 +39,19 @@ class CompositeContest(db.Model):
     __table_args__ = {'extend_existing': True}
 
 
+class VariantInContest(db.Model):
+    """
+    Class variant in Contest model.
+
+    contest_id: id of the contest
+    variant_id: variant connected with current contest
+    """
+
+    __tablename__ = 'variant_in_contest'
+    contest_id = db.Column(db.Integer, db.ForeignKey('composite_contest.contest_id'), primary_key=True)
+    variant_id = db.Column(db.Integer, db.ForeignKey('task_variant.variant_id'), primary_key=True)
+
+
 class UserInContest(db.Model):
     """
     Class describing a User in contest model.
@@ -48,11 +59,13 @@ class UserInContest(db.Model):
     contest_id: id of the contest
     user_id: if of user
     user_status: user status: laureate, winner or custom value
+    variant_id: variant connected with current contest
     """
 
     __tablename__ = 'user_in_contest'
-    contest_id = db.Column(db.Integer, db.ForeignKey('composite_contest.contest_id'), primary_key=True)
     user_id = db.Column(db.Integer, primary_key=True)
+    contest_id = db.Column(db.Integer, db.ForeignKey('composite_contest.contest_id'), nullable=False)
+    variant_id = db.Column(db.Integer, db.ForeignKey('task_variant.variant_id'))
     user_status = db.Column(db.Text, nullable=False)
 
 
@@ -69,7 +82,7 @@ class ContestStage(db.Model):
     __tablename__ = 'contest_stage'
 
     stage_id = db.Column(db.Integer, autoincrement=True, primary_key=True)
-    stage_name = db.Column(db.String(50), index=True)
+    stage_name = db.Column(db.String(50), index=True, nullable=False)
     composite_contest_id = db.Column(db.Integer, db.ForeignKey('composite_contest.contest_id'))
     next_stage_condition = db.Column(db.Text, nullable=False)
     __table_args__ = {'extend_existing': True}
@@ -232,5 +245,5 @@ class AnswersInMultipleChoiceTask(db.Model):
 # debug
 
 
-#if __name__ == "__main__":
-    # db.create_all()
+# if __name__ == "__main__":
+# db.create_all()
