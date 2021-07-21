@@ -3,10 +3,20 @@ from datetime import datetime
 import enum
 
 
-class RoleEnum(enum.Enum):
+class UserRoleEnum(enum.Enum):
     user = 1
     creator = 2
     admin = 3
+    system = 4
+
+
+class UserTypeEnum(enum.Enum):
+    pre_university = 1
+    enrollee = 2
+    school = 3
+    university = 4
+    internal = 5
+    pre_register = 6
 
 
 def _populate_table(table, values):
@@ -24,11 +34,11 @@ class User(db.Model):
     id = db.Column(db.Integer, autoincrement=True, primary_key=True)
     username = db.Column(db.String, index=True, nullable=False, unique=True)
     password_hash = db.Column(db.String, nullable=False)
-    role = db.Column(db.Enum(RoleEnum), nullable=False)
+    role = db.Column(db.Enum(UserRoleEnum), nullable=False)
+    type = db.Column(db.Enum(UserTypeEnum), nullable=False)
     registration_date = db.Column(db.DateTime, default=datetime.utcnow)
-    tmppassword_hash = db.Column(db.String)
 
-    user_id = db.Column(db.Integer, db.ForeignKey('user_info.id'), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('user_info.id'))
     student_id = db.Column(db.Integer, db.ForeignKey('student_info.id'))
 
 
