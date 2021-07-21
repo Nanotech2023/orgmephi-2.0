@@ -14,7 +14,9 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/createContest'
-      security: []
+      security:
+        - cookieJWTAuth: [ ]
+        - CSRFToken: [ ]
       responses:
         '200':
           description: OK
@@ -39,14 +41,16 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/createStage'
-      security: []
+      security:
+        - cookieJWTAuth: [ ]
+        - CSRFToken: [ ]
       responses:
         '200':
           description: OK
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/commonStageInfo'
+                $ref: '#/components/schemas/stageInfo'
 
         '400':
           description: Bad request
@@ -55,6 +59,38 @@ paths:
               schema:
                 $ref: '#/components/schemas/errorResponse'
 
+  /contest/{id}/remove:
+    post:
+      summary: Remove contest
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/removeContest'
+      parameters:
+        - in: path
+          description: Id of the contest
+          name: id
+          required: true
+          schema:
+            type: integer
+      security:
+        - cookieJWTAuth: [ ]
+        - CSRFToken: [ ]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/removeContest'
+        '404':
+          description: Stage not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
 
   /contest/{id}:
     get:
@@ -87,6 +123,66 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/errorResponse'
+    patch:
+      summary: Edit contest info
+      security:
+        - cookieJWTAuth: [ ]
+        - CSRFToken: [ ]
+      parameters:
+        - in: path
+          description: Id of the user
+          name: id
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/contestInfoUpdate'
+      responses:
+        '200':
+          description: OK
+        '404':
+          description: Stage not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+
+  /contest/stage/{id}/remove:
+    post:
+      summary: Remove stage from contest
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/removeStage'
+      parameters:
+        - in: path
+          description: Id of the stage
+          name: id
+          required: true
+          schema:
+            type: integer
+      security:
+        - cookieJWTAuth: [ ]
+        - CSRFToken: [ ]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/removeStage'
+        '404':
+          description: Stage not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
 
   /contest/stage/{id}:
     get:
@@ -96,7 +192,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/commonStageInfo'
+              $ref: '#/components/schemas/stageInfo'
       security: []
       parameters:
         - in: path
@@ -111,7 +207,35 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/commonStageInfo'
+                $ref: '#/components/schemas/stageInfo'
+        '404':
+          description: Stage not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+
+    patch:
+      summary: Set stage info for a contest
+      security:
+        - cookieJWTAuth: [ ]
+        - CSRFToken: [ ]
+      parameters:
+        - in: path
+          description: Id of the user
+          name: id
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/stageInfoUpdate'
+      responses:
+        '200':
+          description: OK
         '404':
           description: Stage not found
           content:
@@ -129,7 +253,9 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/createVariant'
-      security: []
+      security:
+        - cookieJWTAuth: [ ]
+        - CSRFToken: [ ]
       responses:
         '200':
           description: OK
@@ -139,6 +265,39 @@ paths:
                 $ref: '#/components/schemas/commonVariantInfo'
         '400':
           description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+
+  /contest/variant/{id}/remove:
+    post:
+      summary: Remove variant
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/removeVariant'
+      parameters:
+        - in: path
+          description: Id of the variant
+          name: id
+          required: true
+          schema:
+            type: integer
+      security:
+        - cookieJWTAuth: [ ]
+        - CSRFToken: [ ]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/removeVariant'
+        '404':
+          description: Stage not found
           content:
             application/json:
               schema:
@@ -174,7 +333,33 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/errorResponse'
-
+    patch:
+      summary: Edit variant
+      security:
+        - cookieJWTAuth: [ ]
+        - CSRFToken: [ ]
+      parameters:
+        - in: path
+          description: Id of the variant
+          name: id
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/variantInfoUpdate'
+      responses:
+        '200':
+          description: OK
+        '404':
+          description: Stage not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
 
   /contest/variant/plain_task/create:
     post:
@@ -185,7 +370,9 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/createPlainTask'
-      security: []
+      security:
+        - cookieJWTAuth: [ ]
+        - CSRFToken: [ ]
       responses:
         '200':
           description: OK
@@ -240,7 +427,9 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/createRangeTask'
-      security: []
+      security:
+        - cookieJWTAuth: [ ]
+        - CSRFToken: [ ]
       responses:
         '200':
           description: OK
@@ -295,7 +484,35 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/createMultipleTask'
-      security: []
+      security:
+        - cookieJWTAuth: [ ]
+        - CSRFToken: [ ]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/commonMultipleTaskInfo'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+
+  /contest/variant/multiple_task/add_answer:
+    post:
+      summary: Add answer to Multiple task list
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/createMultipleTask'
+      security:
+        - cookieJWTAuth: [ ]
+        - CSRFToken: [ ]
       responses:
         '200':
           description: OK
@@ -336,6 +553,100 @@ paths:
                 $ref: '#/components/schemas/commonMultipleTaskInfo'
         '404':
           description: Task not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+
+  /user/{id}/contest/add:
+    post:
+      summary: Add user to contest
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/updateContest'
+      parameters:
+        - in: path
+          description: Id of the user
+          name: id
+          required: true
+          schema:
+            type: integer
+      security:
+        - cookieJWTAuth: [ ]
+        - CSRFToken: [ ]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/updateContest'
+        '404':
+          description: User or group not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+
+
+  /user/{id}/contest/remove:
+    post:
+      summary: Add user to contest
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/updateContest'
+      parameters:
+        - in: path
+          description: Id of the user
+          name: id
+          required: true
+          schema:
+            type: integer
+      security:
+        - cookieJWTAuth: [ ]
+        - CSRFToken: [ ]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/updateContest'
+        '404':
+          description: User or group not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+
+
+  /contest/user/get:
+    get:
+      summary: list of user in contest
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/usersInContest'
+      security:
+        - cookieJWTAuth: [ ]
+        - CSRFToken: [ ]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/usersInContest'
+        '400':
+          description: Bad request
           content:
             application/json:
               schema:
@@ -425,7 +736,7 @@ components:
           type: integer
         next_stage_condition:
           type: string
-    commonStageInfo:
+    stageInfo:
       title: Stage common info
       description: Request to stage creation
       required:
@@ -448,7 +759,10 @@ components:
       required:
         - variant_number
         - variant_description
+        - contest_id
       properties:
+        contest_id:
+          type: integer
         variant_number:
           type: integer
         variant_description:
@@ -460,7 +774,10 @@ components:
         - variant_id
         - variant_number
         - variant_description
+        - contest_id
       properties:
+        contest_id:
+          type: integer
         variant_id:
           type: integer
         variant_number:
@@ -474,7 +791,10 @@ components:
         - num_of_task
         - image_of_task
         - recommended_answer
+        - variant_id
       properties:
+        variant_id:
+          type: integer
         num_of_task:
           type: integer
         image_of_task:
@@ -490,7 +810,10 @@ components:
         - num_of_task
         - image_of_task
         - recommended_answer
+        - variant_id
       properties:
+        variant_id:
+          type: integer
         task_id:
           type: integer
         num_of_task:
@@ -508,7 +831,10 @@ components:
         - image_of_task
         - start_value
         - end_value
+        - variant_id
       properties:
+        variant_id:
+          type: integer
         num_of_task:
           type: integer
         image_of_task:
@@ -529,7 +855,10 @@ components:
         - image_of_task
         - start_value
         - end_value
+        - variant_id
       properties:
+        variant_id:
+          type: integer
         task_id:
           type: integer
         num_of_task:
@@ -550,7 +879,10 @@ components:
         - num_of_task
         - image_of_task
         - correct_answer
+        - variant_id
       properties:
+        variant_id:
+          type: integer
         num_of_task:
           type: integer
         image_of_task:
@@ -566,7 +898,10 @@ components:
         - num_of_task
         - image_of_task
         - correct_answer
+        - variant_id
       properties:
+        variant_id:
+          type: integer
         task_id:
           type: integer
         num_of_task:
@@ -576,5 +911,82 @@ components:
           format: binary
         correct_answer:
           type: string
-
+    usersInContest:
+      title: Show users in contest
+      description: Request to show users in contest
+      required:
+        - user_id
+        - contest_id
+        - variant_id
+        - user_status
+      properties:
+        user_id:
+          type: integer
+        contest_id:
+          type: integer
+        variant_id:
+          type: integer
+        user_status:
+          type: string
+    updateContest:
+      title: Add or remove user to contest
+      description: Request to add user to contest
+      required:
+        - contest_id
+        - variant_id
+      properties:
+        contest_id:
+          type: integer
+        variant_id:
+          type: integer
+    stageInfoUpdate:
+      title: Edit stage common info
+      description: Request to edit stage
+      properties:
+        stage_name:
+          type: string
+        composite_contest_id:
+          type: integer
+        next_stage_condition:
+          type: string
+    removeStage:
+      title: Remove stage
+      description: Request to remove stage
+      required:
+        - composite_contest_id
+      properties:
+        composite_contest_id:
+          type: integer
+    contestInfoUpdate:
+      title: Edit contest common info
+      description: Request to creation contest
+      properties:
+        description:
+          type: string
+        rules:
+          type: string
+        winning_condition:
+          type: string
+        laureate_condition:
+          type: string
+        certificate_template:
+          type: string
+        visibility:
+          type: boolean
+    removeContest:
+      title: Remove contest
+      description: Request to remove contest
+    removeVariant:
+      title: Remove variant
+      description: Request to variant removing
+    variantInfoUpdate:
+      title: Edit variant
+      description: Request to edit variant
+      properties:
+        contest_id:
+          type: integer
+        variant_number:
+          type: integer
+        variant_description:
+          type: string
 
