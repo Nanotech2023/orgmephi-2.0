@@ -46,25 +46,25 @@ class UserInfo(db.Model):
     __table_name__ = 'user_info'
 
     id = db.Column(db.Integer, autoincrement=True, primary_key=True)
-    email = db.Column(db.String, nullable=False, unique=True)
-    first_name = db.Column(db.String, nullable=False)
-    middle_name = db.Column(db.String, nullable=False)
-    second_name = db.Column(db.String, nullable=False)
-    dateofbirth = db.Column(db.Date, nullable=False)
+    email = db.Column(db.String, unique=True)
+    first_name = db.Column(db.String)
+    middle_name = db.Column(db.String)
+    second_name = db.Column(db.String)
+    dateofbirth = db.Column(db.Date)
 
 
 class StudentInfo(db.Model):
     __table_name__ = 'student_info'
 
     id = db.Column(db.Integer, autoincrement=True, primary_key=True)
-    phone = db.Column(db.String, nullable=False)
+    phone = db.Column(db.String)
     university = db.Column(db.Integer, db.ForeignKey('university.id'))
     custom_university = db.Column(db.String)
-    admission_year = db.Column(db.Date, nullable=False)
-    university_country = db.Column(db.Integer, db.ForeignKey('country.id'), nullable=False)
-    citizenship = db.Column(db.Integer, db.ForeignKey('country.id'), nullable=False)
-    region = db.Column(db.String, nullable=False)
-    city = db.Column(db.String, nullable=False)
+    admission_year = db.Column(db.Date)
+    university_country = db.Column(db.Integer, db.ForeignKey('country.id'))
+    citizenship = db.Column(db.Integer, db.ForeignKey('country.id'))
+    region = db.Column(db.String)
+    city = db.Column(db.String)
 
 
 class University(db.Model):
