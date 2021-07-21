@@ -181,90 +181,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/errorResponse'
-  /user/by-name/{name}:
-    get:
-      summary: Get common info for a different user
-      description: Get info about any user by its username, only for admins and creators
-      security:
-        - cookieJWTAuth: [ ]
-      parameters:
-        - in: path
-          description: Username of the user
-          name: name
-          required: true
-          schema:
-            type: string
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/commonUserInfo'
-        '403':
-          description: Invalid role of current user
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errorResponse'
-        '404':
-          description: User not found
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errorResponse'
-  /user/by-role/{role}:
-    get:
-      summary: Get common info for different users
-      description: Get info about any user by its role, only for admins and creators
-      security:
-        - cookieJWTAuth: [ ]
-      parameters:
-        - in: path
-          description: Role of the user
-          name: role
-          required: true
-          schema:
-            $ref: '#/components/schemas/roleType'
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/userList'
-        '403':
-          description: Invalid role of current user
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errorResponse'
-  /user/by-type/{type}:
-    get:
-      summary: Get common info for different users
-      description: Get info about any user by its type, only for admins and creators
-      security:
-        - cookieJWTAuth: [ ]
-      parameters:
-        - in: path
-          description: Type of the user
-          name: type
-          required: true
-          schema:
-            $ref: '#/components/schemas/userType'
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/userList'
-        '403':
-          description: Invalid role of current user
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errorResponse'
   /user/by-group/{id}:
     get:
       summary: Get common info for different users
@@ -310,50 +226,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/errorResponse'
-  /user/self/role:
-    get:
-      summary: Get the role of the current user
-      security:
-        - cookieJWTAuth: [ ]
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/userRole'
   /user/{id}/role:
-    get:
-      summary: Get the role of another user
-      description: Get the role of another user, only for admins and creators
-      security:
-        - cookieJWTAuth: [ ]
-      parameters:
-        - in: path
-          description: Id of the user
-          name: id
-          required: true
-          schema:
-            type: integer
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/userRole'
-        '403':
-          description: Invalid role of current user
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errorResponse'
-        '404':
-          description: User not found
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errorResponse'
     put:
       summary: Set the role of any user
       description: Set the role of another user, only for admins
@@ -388,50 +261,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/errorResponse'
-  /user/self/type:
-    get:
-      summary: Get type of the current user
-      security:
-        - cookieJWTAuth: [ ]
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/accountType'
   /user/{id}/type:
-    get:
-      summary: Get type of another user
-      description: Get type of another user, only for admins and creators
-      security:
-        - cookieJWTAuth: [ ]
-      parameters:
-        - in: path
-          description: Id of the user
-          name: id
-          required: true
-          schema:
-            type: integer
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/accountType'
-        '403':
-          description: Invalid role of current user
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errorResponse'
-        '404':
-          description: User not found
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errorResponse'
     put:
       summary: Set the type of any user
       description: Set the type of another user, only for admins
@@ -800,38 +630,6 @@ paths:
           required: true
           schema:
             type: integer
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/groupType'
-        '403':
-          description: Invalid role of current user
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errorResponse'
-        '404':
-          description: Group not found
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errorResponse'
-  /group/by-name/{name}:
-    get:
-      summary: Get any group
-      description: Get any group, only for admins and creators
-      security:
-        - cookieJWTAuth: [ ]
-      parameters:
-        - in: path
-          description: Name of the group
-          name: name
-          required: true
-          schema:
-            type: string
       responses:
         '200':
           description: OK
