@@ -30,7 +30,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/errorResponse'
-  /user/contest/by-id/{contest_id}/answer/{task_id}:
+  /user/contest/{contest_id}/answer/{task_id}:
     get:
       summary: Get current user answer for the task
       security:
@@ -61,7 +61,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/errorResponse'
-  /user/by-id/{user_id}/contest/by-id/{contest_id}/answer/{task_id}:
+  /user/{user_id}/contest/{contest_id}/answer/{task_id}:
     get:
       summary: Get user answer for the task
       security:
@@ -104,7 +104,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/errorResponse'
-  /user/contest/by-id/{contest_id}/answer/{task_id}/add:
+  /user/contest/{contest_id}/answer/{task_id}/add:
     post:
       summary: Add current user answer for a task
       security:
@@ -138,7 +138,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/errorResponse'
-  /user/by-id/{user_id}/contest/by-id/{contest_id}/answer/{task_id}/add:
+  /user/{user_id}/contest/{contest_id}/answer/{task_id}/add:
     post:
       summary: Add user answer for a task
       security:
@@ -184,7 +184,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/errorResponse'
-  /user/by-id/{user_id}/contest/by-id/{contest_id}/mark/add:
+  /user/{user_id}/contest/{contest_id}/mark/add:
     post:
       summary: Set mark to user's response
       description: Set mark to user's response, only for inspector
@@ -231,7 +231,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/errorResponse'
-  /user/by-id/{user_id}/contest/by-id/{contest_id}/mark/:
+  /user/{user_id}/contest/{contest_id}/mark/:
     get:
       summary: Get user's mark for contest
       security:
@@ -268,7 +268,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/errorResponse'
-  /user/by-id/{user_id}/contest/by-id/{contest_id}/status:
+  /user/{user_id}/contest/{contest_id}/status:
     get:
       summary: Get user's response status
       security:
@@ -305,7 +305,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/errorResponse'
-  /user/by-id/{user_id}/contest/by-id/{contest_id}/status/set:
+  /user/{user_id}/contest/{contest_id}/status/set:
     post:
       summary: Set new status to user's response
       security:
@@ -345,7 +345,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/errorResponse'
-  /user/by-id/{user_id}/contest/by-id/{contest_id}/status/history:
+  /user/{user_id}/contest/{contest_id}/status/history:
     get:
       summary: Get status history of user's work
       security:
@@ -382,7 +382,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/errorResponse'
-  /contest/by-id/{contest_id}/list/:
+  /contest/{contest_id}/list/:
     get:
       summary: Get the consolidated sheets within a single competition or stage
       security:
@@ -394,7 +394,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/contestResultSheet'
-  /user/by-id/{user_id}/contest/by-id/{contest_id}/appeal/create:
+  /user/{user_id}/contest/{contest_id}/appeal/create:
     post:
       summary: Create appeal for the user's response
       security:
@@ -438,7 +438,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/errorResponse'
-  /user/contest/by-id/{contest_id}/appeal/create:
+  /user/contest/{contest_id}/appeal/create:
     post:
       summary: Create appeal for the user's response
       security:
@@ -470,7 +470,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/errorResponse'
-  /response/by-id/{work_id}/appeal/create:
+  /response/{work_id}/appeal/create:
     post:
       summary: Create appeal for the user's response
       security:
@@ -502,7 +502,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/errorResponse'
-  /user/by-id/{user_id}/contest/by-id/{contest_id}/appeal/reply:
+  /user/{user_id}/contest/{contest_id}/appeal/reply:
     post:
       summary: Reply appeal for the user's response
       security:
@@ -540,7 +540,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/errorResponse'
-  /appeal/by-id/{appeal_id}/reply:
+  /appeal/{appeal_id}/reply:
     post:
       summary: Reply appeal for the user's response
       security:
@@ -572,7 +572,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/errorResponse'
-  /response/by-id/{work_id}/appeal/reply:
+  /response/{work_id}/appeal/reply:
     post:
       summary: Reply appeal for the user's response
       security:
@@ -604,7 +604,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/errorResponse'
-  /appeal/by-id/{appeal_id}:
+  /appeal/{appeal_id}:
     get:
       summary: Get appeal info
       security:
