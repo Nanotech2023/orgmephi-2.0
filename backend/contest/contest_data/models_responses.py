@@ -4,9 +4,6 @@ from contest_data.app import db
 from datetime import datetime
 import enum
 
-APPEAL_MESSAGE_SIZE = 4000
-FILETYPE_SIZE = 6
-
 
 class Response(db.Model):
     """
@@ -24,7 +21,7 @@ class Response(db.Model):
     contest_id = db.Column(db.Integer, nullable=False)  # TODO Add FK of contest, nullable until merge
 
 
-class StatusEnum(enum.Enum):
+class ResponseStatusEnum(enum.Enum):
     """
     Class enumerating statuses of user's work.
 
@@ -33,8 +30,6 @@ class StatusEnum(enum.Enum):
     rejected: rejected work
     appeal: work sent for appeal
     revision: work sent for revision
-    appeal_accepted: appeal accepted
-    appeal_rejected: appeal rejected
     """
 
     not_checked = 0
@@ -42,8 +37,6 @@ class StatusEnum(enum.Enum):
     rejected = 2
     appeal = 3
     revision = 4
-    appeal_accepted = 5
-    appeal_rejected = 6
 
 
 class ResponseStatus(db.Model):
@@ -62,8 +55,22 @@ class ResponseStatus(db.Model):
     status_id = db.Column(db.Integer, autoincrement=True, primary_key=True)
     work_id = db.Column(db.Integer, db.ForeignKey('response.work_id'))
     timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
-    status = db.Column(db.Enum(StatusEnum), nullable=False)
+    status = db.Column(db.Enum(ResponseStatusEnum), nullable=False)
     mark = db.Column(db.Integer)
+
+
+class AppealStatusEnum(enum.Enum):
+    """
+    Class enumerating statuses of user's work appeal.
+
+    under_review: appeal has been submitted and is under review
+    appeal_accepted: appeal accepted
+    appeal_rejected: appeal rejected
+    """
+
+    under_review = 0
+    appeal_accepted = 1
+    appeal_rejected = 2
 
 
 class Appeal(db.Model):
@@ -71,7 +78,7 @@ class Appeal(db.Model):
     Class describing a Appeal for the user's work.
 
     appeal_id: id of the user's appeal
-    work_id: the work for which the appeal is submitted
+    work_status: the status of the work on which the appeal was submitted
     appeal_status: status of the appeal
     appeal_message: student's message for appeal
     appeal_response: expert's response for user's appeal
@@ -80,10 +87,34 @@ class Appeal(db.Model):
     __tablename__ = 'appeal'
 
     appeal_id = db.Column(db.Integer, autoincrement=True, primary_key=True)
-    work_id = db.Column(db.Integer, db.ForeignKey('response.work_id'))
-    appeal_status = db.Column(db.Enum(StatusEnum), nullable=False)
-    appeal_message = db.Column(db.String(APPEAL_MESSAGE_SIZE))
-    appeal_response = db.Column(db.String(APPEAL_MESSAGE_SIZE))
+    work_status = db.Column(db.Integer, db.ForeignKey('responsestatus.status_id'))
+    appeal_status = db.Column(db.Enum(AppealStatusEnum), nullable=False)
+    appeal_message = db.Column(db.Text)
+    appeal_response = db.Column(db.Text)
+
+
+class ResponseFiletypeEnum(enum.Enum):
+    """
+    Class enumerating all possible answer filetypes.
+
+    txt: text document
+    pdf: pdf file
+    jpg: jpg picture
+    doc: Microsoft Word format
+    docx: new Microsoft Word format
+    png: png picture
+    gif: gif picture
+    odt: OpenOffice format
+    """
+
+    txt = 0
+    pdf = 1
+    jpg = 2
+    doc = 3
+    docx = 4
+    png = 5
+    gif = 6
+    odt = 7
 
 
 class ResponseAnswer(db.Model):
@@ -101,9 +132,9 @@ class ResponseAnswer(db.Model):
 
     answer_id = db.Column(db.Integer, autoincrement=True, primary_key=True)
     work_id = db.Column(db.Integer, db.ForeignKey('response.work_id'))
-    task_num = db.Column(db.Integer, nullable=False)  # TODO FK на заданий
+    task_num = db.Column(db.Integer, nullable=False)  # TODO FK of task, nullable until merge
     answer = db.Column(db.LargeBinary, nullable=False)
-    filetype = db.Column(db.String(FILETYPE_SIZE), nullable=False)
+    filetype = db.Column(db.Enum(ResponseFiletypeEnum), nullable=False)
 
 
 """
