@@ -50,7 +50,7 @@ class UserInfo(db.Model):
     first_name = db.Column(db.String)
     middle_name = db.Column(db.String)
     second_name = db.Column(db.String)
-    dateofbirth = db.Column(db.Date)
+    date_of_birth = db.Column(db.Date)
 
 
 class StudentInfo(db.Model):
@@ -87,6 +87,22 @@ class Country(db.Model):
 
 def populate_country():
     return _populate_table(Country, open(db.get_app().config['ORGMEPHI_COUNTRY_FILE']).read().splitlines())
+
+
+users_in_group = db.Table('user_in_group',
+                          db.Column('user_id', db.Integer, db.ForeignKey('user.id'), primary_key=True),
+                          db.Column('group_id', db.Integer, db.ForeignKey('group.id'), primary_key=True)
+                          )
+
+
+class Group(db.Model):
+    __table_name__ = 'group'
+
+    id = db.Column(db.Integer, autoincrement=True, primary_key=True)
+    name = db.Column(db.String, nullable=False, unique=True)
+
+    users = db.relationship('User', secondary=users_in_group, lazy='subquery',
+                            backref=db.backref('group', lazy=True))
 
 
 if __name__ == "__main__":
