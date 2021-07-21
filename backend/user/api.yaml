@@ -222,7 +222,7 @@ paths:
       parameters:
         - in: path
           description: Role of the user
-          name: name
+          name: role
           required: true
           schema:
             $ref: '#/components/schemas/roleType'
