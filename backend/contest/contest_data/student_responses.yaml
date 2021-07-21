@@ -326,7 +326,128 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/contestResultSheet'
-
+  /user/by-id/{user_id}/contest/by-id/{contest_id}/appeal/create:
+    post:
+      summary: Create appeal for the user's response
+      parameters:
+        - in: path
+          description: Id of the user
+          name: user_id
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the contest
+          name: contest_id
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/appealMessage'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/commonAppealInfo'
+        '404':
+          description: User or contest not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+  /user/by-id/{user_id}/contest/by-id/{contest_id}/appeal/reply:
+    post:
+      summary: Reply appeal for the user's response
+      parameters:
+        - in: path
+          description: Id of the user
+          name: user_id
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the contest
+          name: contest_id
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/appealMessage'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/commonAppealInfo'
+        '404':
+          description: User or contest not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+  /appeal/by-id/{appeal_id}/reply:
+    post:
+      summary: Reply appeal for the user's response
+      parameters:
+        - in: path
+          description: Id of the appeal
+          name: appeal_id
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/appealMessage'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/commonAppealInfo'
+        '404':
+          description: Appeal not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+  /appeal/by-id/{appeal_id}:
+    get:
+      summary: Get appeal info
+      parameters:
+        - in: path
+          description: Id of the appeal
+          name: appeal_id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/commonAppealInfo'
+        '404':
+          description: Appeal not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
 
 
 components:
@@ -469,5 +590,27 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/contestResultLine'
-
+    appealMessage:
+      title: Appeal message
+      required:
+        - message
+      properties:
+        message:
+          type: string
+    commonAppealInfo:
+      title: "Common appeal info"
+      required:
+        - appeal_id
+        - status
+        - appeal_message
+        - appeal_response
+      properties:
+        appeal_id:
+          type: integer
+        status:
+          type: string
+        appeal_message:
+          type: string
+        appeal_response:
+          type: string
 
