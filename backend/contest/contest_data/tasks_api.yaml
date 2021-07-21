@@ -1,0 +1,386 @@
+openapi: 3.0.0
+info:
+  title: Tasks service API
+  description: API description in Markdown.
+  version: 1.0.0
+
+paths:
+  /contest/contest/create:
+    post:
+      summary: Create a new contest
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/createContest'
+      security: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/commonContestInfo'
+
+        #4xx type errors, TODO: specify exact error codes
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+  /contest/stage/create:
+    post:
+      summary: Create a new stage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/createStage'
+      security: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/commonStageInfo'
+
+        #4xx type errors, TODO: specify exact error codes
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+  /contest/variant/create:
+    post:
+      summary: Create a new variant
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/createVariant'
+      security: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/commonVariantInfo'
+        #4xx type errors, TODO: specify exact error codes
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+  /contest/variant/plain_task/create:
+    post:
+      summary: Create a new task with plain text
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/createPlainTask'
+      security: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/commonPlainTaskInfo'
+        #4xx type errors, TODO: specify exact error codes
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+  /contest/variant/range_task/create:
+    post:
+      summary: Create a new task with plain text
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/createRangeTask'
+      security: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/commonRangeTaskInfo'
+        #4xx type errors, TODO: specify exact error codes
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+  /contest/variant/multiple_task/create:
+    post:
+      summary: Create a new task with plain text
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/createMultipleTask'
+      security: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/commonMultipleTaskInfo'
+        #4xx type errors, TODO: specify exact error codes
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+
+
+components:
+  securitySchemes:
+    cookieJWTAuth:
+      description: Authentication with JWT stored in cookies
+      type: apiKey
+      in: cookie
+      name: access_token_cookie
+    CSRFToken:
+      description: CSRF token
+      type: apiKey
+      in: header
+      name: X-CSRF-TOKEN
+  schemas:
+    errorResponse:
+      title: Error response
+      description: 'Common response with error message'
+      required:
+        - error_msg
+      properties:
+        error_msg:
+          type: string
+    createContest:
+      title: Create contest
+      description: Request to creation contest
+      required:
+        - description
+        - rules
+        - winning_condition
+        - laureate_condition
+        - certificate_template
+        - visibility
+      properties:
+        description:
+          type: string
+        rules:
+          type: string
+        winning_condition:
+          type: string
+        laureate_condition:
+          type: string
+        certificate_template:
+          type: string
+        visibility:
+          type: boolean
+    commonContestInfo:
+      title: Contest common info
+      description: Request to creation contest
+      required:
+        - contest_id
+        - description
+        - rules
+        - winning_condition
+        - laureate_condition
+        - certificate_template
+        - visibility
+      properties:
+        contest_id:
+          type: integer
+        description:
+          type: string
+        rules:
+          type: string
+        winning_condition:
+          type: string
+        laureate_condition:
+          type: string
+        certificate_template:
+          type: string
+        visibility:
+          type: boolean
+    createStage:
+      title: Create stage
+      description: Request to stage creation
+      required:
+        - stage_name
+        - composite_contest_id
+        - next_stage_condition
+      properties:
+        stage_name:
+          type: string
+        composite_contest_id:
+          type: integer
+        next_stage_condition:
+          type: string
+    commonStageInfo:
+      title: Stage common info
+      description: Request to stage creation
+      required:
+        - stage_id
+        - stage_name
+        - composite_contest_id
+        - next_stage_condition
+      properties:
+        stage_id:
+          type: integer
+        stage_name:
+          type: string
+        composite_contest_id:
+          type: integer
+        next_stage_condition:
+          type: string
+    createVariant:
+      title: Create variant
+      description: Request to variant creation
+      required:
+        - variant_number
+        - variant_description
+      properties:
+        variant_number:
+          type: integer
+        variant_description:
+          type: string
+    commonVariantInfo:
+      title: Common variant info
+      description: Request to variant creation
+      required:
+        - variant_id
+        - variant_number
+        - variant_description
+      properties:
+        variant_id:
+          type: integer
+        variant_number:
+          type: integer
+        variant_description:
+          type: string
+    createPlainTask:
+      title: Create plain text task
+      description: Request to creation task with plain text
+      required:
+        - num_of_task
+        - image_of_task
+        - recommended_answer
+      properties:
+        num_of_task:
+          type: integer
+        image_of_task:
+          type: object #TODO LargeBinary ?
+        recommended_answer:
+          type: string
+    commonPlainTaskInfo:
+      title: Plain text task info
+      description: Request to creation task with plain text
+      required:
+        - task_id
+        - num_of_task
+        - image_of_task
+        - recommended_answer
+      properties:
+        task_id:
+          type: integer
+        num_of_task:
+          type: integer
+        image_of_task:
+          type: object #TODO LargeBinary ?
+        recommended_answer:
+          type: string
+    createRangeTask:
+      title: Create range text task
+      description: Request to creation task with plain text
+      required:
+        - num_of_task
+        - image_of_task
+        - start_value
+        - end_value
+      properties:
+        num_of_task:
+          type: integer
+        image_of_task:
+          type: object #TODO LargeBinary ?
+        start_value:
+          type: number
+          format: float
+        end_value:
+          type: number
+          format: float
+    commonRangeTaskInfo:
+      title: Range text task info
+      description: Request to creation task with plain text
+      required:
+        - task_id
+        - num_of_task
+        - image_of_task
+        - start_value
+        - end_value
+      properties:
+        task_id:
+          type: integer
+        num_of_task:
+          type: integer
+        image_of_task:
+          type: object #TODO LargeBinary ?
+        start_value:
+          type: number
+          format: float
+        end_value:
+          type: number
+          format: float
+    createMultipleTask:
+      title: Create multiple text task
+      description: Request to creation task with plain text
+      required:
+        - num_of_task
+        - image_of_task
+        - correct_answer
+      properties:
+        num_of_task:
+          type: integer
+        image_of_task:
+          type: object #TODO LargeBinary ?
+        correct_answer:
+          type: string
+    commonMultipleTaskInfo:
+      title: Multiple text task info
+      description: Request to creation task with plain text
+      required:
+        - task_id
+        - num_of_task
+        - image_of_task
+        - correct_answer
+      properties:
+        task_id:
+          type: integer
+        num_of_task:
+          type: integer
+        image_of_task:
+          type: object #TODO LargeBinary ?
+        correct_answer:
+          type: string
+
+
