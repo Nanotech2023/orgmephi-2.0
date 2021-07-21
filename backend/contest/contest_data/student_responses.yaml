@@ -27,6 +27,78 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/errorResponse'
+  /user/by-id/{user_id}/contest/by-id/{contest_id}/answer/{task_id}:
+    get:
+      summary: Get user answer for the task
+      parameters:
+        - in: path
+          description: Id of the user
+          name: user_id
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the contest
+          name: contest_id
+          required: true
+          schema:
+            type: integer
+        - in: task_id
+          description: Id of the task
+          name: task_id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/userContestAnswer'
+        '404':
+          description: User, contest or task not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+  /user/by-id/{user_id}/contest/by-id/{contest_id}/answer/{task_id}/add:
+    post:
+      summary: Add user answer for a task
+      parameters:
+        - in: path
+          description: Id of the user
+          name: user_id
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the contest
+          name: contest_id
+          required: true
+          schema:
+            type: integer
+        - in: task_id
+          description: Id of the task
+          name: task_id
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/userContestAnswer'
+      responses:
+        '200':
+          description: OK
+        '404':
+          description: User, contest or task not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
 
 
 
@@ -62,6 +134,13 @@ components:
           type: integer
         contest_id:
           type: integer
+    userContestAnswer:
+      title: "User's contest answer"
+      required:
+        - user_answer
+      properties:
+        user_answer:
+          type: object #TODO BLOB FILE or text?
     commonResponseInfo:
       title: "Common response info"
       required:
