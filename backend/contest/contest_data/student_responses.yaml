@@ -5,6 +5,28 @@ info:
   version: 1.0.0
 
 paths:
+  /user/contest/create:
+    post:
+      summary: Create user's response for the contest
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/createUserResponse'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/commonResponseInfo'
+        '404':
+          description: User or contest not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
 
 
 
@@ -29,4 +51,28 @@ components:
       properties:
         error_msg:
           type: string
-    
+    createUserResponse:
+      title: "Create user's work"
+      description: "Request to create user's response"
+      required:
+        - user_id
+        - contest_id
+      properties:
+        user_id:
+          type: integer
+        contest_id:
+          type: integer
+    commonResponseInfo:
+      title: "Common response info"
+      required:
+        - work_id
+        - user_id
+        - contest_id
+      properties:
+        work_id:
+          type: integer
+        user_id:
+          type: integer
+        contest_id:
+          type: integer
+
