@@ -1,5 +1,6 @@
 """File with models description for contests and tasks management."""
 from backend.contest.contest_data.app import db
+from datetime import datetime
 
 # Constants
 
@@ -18,6 +19,7 @@ class CompositeContest(db.Model):
     rules: rules of the contest
     variant_id: variant connected with current contest
     winning_condition: winning condition
+    laureate_condition: laureate condition
     certificate_template: contest certificate template
     visibility: visibility of the contest
     """
@@ -29,9 +31,29 @@ class CompositeContest(db.Model):
     rules = db.Column(db.Text, nullable=False)
     variant_id = db.Column(db.Integer, db.ForeignKey('task_variant.variant_id'))
     winning_condition = db.Column(db.Text, nullable=False)
+    laureate_condition = db.Column(db.Text, nullable=False)
     certificate_template = db.Column(db.Text, nullable=True)
     visibility = db.Column(db.Boolean, default=DEFAULT_VISIBILITY, nullable=False)
+
+    start_date = db.Column(db.DateTime, index=True, default=datetime.utcnow)
+    end_date = db.Column(db.DateTime, index=True, default=datetime.utcnow)
+
     __table_args__ = {'extend_existing': True}
+
+
+class UserInContest(db.Model):
+    """
+    Class describing a User in contest model.
+
+    contest_id: id of the contest
+    user_id: if of user
+    user_status: user status: laureate, winner or custom value
+    """
+
+    __tablename__ = 'user_in_contest'
+    contest_id = db.Column(db.Integer, db.ForeignKey('composite_contest.contest_id'), primary_key=True)
+    user_id = db.Column(db.Integer, primary_key=True)
+    user_status = db.Column(db.Text, nullable=False)
 
 
 class ContestStage(db.Model):
