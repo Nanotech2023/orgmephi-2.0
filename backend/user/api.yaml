@@ -99,9 +99,9 @@ paths:
               schema:
                 type: string
                 example: access_token_cookie=deleted; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT
-  /user/self/reset:
+  /user/self/password:
     post:
-      summary: Reset password for current user
+      summary: Change password for current user
       security:
         - cookieJWTAuth: []
         - CSRFToken: []
@@ -110,14 +110,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/resetPassword'
+              $ref: '#/components/schemas/changePassword'
       responses:
         '200':
           description: OK
-  /user/{id}/reset:
+  /user/{id}/password:
     post:
-      summary: Reset password for another user
-      description: Reset password for another user, admins only
+      summary: Change password for another user
+      description: Change password for another user, admins only
       security:
         - cookieJWTAuth: [ ]
         - CSRFToken: [ ]
@@ -133,7 +133,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/resetPasswordAdmin'
+              $ref: '#/components/schemas/changePasswordAdmin'
       responses:
         '200':
           description: OK
@@ -927,7 +927,7 @@ components:
           type: array
           items:
             type: string
-    resetPassword:
+    changePassword:
       title: 'Reset password request'
       required:
         - new_password
@@ -939,7 +939,7 @@ components:
         old_password:
           type: string
           format: password
-    resetPasswordAdmin:
+    changePasswordAdmin:
       title: 'Reset password request for admins'
       required:
         - new_password
