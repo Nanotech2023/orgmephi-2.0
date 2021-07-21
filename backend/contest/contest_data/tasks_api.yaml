@@ -387,6 +387,39 @@ paths:
               schema:
                 $ref: '#/components/schemas/errorResponse'
 
+  /contest/variant/plain_task/{id}/remove:
+    post:
+      summary: Remove multiple task
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/removePlainTextTask'
+      parameters:
+        - in: path
+          description: Id of the task
+          name: id
+          required: true
+          schema:
+            type: integer
+      security:
+        - cookieJWTAuth: [ ]
+        - CSRFToken: [ ]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/removePlainTextTask'
+        '404':
+          description: Task not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+
   /contest/variant/plain_task/{id}:
     get:
       summary: Get common info for a different plain text task
@@ -411,6 +444,66 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/commonPlainTaskInfo'
+        '404':
+          description: Task not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+    patch:
+      summary: Edit plain text task
+      security:
+        - cookieJWTAuth: [ ]
+        - CSRFToken: [ ]
+      parameters:
+        - in: path
+          description: Id of the task
+          name: id
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/plainTaskInfoUpdate'
+      responses:
+        '200':
+          description: OK
+        '404':
+          description: Stage not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+
+
+
+  /contest/variant/plain_task/{id}/right_answer:
+    get:
+      summary: Get right answer for common info for a different plain text task
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/answerPlainTaskInfo'
+      security: []
+      parameters:
+        - in: path
+          description: Id of the plain task
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/answerPlainTaskInfo'
         '404':
           description: Task not found
           content:
@@ -444,6 +537,39 @@ paths:
               schema:
                 $ref: '#/components/schemas/errorResponse'
 
+  /contest/variant/range_task/{id}/remove:
+    post:
+      summary: Remove multiple task
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/removeRangeTask'
+      parameters:
+        - in: path
+          description: Id of the task
+          name: id
+          required: true
+          schema:
+            type: integer
+      security:
+        - cookieJWTAuth: [ ]
+        - CSRFToken: [ ]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/removeRangeTask'
+        '404':
+          description: Task not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+
   /contest/variant/range_task/{id}:
     get:
       summary: Get common info for a different range task
@@ -468,6 +594,65 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/commonRangeTaskInfo'
+        '404':
+          description: Task not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+    patch:
+      summary: Edit range task
+      security:
+        - cookieJWTAuth: [ ]
+        - CSRFToken: [ ]
+      parameters:
+        - in: path
+          description: Id of the task
+          name: id
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/rangeTaskInfoUpdate'
+      responses:
+        '200':
+          description: OK
+        '404':
+          description: Stage not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+
+
+  /contest/variant/range_task/{id}/right_answer:
+    get:
+      summary: Get right answer common info for a different range task
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/answerRangeTaskInfo'
+      security: []
+      parameters:
+        - in: path
+          description: Id of the range task
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/answerRangeTaskInfo'
         '404':
           description: Task not found
           content:
@@ -527,9 +712,43 @@ paths:
               schema:
                 $ref: '#/components/schemas/errorResponse'
 
+  /contest/variant/multiple_task/{id}/remove:
+    post:
+      summary: Remove multiple task
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/removeMultipleTask'
+      parameters:
+        - in: path
+          description: Id of the task
+          name: id
+          required: true
+          schema:
+            type: integer
+      security:
+        - cookieJWTAuth: [ ]
+        - CSRFToken: [ ]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/removeMultipleTask'
+        '404':
+          description: Task not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+
+
   /contest/variant/multiple_task/{id}:
     get:
-      summary: Get common info for a multiple range task
+      summary: Get common info for a multiple task
       requestBody:
         required: true
         content:
@@ -551,6 +770,64 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/commonMultipleTaskInfo'
+        '404':
+          description: Task not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+    patch:
+      summary: Edit multiple task
+      security:
+        - cookieJWTAuth: [ ]
+        - CSRFToken: [ ]
+      parameters:
+        - in: path
+          description: Id of the task
+          name: id
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/multipleTaskInfoUpdate'
+      responses:
+        '200':
+          description: OK
+        '404':
+          description: Stage not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+
+  /contest/variant/multiple_task/{id}/right_answer:
+    get:
+      summary: Get right answer common info for a multiple range task
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/answerMultipleTaskInfo'
+      security: []
+      parameters:
+        - in: path
+          description: Id of the multiple task
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/answerMultipleTaskInfo'
         '404':
           description: Task not found
           content:
@@ -784,6 +1061,24 @@ components:
           type: integer
         variant_description:
           type: string
+    removePlainTextTask:
+      title: Remove plain text task
+      description: Request to remove task with plain text
+    plainTaskInfoUpdate:
+      title: Edit plain text task
+      description: Request to edit task with plain text
+      properties:
+        variant_id:
+          type: integer
+        num_of_task:
+          type: integer
+        image_of_task:
+          type: string
+          format: binary
+        recommended_answer:
+          type: string
+
+
     createPlainTask:
       title: Create plain text task
       description: Request to creation task with plain text
@@ -823,6 +1118,34 @@ components:
           format: binary
         recommended_answer:
           type: string
+    answerPlainTaskInfo:
+      title: Plain text task answer
+      description: Request to get correct answer for plain text task
+      required:
+        - recommended_answer
+      properties:
+        recommended_answer:
+          type: string
+    removeRangeTask:
+      title: Remove range task
+      description: Request to remove task with range
+    rangeTaskInfoUpdate:
+      title: Edit range text task
+      description: Request to edit task with plain text
+      properties:
+        variant_id:
+          type: integer
+        num_of_task:
+          type: integer
+        image_of_task:
+          type: string
+          format: binary
+        start_value:
+          type: number
+          format: float
+        end_value:
+          type: number
+          format: float
     createRangeTask:
       title: Create range text task
       description: Request to creation task with plain text
@@ -847,7 +1170,7 @@ components:
           type: number
           format: float
     commonRangeTaskInfo:
-      title: Range text task info
+      title: Range task info
       description: Request to creation task with plain text
       required:
         - task_id
@@ -872,6 +1195,35 @@ components:
         end_value:
           type: number
           format: float
+    answerRangeTaskInfo:
+      title: Range task answer
+      description: Request to get correct answer for range choice task
+      required:
+        - start_value
+        - end_value
+      properties:
+        start_value:
+          type: number
+          format: float
+        end_value:
+          type: number
+          format: float
+    removeMultipleTask:
+      title: Remove multiple choice task
+      description: Request to remove task with multiple choice
+    multipleTaskInfoUpdate:
+      title: Edit multiple text task
+      description: Request to creation task with plain text
+      properties:
+        variant_id:
+          type: integer
+        num_of_task:
+          type: integer
+        image_of_task:
+          type: string
+          format: binary
+        correct_answer:
+          type: string
     createMultipleTask:
       title: Create multiple text task
       description: Request to creation task with plain text
@@ -909,6 +1261,14 @@ components:
         image_of_task:
           type: string
           format: binary
+        correct_answer:
+          type: string
+    answerMultipleTaskInfo:
+      title: Multiple task answer
+      description: Request to get correct answer for multiple choice task
+      required:
+        - correct_answer
+      properties:
         correct_answer:
           type: string
     usersInContest:
