@@ -56,7 +56,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/errorResponse'
-  /auth:
+  /login:
     post:
       summary: Authenticate a user
       requestBody:
@@ -99,7 +99,7 @@ paths:
               schema:
                 type: string
                 example: access_token_cookie=deleted; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT
-  /reset:
+  /user/self/reset:
     post:
       summary: Reset password for current user
       security:
@@ -114,7 +114,7 @@ paths:
       responses:
         '200':
           description: OK
-  /reset/{id}:
+  /user/{id}/reset:
     post:
       summary: Reset password for another user
       description: Reset password for another user, admins only
@@ -137,7 +137,7 @@ paths:
       responses:
         '200':
           description: OK
-  /user:
+  /user/self:
     get:
       summary: Get common info for current user
       security:
@@ -149,7 +149,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/commonUserInfo'
-  /user/by-id/{id}:
+  /user/{id}:
     get:
       summary: Get common info for a different user
       description: Get info about any user by its id, only for admins and creators
@@ -310,7 +310,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/errorResponse'
-  /role:
+  /user/self/role:
     get:
       summary: Get the role of the current user
       security:
@@ -322,7 +322,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/userRole'
-  /role/{id}:
+  /user/{id}/role:
     get:
       summary: Get the role of another user
       description: Get the role of another user, only for admins and creators
@@ -388,7 +388,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/errorResponse'
-  /user/personal:
+  /user/self/personal:
     get:
       summary: Get personal info for current user
       security:
@@ -400,7 +400,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/personalInfo'
-  /user/by-id/{id}/personal:
+  /user/{id}/personal:
     get:
       summary: Get personal info for a different user
       description: Get personal info about any user by its id, only for admins and creators
@@ -466,7 +466,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/errorResponse'
-  /user/university:
+  /user/self/university:
     get:
       summary: Get university student info for current user
       security:
@@ -484,7 +484,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/errorResponse'
-  /user/by-id/{id}/university:
+  /user/{id}/university:
     get:
       summary: Get university student info for a different user
       description: Get university student info about any user by its id, only for admins and creators
@@ -550,26 +550,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/errorResponse'
-  /info/universities:
-    get:
-      summary: Get known university list
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/getUniversitiesResponse'
-  /info/countries:
-    get:
-      summary: Get known country list
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/getCountriesResponse'
   /preregister:
     post:
       summary: Register an unconfirmed user with a one-time password
@@ -590,7 +570,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/errorResponse'
-  /user/groups:
+  /user/self/groups:
     get:
       summary: Get groups for current user
       security:
@@ -602,7 +582,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/groupList'
-  /user/by-id/{id}/groups:
+  /user/{id}/groups:
     get:
       summary: Get groups for a different user
       description: Get group list for any user by its id, only for admins and creators
@@ -634,7 +614,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/errorResponse'
-  /user/by-id/{id}/groups/add:
+  /user/{id}/groups/add:
     post:
       summary: Assign a user to a group
       description: Assign a user to a group, only for admins and creators
@@ -669,7 +649,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/errorResponse'
-  /user/by-id/{id}/groups/remove:
+  /user/{id}/groups/remove:
     post:
       summary: Remove a user from a group
       description: Remove a user from a group, only for admins and creators
@@ -723,7 +703,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/errorResponse'
-  /group/by-id/{id}:
+  /group/{id}:
     get:
       summary: Get any group
       description: Get any group, only for admins and creators
@@ -825,7 +805,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/errorResponse'
-  /group/by-id/{id}/delete:
+  /group/{id}/delete:
     post:
       summary: Delete a group
       description: Add a group, only for admins
@@ -860,8 +840,26 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/errorResponse'
-
-
+  /info/universities:
+    get:
+      summary: Get known university list
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/getUniversitiesResponse'
+  /info/countries:
+    get:
+      summary: Get known country list
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/getCountriesResponse'
 
 
 components:
