@@ -9,10 +9,76 @@ DEFAULT_VISIBILITY = False
 
 # Contest models
 
-
-class CompositeContest(db.Model):
+class Olympiad(db.Model):
     """
-    Class describing a Composite contest model.
+    Class describing a Olympiad model.
+
+    olympiad_id: id of olympiad
+    description: description of the contest
+    rules: rules of the contest
+    """
+
+    __tablename__ = 'olympiad'
+
+    olympiad_id = db.Column(db.Integer, autoincrement=True, primary_key=True)
+    name = db.Column(db.String(50), nullable=False)
+    description = db.Column(db.Text, nullable=False)
+    rules = db.Column(db.Text, nullable=False)
+    __table_args__ = {'extend_existing': True}
+
+
+class OlympiadStage(db.Model):
+    """
+    Class describing a Stage model.
+
+    stage_id: id of the stage
+    stage_name: name of the stage
+    contest_id: if of the composite contest
+    next_stage_condition: condition to pass to the next stage
+    """
+
+    __tablename__ = 'olympiad_stage'
+
+    stage_id = db.Column(db.Integer, autoincrement=True, primary_key=True)
+    stage_name = db.Column(db.String(50), index=True, nullable=False)
+    contest_id = db.Column(db.Integer, db.ForeignKey('contest.contest_id'))
+    next_stage_condition = db.Column(db.Text, nullable=False)
+    __table_args__ = {'extend_existing': True}
+
+
+class StageInOlympiad(db.Model):
+    """
+    Class describing a Stage In Olympiad model.
+
+    olympiad_id: id of olympiad
+    contest_id: id of contest
+    """
+
+    __tablename__ = 'stage_in_olympiad'
+
+    olympiad_id = db.Column(db.Integer, db.ForeignKey('olympiad.olympiad_id'), primary_key=True)
+    stage_id = db.Column(db.Integer, db.ForeignKey('olympiad_stage.stage_id'), primary_key=True)
+    __table_args__ = {'extend_existing': True}
+
+
+class ContestsInStage(db.Model):
+    """
+    Class describing a Contests In Stage model.
+
+    stage_id: id of the stage
+    contest_id: id of contest
+    """
+
+    __tablename__ = 'contests_in_stage'
+
+    stage_id = db.Column(db.Integer, db.ForeignKey('olympiad_stage.stage_id'), primary_key=True)
+    contest_id = db.Column(db.Integer, db.ForeignKey('contest.contest_id'), primary_key=True)
+    __table_args__ = {'extend_existing': True}
+
+
+class Contest(db.Model):
+    """
+    Class describing a Contest model.
 
     contest_id: id of contest
     description: description of the contest
@@ -23,7 +89,7 @@ class CompositeContest(db.Model):
     visibility: visibility of the contest
     """
 
-    __tablename__ = 'composite_contest'
+    __tablename__ = 'contest'
 
     contest_id = db.Column(db.Integer, autoincrement=True, primary_key=True)
     description = db.Column(db.Text, nullable=False)
@@ -48,7 +114,7 @@ class VariantInContest(db.Model):
     """
 
     __tablename__ = 'variant_in_contest'
-    contest_id = db.Column(db.Integer, db.ForeignKey('composite_contest.contest_id'), primary_key=True)
+    contest_id = db.Column(db.Integer, db.ForeignKey('contest.contest_id'), primary_key=True)
     variant_id = db.Column(db.Integer, db.ForeignKey('task_variant.variant_id'), primary_key=True)
 
 
@@ -64,59 +130,13 @@ class UserInContest(db.Model):
 
     __tablename__ = 'user_in_contest'
     user_id = db.Column(db.Integer, primary_key=True)
-    contest_id = db.Column(db.Integer, db.ForeignKey('composite_contest.contest_id'), nullable=False)
+    contest_id = db.Column(db.Integer, db.ForeignKey('contest.contest_id'), nullable=False)
     variant_id = db.Column(db.Integer, db.ForeignKey('task_variant.variant_id'))
     user_status = db.Column(db.Text, nullable=False)
 
 
-class ContestStage(db.Model):
-    """
-    Class describing a Stage model.
-
-    stage_id: id of the stage
-    stage_name: name of the stage
-    composite_contest_id: if of the composite contest
-    next_stage_condition: condition to pass to the next stage
-    """
-
-    __tablename__ = 'contest_stage'
-
-    stage_id = db.Column(db.Integer, autoincrement=True, primary_key=True)
-    stage_name = db.Column(db.String(50), index=True, nullable=False)
-    composite_contest_id = db.Column(db.Integer, db.ForeignKey('composite_contest.contest_id'))
-    next_stage_condition = db.Column(db.Text, nullable=False)
-    __table_args__ = {'extend_existing': True}
-
-
-class ContestsInStage(db.Model):
-    """
-    Class describing a Contests In Stage model.
-
-    ///
-    """
-
-    __tablename__ = 'contests_in_stage'
-
-    stage_id = db.Column(db.Integer, db.ForeignKey('contest_stage.stage_id'), primary_key=True)
-    contest_id = db.Column(db.Integer, db.ForeignKey('composite_contest.contest_id'), primary_key=True)
-    __table_args__ = {'extend_existing': True}
-
-
-class ContestsInCompositeContest(db.Model):
-    """
-    Class describing a Contests In Composite Contest model.
-
-    ///
-    """
-
-    __tablename__ = 'contests_in_composite_contest'
-
-    composite_contest_id = db.Column(db.Integer, db.ForeignKey('composite_contest.contest_id'), primary_key=True)
-    contest_id = db.Column(db.Integer, db.ForeignKey('composite_contest.contest_id'), primary_key=True)
-    __table_args__ = {'extend_existing': True}
-
-
 # Tasks models
+
 
 class TaskVariant(db.Model):
     """
