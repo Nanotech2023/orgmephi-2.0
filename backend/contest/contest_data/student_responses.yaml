@@ -287,6 +287,45 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/errorResponse'
+  /user/by-id/{user_id}/contest/by-id/{contest_id}/status/history:
+    get:
+      summary: Get status history user's work
+      parameters:
+        - in: path
+          description: Id of the user
+          name: user_id
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the contest
+          name: contest_id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/userResponseStatusHistory'
+        '404':
+          description: User or contest not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+  /contest/by-id/{contest_id}/list/:
+    get:
+      summary: Get the consolidated sheets within a single competition or stage
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/contestResultSheet'
 
 
 
@@ -328,7 +367,8 @@ components:
         - user_answer
       properties:
         user_answer:
-          type: object #TODO BLOB FILE or text?
+          type: string
+          format: binary
     commonResponseInfo:
       title: "Common response info"
       required:
@@ -356,7 +396,7 @@ components:
         mark:
           type: integer
     userResponseStatus:
-      title: "Status of user's response"
+      title: "Status of user response"
       required:
         - user_id
         - contest_id
@@ -368,5 +408,66 @@ components:
           type: integer
         status:
           type: string
+    StatusHistoryItem:
+      title: "Item of status history"
+      required:
+        - status
+        - datetime
+      properties:
+        status:
+          type: string
+        datetime:
+          type: string
+          format: data-time
+          description: "Change date and time"
+    userResponseStatusHistory:
+      title: "Status history of user response"
+      required:
+        - user_id
+        - contest_id
+        - history
+      properties:
+        user_id:
+          type: integer
+        contest_id:
+          type: integer
+        history:
+          type: array
+          items:
+            $ref: '#/components/schemas/StatusHistoryItem'
+    contestResultLine:
+      title: "Line in sheet"
+      required:
+        - user_id
+        - first_name
+        - second_name
+        - middle_name
+        - mark
+      properties:
+        user_id:
+          type: integer
+        first_name:
+          type: string
+        second_name:
+          type: string
+        middle_name:
+          type: string
+        mark:
+          type: integer
+    contestResultSheet:
+      title: "Result sheet for one contest"
+      required:
+        - contest_id
+        - contest_name
+        - userrow
+      properties:
+        contest_id:
+          type: integer
+        contest_name:
+          type: string
+        userrow:
+          type: array
+          items:
+            $ref: '#/components/schemas/contestResultLine'
 
 
