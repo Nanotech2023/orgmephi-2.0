@@ -27,6 +27,35 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/errorResponse'
+  /user/contest/by-id/{contest_id}/answer/{task_id}:
+    get:
+      summary: Get current user answer for the task
+      parameters:
+        - in: path
+          description: Id of the contest
+          name: contest_id
+          required: true
+          schema:
+            type: integer
+        - in: task_id
+          description: Id of the task
+          name: task_id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/userContestAnswer'
+        '404':
+          description: User, contest or task not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
   /user/by-id/{user_id}/contest/by-id/{contest_id}/answer/{task_id}:
     get:
       summary: Get user answer for the task
@@ -56,6 +85,37 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/userContestAnswer'
+        '404':
+          description: User, contest or task not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+  /user/contest/by-id/{contest_id}/answer/{task_id}/add:
+    post:
+      summary: Add current user answer for a task
+      parameters:
+        - in: path
+          description: Id of the contest
+          name: contest_id
+          required: true
+          schema:
+            type: integer
+        - in: task_id
+          description: Id of the task
+          name: task_id
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/userContestAnswer'
+      responses:
+        '200':
+          description: OK
         '404':
           description: User, contest or task not found
           content:
@@ -95,6 +155,134 @@ paths:
           description: OK
         '404':
           description: User, contest or task not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+  /user/by-id/{user_id}/contest/by-id/{contest_id}/mark/add:
+    post:
+      summary: Set mark to user's response
+      description: Set mark to user's response, only for inspector
+      parameters:
+        - in: path
+          description: Id of the user
+          name: user_id
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the contest
+          name: contest_id
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/commonResponseMark'
+      responses:
+        '200':
+          description: OK
+        '403':
+          description: Invalid role of current user
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+        '404':
+          description: User or contest not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+        #TODO 4xx error for incorrect mark
+  /user/by-id/{user_id}/contest/by-id/{contest_id}/mark/:
+    get:
+      summary: Get user's mark for contest
+      parameters:
+        - in: path
+          description: Id of the user
+          name: user_id
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the contest
+          name: contest_id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/commonResponseMark'
+        '404':
+          description: User or contest not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+  /user/by-id/{user_id}/contest/by-id/{contest_id}/status:
+    get:
+      summary: Get current user's response status
+      parameters:
+        - in: path
+          description: Id of the user
+          name: user_id
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the contest
+          name: contest_id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/userResponseStatus'
+        '404':
+          description: User or contest not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+  /user/by-id/{user_id}/contest/by-id/{contest_id}/status/set:
+    post:
+      summary: Set new status to user's response
+      parameters:
+        - in: path
+          description: Id of the user
+          name: user_id
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the contest
+          name: contest_id
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/userResponseStatus'
+      responses:
+        '200':
+          description: OK
+        '404':
+          description: User or contest not found
           content:
             application/json:
               schema:
@@ -154,4 +342,31 @@ components:
           type: integer
         contest_id:
           type: integer
+    commonResponseMark:
+      title: "Common user's mark for response"
+      required:
+        - user_id
+        - contest_id
+        - mark
+      properties:
+        user_id:
+          type: integer
+        contest_id:
+          type: integer
+        mark:
+          type: integer
+    userResponseStatus:
+      title: "Status of user's response"
+      required:
+        - user_id
+        - contest_id
+        - status
+      properties:
+        user_id:
+          type: integer
+        contest_id:
+          type: integer
+        status:
+          type: string
+
 
