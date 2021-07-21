@@ -23,7 +23,6 @@ paths:
               schema:
                 $ref: '#/components/schemas/commonContestInfo'
 
-        #4xx type errors, TODO: specify exact error codes
         '400':
           description: Bad request
           content:
@@ -49,7 +48,6 @@ paths:
               schema:
                 $ref: '#/components/schemas/commonStageInfo'
 
-        #4xx type errors, TODO: specify exact error codes
         '400':
           description: Bad request
           content:
@@ -83,9 +81,8 @@ paths:
               schema:
                 $ref: '#/components/schemas/commonContestInfo'
 
-        #4xx type errors, TODO: specify exact error codes
-        '400':
-          description: Bad request
+        '404':
+          description: Contest not found
           content:
             application/json:
               schema:
@@ -115,10 +112,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/commonStageInfo'
-
-        #4xx type errors, TODO: specify exact error codes
-        '400':
-          description: Bad request
+        '404':
+          description: Stage not found
           content:
             application/json:
               schema:
@@ -142,7 +137,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/commonVariantInfo'
-        #4xx type errors, TODO: specify exact error codes
         '400':
           description: Bad request
           content:
@@ -174,10 +168,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/commonVariantInfo'
-
-        #4xx type errors, TODO: specify exact error codes
-        '400':
-          description: Bad request
+        '404':
+          description: Variant not found
           content:
             application/json:
               schema:
@@ -201,7 +193,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/commonPlainTaskInfo'
-        #4xx type errors, TODO: specify exact error codes
         '400':
           description: Bad request
           content:
@@ -233,10 +224,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/commonPlainTaskInfo'
-
-        #4xx type errors, TODO: specify exact error codes
-        '400':
-          description: Bad request
+        '404':
+          description: Task not found
           content:
             application/json:
               schema:
@@ -259,7 +248,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/commonRangeTaskInfo'
-        #4xx type errors, TODO: specify exact error codes
         '400':
           description: Bad request
           content:
@@ -291,10 +279,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/commonRangeTaskInfo'
-
-        #4xx type errors, TODO: specify exact error codes
-        '400':
-          description: Bad request
+        '404':
+          description: Task not found
           content:
             application/json:
               schema:
@@ -317,7 +303,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/commonMultipleTaskInfo'
-        #4xx type errors, TODO: specify exact error codes
         '400':
           description: Bad request
           content:
@@ -349,10 +334,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/commonMultipleTaskInfo'
-
-        #4xx type errors, TODO: specify exact error codes
-        '400':
-          description: Bad request
+        '404':
+          description: Task not found
           content:
             application/json:
               schema:
@@ -495,7 +478,8 @@ components:
         num_of_task:
           type: integer
         image_of_task:
-          type: object #TODO LargeBinary ?
+          type: string
+          format: binary
         recommended_answer:
           type: string
     commonPlainTaskInfo:
@@ -512,7 +496,8 @@ components:
         num_of_task:
           type: integer
         image_of_task:
-          type: object #TODO LargeBinary ?
+          type: string
+          format: binary
         recommended_answer:
           type: string
     createRangeTask:
@@ -527,7 +512,8 @@ components:
         num_of_task:
           type: integer
         image_of_task:
-          type: object #TODO LargeBinary ?
+          type: string
+          format: binary
         start_value:
           type: number
           format: float
@@ -549,7 +535,8 @@ components:
         num_of_task:
           type: integer
         image_of_task:
-          type: object #TODO LargeBinary ?
+          type: string
+          format: binary
         start_value:
           type: number
           format: float
@@ -567,7 +554,8 @@ components:
         num_of_task:
           type: integer
         image_of_task:
-          type: object #TODO LargeBinary ?
+          type: string
+          format: binary
         correct_answer:
           type: string
     commonMultipleTaskInfo:
@@ -584,7 +572,8 @@ components:
         num_of_task:
           type: integer
         image_of_task:
-          type: object #TODO LargeBinary ?
+          type: string
+          format: binary
         correct_answer:
           type: string
 
