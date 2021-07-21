@@ -40,8 +40,8 @@ paths:
             schema:
               $ref: '#/components/schemas/registerAuthInfo'
       security:
-        - cookieJWTAuth: [ ]
-        - CSRFToken: [ ]
+        - JWTAcessToken: [ ]
+        - CSRFAcessToken: [ ]
       responses:
         '200':
           description: OK
@@ -72,6 +72,7 @@ paths:
           headers:
             Set-Cookie:
               schema:
+                description: Set both access_token_cookie and refresh_token_cookie
                 type: string
                 example: access_token_cookie=eyJ0eXAi...; Path=/; HttpOnly
           content:
@@ -90,35 +91,41 @@ paths:
     post:
       summary: Refresh JWT token for current user
       security:
-        - cookieJWTAuth: [ ]
-        - CSRFToken: [ ]
+        - JWTRefreshToken: [ ]
+        - CSRFRefreshToken: [ ]
       responses:
         '200':
           description: OK
           headers:
             Set-Cookie:
               schema:
+                description: Set both access_token_cookie and refresh_token_cookie
                 type: string
                 example: access_token_cookie=eyJ0eXAi...; Path=/; HttpOnly
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/authResponse'
   /logout:
     post:
       summary: Logout current user
       security:
-        - cookieJWTAuth: []
+        - JWTAcessToken: []
       responses:
         '200':
           description: OK
           headers:
             Set-Cookie:
               schema:
+                description: Set both access_token_cookie and refresh_token_cookie
                 type: string
                 example: access_token_cookie=deleted; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT
   /user/self/password:
     post:
       summary: Change password for current user
       security:
-        - cookieJWTAuth: []
-        - CSRFToken: []
+        - JWTAcessToken: []
+        - CSRFAcessToken: []
       requestBody:
         required: true
         content:
@@ -133,8 +140,8 @@ paths:
       summary: Change password for another user
       description: Change password for another user, admins only
       security:
-        - cookieJWTAuth: [ ]
-        - CSRFToken: [ ]
+        - JWTAcessToken: [ ]
+        - CSRFAcessToken: [ ]
       parameters:
         - in: path
           description: Id of the user
@@ -155,7 +162,7 @@ paths:
     get:
       summary: Get common info for current user
       security:
-        - cookieJWTAuth: []
+        - JWTAcessToken: []
       responses:
         '200':
           description: OK
@@ -168,7 +175,7 @@ paths:
       summary: Get common info for a different user
       description: Get info about any user by its id, only for admins and creators
       security:
-        - cookieJWTAuth: [ ]
+        - JWTAcessToken: [ ]
       parameters:
         - in: path
           description: Id of the user
@@ -200,7 +207,7 @@ paths:
       summary: Get common info for different users
       description: Get info about any user by their group, only for admins and creators
       security:
-        - cookieJWTAuth: [ ]
+        - JWTAcessToken: [ ]
       parameters:
         - in: path
           description: ID of the group
@@ -226,7 +233,7 @@ paths:
       summary: Get common info for all users
       description: Get info about all users, only for admins and creators
       security:
-        - cookieJWTAuth: [ ]
+        - JWTAcessToken: [ ]
       responses:
         '200':
           description: OK
@@ -245,8 +252,8 @@ paths:
       summary: Set the role of any user
       description: Set the role of another user, only for admins
       security:
-        - cookieJWTAuth: [ ]
-        - CSRFToken: [ ]
+        - JWTAcessToken: [ ]
+        - CSRFAcessToken: [ ]
       parameters:
         - in: path
           description: Id of the user
@@ -280,8 +287,8 @@ paths:
       summary: Set the type of any user
       description: Set the type of another user, only for admins
       security:
-        - cookieJWTAuth: [ ]
-        - CSRFToken: [ ]
+        - JWTAcessToken: [ ]
+        - CSRFAcessToken: [ ]
       parameters:
         - in: path
           description: Id of the user
@@ -320,7 +327,7 @@ paths:
     get:
       summary: Get personal info for current user
       security:
-        - cookieJWTAuth: []
+        - JWTAcessToken: []
       responses:
         '200':
           description: OK
@@ -333,7 +340,7 @@ paths:
       summary: Get personal info for a different user
       description: Get personal info about any user by its id, only for admins and creators
       security:
-        - cookieJWTAuth: [ ]
+        - JWTAcessToken: [ ]
       parameters:
         - in: path
           description: Id of the user
@@ -364,8 +371,8 @@ paths:
       summary: Set personal info for a user
       description: Set personal info about any user by its id, only for admins
       security:
-        - cookieJWTAuth: [ ]
-        - CSRFToken: [ ]
+        - JWTAcessToken: [ ]
+        - CSRFAcessToken: [ ]
       parameters:
         - in: path
           description: Id of the user
@@ -398,7 +405,7 @@ paths:
     get:
       summary: Get university student info for current user
       security:
-        - cookieJWTAuth: [ ]
+        - JWTAcessToken: [ ]
       responses:
         '200':
           description: OK
@@ -417,7 +424,7 @@ paths:
       summary: Get university student info for a different user
       description: Get university student info about any user by its id, only for admins and creators
       security:
-        - cookieJWTAuth: [ ]
+        - JWTAcessToken: [ ]
       parameters:
         - in: path
           description: Id of the user
@@ -448,8 +455,8 @@ paths:
       summary: Set university student info for a user
       description: Set university student info about any user by its id, only for admins
       security:
-        - cookieJWTAuth: [ ]
-        - CSRFToken: [ ]
+        - JWTAcessToken: [ ]
+        - CSRFAcessToken: [ ]
       parameters:
         - in: path
           description: Id of the user
@@ -483,8 +490,8 @@ paths:
       summary: Register an unconfirmed user with a one-time password
       description: Register an unconfirmed user with a one-time password, creators and admins only
       security:
-        - cookieJWTAuth: [ ]
-        - CSRFToken: [ ]
+        - JWTAcessToken: [ ]
+        - CSRFAcessToken: [ ]
       responses:
         '200':
           description: OK
@@ -502,7 +509,7 @@ paths:
     get:
       summary: Get groups for current user
       security:
-        - cookieJWTAuth: [ ]
+        - JWTAcessToken: [ ]
       responses:
         '200':
           description: OK
@@ -515,7 +522,7 @@ paths:
       summary: Get groups for a different user
       description: Get group list for any user by its id, only for admins and creators
       security:
-        - cookieJWTAuth: [ ]
+        - JWTAcessToken: [ ]
       parameters:
         - in: path
           description: Id of the user
@@ -547,8 +554,8 @@ paths:
       summary: Assign a user to a group
       description: Assign a user to a group, only for admins and creators
       security:
-        - cookieJWTAuth: [ ]
-        - CSRFToken: [ ]
+        - JWTAcessToken: [ ]
+        - CSRFAcessToken: [ ]
       parameters:
         - in: path
           description: Id of the user
@@ -582,8 +589,8 @@ paths:
       summary: Remove a user from a group
       description: Remove a user from a group, only for admins and creators
       security:
-        - cookieJWTAuth: [ ]
-        - CSRFToken: [ ]
+        - JWTAcessToken: [ ]
+        - CSRFAcessToken: [ ]
       parameters:
         - in: path
           description: Id of the user
@@ -617,7 +624,7 @@ paths:
       summary: Get all groups
       description: Get all group list, only for admins and creators
       security:
-        - cookieJWTAuth: [ ]
+        - JWTAcessToken: [ ]
       responses:
         '200':
           description: OK
@@ -636,7 +643,7 @@ paths:
       summary: Get any group
       description: Get any group, only for admins and creators
       security:
-        - cookieJWTAuth: [ ]
+        - JWTAcessToken: [ ]
       parameters:
         - in: path
           description: Id of the group
@@ -668,8 +675,8 @@ paths:
       summary: Add a group
       description: Add a group, only for admins
       security:
-        - cookieJWTAuth: [ ]
-        - CSRFToken: [ ]
+        - JWTAcessToken: [ ]
+        - CSRFAcessToken: [ ]
       requestBody:
         required: true
         content:
@@ -706,8 +713,8 @@ paths:
       summary: Delete a group
       description: Add a group, only for admins
       security:
-        - cookieJWTAuth: [ ]
-        - CSRFToken: [ ]
+        - JWTAcessToken: [ ]
+        - CSRFAcessToken: [ ]
       parameters:
         - in: path
           description: ID of the group
@@ -760,13 +767,23 @@ paths:
 
 components:
   securitySchemes:
-    cookieJWTAuth:
+    JWTAcessToken:
       description: Authentication with JWT stored in cookies
       type: apiKey
       in: cookie
       name: access_token_cookie
-    CSRFToken:
-      description: CSRF token
+    JWTRefreshToken:
+      description: JWT stored in cookies to refresh an acess token
+      type: apiKey
+      in: cookie
+      name: refresh_token_cookie
+    CSRFAcessToken:
+      description: CSRF acess token
+      type: apiKey
+      in: header
+      name: X-CSRF-TOKEN
+    CSRFRefreshToken:
+      description: CSRF refresh token for "remember me" functionality
       type: apiKey
       in: header
       name: X-CSRF-TOKEN
@@ -900,9 +917,13 @@ components:
       title: 'Authentication request info'
       required:
         - auth_credentials
+        - remember_me
       properties:
         auth_credentials:
           $ref: '#/components/schemas/authCredentials'
+        rememver_me:
+          description: Greatly refresh token expiration time
+          type: boolean
     authCredentials:
       title: 'Authentication credentials'
       required:
@@ -919,9 +940,13 @@ components:
       title: 'Authentication response'
       required:
         - csrf_access_token
+        - csrf_refresh_token
       properties:
         csrf_access_token:
-          title: CSRF token
+          title: CSRF token for acess JWT token
+          type: string
+        csrf_refresh_token:
+          title: CSRF token for refresh JWT token
           type: string
     getUniversitiesResponse:
       title: 'Get university list response'
