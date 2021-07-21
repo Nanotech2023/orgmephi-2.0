@@ -194,8 +194,8 @@ class RangeTask(db.Model):
     __tablename__ = 'range_task'
 
     task_id = db.Column(db.Integer, db.ForeignKey('base_task.task_id'), primary_key=True)
-    start_value = db.Column(db.Text, nullable=False)
-    end_value = db.Column(db.Text, nullable=False)
+    start_value = db.Column(db.Float, nullable=False)
+    end_value = db.Column(db.Float, nullable=False)
     __table_args__ = {'extend_existing': True}
 
 
