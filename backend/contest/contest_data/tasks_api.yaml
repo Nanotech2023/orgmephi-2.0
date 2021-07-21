@@ -5,7 +5,7 @@ info:
   version: 1.0.0
 
 paths:
-  /contest/contest/create:
+  /contest/create:
     post:
       summary: Create a new contest
       requestBody:
@@ -30,6 +30,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/errorResponse'
+
   /contest/stage/create:
     post:
       summary: Create a new stage
@@ -55,6 +56,75 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/errorResponse'
+
+
+  /contest/{id}:
+    get:
+      summary: Get common info for a different contest
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/commonContestInfo'
+      security: []
+      parameters:
+        - in: path
+          description: Id of the contest
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/commonContestInfo'
+
+        #4xx type errors, TODO: specify exact error codes
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+
+  /contest/stage/{id}:
+    get:
+      summary: Get common info for a different stage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/commonStageInfo'
+      security: []
+      parameters:
+        - in: path
+          description: Id of the stage
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/commonStageInfo'
+
+        #4xx type errors, TODO: specify exact error codes
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+
+
   /contest/variant/create:
     post:
       summary: Create a new variant
@@ -79,6 +149,41 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/errorResponse'
+
+  /contest/variant/{id}:
+    get:
+      summary: Get common info for a different variant
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/commonVariantInfo'
+      security: []
+      parameters:
+        - in: path
+          description: Id of the variant
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/commonVariantInfo'
+
+        #4xx type errors, TODO: specify exact error codes
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+
+
   /contest/variant/plain_task/create:
     post:
       summary: Create a new task with plain text
@@ -103,6 +208,40 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/errorResponse'
+
+  /contest/variant/plain_task/{id}:
+    get:
+      summary: Get common info for a different plain text task
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/commonPlainTaskInfo'
+      security: []
+      parameters:
+        - in: path
+          description: Id of the plain task
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/commonPlainTaskInfo'
+
+        #4xx type errors, TODO: specify exact error codes
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+
   /contest/variant/range_task/create:
     post:
       summary: Create a new task with plain text
@@ -127,6 +266,40 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/errorResponse'
+
+  /contest/variant/range_task/{id}:
+    get:
+      summary: Get common info for a different range task
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/commonRangeTaskInfo'
+      security: []
+      parameters:
+        - in: path
+          description: Id of the range task
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/commonRangeTaskInfo'
+
+        #4xx type errors, TODO: specify exact error codes
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+
   /contest/variant/multiple_task/create:
     post:
       summary: Create a new task with plain text
@@ -152,6 +325,38 @@ paths:
               schema:
                 $ref: '#/components/schemas/errorResponse'
 
+  /contest/variant/multiple_task/{id}:
+    get:
+      summary: Get common info for a multiple range task
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/commonMultipleTaskInfo'
+      security: []
+      parameters:
+        - in: path
+          description: Id of the multiple task
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/commonMultipleTaskInfo'
+
+        #4xx type errors, TODO: specify exact error codes
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
 
 components:
   securitySchemes:
