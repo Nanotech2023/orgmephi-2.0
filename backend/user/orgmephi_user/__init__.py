@@ -2,7 +2,9 @@ import os
 
 from flask import Flask, current_app
 from flask_sqlalchemy import SQLAlchemy
+from openapi_core.contrib.flask.decorators import FlaskOpenAPIViewDecorator
 from orgmephi_user.default_config import DefaultConfiguration
+from orgmephi_user.security import init_security
 
 
 def create_app(test_config=None):
@@ -23,10 +25,27 @@ def init_db():
     populate_country()
 
 
+def init_api():
+    import yaml
+    from openapi_core import create_spec
+    api_path = current_app.config['ORGMEPHI_API_PATH']
+    with open(api_path, 'r') as spec_file:
+        spec_dict = yaml.safe_load(spec_file)
+    global openapi
+    spec = create_spec(spec_dict)
+    openapi = FlaskOpenAPIViewDecorator.from_spec(spec)
+
+
 app = create_app()
 db = SQLAlchemy()
+openapi = None
 app.app_context().push()
+init_security(app)
 init_db()
+init_api()
+
+
+from orgmephi_user.views import *
 
 if __name__ == "__main__":
     app.run()

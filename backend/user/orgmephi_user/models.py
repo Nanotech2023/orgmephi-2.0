@@ -14,10 +14,10 @@ class UserRoleEnum(enum.Enum):
         admin: administrator user
         system: may be used for maintenance or by connected services
     """
-    user = 1
-    creator = 2
-    admin = 3
-    system = 4
+    participant = 'Participant'
+    creator = 'Creator'
+    admin = 'Admin'
+    system = 'System'
 
 
 class UserTypeEnum(enum.Enum):
@@ -31,12 +31,12 @@ class UserTypeEnum(enum.Enum):
         internal: internal MEPhI user (e.g. creator or admin)
         pre_register: unconfirmed preregistered account
     """
-    pre_university = 1
-    enrollee = 2
-    school = 3
-    university = 4
-    internal = 5
-    pre_register = 6
+    pre_university = 'PreUniversity'
+    enrollee = 'Enrollee'
+    school = 'School'
+    university = 'University'
+    internal = 'Internal'
+    pre_register = 'PreRegister'
 
 
 def _populate_table(table, values):
