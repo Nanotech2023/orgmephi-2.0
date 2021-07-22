@@ -21,7 +21,7 @@ class Olympiad(db.Model):
     __tablename__ = 'olympiad'
 
     olympiad_id = db.Column(db.Integer, autoincrement=True, primary_key=True)
-    name = db.Column(db.String(50), nullable=False)
+    name = db.Column(db.Text, nullable=False)
     description = db.Column(db.Text, nullable=False)
     rules = db.Column(db.Text, nullable=False)
     __table_args__ = {'extend_existing': True}
@@ -54,7 +54,7 @@ class OlympiadStage(db.Model):
     __tablename__ = 'olympiad_stage'
 
     stage_id = db.Column(db.Integer, autoincrement=True, primary_key=True)
-    stage_name = db.Column(db.String(50), index=True, nullable=False)
+    stage_name = db.Column(db.Text, index=True, nullable=False)
     next_stage_condition = db.Column(db.Text, nullable=False)
     __table_args__ = {'extend_existing': True}
 
@@ -230,7 +230,7 @@ class MultipleChoiceTask(db.Model):
     __tablename__ = 'multiple_task'
 
     task_id = db.Column(db.Integer, db.ForeignKey('base_task.task_id'), primary_key=True)
-    correct_answer = db.Column(db.String(50), nullable=False)
+    correct_answer = db.Column(db.Text, nullable=False)
     __table_args__ = {'extend_existing': True}
 
 
@@ -247,7 +247,7 @@ class AnswersInMultipleChoiceTask(db.Model):
 
     answer_id = db.Column(db.Integer, autoincrement=True, primary_key=True)
     task_id = db.Column(db.Integer, db.ForeignKey('multiple_task.task_id'), nullable=False)
-    answer = db.Column(db.String(50), nullable=False)
+    answer = db.Column(db.Text, nullable=False)
     __table_args__ = {'extend_existing': True}
 
 
