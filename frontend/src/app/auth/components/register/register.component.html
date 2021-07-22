@@ -5,14 +5,14 @@
             <label class="form-check-label">
                 <input type="radio" class="form-check-input" (change)="selectRegisterType(registerType)"
                        name="registerType">
-                {{ registerType.name }}
+                {{ registerType }}
             </label>
         </div>
     </fieldset>
 
     <div *ngIf="isAvailable(); else notSupported">
-        <ng-container *ngIf="isRegistered$ | async as registerResult; else registrationForm">
-            <div class="alert alert-success" *ngIf="registerResult">
+        <ng-container *ngIf="isRegistered; else registrationForm">
+            <div class="alert alert-success" *ngIf="isRegistered">
                 Регистрация успешно завершена
             </div>
         </ng-container>
@@ -21,7 +21,7 @@
 
 
     <ng-template #notSupported>
-        <div *ngIf="selectedRegisterType" class="alert alert-warning" role="alert">
+        <div *ngIf="selectedUserType" class="alert alert-warning" role="alert">
             Данный тип регистрации временно недоступен
         </div>
     </ng-template>
@@ -41,7 +41,8 @@
             <div class="form-group row" id="have_id" *ngIf="hasRegisterNumber">
                 <label class="col-sm-4 col-form-label">Регистрационный номер</label>
                 <div class="col-sm-4">
-                    <input class="form-control" type="text" [(ngModel)]="registerAttempt.registerNumber">
+                    <input class="form-control" type="text"
+                           [(ngModel)]="registerAttempt.registerConfirm.registrationNumber">
                 </div>
             </div>
             <br/>
@@ -49,7 +50,8 @@
                 <label class="col-sm-4 col-form-label">Код активации (вводится с учетом
                     регистра и только латинскими буквами)</label>
                 <div class="col-sm-4">
-                    <input class="form-control" type="text" [(ngModel)]="registerAttempt.activationCode">
+                    <input class="form-control" type="text"
+                           [(ngModel)]="registerAttempt.registerConfirm.oneTimePassword">
                 </div>
             </div>
         </fieldset>
@@ -59,7 +61,7 @@
             <div class="form-group row">
                 <label class="col-sm-4 col-form-label">E-mail <span class="accent_red">*</span>:</label>
                 <div class="col-sm-4">
-                    <input class="form-control" type="email" email required [(ngModel)]="registerAttempt.email"
+                    <input class="form-control" type="email" email required [(ngModel)]="registerAttempt.authInfo.email"
                            #email="ngModel"
                            name="email">
                     <div *ngIf="email.invalid && (email.dirty || email.touched)"
@@ -79,7 +81,7 @@
                 <div class="col-sm-4">
                     <input class="form-control" type="password" required minlength="6" #password="ngModel"
                            name="password"
-                           [(ngModel)]="registerAttempt.password">
+                           [(ngModel)]="registerAttempt.authInfo.password">
                     <div *ngIf="password.invalid && (password.dirty || password.touched)"
                          class="alert alert-danger">
                         <div *ngIf="password.errors?.required">
@@ -98,7 +100,7 @@
             <div class="form-group row">
                 <label class="col-sm-4 col-form-label">Имя <span class="accent_red">*</span>:</label>
                 <div class="col-sm-4">
-                    <input class="form-control" type="text" required [(ngModel)]="registerAttempt.name"
+                    <input class="form-control" type="text" required [(ngModel)]="registerAttempt.personalInfo.firstName"
                            #name="ngModel"
                            name="name">
                     <div *ngIf="name.invalid && (name.dirty || name.touched)"
@@ -113,7 +115,7 @@
             <div class="form-group row">
                 <label class="col-sm-4 col-form-label">Фамилия <span class="accent_red">*</span>:</label>
                 <div class="col-sm-4">
-                    <input class="form-control" type="text" required [(ngModel)]="registerAttempt.surname"
+                    <input class="form-control" type="text" required [(ngModel)]="registerAttempt.personalInfo.secondName"
                            #surname="ngModel"
                            name="surname">
                     <div *ngIf="surname.invalid && (surname.dirty || surname.touched)"
@@ -128,7 +130,7 @@
             <div class="form-group row">
                 <label class="col-sm-4 col-form-label">Отчество <span class="accent_red">*</span>:</label>
                 <div class="col-sm-4">
-                    <input class="form-control" type="text" required [(ngModel)]="registerAttempt.lastName"
+                    <input class="form-control" type="text" required [(ngModel)]="registerAttempt.personalInfo.middleName"
                            #lastName="ngModel"
                            name="lastName">
                     <div *ngIf="lastName.invalid && (lastName.dirty || lastName.touched)"
@@ -143,7 +145,7 @@
             <div class="form-group row">
                 <label class="col-sm-4 col-form-label">Дата рождения <span class="accent_red">*</span>:</label>
                 <div class="col-sm-4">
-                    <input class="form-control" type="date" required [(ngModel)]="registerAttempt.birthDate"
+                    <input class="form-control" type="date" required [(ngModel)]="registerAttempt.personalInfo.dateOfBirth"
                            #birthDate="ngModel"
                            name="birthDate">
                     <div *ngIf="birthDate.invalid && (birthDate.dirty || birthDate.touched)"
@@ -162,9 +164,9 @@
                 <label class="form-check-label">
                     <input type="checkbox" class="form-check-input" required [(ngModel)]="agreementAccepted"
                            style="position: relative; vertical-align: top">
-                    <p *ngFor="let agreement of agreements">
+                    <span *ngFor="let agreement of agreements">
                         {{ agreement }}
-                    </p>
+                    </span>
                 </label>
             </div>
         </fieldset>
