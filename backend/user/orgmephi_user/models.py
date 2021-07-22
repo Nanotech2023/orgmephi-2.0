@@ -81,8 +81,8 @@ class User(db.Model):
     type = db.Column(db.Enum(UserTypeEnum), nullable=False)
     registration_date = db.Column(db.DateTime, default=datetime.utcnow)
 
-    user_id = db.Column(db.Integer, db.ForeignKey('user_info.id'))
-    student_id = db.Column(db.Integer, db.ForeignKey('student_info.id'))
+    userInfo = db.relationship('UserInfo', backref='user', lazy=True, uselist=False)
+    studentInfo = db.relationship('StudentInfo', backref='user', lazy=True, uselist=False)
 
 
 class UserInfo(db.Model):
@@ -102,6 +102,7 @@ class UserInfo(db.Model):
     __table_name__ = 'user_info'
 
     id = db.Column(db.Integer, autoincrement=True, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     email = db.Column(db.String, unique=True)
     first_name = db.Column(db.String)
     middle_name = db.Column(db.String)
@@ -129,6 +130,7 @@ class StudentInfo(db.Model):
     __table_name__ = 'student_info'
 
     id = db.Column(db.Integer, autoincrement=True, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     phone = db.Column(db.String)
     university = db.Column(db.Integer, db.ForeignKey('university.id'))
     custom_university = db.Column(db.String)
@@ -168,7 +170,7 @@ class Country(db.Model):
         Attributes:
 
         id: id of the country
-        phone: name of the country
+        name: name of the country
     """
     __table_name__ = 'country'
 
@@ -197,7 +199,7 @@ class Group(db.Model):
         Attributes:
 
         id: id of the group
-        phone: name of the group
+        name: name of the group
         users: relationship with users within the group
     """
     __table_name__ = 'group'
