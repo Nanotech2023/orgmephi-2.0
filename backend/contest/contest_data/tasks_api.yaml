@@ -118,9 +118,16 @@ paths:
               schema:
                 $ref: '#/components/schemas/errorResponse'
 
-  /contest/create:
+  /olypmiad/stage/{id}/contest/create:
     post:
       summary: Create a new contest
+      parameters:
+        - in: path
+          description: Id of the stage
+          name: id
+          required: true
+          schema:
+            type: integer
       requestBody:
         required: true
         content:
@@ -145,9 +152,16 @@ paths:
               schema:
                 $ref: '#/components/schemas/errorResponse'
 
-  /contest/stage/create:
+  /olympiad/{id}/stage/create:
     post:
       summary: Create a new stage in oimpiad
+      parameters:
+        - in: path
+          description: Id of the olympiad
+          name: id
+          required: true
+          schema:
+            type: integer
       requestBody:
         required: true
         content:
@@ -258,7 +272,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/errorResponse'
 
-  /contest/stage/{id}/remove:
+  /olympiad/stage/{id}/remove:
     post:
       summary: Remove stage from olympiad
       requestBody:
@@ -291,7 +305,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/errorResponse'
 
-  /contest/stage/{id}:
+  /olympiad/stage/{id}:
     get:
       summary: Get common info for a different stage
       security: []
@@ -344,10 +358,16 @@ paths:
               schema:
                 $ref: '#/components/schemas/errorResponse'
 
-
-  /contest/variant/create:
+  /olympiad/stage/contest/{id}/variant/create:
     post:
       summary: Create a new variant
+      parameters:
+        - in: path
+          description: Id of the contest
+          name: id
+          required: true
+          schema:
+            type: integer
       requestBody:
         required: true
         content:
@@ -371,7 +391,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/errorResponse'
 
-  /contest/variant/{id}/remove:
+  /olympiad/stage/contest/variant/{id}/remove:
     post:
       summary: Remove variant
       requestBody:
@@ -404,7 +424,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/errorResponse'
 
-  /contest/variant/{id}:
+  /olympiad/stage/contest/variant/{id}:
     get:
       summary: Get info for a different variant
       security: []
@@ -456,9 +476,16 @@ paths:
               schema:
                 $ref: '#/components/schemas/errorResponse'
 
-  /contest/variant/plain_task/create:
+  /olympiad/stage/contest/variant/{id}/plain_task/create:
     post:
       summary: Create a new task with plain text
+      parameters:
+        - in: path
+          description: Id of the variant
+          name: id
+          required: true
+          schema:
+            type: integer
       requestBody:
         required: true
         content:
@@ -482,7 +509,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/errorResponse'
 
-  /contest/variant/plain_task/{id}/remove:
+  /olympiad/stage/contest/variant/plain_task/{id}/remove:
     post:
       summary: Remove task with plain text
       requestBody:
@@ -515,7 +542,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/errorResponse'
 
-  /contest/variant/plain_task/{id}:
+  /olympiad/stage/contest/variant/plain_task/{id}:
     get:
       summary: Get common info for a different plain text task
       security: []
@@ -567,9 +594,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/errorResponse'
 
-
-
-  /contest/variant/plain_task/{id}/right_answer:
+  /olympiad/stage/contest/variant/plain_task/{id}/right_answer:
     get:
       summary: Get right answer for common info for a different plain text task
       security: []
@@ -594,9 +619,16 @@ paths:
               schema:
                 $ref: '#/components/schemas/errorResponse'
 
-  /contest/variant/range_task/create:
+  /olympiad/stage/contest/variant/{id}/range_task/create:
     post:
       summary: Create a new task with range
+      parameters:
+        - in: path
+          description: Id of the variant
+          name: id
+          required: true
+          schema:
+            type: integer
       requestBody:
         required: true
         content:
@@ -620,7 +652,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/errorResponse'
 
-  /contest/variant/range_task/{id}/remove:
+  /olympiad/stage/contest/variant/range_task/{id}/remove:
     post:
       summary: Remove range task
       requestBody:
@@ -653,7 +685,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/errorResponse'
 
-  /contest/variant/range_task/{id}:
+  /olympiad/stage/contest/variant/range_task/{id}:
     get:
       summary: Get info for a different range task
       security: []
@@ -705,8 +737,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/errorResponse'
 
-
-  /contest/variant/range_task/{id}/right_answer:
+  /olympiad/stage/contest/variant/range_task/{id}/right_answer:
     get:
       summary: Get right answer info for a different range task
       security: []
@@ -731,9 +762,16 @@ paths:
               schema:
                 $ref: '#/components/schemas/errorResponse'
 
-  /contest/variant/multiple_task/create:
+  /olympiad/stage/contest/variant/{id}/multiple_task/create:
     post:
       summary: Create a new task with multiple answer
+      parameters:
+        - in: path
+          description: Id of the variant
+          name: id
+          required: true
+          schema:
+            type: integer
       requestBody:
         required: true
         content:
@@ -757,9 +795,16 @@ paths:
               schema:
                 $ref: '#/components/schemas/errorResponse'
 
-  /contest/variant/multiple_task/add_answer:
+  /olympiad/stage/contest/variant/multiple_task/{id}/add_answer:
     post:
       summary: Add answer to Multiple task list
+      parameters:
+        - in: path
+          description: Id of the task
+          name: id
+          required: true
+          schema:
+            type: integer
       requestBody:
         required: true
         content:
@@ -783,7 +828,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/errorResponse'
 
-  /contest/variant/multiple_task/{id}/remove:
+  /olympiad/stage/contest/variant/multiple_task/{id}/remove:
     post:
       summary: Remove multiple task
       requestBody:
@@ -816,8 +861,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/errorResponse'
 
-
-  /contest/variant/multiple_task/{id}:
+  /olympiad/stage/contest/variant/multiple_task/{id}:
     get:
       summary: Get common info for a multiple task
       security: []
@@ -869,7 +913,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/errorResponse'
 
-  /contest/variant/multiple_task/{id}/right_answer:
+  /olympiad/stage/contest/variant/multiple_task/{id}/right_answer:
     get:
       summary: Get right answer common info for a multiple range task
       security: []
@@ -894,7 +938,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/errorResponse'
 
-  /user/{id}/contest/add:
+  /olympiad/stage/contest/{id}/user/{id}/add:
     post:
       summary: Add user to contest
       requestBody:
@@ -902,11 +946,17 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/updateContest'
+              $ref: '#/components/schemas/updateContestUsers'
       parameters:
         - in: path
           description: Id of the user
-          name: id
+          name: user_id
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the contest
+          name: contest_id
           required: true
           schema:
             type: integer
@@ -919,7 +969,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/updateContest'
+                $ref: '#/components/schemas/updateContestUsers'
         '404':
           description: User or group not found
           content:
@@ -927,8 +977,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/errorResponse'
 
-
-  /user/{id}/contest/remove:
+  /olympiad/stage/contest/user/{id}/remove:
     post:
       summary: Remove user from contest
       requestBody:
@@ -936,7 +985,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/updateContest'
+              $ref: '#/components/schemas/updateContestUsers'
       parameters:
         - in: path
           description: Id of the user
@@ -953,7 +1002,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/updateContest'
+                $ref: '#/components/schemas/updateContestUsers'
         '404':
           description: User or group not found
           content:
@@ -961,10 +1010,98 @@ paths:
               schema:
                 $ref: '#/components/schemas/errorResponse'
 
+  /olympiad/{id}/get_stages:
+    get:
+      summary: list of stages in olympiad
+      parameters:
+        - in: path
+          description: Id of the olympiad
+          name: id
+          required: true
+          schema:
+            type: integer
+      security:
+        - cookieJWTAuth: [ ]
+        - CSRFToken: [ ]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/stagesInOlympiad'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
 
-  /contest/user/get:
+  /olympiad/stage/{id}/get_contests:
+    get:
+      summary: list of contests in stage
+      parameters:
+        - in: path
+          description: Id of the stage
+          name: id
+          required: true
+          schema:
+            type: integer
+      security:
+        - cookieJWTAuth: [ ]
+        - CSRFToken: [ ]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/contestsInStage'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+
+  /olympiad/stage/contest/{id}/variants:
+    get:
+      summary: list of variants in contest
+      parameters:
+        - in: path
+          description: Id of the contest
+          name: id
+          required: true
+          schema:
+            type: integer
+      security:
+        - cookieJWTAuth: [ ]
+        - CSRFToken: [ ]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/variantsInContest'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+
+
+  /olympiad/stage/contest/{id}/get_users:
     get:
       summary: list of user in contest
+      parameters:
+        - in: path
+          description: Id of the contest
+          name: id
+          required: true
+          schema:
+            type: integer
       security:
         - cookieJWTAuth: [ ]
         - CSRFToken: [ ]
@@ -1003,9 +1140,93 @@ components:
       properties:
         error_msg:
           type: string
+    createOlympiad:
+      title: Create olympiad
+      description: Request to olympiad creation
+      required:
+        - name
+        - description
+        - rules
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        rules:
+          type: string
+    olympiadInfo:
+      title: Get olympiad information
+      description: Request to get olympiad information
+      required:
+        - olympiad_id
+        - name
+        - description
+        - rules
+      properties:
+        olympiad_id:
+          type: integer
+        name:
+          type: string
+        description:
+          type: string
+        rules:
+          type: string
+    olympiadInfoUpdate:
+      title: Update olympiad information
+      description: Request to update olympiad information
+      properties:
+        olympiad_id:
+          type: integer
+        name:
+          type: string
+        description:
+          type: string
+        rules:
+          type: string
+    removeOlympiad:
+      title: Remove olympiad
+      description: Request to remove olympiad
+    createStage:
+      title: Create stage
+      description: Request to stage creation
+      required:
+        - stage_name
+        - next_stage_condition
+      properties:
+        stage_name:
+          type: string
+        next_stage_condition:
+          type: string
+    stageInfo:
+      title: Stage common info
+      description: Request to get stage info
+      required:
+        - stage_id
+        - stage_name
+        - next_stage_condition
+      properties:
+        stage_id:
+          type: integer
+        stage_name:
+          type: string
+        composite_contest_id:
+          type: integer
+        next_stage_condition:
+          type: string
+    stageInfoUpdate:
+      title: Edit stage common info
+      description: Request to edit stage
+      properties:
+        stage_name:
+          type: string
+        next_stage_condition:
+          type: string
+    removeStage:
+      title: Remove stage
+      description: Request to remove stage
     createContest:
       title: Create contest
-      description: Request to creation contest
+      description: Request to contest creation
       required:
         - description
         - rules
@@ -1036,7 +1257,7 @@ components:
           type: boolean
     commonContestInfo:
       title: Contest common info
-      description: Request to creation contest
+      description: Request to get contest info
       required:
         - contest_id
         - description
@@ -1068,67 +1289,81 @@ components:
           type: string
         visibility:
           type: boolean
-    createStage:
-      title: Create stage
-      description: Request to stage creation
-      required:
-        - stage_name
-        - composite_contest_id
-        - next_stage_condition
+    contestInfoUpdate:
+      title: Edit contest common info
+      description: Request to creation contest
       properties:
-        stage_name:
+        start_time:
           type: string
-        composite_contest_id:
-          type: integer
-        next_stage_condition:
+          format: 'date-time'
+        end_time:
           type: string
-    stageInfo:
-      title: Stage common info
-      description: Request to stage creation
-      required:
-        - stage_id
-        - stage_name
-        - composite_contest_id
-        - next_stage_condition
-      properties:
-        stage_id:
-          type: integer
-        stage_name:
+          format: 'date-time'
+        description:
           type: string
-        composite_contest_id:
-          type: integer
-        next_stage_condition:
+        rules:
           type: string
+        winning_condition:
+          type: string
+        laureate_condition:
+          type: string
+        certificate_template:
+          type: string
+        visibility:
+          type: boolean
+    removeContest:
+      title: Remove contest
+      description: Request to remove contest
     createVariant:
       title: Create variant
       description: Request to variant creation
       required:
         - variant_number
         - variant_description
-        - contest_id
       properties:
-        contest_id:
-          type: integer
         variant_number:
           type: integer
         variant_description:
           type: string
     variantInfo:
       title: Common variant info
-      description: Request to variant creation
+      description: Request to get variant info
       required:
         - variant_id
         - variant_number
         - variant_description
-        - contest_id
       properties:
-        contest_id:
-          type: integer
         variant_id:
           type: integer
         variant_number:
           type: integer
         variant_description:
+          type: string
+    variantInfoUpdate:
+      title: Edit variant
+      description: Request to edit variant
+      properties:
+        variant_number:
+          type: integer
+        variant_description:
+          type: string
+    removeVariant:
+      title: Remove variant
+      description: Request to variant removing
+    createPlainTask:
+      title: Create plain text task
+      description: Request to creation task with plain text
+      required:
+        - num_of_task
+        - image_of_task
+        - recommended_answer
+      properties:
+        num_of_task:
+          type: integer
+        image_of_task:
+          type: string
+          format: binary
+        recommended_answer:
           type: string
     removePlainTextTask:
       title: Remove plain text task
@@ -1137,28 +1372,6 @@ components:
       title: Edit plain text task
       description: Request to edit task with plain text
       properties:
-        variant_id:
-          type: integer
-        num_of_task:
-          type: integer
-        image_of_task:
-          type: string
-          format: binary
-        recommended_answer:
-          type: string
-
-
-    createPlainTask:
-      title: Create plain text task
-      description: Request to creation task with plain text
-      required:
-        - num_of_task
-        - image_of_task
-        - recommended_answer
-        - variant_id
-      properties:
-        variant_id:
-          type: integer
         num_of_task:
           type: integer
         image_of_task:
@@ -1168,16 +1381,13 @@ components:
           type: string
     commonPlainTaskInfo:
       title: Plain text task info
-      description: Request to creation task with plain text
+      description: Request to getting task with plain text
       required:
         - task_id
         - num_of_task
         - image_of_task
         - recommended_answer
-        - variant_id
       properties:
-        variant_id:
-          type: integer
         task_id:
           type: integer
         num_of_task:
@@ -1195,26 +1405,6 @@ components:
       properties:
         recommended_answer:
           type: string
-    removeRangeTask:
-      title: Remove range task
-      description: Request to remove task with range
-    rangeTaskInfoUpdate:
-      title: Edit range text task
-      description: Request to edit task with plain text
-      properties:
-        variant_id:
-          type: integer
-        num_of_task:
-          type: integer
-        image_of_task:
-          type: string
-          format: binary
-        start_value:
-          type: number
-          format: float
-        end_value:
-          type: number
-          format: float
     createRangeTask:
       title: Create range text task
       description: Request to creation task with plain text
@@ -1238,6 +1428,24 @@ components:
         end_value:
           type: number
           format: float
+    removeRangeTask:
+      title: Remove range task
+      description: Request to remove task with range
+    rangeTaskInfoUpdate:
+      title: Edit range text task
+      description: Request to edit task with plain text
+      properties:
+        num_of_task:
+          type: integer
+        image_of_task:
+          type: string
+          format: binary
+        start_value:
+          type: number
+          format: float
+        end_value:
+          type: number
+          format: float
     rangeTaskInfo:
       title: Range task info
       description: Request to creation task with plain text
@@ -1247,10 +1455,7 @@ components:
         - image_of_task
         - start_value
         - end_value
-        - variant_id
       properties:
-        variant_id:
-          type: integer
         task_id:
           type: integer
         num_of_task:
@@ -1277,22 +1482,6 @@ components:
         end_value:
           type: number
           format: float
-    removeMultipleTask:
-      title: Remove multiple choice task
-      description: Request to remove task with multiple choice
-    multipleTaskInfoUpdate:
-      title: Edit multiple text task
-      description: Request to creation task with plain text
-      properties:
-        variant_id:
-          type: integer
-        num_of_task:
-          type: integer
-        image_of_task:
-          type: string
-          format: binary
-        correct_answer:
-          type: string
     createMultipleTask:
       title: Create multiple text task
       description: Request to creation task with plain text
@@ -1300,10 +1489,21 @@ components:
         - num_of_task
         - image_of_task
         - correct_answer
-        - variant_id
       properties:
-        variant_id:
+        num_of_task:
           type: integer
+        image_of_task:
+          type: string
+          format: binary
+        correct_answer:
+          type: string
+    removeMultipleTask:
+      title: Remove multiple choice task
+      description: Request to remove task with multiple choice
+    multipleTaskInfoUpdate:
+      title: Edit multiple text task
+      description: Request to creation task with plain text
+      properties:
         num_of_task:
           type: integer
         image_of_task:
@@ -1319,10 +1519,7 @@ components:
         - num_of_task
         - image_of_task
         - correct_answer
-        - variant_id
       properties:
-        variant_id:
-          type: integer
         task_id:
           type: integer
         num_of_task:
@@ -1341,85 +1538,104 @@ components:
         correct_answer:
           type: string
     usersInContest:
-      title: Show users in contest
-      description: Request to show users in contest
+      title: Get users in contest
+      description: Request to get users in contest
       required:
-        - user_id
         - contest_id
-        - variant_id
-        - user_status
       properties:
-        user_id:
-          type: integer
         contest_id:
           type: integer
-        variant_id:
-          type: integer
-        user_status:
-          type: string
-    updateContest:
+        user_list:
+          type: array
+          items:
+            type: object
+            properties:
+              user_id:
+                type: integer
+              variant_id:
+                type: integer
+              user_status:
+                type: string
+    updateContestUsers:
       title: Add or remove user to contest
       description: Request to add user to contest
       required:
-        - contest_id
         - variant_id
       properties:
-        contest_id:
-          type: integer
         variant_id:
           type: integer
-    stageInfoUpdate:
-      title: Edit stage common info
-      description: Request to edit stage
-      properties:
-        stage_name:
-          type: string
-        composite_contest_id:
-          type: integer
-        next_stage_condition:
-          type: string
-    removeStage:
-      title: Remove stage
-      description: Request to remove stage
+    stagesInOlympiad:
+      title: Get stages in olympiad
+      description: Request to get stages in olympiad
       required:
-        - composite_contest_id
+        - olympiad_id
       properties:
-        composite_contest_id:
+        olympiad_id:
           type: integer
-    contestInfoUpdate:
-      title: Edit contest common info
-      description: Request to creation contest
+        stages_list:
+          type: array
+          items:
+            type: object
+            properties:
+              stage_id:
+                type: integer
+              stage_name:
+                type: string
+              composite_contest_id:
+                type: integer
+              next_stage_condition:
+                type: string
+
+    contestsInStage:
+      title: Get contests in stage
+      description: Request to get contests in stage
+      required:
+        - stage_id
       properties:
-        description:
-          type: string
-        rules:
-          type: string
-        winning_condition:
-          type: string
-        laureate_condition:
-          type: string
-        certificate_template:
-          type: string
-        visibility:
-          type: boolean
-    removeContest:
-      title: Remove contest
-      description: Request to remove contest
-    removeVariant:
-      title: Remove variant
-      description: Request to variant removing
-    variantInfoUpdate:
-      title: Edit variant
-      description: Request to edit variant
+        stage_id:
+          type: integer
+        contests_list:
+          type: array
+          items:
+            type: object
+            properties:
+              start_time:
+                type: string
+                format: 'date-time'
+              end_time:
+                type: string
+                format: 'date-time'
+              contest_id:
+                type: integer
+              description:
+                type: string
+              rules:
+                type: string
+              winning_condition:
+                type: string
+              laureate_condition:
+                type: string
+              certificate_template:
+                type: string
+              visibility:
+                type: boolean
+    variantsInContest:
+      title: Get variants in contest
+      description: Request to get variants in contest
+      required:
+        - contest_id
       properties:
-        contest_id:
+        olympiad_id:
           type: integer
-        variant_number:
-          type: integer
-        variant_description:
-          type: string
-    createOlympiad:
-    olympiadInfo:
-    olympiadInfoUpdate:
-    removeOlympiad:
+        variants_list:
+          type: array
+          items:
+            type: object
+            properties:
+              variant_id:
+                type: integer
+              variant_number:
+                type: integer
+              variant_description:
+                type: string
 
