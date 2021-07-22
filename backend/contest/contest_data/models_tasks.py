@@ -1,7 +1,8 @@
 """File with models description for contests and tasks management."""
 
-from backend.contest.contest_data.app import db
+from contest_data.app import db
 from datetime import datetime
+import enum
 
 # Constants
 
@@ -155,7 +156,7 @@ class UserInContest(db.Model):
     user_status = db.Column(db.Text, nullable=False)
 
 
-class TaskType(db.Enum):
+class TaskType(enum.Enum):
 
     plain_task = 1
     range_task = 1

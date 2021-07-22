@@ -18,6 +18,7 @@ SCRIPT_DIR = os.path.dirname(os.path.realpath(os.path.join(os.getcwd(), os.path.
 sys.path.append(os.path.normpath(os.path.join(SCRIPT_DIR, PACKAGE_PARENT)))
 
 import contest_data.models_tasks
+import contest_data.models_responses
 
 if __name__ == "__main__":
 

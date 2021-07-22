@@ -17,6 +17,7 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 
 from contest_data.models_tasks import *
+from contest_data.models_responses import *
 
 if __name__ == "__main__":
     app.run(debug=True)
