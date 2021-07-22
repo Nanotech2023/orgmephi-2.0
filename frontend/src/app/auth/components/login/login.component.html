@@ -2,10 +2,10 @@
     <div class="row justify-content-center">
         <div class="col-6">
             <h2 class="mt-5 mb-5">Авторизация участников</h2>
-            <div *ngIf="!(authResult$ | async)?.isSuccessful">
+            <div *ngIf="!(isAuthenticated$ | async)">
                 <div class="form-floating">
                     <input type="email" class="form-control" required email placeholder="name@example.com"
-                           [(ngModel)]="loginAttemptUser.email" #email="ngModel" name="email">
+                           [(ngModel)]="loginAttempt.username" #email="ngModel" name="email">
                     <label>Электронная почта</label>
                     <div *ngIf="email.invalid && (email.dirty || email.touched)"
                          class="alert alert-danger">
@@ -20,21 +20,18 @@
                 <br/>
                 <div class="form-floating">
                     <input type="password" class="form-control" placeholder="Пароль"
-                           [(ngModel)]="loginAttemptUser.password">
+                           [(ngModel)]="loginAttempt.password">
                     <label>Пароль</label>
                 </div>
                 <br/>
-                <button class="w-100 btn btn-lg btn-primary" [disabled]="!isValid(this.loginAttemptUser)"
-                        (click)="login(this.loginAttemptUser)">
+                <button class="w-100 btn btn-lg btn-primary" [disabled]="!isValid(this.loginAttempt)"
+                        (click)="login(this.loginAttempt)">
                     Войти
                 </button>
 
-                <ng-container *ngIf="authResult$ | async as authResult">
-                    <div class="alert alert-success" *ngIf="authResult.isSuccessful">
+                <ng-container *ngIf="isAuthenticated$ | async as isAuthenticated">
+                    <div class="alert alert-success">
                         Вы успешно вошли в систему
-                    </div>
-                    <div class="alert alert-danger" *ngIf="authResult.error">
-                        {{ authResult.error }}
                     </div>
                 </ng-container>
 

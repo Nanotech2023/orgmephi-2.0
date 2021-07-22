@@ -1,13 +1,14 @@
-import { AuthResult, RegisterResult, UserAuth, UserRegister } from '@/auth/models'
 import { createReducer, on } from '@ngrx/store'
 import {
     loginAttempt,
     loginError,
     loginSuccess,
+    pushPersonalInfo,
     registerAttempt,
     registerError,
     registerSuccess
 } from '@/auth/store/auth.actions'
+import { AuthResponse, CommonUserInfo, PersonalInfo } from '@/auth/models'
 
 
 export const featureKey: string = 'auth'
@@ -15,72 +16,41 @@ export const featureKey: string = 'auth'
 
 export interface State
 {
-    user: UserAuth | null
-    registration: UserRegister
-    authResult: AuthResult
-    registrationResult: RegisterResult
+    apiKeys: AuthResponse | null
+    commonUserInfo: CommonUserInfo | null
+    personalInfo: PersonalInfo | null
+    error: string | null
 }
 
 
 export const initialState: State = {
-    user: null,
-    registration: {
-        registerNumber: '',
-        activationCode: '',
-        email: '',
-        password: '',
-        name: '',
-        lastName: '',
-        birthDate: null,
-        surname: ''
-    },
-    registrationResult: {
-        isSuccessful: false,
-        error: ''
-    },
-    authResult: {
-        isSuccessful: false,
-        error: ''
-    }
+    apiKeys: null,
+    commonUserInfo: null,
+    personalInfo: null,
+    error: null
 }
 
 export const reducer =
     createReducer(
         initialState,
-        on( loginAttempt,
+        on( loginAttempt, registerAttempt,
             ( state ) =>
-            {
-                const successAuthResult = { isSuccessful: false, error: '' }
-                return ( { ...state, user: null, authResult: successAuthResult } )
-            }
+                ( { ...state } )
         ),
         on( loginSuccess,
-            ( state, { user } ) =>
-            {
-                const errorAuthResult = { isSuccessful: true, error: '' }
-                return ( { ...state, user: user, authResult: errorAuthResult } )
-            }
-        ),
-        on( loginError,
-            ( state, { result: authResult } ) =>
-            {
-                return ( { ...state, authResult: authResult } )
-            }
-        ),
-
-        on( registerAttempt,
-            ( state, { registration } ) =>
-                ( { ...state, registration: registration } )
+            ( state, { authResponse } ) =>
+                ( { ...state, apiKeys: authResponse } )
         ),
         on( registerSuccess,
-            ( state, { registration } ) =>
-            {
-                const registrationResult = { isSuccessful: true, error: '' }
-                return ( { ...state, registration: registration, registrationResult: registrationResult } )
-            }
+            ( state, { commonUserInfo } ) =>
+                ( { ...state, commonUserInfo: commonUserInfo } )
         ),
-        on( registerError,
-            ( state, { result } ) =>
-                ( { ...state, registrationResult: result } )
+        on( loginError, registerError,
+            ( state, { error } ) =>
+                ( { ...state, error: error.errorMsg } )
+        ),
+        on( pushPersonalInfo,
+            ( state, { personalInfo } ) =>
+                ( { ...state, personalInfo: personalInfo } )
         )
     )

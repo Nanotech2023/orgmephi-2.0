@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core'
 import { select, Store } from '@ngrx/store'
 import { AuthSelectors, AuthState } from '@/auth/store'
 import { Observable } from 'rxjs'
-import { UserRegister } from '@/auth/models'
+import { CommonUserInfo } from '@/auth/models'
 
 
 @Component( {
@@ -13,13 +13,13 @@ import { UserRegister } from '@/auth/models'
 export class HeaderComponent implements OnInit
 {
     isAuthorized$!: Observable<boolean>
-    user$!: Observable<UserRegister>
+    commonUserInfo$!: Observable<CommonUserInfo | null>
 
     constructor( private store: Store<AuthState.State> ) {}
 
     ngOnInit(): void
     {
         this.isAuthorized$ = this.store.pipe( select( AuthSelectors.selectIsAuthenticated ) )
-        this.user$ = this.store.pipe( select( AuthSelectors.selectRegistration ) )
+        this.commonUserInfo$ = this.store.pipe( select( AuthSelectors.selectCommonUserInfo ) )
     }
 }

@@ -1,35 +1,36 @@
 import { createFeatureSelector, createSelector, MemoizedSelector } from '@ngrx/store'
 import { featureKey, State } from '@/auth/store/auth.reducer'
-import { AuthResult, RegisterResult, UserAuth, UserRegister } from '@/auth/models'
+import { AuthResponse, CommonUserInfo, PersonalInfo } from '@/auth/models'
 
 
 export const selectFeature: MemoizedSelector<object, State> = createFeatureSelector<State>( featureKey )
 
-export const selectAuthResult: MemoizedSelector<State, AuthResult> = createSelector(
+export const selectApiKeys: MemoizedSelector<State, AuthResponse | null> = createSelector(
     selectFeature,
     ( state: State ) =>
-        state.authResult
+        state.apiKeys
 )
 
 export const selectIsAuthenticated: MemoizedSelector<State, boolean> = createSelector(
     selectFeature,
     ( state: State ) =>
-        state.authResult.isSuccessful
+        state.apiKeys !== null
 )
 
-export const selectUser: MemoizedSelector<State, UserAuth | null> = createSelector(
+export const selectCommonUserInfo: MemoizedSelector<State, CommonUserInfo | null> = createSelector(
     selectFeature,
     ( state: State ) =>
-        state.user
+        state.commonUserInfo
 )
 
-export const selectRegistration: MemoizedSelector<State, UserRegister> = createSelector(
+export const selectPersonalInfo: MemoizedSelector<State, PersonalInfo | null> = createSelector(
     selectFeature,
     ( state: State ) =>
-        state.registration
+        state.personalInfo
 )
-export const selectIsRegistered: MemoizedSelector<State, boolean> = createSelector(
+
+export const selectError: MemoizedSelector<State, string | null> = createSelector(
     selectFeature,
     ( state: State ) =>
-        state.registrationResult.isSuccessful
+        state.error
 )
