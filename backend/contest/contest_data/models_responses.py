@@ -17,7 +17,8 @@ class Response(db.Model):
     __tablename__ = 'response'
 
     work_id = db.Column(db.Integer, autoincrement=True, primary_key=True)
-    user_in_contest_id = db.Column(db.Integer, nullable=False)  # TODO Add FK of contest, nullable until merge
+    user_id = db.Column(db.Integer, db.ForeignKey('user_in_contest.user_id'))
+    contest_id = db.Column(db.Integer, db.ForeignKey('user_in_contest.contest_id'))
     statuses = db.relationship('responsestatus', backref='response', lazy=True)
     answers = db.relationship('responseanswer', backref='response', lazy=True)
 
@@ -133,7 +134,7 @@ class ResponseAnswer(db.Model):
 
     answer_id = db.Column(db.Integer, autoincrement=True, primary_key=True)
     work_id = db.Column(db.Integer, db.ForeignKey('response.work_id'))
-    task_num = db.Column(db.Integer, nullable=False)  # TODO FK of task, nullable until merge
+    task_num = db.Column(db.Integer, db.ForeignKey('base_task.task_id'))
     answer = db.Column(db.LargeBinary, nullable=False)
     filetype = db.Column(db.Enum(ResponseFiletypeEnum), nullable=False)
 
@@ -148,3 +149,6 @@ class ResponseAnswer(db.Model):
     - Выдать все ответы пользователя + файлы
     - Изменить статус работы
 """
+
+if __name__ == '__main__':
+    db.create_all()
