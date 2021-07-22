@@ -25,13 +25,13 @@ export interface State
 export const initialState: State = {
     user: null,
     registration: {
-        registerNumber: '',
-        activationCode: '',
-        email: '',
+        registerNumber: 'test',
+        activationCode: 'test',
+        email: 'test@test',
         password: '',
-        name: '',
-        lastName: '',
-        birthDate: null,
+        name: 'test1',
+        lastName: 'tes2',
+        birthDate: new Date(),
         surname: ''
     },
     registrationResult: {
@@ -39,7 +39,7 @@ export const initialState: State = {
         error: ''
     },
     authResult: {
-        isSuccessful: false,
+        isSuccessful: true,
         error: ''
     }
 }

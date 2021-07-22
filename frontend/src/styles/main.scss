@@ -1,3 +1,9 @@
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@100;300&display=swap');
+
+body, html {
+  font-family: 'Roboto', sans-serif;
+}
+
 fieldset {
   border: 0.5px solid rgba(0, 0, 0, 0.2);
   padding: 2%;
@@ -20,4 +26,12 @@ fieldset {
   border: 1px solid rgba(245, 245, 245, 0.38);
   text-align: center;
   height: 80%;
+}
+
+.img-responsive {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  max-height: 30px;
+  padding: 3px;
 }

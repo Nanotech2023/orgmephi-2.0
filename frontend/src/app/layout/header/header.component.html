@@ -8,10 +8,19 @@
         </a>
 
         <ul class="nav col-12 col-md-auto mb-2 justify-content-center mb-md-0">
-            <li><a routerLink="/user" class="nav-link px-2 link-secondary" *ngIf="isAuthorized$ | async">Анкета</a>
+            <li><a routerLink="/user" class="nav-link px-2 link-secondary" *ngIf="isAuthorized$ | async">Профиль</a>
+            </li>
+            <li style="display: flex; justify-content: center; justify-items: center">
+                <span class="nav-link px-2 link-secondary">/</span>
             </li>
             <li><a href="https://admission.mephi.ru" class="nav-link px-2 link-secondary">Приемная комиссия</a></li>
+            <li style="display: flex; justify-content: center; justify-items: center">
+                <span class="nav-link px-2 link-secondary">/</span>
+            </li>
             <li><a href="https://school.mephi.ru" class="nav-link px-2 link-secondary">Сетевая школа</a></li>
+            <li>
+                <span class="nav-link px-2 link-secondary">/</span>
+            </li>
             <li><a href="https://open.mephi.ru" class="nav-link px-2 link-secondary">Прием онлайн</a></li>
         </ul>
 
