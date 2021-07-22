@@ -23,8 +23,7 @@ pages:
   script:
     - mkdir .public
     - cp -r frontend/dist/* .public
-    - mv .public public
-  artifacts:
-    paths:
-      - public
+    - mv .public/* .ci/heroku/public
+    - gem install dpl
+    - dpl --provider=heroku --app=$HEROKU_PRODUCTION_APP --api_key=$HEROKU_PRODUCTION_API_KEY
   when: manual
