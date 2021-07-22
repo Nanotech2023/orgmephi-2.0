@@ -17,8 +17,9 @@ class Response(db.Model):
     __tablename__ = 'response'
 
     work_id = db.Column(db.Integer, autoincrement=True, primary_key=True)
-    user_id = db.Column(db.Integer, nullable=False)
-    contest_id = db.Column(db.Integer, nullable=False)  # TODO Add FK of contest, nullable until merge
+    user_in_contest_id = db.Column(db.Integer, nullable=False)  # TODO Add FK of contest, nullable until merge
+    statuses = db.relationship('responsestatus', backref='response', lazy=True)
+    answers = db.relationship('responseanswer', backref='response', lazy=True)
 
 
 class ResponseStatusEnum(enum.Enum):
@@ -56,7 +57,7 @@ class ResponseStatus(db.Model):
     work_id = db.Column(db.Integer, db.ForeignKey('response.work_id'))
     timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
     status = db.Column(db.Enum(ResponseStatusEnum), nullable=False)
-    mark = db.Column(db.Integer)
+    mark = db.Column(db.Float)
 
 
 class AppealStatusEnum(enum.Enum):
