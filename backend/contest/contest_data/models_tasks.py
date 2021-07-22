@@ -1,4 +1,5 @@
 """File with models description for contests and tasks management."""
+
 from backend.contest.contest_data.app import db
 from datetime import datetime
 
@@ -24,22 +25,24 @@ class Olympiad(db.Model):
     name = db.Column(db.Text, nullable=False)
     description = db.Column(db.Text, nullable=False)
     rules = db.Column(db.Text, nullable=False)
-    __table_args__ = {'extend_existing': True}
+    stages = db.relationship('olympiad_stage', lazy='select',
+                             backref=db.backref('olympiad', lazy='joined'))
 
 
-class StageInOlympiad(db.Model):
-    """
-    Class describing a Stage In Olympiad model.
+"""
+Table describing a Contests In Stage model.
 
-    olympiad_id: id of olympiad
-    contest_id: id of contest
-    """
+stage_id: id of the stage
+contest_id: id of contest
+location: address + room or link to online
+"""
 
-    __tablename__ = 'stage_in_olympiad'
-
-    olympiad_id = db.Column(db.Integer, db.ForeignKey('olympiad.olympiad_id'), primary_key=True)
-    stage_id = db.Column(db.Integer, db.ForeignKey('olympiad_stage.stage_id'), primary_key=True)
-    __table_args__ = {'extend_existing': True}
+contestsInStage = db.Table('contests_in_stage',
+                           db.Column('stage_id', db.Integer, db.ForeignKey('olympiad_stage.stage_id'),
+                                     primary_key=True),
+                           db.Column('contest_id', db.Integer, db.ForeignKey('contest.contest_id'), primary_key=True),
+                           db.Column('location', db.Text, nullable=False)
+                           )
 
 
 class OlympiadStage(db.Model):
@@ -47,6 +50,7 @@ class OlympiadStage(db.Model):
     Class describing a Stage model.
 
     stage_id: id of the stage
+    olympiad_id: id of olympiad
     stage_name: name of the stage
     next_stage_condition: condition to pass to the next stage
     """
@@ -54,24 +58,14 @@ class OlympiadStage(db.Model):
     __tablename__ = 'olympiad_stage'
 
     stage_id = db.Column(db.Integer, autoincrement=True, primary_key=True)
+    olympiad_id = db.Column(db.Integer, db.ForeignKey('olympiad.olympiad_id'))
     stage_name = db.Column(db.Text, index=True, nullable=False)
     next_stage_condition = db.Column(db.Text, nullable=False)
-    __table_args__ = {'extend_existing': True}
+    stages = db.relationship('olympiad_stage', lazy='select',
+                             backref=db.backref('olympiad', lazy='joined'))
 
-
-class ContestsInStage(db.Model):
-    """
-    Class describing a Contests In Stage model.
-
-    stage_id: id of the stage
-    contest_id: id of contest
-    """
-
-    __tablename__ = 'contests_in_stage'
-
-    stage_id = db.Column(db.Integer, db.ForeignKey('olympiad_stage.stage_id'), primary_key=True)
-    contest_id = db.Column(db.Integer, db.ForeignKey('contest.contest_id'), primary_key=True)
-    __table_args__ = {'extend_existing': True}
+    contests = db.relationship('contest', secondary=contestsInStage, lazy='subquery',
+                               backref=db.backref('olympiad_stage', lazy=True))
 
 
 class Contest(db.Model):
@@ -81,8 +75,8 @@ class Contest(db.Model):
     contest_id: id of contest
     description: description of the contest
     rules: rules of the contest
-    winning_condition: winning condition
-    laureate_condition: laureate condition
+    winning_condition: minimum passing scores
+    laureate_condition: minimum passing scores
     certificate_template: contest certificate template
     visibility: visibility of the contest
     start_date: start date of contest
@@ -94,28 +88,32 @@ class Contest(db.Model):
     contest_id = db.Column(db.Integer, autoincrement=True, primary_key=True)
     description = db.Column(db.Text, nullable=False)
     rules = db.Column(db.Text, nullable=False)
-    winning_condition = db.Column(db.Text, nullable=False)
-    laureate_condition = db.Column(db.Text, nullable=False)
+    winning_condition = db.Column(db.Float, nullable=False)
+    laureate_condition = db.Column(db.Float, nullable=False)
     certificate_template = db.Column(db.Text, nullable=True)
     visibility = db.Column(db.Boolean, default=DEFAULT_VISIBILITY, nullable=False)
 
     start_date = db.Column(db.DateTime, index=True, default=datetime.utcnow)
     end_date = db.Column(db.DateTime, index=True, default=datetime.utcnow)
 
-    __table_args__ = {'extend_existing': True}
+    variants = db.relationship('variant', lazy='select',
+                               backref=db.backref('contest', lazy='joined'))
+
+    users = db.relationship('user_in_contest', lazy='select',
+                            backref=db.backref('contest', lazy='joined'))
 
 
-class VariantInContest(db.Model):
-    """
-    Class variant in Contest model.
+"""
+Class describing a Task in variant model.
 
-    contest_id: id of the contest
-    variant_id: variant connected with current contest
-    """
+variant_id: id of the variant
+task_id: id of the task
+"""
 
-    __tablename__ = 'variant_in_contest'
-    contest_id = db.Column(db.Integer, db.ForeignKey('contest.contest_id'), primary_key=True)
-    variant_id = db.Column(db.Integer, db.ForeignKey('variant.variant_id'), primary_key=True)
+taskInVariant = db.Table('task_in_variant',
+                         db.Column('variant_id', db.Integer, db.ForeignKey('variant.variant_id'), primary_key=True),
+                         db.Column('task_id', db.ForeignKey('base_task.task_id'), primary_key=True)
+                         )
 
 
 class Variant(db.Model):
@@ -123,6 +121,7 @@ class Variant(db.Model):
     Class describing a Task variant model.
 
     variant_id: id of the variant
+    contest_id: id of contest
     variant_number: id of the variant number
     variant_description: description of the variant
     """
@@ -130,9 +129,15 @@ class Variant(db.Model):
     __tablename__ = 'variant'
 
     variant_id = db.Column(db.Integer, autoincrement=True, primary_key=True)
+    contest_id = db.Column(db.Integer, db.ForeignKey('contest.contest_id'))
     variant_number = db.Column(db.Integer)
     variant_description = db.Column(db.Text)
-    __table_args__ = {'extend_existing': True}
+
+    users = db.relationship('user_in_contest', lazy='select',
+                            backref=db.backref('variant', lazy='joined'))
+
+    contests = db.relationship('base_task', secondary=taskInVariant, lazy='subquery',
+                               backref=db.backref('variant', lazy=True))
 
 
 class UserInContest(db.Model):
@@ -147,28 +152,9 @@ class UserInContest(db.Model):
 
     __tablename__ = 'user_in_contest'
     user_id = db.Column(db.Integer, primary_key=True)
-    contest_id = db.Column(db.Integer, db.ForeignKey('contest.contest_id'), nullable=False, primary_key=True)
+    contest_id = db.Column(db.Integer, db.ForeignKey('contest.contest_id'), primary_key=True)
     variant_id = db.Column(db.Integer, db.ForeignKey('variant.variant_id'))
     user_status = db.Column(db.Text, nullable=False)
-
-
-# Tasks models
-
-
-class TaskInVariant(db.Model):
-    """
-    Class describing a Task in variant model.
-
-    variant_id: id of the variant
-    task_id: id of the task
-    """
-
-    __tablename__ = 'task_in_variant'
-
-    variant_id = db.Column(db.Integer, db.ForeignKey('variant.variant_id'), primary_key=True)
-    task_id = db.Column(db.Integer, db.ForeignKey('base_task.task_id'), primary_key=True)
-
-    __table_args__ = {'extend_existing': True}
 
 
 class Task(db.Model):
@@ -184,7 +170,13 @@ class Task(db.Model):
     task_id = db.Column(db.Integer, autoincrement=True, primary_key=True)
     num_of_task = db.Column(db.Integer, nullable=False)
     image_of_task = db.Column(db.LargeBinary, nullable=True)
-    __table_args__ = {'extend_existing': True}
+
+    plain_tasks = db.relationship('plain_task', lazy='select',
+                                  backref=db.backref('base_task', lazy='joined'))
+    range_tasks = db.relationship('range_task', lazy='select',
+                                  backref=db.backref('base_task', lazy='joined'))
+    multiple_tasks = db.relationship('multiple_task', lazy='select',
+                                     backref=db.backref('base_task', lazy='joined'))
 
 
 class PlainTask(db.Model):
@@ -199,7 +191,6 @@ class PlainTask(db.Model):
 
     task_id = db.Column(db.Integer, db.ForeignKey('base_task.task_id'), primary_key=True)
     recommended_answer = db.Column(db.Text, nullable=False)
-    __table_args__ = {'extend_existing': True}
 
 
 class RangeTask(db.Model):
@@ -216,7 +207,6 @@ class RangeTask(db.Model):
     task_id = db.Column(db.Integer, db.ForeignKey('base_task.task_id'), primary_key=True)
     start_value = db.Column(db.Float, nullable=False)
     end_value = db.Column(db.Float, nullable=False)
-    __table_args__ = {'extend_existing': True}
 
 
 class MultipleChoiceTask(db.Model):
@@ -231,7 +221,8 @@ class MultipleChoiceTask(db.Model):
 
     task_id = db.Column(db.Integer, db.ForeignKey('base_task.task_id'), primary_key=True)
     correct_answer = db.Column(db.Text, nullable=False)
-    __table_args__ = {'extend_existing': True}
+    all_answers_in_multiple_task = db.relationship('answers_in_multiple_task', lazy='select',
+                                               backref=db.backref('multiple_task', lazy='joined'))
 
 
 class AnswersInMultipleChoiceTask(db.Model):
@@ -248,24 +239,3 @@ class AnswersInMultipleChoiceTask(db.Model):
     answer_id = db.Column(db.Integer, autoincrement=True, primary_key=True)
     task_id = db.Column(db.Integer, db.ForeignKey('multiple_task.task_id'), nullable=False)
     answer = db.Column(db.Text, nullable=False)
-    __table_args__ = {'extend_existing': True}
-
-
-"""
-Возможные запросы:
-- Создавать, редактировать, удалять и предоставлять доступ к карточке конкурса; 
-- Создавать, редактировать, удалять и предоставлять доступ к карточке этапа;
-- Добавлять и удалять этапы в структуре конкурса;
-- Генерацию документа для печати сертификатов.
-
-
-- Редактирование описания и метаинформацию конкурсов и этапов
-- Редактировать структуру конкурсного мероприятия, добавлять и удалять этапы, изменять видимость конкурса
-- Загружать шаблоны и отправлять на печатать дипломы и сертификаты. 
-"""
-
-# debug
-
-
-# if __name__ == "__main__":
-# db.create_all()
