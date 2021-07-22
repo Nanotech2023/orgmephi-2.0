@@ -5,6 +5,119 @@ info:
   version: 1.0.0
 
 paths:
+  /olympiad/create:
+    post:
+      summary: Create a new olimpiad
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/createOlympiad'
+      security:
+        - cookieJWTAuth: [ ]
+        - CSRFToken: [ ]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/olympiadInfo'
+
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+
+  /olympiad/{id}/remove:
+    post:
+      summary: Remove olympiad
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/removeOlympiad'
+      parameters:
+        - in: path
+          description: Id of the olympiad
+          name: id
+          required: true
+          schema:
+            type: integer
+      security:
+        - cookieJWTAuth: [ ]
+        - CSRFToken: [ ]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/removeOlympiad'
+        '404':
+          description: Stage not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+
+  /olympiad/{id}:
+    get:
+      summary: Get info for the olympiad
+      security: []
+      parameters:
+        - in: path
+          description: Id of the olympiad
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/olympiadInfo'
+
+        '404':
+          description: Contest not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+    patch:
+      summary: Edit olympiad info
+      security:
+        - cookieJWTAuth: [ ]
+        - CSRFToken: [ ]
+      parameters:
+        - in: path
+          description: Id of the olympiad
+          name: id
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/olympiadInfoUpdate'
+      responses:
+        '200':
+          description: OK
+        '404':
+          description: Stage not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+
   /contest/create:
     post:
       summary: Create a new contest
@@ -34,7 +147,7 @@ paths:
 
   /contest/stage/create:
     post:
-      summary: Create a new stage
+      summary: Create a new stage in oimpiad
       requestBody:
         required: true
         content:
@@ -94,13 +207,7 @@ paths:
 
   /contest/{id}:
     get:
-      summary: Get common info for a different contest
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/commonContestInfo'
+      summary: Get common info for a contest
       security: []
       parameters:
         - in: path
@@ -130,7 +237,7 @@ paths:
         - CSRFToken: [ ]
       parameters:
         - in: path
-          description: Id of the user
+          description: Id of the contest
           name: id
           required: true
           schema:
@@ -153,7 +260,7 @@ paths:
 
   /contest/stage/{id}/remove:
     post:
-      summary: Remove stage from contest
+      summary: Remove stage from olympiad
       requestBody:
         required: true
         content:
@@ -187,12 +294,6 @@ paths:
   /contest/stage/{id}:
     get:
       summary: Get common info for a different stage
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/stageInfo'
       security: []
       parameters:
         - in: path
@@ -216,13 +317,13 @@ paths:
                 $ref: '#/components/schemas/errorResponse'
 
     patch:
-      summary: Set stage info for a contest
+      summary: Set stage info for a olympiad
       security:
         - cookieJWTAuth: [ ]
         - CSRFToken: [ ]
       parameters:
         - in: path
-          description: Id of the user
+          description: Id of the stage
           name: id
           required: true
           schema:
@@ -262,7 +363,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/commonVariantInfo'
+                $ref: '#/components/schemas/variantInfo'
         '400':
           description: Bad request
           content:
@@ -305,13 +406,7 @@ paths:
 
   /contest/variant/{id}:
     get:
-      summary: Get common info for a different variant
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/commonVariantInfo'
+      summary: Get info for a different variant
       security: []
       parameters:
         - in: path
@@ -326,7 +421,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/commonVariantInfo'
+                $ref: '#/components/schemas/variantInfo'
         '404':
           description: Variant not found
           content:
@@ -355,7 +450,7 @@ paths:
         '200':
           description: OK
         '404':
-          description: Stage not found
+          description: Variant not found
           content:
             application/json:
               schema:
@@ -389,7 +484,7 @@ paths:
 
   /contest/variant/plain_task/{id}/remove:
     post:
-      summary: Remove multiple task
+      summary: Remove task with plain text
       requestBody:
         required: true
         content:
@@ -423,12 +518,6 @@ paths:
   /contest/variant/plain_task/{id}:
     get:
       summary: Get common info for a different plain text task
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/commonPlainTaskInfo'
       security: []
       parameters:
         - in: path
@@ -483,12 +572,6 @@ paths:
   /contest/variant/plain_task/{id}/right_answer:
     get:
       summary: Get right answer for common info for a different plain text task
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/answerPlainTaskInfo'
       security: []
       parameters:
         - in: path
@@ -513,7 +596,7 @@ paths:
 
   /contest/variant/range_task/create:
     post:
-      summary: Create a new task with plain text
+      summary: Create a new task with range
       requestBody:
         required: true
         content:
@@ -529,7 +612,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/commonRangeTaskInfo'
+                $ref: '#/components/schemas/rangeTaskInfo'
         '400':
           description: Bad request
           content:
@@ -539,7 +622,7 @@ paths:
 
   /contest/variant/range_task/{id}/remove:
     post:
-      summary: Remove multiple task
+      summary: Remove range task
       requestBody:
         required: true
         content:
@@ -572,13 +655,7 @@ paths:
 
   /contest/variant/range_task/{id}:
     get:
-      summary: Get common info for a different range task
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/commonRangeTaskInfo'
+      summary: Get info for a different range task
       security: []
       parameters:
         - in: path
@@ -593,7 +670,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/commonRangeTaskInfo'
+                $ref: '#/components/schemas/rangeTaskInfo'
         '404':
           description: Task not found
           content:
@@ -631,13 +708,7 @@ paths:
 
   /contest/variant/range_task/{id}/right_answer:
     get:
-      summary: Get right answer common info for a different range task
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/answerRangeTaskInfo'
+      summary: Get right answer info for a different range task
       security: []
       parameters:
         - in: path
@@ -662,7 +733,7 @@ paths:
 
   /contest/variant/multiple_task/create:
     post:
-      summary: Create a new task with plain text
+      summary: Create a new task with multiple answer
       requestBody:
         required: true
         content:
@@ -678,7 +749,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/commonMultipleTaskInfo'
+                $ref: '#/components/schemas/multipleTaskInfo'
         '400':
           description: Bad request
           content:
@@ -704,7 +775,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/commonMultipleTaskInfo'
+                $ref: '#/components/schemas/multipleTaskInfo'
         '400':
           description: Bad request
           content:
@@ -749,12 +820,6 @@ paths:
   /contest/variant/multiple_task/{id}:
     get:
       summary: Get common info for a multiple task
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/commonMultipleTaskInfo'
       security: []
       parameters:
         - in: path
@@ -769,7 +834,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/commonMultipleTaskInfo'
+                $ref: '#/components/schemas/multipleTaskInfo'
         '404':
           description: Task not found
           content:
@@ -807,12 +872,6 @@ paths:
   /contest/variant/multiple_task/{id}/right_answer:
     get:
       summary: Get right answer common info for a multiple range task
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/answerMultipleTaskInfo'
       security: []
       parameters:
         - in: path
@@ -871,7 +930,7 @@ paths:
 
   /user/{id}/contest/remove:
     post:
-      summary: Add user to contest
+      summary: Remove user from contest
       requestBody:
         required: true
         content:
@@ -906,12 +965,6 @@ paths:
   /contest/user/get:
     get:
       summary: list of user in contest
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/usersInContest'
       security:
         - cookieJWTAuth: [ ]
         - CSRFToken: [ ]
@@ -960,7 +1013,15 @@ components:
         - laureate_condition
         - certificate_template
         - visibility
+        - start_date
+        - end_time
       properties:
+        start_time:
+          type: string
+          format: 'date-time'
+        end_time:
+          type: string
+          format: 'date-time'
         description:
           type: string
         rules:
@@ -984,7 +1045,15 @@ components:
         - laureate_condition
         - certificate_template
         - visibility
+        - start_date
+        - end_time
       properties:
+        start_time:
+          type: string
+          format: 'date-time'
+        end_time:
+          type: string
+          format: 'date-time'
         contest_id:
           type: integer
         description:
@@ -1044,7 +1113,7 @@ components:
           type: integer
         variant_description:
           type: string
-    commonVariantInfo:
+    variantInfo:
       title: Common variant info
       description: Request to variant creation
       required:
@@ -1169,7 +1238,7 @@ components:
         end_value:
           type: number
           format: float
-    commonRangeTaskInfo:
+    rangeTaskInfo:
       title: Range task info
       description: Request to creation task with plain text
       required:
@@ -1242,7 +1311,7 @@ components:
           format: binary
         correct_answer:
           type: string
-    commonMultipleTaskInfo:
+    multipleTaskInfo:
       title: Multiple text task info
       description: Request to creation task with plain text
       required:
@@ -1349,4 +1418,8 @@ components:
           type: integer
         variant_description:
           type: string
+    createOlympiad:
+    olympiadInfo:
+    olympiadInfoUpdate:
+    removeOlympiad:
 
