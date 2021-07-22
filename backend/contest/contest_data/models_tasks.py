@@ -33,7 +33,6 @@ class OlympiadStage(db.Model):
 
     stage_id: id of the stage
     stage_name: name of the stage
-    contest_id: if of the composite contest
     next_stage_condition: condition to pass to the next stage
     """
 
@@ -41,7 +40,6 @@ class OlympiadStage(db.Model):
 
     stage_id = db.Column(db.Integer, autoincrement=True, primary_key=True)
     stage_name = db.Column(db.String(50), index=True, nullable=False)
-    contest_id = db.Column(db.Integer, db.ForeignKey('contest.contest_id'))
     next_stage_condition = db.Column(db.Text, nullable=False)
     __table_args__ = {'extend_existing': True}
 
@@ -87,6 +85,8 @@ class Contest(db.Model):
     laureate_condition: laureate condition
     certificate_template: contest certificate template
     visibility: visibility of the contest
+    start_date: start date of contest
+    end_date: end date of contest
     """
 
     __tablename__ = 'contest'
@@ -115,7 +115,7 @@ class VariantInContest(db.Model):
 
     __tablename__ = 'variant_in_contest'
     contest_id = db.Column(db.Integer, db.ForeignKey('contest.contest_id'), primary_key=True)
-    variant_id = db.Column(db.Integer, db.ForeignKey('task_variant.variant_id'), primary_key=True)
+    variant_id = db.Column(db.Integer, db.ForeignKey('variant.variant_id'), primary_key=True)
 
 
 class UserInContest(db.Model):
@@ -131,14 +131,14 @@ class UserInContest(db.Model):
     __tablename__ = 'user_in_contest'
     user_id = db.Column(db.Integer, primary_key=True)
     contest_id = db.Column(db.Integer, db.ForeignKey('contest.contest_id'), nullable=False)
-    variant_id = db.Column(db.Integer, db.ForeignKey('task_variant.variant_id'))
+    variant_id = db.Column(db.Integer, db.ForeignKey('variant.variant_id'))
     user_status = db.Column(db.Text, nullable=False)
 
 
 # Tasks models
 
 
-class TaskVariant(db.Model):
+class Variant(db.Model):
     """
     Class describing a Task variant model.
 
@@ -147,7 +147,7 @@ class TaskVariant(db.Model):
     variant_description: description of the variant
     """
 
-    __tablename__ = 'task_variant'
+    __tablename__ = 'variant'
 
     variant_id = db.Column(db.Integer, autoincrement=True, primary_key=True)
     variant_number = db.Column(db.Integer)
@@ -165,7 +165,7 @@ class TaskInVariant(db.Model):
 
     __tablename__ = 'task_in_variant'
 
-    variant_id = db.Column(db.Integer, db.ForeignKey('task_variant.variant_id'), primary_key=True)
+    variant_id = db.Column(db.Integer, db.ForeignKey('variant.variant_id'), primary_key=True)
     task_id = db.Column(db.Integer, db.ForeignKey('base_task.task_id'), primary_key=True)
 
     __table_args__ = {'extend_existing': True}
@@ -183,7 +183,7 @@ class Task(db.Model):
     __tablename__ = 'base_task'
     task_id = db.Column(db.Integer, autoincrement=True, primary_key=True)
     num_of_task = db.Column(db.Integer, nullable=False)
-    # image_of_task = db.Column(db.LargeBinary, nullable=True) #TODO
+    image_of_task = db.Column(db.LargeBinary, nullable=True)
     __table_args__ = {'extend_existing': True}
 
 
@@ -238,14 +238,16 @@ class AnswersInMultipleChoiceTask(db.Model):
     """
     Class describing a Multiple answers for the task model.
 
+    answer_id: id of answer
     task_id: id of the task
     answer: possible answer
     """
 
     __tablename__ = 'answers_in_multiple_task'
 
-    task_id = db.Column(db.Integer, db.ForeignKey('multiple_task.task_id'), primary_key=True)
-    answer = db.Column(db.String(50), primary_key=True)
+    answer_id = db.Column(db.Integer, primary_key=True)
+    task_id = db.Column(db.Integer, db.ForeignKey('multiple_task.task_id'))
+    answer = db.Column(db.String(50))
     __table_args__ = {'extend_existing': True}
 
 
