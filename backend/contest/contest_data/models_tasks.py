@@ -61,8 +61,6 @@ class OlympiadStage(db.Model):
     olympiad_id = db.Column(db.Integer, db.ForeignKey('olympiad.olympiad_id'))
     stage_name = db.Column(db.Text, index=True, nullable=False)
     next_stage_condition = db.Column(db.Text, nullable=False)
-    stages = db.relationship('olympiad_stage', lazy='select',
-                             backref=db.backref('olympiad', lazy='joined'))
 
     contests = db.relationship('contest', secondary=contestsInStage, lazy='subquery',
                                backref=db.backref('olympiad_stage', lazy=True))
@@ -157,6 +155,13 @@ class UserInContest(db.Model):
     user_status = db.Column(db.Text, nullable=False)
 
 
+class TaskType(db.Enum):
+
+    plain_task = 1
+    range_task = 1
+    multiple_task = 2
+
+
 class Task(db.Model):
     """
     Class describing a Base Task model.
@@ -170,6 +175,7 @@ class Task(db.Model):
     task_id = db.Column(db.Integer, autoincrement=True, primary_key=True)
     num_of_task = db.Column(db.Integer, nullable=False)
     image_of_task = db.Column(db.LargeBinary, nullable=True)
+    type = db.Column(db.Enum(TaskType))
 
     plain_tasks = db.relationship('plain_task', lazy='select',
                                   backref=db.backref('base_task', lazy='joined'))
@@ -178,8 +184,13 @@ class Task(db.Model):
     multiple_tasks = db.relationship('multiple_task', lazy='select',
                                      backref=db.backref('base_task', lazy='joined'))
 
+    __mapper_args__ = {
+        'polymorphic_identity': 'base_task',
+        'polymorphic_on': type
+    }
 
-class PlainTask(db.Model):
+
+class PlainTask(Task):
     """
     Class describing a Task with plain text model.
 
@@ -192,8 +203,12 @@ class PlainTask(db.Model):
     task_id = db.Column(db.Integer, db.ForeignKey('base_task.task_id'), primary_key=True)
     recommended_answer = db.Column(db.Text, nullable=False)
 
+    __mapper_args__ = {
+        'polymorphic_identity': 'plain_task',
+    }
 
-class RangeTask(db.Model):
+
+class RangeTask(Task):
     """
     Class describing a Task with range model.
 
@@ -208,21 +223,27 @@ class RangeTask(db.Model):
     start_value = db.Column(db.Float, nullable=False)
     end_value = db.Column(db.Float, nullable=False)
 
+    __mapper_args__ = {
+        'polymorphic_identity': 'range_task',
+    }
 
-class MultipleChoiceTask(db.Model):
+
+class MultipleChoiceTask(Task):
     """
     Class describing a Task with multiple choice model.
 
     task_id: id of the task
-    correct_answer: correct answer
     """
 
     __tablename__ = 'multiple_task'
 
     task_id = db.Column(db.Integer, db.ForeignKey('base_task.task_id'), primary_key=True)
-    correct_answer = db.Column(db.Text, nullable=False)
     all_answers_in_multiple_task = db.relationship('answers_in_multiple_task', lazy='select',
-                                               backref=db.backref('multiple_task', lazy='joined'))
+                                                   backref=db.backref('multiple_task', lazy='joined'))
+
+    __mapper_args__ = {
+        'polymorphic_identity': 'multiple_task',
+    }
 
 
 class AnswersInMultipleChoiceTask(db.Model):
@@ -232,6 +253,7 @@ class AnswersInMultipleChoiceTask(db.Model):
     answer_id: id of answer
     task_id: id of the task
     answer: possible answer
+    correct: is answer correct
     """
 
     __tablename__ = 'answers_in_multiple_task'
@@ -239,3 +261,4 @@ class AnswersInMultipleChoiceTask(db.Model):
     answer_id = db.Column(db.Integer, autoincrement=True, primary_key=True)
     task_id = db.Column(db.Integer, db.ForeignKey('multiple_task.task_id'), nullable=False)
     answer = db.Column(db.Text, nullable=False)
+    correct = db.Column(db.Boolean, nullable=False)
