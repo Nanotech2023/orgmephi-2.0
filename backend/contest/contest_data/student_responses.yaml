@@ -104,6 +104,43 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/errorResponse'
+  /user/{user_id}/contest/{contest_id}/answer:
+    get:
+      summary: Get all user answers for the contest
+      security:
+        - cookieJWTAuth: [ ]
+      parameters:
+        - in: path
+          description: Id of the user
+          name: user_id
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the contest
+          name: contest_id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/userContestAllAnswer'
+        '403':
+          description: Not enough rights for current user
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+        '404':
+          description: User, contest or task not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
   /user/contest/{contest_id}/answer/{task_id}/add:
     post:
       summary: Add current user answer for a task
@@ -794,4 +831,21 @@ components:
           type: string
         appeal_response:
           type: string
+    userContestAllAnswer:
+      title: "ALl user's answer for the contest"
+      properties:
+        user_id:
+          type: integer
+        contest_id:
+          type: integer
+        user_answer:
+          type: array
+          items:
+            type: object
+            properties:
+              task_id:
+                type: integer
+              answer:
+                type: string
+                format: binary
 
