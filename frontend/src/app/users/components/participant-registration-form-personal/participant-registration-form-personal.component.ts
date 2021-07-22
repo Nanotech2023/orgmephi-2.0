@@ -3,8 +3,9 @@ import { Gender, ParticipantRegister } from '@/users/models/participant'
 import { ParticipantService } from '@/users/services/participant.service'
 import { select, Store } from '@ngrx/store'
 import { AuthSelectors, AuthState } from '@/auth/store'
-import { UserRegister } from '@/auth/models'
+import { CommonUserInfo, PersonalInfo } from '@/auth/models'
 import { Observable } from 'rxjs'
+import { selectPersonalInfo } from '@/auth/store/auth.selectors'
 
 
 @Component( {
@@ -19,7 +20,8 @@ export class ParticipantRegistrationFormPersonalComponent implements OnInit
 
     genderOptions: Gender[] = [ Gender.male, Gender.female ]
     countriesList: string[] = []
-    user$!: Observable<UserRegister>
+    commonUserInfo$!: Observable<CommonUserInfo | null>
+    personalInfo$!: Observable<PersonalInfo | null>
 
 
     constructor( private service: ParticipantService, private store: Store<AuthState.State> )
@@ -29,6 +31,7 @@ export class ParticipantRegistrationFormPersonalComponent implements OnInit
     ngOnInit(): void
     {
         this.countriesList = this.service.getCountriesList()
-        this.user$ = this.store.pipe( select( AuthSelectors.selectRegistration ) )
+        this.commonUserInfo$ = this.store.pipe( select( AuthSelectors.selectCommonUserInfo ) )
+        this.personalInfo$ = this.store.pipe( select( AuthSelectors.selectPersonalInfo ) )
     }
 }

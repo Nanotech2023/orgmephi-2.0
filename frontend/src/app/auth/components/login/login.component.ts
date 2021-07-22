@@ -1,11 +1,8 @@
 import { Component, OnInit } from '@angular/core'
-import { AuthService } from '@/auth/services/auth.service'
-import { UserAuth } from '@/auth/models/userAuth'
-import { AuthResult } from '@/auth/models'
 import { Store } from '@ngrx/store'
 import { AuthActions, AuthSelectors, AuthState } from '@/auth/store'
 import { Observable } from 'rxjs'
-import { selectAuthResult } from '@/auth/store/auth.selectors'
+import { AuthCredentials } from '@/auth/models'
 
 
 @Component( {
@@ -15,30 +12,30 @@ import { selectAuthResult } from '@/auth/store/auth.selectors'
 } )
 export class LoginComponent implements OnInit
 {
-    loginAttemptUser: UserAuth
-    authResult$!: Observable<AuthResult>
+    loginAttempt: AuthCredentials
+    isAuthenticated$!: Observable<boolean>
+    error$!: Observable<string | null>
 
     constructor( private readonly store: Store<AuthState.State> )
     {
-        this.loginAttemptUser = {
-            email: '',
-            password: ''
-        }
+        this.loginAttempt = { username: '', password: '' }
     }
 
     ngOnInit(): void
     {
-        this.authResult$ = this.store.select( AuthSelectors.selectAuthResult )
+        this.isAuthenticated$ = this.store.select( AuthSelectors.selectIsAuthenticated )
+        this.error$ = this.store.select( AuthSelectors.selectError )
     }
 
-    login( loginAttemptUser: UserAuth ): void
+    login( loginAttemptUser: AuthCredentials ): void
     {
-        this.store.dispatch( AuthActions.loginAttempt( { user: loginAttemptUser } ) )
+        const authentication = { authentication: { authCredentials: loginAttemptUser } }
+        this.store.dispatch( AuthActions.loginAttempt( authentication ) )
     }
 
-    isValid( loginAttemptUser: UserAuth ): boolean
+    isValid( loginAttemptUser: AuthCredentials ): boolean
     {
         // TODO enforce email regex check
-        return !!( loginAttemptUser.password && loginAttemptUser.email )
+        return !!( loginAttemptUser.password && loginAttemptUser.username )
     }
 }

@@ -1,10 +1,12 @@
 <div class="container">
-    <app-participant-registration-form-personal *ngIf="currentStage === 0"
-                                                [(participant)]="participant">
+    <app-participant-registration-form-personal *ngIf="currentStage === 0" [(participant)]="participant">
     </app-participant-registration-form-personal>
 
     <app-participant-registration-form-education *ngIf="currentStage === 1" [(participant)]="participant">
     </app-participant-registration-form-education>
+
+    <p *ngIf="currentStage === 2">Завершено
+    </p>
 </div>
 <br/>
 <div class="container">
@@ -16,7 +18,8 @@
             </button>
         </div>
         <div class="col-sm-2">
-            <button style="float: right" class="btn btn-primary" *ngIf="currentStage<totalStages" (click)="currentStage = currentStage+1">
+            <button style="float: right" class="btn btn-primary" *ngIf="currentStage < totalStages"
+                    (click)="currentStage = currentStage + 1">
                 Вперед
             </button>
         </div>

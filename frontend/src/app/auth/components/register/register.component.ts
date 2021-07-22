@@ -1,9 +1,8 @@
 import { Component } from '@angular/core'
-import { RegisterType, RegisterTypeEnum, RegisterTypes, UserRegister, validateUser, Agreements } from '@/auth/models'
-import { AuthActions, AuthSelectors, AuthState } from '@/auth/store'
+import { AuthActions, AuthState } from '@/auth/store'
 import { Store } from '@ngrx/store'
-import { Observable } from 'rxjs'
-import { AuthService } from '@/auth/services/auth.service'
+import { Agreements } from '@/auth/models/agreements'
+import { AllUserTypes, Registration, UserType } from '@/auth/models'
 
 
 @Component( {
@@ -14,41 +13,47 @@ import { AuthService } from '@/auth/services/auth.service'
 export class RegisterComponent
 {
     agreements: string[] = Agreements
-    registerTypes: RegisterType[] = RegisterTypes
+    registerTypes: UserType[] = AllUserTypes
 
-    registerAttempt: UserRegister
-    isRegistered$: Observable<boolean>
+    registerAttempt: Registration
+    isRegistered: boolean
 
-    selectedRegisterType: RegisterType | null
+    selectedUserType: UserType | null
     hasRegisterNumber: boolean
     agreementAccepted: boolean
 
-    constructor( private readonly store: Store<AuthState.State>, private readonly service: AuthService )
+    constructor( private readonly store: Store<AuthState.State> )
     {
-        this.registerAttempt = this.service.createEmptyUser()
-        this.isRegistered$ = this.store.select( AuthSelectors.selectIsRegistered )
+        this.registerAttempt = {
+            authInfo: { email: '', password: '' },
+            registerType: this.registerTypes[ 0 ],
+            personalInfo: { dateOfBirth: '', firstName: '', secondName: '', middleName: '' },
+            registerConfirm: { registrationNumber: '', oneTimePassword: '' }
+        }
+        this.isRegistered = false
         this.agreementAccepted = false
-        this.selectedRegisterType = null
+        this.selectedUserType = null
         this.hasRegisterNumber = false
     }
 
-    selectRegisterType( registerType: RegisterType ): void
+    selectRegisterType( userType: UserType ): void
     {
-        this.selectedRegisterType = registerType
+        this.selectedUserType = userType
     }
 
     isAvailable(): boolean
     {
-        return this.selectedRegisterType !== null && this.selectedRegisterType?.value == RegisterTypeEnum.schoolOlymp
+        return this.selectedUserType !== null && this.selectedUserType == UserType.School
     }
 
-    isValid( registerUser: UserRegister ): boolean
+    isValid( registration: Registration ): boolean
     {
-        return validateUser( registerUser ) && this.agreementAccepted
+        return this.agreementAccepted
     }
 
-    register( registerUser: UserRegister ): void
+    register( registerUser: Registration ): void
     {
+        this.isRegistered = true
         this.store.dispatch( AuthActions.registerAttempt( { registration: registerUser } ) )
     }
 }

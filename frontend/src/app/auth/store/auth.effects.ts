@@ -1,24 +1,24 @@
 import { Injectable } from '@angular/core'
 import { Actions, createEffect, ofType } from '@ngrx/effects'
-import { AuthService } from '@/auth/services/auth.service'
+import { AuthServiceMock } from '@/auth/api/auth.mock.service'
 import {
     loginAttempt,
     loginError,
     loginSuccess,
+    pushPersonalInfo,
     registerAttempt,
-    registerError,
     registerSuccess
 } from '@/auth/store/auth.actions'
 import { catchError, concatMap, mergeMap } from 'rxjs/operators'
-import { AuthResult, RegisterResult } from '@/auth/models'
-import { iif, of } from 'rxjs'
+import { of } from 'rxjs'
+import { AuthResponse, CommonUserInfo } from '@/auth/models'
 
 
 // noinspection JSUnusedGlobalSymbols
 @Injectable()
 export class AuthEffects
 {
-    constructor( private actions$: Actions, private authService: AuthService )
+    constructor( private actions$: Actions, private authService: AuthServiceMock )
     {
     }
 
@@ -26,42 +26,39 @@ export class AuthEffects
         this.actions$.pipe
         (
             ofType( loginAttempt ),
-            concatMap( ( action ) =>
-                this.authService.auth( action.user ).pipe(
-                    mergeMap( ( authResult: AuthResult ) =>
-                        iif( () => authResult.isSuccessful,
-                            of( loginSuccess( {
-                                user: { email: action.user.email, password: action.user.password }
-                            } ) ),
-                            of( loginError( {
-                                result: { error: authResult.error, isSuccessful: false }
-                            } ) )
-                        ) ),
+            concatMap( ( { authentication } ) =>
+                this.authService.loginPost( authentication ).pipe(
+                    mergeMap( ( authResult: AuthResponse ) =>
+                        of( loginSuccess( {
+                            authResponse: {
+                                csrfAccessToken: authResult.csrfAccessToken,
+                                csrfRefreshToken: authResult.csrfRefreshToken
+                            }
+                        } ) )
+                    ),
                     catchError(
                         error =>
-                            of( loginError( { result: { error: error, isSuccessful: false } } ) )
+                            of( loginError( { error: error } ) )
                     )
                 )
             )
-        ) )
+        )
+    )
 
     registerAttempt$ = createEffect( () =>
         this.actions$.pipe
         (
             ofType( registerAttempt ),
             concatMap( ( action ) =>
-                this.authService.register( action.registration ).pipe(
-                    mergeMap( ( registerResult: RegisterResult ) =>
-                        iif( () => registerResult.isSuccessful,
-                            of( registerSuccess( {
-                                registration: action.registration
-                            } ) ),
-                            of( registerError({
-                                result: registerResult
-                            }) )
-                        )
+                this.authService.registerPost( action.registration ).pipe(
+                    mergeMap( ( registerResult: CommonUserInfo ) =>
+                        of( registerSuccess( { commonUserInfo: registerResult } ) ) ),
+                    catchError(
+                        error =>
+                            of( loginError( { error: error } ) )
                     )
                 )
             )
-        ) )
+        )
+    )
 }

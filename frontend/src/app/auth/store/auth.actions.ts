@@ -1,33 +1,38 @@
 import { createAction, props } from '@ngrx/store'
-import { AuthResult, RegisterResult, UserAuth, UserRegister } from '@/auth/models'
+import { Authentication, AuthResponse, CommonUserInfo, ErrorResponse, PersonalInfo, Registration } from '@/auth/models'
 
 
 export const loginAttempt = createAction(
     '[Auth] Login Attempt',
-    props<{ user: UserAuth }>()
+    props<{ authentication: Authentication }>()
 )
 
 export const loginSuccess = createAction(
     '[Auth] Login Success',
-    props<{ user: UserAuth }>()
+    props<{ authResponse: AuthResponse }>()
 )
 
 export const loginError = createAction(
     '[Auth] Login Error',
-    props<{ result: AuthResult }>()
+    props<{ error: ErrorResponse }>()
 )
 
 export const registerAttempt = createAction(
     '[Auth] Register Attempt',
-    props<{ registration: UserRegister }>()
+    props<{ registration: Registration }>()
 )
 
 export const registerSuccess = createAction(
     '[Auth] Register Success',
-    props<{ registration: UserRegister }>()
+    props<{ commonUserInfo: CommonUserInfo }>()
 )
 
 export const registerError = createAction(
     '[Auth] Register Error',
-    props<{ result: RegisterResult }>()
+    props<{ error: ErrorResponse }>()
+)
+
+export const pushPersonalInfo = createAction(
+    '[Auth] Push Personal Info',
+    props<{ personalInfo: PersonalInfo }>()
 )
