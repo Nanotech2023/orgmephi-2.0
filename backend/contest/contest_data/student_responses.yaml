@@ -5,51 +5,7 @@ info:
   version: 1.0.0
 
 paths:
-  /olympiad/{olympiad_id}/stage/{stage_id}/contest/{contest_id}/response/create:
-    post:
-      summary: Create user's response for the contest
-      security:
-        - cookieJWTAuth: [ ]
-        - CSRFToken: [ ]
-      parameters:
-        - in: path
-          description: Id of the contest
-          name: contest_id
-          required: true
-          schema:
-            type: integer
-        - in: path
-          description: Id of the olympiad
-          name: olympiad_id
-          required: true
-          schema:
-            type: integer
-        - in: path
-          description: Id of the stage
-          name: stage_id
-          required: true
-          schema:
-            type: integer
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/createUserResponse'
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/createResponseInfo'
-        '404':
-          description: User, olympiad, stage or contest not found
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errorResponse'
-  /olympiad/{olympiad_id}/stage/{stage_id}/contest/{contest_id}/response/user/{user_id}:
+  /olympiad/{olympiad_id}/stage/{stage_id}/contest/{contest_id}/user/{user_id}/response:
     get:
       summary: Get all user answers for the contest
       security:
@@ -298,7 +254,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/errorResponse'
-  /olympiad/{olympiad_id}/stage/{stage_id}/contest/{contest_id}/status/user/self:
+  /olympiad/{olympiad_id}/stage/{stage_id}/contest/{contest_id}/user/self/status:
     get:
       summary: Get user's status and mark for reponse
       security:
@@ -393,7 +349,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/errorResponse'
-  /olympiad/{olympiad_id}/stage/{stage_id}/contest/{contest_id}/status/user/{user_id}:
+  /olympiad/{olympiad_id}/stage/{stage_id}/contest/{contest_id}/user/{user_id}/status:
     get:
       summary: Get user's status and mark for reponse
       security:
@@ -500,7 +456,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/errorResponse'
-  /olympiad/{olympiad_id}/stage/{stage_id}/contest/{contest_id}/status/user/self/history:
+  /olympiad/{olympiad_id}/stage/{stage_id}/contest/{contest_id}/user/self/status/history:
     get:
       summary: Get status history of current user's work
       security:
@@ -543,7 +499,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/errorResponse'
-  /olympiad/{olympiad_id}/stage/{stage_id}/contest/{contest_id}/status/user/{user_id}/history:
+  /olympiad/{olympiad_id}/stage/{stage_id}/contest/{contest_id}/user/{user_id}/status/history:
     get:
       summary: Get status history of user's work
       security:
@@ -629,7 +585,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/errorResponse'
-  /olympiad/{olympiad_id}/stage/{stage_id}/contest/{contest_id}/appeal/user/self:
+  /olympiad/{olympiad_id}/stage/{stage_id}/contest/{contest_id}/user/self/appeal/last:
     get:
       summary: Get appeal info for current user's response
       security:
@@ -709,7 +665,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/errorResponse'
-  /olympiad/{olympiad_id}/stage/{stage_id}/contest/{contest_id}/appeal/user/{user_id}:
+  /olympiad/{olympiad_id}/stage/{stage_id}/contest/{contest_id}/user/{user_id}/appeal/last:
     get:
       summary: Get appeal info for user's response
       security:
@@ -917,22 +873,17 @@ components:
       properties:
         error_msg:
           type: string
-    createUserResponse:
-      title: "Create user's work"
-      description: "Request to create user's response"
-      required:
-        - user_id
-      properties:
-        user_id:
-          type: integer
     userContestAnswer:
       title: "User's contest answer"
       required:
         - user_answer
+        - filetype
       properties:
         user_answer:
           type: string
           format: binary
+        filetype:
+          type: string
     StatusHistoryItem:
       title: "Item of status history"
       required:
@@ -1053,16 +1004,8 @@ components:
             properties:
               task_id:
                 type: integer
-              answer:
-                type: string
-                format: binary
-    createResponseInfo:
-      title: "Id of created response"
-      required:
-        - contest_id
-      properties:
-        contest_id:
-          type: integer
+              answer_id:
+                type: integer
     responseStatus:
       title: "User's response status and mark"
       required:
