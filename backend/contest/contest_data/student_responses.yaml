@@ -5,7 +5,7 @@ info:
   version: 1.0.0
 
 paths:
-  /contest/{contest_id}/response/create: #TODO нужна ли олимпиада, если по contest и user восстановим UserInContest
+  /olympiad/{olympiad_id}/stage/{stage_id}/contest/{contest_id}/response/create:
     post:
       summary: Create user's response for the contest
       security:
@@ -15,6 +15,18 @@ paths:
         - in: path
           description: Id of the contest
           name: contest_id
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the olympiad
+          name: olympiad_id
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the stage
+          name: stage_id
           required: true
           schema:
             type: integer
@@ -32,12 +44,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/createResponseInfo'
         '404':
-          description: User or contest not found
+          description: User, olympiad, stage or contest not found
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/errorResponse'
-  /contest/{contest_id}/response/user/{user_id}:
+  /olympiad/{olympiad_id}/stage/{stage_id}/contest/{contest_id}/response/user/{user_id}:
     get:
       summary: Get all user answers for the contest
       security:
@@ -55,6 +67,18 @@ paths:
           required: true
           schema:
             type: integer
+        - in: path
+          description: Id of the olympiad
+          name: olympiad_id
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the stage
+          name: stage_id
+          required: true
+          schema:
+            type: integer
       responses:
         '200':
           description: OK
@@ -69,12 +93,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/errorResponse'
         '404':
-          description: User, contest or task not found
+          description: User, olympiad, stage or contest not found
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/errorResponse'
-  /contest/{contest_id}/task/{task_id}/user/self:
+  /olympiad/{olympiad_id}/stage/{stage_id}/contest/{contest_id}/task/{task_id}/user/self:
     get:
       summary: Get current user answer for the task
       security:
@@ -92,6 +116,18 @@ paths:
           required: true
           schema:
             type: integer
+        - in: path
+          description: Id of the olympiad
+          name: olympiad_id
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the stage
+          name: stage_id
+          required: true
+          schema:
+            type: integer
       responses:
         '200':
           description: OK
@@ -100,7 +136,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/userContestAnswer'
         '404':
-          description: User, contest or task not found
+          description: User, contest, olympiad, stage or task not found
           content:
             application/json:
               schema:
@@ -123,6 +159,18 @@ paths:
           required: true
           schema:
             type: integer
+        - in: path
+          description: Id of the olympiad
+          name: olympiad_id
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the stage
+          name: stage_id
+          required: true
+          schema:
+            type: integer
       requestBody:
         required: true
         content:
@@ -133,12 +181,12 @@ paths:
         '200':
           description: OK
         '404':
-          description: User, contest or task not found
+          description: User, olympiad, stage, contest or task not found
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/errorResponse'
-  /contest/{contest_id}/task/{task_id}/user/{user_id}:
+  /olympiad/{olympiad_id}/stage/{stage_id}/contest/{contest_id}/task/{task_id}/user/{user_id}:
     get:
       summary: Get user answer for the task
       security:
@@ -162,6 +210,18 @@ paths:
           required: true
           schema:
             type: integer
+        - in: path
+          description: Id of the olympiad
+          name: olympiad_id
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the stage
+          name: stage_id
+          required: true
+          schema:
+            type: integer
       responses:
         '200':
           description: OK
@@ -176,7 +236,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/errorResponse'
         '404':
-          description: User, contest or task not found
+          description: User, olympiad, stage, contest or task not found
           content:
             application/json:
               schema:
@@ -205,6 +265,18 @@ paths:
           required: true
           schema:
             type: integer
+        - in: path
+          description: Id of the olympiad
+          name: olympiad_id
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the stage
+          name: stage_id
+          required: true
+          schema:
+            type: integer
       requestBody:
         required: true
         content:
@@ -221,12 +293,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/errorResponse'
         '404':
-          description: User, contest or task not found
+          description: User, olympiad, stage, contest or task not found
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/errorResponse'
-  /contest/{contest_id}/status/user/self:
+  /olympiad/{olympiad_id}/stage/{stage_id}/contest/{contest_id}/status/user/self:
     get:
       summary: Get user's status and mark for reponse
       security:
@@ -235,6 +307,18 @@ paths:
         - in: path
           description: Id of the contest
           name: contest_id
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the olympiad
+          name: olympiad_id
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the stage
+          name: stage_id
           required: true
           schema:
             type: integer
@@ -252,7 +336,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/errorResponse'
         '404':
-          description: User or contest not found
+          description: User, olympiad, stage or contest not found
           content:
             application/json:
               schema:
@@ -267,6 +351,18 @@ paths:
         - in: path
           description: Id of the contest
           name: contest_id
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the olympiad
+          name: olympiad_id
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the stage
+          name: stage_id
           required: true
           schema:
             type: integer
@@ -292,12 +388,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/errorResponse'
         '404':
-          description: User or contest not found
+          description: User, olympiad, stage or contest not found
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/errorResponse'
-  /contest/{contest_id}/status/user/{user_id}:
+  /olympiad/{olympiad_id}/stage/{stage_id}/contest/{contest_id}/status/user/{user_id}:
     get:
       summary: Get user's status and mark for reponse
       security:
@@ -315,6 +411,18 @@ paths:
           required: true
           schema:
             type: integer
+        - in: path
+          description: Id of the olympiad
+          name: olympiad_id
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the stage
+          name: stage_id
+          required: true
+          schema:
+            type: integer
       responses:
         '200':
           description: OK
@@ -329,7 +437,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/errorResponse'
         '404':
-          description: User or contest not found
+          description: User, olympiad, stage or contest not found
           content:
             application/json:
               schema:
@@ -350,6 +458,18 @@ paths:
         - in: path
           description: Id of the contest
           name: contest_id
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the olympiad
+          name: olympiad_id
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the stage
+          name: stage_id
           required: true
           schema:
             type: integer
@@ -375,12 +495,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/errorResponse'
         '404':
-          description: User or contest not found
+          description: User, olympiad, stage or contest not found
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/errorResponse'
-  /contest/{contest_id}/status/user/self/history:
+  /olympiad/{olympiad_id}/stage/{stage_id}/contest/{contest_id}/status/user/self/history:
     get:
       summary: Get status history of current user's work
       security:
@@ -389,6 +509,18 @@ paths:
         - in: path
           description: Id of the contest
           name: contest_id
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the olympiad
+          name: olympiad_id
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the stage
+          name: stage_id
           required: true
           schema:
             type: integer
@@ -406,12 +538,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/errorResponse'
         '404':
-          description: User or contest not found
+          description: User, olympiad, stage or contest not found
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/errorResponse'
-  /contest/{contest_id}/status/user/{user_id}/history:
+  /olympiad/{olympiad_id}/stage/{stage_id}/contest/{contest_id}/status/user/{user_id}/history:
     get:
       summary: Get status history of user's work
       security:
@@ -429,6 +561,18 @@ paths:
           required: true
           schema:
             type: integer
+        - in: path
+          description: Id of the olympiad
+          name: olympiad_id
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the stage
+          name: stage_id
+          required: true
+          schema:
+            type: integer
       responses:
         '200':
           description: OK
@@ -443,12 +587,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/errorResponse'
         '404':
-          description: User or contest not found
+          description: User, olympiad, stage or contest not found
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/errorResponse'
-  /contest/{contest_id}/list/:
+  /olympiad/{olympiad_id}/stage/{stage_id}/contest/{contest_id}/list/:
     get:
       summary: Get the consolidated sheets within a single competition or stage
       security:
@@ -460,6 +604,18 @@ paths:
           required: true
           schema:
             type: integer
+        - in: path
+          description: Id of the olympiad
+          name: olympiad_id
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the stage
+          name: stage_id
+          required: true
+          schema:
+            type: integer
       responses:
         '200':
           description: OK
@@ -467,7 +623,13 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/contestResultSheet'
-  /contest/{contest_id}/appeal/user/self:
+        '404':
+          description: Olympiad, stage or contest not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+  /olympiad/{olympiad_id}/stage/{stage_id}/contest/{contest_id}/appeal/user/self:
     get:
       summary: Get appeal info for current user's response
       security:
@@ -479,15 +641,27 @@ paths:
           required: true
           schema:
             type: integer
+        - in: path
+          description: Id of the olympiad
+          name: olympiad_id
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the stage
+          name: stage_id
+          required: true
+          schema:
+            type: integer
       responses:
         '200':
           description: OK
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/commonAppealInfo'
+                $ref: '#/components/schemas/appealListInfo'
         '404':
-          description: User or contest not found
+          description: User, olympiad, stage or contest not found
           content:
             application/json:
               schema:
@@ -501,6 +675,18 @@ paths:
         - in: path
           description: Id of the contest
           name: contest_id
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the olympiad
+          name: olympiad_id
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the stage
+          name: stage_id
           required: true
           schema:
             type: integer
@@ -518,12 +704,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/createAppealInfo'
         '404':
-          description: User or contest not found
+          description: User, olympiad, stage or contest not found
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/errorResponse'
-  /contest/{contest_id}/appeal/user/{user_id}:
+  /olympiad/{olympiad_id}/stage/{stage_id}/contest/{contest_id}/appeal/user/{user_id}:
     get:
       summary: Get appeal info for user's response
       security:
@@ -541,15 +727,27 @@ paths:
           required: true
           schema:
             type: integer
+        - in: path
+          description: Id of the olympiad
+          name: olympiad_id
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the stage
+          name: stage_id
+          required: true
+          schema:
+            type: integer
       responses:
         '200':
           description: OK
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/commonAppealInfo'
+                $ref: '#/components/schemas/appealListInfo'
         '404':
-          description: User or contest not found
+          description: User, olympiad, stage or contest not found
           content:
             application/json:
               schema:
@@ -572,6 +770,18 @@ paths:
           required: true
           schema:
             type: integer
+        - in: path
+          description: Id of the olympiad
+          name: olympiad_id
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the stage
+          name: stage_id
+          required: true
+          schema:
+            type: integer
       requestBody:
         required: true
         content:
@@ -586,12 +796,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/createAppealInfo'
         '404':
-          description: User or contest not found
+          description: User, olympiad, stage or contest not found
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/errorResponse'
-  /contest/{contest_id}/appeal/{appeal_id}/reply:
+  /olympiad/{olympiad_id}/stage/{stage_id}/contest/{contest_id}/appeal/{appeal_id}/reply:
     post:
       summary: Reply appeal for the user's response
       security:
@@ -610,6 +820,18 @@ paths:
           required: true
           schema:
             type: integer
+        - in: path
+          description: Id of the olympiad
+          name: olympiad_id
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the stage
+          name: stage_id
+          required: true
+          schema:
+            type: integer
       requestBody:
         required: true
         content:
@@ -624,12 +846,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/commonAppealInfo'
         '404':
-          description: User or contest not found
+          description: User, olympiad, stage or contest not found
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/errorResponse'
-  /contest/{contest_id}/appeal/user/{user_id}/reply:
+  /olympiad/{olympiad_id}/stage/{stage_id}/contest/{contest_id}/appeal/user/{user_id}/reply:
     post:
       summary: Reply appeal for the user's response
       security:
@@ -648,6 +870,18 @@ paths:
           required: true
           schema:
             type: integer
+        - in: path
+          description: Id of the olympiad
+          name: olympiad_id
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the stage
+          name: stage_id
+          required: true
+          schema:
+            type: integer
       requestBody:
         required: true
         content:
@@ -662,12 +896,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/commonAppealInfo'
         '404':
-          description: Appeal not found
+          description: Appeal, olympiad, stage or contest not found
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/errorResponse'
-  /contest/{contest_id}/appeal/{appeal_id}:
+  /olympiad/{olympiad_id}/stage/{stage_id}/contest/{contest_id}/appeal/{appeal_id}:
     get:
       summary: Get appeal info
       security:
@@ -685,6 +919,18 @@ paths:
           required: true
           schema:
             type: integer
+        - in: path
+          description: Id of the olympiad
+          name: olympiad_id
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the stage
+          name: stage_id
+          required: true
+          schema:
+            type: integer
       responses:
         '200':
           description: OK
@@ -693,7 +939,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/commonAppealInfo'
         '404':
-          description: Appeal not found
+          description: Appeal, olympiad, stage or contest not found
           content:
             application/json:
               schema:
@@ -737,45 +983,6 @@ components:
         user_answer:
           type: string
           format: binary
-    commonResponseInfo:
-      title: "Common response info"
-      required:
-        - work_id
-        - user_id
-        - contest_id
-      properties:
-        work_id:
-          type: integer
-        user_id:
-          type: integer
-        contest_id:
-          type: integer
-    commonResponseMark:
-      title: "Common user's mark for response"
-      required:
-        - user_id
-        - contest_id
-        - mark
-      properties:
-        user_id:
-          type: integer
-        contest_id:
-          type: integer
-        mark:
-          type: integer
-    userResponseStatus:
-      title: "Status of user response"
-      required:
-        - user_id
-        - contest_id
-        - status
-      properties:
-        user_id:
-          type: integer
-        contest_id:
-          type: integer
-        status:
-          type: string
     StatusHistoryItem:
       title: "Item of status history"
       required:
@@ -846,6 +1053,20 @@ components:
       properties:
         message:
           type: string
+    appealListInfo:
+      title: "All appeal for the user's response"
+      required:
+        - user_id
+        - work_id
+      properties:
+        user_id:
+          type: integer
+        work_id:
+          type: integer
+        appeal_elem:
+          type: array
+          items:
+            $ref: '#/components/schemas/commonAppealInfo'
     commonAppealInfo:
       title: "Common appeal info"
       required:
