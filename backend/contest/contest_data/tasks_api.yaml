@@ -57,7 +57,9 @@ paths:
   /olympiad/{id_olympiad}:
     get:
       summary: Get info for the olympiad
-      security: []
+      security:
+        - cookieJWTAuth: [ ]
+        - CSRFToken: [ ]
       parameters:
         - in: path
           description: Id of the olympiad
@@ -219,7 +221,9 @@ paths:
   /olympiad/{id_olympiad}/stage/{id_stage}/contest/{id_contest}:
     get:
       summary: Get common info for a contest
-      security: []
+      security:
+        - cookieJWTAuth: [ ]
+        - CSRFToken: [ ]
       parameters:
         - in: path
           description: Id of the olympiad
@@ -476,7 +480,9 @@ paths:
   /olympiad/{id_olympiad}/stage/{id_stage}/contest/{id_contest}/variant/{id_variant}:
     get:
       summary: Get info for a different variant
-      security: []
+      security:
+        - cookieJWTAuth: [ ]
+        - CSRFToken: [ ]
       parameters:
         - in: path
           description: Id of the olympiad
@@ -561,7 +567,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/errorResponse'
 
-  /olympiad/{id_olympiad}/stage/{id_stage}/contest/{id_contest}/variant/{id_variant}/tasks/create:
+  /olympiad/{id_olympiad}/stage/{id_stage}/contest/{id_contest}/variant/{id_variant}/task/create:
     post:
       summary: Create a new task
       parameters:
@@ -594,7 +600,10 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/createTask'
+              oneOf:
+                - $ref: '#/components/schemas/createPlainTask'
+                - $ref: '#/components/schemas/createRangeTask'
+                - $ref: '#/components/schemas/createMultipleTask'
       security:
         - cookieJWTAuth: [ ]
         - CSRFToken: [ ]
@@ -612,7 +621,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/errorResponse'
 
-  /olympiad/{id_olympiad}/stage/{id_stage}/contest/{id_contest}/variant/{id_variant}/tasks/{id_task}/remove:
+  /olympiad/{id_olympiad}/stage/{id_stage}/contest/{id_contest}/variant/{id_variant}/task/{id_task}/remove:
     post:
       summary: Remove task
       parameters:
@@ -659,10 +668,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/errorResponse'
 
-  /olympiad/{id_olympiad}/stage/{id_stage}/contest/{id_contest}/variant/{id_variant}/tasks/{id_task}:
+  /olympiad/{id_olympiad}/stage/{id_stage}/contest/{id_contest}/variant/{id_variant}/task/{id_task}:
     get:
       summary: Get info for a different tasks
-      security: []
+      security:
+        - cookieJWTAuth: [ ]
+        - CSRFToken: [ ]
       parameters:
         - in: path
           description: Id of the olympiad
@@ -700,7 +711,10 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/taskInfo'
+                oneOf:
+                  - $ref: '#/components/schemas/plainTaskInfo'
+                  - $ref: '#/components/schemas/rangeTaskInfo'
+                  - $ref: '#/components/schemas/multipleTaskInfo'
         '404':
           description: Task not found
           content:
@@ -748,7 +762,10 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/taskInfoUpdate'
+                oneOf:
+                  - $ref: '#/components/schemas/plainTaskInfoUpdate'
+                  - $ref: '#/components/schemas/rangeTaskInfoUpdate'
+                  - $ref: '#/components/schemas/multipleTaskInfoUpdate'
       responses:
         '200':
           description: OK
@@ -849,6 +866,26 @@ paths:
               schema:
                 $ref: '#/components/schemas/errorResponse'
 
+  /olympiad/all:
+    get:
+      summary: list of olympiads
+      security:
+        - cookieJWTAuth: [ ]
+        - CSRFToken: [ ]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/olympiads'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+
   /olympiad/{id_olympiad}/stage/all:
     get:
       summary: list of stages in olympiad
@@ -941,6 +978,51 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/variantsInContest'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+
+  /olympiad/{id_olympiad}/stage/{id_stage}/contest/{id_contest}/variant/{id_variant}/tasks/all:
+    get:
+      summary: list of tasks in variant
+      parameters:
+        - in: path
+          description: Id of the olympiad
+          name: id_olympiad
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the stage
+          name: id_stage
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the contest
+          name: id_contest
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the variant
+          name: id_variant
+          required: true
+          schema:
+            type: integer
+      security:
+        - cookieJWTAuth: [ ]
+        - CSRFToken: [ ]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/tasksInVariant'
         '400':
           description: Bad request
           content:
@@ -1078,8 +1160,6 @@ components:
           type: integer
         stage_name:
           type: string
-        composite_contest_id:
-          type: integer
         next_stage_condition:
           type: string
     stageInfoId:
@@ -1122,9 +1202,11 @@ components:
         rules:
           type: string
         winning_condition:
-          type: string
+          type: number
+          format: float
         laureate_condition:
-          type: string
+          type: number
+          format: float
         certificate_template:
           type: string
         visibility:
@@ -1234,129 +1316,10 @@ components:
           type: integer
         variant_description:
           type: string
-    createTask:
-      title: Create task
-      description: Request to creation task
-      required:
-        - num_of_task
-        - image_of_task
-        - task_type
-      properties:
-        num_of_task:
-          type: integer
-        image_of_task:
-          type: string
-          format: binary
-        task_type:
-          type: string
-          enum:
-            - plain_text
-            - range
-            - multiple_choice
-        plain_task_recommended_answer:
-          type: string
-        range_task_start_value:
-          type: number
-          format: float
-        range_task_end_value:
-          type: number
-          format: float
-        multiple_task_answers:
-          type: array
-          items:
-            type: object
-            properties:
-              answer:
-                type: string
-              is_right_answer:
-                type: boolean
-    taskId:
-      title: Get task id
-      description: Request to get task id
-      required:
-        - task_id
-      properties:
-        task_id:
-          type: integer
-    taskInfo:
-      title: Get task info
-      description: Request to get task info
-      required:
-        - task_id
-        - num_of_task
-        - image_of_task
-        - task_type
-      properties:
-        task_id:
-          type: integer
-        num_of_task:
-          type: integer
-        image_of_task:
-          type: string
-          format: binary
-        task_type:
-          type: string
-          enum:
-            - plain_text
-            - range
-            - multiple_choice
-        plain_task_recommended_answer:
-          type: string
-        range_task_start_value:
-          type: number
-          format: float
-        range_task_end_value:
-          type: number
-          format: float
-        multiple_task_answers:
-          type: array
-          items:
-            type: object
-            properties:
-              answer:
-                type: string
-              is_right_answer:
-                type: boolean
-    taskInfoUpdate:
-      title: Update task
-      description: Request to update task
-      properties:
-        num_of_task:
-          type: integer
-        image_of_task:
-          type: string
-          format: binary
-        task_type:
-          type: string
-          enum:
-            - plain_text
-            - range
-            - multiple_choice
-        plain_task_recommended_answer:
-          type: string
-        range_task_start_value:
-          type: number
-          format: float
-        range_task_end_value:
-          type: number
-          format: float
-        multiple_task_answers:
-          type: array
-          items:
-            type: object
-            properties:
-              answer:
-                type: string
-              is_right_answer:
-                type: boolean
     usersInContest:
       title: Get users in contest
       description: Request to get users in contest
-      required:
-        - contest_id
       properties:
-        contest_id:
-          type: integer
         user_list:
           type: array
           items:
@@ -1372,18 +1335,19 @@ components:
       title: Add or remove user to contest
       description: Request to add user to contest
       required:
-        - user_id
+        - users_id
       properties:
-        user_id:
-          type: integer
+        users_id:
+          type: array
+          items:
+            type: object
+            properties:
+              user_id:
+                type: integer
     stagesInOlympiad:
       title: Get stages in olympiad
       description: Request to get stages in olympiad
-      required:
-        - olympiad_id
       properties:
-        olympiad_id:
-          type: integer
         stages_list:
           type: array
           items:
@@ -1393,18 +1357,45 @@ components:
                 type: integer
               stage_name:
                 type: string
-              composite_contest_id:
-                type: integer
               next_stage_condition:
                 type: string
+    olympiads:
+      title: Get olympiads
+      description: Request to get olympiads
+      properties:
+        olympiad_list:
+          type: array
+          items:
+            type: object
+            properties:
+              olympiad_id:
+                type: integer
+              name:
+                type: string
+              description:
+                type: string
+              rules:
+                type: string
+    tasksInVariant:
+      title: Get contests in stage
+      description: Request to get contests in stage
+      properties:
+        tasks_list:
+          type: array
+          items:
+            type: object
+            properties:
+              task_id:
+                type: integer
+              num_of_task:
+                type: integer
+              image_of_task:
+                type: string
+                format: binary
     contestsInStage:
       title: Get contests in stage
       description: Request to get contests in stage
-      required:
-        - stage_id
       properties:
-        stage_id:
-          type: integer
         contests_list:
           type: array
           items:
@@ -1433,11 +1424,7 @@ components:
     variantsInContest:
       title: Get variants in contest
       description: Request to get variants in contest
-      required:
-        - contest_id
       properties:
-        olympiad_id:
-          type: integer
         variants_list:
           type: array
           items:
@@ -1449,4 +1436,192 @@ components:
                 type: integer
               variant_description:
                 type: string
+    taskId:
+      title: Get task id
+      description: Request to get task id
+      required:
+        - task_id
+      properties:
+        task_id:
+          type: integer
+    createPlainTask:
+      title: Create task with plain text
+      description: Request to creation task with plain text
+      required:
+        - num_of_task
+        - image_of_task
+        - recommended_answer
+      properties:
+        num_of_task:
+          type: integer
+        image_of_task:
+          type: string
+          format: binary
+        recommended_answer:
+          type: string
+    createRangeTask:
+      title: Create task with range
+      description: Request to creation task with range
+      required:
+        - num_of_task
+        - image_of_task
+        - start_value
+        - end_value
+      properties:
+        num_of_task:
+          type: integer
+        image_of_task:
+          type: string
+          format: binary
+        start_value:
+          type: number
+          format: float
+        end_value:
+          type: number
+          format: float
+    createMultipleTask:
+      title: Create task with multiple choice
+      description: Request to creation task with multiple choice
+      required:
+        - num_of_task
+        - image_of_task
+        - answers
+      properties:
+        num_of_task:
+          type: integer
+        image_of_task:
+          type: string
+          format: binary
+        answers:
+          type: array
+          items:
+            type: object
+            properties:
+              answer:
+                type: string
+              is_right_answer:
+                type: boolean
+    plainTaskInfo:
+      title: Get info of task with plain text
+      description: Request to get info of task with plain text
+      required:
+        - task_id
+        - num_of_task
+        - image_of_task
+        - recommended_answer
+      properties:
+        task_id:
+          type: integer
+        num_of_task:
+          type: integer
+        image_of_task:
+          type: string
+          format: binary
+        recommended_answer:
+          type: string
+    rangeTaskInfo:
+      title: Get info of task with range
+      description: Request to get info of task with range
+      required:
+        - task_id
+        - num_of_task
+        - image_of_task
+        - start_value
+        - end_value
+      properties:
+        task_id:
+          type: integer
+        num_of_task:
+          type: integer
+        image_of_task:
+          type: string
+          format: binary
+        start_value:
+          type: number
+          format: float
+        end_value:
+          type: number
+          format: float
+    multipleTaskInfo:
+      title: Get info of task with multiple choice
+      description: Request to get info of task with multiple choice
+      required:
+        - task_id
+        - num_of_task
+        - image_of_task
+        - answers
+      properties:
+        task_id:
+          type: integer
+        num_of_task:
+          type: integer
+        image_of_task:
+          type: string
+          format: binary
+        answers:
+          type: array
+          items:
+            type: object
+            properties:
+              answer:
+                type: string
+              is_right_answer:
+                type: boolean
+    rangeTaskInfoUpdate:
+      title: Update task with range
+      description: Request to update task with range
+      required:
+        - num_of_task
+        - image_of_task
+        - start_value
+        - end_value
+      properties:
+        num_of_task:
+          type: integer
+        image_of_task:
+          type: string
+          format: binary
+        start_value:
+          type: number
+          format: float
+        end_value:
+          type: number
+          format: float
+    multipleTaskInfoUpdate:
+      title: Update task with multiple choice
+      description: Request to update task with multiple choice
+      required:
+        - num_of_task
+        - image_of_task
+        - answers
+      properties:
+        num_of_task:
+          type: integer
+        image_of_task:
+          type: string
+          format: binary
+        answers:
+          type: array
+          items:
+            type: object
+            properties:
+              answer:
+                type: string
+              is_right_answer:
+                type: boolean
+    plainTaskInfoUpdate:
+      title: Update task with plain text
+      description: Request to update task with plain text
+      required:
+        - num_of_task
+        - image_of_task
+        - recommended_answer
+      properties:
+        num_of_task:
+          type: integer
+        image_of_task:
+          type: string
+          format: binary
+        recommended_answer:
+          type: string
 
