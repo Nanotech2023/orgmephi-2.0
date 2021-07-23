@@ -453,6 +453,13 @@ paths:
       summary: Get the consolidated sheets within a single competition or stage
       security:
         - cookieJWTAuth: [ ]
+      parameters:
+        - in: path
+          description: Id of the contest
+          name: contest_id
+          required: true
+          schema:
+            type: integer
       responses:
         '200':
           description: OK
