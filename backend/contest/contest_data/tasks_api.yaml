@@ -435,9 +435,10 @@ paths:
               schema:
                 $ref: '#/components/schemas/errorResponse'
 
-  /olympiad/stage/contest/variant/{id}/plain_task/create:
+
+  /olympiad/stage/contest/variant/{id}/tasks/create:
     post:
-      summary: Create a new task with plain text
+      summary: Create a new task
       parameters:
         - in: path
           description: Id of the variant
@@ -450,7 +451,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/createPlainTask'
+              $ref: '#/components/schemas/createTask'
       security:
         - cookieJWTAuth: [ ]
         - CSRFToken: [ ]
@@ -460,7 +461,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/commonPlainTaskInfo'
+                $ref: '#/components/schemas/taskId'
         '400':
           description: Bad request
           content:
@@ -468,9 +469,9 @@ paths:
               schema:
                 $ref: '#/components/schemas/errorResponse'
 
-  /olympiad/stage/contest/variant/plain_task/{id}/remove:
+  /olympiad/stage/contest/variant/tasks/{id}/remove:
     post:
-      summary: Remove task with plain text
+      summary: Remove task
       parameters:
         - in: path
           description: Id of the task
@@ -491,9 +492,9 @@ paths:
               schema:
                 $ref: '#/components/schemas/errorResponse'
 
-  /olympiad/stage/contest/variant/plain_task/{id}:
+  /olympiad/stage/contest/variant/tasks/{id}:
     get:
-      summary: Get common info for a different plain text task
+      summary: Get info for a different tasks
       security: []
       parameters:
         - in: path
@@ -508,7 +509,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/commonPlainTaskInfo'
+                $ref: '#/components/schemas/taskInfo'
         '404':
           description: Task not found
           content:
@@ -516,7 +517,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/errorResponse'
     patch:
-      summary: Edit plain text task
+      summary: Update task info
       security:
         - cookieJWTAuth: [ ]
         - CSRFToken: [ ]
@@ -532,336 +533,12 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/plainTaskInfoUpdate'
+              $ref: '#/components/schemas/taskInfoUpdate'
       responses:
         '200':
           description: OK
         '404':
           description: Stage not found
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errorResponse'
-
-  /olympiad/stage/contest/variant/plain_task/{id}/right_answer:
-    get:
-      summary: Get right answer for common info for a different plain text task
-      security: []
-      parameters:
-        - in: path
-          description: Id of the plain task
-          name: id
-          required: true
-          schema:
-            type: integer
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/answerPlainTaskInfo'
-        '404':
-          description: Task not found
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errorResponse'
-
-  /olympiad/stage/contest/variant/{id}/range_task/create:
-    post:
-      summary: Create a new task with range
-      parameters:
-        - in: path
-          description: Id of the variant
-          name: id
-          required: true
-          schema:
-            type: integer
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/createRangeTask'
-      security:
-        - cookieJWTAuth: [ ]
-        - CSRFToken: [ ]
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/rangeTaskInfo'
-        '400':
-          description: Bad request
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errorResponse'
-
-  /olympiad/stage/contest/variant/range_task/{id}/remove:
-    post:
-      summary: Remove range task
-      parameters:
-        - in: path
-          description: Id of the task
-          name: id
-          required: true
-          schema:
-            type: integer
-      security:
-        - cookieJWTAuth: [ ]
-        - CSRFToken: [ ]
-      responses:
-        '200':
-          description: OK
-        '404':
-          description: Task not found
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errorResponse'
-
-  /olympiad/stage/contest/variant/range_task/{id}:
-    get:
-      summary: Get info for a different range task
-      security: []
-      parameters:
-        - in: path
-          description: Id of the range task
-          name: id
-          required: true
-          schema:
-            type: integer
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/rangeTaskInfo'
-        '404':
-          description: Task not found
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errorResponse'
-    patch:
-      summary: Edit range task
-      security:
-        - cookieJWTAuth: [ ]
-        - CSRFToken: [ ]
-      parameters:
-        - in: path
-          description: Id of the task
-          name: id
-          required: true
-          schema:
-            type: integer
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/rangeTaskInfoUpdate'
-      responses:
-        '200':
-          description: OK
-        '404':
-          description: Stage not found
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errorResponse'
-
-  /olympiad/stage/contest/variant/range_task/{id}/right_answer:
-    get:
-      summary: Get right answer info for a different range task
-      security: []
-      parameters:
-        - in: path
-          description: Id of the range task
-          name: id
-          required: true
-          schema:
-            type: integer
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/answerRangeTaskInfo'
-        '404':
-          description: Task not found
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errorResponse'
-
-  /olympiad/stage/contest/variant/{id}/multiple_task/create:
-    post:
-      summary: Create a new task with multiple answer
-      parameters:
-        - in: path
-          description: Id of the variant
-          name: id
-          required: true
-          schema:
-            type: integer
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/createMultipleTask'
-      security:
-        - cookieJWTAuth: [ ]
-        - CSRFToken: [ ]
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/multipleTaskInfo'
-        '400':
-          description: Bad request
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errorResponse'
-
-  /olympiad/stage/contest/variant/multiple_task/{id}/add_answer:
-    post:
-      summary: Add answer to Multiple task list
-      parameters:
-        - in: path
-          description: Id of the task
-          name: id
-          required: true
-          schema:
-            type: integer
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/createMultipleTask'
-      security:
-        - cookieJWTAuth: [ ]
-        - CSRFToken: [ ]
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/multipleTaskInfo'
-        '400':
-          description: Bad request
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errorResponse'
-
-  /olympiad/stage/contest/variant/multiple_task/{id}/remove:
-    post:
-      summary: Remove multiple task
-      parameters:
-        - in: path
-          description: Id of the task
-          name: id
-          required: true
-          schema:
-            type: integer
-      security:
-        - cookieJWTAuth: [ ]
-        - CSRFToken: [ ]
-      responses:
-        '200':
-          description: OK
-        '404':
-          description: Task not found
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errorResponse'
-
-  /olympiad/stage/contest/variant/multiple_task/{id}:
-    get:
-      summary: Get common info for a multiple task
-      security: []
-      parameters:
-        - in: path
-          description: Id of the multiple task
-          name: id
-          required: true
-          schema:
-            type: integer
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/multipleTaskInfo'
-        '404':
-          description: Task not found
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errorResponse'
-    patch:
-      summary: Edit multiple task
-      security:
-        - cookieJWTAuth: [ ]
-        - CSRFToken: [ ]
-      parameters:
-        - in: path
-          description: Id of the task
-          name: id
-          required: true
-          schema:
-            type: integer
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/multipleTaskInfoUpdate'
-      responses:
-        '200':
-          description: OK
-        '404':
-          description: Stage not found
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errorResponse'
-
-  /olympiad/stage/contest/variant/multiple_task/{id}/right_answer:
-    get:
-      summary: Get right answer common info for a multiple range task
-      security: []
-      parameters:
-        - in: path
-          description: Id of the multiple task
-          name: id
-          required: true
-          schema:
-            type: integer
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/answerMultipleTaskInfo'
-        '404':
-          description: Task not found
           content:
             application/json:
               schema:
@@ -1019,7 +696,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/errorResponse'
-
 
   /olympiad/stage/contest/{id}/get_users:
     get:
@@ -1294,40 +970,58 @@ components:
           type: integer
         variant_description:
           type: string
-    createPlainTask:
-      title: Create plain text task
-      description: Request to creation task with plain text
+    createTask:
+      title: Create task
+      description: Request to creation task
       required:
         - num_of_task
         - image_of_task
-        - recommended_answer
+        - task_type
       properties:
         num_of_task:
           type: integer
         image_of_task:
           type: string
           format: binary
-        recommended_answer:
+        task_type:
           type: string
-    plainTaskInfoUpdate:
-      title: Edit plain text task
-      description: Request to edit task with plain text
+          enum:
+            - plain_text
+            - range
+            - multiple_choice
+        plain_task_recommended_answer:
+          type: string
+        range_task_start_value:
+          type: number
+          format: float
+        range_task_end_value:
+          type: number
+          format: float
+        multiple_task_answers:
+          type: array
+          items:
+            type: object
+            properties:
+              answer:
+                type: string
+              is_right_answer:
+                type: boolean
+    taskId:
+      title: Get task id
+      description: Request to get task id
+      required:
+        - task_id
       properties:
-        num_of_task:
+        task_id:
           type: integer
-        image_of_task:
-          type: string
-          format: binary
-        recommended_answer:
-          type: string
-    commonPlainTaskInfo:
-      title: Plain text task info
-      description: Request to getting task with plain text
+    taskInfo:
+      title: Get task info
+      description: Request to get task info
       required:
         - task_id
         - num_of_task
         - image_of_task
-        - recommended_answer
+        - task_type
       properties:
         task_id:
           type: integer
@@ -1336,142 +1030,61 @@ components:
         image_of_task:
           type: string
           format: binary
-        recommended_answer:
+        task_type:
           type: string
-    answerPlainTaskInfo:
-      title: Plain text task answer
-      description: Request to get correct answer for plain text task
-      required:
-        - recommended_answer
-      properties:
-        recommended_answer:
+          enum:
+            - plain_text
+            - range
+            - multiple_choice
+        plain_task_recommended_answer:
           type: string
-    createRangeTask:
-      title: Create range text task
-      description: Request to creation task with plain text
-      required:
-        - num_of_task
-        - image_of_task
-        - start_value
-        - end_value
-        - variant_id
-      properties:
-        variant_id:
-          type: integer
-        num_of_task:
-          type: integer
-        image_of_task:
-          type: string
-          format: binary
-        start_value:
+        range_task_start_value:
           type: number
           format: float
-        end_value:
+        range_task_end_value:
           type: number
           format: float
-    rangeTaskInfoUpdate:
-      title: Edit range text task
-      description: Request to edit task with plain text
+        multiple_task_answers:
+          type: array
+          items:
+            type: object
+            properties:
+              answer:
+                type: string
+              is_right_answer:
+                type: boolean
+    taskInfoUpdate:
+      title: Update task
+      description: Request to update task
       properties:
         num_of_task:
           type: integer
         image_of_task:
           type: string
           format: binary
-        start_value:
+        task_type:
+          type: string
+          enum:
+            - plain_text
+            - range
+            - multiple_choice
+        plain_task_recommended_answer:
+          type: string
+        range_task_start_value:
           type: number
           format: float
-        end_value:
+        range_task_end_value:
           type: number
           format: float
-    rangeTaskInfo:
-      title: Range task info
-      description: Request to creation task with plain text
-      required:
-        - task_id
-        - num_of_task
-        - image_of_task
-        - start_value
-        - end_value
-      properties:
-        task_id:
-          type: integer
-        num_of_task:
-          type: integer
-        image_of_task:
-          type: string
-          format: binary
-        start_value:
-          type: number
-          format: float
-        end_value:
-          type: number
-          format: float
-    answerRangeTaskInfo:
-      title: Range task answer
-      description: Request to get correct answer for range choice task
-      required:
-        - start_value
-        - end_value
-      properties:
-        start_value:
-          type: number
-          format: float
-        end_value:
-          type: number
-          format: float
-    createMultipleTask:
-      title: Create multiple text task
-      description: Request to creation task with plain text
-      required:
-        - num_of_task
-        - image_of_task
-        - correct_answer
-      properties:
-        num_of_task:
-          type: integer
-        image_of_task:
-          type: string
-          format: binary
-        correct_answer:
-          type: string
-    multipleTaskInfoUpdate:
-      title: Edit multiple text task
-      description: Request to creation task with plain text
-      properties:
-        num_of_task:
-          type: integer
-        image_of_task:
-          type: string
-          format: binary
-        correct_answer:
-          type: string
-    multipleTaskInfo:
-      title: Multiple text task info
-      description: Request to creation task with plain text
-      required:
-        - task_id
-        - num_of_task
-        - image_of_task
-        - correct_answer
-      properties:
-        task_id:
-          type: integer
-        num_of_task:
-          type: integer
-        image_of_task:
-          type: string
-          format: binary
-        correct_answer:
-          type: string
-    answerMultipleTaskInfo:
-      title: Multiple task answer
-      description: Request to get correct answer for multiple choice task
-      required:
-        - correct_answer
-      properties:
-        correct_answer:
-          type: string
+        multiple_task_answers:
+          type: array
+          items:
+            type: object
+            properties:
+              answer:
+                type: string
+              is_right_answer:
+                type: boolean
     usersInContest:
       title: Get users in contest
       description: Request to get users in contest
