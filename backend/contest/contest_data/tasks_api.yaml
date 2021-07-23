@@ -107,13 +107,19 @@ paths:
               schema:
                 $ref: '#/components/schemas/errorResponse'
 
-  /olypmiad/stage/{id}/contest/create:
+  /olypmiad/{id}/stage/{id}/contest/create:
     post:
       summary: Create a new contest
       parameters:
         - in: path
           description: Id of the stage
-          name: id
+          name: id_stage
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the olympiad
+          name: id_olympiad
           required: true
           schema:
             type: integer
@@ -175,13 +181,25 @@ paths:
               schema:
                 $ref: '#/components/schemas/errorResponse'
 
-  /contest/{id}/remove:
+  /olympiad/{id}/stage/{id}/contest/{id}/remove:
     post:
       summary: Remove contest
       parameters:
         - in: path
+          description: Id of the olympiad
+          name: id_olympiad
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the stage
+          name: id_stage
+          required: true
+          schema:
+            type: integer
+        - in: path
           description: Id of the contest
-          name: id
+          name: id_contest
           required: true
           schema:
             type: integer
@@ -198,14 +216,26 @@ paths:
               schema:
                 $ref: '#/components/schemas/errorResponse'
 
-  /contest/{id}:
+  /olympiad/{id}/stage/{id}/contest/{id}:
     get:
       summary: Get common info for a contest
       security: []
       parameters:
         - in: path
+          description: Id of the olympiad
+          name: id_olympiad
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the stage
+          name: id_stage
+          required: true
+          schema:
+            type: integer
+        - in: path
           description: Id of the contest
-          name: id
+          name: id_contest
           required: true
           schema:
             type: integer
@@ -230,8 +260,20 @@ paths:
         - CSRFToken: [ ]
       parameters:
         - in: path
+          description: Id of the olympiad
+          name: id_olympiad
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the stage
+          name: id_stage
+          required: true
+          schema:
+            type: integer
+        - in: path
           description: Id of the contest
-          name: id
+          name: id_contest
           required: true
           schema:
             type: integer
@@ -251,13 +293,19 @@ paths:
               schema:
                 $ref: '#/components/schemas/errorResponse'
 
-  /olympiad/stage/{id}/remove:
+  /olympiad/{id}/stage/{id}/remove:
     post:
       summary: Remove stage from olympiad
       parameters:
         - in: path
+          description: Id of the olympiad
+          name: id_olympiad
+          required: true
+          schema:
+            type: integer
+        - in: path
           description: Id of the stage
-          name: id
+          name: id_stage
           required: true
           schema:
             type: integer
@@ -274,14 +322,20 @@ paths:
               schema:
                 $ref: '#/components/schemas/errorResponse'
 
-  /olympiad/stage/{id}:
+  /olympiad/{id}/stage/{id}:
     get:
       summary: Get common info for a different stage
       security: []
       parameters:
         - in: path
+          description: Id of the olympiad
+          name: id_olympiad
+          required: true
+          schema:
+            type: integer
+        - in: path
           description: Id of the stage
-          name: id
+          name: id_stage
           required: true
           schema:
             type: integer
@@ -306,8 +360,14 @@ paths:
         - CSRFToken: [ ]
       parameters:
         - in: path
+          description: Id of the olympiad
+          name: id_olympiad
+          required: true
+          schema:
+            type: integer
+        - in: path
           description: Id of the stage
-          name: id
+          name: id_stage
           required: true
           schema:
             type: integer
@@ -327,13 +387,25 @@ paths:
               schema:
                 $ref: '#/components/schemas/errorResponse'
 
-  /olympiad/stage/contest/{id}/variant/create:
+  /olympiad/{id}/stage/{id}/contest/{id}/variant/create:
     post:
       summary: Create a new variant
       parameters:
         - in: path
+          description: Id of the olympiad
+          name: id_olympiad
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the stage
+          name: id_stage
+          required: true
+          schema:
+            type: integer
+        - in: path
           description: Id of the contest
-          name: id
+          name: id_contest
           required: true
           schema:
             type: integer
@@ -360,13 +432,31 @@ paths:
               schema:
                 $ref: '#/components/schemas/errorResponse'
 
-  /olympiad/stage/contest/variant/{id}/remove:
+  /olympiad/{id}/stage/{id}/contest/{id}/variant/{id}/remove:
     post:
       summary: Remove variant
       parameters:
         - in: path
+          description: Id of the olympiad
+          name: id_olympiad
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the stage
+          name: id_stage
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the contest
+          name: id_contest
+          required: true
+          schema:
+            type: integer
+        - in: path
           description: Id of the variant
-          name: id
+          name: id_variant
           required: true
           schema:
             type: integer
@@ -383,14 +473,32 @@ paths:
               schema:
                 $ref: '#/components/schemas/errorResponse'
 
-  /olympiad/stage/contest/variant/{id}:
+  /olympiad/{id}/stage/{id}/contest/{id}/variant/{id}:
     get:
       summary: Get info for a different variant
       security: []
       parameters:
         - in: path
+          description: Id of the olympiad
+          name: id_olympiad
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the stage
+          name: id_stage
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the contest
+          name: id_contest
+          required: true
+          schema:
+            type: integer
+        - in: path
           description: Id of the variant
-          name: id
+          name: id_variant
           required: true
           schema:
             type: integer
@@ -414,8 +522,26 @@ paths:
         - CSRFToken: [ ]
       parameters:
         - in: path
+          description: Id of the olympiad
+          name: id_olympiad
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the stage
+          name: id_stage
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the contest
+          name: id_contest
+          required: true
+          schema:
+            type: integer
+        - in: path
           description: Id of the variant
-          name: id
+          name: id_variant
           required: true
           schema:
             type: integer
@@ -435,14 +561,31 @@ paths:
               schema:
                 $ref: '#/components/schemas/errorResponse'
 
-
-  /olympiad/stage/contest/variant/{id}/tasks/create:
+  /olympiad/{id}/stage/{id}/contest/{id}/variant/{id}/tasks/create:
     post:
       summary: Create a new task
       parameters:
         - in: path
+          description: Id of the olympiad
+          name: id_olympiad
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the stage
+          name: id_stage
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the contest
+          name: id_contest
+          required: true
+          schema:
+            type: integer
+        - in: path
           description: Id of the variant
-          name: id
+          name: id_variant
           required: true
           schema:
             type: integer
@@ -469,13 +612,37 @@ paths:
               schema:
                 $ref: '#/components/schemas/errorResponse'
 
-  /olympiad/stage/contest/variant/tasks/{id}/remove:
+  /olympiad/{id}/stage/{id}/contest/{id}/variant/{id}/tasks/{id}/remove:
     post:
       summary: Remove task
       parameters:
         - in: path
+          description: Id of the olympiad
+          name: id_olympiad
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the stage
+          name: id_stage
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the contest
+          name: id_contest
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the variant
+          name: id_variant
+          required: true
+          schema:
+            type: integer
+        - in: path
           description: Id of the task
-          name: id
+          name: id_task
           required: true
           schema:
             type: integer
@@ -492,14 +659,38 @@ paths:
               schema:
                 $ref: '#/components/schemas/errorResponse'
 
-  /olympiad/stage/contest/variant/tasks/{id}:
+  /olympiad/{id}/stage/{id}/contest/{id}/variant/{id}/tasks/{id}:
     get:
       summary: Get info for a different tasks
       security: []
       parameters:
         - in: path
-          description: Id of the plain task
-          name: id
+          description: Id of the olympiad
+          name: id_olympiad
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the stage
+          name: id_stage
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the contest
+          name: id_contest
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the variant
+          name: id_variant
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the task
+          name: id_task
           required: true
           schema:
             type: integer
@@ -523,8 +714,32 @@ paths:
         - CSRFToken: [ ]
       parameters:
         - in: path
+          description: Id of the olympiad
+          name: id_olympiad
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the stage
+          name: id_stage
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the contest
+          name: id_contest
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the variant
+          name: id_variant
+          required: true
+          schema:
+            type: integer
+        - in: path
           description: Id of the task
-          name: id
+          name: id_task
           required: true
           schema:
             type: integer
@@ -544,7 +759,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/errorResponse'
 
-  /olympiad/stage/contest/{id}/user/{id}/add:
+  /olympiad/{id}/stage/{id}/contest/{id}/adduser:
     post:
       summary: Add user to contest
       requestBody:
@@ -552,17 +767,23 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/updateContestUsers'
+              $ref: '#/components/schemas/updateUserInContest'
       parameters:
         - in: path
-          description: Id of the user
-          name: user_id
+          description: Id of the olympiad
+          name: id_olympiad
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the stage
+          name: id_stage
           required: true
           schema:
             type: integer
         - in: path
           description: Id of the contest
-          name: contest_id
+          name: id_contest
           required: true
           schema:
             type: integer
@@ -575,7 +796,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/updateContestUsers'
+                $ref: '#/components/schemas/updateUserInContest'
         '404':
           description: User or group not found
           content:
@@ -583,7 +804,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/errorResponse'
 
-  /olympiad/stage/contest/user/{id}/remove:
+  /olympiad/{id}/stage/{id}/contest/{id}/removeuser:
     post:
       summary: Remove user from contest
       requestBody:
@@ -591,11 +812,23 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/updateContestUsers'
+              $ref: '#/components/schemas/updateUserInContest'
       parameters:
         - in: path
-          description: Id of the user
-          name: id
+          description: Id of the olympiad
+          name: id_olympiad
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the stage
+          name: id_stage
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the contest
+          name: id_contest
           required: true
           schema:
             type: integer
@@ -608,7 +841,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/updateContestUsers'
+                $ref: '#/components/schemas/updateUserInContest'
         '404':
           description: User or group not found
           content:
@@ -643,13 +876,19 @@ paths:
               schema:
                 $ref: '#/components/schemas/errorResponse'
 
-  /olympiad/stage/{id}/get_contests:
+  /olympiad/{id}/stage/{id}/get_contests:
     get:
       summary: list of contests in stage
       parameters:
         - in: path
+          description: Id of the olympiad
+          name: id_olympiad
+          required: true
+          schema:
+            type: integer
+        - in: path
           description: Id of the stage
-          name: id
+          name: id_stage
           required: true
           schema:
             type: integer
@@ -670,13 +909,25 @@ paths:
               schema:
                 $ref: '#/components/schemas/errorResponse'
 
-  /olympiad/stage/contest/{id}/variants:
+  /olympiad/{id}/stage/{id}/contest/{id}/variants:
     get:
       summary: list of variants in contest
       parameters:
         - in: path
+          description: Id of the olympiad
+          name: id_olympiad
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the stage
+          name: id_stage
+          required: true
+          schema:
+            type: integer
+        - in: path
           description: Id of the contest
-          name: id
+          name: id_contest
           required: true
           schema:
             type: integer
@@ -697,13 +948,25 @@ paths:
               schema:
                 $ref: '#/components/schemas/errorResponse'
 
-  /olympiad/stage/contest/{id}/get_users:
+  /olympiad/{id}/stage/{id}/contest/{id}/get_users:
     get:
       summary: list of user in contest
       parameters:
         - in: path
+          description: Id of the olympiad
+          name: id_olympiad
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the stage
+          name: id_stage
+          required: true
+          schema:
+            type: integer
+        - in: path
           description: Id of the contest
-          name: id
+          name: id_contest
           required: true
           schema:
             type: integer
@@ -1104,13 +1367,13 @@ components:
                 type: integer
               user_status:
                 type: string
-    updateContestUsers:
+    updateUserInContest:
       title: Add or remove user to contest
       description: Request to add user to contest
       required:
-        - variant_id
+        - user_id
       properties:
-        variant_id:
+        user_id:
           type: integer
     stagesInOlympiad:
       title: Get stages in olympiad
