@@ -7,7 +7,7 @@ info:
 paths:
   /olympiad/create:
     post:
-      summary: Create a new olimpiad
+      summary: Create a new olympiad
       requestBody:
         required: true
         content:
@@ -23,8 +23,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/olympiadInfo'
-
+                $ref: '#/components/schemas/olympiadInfoId'
         '400':
           description: Bad request
           content:
@@ -35,12 +34,6 @@ paths:
   /olympiad/{id}/remove:
     post:
       summary: Remove olympiad
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/removeOlympiad'
       parameters:
         - in: path
           description: Id of the olympiad
@@ -54,10 +47,6 @@ paths:
       responses:
         '200':
           description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/removeOlympiad'
         '404':
           description: Stage not found
           content:
@@ -143,7 +132,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/commonContestInfo'
+                $ref: '#/components/schemas/commonContestId'
 
         '400':
           description: Bad request
@@ -177,7 +166,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/stageInfo'
+                $ref: '#/components/schemas/stageInfoId'
 
         '400':
           description: Bad request
@@ -189,12 +178,6 @@ paths:
   /contest/{id}/remove:
     post:
       summary: Remove contest
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/removeContest'
       parameters:
         - in: path
           description: Id of the contest
@@ -208,10 +191,6 @@ paths:
       responses:
         '200':
           description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/removeContest'
         '404':
           description: Stage not found
           content:
@@ -275,12 +254,6 @@ paths:
   /olympiad/stage/{id}/remove:
     post:
       summary: Remove stage from olympiad
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/removeStage'
       parameters:
         - in: path
           description: Id of the stage
@@ -294,10 +267,6 @@ paths:
       responses:
         '200':
           description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/removeStage'
         '404':
           description: Stage not found
           content:
@@ -383,7 +352,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/variantInfo'
+                $ref: '#/components/schemas/variantInfoId'
         '400':
           description: Bad request
           content:
@@ -394,12 +363,6 @@ paths:
   /olympiad/stage/contest/variant/{id}/remove:
     post:
       summary: Remove variant
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/removeVariant'
       parameters:
         - in: path
           description: Id of the variant
@@ -413,10 +376,6 @@ paths:
       responses:
         '200':
           description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/removeVariant'
         '404':
           description: Stage not found
           content:
@@ -512,12 +471,6 @@ paths:
   /olympiad/stage/contest/variant/plain_task/{id}/remove:
     post:
       summary: Remove task with plain text
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/removePlainTextTask'
       parameters:
         - in: path
           description: Id of the task
@@ -531,10 +484,6 @@ paths:
       responses:
         '200':
           description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/removePlainTextTask'
         '404':
           description: Task not found
           content:
@@ -655,12 +604,6 @@ paths:
   /olympiad/stage/contest/variant/range_task/{id}/remove:
     post:
       summary: Remove range task
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/removeRangeTask'
       parameters:
         - in: path
           description: Id of the task
@@ -674,10 +617,6 @@ paths:
       responses:
         '200':
           description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/removeRangeTask'
         '404':
           description: Task not found
           content:
@@ -831,12 +770,6 @@ paths:
   /olympiad/stage/contest/variant/multiple_task/{id}/remove:
     post:
       summary: Remove multiple task
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/removeMultipleTask'
       parameters:
         - in: path
           description: Id of the task
@@ -850,10 +783,6 @@ paths:
       responses:
         '200':
           description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/removeMultipleTask'
         '404':
           description: Task not found
           content:
@@ -1145,8 +1074,6 @@ components:
       description: Request to olympiad creation
       required:
         - name
-        - description
-        - rules
       properties:
         name:
           type: string
@@ -1154,6 +1081,14 @@ components:
           type: string
         rules:
           type: string
+    olympiadInfoId:
+      title: Get olympiad id
+      description: Request to get olympiad information as response on creation
+      required:
+        - olympiad_id
+      properties:
+        olympiad_id:
+          type: integer
     olympiadInfo:
       title: Get olympiad information
       description: Request to get olympiad information
@@ -1175,17 +1110,12 @@ components:
       title: Update olympiad information
       description: Request to update olympiad information
       properties:
-        olympiad_id:
-          type: integer
         name:
           type: string
         description:
           type: string
         rules:
           type: string
-    removeOlympiad:
-      title: Remove olympiad
-      description: Request to remove olympiad
     createStage:
       title: Create stage
       description: Request to stage creation
@@ -1213,6 +1143,13 @@ components:
           type: integer
         next_stage_condition:
           type: string
+    stageInfoId:
+      title: Stage id
+      description: Request to get stage id as response to creation
+      required:
+        - stage_id
+        stage_id:
+          type: integer
     stageInfoUpdate:
       title: Edit stage common info
       description: Request to edit stage
@@ -1221,9 +1158,6 @@ components:
           type: string
         next_stage_condition:
           type: string
-    removeStage:
-      title: Remove stage
-      description: Request to remove stage
     createContest:
       title: Create contest
       description: Request to contest creation
@@ -1289,6 +1223,14 @@ components:
           type: string
         visibility:
           type: boolean
+    commonContestId:
+      title: Contest id
+      description: Request to get contest id as response for creation
+      required:
+        - contest_id
+      properties:
+        contest_id:
+          type: integer
     contestInfoUpdate:
       title: Edit contest common info
       description: Request to creation contest
@@ -1311,9 +1253,6 @@ components:
           type: string
         visibility:
           type: boolean
-    removeContest:
-      title: Remove contest
-      description: Request to remove contest
     createVariant:
       title: Create variant
       description: Request to variant creation
@@ -1339,6 +1278,14 @@ components:
           type: integer
         variant_description:
           type: string
+    variantInfoId:
+      title: Common variant id
+      description: Request to get variant id as response for creation
+      required:
+        - variant_id
+      properties:
+        variant_id:
+          type: integer
     variantInfoUpdate:
       title: Edit variant
       description: Request to edit variant
@@ -1347,9 +1294,6 @@ components:
           type: integer
         variant_description:
           type: string
-    removeVariant:
-      title: Remove variant
-      description: Request to variant removing
     createPlainTask:
       title: Create plain text task
       description: Request to creation task with plain text
@@ -1365,9 +1309,6 @@ components:
           format: binary
         recommended_answer:
           type: string
-    removePlainTextTask:
-      title: Remove plain text task
-      description: Request to remove task with plain text
     plainTaskInfoUpdate:
       title: Edit plain text task
       description: Request to edit task with plain text
@@ -1428,9 +1369,6 @@ components:
         end_value:
           type: number
           format: float
-    removeRangeTask:
-      title: Remove range task
-      description: Request to remove task with range
     rangeTaskInfoUpdate:
       title: Edit range text task
       description: Request to edit task with plain text
@@ -1497,9 +1435,6 @@ components:
           format: binary
         correct_answer:
           type: string
-    removeMultipleTask:
-      title: Remove multiple choice task
-      description: Request to remove task with multiple choice
     multipleTaskInfoUpdate:
       title: Edit multiple text task
       description: Request to creation task with plain text
@@ -1585,7 +1520,6 @@ components:
                 type: integer
               next_stage_condition:
                 type: string
-
     contestsInStage:
       title: Get contests in stage
       description: Request to get contests in stage
