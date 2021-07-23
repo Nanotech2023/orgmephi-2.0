@@ -5,12 +5,19 @@ info:
   version: 1.0.0
 
 paths:
-  /user/contest/create:
+  /contest/{contest_id}/response/create: #TODO нужна ли олимпиада, если по contest и user восстановим UserInContest
     post:
       summary: Create user's response for the contest
       security:
         - cookieJWTAuth: [ ]
         - CSRFToken: [ ]
+      parameters:
+        - in: path
+          description: Id of the contest
+          name: contest_id
+          required: true
+          schema:
+            type: integer
       requestBody:
         required: true
         content:
@@ -23,88 +30,14 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/commonResponseInfo'
+                $ref: '#/components/schemas/createResponseInfo'
         '404':
           description: User or contest not found
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/errorResponse'
-  /user/contest/{contest_id}/answer/{task_id}:
-    get:
-      summary: Get current user answer for the task
-      security:
-        - cookieJWTAuth: [ ]
-      parameters:
-        - in: path
-          description: Id of the contest
-          name: contest_id
-          required: true
-          schema:
-            type: integer
-        - in: task_id
-          description: Id of the task
-          name: task_id
-          required: true
-          schema:
-            type: integer
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/userContestAnswer'
-        '404':
-          description: User, contest or task not found
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errorResponse'
-  /user/{user_id}/contest/{contest_id}/answer/{task_id}:
-    get:
-      summary: Get user answer for the task
-      security:
-        - cookieJWTAuth: [ ]
-      parameters:
-        - in: path
-          description: Id of the user
-          name: user_id
-          required: true
-          schema:
-            type: integer
-        - in: path
-          description: Id of the contest
-          name: contest_id
-          required: true
-          schema:
-            type: integer
-        - in: task_id
-          description: Id of the task
-          name: task_id
-          required: true
-          schema:
-            type: integer
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/userContestAnswer'
-        '403':
-          description: Not enough rights for current user
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errorResponse'
-        '404':
-          description: User, contest or task not found
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errorResponse'
-  /user/{user_id}/contest/{contest_id}/answer:
+  /contest/{contest_id}/response/user/{user_id}:
     get:
       summary: Get all user answers for the contest
       security:
@@ -141,9 +74,39 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/errorResponse'
-  /user/contest/{contest_id}/answer/{task_id}/add:
+  /contest/{contest_id}/task/{task_id}/user/self:
+    get:
+      summary: Get current user answer for the task
+      security:
+        - cookieJWTAuth: [ ]
+      parameters:
+        - in: path
+          description: Id of the contest
+          name: contest_id
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the task
+          name: task_id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/userContestAnswer'
+        '404':
+          description: User, contest or task not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
     post:
-      summary: Add current user answer for a task
+      summary: Add current user answer for the task
       security:
         - cookieJWTAuth: [ ]
         - CSRFToken: [ ]
@@ -154,7 +117,7 @@ paths:
           required: true
           schema:
             type: integer
-        - in: task_id
+        - in: path
           description: Id of the task
           name: task_id
           required: true
@@ -175,7 +138,49 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/errorResponse'
-  /user/{user_id}/contest/{contest_id}/answer/{task_id}/add:
+  /contest/{contest_id}/task/{task_id}/user/{user_id}:
+    get:
+      summary: Get user answer for the task
+      security:
+        - cookieJWTAuth: [ ]
+      parameters:
+        - in: path
+          description: Id of the user
+          name: user_id
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the contest
+          name: contest_id
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the task
+          name: task_id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/userContestAnswer'
+        '403':
+          description: Not enough rights for current user
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+        '404':
+          description: User, contest or task not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
     post:
       summary: Add user answer for a task
       security:
@@ -194,7 +199,7 @@ paths:
           required: true
           schema:
             type: integer
-        - in: task_id
+        - in: path
           description: Id of the task
           name: task_id
           required: true
@@ -221,10 +226,117 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/errorResponse'
-  /user/{user_id}/contest/{contest_id}/mark/add:
+  /contest/{contest_id}/status/user/self:
+    get:
+      summary: Get user's status and mark for reponse
+      security:
+        - cookieJWTAuth: [ ]
+      parameters:
+        - in: path
+          description: Id of the contest
+          name: contest_id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/responseStatus'
+        '403':
+          description: Invalid role of current user
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+        '404':
+          description: User or contest not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
     post:
-      summary: Set mark to user's response
-      description: Set mark to user's response, only for inspector
+      summary: Set user's status and mark for reponse
+      description: Set user's status and mark for reponse, only for inspector
+      security:
+        - cookieJWTAuth: [ ]
+        - CSRFToken: [ ]
+      parameters:
+        - in: path
+          description: Id of the contest
+          name: contest_id
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/responseStatus'
+      responses:
+        '200':
+          description: OK
+        '400':
+          description: Incorrect mark or status
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+        '403':
+          description: Invalid role of current user
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+        '404':
+          description: User or contest not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+  /contest/{contest_id}/status/user/{user_id}:
+    get:
+      summary: Get user's status and mark for reponse
+      security:
+        - cookieJWTAuth: [ ]
+      parameters:
+        - in: path
+          description: Id of the contest
+          name: contest_id
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the user
+          name: user_id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/responseStatus'
+        '403':
+          description: Invalid role of current user
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+        '404':
+          description: User or contest not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+    post:
+      summary: Set user's status and mark for reponse
+      description: Set user's status and mark for reponse, only for inspector
       security:
         - cookieJWTAuth: [ ]
         - CSRFToken: [ ]
@@ -246,12 +358,12 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/commonResponseMark'
+              $ref: '#/components/schemas/responseStatus'
       responses:
         '200':
           description: OK
         '400':
-          description: Incorrect mark. Must be 0 to 100
+          description: Incorrect mark or status
           content:
             application/json:
               schema:
@@ -268,18 +380,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/errorResponse'
-  /user/{user_id}/contest/{contest_id}/mark/:
+  /contest/{contest_id}/status/user/self/history:
     get:
-      summary: Get user's mark for contest
+      summary: Get status history of current user's work
       security:
         - cookieJWTAuth: [ ]
       parameters:
-        - in: path
-          description: Id of the user
-          name: user_id
-          required: true
-          schema:
-            type: integer
         - in: path
           description: Id of the contest
           name: contest_id
@@ -292,9 +398,9 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/commonResponseMark'
+                $ref: '#/components/schemas/userResponseStatusHistory'
         '403':
-          description: Invalid role of current user
+          description: Not enough rights for current user
           content:
             application/json:
               schema:
@@ -305,98 +411,21 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/errorResponse'
-  /user/{user_id}/contest/{contest_id}/status:
-    get:
-      summary: Get user's response status
-      security:
-        - cookieJWTAuth: [ ]
-      parameters:
-        - in: path
-          description: Id of the user
-          name: user_id
-          required: true
-          schema:
-            type: integer
-        - in: path
-          description: Id of the contest
-          name: contest_id
-          required: true
-          schema:
-            type: integer
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/userResponseStatus'
-        '403':
-          description: Invalid role of current user
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errorResponse'
-        '404':
-          description: User or contest not found
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errorResponse'
-  /user/{user_id}/contest/{contest_id}/status/set:
-    post:
-      summary: Set new status to user's response
-      security:
-        - cookieJWTAuth: [ ]
-        - CSRFToken: [ ]
-      parameters:
-        - in: path
-          description: Id of the user
-          name: user_id
-          required: true
-          schema:
-            type: integer
-        - in: path
-          description: Id of the contest
-          name: contest_id
-          required: true
-          schema:
-            type: integer
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/userResponseStatus'
-      responses:
-        '200':
-          description: OK
-        '400':
-          description: Incorrect status
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errorResponse'
-        '404':
-          description: User or contest not found
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errorResponse'
-  /user/{user_id}/contest/{contest_id}/status/history:
+  /contest/{contest_id}/status/user/{user_id}/history:
     get:
       summary: Get status history of user's work
       security:
         - cookieJWTAuth: [ ]
       parameters:
         - in: path
-          description: Id of the user
-          name: user_id
+          description: Id of the contest
+          name: contest_id
           required: true
           schema:
             type: integer
         - in: path
-          description: Id of the contest
-          name: contest_id
+          description: Id of the user
+          name: user_id
           required: true
           schema:
             type: integer
@@ -431,31 +460,80 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/contestResultSheet'
-  /user/{user_id}/contest/{contest_id}/appeal/create:
+  /contest/{contest_id}/appeal/user/self:
+    get:
+      summary: Get appeal info for current user's response
+      security:
+        - cookieJWTAuth: [ ]
+      parameters:
+        - in: path
+          description: Id of the contest
+          name: contest_id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/commonAppealInfo'
+        '404':
+          description: User or contest not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
     post:
-      summary: Create appeal for the user's response
+      summary: Create appeal for current user's response
       security:
         - cookieJWTAuth: [ ]
         - CSRFToken: [ ]
       parameters:
+        - in: path
+          description: Id of the contest
+          name: contest_id
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/appealMessage'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/createAppealInfo'
+        '404':
+          description: User or contest not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+  /contest/{contest_id}/appeal/user/{user_id}:
+    get:
+      summary: Get appeal info for user's response
+      security:
+        - cookieJWTAuth: [ ]
+      parameters:
+        - in: path
+          description: Id of the contest
+          name: contest_id
+          required: true
+          schema:
+            type: integer
         - in: path
           description: Id of the user
           name: user_id
           required: true
           schema:
             type: integer
-        - in: path
-          description: Id of the contest
-          name: contest_id
-          required: true
-          schema:
-            type: integer
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/appealMessage'
       responses:
         '200':
           description: OK
@@ -463,21 +541,14 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/commonAppealInfo'
-        '403':
-          description: Not enough rights for current user
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errorResponse'
         '404':
           description: User or contest not found
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/errorResponse'
-  /user/contest/{contest_id}/appeal/create:
     post:
-      summary: Create appeal for the user's response
+      summary: Create appeal for current user's response
       security:
         - cookieJWTAuth: [ ]
         - CSRFToken: [ ]
@@ -488,35 +559,9 @@ paths:
           required: true
           schema:
             type: integer
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/appealMessage'
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/commonAppealInfo'
-        '404':
-          description: User or contest not found
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errorResponse'
-  /response/{work_id}/appeal/create:
-    post:
-      summary: Create appeal for the user's response
-      security:
-        - cookieJWTAuth: [ ]
-        - CSRFToken: [ ]
-      parameters:
         - in: path
-          description: Id of the work
-          name: work_id
+          description: Id of the user
+          name: user_id
           required: true
           schema:
             type: integer
@@ -532,14 +577,14 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/commonAppealInfo'
+                $ref: '#/components/schemas/createAppealInfo'
         '404':
           description: User or contest not found
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/errorResponse'
-  /user/{user_id}/contest/{contest_id}/appeal/reply:
+  /contest/{contest_id}/appeal/{appeal_id}/reply:
     post:
       summary: Reply appeal for the user's response
       security:
@@ -547,46 +592,52 @@ paths:
         - CSRFToken: [ ]
       parameters:
         - in: path
-          description: Id of the user
-          name: user_id
-          required: true
-          schema:
-            type: integer
-        - in: path
           description: Id of the contest
           name: contest_id
           required: true
           schema:
             type: integer
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/appealMessage'
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/commonAppealInfo'
-        '404':
-          description: User or contest not found
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errorResponse'
-  /appeal/{appeal_id}/reply:
-    post:
-      summary: Reply appeal for the user's response
-      security:
-        - cookieJWTAuth: [ ]
-        - CSRFToken: [ ]
-      parameters:
         - in: path
           description: Id of the appeal
           name: appeal_id
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/appealMessage'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/commonAppealInfo'
+        '404':
+          description: User or contest not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+  /contest/{contest_id}/appeal/user/{user_id}/reply:
+    post:
+      summary: Reply appeal for the user's response
+      security:
+        - cookieJWTAuth: [ ]
+        - CSRFToken: [ ]
+      parameters:
+        - in: path
+          description: Id of the contest
+          name: contest_id
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the user
+          name: user_id
           required: true
           schema:
             type: integer
@@ -609,44 +660,18 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/errorResponse'
-  /response/{work_id}/appeal/reply:
-    post:
-      summary: Reply appeal for the user's response
-      security:
-        - cookieJWTAuth: [ ]
-        - CSRFToken: [ ]
-      parameters:
-        - in: path
-          description: Id of the work
-          name: work_id
-          required: true
-          schema:
-            type: integer
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/appealMessage'
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/commonAppealInfo'
-        '404':
-          description: User or contest not found
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errorResponse'
-  /appeal/{appeal_id}:
+  /contest/{contest_id}/appeal/{appeal_id}:
     get:
       summary: Get appeal info
       security:
         - cookieJWTAuth: [ ]
       parameters:
+        - in: path
+          description: Id of the contest
+          name: contest_id
+          required: true
+          schema:
+            type: integer
         - in: path
           description: Id of the appeal
           name: appeal_id
@@ -694,11 +719,8 @@ components:
       description: "Request to create user's response"
       required:
         - user_id
-        - contest_id
       properties:
         user_id:
-          type: integer
-        contest_id:
           type: integer
     userContestAnswer:
       title: "User's contest answer"
@@ -759,6 +781,8 @@ components:
           type: string
           format: data-time
           description: "Change date and time"
+        appeal_id:
+          type: integer
     userResponseStatusHistory:
       title: "Status history of user response"
       required:
@@ -833,8 +857,14 @@ components:
           type: string
     userContestAllAnswer:
       title: "ALl user's answer for the contest"
+      required:
+        - user_id
+        - work_id
+        - contest_id
       properties:
         user_id:
+          type: integer
+        work_id:
           type: integer
         contest_id:
           type: integer
@@ -848,4 +878,27 @@ components:
               answer:
                 type: string
                 format: binary
-
+    createResponseInfo:
+      title: "Id of created response"
+      required:
+        - contest_id
+      properties:
+        contest_id:
+          type: integer
+    responseStatus:
+      title: "User's response status and mark"
+      required:
+        - status
+      properties:
+        status:
+          type: string
+        mark:
+          type: number
+          format: float
+    createAppealInfo:
+      title: "Id of created appeal"
+      required:
+        - appeal_id
+      properties:
+        appeal_id:
+          type: integer
