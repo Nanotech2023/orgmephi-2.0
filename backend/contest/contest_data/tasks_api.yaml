@@ -1087,6 +1087,7 @@ components:
       description: Request to get stage id as response to creation
       required:
         - stage_id
+      properties:
         stage_id:
           type: integer
     stageInfoUpdate:
