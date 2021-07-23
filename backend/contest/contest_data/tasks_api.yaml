@@ -31,13 +31,13 @@ paths:
               schema:
                 $ref: '#/components/schemas/errorResponse'
 
-  /olympiad/{id}/remove:
+  /olympiad/{id_olympiad}/remove:
     post:
       summary: Remove olympiad
       parameters:
         - in: path
           description: Id of the olympiad
-          name: id
+          name: id_olympiad
           required: true
           schema:
             type: integer
@@ -54,14 +54,14 @@ paths:
               schema:
                 $ref: '#/components/schemas/errorResponse'
 
-  /olympiad/{id}:
+  /olympiad/{id_olympiad}:
     get:
       summary: Get info for the olympiad
       security: []
       parameters:
         - in: path
           description: Id of the olympiad
-          name: id
+          name: id_olympiad
           required: true
           schema:
             type: integer
@@ -87,7 +87,7 @@ paths:
       parameters:
         - in: path
           description: Id of the olympiad
-          name: id
+          name: id_olympiad
           required: true
           schema:
             type: integer
@@ -107,7 +107,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/errorResponse'
 
-  /olympiad/{id}/stage/{id}/contest/create:
+  /olympiad/{id_olympiad}/stage/{id_stage}/contest/create:
     post:
       summary: Create a new contest
       parameters:
@@ -147,13 +147,13 @@ paths:
               schema:
                 $ref: '#/components/schemas/errorResponse'
 
-  /olympiad/{id}/stage/create:
+  /olympiad/{id_olympiad}/stage/create:
     post:
       summary: Create a new stage in oimpiad
       parameters:
         - in: path
           description: Id of the olympiad
-          name: id
+          name: id_olympiad
           required: true
           schema:
             type: integer
@@ -181,7 +181,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/errorResponse'
 
-  /olympiad/{id}/stage/{id}/contest/{id}/remove:
+  /olympiad/{id_olympiad}/stage/{id_stage}/contest/{id_contest}/remove:
     post:
       summary: Remove contest
       parameters:
@@ -216,7 +216,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/errorResponse'
 
-  /olympiad/{id}/stage/{id}/contest/{id}:
+  /olympiad/{id_olympiad}/stage/{id_stage}/contest/{id_contest}:
     get:
       summary: Get common info for a contest
       security: []
@@ -293,7 +293,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/errorResponse'
 
-  /olympiad/{id}/stage/{id}/remove:
+  /olympiad/{id_olympiad}/stage/{id_stage}/remove:
     post:
       summary: Remove stage from olympiad
       parameters:
@@ -322,7 +322,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/errorResponse'
 
-  /olympiad/{id}/stage/{id}:
+  /olympiad/{id_olympiad}/stage/{id_stage}:
     get:
       summary: Get common info for a different stage
       security: []
@@ -387,7 +387,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/errorResponse'
 
-  /olympiad/{id}/stage/{id}/contest/{id}/variant/create:
+  /olympiad/{id_olympiad}/stage/{id_stage}/contest/{id_contest}/variant/create:
     post:
       summary: Create a new variant
       parameters:
@@ -432,7 +432,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/errorResponse'
 
-  /olympiad/{id}/stage/{id}/contest/{id}/variant/{id}/remove:
+  /olympiad/{id_olympiad}/stage/{id_stage}/contest/{id_contest}/variant/{id_variant}/remove:
     post:
       summary: Remove variant
       parameters:
@@ -473,7 +473,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/errorResponse'
 
-  /olympiad/{id}/stage/{id}/contest/{id}/variant/{id}:
+  /olympiad/{id_olympiad}/stage/{id_stage}/contest/{id_contest}/variant/{id_variant}:
     get:
       summary: Get info for a different variant
       security: []
@@ -561,7 +561,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/errorResponse'
 
-  /olympiad/{id}/stage/{id}/contest/{id}/variant/{id}/tasks/create:
+  /olympiad/{id_olympiad}/stage/{id_stage}/contest/{id_contest}/variant/{id_variant}/tasks/create:
     post:
       summary: Create a new task
       parameters:
@@ -612,7 +612,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/errorResponse'
 
-  /olympiad/{id}/stage/{id}/contest/{id}/variant/{id}/tasks/{id}/remove:
+  /olympiad/{id_olympiad}/stage/{id_stage}/contest/{id_contest}/variant/{id_variant}/tasks/{id_task}/remove:
     post:
       summary: Remove task
       parameters:
@@ -659,7 +659,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/errorResponse'
 
-  /olympiad/{id}/stage/{id}/contest/{id}/variant/{id}/tasks/{id}:
+  /olympiad/{id_olympiad}/stage/{id_stage}/contest/{id_contest}/variant/{id_variant}/tasks/{id_task}:
     get:
       summary: Get info for a different tasks
       security: []
@@ -759,7 +759,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/errorResponse'
 
-  /olympiad/{id}/stage/{id}/contest/{id}/adduser:
+  /olympiad/{id_olympiad}/stage/{id_stage}/contest/{id_contest}/adduser:
     post:
       summary: Add user to contest
       requestBody:
@@ -804,7 +804,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/errorResponse'
 
-  /olympiad/{id}/stage/{id}/contest/{id}/removeuser:
+  /olympiad/{id_olympiad}/stage/{id_stage}/contest/{id_contest}/removeuser:
     post:
       summary: Remove user from contest
       requestBody:
@@ -849,13 +849,13 @@ paths:
               schema:
                 $ref: '#/components/schemas/errorResponse'
 
-  /olympiad/{id}/stage/all:
+  /olympiad/{id_olympiad}/stage/all:
     get:
       summary: list of stages in olympiad
       parameters:
         - in: path
           description: Id of the olympiad
-          name: id
+          name: id_olympiad
           required: true
           schema:
             type: integer
@@ -876,7 +876,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/errorResponse'
 
-  /olympiad/{id}/stage/{id}/contest/all:
+  /olympiad/{id_olympiad}/stage/{id_stage}/contest/all:
     get:
       summary: list of contests in stage
       parameters:
@@ -909,7 +909,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/errorResponse'
 
-  /olympiad/{id}/stage/{id}/contest/{id}/variant/all:
+  /olympiad/{id_olympiad}/stage/{id_stage}/contest/{id_contest}/variant/all:
     get:
       summary: list of variants in contest
       parameters:
@@ -948,7 +948,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/errorResponse'
 
-  /olympiad/{id}/stage/{id}/contest/{id}/user/all:
+  /olympiad/{id_olympiad}/stage/{id_stage}/contest/{id_contest}/user/all:
     get:
       summary: list of user in contest
       parameters:
