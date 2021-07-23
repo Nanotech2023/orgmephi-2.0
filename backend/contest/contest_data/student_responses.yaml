@@ -851,56 +851,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/errorResponse'
-  /olympiad/{olympiad_id}/stage/{stage_id}/contest/{contest_id}/appeal/user/{user_id}/reply:
-    post:
-      summary: Reply appeal for the user's response
-      security:
-        - cookieJWTAuth: [ ]
-        - CSRFToken: [ ]
-      parameters:
-        - in: path
-          description: Id of the contest
-          name: contest_id
-          required: true
-          schema:
-            type: integer
-        - in: path
-          description: Id of the user
-          name: user_id
-          required: true
-          schema:
-            type: integer
-        - in: path
-          description: Id of the olympiad
-          name: olympiad_id
-          required: true
-          schema:
-            type: integer
-        - in: path
-          description: Id of the stage
-          name: stage_id
-          required: true
-          schema:
-            type: integer
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/appealMessage'
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/commonAppealInfo'
-        '404':
-          description: Appeal, olympiad, stage or contest not found
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errorResponse'
   /olympiad/{olympiad_id}/stage/{stage_id}/contest/{contest_id}/appeal/{appeal_id}:
     get:
       summary: Get appeal info
