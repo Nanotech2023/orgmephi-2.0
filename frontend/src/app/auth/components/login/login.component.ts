@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core'
+import { Component, HostListener, OnInit } from '@angular/core'
 import { Store } from '@ngrx/store'
 import { AuthActions, AuthSelectors, AuthState } from '@/auth/store'
 import { Observable } from 'rxjs'
@@ -15,16 +15,24 @@ export class LoginComponent implements OnInit
     loginAttempt: AuthCredentials
     isAuthenticated$!: Observable<boolean>
     error$!: Observable<string | null>
+    containerHeight: number
 
     constructor( private readonly store: Store<AuthState.State> )
     {
         this.loginAttempt = { username: '', password: '' }
+        this.containerHeight = window.innerHeight - ( 125 + 167 )
     }
 
     ngOnInit(): void
     {
         this.isAuthenticated$ = this.store.select( AuthSelectors.selectIsAuthenticated )
         this.error$ = this.store.select( AuthSelectors.selectError )
+    }
+
+    @HostListener( 'window:resize', [ '$event' ] )
+    onResize()
+    {
+        this.containerHeight = window.innerHeight - ( 125 + 167 )
     }
 
     login( loginAttemptUser: AuthCredentials ): void
@@ -37,10 +45,5 @@ export class LoginComponent implements OnInit
     {
         // TODO enforce email regex check
         return !!( loginAttemptUser.password && loginAttemptUser.username )
-    }
-
-    calculateHeight(): number
-    {
-        return window.innerHeight - ( 125 + 167 )
     }
 }

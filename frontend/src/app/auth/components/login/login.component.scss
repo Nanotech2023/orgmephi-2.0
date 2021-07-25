@@ -4,6 +4,7 @@
   padding-right: 10%;
   padding-left: 10%;
   margin: auto;
+  overflow: auto;
 }
 .form-signin .checkbox {
   font-weight: 400;
@@ -41,6 +42,7 @@ fieldset {
   flex-direction: column;
   justify-items: center;
   justify-content: center;
+  overflow: auto;
 }
 
 .container_left {
@@ -109,10 +111,6 @@ fieldset {
 
     .input_error {
       color: $error;
-    }
-
-    input:invalid:not(:focus) {
-      border: 2px solid $error;
     }
   }
 
