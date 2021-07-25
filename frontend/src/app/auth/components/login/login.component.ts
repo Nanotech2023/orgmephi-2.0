@@ -41,7 +41,6 @@ export class LoginComponent implements OnInit
 
     calculateHeight(): number
     {
-        let number = window.innerHeight - (125 + 167)
-        return number
+        return window.innerHeight - ( 125 + 167 )
     }
 }

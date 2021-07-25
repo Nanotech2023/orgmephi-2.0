@@ -1,15 +1,22 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit } from '@angular/core'
 
-@Component({
-  selector: 'app-participant',
-  templateUrl: './participant.component.html',
-  styleUrls: ['./participant.component.scss']
-})
-export class ParticipantComponent implements OnInit {
 
-  constructor() { }
+@Component( {
+    selector: 'app-participant',
+    templateUrl: './participant.component.html',
+    styleUrls: [ './participant.component.scss' ]
+} )
+export class ParticipantComponent implements OnInit
+{
 
-  ngOnInit(): void {
-  }
+    constructor() { }
 
+    ngOnInit(): void
+    {
+    }
+
+    calculateHeight(): number
+    {
+        return window.innerHeight - ( 125 + 167 )
+    }
 }
