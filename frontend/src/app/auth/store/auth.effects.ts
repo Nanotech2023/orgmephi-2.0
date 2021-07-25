@@ -9,16 +9,17 @@ import {
     registerAttempt,
     registerSuccess
 } from '@/auth/store/auth.actions'
-import { catchError, concatMap, mergeMap } from 'rxjs/operators'
+import { catchError, concatMap, mergeMap, tap } from 'rxjs/operators'
 import { of } from 'rxjs'
 import { AuthResponse, CommonUserInfo } from '@/auth/models'
+import { Router } from '@angular/router'
 
 
 // noinspection JSUnusedGlobalSymbols
 @Injectable()
 export class AuthEffects
 {
-    constructor( private actions$: Actions, private authService: AuthServiceMock )
+    constructor( private actions$: Actions, private authService: AuthServiceMock, private router: Router )
     {
     }
 
@@ -29,12 +30,15 @@ export class AuthEffects
             concatMap( ( { authentication } ) =>
                 this.authService.loginPost( authentication ).pipe(
                     mergeMap( ( authResult: AuthResponse ) =>
-                        of( loginSuccess( {
-                            authResponse: {
-                                csrfAccessToken: authResult.csrfAccessToken,
-                                csrfRefreshToken: authResult.csrfRefreshToken
-                            }
-                        } ) )
+                        {
+                            this.router.navigate( [ '/users' ] )
+                            return of( loginSuccess( {
+                                authResponse: {
+                                    csrfAccessToken: authResult.csrfAccessToken,
+                                    csrfRefreshToken: authResult.csrfRefreshToken
+                                }
+                            } ) )
+                        }
                     ),
                     catchError(
                         error =>

@@ -30,8 +30,8 @@ a.nav-link:hover {
 .navbar {
   border-bottom: 1px solid #CCCCCC;
   background-color: #E5E5E5;
-  padding-left: 15%;
-  padding-right: 15%;
+  padding-left: 10%;
+  padding-right: 10%;
 }
 
 li a {
@@ -40,12 +40,12 @@ li a {
   font-family: Roboto;
   font-style: normal;
   font-weight: normal;
-  font-size: 14px;
+  font-size: 12px;
   line-height: 20px;
   letter-spacing: 0.25px;
 }
 
-li a:hover {
+li a:hover, .active {
   color: #0055bb;
   font-weight: bolder;
 }
@@ -87,7 +87,7 @@ li {
   height: 37px;
   text-decoration: none;
   text-align: center;
-  width: 200px;
+  max-width: 200px;
   display: flex;
   flex-direction: row;
   justify-content: center;
@@ -122,10 +122,10 @@ li.nav-item {
 .button_register:hover {
   background: #0C32C6;
   color: #FFFFFF;
-  border: 1px solid #0C32C6;
 }
 
 .button_auth:hover {
+  border: 1px solid #0C32C6;
   background: #FFFFFF;
   color: #0C32C6;
 }
