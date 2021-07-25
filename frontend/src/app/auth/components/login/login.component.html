@@ -207,7 +207,7 @@
                            [(ngModel)]="loginAttempt.username" #email="ngModel" name="email">
                     <label>Электронная почта</label>
                     <div *ngIf="email.invalid && (email.dirty || email.touched)"
-                         class="alert alert-danger">
+                         class="input_error">
                         <div *ngIf="email.errors?.required">
                             Поле обязательно для заполнения
                         </div>
@@ -233,17 +233,22 @@
                         Вы успешно вошли в систему
                     </div>
                 </ng-container>
-
-                <p class="mt-5 mb-3 text-muted">Если у Вас еще нет учетной записи, вы можете создать её,
-                    воспользовавшись <a routerLink="/register">процедурой регистрации</a>
-                </p>
-                <p class="mb-3 text-muted">
-                    <a routerLink="/register">Забыли пароль?</a>
-                </p>
-                <p class="text-muted">
-                    <a routerLink="/register">Не пришло письмо для активации учетной записи?</a>
-                </p>
             </div>
+        </div>
+
+        <div class="container_right_actions">
+            <div class="row">
+                <div class="col-6"><a routerLink="/register">Забыли пароль?</a>
+                </div>
+                <div class="col-6">
+                    <a routerLink="/register">Не пришло письмо для активации учетной записи?</a>
+                </div>
+            </div>
+            <p>
+                Если у Вас возникли проблемы при регистрации или вводе информации, обращайтесь по тел.:
+                <b>+7(495)785 55 25</b>,
+                email: <a href="mailto:orginfo@mephi.ru">orginfo@mephi.ru</a>
+            </p>
         </div>
 
     </div>

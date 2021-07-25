@@ -1,3 +1,5 @@
+@import "./src/styles/colors";
+
 .form-signin .checkbox {
   font-weight: 400;
 }
@@ -80,7 +82,7 @@ fieldset {
   }
 
   .container_right_form {
-    
+
     button {
       background: #3E5FE4;
       width: 100%;
@@ -89,6 +91,7 @@ fieldset {
       text-align: center;
       font-size: 20px;
       font-weight: lighter;
+      border: none;
     }
 
     button:hover {
@@ -97,6 +100,44 @@ fieldset {
 
     p {
       margin-bottom: 0;
+    }
+
+    .input_error {
+      color: $error;
+    }
+
+    input:invalid:not(:focus) {
+      border: 2px solid $error;
+    }
+  }
+
+  .container_right_actions {
+    margin-top: 5%;
+    border-top: 1px dashed #CCCCCC;
+
+    p {
+      color: #828282;
+    }
+
+    .col-6 {
+      justify-items: center;
+      justify-content: center;
+      flex-direction: column;
+      text-align: center;
+    }
+
+    .col-6:first-child {
+      border-right: 1px solid $error;
+    }
+
+    .col-6 a {
+      font-weight: bolder;
+      color: $error;
+    }
+
+    .row {
+      padding-top: 3%;
+      padding-bottom: 3%;
     }
   }
 }
