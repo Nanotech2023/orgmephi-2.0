@@ -1,7 +1,206 @@
-<div class="container">
-    <div class="row justify-content-center">
-        <div class="col-6">
-            <h2 class="mt-5 mb-5">Авторизация участников</h2>
+<!--<div class="container">-->
+<!--    <div class="row justify-content-center">-->
+<!--        <div class="col-6">-->
+<!--            <h2 class="mt-5 mb-5">Авторизация участников</h2>-->
+<!--            <div *ngIf="!(isAuthenticated$ | async)">-->
+<!--                <div class="form-floating">-->
+<!--                    <input type="email" class="form-control" required email placeholder="name@example.com"-->
+<!--                           [(ngModel)]="loginAttempt.username" #email="ngModel" name="email">-->
+<!--                    <label>Электронная почта</label>-->
+<!--                    <div *ngIf="email.invalid && (email.dirty || email.touched)"-->
+<!--                         class="alert alert-danger">-->
+<!--                        <div *ngIf="email.errors?.required">-->
+<!--                            Поле обязательно для заполнения-->
+<!--                        </div>-->
+<!--                        <div *ngIf="email.errors?.email">-->
+<!--                            Невалидный e-mail-->
+<!--                        </div>-->
+<!--                    </div>-->
+<!--                </div>-->
+<!--                <br/>-->
+<!--                <div class="form-floating">-->
+<!--                    <input type="password" class="form-control" placeholder="Пароль"-->
+<!--                           [(ngModel)]="loginAttempt.password">-->
+<!--                    <label>Пароль</label>-->
+<!--                </div>-->
+<!--                <br/>-->
+<!--                <button class="w-100 btn btn-lg btn-primary" [disabled]="!isValid(this.loginAttempt)"-->
+<!--                        (click)="login(this.loginAttempt)">-->
+<!--                    Войти-->
+<!--                </button>-->
+
+<!--                <ng-container *ngIf="isAuthenticated$ | async as isAuthenticated">-->
+<!--                    <div class="alert alert-success">-->
+<!--                        Вы успешно вошли в систему-->
+<!--                    </div>-->
+<!--                </ng-container>-->
+
+<!--                <p class="mt-5 mb-3 text-muted">Если у Вас еще нет учетной записи, вы можете создать её,-->
+<!--                    воспользовавшись <a routerLink="/register">процедурой регистрации</a>-->
+<!--                </p>-->
+<!--                <p class="mb-3 text-muted">-->
+<!--                    <a routerLink="/register">Забыли пароль?</a>-->
+<!--                </p>-->
+<!--                <p class="text-muted">-->
+<!--                    <a routerLink="/register">Не пришло письмо для активации учетной записи?</a>-->
+<!--                </p>-->
+<!--            </div>-->
+
+
+<!--        </div>-->
+<!--    </div>-->
+<!--</div>-->
+
+<div class="row" [style.height.px]="calculateHeight()">
+    <div class="col-6 container_left">
+        <div class="container_left_icon">
+            <svg width="24" height="25" viewBox="0 0 24 25" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path fill-rule="evenodd" clip-rule="evenodd"
+                      d="M0 2.5C0 1.11929 1.11929 0 2.5 0H21.5C22.8807 0 24 1.11929 24 2.5C24 3.88071 22.8807 5 21.5 5H2.5C1.11929 5 0 3.88071 0 2.5ZM0 12.5C0 11.1193 1.11929 10 2.5 10H13.5C14.8807 10 16 11.1193 16 12.5C16 13.8807 14.8807 15 13.5 15H2.5C1.11929 15 0 13.8807 0 12.5ZM2.5 20C1.11929 20 0 21.1193 0 22.5C0 23.8807 1.11929 25 2.5 25H5.5C6.88071 25 8 23.8807 8 22.5C8 21.1193 6.88071 20 5.5 20H2.5Z"
+                      fill="white"/>
+            </svg>
+        </div>
+        <div class="container_left_title">
+            <p style="font-size: 35px; font-weight: lighter">Информационная система</p>
+            <br/>
+            <p style="font-size: 25px; font-weight: bolder">Абитуриент-Студент</p>
+            <br/>
+            <p style="font-size: 15px; font-weight: lighter">Национального Исследовательского Ядерного Университета
+                «МИФИ»</p>
+        </div>
+        <div class="container_left_picture">
+            <svg width="256" height="361" viewBox="0 0 256 361" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <g style="mix-blend-mode:screen">
+                    <path opacity="0.5"
+                          d="M184.848 125.997C155.917 109.117 131.989 124.914 127.756 161.297C127.021 167.623 131.814 175.941 137.621 179.331L232.039 234.412C237.846 237.802 242.639 235.076 241.939 227.911C237.706 186.565 213.778 142.843 184.848 125.997Z"
+                          fill="url(#paint0_linear)"/>
+                    <path opacity="0.5"
+                          d="M217.101 78.7103C217.101 103.839 202.549 115.722 184.603 105.237C166.692 94.7872 152.139 65.9536 152.139 40.8247C152.139 15.6958 166.692 3.81286 184.638 14.2978C202.584 24.7478 217.101 53.6163 217.101 78.7103Z"
+                          fill="url(#paint1_linear)"/>
+                    <path opacity="0.07"
+                          d="M198.841 115.512C169.91 98.6317 145.982 114.429 141.749 150.812C141.015 157.138 145.807 165.456 151.614 168.846L246.032 223.927C251.839 227.317 256.632 224.591 255.932 217.426C251.699 176.08 227.771 132.358 198.841 115.512Z"
+                          fill="url(#paint2_linear)"/>
+                    <path opacity="0.07"
+                          d="M231.094 68.2254C231.094 93.3543 216.541 105.237 198.595 94.7523C180.684 84.3023 166.132 55.4687 166.132 30.3398C166.132 5.21087 180.684 -6.67206 198.63 3.81288C216.576 14.2629 231.094 43.1314 231.094 68.2254Z"
+                          fill="url(#paint3_linear)"/>
+                    <path opacity="0.2" d="M65.1374 138.824L0 101.253V135.154L65.1723 172.725L65.1374 138.824Z"
+                          fill="url(#paint4_linear)"/>
+                    <path
+                        d="M13.2237 120.266C13.2237 123.062 11.5795 124.355 9.51551 123.201C7.48653 122.013 5.80737 118.798 5.80737 116.002C5.80737 113.206 7.45155 111.913 9.51551 113.066C11.5795 114.254 13.2237 117.47 13.2237 120.266Z"
+                        fill="#F2994A"/>
+                    <path opacity="0.15" d="M16.5818 119.217L37.8861 131.485V136.238L16.5818 123.97V119.217Z"
+                          fill="white"/>
+                    <path opacity="0.15" d="M16.6866 128.793L58.4207 152.874V157.627L16.6866 133.547V128.793Z"
+                          fill="white"/>
+                    <path opacity="0.05" d="M167.986 173.005L233.438 210.751V351.564L167.986 313.853V173.005Z"
+                          fill="url(#paint5_linear)"/>
+                    <path opacity="0.3"
+                          d="M222.524 220.187L157.036 182.441V323.254L222.489 361L222.524 220.187ZM178.376 203.761L200.24 216.343V221.935L178.376 209.528V203.761Z"
+                          fill="url(#paint6_linear)"/>
+                    <path opacity="0.15" d="M163.368 271.668L215.947 301.97V306.723L163.368 276.421V271.668Z"
+                          fill="white"/>
+                    <path opacity="0.15" d="M167.076 283.062L212.309 309.134V313.888L167.076 287.815V283.062Z"
+                          fill="white"/>
+                    <path
+                        d="M204.403 259.82C204.403 248.671 197.861 235.845 189.815 231.196C181.769 226.548 175.228 231.825 175.228 242.974C175.228 254.123 181.769 266.95 189.815 271.598C197.861 276.247 204.403 270.969 204.403 259.82Z"
+                        fill="#F2994A"/>
+                    <path opacity="0.05" d="M86.4767 59.6627L151.929 97.4085V238.221L86.4767 200.475V59.6627Z"
+                          fill="url(#paint7_linear)"/>
+                    <path opacity="0.3"
+                          d="M141.014 106.95L75.5272 69.204V210.017L140.979 247.763L141.014 106.95ZM96.8665 90.5234L118.731 103.105V108.697L96.8665 96.2901V90.5234Z"
+                          fill="url(#paint8_linear)"/>
+                    <path opacity="0.15" d="M81.859 158.291L134.438 188.593V193.346L81.859 163.044V158.291Z"
+                          fill="white"/>
+                    <path opacity="0.15" d="M85.5323 169.72L130.73 195.792V200.545L85.4973 174.473L85.5323 169.72Z"
+                          fill="white"/>
+                    <path
+                        d="M122.894 146.478C122.894 135.329 116.352 122.502 108.306 117.854C100.26 113.206 93.7183 118.483 93.7183 129.632C93.7183 140.781 100.26 153.608 108.306 158.256C116.352 162.904 122.894 157.627 122.894 146.478Z"
+                        fill="#F2C94C"/>
+                    <path opacity="0.3"
+                          d="M122.893 225.01L18.7856 164.966L18.8206 219.174L113.728 273.905L122.928 287.501L122.893 225.01Z"
+                          fill="url(#paint9_linear)"/>
+                    <path d="M7.69604 186.111V171.397L46.9814 194.045V208.759L7.69604 186.111Z" fill="#F2994A"/>
+                    <path opacity="0.15" d="M96.1319 222.773L73.3234 209.632V214.386L96.1319 227.527V222.773Z"
+                          fill="white"/>
+                    <path opacity="0.15" d="M96.132 232.315L52.1591 206.976V211.729L96.132 237.068V232.315Z"
+                          fill="white"/>
+                    <path opacity="0.15" d="M96.132 241.821L42.8887 211.1V215.853L96.167 246.574L96.132 241.821Z"
+                          fill="white"/>
+                    <path
+                        d="M101.764 230.987C101.764 235.46 104.423 240.598 107.676 242.485C110.93 244.372 113.588 242.275 113.588 237.802C113.588 233.328 110.93 228.191 107.676 226.303C104.388 224.416 101.729 226.513 101.764 230.987Z"
+                        fill="#F2994A"/>
+                    <path opacity="0.2"
+                          d="M41.2794 62.3538C43.3784 63.5421 45.0575 66.4779 45.0575 68.8894V79.5491L52.124 83.6033C54.2229 84.7916 55.9021 87.7273 55.9021 90.1389C55.9021 92.5504 54.2229 93.529 52.124 92.3407L45.0575 88.2865V98.9462C45.0575 101.358 43.3784 102.336 41.2794 101.148C39.1805 99.9598 37.5013 97.024 37.5013 94.6125V83.9528L30.4348 79.8986C28.3359 78.7103 26.6567 75.7745 26.6567 73.363C26.6567 70.9514 28.3359 69.9728 30.4348 71.1611L37.5013 75.2153V64.5556C37.5013 62.1441 39.1805 61.1655 41.2794 62.3538Z"
+                          fill="url(#paint10_linear)"/>
+                </g>
+                <defs>
+                    <linearGradient id="paint0_linear" x1="304.22" y1="98.4632" x2="186.782" y2="184.211"
+                                    gradientUnits="userSpaceOnUse">
+                        <stop stop-color="white"/>
+                        <stop offset="1" stop-color="white" stop-opacity="0"/>
+                    </linearGradient>
+                    <linearGradient id="paint1_linear" x1="244.333" y1="16.2546" x2="126.895" y2="102.002"
+                                    gradientUnits="userSpaceOnUse">
+                        <stop stop-color="white"/>
+                        <stop offset="1" stop-color="white" stop-opacity="0"/>
+                    </linearGradient>
+                    <linearGradient id="paint2_linear" x1="318.213" y1="87.9782" x2="200.775" y2="173.726"
+                                    gradientUnits="userSpaceOnUse">
+                        <stop stop-color="white"/>
+                        <stop offset="1" stop-color="white" stop-opacity="0"/>
+                    </linearGradient>
+                    <linearGradient id="paint3_linear" x1="258.326" y1="5.76969" x2="140.888" y2="91.5173"
+                                    gradientUnits="userSpaceOnUse">
+                        <stop stop-color="white"/>
+                        <stop offset="1" stop-color="white" stop-opacity="0"/>
+                    </linearGradient>
+                    <linearGradient id="paint4_linear" x1="39.9202" y1="124.282" x2="25.2443" y2="149.732"
+                                    gradientUnits="userSpaceOnUse">
+                        <stop stop-color="white"/>
+                        <stop offset="1" stop-color="white" stop-opacity="0"/>
+                    </linearGradient>
+                    <linearGradient id="paint5_linear" x1="238.728" y1="196.522" x2="157.781" y2="336.895"
+                                    gradientUnits="userSpaceOnUse">
+                        <stop stop-color="white"/>
+                        <stop offset="1" stop-color="white" stop-opacity="0"/>
+                    </linearGradient>
+                    <linearGradient id="paint6_linear" x1="227.78" y1="205.941" x2="146.833" y2="346.314"
+                                    gradientUnits="userSpaceOnUse">
+                        <stop stop-color="white"/>
+                        <stop offset="1" stop-color="white" stop-opacity="0"/>
+                    </linearGradient>
+                    <linearGradient id="paint7_linear" x1="157.216" y1="83.1735" x2="76.269" y2="223.546"
+                                    gradientUnits="userSpaceOnUse">
+                        <stop stop-color="white"/>
+                        <stop offset="1" stop-color="white" stop-opacity="0"/>
+                    </linearGradient>
+                    <linearGradient id="paint8_linear" x1="146.271" y1="92.7036" x2="65.3234" y2="233.076"
+                                    gradientUnits="userSpaceOnUse">
+                        <stop stop-color="white"/>
+                        <stop offset="1" stop-color="white" stop-opacity="0"/>
+                    </linearGradient>
+                    <linearGradient id="paint9_linear" x1="100.19" y1="203.301" x2="46.4779" y2="245.396"
+                                    gradientUnits="userSpaceOnUse">
+                        <stop stop-color="white"/>
+                        <stop offset="1" stop-color="white" stop-opacity="0"/>
+                    </linearGradient>
+                    <linearGradient id="paint10_linear" x1="48.5831" y1="75.9805" x2="30.2802" y2="90.4384"
+                                    gradientUnits="userSpaceOnUse">
+                        <stop stop-color="white"/>
+                        <stop offset="1" stop-color="white" stop-opacity="0"/>
+                    </linearGradient>
+                </defs>
+            </svg>
+        </div>
+    </div>
+    <div class="col-6 container_right">
+        <div class="container_right_title">
+            <p style="font-size: 35px; font-weight: bolder">Авторизация участников</p>
+            <p style="font-size: 12px; line-height: 20px; color: #4D4D4D">Если у Вас еще нет учетной записи, вы
+                можете создать её, воспользовавшись процедурой
+                <a [routerLink]="'/register'">регистрации</a></p>
+        </div>
+        <div class="container_right_form">
             <div *ngIf="!(isAuthenticated$ | async)">
                 <div class="form-floating">
                     <input type="email" class="form-control" required email placeholder="name@example.com"
@@ -24,7 +223,7 @@
                     <label>Пароль</label>
                 </div>
                 <br/>
-                <button class="w-100 btn btn-lg btn-primary" [disabled]="!isValid(this.loginAttempt)"
+                <button [disabled]="!isValid(this.loginAttempt)"
                         (click)="login(this.loginAttempt)">
                     Войти
                 </button>
@@ -45,8 +244,7 @@
                     <a routerLink="/register">Не пришло письмо для активации учетной записи?</a>
                 </p>
             </div>
-
-
         </div>
+
     </div>
 </div>

@@ -1,3 +1,7 @@
+header, nav {
+  height: 125px;
+}
+
 .home-link {
   display: block;
   padding: 15px 0;
@@ -12,13 +16,116 @@
   padding: 5px 0;
   padding-left: 18px;
   color: #0055bb;
-  font-size: 20px;
+  font-size: 15px;
   line-height: 23px;
   text-transform: uppercase;
   border-left: 1px solid #0055bb;
 }
 
-a.nav-link:hover{
+a.nav-link:hover {
   color: #0055bb;
   font-weight: bolder;
+}
+
+.navbar {
+  border-bottom: 1px solid #CCCCCC;
+  background-color: #E5E5E5;
+  padding-left: 15%;
+  padding-right: 15%;
+}
+
+li a {
+  color: #828282;
+  text-decoration: none;
+  font-family: Roboto;
+  font-style: normal;
+  font-weight: normal;
+  font-size: 14px;
+  line-height: 20px;
+  letter-spacing: 0.25px;
+}
+
+li a:hover {
+  color: #0055bb;
+  font-weight: bolder;
+}
+
+li span {
+  color: #828282;
+}
+
+li.divider {
+  display: flex;
+  justify-content: center;
+  justify-items: center
+}
+
+li {
+  padding-left: 1%;
+  padding-right: 1%;
+}
+
+.actions {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-end;
+  align-content: flex-end;
+  horiz-align: right;
+  float: right;
+  width: auto;
+  margin-left: auto;
+  margin-right: 0;
+}
+
+.button_auth, .button_register {
+  font-style: normal;
+  font-weight: 500;
+  font-size: 14px;
+  line-height: 16px;
+  align-items: flex-start;
+  padding: 10.5px;
+  height: 37px;
+  text-decoration: none;
+  text-align: center;
+  width: 200px;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  justify-items: center;
+}
+
+.button_auth {
+  background: #0C32C6;
+  color: #FFFFFF;
+
+}
+
+.button_register {
+  background: #FFFFFF;
+  color: #0C32C6;
+  border: 1px solid #0C32C6;
+}
+
+.button_container {
+  width: 100%;
+}
+
+li.nav-item {
+  clear: both;
+  display: inline-block;
+  overflow: hidden;
+  white-space: nowrap;
+  min-width: fit-content;
+  margin-right: 2%;
+}
+
+.button_register:hover {
+  background: #0C32C6;
+  color: #FFFFFF;
+  border: 1px solid #0C32C6;
+}
+
+.button_auth:hover {
+  background: #FFFFFF;
+  color: #0C32C6;
 }

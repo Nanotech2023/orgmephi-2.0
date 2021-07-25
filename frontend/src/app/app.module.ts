@@ -9,7 +9,8 @@ import { OlympiadsModule } from '@/olympiads/olympiads.module'
 import { AppRoutingModule } from '@/app-routing.module'
 import { environment } from '@environments/environment'
 import { AppComponent } from '@/app.component'
-import { UsersModule } from '@/users/users.module'
+import { UsersModule } from '@/users/users.module';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations'
 
 
 @NgModule( {
@@ -25,7 +26,8 @@ import { UsersModule } from '@/users/users.module'
         AppRoutingModule,
         StoreModule.forRoot( {} ),
         EffectsModule.forRoot( [] ),
-        environment.production ? [] : StoreDevtoolsModule.instrument()
+        environment.production ? [] : StoreDevtoolsModule.instrument(),
+        BrowserAnimationsModule
     ],
     providers: [],
     bootstrap: [ AppComponent ]

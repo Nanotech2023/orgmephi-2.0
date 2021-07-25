@@ -4,6 +4,8 @@ import { BrowserModule } from '@angular/platform-browser'
 import { HttpClientModule } from '@angular/common/http'
 import { FormsModule } from '@angular/forms'
 import { RouterModule } from '@angular/router'
+import { MatInputModule } from '@angular/material/input'
+import { MatFormFieldModule } from '@angular/material/form-field'
 
 
 const SHARED = [
@@ -11,7 +13,9 @@ const SHARED = [
     BrowserModule,
     HttpClientModule,
     RouterModule,
-    FormsModule
+    FormsModule,
+    MatFormFieldModule,
+    MatInputModule
 ]
 
 

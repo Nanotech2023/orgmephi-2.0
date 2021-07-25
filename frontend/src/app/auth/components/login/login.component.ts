@@ -38,4 +38,10 @@ export class LoginComponent implements OnInit
         // TODO enforce email regex check
         return !!( loginAttemptUser.password && loginAttemptUser.username )
     }
+
+    calculateHeight(): number
+    {
+        let number = window.innerHeight - (125 + 167)
+        return number
+    }
 }

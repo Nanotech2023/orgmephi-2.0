@@ -1,49 +1,54 @@
-<div class="container">
-    <header
-        class="d-flex flex-wrap align-items-center justify-content-center justify-content-md-between py-3 mb-4 border-bottom">
+<header>
+    <nav class="navbar navbar-expand-md navbar-dark fixed-top bg-light">
         <a routerLink="/" routerLinkActive="active"
-           class="d-flex align-items-center col-md-3 mb-2 mb-md-0 text-dark text-decoration-none home-link"
+           class="navbar-brand text-dark text-decoration-none home-link"
            title="На главную">
             <span class="site-title">Портал<br>олимпиад</span>
         </a>
-
-        <ul class="nav col-12 col-md-auto mb-2 justify-content-center mb-md-0">
-            <li><a routerLink="/user" class="nav-link px-2 link-secondary" *ngIf="isAuthorized$ | async">Профиль</a>
+        <ul class="navbar-nav mr-auto">
+            <li class="nav-item">
+                <a routerLink="/user" *ngIf="isAuthorized$ | async">Профиль</a>
             </li>
-            <li style="display: flex; justify-content: center; justify-items: center">
-                <span class="nav-link px-2 link-secondary">/</span>
+            <li class="nav-item divider">
+                <span>/</span>
             </li>
-            <li><a href="https://admission.mephi.ru" class="nav-link px-2 link-secondary">Приемная комиссия</a></li>
-            <li style="display: flex; justify-content: center; justify-items: center">
-                <span class="nav-link px-2 link-secondary">/</span>
+            <li class="nav-item">
+                <a href="https://admission.mephi.ru">Приемная комиссия</a>
             </li>
-            <li><a href="https://school.mephi.ru" class="nav-link px-2 link-secondary">Сетевая школа</a></li>
-            <li>
-                <span class="nav-link px-2 link-secondary">/</span>
+            <li class="nav-item divider">
+                <span>/</span>
             </li>
-            <li><a href="https://open.mephi.ru" class="nav-link px-2 link-secondary">Прием онлайн</a></li>
+            <li class="nav-item">
+                <a href="https://school.mephi.ru">Сетевая школа</a>
+            </li>
+            <li class="nav-item divider">
+                <span>/</span>
+            </li>
+            <li class="nav-item">
+                <a href="https://open.mephi.ru">Прием онлайн</a>
+            </li>
         </ul>
 
-        <div class="col-md-3 text-end">
-            <ul class="nav">
-                <li class="nav-item">
-                    <a type="button" class="btn btn-outline-primary me-2" routerLink="/login" routerLinkActive="active"
-                       *ngIf="!(isAuthorized$ | async)">Авторизация</a>
-                </li>
-                <li class="nav-item">
-                    <a type="button" class="btn btn-outline-primary" routerLink="/register" routerLinkActive="active"
-                       *ngIf="!(isAuthorized$ | async)">Регистрация</a>
-                </li>
-                <li class="nav-item dropdown" *ngIf="isAuthorized$ | async">
-                    <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" role="button"
-                       aria-expanded="false" *ngIf="commonUserInfo$ | async as userInfo">
-                        {{ userInfo.username }}
-                    </a>
-                    <ul class="dropdown-menu">
-                        <li><a class="dropdown-item" href="#">Выйти</a></li>
-                    </ul>
-                </li>
-            </ul>
+        <div class="actions">
+            <div class="button_container">
+                <a class="button_auth" routerLink="/login"
+                   routerLinkActive="active"
+                   *ngIf="!(isAuthorized$ | async)">Авторизация</a>
+            </div>
+            <div class="button_container">
+                <a class="button_register" routerLink="/register"
+                   routerLinkActive="active"
+                   *ngIf="!(isAuthorized$ | async)">Регистрация</a>
+            </div>
+            <div class="button_container dropdown" *ngIf="isAuthorized$ | async">
+                <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" role="button"
+                   aria-expanded="false" *ngIf="commonUserInfo$ | async as userInfo">
+                    {{ userInfo.username }}
+                </a>
+                <ul class="dropdown-menu">
+                    <li><a class="dropdown-item" href="#">Выйти</a></li>
+                </ul>
+            </div>
         </div>
-    </header>
-</div>
+    </nav>
+</header>
