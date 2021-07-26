@@ -1,5 +1,7 @@
 from datetime import datetime
-from flask import request, make_response
+from os import getcwd
+
+from flask import request, make_response, send_file, abort
 
 from orgmephi_user.models import UserRoleEnum, UserTypeEnum, add_user, add_personal_info, add_university_info
 from orgmephi_user.errors import RequestError, WeakPassword
@@ -24,6 +26,16 @@ user_types = {
 }
 
 user_types_reverse = {val: key for key, val in user_types.items()}
+
+
+@app.route('/api.yaml', methods=['GET'])
+def get_api():
+    if not app.config['DEBUG']:
+        abort(404)
+    api_path = app.config['ORGMEPHI_API_PATH']
+    if api_path[0] != '/':
+        api_path = '%s/%s' % (getcwd(), api_path)
+    return send_file(api_path)
 
 
 def grade_to_year(grade):

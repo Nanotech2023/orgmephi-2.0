@@ -6,7 +6,6 @@ from openapi_core.contrib.flask.decorators import FlaskOpenAPIViewDecorator
 from orgmephi_user.default_config import DefaultConfiguration
 from orgmephi_user.security import init_security
 
-
 def create_app(test_config=None):
     new_app = Flask(__name__)
     new_app.config.from_object('orgmephi_user.DefaultConfiguration')
@@ -34,6 +33,17 @@ def init_api():
     global openapi
     spec = create_spec(spec_dict)
     openapi = FlaskOpenAPIViewDecorator.from_spec(spec)
+    if app.config['DEBUG']:
+        from flask_swagger_ui import get_swaggerui_blueprint
+        from flask import send_file
+        swagger_ui_blueprint = get_swaggerui_blueprint(
+            '/swagger_ui',
+            '/api.yaml',
+            config={
+                'app_name': "orgmephi_user"
+            }
+        )
+        app.register_blueprint(swagger_ui_blueprint)
 
 
 app = create_app()
