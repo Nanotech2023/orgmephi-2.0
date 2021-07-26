@@ -49,10 +49,11 @@ def grade_to_year(grade):
     return admission_date
 
 
-def hash_password(password):
-    pass_check = app.config['ORGMEPHI_PASSWORD_POLICY'].test(password)
-    if pass_check:
-        raise WeakPassword(pass_check)
+def hash_password(password, force=False):
+    if not force:
+        pass_check = app.config['ORGMEPHI_PASSWORD_POLICY'].test(password)
+        if pass_check:
+            raise WeakPassword(pass_check)
     hash_policy = app.config['ORGMEPHI_PASSLIB_CONTEXT']
     password_hash = hash_policy.hash(password)
     return password_hash
@@ -77,6 +78,31 @@ def register():
             add_university_info(db.session, user, student_data['phone_number'], student_data['university'],
                                 grade_to_year(student_data['grade']), student_data['university_country'],
                                 student_data['citizenship'], student_data['region'], student_data['city'])
+
+        db.session.commit()
+
+        return make_response(
+            {
+                "id": user.id,
+                "username": user.username,
+                "role": user_roles_reverse[user.role],
+                "type": user_types_reverse[user.type]
+            }, 200)
+
+    except RequestError as err:
+        db.session.rollback()
+        return err.to_response()
+
+
+@app.route('/register/internal', methods=['POST'])
+@openapi
+@jwt_required_role(['Admin', 'System'])
+def register_internal():
+    try:
+        values = request.openapi.body
+        username = values['username']
+        password_hash = hash_password(values['password'], force=True)
+        user = add_user(db.session, username, password_hash, UserRoleEnum.participant, UserTypeEnum.internal)
 
         db.session.commit()
 
