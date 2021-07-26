@@ -179,3 +179,45 @@ def user_status_and_mark_for_response_by_id(olympiad_id, stage_id, contest_id, u
             db.session.commit()
     except Exception as err:  # TODO Add exception
         pass
+
+
+@app.route('/olympiad/{olympiad_id}/stage/{stage_id}/contest/{contest_id}/user/self/status/history', methods=['GET'])
+@openapi
+def user_status_history_for_response(olympiad_id, stage_id, contest_id):
+    try:  # TODO Add Checking
+        pass
+    except Exception as err:  # TODO Add exception
+        pass
+
+
+@app.route('/olympiad/{olympiad_id}/stage/{stage_id}/contest/{contest_id}/user/{user_id}/status/history', methods=['GET'])
+@openapi
+def user_status_history_for_response(olympiad_id, stage_id, contest_id, user_id):
+    try:    # TODO Add Checking
+        user_work = Response.query.filter_by(user_id=user_id). \
+            filter_by(contest_id=contest_id).one()
+        status = user_work.statuses.order_by(ResponseStatus.timestamp.desc())
+        history = []
+        appeals = db.session.query(ResponseStatus, Appeal). \
+            filter(ResponseStatus.status_id == Appeal.work_status).order_by(ResponseStatus.timestamp.desc())
+        for elem in status:     # TODO Add mark to api spec
+            if appeals.work_status == elem.status_id:
+                appeal = appeals.appeal_id
+            else:
+                appeal = None
+            history.append(
+                {
+                    'status:': work_status_reverse[elem.status],
+                    'datetime': elem.timestamp,
+                    'appeal_id': appeal,
+                    'mark': elem.mark
+                }
+            )
+        return make_response(
+            {
+                'user_id': user_id,
+                'contest_id': contest_id,
+                'history': history
+            }, 200)
+    except Exception as err:    # TODO Add exception
+        pass
