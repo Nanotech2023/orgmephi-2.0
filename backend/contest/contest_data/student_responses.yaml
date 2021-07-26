@@ -56,7 +56,7 @@ paths:
                 $ref: '#/components/schemas/errorResponse'
   /olympiad/{olympiad_id}/stage/{stage_id}/contest/{contest_id}/answer/{answer_id}:
     get:
-      summary: Get all user answers for the contest
+      summary: Get user's answer by id
       security:
         - cookieJWTAuth: [ ]
       parameters:
