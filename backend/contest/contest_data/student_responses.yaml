@@ -947,6 +947,9 @@ components:
           description: "Change date and time"
         appeal_id:
           type: integer
+        mark:
+          type: number
+          format: float
     userResponseStatusHistory:
       title: "Status history of user response"
       required:
