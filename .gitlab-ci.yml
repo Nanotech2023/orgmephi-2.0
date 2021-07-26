@@ -15,15 +15,3 @@ build-frontend:
     paths:
       - frontend/dist
   when: manual
-
-
-pages:
-  stage: deploy
-  needs: [ 'build-frontend' ]
-  script:
-    - mkdir .public
-    - cp -r frontend/dist/* .public
-    - mv .public/* .ci/heroku/public
-    - gem install dpl
-    - dpl --provider=heroku --app=$HEROKU_PRODUCTION_APP --api_key=$HEROKU_PRODUCTION_API_KEY
-  when: manual
