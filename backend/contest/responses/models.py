@@ -37,11 +37,11 @@ class ResponseStatusEnum(enum.Enum):
     revision: work sent for revision
     """
 
-    not_checked = 0
-    accepted = 1
-    rejected = 2
-    appeal = 3
-    revision = 4
+    not_checked = 'NotChecked'
+    accepted = 'Accepted'
+    rejected = 'Rejected'
+    appeal = 'Appeal'
+    revision = 'Revision'
 
 
 class ResponseStatus(db.Model):
