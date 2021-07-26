@@ -1,6 +1,6 @@
 """File with models description for response management."""
 
-from contest_data.app import db
+from contest_data import db
 from datetime import datetime
 import enum
 
