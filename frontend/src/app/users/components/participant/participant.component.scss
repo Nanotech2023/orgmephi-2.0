@@ -1,0 +1,41 @@
+@import "src/styles/colors";
+
+.container_main {
+  padding-right: 10%;
+  padding-left: 10%;
+  margin: auto;
+}
+
+.col-4, .container_left, .container_right, .container_center {
+  height: 100%;
+}
+
+.col-4 {
+  padding: 0;
+}
+
+.container_left {
+  background-color: $primary;
+}
+
+.container_right {
+  .row {
+    height: 100%;
+  }
+
+  .top {
+    background-color: #0C32C6;
+    height: 50%;
+  }
+
+  .bottom {
+    background-color: #FFFFFF;
+    border: 1px solid #0C32C6;
+    height: 50%;
+  }
+}
+
+.container_center {
+  background-color: $secondary;
+
+}

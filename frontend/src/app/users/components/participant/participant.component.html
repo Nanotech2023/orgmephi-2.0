@@ -1,13 +1,20 @@
-<div class="container">
-    <div class="row">
-        <div class="col-md-4">
-            <h4>Олимпиады</h4>
-            <div class="container">
-                <a class="btn btn-primary" routerLink="/user/olymp">Заполнить анкету</a>
+<div class="row container_main" [style.height.px]="calculateHeight()">
+    <div class="col-4">
+        <div class="container_left">
+            <a class="btn btn-danger" routerLink="/user/olymp">Заполнить анкету</a>
+        </div>
+    </div>
+    <div class="col-4">
+        <div class="container_center"></div>
+
+    </div>
+    <div class="col-4">
+        <div class="container_right">
+            <div class="row">
+                <div class="col-12 top"></div>
+                <div class="col-12 bottom"></div>
             </div>
         </div>
-        <div class="col-md-4"></div>
-        <div class="col-md-4"></div>
-        <div class="col-md-4"></div>
+
     </div>
 </div>
