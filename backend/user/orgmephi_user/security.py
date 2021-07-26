@@ -1,6 +1,7 @@
 from passlib.context import CryptContext
 from password_strength import PasswordPolicy
 
+
 def init_security(app):
     app.config['ORGMEPHI_PASSLIB_CONTEXT'] = CryptContext(schemes=app.config['ORGMEPHI_PASSWORD_HASH'])
     app.config['ORGMEPHI_PASSWORD_POLICY'] = PasswordPolicy.from_names(

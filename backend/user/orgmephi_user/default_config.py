@@ -1,3 +1,6 @@
+from datetime import timedelta
+
+
 class DefaultConfiguration:
     SQLALCHEMY_DATABASE_URI = 'sqlite:///database.sqlite'
     SQLALCHEMY_TRACK_MODIFICATIONS = False
@@ -10,3 +13,9 @@ class DefaultConfiguration:
     ORGMEPHI_PASSWORD_NUMBERS = 1
     ORGMEPHI_PASSWORD_SPECIAL = 1
     ORGMEPHI_PASSWORD_NONLETTERS = 0
+    JWT_ACCESS_TOKEN_EXPIRES = timedelta(hours=1)
+    JWT_REFRESH_TOKEN_EXPIRES = timedelta(hours=1)
+    ORGMEPHI_REMEMBER_ME_TIME = timedelta(days=30)
+    JWT_ALGORITHM = 'RS256'
+    ORGMEPHI_PUBLIC_KEY = 'id_rsa.pub'
+    ORGMEPHI_PRIVATE_KEY = 'id_rsa'

@@ -229,6 +229,10 @@ def add_user(db_session, username, password_hash, role, reg_type):
     return user
 
 
+def get_user_by_name(username):
+    return User.query.filter(User.username == username).one_or_none()
+
+
 def add_personal_info(db_session, user, email, first_name, second_name, middle_name, date_of_birth):
     user_info = UserInfo(
         user_id=user.id,
@@ -244,7 +248,7 @@ def add_personal_info(db_session, user, email, first_name, second_name, middle_n
 
 def add_university_info(db_session, user, phone, university_name, admission_year, university_country, citizenship,
                         region, city):
-    university = University.query.filter(University.name == university_name).one_or_none
+    university = University.query.filter(University.name == university_name).one_or_none()
     student_info = StudentInfo(
         user_id=user.id,
         phone=phone,

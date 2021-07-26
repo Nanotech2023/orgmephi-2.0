@@ -1,9 +1,10 @@
-from datetime import datetime
 from os import getcwd
 
 from flask import request, make_response, send_file, abort
+from flask_jwt_extended import create_access_token, set_access_cookies, \
+    create_refresh_token, set_refresh_cookies, get_csrf_token
 
-from orgmephi_user.models import UserRoleEnum, UserTypeEnum, add_user, add_personal_info, add_university_info
+from orgmephi_user.models import *
 from orgmephi_user.errors import RequestError, WeakPassword
 from orgmephi_user import app, db, openapi
 
@@ -89,3 +90,54 @@ def register():
     except RequestError as err:
         db.session.rollback()
         return err.to_response()
+
+
+def validate_password(password, password_hash):
+    hash_policy = app.config['ORGMEPHI_PASSLIB_CONTEXT']
+    if not hash_policy.verify(password, password_hash):
+        abort(401)
+
+
+def generate_access_token(user):
+    additional_claims = {"name": user.username, "role": user_roles_reverse[user.role]}
+    access_token = create_access_token(identity=user.id, additional_claims=additional_claims)
+    csrf_access_token = get_csrf_token(access_token)
+    return access_token, csrf_access_token
+
+
+def generate_refresh_token(user, remember_me):
+    if remember_me:
+        refresh_token = create_refresh_token(identity=user.id, expires_delta=app.config['ORGMEPHI_REMEMBER_ME_TIME'])
+    else:
+        refresh_token = create_refresh_token(identity=user.id)
+    csrf_refresh_token = get_csrf_token(refresh_token)
+    return refresh_token, csrf_refresh_token
+
+
+@app.route('/login', methods=['POST'])
+@openapi
+def login():
+    values = request.openapi.body
+    user = get_user_by_name(values['auth_credentials']['username'])
+
+    if user is not None:
+        validate_password(values['auth_credentials']['password'], user.password_hash)
+    else:
+        # align response times
+        validate_password(values['auth_credentials']['password'],
+                          '$pbkdf2-sha256$29000$h8DWeu8dg3CudQ4BAACg1A$JMTWWR9uLxzruMTaZObU8CJxMJoDTjJPwfL.aboeCIM')
+        abort(401)
+
+    access_token, access_csrf = generate_access_token(user)
+    refresh_token, refresh_csrf = generate_refresh_token(user, values['remember_me'])
+
+    response = make_response(
+        {
+            "csrf_access_token": access_csrf,
+            "csrf_refresh_token": refresh_csrf
+        }, 200)
+
+    set_access_cookies(response, access_token)
+    set_refresh_cookies(response, refresh_token)
+
+    return response

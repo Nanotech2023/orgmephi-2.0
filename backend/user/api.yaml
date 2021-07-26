@@ -986,7 +986,7 @@ components:
         auth_credentials:
           $ref: '#/components/schemas/authCredentials'
         remember_me:
-          description: Greatly refresh token expiration time
+          description: Greatly increases refresh token expiration time
           type: boolean
     authCredentials:
       title: 'Authentication credentials'
@@ -997,9 +997,11 @@ components:
         username:
           description: Email for external users, username for MEPhI students, number for unconfirmed users
           type: string
+          maxLength: 64
         password:
           type: string
           format: password
+          maxLength: 128
     authResponse:
       title: 'Authentication response'
       required:
