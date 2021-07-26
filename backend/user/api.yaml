@@ -144,7 +144,11 @@ paths:
       responses:
         '200':
           description: OK
-  /user/{id}/password:
+        '400':
+          description: Weak password
+        '404':
+          description: User not found
+  /user/{user_id}/password:
     post:
       summary: Change password for another user
       description: Change password for another user, admins only
@@ -154,7 +158,7 @@ paths:
       parameters:
         - in: path
           description: Id of the user
-          name: id
+          name: user_id
           required: true
           schema:
             type: integer
@@ -167,6 +171,8 @@ paths:
       responses:
         '200':
           description: OK
+        '404':
+          description: User not found
   /user/self:
     get:
       summary: Get common info for current user
@@ -1042,9 +1048,11 @@ components:
         new_password:
           type: string
           format: password
+          maxLength: 128
         old_password:
           type: string
           format: password
+          maxLength: 128
     changePasswordAdmin:
       title: 'Reset password request for admins'
       required:
@@ -1053,6 +1061,7 @@ components:
         new_password:
           type: string
           format: password
+          maxLength: 128
     commonUserInfo:
       title: 'Common user info'
       required:

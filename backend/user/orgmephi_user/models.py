@@ -233,6 +233,10 @@ def get_user_by_name(username):
     return User.query.filter(User.username == username).one_or_none()
 
 
+def get_user_by_id(user_id):
+    return User.query.filter(User.id == user_id).one_or_none()
+
+
 def add_personal_info(db_session, user, email, first_name, second_name, middle_name, date_of_birth):
     user_info = UserInfo(
         user_id=user.id,

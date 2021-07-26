@@ -202,3 +202,35 @@ def logout():
     response = make_response({}, 200)
     unset_jwt_cookies(response)
     return response
+
+
+def update_password(user_id, new_password, old_password, admin=False):
+    user = get_user_by_id(user_id)
+    if user is None:
+        return 404
+    if not admin:
+        validate_password(old_password, user.password_hash)
+    try:
+        password_hash = hash_password(new_password, force=admin)
+    except RequestError as err:
+        return err.to_response()
+    user.password_hash = password_hash
+    db.session.commit()
+    return make_response({}, 200)
+
+
+@app.route('/user/<int:user_id>/password', methods=['POST'])
+@openapi
+@jwt_required_role(['Admin'])
+def change_password_admin(user_id):
+    values = request.openapi.body
+    return update_password(user_id, values['new_password'], None, True)
+
+
+@app.route('/user/self/password', methods=['POST'])
+@openapi
+@jwt_required()
+def change_password_self():
+    values = request.openapi.body
+    user_id = jwt_get_id()
+    return update_password(user_id, values['new_password'], values['old_password'], False)
