@@ -119,6 +119,7 @@ paths:
       summary: Logout current user
       security:
         - JWTAcessToken: []
+        - CSRFAcessToken: [] #framework limitations
       responses:
         '200':
           description: OK

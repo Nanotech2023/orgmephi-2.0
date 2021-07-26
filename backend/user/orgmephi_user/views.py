@@ -1,8 +1,8 @@
 from os import getcwd
 
 from flask import request, make_response, send_file
-from flask_jwt_extended import create_access_token, set_access_cookies, \
-    create_refresh_token, set_refresh_cookies, get_csrf_token, jwt_required
+from flask_jwt_extended import create_access_token, set_access_cookies, create_refresh_token, set_refresh_cookies,\
+    get_csrf_token, jwt_required, unset_jwt_cookies
 
 from orgmephi_user.models import *
 from orgmephi_user.errors import RequestError, WeakPassword
@@ -192,4 +192,13 @@ def refresh():
     set_access_cookies(response, access_token)
     set_refresh_cookies(response, refresh_token)
 
+    return response
+
+
+@app.route('/logout', methods=['POST'])
+@openapi
+@jwt_required()
+def logout():
+    response = make_response({}, 200)
+    unset_jwt_cookies(response)
     return response
