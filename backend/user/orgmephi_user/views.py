@@ -2,7 +2,7 @@ from os import getcwd
 
 from flask import request, make_response, send_file
 from flask_jwt_extended import create_access_token, set_access_cookies, \
-    create_refresh_token, set_refresh_cookies, get_csrf_token
+    create_refresh_token, set_refresh_cookies, get_csrf_token, jwt_required
 
 from orgmephi_user.models import *
 from orgmephi_user.errors import RequestError, WeakPassword
@@ -125,18 +125,20 @@ def validate_password(password, password_hash):
         abort(401)
 
 
-def generate_access_token(user):
-    additional_claims = {"name": user.username, "role": user_roles_reverse[user.role]}
-    access_token = create_access_token(identity=user.id, additional_claims=additional_claims)
+def generate_access_token(user_id, name, role):
+    additional_claims = {"name": name, "role": role}
+    access_token = create_access_token(identity=user_id, additional_claims=additional_claims)
     csrf_access_token = get_csrf_token(access_token)
     return access_token, csrf_access_token
 
 
-def generate_refresh_token(user, remember_me):
+def generate_refresh_token(user_id, name, role, remember_me):
+    additional_claims = {"name": name, "role": role, "remember": remember_me}
     if remember_me:
-        refresh_token = create_refresh_token(identity=user.id, expires_delta=app.config['ORGMEPHI_REMEMBER_ME_TIME'])
+        refresh_token = create_refresh_token(identity=user_id, expires_delta=app.config['ORGMEPHI_REMEMBER_ME_TIME'],
+                                             additional_claims=additional_claims)
     else:
-        refresh_token = create_refresh_token(identity=user.id)
+        refresh_token = create_refresh_token(identity=user_id, additional_claims=additional_claims)
     csrf_refresh_token = get_csrf_token(refresh_token)
     return refresh_token, csrf_refresh_token
 
@@ -155,8 +157,31 @@ def login():
                           '$pbkdf2-sha256$29000$h8DWeu8dg3CudQ4BAACg1A$JMTWWR9uLxzruMTaZObU8CJxMJoDTjJPwfL.aboeCIM')
         abort(401)
 
-    access_token, access_csrf = generate_access_token(user)
-    refresh_token, refresh_csrf = generate_refresh_token(user, values['remember_me'])
+    access_token, access_csrf = generate_access_token(user.id, user.username, user_roles_reverse[user.role])
+    refresh_token, refresh_csrf = generate_refresh_token(user.id, user.username, user_roles_reverse[user.role],
+                                                         values['remember_me'])
+
+    response = make_response(
+        {
+            "csrf_access_token": access_csrf,
+            "csrf_refresh_token": refresh_csrf
+        }, 200)
+
+    set_access_cookies(response, access_token)
+    set_refresh_cookies(response, refresh_token)
+
+    return response
+
+
+@app.route('/refresh', methods=['POST'])
+@openapi
+@jwt_required(refresh=True)
+def refresh():
+    user_id = jwt_get_id()
+    role = jwt_get_role()
+    username = jwt_get_username()
+    access_token, access_csrf = generate_access_token(user_id, username, role)
+    refresh_token, refresh_csrf = generate_refresh_token(user_id, username, role, get_jwt()['remember'])
 
     response = make_response(
         {
