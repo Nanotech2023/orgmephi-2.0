@@ -1,0 +1,29 @@
+stages:
+  - build
+  - deploy
+
+
+
+build-frontend:
+  image: node:lts-slim
+  stage: build
+  before_script:
+    - 'yarn --cwd frontend install'
+  script:
+    - 'yarn --cwd frontend run build'
+  artifacts:
+    paths:
+      - frontend/dist
+  when: manual
+
+
+pages:
+  stage: deploy
+  needs: [ 'build-frontend' ]
+  script:
+    - mkdir .public
+    - cp -r frontend/dist/* .public
+    - mv .public/* .ci/heroku/public
+    - gem install dpl
+    - dpl --provider=heroku --app=$HEROKU_PRODUCTION_APP --api_key=$HEROKU_PRODUCTION_API_KEY
+  when: manual
