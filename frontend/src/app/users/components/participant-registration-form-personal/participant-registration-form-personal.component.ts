@@ -5,7 +5,6 @@ import { select, Store } from '@ngrx/store'
 import { AuthSelectors, AuthState } from '@/auth/store'
 import { CommonUserInfo, PersonalInfo } from '@/auth/models'
 import { Observable } from 'rxjs'
-import { selectPersonalInfo } from '@/auth/store/auth.selectors'
 
 
 @Component( {

@@ -1,25 +1,30 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing'
 
-import { ParticipantCabinetComponent } from './participant-cabinet.component';
+import { ParticipantCabinetComponent } from './participant-cabinet.component'
 
-describe('ParticipantCabinetComponent', () => {
-  let component: ParticipantCabinetComponent;
-  let fixture: ComponentFixture<ParticipantCabinetComponent>;
 
-  beforeEach(async () => {
-    await TestBed.configureTestingModule({
-      declarations: [ ParticipantCabinetComponent ]
-    })
-    .compileComponents();
-  });
+describe( 'ParticipantCabinetComponent', () =>
+{
+    let component: ParticipantCabinetComponent
+    let fixture: ComponentFixture<ParticipantCabinetComponent>
 
-  beforeEach(() => {
-    fixture = TestBed.createComponent(ParticipantCabinetComponent);
-    component = fixture.componentInstance;
-    fixture.detectChanges();
-  });
+    beforeEach( async () =>
+    {
+        await TestBed.configureTestingModule( {
+            declarations: [ ParticipantCabinetComponent ]
+        } )
+            .compileComponents()
+    } )
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
-  });
-});
+    beforeEach( () =>
+    {
+        fixture = TestBed.createComponent( ParticipantCabinetComponent )
+        component = fixture.componentInstance
+        fixture.detectChanges()
+    } )
+
+    it( 'should create', () =>
+    {
+        expect( component ).toBeTruthy()
+    } )
+} )

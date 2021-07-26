@@ -1,10 +1,7 @@
 stages:
   - build
-  - deploy
 
-
-
-build-frontend:
+.job_template: &build
   image: node:lts-slim
   stage: build
   before_script:
@@ -14,4 +11,20 @@ build-frontend:
   artifacts:
     paths:
       - frontend/dist
+
+build-frontend-prod:
+  <<: *build
+  only:
+    - master
+    - frontend
+    - backend
+    - tags
+
+build-frontend-dev:
+  <<: *build
   when: manual
+  except:
+    - master
+    - frontend
+    - backend
+    - tags
