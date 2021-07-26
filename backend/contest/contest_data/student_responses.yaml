@@ -54,6 +54,55 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/errorResponse'
+  /olympiad/{olympiad_id}/stage/{stage_id}/contest/{contest_id}/answer/{answer_id}:
+    get:
+      summary: Get all user answers for the contest
+      security:
+        - cookieJWTAuth: [ ]
+      parameters:
+        - in: path
+          description: Id of the contest
+          name: contest_id
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the olympiad
+          name: olympiad_id
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the stage
+          name: stage_id
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the answer
+          name: answer_id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/userContestAnswer'
+        '403':
+          description: Not enough rights for current user
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+        '404':
+          description: User, olympiad, stage or contest not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
   /olympiad/{olympiad_id}/stage/{stage_id}/contest/{contest_id}/task/{task_id}/user/self:
     get:
       summary: Get current user answer for the task
