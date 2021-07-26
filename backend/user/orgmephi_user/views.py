@@ -1,12 +1,13 @@
 from os import getcwd
 
-from flask import request, make_response, send_file, abort
+from flask import request, make_response, send_file
 from flask_jwt_extended import create_access_token, set_access_cookies, \
     create_refresh_token, set_refresh_cookies, get_csrf_token
 
 from orgmephi_user.models import *
 from orgmephi_user.errors import RequestError, WeakPassword
 from orgmephi_user import app, db, openapi
+from orgmephi_user.jwt_verify import *
 
 user_roles = {
     'Participant': UserRoleEnum.participant,
