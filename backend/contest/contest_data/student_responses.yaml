@@ -664,7 +664,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/appealListInfo'
+                $ref: '#/components/schemas/commonAppealInfo'
         '404':
           description: User, olympiad, stage or contest not found
           content:
@@ -750,7 +750,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/appealListInfo'
+                $ref: '#/components/schemas/commonAppealInfo'
         '404':
           description: User, olympiad, stage or contest not found
           content:
