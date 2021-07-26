@@ -161,7 +161,10 @@ def user_status_and_mark_for_response_by_id(olympiad_id, stage_id, contest_id, u
         elif request.method == 'POST':
             values = request.openapi.body
             status = values['status']
-            mark = values.get('mark')
+            if 'mark' in values:
+                mark = values['mark']
+            else:
+                mark = None
             user_work = Response.query.filter_by(user_id=user_id). \
                 filter_by(contest_id=contest_id).one()
             if mark is None:
@@ -199,10 +202,12 @@ def user_status_history_for_response(olympiad_id, stage_id, contest_id, user_id)
         status = user_work.statuses.order_by(ResponseStatus.timestamp.desc())
         history = []
         appeals = db.session.query(ResponseStatus, Appeal). \
-            filter(ResponseStatus.status_id == Appeal.work_status).order_by(ResponseStatus.timestamp.desc())
+            filter(ResponseStatus.status_id == Appeal.work_status).order_by(ResponseStatus.timestamp.desc()) # TODO fix query
+        number = 0
         for elem in status:     # TODO Add mark to api spec
-            if appeals.work_status == elem.status_id:
+            if appeals[number].work_status == elem.status_id:
                 appeal = appeals.appeal_id
+                number += 1
             else:
                 appeal = None
             history.append(
@@ -221,3 +226,54 @@ def user_status_history_for_response(olympiad_id, stage_id, contest_id, user_id)
             }, 200)
     except Exception as err:    # TODO Add exception
         pass
+
+
+@app.route('/olympiad/{olympiad_id}/stage/{stage_id}/contest/{contest_id}/list/', methods=['GET'])
+@openapi
+def get_list_for_stage(olympiad_id, stage_id, contest_id):
+    try:     # TODO Add Checking
+        pass
+    except Exception as err:
+        pass    # TODO Add exception
+
+
+@app.route('/olympiad/{olympiad_id}/stage/{stage_id}/contest/{contest_id}/user/self/appeal/last',
+           methods=['GET', 'POST'])
+@openapi
+def user_response_appeal_info(olympiad_id, stage_id, contest_id):
+    try:    # TODO Add Checking
+        if request.method == 'GET':
+            pass
+        elif request.method == 'POST':
+            pass
+    except Exception as err:
+        pass    # TODO Add exception
+
+
+@app.route('/olympiad/{olympiad_id}/stage/{stage_id}/contest/{contest_id}/user/{user_id}/appeal/last',
+           methods=['GET', 'POST'])
+@openapi
+def user_response_appeal_info_by_id(olympiad_id, stage_id, contest_id, user_id):  # TODO change to commonAppealInfo
+    try:    # TODO Add Checking
+        if request.method == 'GET':
+            user_work = Response.query.filter_by(user_id=user_id). \
+                filter_by(contest_id=contest_id).one()
+            last_appeal = ResponseStatus.query.join(Appeal, ResponseStatus.status_id == Appeal.work_status). \
+                filter(ResponseStatus.work_id == user_work.work_id). \
+                order_by(ResponseStatus.timestamp.desc()).first()
+            if last_appeal is None:
+                pass # TODO Exception no appeal
+            return make_response(
+                {
+                    'appeal_id': last_appeal.appeal_id,
+                    'status': last_appeal.work_status,
+                    'appeal_message': last_appeal.appeal_message,
+                    'appeal_response': last_appeal.appeal_response
+                })
+        elif request.method == 'POST':
+            pass
+    except Exception as err:
+        pass    # TODO Add exception
+
+
+
