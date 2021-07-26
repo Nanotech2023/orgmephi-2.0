@@ -31,6 +31,26 @@ paths:
               schema:
                 $ref: '#/components/schemas/errorResponse'
 
+  /olympiad/all:
+    get:
+      summary: list of olympiads
+      security:
+        - cookieJWTAuth: [ ]
+        - CSRFToken: [ ]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/olympiads'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+
   /olympiad/{id_olympiad}/remove:
     post:
       summary: Remove olympiad
@@ -109,6 +129,68 @@ paths:
               schema:
                 $ref: '#/components/schemas/errorResponse'
 
+  /olympiad/{id_olympiad}/stage/create:
+    post:
+      summary: Create a new stage in oimpiad
+      parameters:
+        - in: path
+          description: Id of the olympiad
+          name: id_olympiad
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/createStage'
+      security:
+        - cookieJWTAuth: [ ]
+        - CSRFToken: [ ]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/stageInfoId'
+
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+
+  /olympiad/{id_olympiad}/stage/all:
+    get:
+      summary: list of stages in olympiad
+      parameters:
+        - in: path
+          description: Id of the olympiad
+          name: id_olympiad
+          required: true
+          schema:
+            type: integer
+      security:
+        - cookieJWTAuth: [ ]
+        - CSRFToken: [ ]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/stagesInOlympiad'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+
+
   /olympiad/{id_olympiad}/stage/{id_stage}/contest/create:
     post:
       summary: Create a new contest
@@ -149,13 +231,81 @@ paths:
               schema:
                 $ref: '#/components/schemas/errorResponse'
 
-  /olympiad/{id_olympiad}/stage/create:
+  /olympiad/{id_olympiad}/stage/{id_stage}/remove:
     post:
-      summary: Create a new stage in oimpiad
+      summary: Remove stage from olympiad
       parameters:
         - in: path
           description: Id of the olympiad
           name: id_olympiad
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the stage
+          name: id_stage
+          required: true
+          schema:
+            type: integer
+      security:
+        - cookieJWTAuth: [ ]
+        - CSRFToken: [ ]
+      responses:
+        '200':
+          description: OK
+        '404':
+          description: Stage not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+
+  /olympiad/{id_olympiad}/stage/{id_stage}:
+    get:
+      summary: Get common info for a different stage
+      security: []
+      parameters:
+        - in: path
+          description: Id of the olympiad
+          name: id_olympiad
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the stage
+          name: id_stage
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/stageInfo'
+        '404':
+          description: Stage not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+
+    patch:
+      summary: Set stage info for a olympiad
+      security:
+        - cookieJWTAuth: [ ]
+        - CSRFToken: [ ]
+      parameters:
+        - in: path
+          description: Id of the olympiad
+          name: id_olympiad
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the stage
+          name: id_stage
           required: true
           schema:
             type: integer
@@ -164,20 +314,12 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/createStage'
-      security:
-        - cookieJWTAuth: [ ]
-        - CSRFToken: [ ]
+              $ref: '#/components/schemas/stageInfoUpdate'
       responses:
         '200':
           description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/stageInfoId'
-
-        '400':
-          description: Bad request
+        '404':
+          description: Stage not found
           content:
             application/json:
               schema:
@@ -297,39 +439,9 @@ paths:
               schema:
                 $ref: '#/components/schemas/errorResponse'
 
-  /olympiad/{id_olympiad}/stage/{id_stage}/remove:
-    post:
-      summary: Remove stage from olympiad
-      parameters:
-        - in: path
-          description: Id of the olympiad
-          name: id_olympiad
-          required: true
-          schema:
-            type: integer
-        - in: path
-          description: Id of the stage
-          name: id_stage
-          required: true
-          schema:
-            type: integer
-      security:
-        - cookieJWTAuth: [ ]
-        - CSRFToken: [ ]
-      responses:
-        '200':
-          description: OK
-        '404':
-          description: Stage not found
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errorResponse'
-
-  /olympiad/{id_olympiad}/stage/{id_stage}:
+  /olympiad/{id_olympiad}/stage/{id_stage}/contest/all:
     get:
-      summary: Get common info for a different stage
-      security: []
+      summary: list of contests in stage
       parameters:
         - in: path
           description: Id of the olympiad
@@ -343,49 +455,192 @@ paths:
           required: true
           schema:
             type: integer
+      security:
+        - cookieJWTAuth: [ ]
+        - CSRFToken: [ ]
       responses:
         '200':
           description: OK
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/stageInfo'
-        '404':
-          description: Stage not found
+                $ref: '#/components/schemas/contestsInStage'
+        '400':
+          description: Bad request
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/errorResponse'
 
-    patch:
-      summary: Set stage info for a olympiad
-      security:
-        - cookieJWTAuth: [ ]
-        - CSRFToken: [ ]
-      parameters:
-        - in: path
-          description: Id of the olympiad
-          name: id_olympiad
-          required: true
-          schema:
-            type: integer
-        - in: path
-          description: Id of the stage
-          name: id_stage
-          required: true
-          schema:
-            type: integer
+  /olympiad/{id_olympiad}/stage/{id_stage}/contest/{id_contest}/adduser:
+    post:
+      summary: Add user to contest
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/stageInfoUpdate'
+              $ref: '#/components/schemas/updateUserInContest'
+      parameters:
+        - in: path
+          description: Id of the olympiad
+          name: id_olympiad
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the stage
+          name: id_stage
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the contest
+          name: id_contest
+          required: true
+          schema:
+            type: integer
+      security:
+        - cookieJWTAuth: [ ]
+        - CSRFToken: [ ]
       responses:
         '200':
           description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/updateUserInContest'
         '404':
-          description: Stage not found
+          description: User or group not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+
+  /olympiad/{id_olympiad}/stage/{id_stage}/contest/{id_contest}/removeuser:
+    post:
+      summary: Remove user from contest
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/updateUserInContest'
+      parameters:
+        - in: path
+          description: Id of the olympiad
+          name: id_olympiad
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the stage
+          name: id_stage
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the contest
+          name: id_contest
+          required: true
+          schema:
+            type: integer
+      security:
+        - cookieJWTAuth: [ ]
+        - CSRFToken: [ ]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/updateUserInContest'
+        '404':
+          description: User or group not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+
+  /olympiad/{id_olympiad}/stage/{id_stage}/contest/{id_contest}/user/all:
+    get:
+      summary: list of user in contest
+      parameters:
+        - in: path
+          description: Id of the olympiad
+          name: id_olympiad
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the stage
+          name: id_stage
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the contest
+          name: id_contest
+          required: true
+          schema:
+            type: integer
+      security:
+        - cookieJWTAuth: [ ]
+        - CSRFToken: [ ]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/usersInContest'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+
+  /olympiad/{id_olympiad}/stage/{id_stage}/contest/{id_contest}/user/{id_user}/certificate:
+    get:
+      summary: certificate of user in contest
+      parameters:
+        - in: path
+          description: Id of the olympiad
+          name: id_olympiad
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the stage
+          name: id_stage
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the contest
+          name: id_contest
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the user
+          name: id_user
+          required: true
+          schema:
+            type: integer
+      security:
+        - cookieJWTAuth: [ ]
+        - CSRFToken: [ ]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/userCertificate'
+        '400':
+          description: Bad request
           content:
             application/json:
               schema:
@@ -436,6 +691,45 @@ paths:
               schema:
                 $ref: '#/components/schemas/errorResponse'
 
+  /olympiad/{id_olympiad}/stage/{id_stage}/contest/{id_contest}/variant/all:
+    get:
+      summary: list of variants in contest
+      parameters:
+        - in: path
+          description: Id of the olympiad
+          name: id_olympiad
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the stage
+          name: id_stage
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the contest
+          name: id_contest
+          required: true
+          schema:
+            type: integer
+      security:
+        - cookieJWTAuth: [ ]
+        - CSRFToken: [ ]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/variantsInContest'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+
   /olympiad/{id_olympiad}/stage/{id_stage}/contest/{id_contest}/variant/{id_variant}/remove:
     post:
       summary: Remove variant
@@ -477,7 +771,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/errorResponse'
 
-  /olympiad/{id_olympiad}/stage/{id_stage}/contest/{id_contest}/variant/{id_variant}:
+  /olympiad/{id_olympiad}/stage/{id_stage}/contest/{id_contest}/variant/{variant_num}:
     get:
       summary: Get info for a different variant
       security:
@@ -503,8 +797,8 @@ paths:
           schema:
             type: integer
         - in: path
-          description: Id of the variant
-          name: id_variant
+          description: Number of the variant in contest
+          name: variant_num
           required: true
           schema:
             type: integer
@@ -546,8 +840,8 @@ paths:
           schema:
             type: integer
         - in: path
-          description: Id of the variant
-          name: id_variant
+          description: Number of the variant in contest
+          name: variant_num
           required: true
           schema:
             type: integer
@@ -776,215 +1070,6 @@ paths:
               schema:
                 $ref: '#/components/schemas/errorResponse'
 
-  /olympiad/{id_olympiad}/stage/{id_stage}/contest/{id_contest}/adduser:
-    post:
-      summary: Add user to contest
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/updateUserInContest'
-      parameters:
-        - in: path
-          description: Id of the olympiad
-          name: id_olympiad
-          required: true
-          schema:
-            type: integer
-        - in: path
-          description: Id of the stage
-          name: id_stage
-          required: true
-          schema:
-            type: integer
-        - in: path
-          description: Id of the contest
-          name: id_contest
-          required: true
-          schema:
-            type: integer
-      security:
-        - cookieJWTAuth: [ ]
-        - CSRFToken: [ ]
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/updateUserInContest'
-        '404':
-          description: User or group not found
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errorResponse'
-
-  /olympiad/{id_olympiad}/stage/{id_stage}/contest/{id_contest}/removeuser:
-    post:
-      summary: Remove user from contest
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/updateUserInContest'
-      parameters:
-        - in: path
-          description: Id of the olympiad
-          name: id_olympiad
-          required: true
-          schema:
-            type: integer
-        - in: path
-          description: Id of the stage
-          name: id_stage
-          required: true
-          schema:
-            type: integer
-        - in: path
-          description: Id of the contest
-          name: id_contest
-          required: true
-          schema:
-            type: integer
-      security:
-        - cookieJWTAuth: [ ]
-        - CSRFToken: [ ]
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/updateUserInContest'
-        '404':
-          description: User or group not found
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errorResponse'
-
-  /olympiad/all:
-    get:
-      summary: list of olympiads
-      security:
-        - cookieJWTAuth: [ ]
-        - CSRFToken: [ ]
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/olympiads'
-        '400':
-          description: Bad request
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errorResponse'
-
-  /olympiad/{id_olympiad}/stage/all:
-    get:
-      summary: list of stages in olympiad
-      parameters:
-        - in: path
-          description: Id of the olympiad
-          name: id_olympiad
-          required: true
-          schema:
-            type: integer
-      security:
-        - cookieJWTAuth: [ ]
-        - CSRFToken: [ ]
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/stagesInOlympiad'
-        '400':
-          description: Bad request
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errorResponse'
-
-  /olympiad/{id_olympiad}/stage/{id_stage}/contest/all:
-    get:
-      summary: list of contests in stage
-      parameters:
-        - in: path
-          description: Id of the olympiad
-          name: id_olympiad
-          required: true
-          schema:
-            type: integer
-        - in: path
-          description: Id of the stage
-          name: id_stage
-          required: true
-          schema:
-            type: integer
-      security:
-        - cookieJWTAuth: [ ]
-        - CSRFToken: [ ]
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/contestsInStage'
-        '400':
-          description: Bad request
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errorResponse'
-
-  /olympiad/{id_olympiad}/stage/{id_stage}/contest/{id_contest}/variant/all:
-    get:
-      summary: list of variants in contest
-      parameters:
-        - in: path
-          description: Id of the olympiad
-          name: id_olympiad
-          required: true
-          schema:
-            type: integer
-        - in: path
-          description: Id of the stage
-          name: id_stage
-          required: true
-          schema:
-            type: integer
-        - in: path
-          description: Id of the contest
-          name: id_contest
-          required: true
-          schema:
-            type: integer
-      security:
-        - cookieJWTAuth: [ ]
-        - CSRFToken: [ ]
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/variantsInContest'
-        '400':
-          description: Bad request
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errorResponse'
-
   /olympiad/{id_olympiad}/stage/{id_stage}/contest/{id_contest}/variant/{id_variant}/tasks/all:
     get:
       summary: list of tasks in variant
@@ -1030,9 +1115,9 @@ paths:
               schema:
                 $ref: '#/components/schemas/errorResponse'
 
-  /olympiad/{id_olympiad}/stage/{id_stage}/contest/{id_contest}/user/all:
+  /olympiad/{id_olympiad}/stage/{id_stage}/contest/{id_contest}/variant/{id_variant}/tasks/{id_task}/taskimage:
     get:
-      summary: list of user in contest
+      summary: Task image
       parameters:
         - in: path
           description: Id of the olympiad
@@ -1052,6 +1137,18 @@ paths:
           required: true
           schema:
             type: integer
+        - in: path
+          description: Id of the variant
+          name: id_variant
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the task
+          name: id_task
+          required: true
+          schema:
+            type: integer
       security:
         - cookieJWTAuth: [ ]
         - CSRFToken: [ ]
@@ -1061,13 +1158,14 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/usersInContest'
+                $ref: '#/components/schemas/taskInVariantImage'
         '400':
           description: Bad request
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/errorResponse'
+
 
 components:
   securitySchemes:
@@ -1279,11 +1377,8 @@ components:
       title: Create variant
       description: Request to variant creation
       required:
-        - variant_number
         - variant_description
       properties:
-        variant_number:
-          type: integer
         variant_description:
           type: string
     variantInfo:
@@ -1340,10 +1435,7 @@ components:
         users_id:
           type: array
           items:
-            type: object
-            properties:
-              user_id:
-                type: integer
+            type: integer
     stagesInOlympiad:
       title: Get stages in olympiad
       description: Request to get stages in olympiad
@@ -1389,9 +1481,6 @@ components:
                 type: integer
               num_of_task:
                 type: integer
-              image_of_task:
-                type: string
-                format: binary
     contestsInStage:
       title: Get contests in stage
       description: Request to get contests in stage
@@ -1624,4 +1713,24 @@ components:
           format: binary
         recommended_answer:
           type: string
+    userCertificate:
+      title: Get certificate of the user
+      description: Request to get certificate of the user
+      required:
+        - certificate_template
+      properties:
+        certificate_template:
+          type: string
+    taskInVariantImage:
+      title: Get image of the task
+      description: Request to get task image
+      required:
+        - task_id
+        - image_of_task
+      properties:
+        task_id:
+          type: integer
+        image_of_task:
+          type: string
+          format: binary
 
