@@ -35,22 +35,3 @@ class WeakPassword(RequestError):
 
     def get_msg(self):
         return 'Password is too weak: %s' % str(self.errors)
-
-
-class MissingField(RequestError):
-    def __init__(self, field_name):
-        super(MissingField, self).__init__(400)
-        self.field_name = field_name
-
-    def get_msg(self):
-        return '%s is missing' % self.field_name
-
-
-class WrongValue(RequestError):
-    def __init__(self, field, value):
-        super(WrongValue, self).__init__(400)
-        self.field = field
-        self.value = value
-
-    def get_msg(self):
-        return '"%s" is an inappropriate value for "%s"' % (self.field, self.value)

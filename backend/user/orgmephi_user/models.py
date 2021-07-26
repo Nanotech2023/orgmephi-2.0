@@ -3,6 +3,7 @@
 from orgmephi_user import db
 from datetime import datetime
 import enum
+import sqlalchemy.exc
 
 
 class UserRoleEnum(enum.Enum):
@@ -209,6 +210,55 @@ class Group(db.Model):
 
     users = db.relationship('User', secondary=users_in_group, lazy='subquery',
                             backref=db.backref('group', lazy=True))
+
+
+def add_user(db_session, username, password_hash, role, reg_type):
+    from orgmephi_user.errors import AlreadyExists
+    user = User(
+        username=username,
+        password_hash=password_hash,
+        role=role,
+        type=reg_type
+    )
+    db_session.add(user)
+
+    try:
+        db_session.flush()
+    except sqlalchemy.exc.IntegrityError:
+        raise AlreadyExists('username', username)
+    return user
+
+
+def add_personal_info(db_session, user, email, first_name, second_name, middle_name, date_of_birth):
+    user_info = UserInfo(
+        user_id=user.id,
+        email=email,
+        first_name=first_name,
+        second_name=second_name,
+        middle_name=middle_name,
+        date_of_birth=date_of_birth
+    )
+    db_session.add(user_info)
+    db_session.flush()
+
+
+def add_university_info(db_session, user, phone, university_name, admission_year, university_country, citizenship,
+                        region, city):
+    university = University.query.filter(University.name == university_name).one_or_none
+    student_info = StudentInfo(
+        user_id=user.id,
+        phone=phone,
+        university=(university.id if university is not None else None),
+        custom_university=(university_name if university is None else None),
+        admission_year=admission_year,
+        university_country=university_country,
+        citizenship=citizenship,
+        region=region,
+        city=city
+    )
+    db_session.add(student_info)
+    db_session.flush()
+    return student_info
 
 
 if __name__ == "__main__":
