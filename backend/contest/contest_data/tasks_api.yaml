@@ -1717,10 +1717,11 @@ components:
       title: Get certificate of the user
       description: Request to get certificate of the user
       required:
-        - certificate_template
+        - certificate
       properties:
-        certificate_template:
+        certificate:
           type: string
+          format: binary
     taskInVariantImage:
       title: Get image of the task
       description: Request to get task image
