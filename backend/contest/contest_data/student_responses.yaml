@@ -842,7 +842,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/appealMessage'
+              $ref: '#/components/schemas/appealMessageReply'
       responses:
         '200':
           description: OK
@@ -1075,3 +1075,16 @@ components:
       properties:
         appeal_id:
           type: integer
+    appealMessageReply:
+      title: "Reply to user's appeal"
+      required:
+        - message
+        - accepted
+      properties:
+        message:
+          type: string
+        accepted:
+          type: boolean
+        new_mark:
+          type: number
+          format: float
