@@ -15,6 +15,14 @@ work_status = {
 
 work_status_reverse = {val: key for key, val in work_status.items()}
 
+appeal_status = {
+    'UnderReview': AppealStatusEnum.under_review,
+    'AppealAccepted': AppealStatusEnum.appeal_accepted,
+    'AppealRejected': AppealStatusEnum.appeal_rejected
+}
+
+appeal_status_reverse = {val: key for key, val in appeal_status.items()}
+
 
 @app.route('/olympiad/<olympiad_id>/stage/<stage_id>/contest/<contest_id>/user/<user_id>/response:', methods=['GET'])
 @openapi
@@ -173,7 +181,7 @@ def user_status_and_mark_for_response_by_id(olympiad_id, stage_id, contest_id, u
                     status=status
                 )
             else:
-                response_status= ResponseStatus(
+                response_status = ResponseStatus(
                     work_id=user_work.work_id,
                     status=status,
                     mark=mark
@@ -193,18 +201,20 @@ def user_status_history_for_response(olympiad_id, stage_id, contest_id):
         pass
 
 
-@app.route('/olympiad/{olympiad_id}/stage/{stage_id}/contest/{contest_id}/user/{user_id}/status/history', methods=['GET'])
+@app.route('/olympiad/{olympiad_id}/stage/{stage_id}/contest/{contest_id}/user/{user_id}/status/history',
+           methods=['GET'])
 @openapi
 def user_status_history_for_response(olympiad_id, stage_id, contest_id, user_id):
-    try:    # TODO Add Checking
+    try:  # TODO Add Checking
         user_work = Response.query.filter_by(user_id=user_id). \
             filter_by(contest_id=contest_id).one()
         status = user_work.statuses.order_by(ResponseStatus.timestamp.desc())
         history = []
         appeals = db.session.query(ResponseStatus, Appeal). \
-            filter(ResponseStatus.status_id == Appeal.work_status).order_by(ResponseStatus.timestamp.desc()) # TODO fix query
+            filter(ResponseStatus.status_id == Appeal.work_status).order_by(
+            ResponseStatus.timestamp.desc())  # TODO fix query
         number = 0
-        for elem in status:     # TODO Add mark to api spec
+        for elem in status:  # TODO Add mark to api spec
             if appeals[number].work_status == elem.status_id:
                 appeal = appeals.appeal_id
                 number += 1
@@ -224,45 +234,33 @@ def user_status_history_for_response(olympiad_id, stage_id, contest_id, user_id)
                 'contest_id': contest_id,
                 'history': history
             }, 200)
-    except Exception as err:    # TODO Add exception
+    except Exception as err:  # TODO Add exception
         pass
 
 
 @app.route('/olympiad/{olympiad_id}/stage/{stage_id}/contest/{contest_id}/list/', methods=['GET'])
 @openapi
 def get_list_for_stage(olympiad_id, stage_id, contest_id):
-    try:     # TODO Add Checking
+    try:  # TODO Add Checking
         pass
     except Exception as err:
-        pass    # TODO Add exception
+        pass  # TODO Add exception
 
 
 @app.route('/olympiad/{olympiad_id}/stage/{stage_id}/contest/{contest_id}/user/self/appeal/last',
            methods=['GET', 'POST'])
 @openapi
 def user_response_appeal_info(olympiad_id, stage_id, contest_id):
-    try:    # TODO Add Checking
+    try:  # TODO Add Checking
         if request.method == 'GET':
-            pass
-        elif request.method == 'POST':
-            pass
-    except Exception as err:
-        pass    # TODO Add exception
-
-
-@app.route('/olympiad/{olympiad_id}/stage/{stage_id}/contest/{contest_id}/user/{user_id}/appeal/last',
-           methods=['GET', 'POST'])
-@openapi
-def user_response_appeal_info_by_id(olympiad_id, stage_id, contest_id, user_id):  # TODO change to commonAppealInfo
-    try:    # TODO Add Checking
-        if request.method == 'GET':
-            user_work = Response.query.filter_by(user_id=user_id). \
+            self_user_id = None  # TODO Get current user id
+            user_work = Response.query.filter_by(user_id=self_user_id). \
                 filter_by(contest_id=contest_id).one()
             last_appeal = ResponseStatus.query.join(Appeal, ResponseStatus.status_id == Appeal.work_status). \
                 filter(ResponseStatus.work_id == user_work.work_id). \
                 order_by(ResponseStatus.timestamp.desc()).first()
             if last_appeal is None:
-                pass # TODO Exception no appeal
+                pass  # TODO Exception no appeal
             return make_response(
                 {
                     'appeal_id': last_appeal.appeal_id,
@@ -271,9 +269,115 @@ def user_response_appeal_info_by_id(olympiad_id, stage_id, contest_id, user_id):
                     'appeal_response': last_appeal.appeal_response
                 })
         elif request.method == 'POST':
-            pass
+            self_user_id = None  # TODO Get current user id
+            values = request.openapi.body
+            message = values['message']
+            user_work = Response.query.filter_by(user_id=user_id). \
+                filter_by(contest_id=contest_id).one()
+            new_status = ResponseStatus(
+                work_id=user_work.work_id,
+                status=work_status['Appeal']
+            )
+            db.session.add(new_status)
+            db.session.commit()
+            appeal = Appeal(
+                work_status=new_status.status_id,
+                appeal_status=appeal_status['UnderReview'],
+                appeal_message=message
+            )
+            db.session.add(appeal)
+            db.session.commit()
+            return make_response(
+                {
+                    'appeal_id': appeal.appeal_id
+                }, 200)
     except Exception as err:
-        pass    # TODO Add exception
+        pass  # TODO Add exception
 
 
+@app.route('/olympiad/{olympiad_id}/stage/{stage_id}/contest/{contest_id}/user/{user_id}/appeal/last',
+           methods=['GET', 'POST'])
+@openapi
+def user_response_appeal_info_by_id(olympiad_id, stage_id, contest_id, user_id):
+    try:  # TODO Add Checking
+        if request.method == 'GET':
+            user_work = Response.query.filter_by(user_id=user_id). \
+                filter_by(contest_id=contest_id).one()
+            last_appeal = ResponseStatus.query.join(Appeal, ResponseStatus.status_id == Appeal.work_status). \
+                filter(ResponseStatus.work_id == user_work.work_id). \
+                order_by(ResponseStatus.timestamp.desc()).first()
+            if last_appeal is None:
+                pass  # TODO Exception no appeal
+            return make_response(
+                {
+                    'appeal_id': last_appeal.appeal_id,
+                    'status': appeal_status_reverse[last_appeal.work_status],
+                    'appeal_message': last_appeal.appeal_message,
+                    'appeal_response': last_appeal.appeal_response
+                })
+        elif request.method == 'POST':
+            values = request.openapi.body
+            message = values['message']
+            user_work = Response.query.filter_by(user_id=user_id). \
+                filter_by(contest_id=contest_id).one()
+            new_status = ResponseStatus(
+                work_id=user_work.work_id,
+                status=work_status['Appeal']
+            )
+            db.session.add(new_status)
+            db.session.commit()
+            appeal = Appeal(
+                work_status=new_status.status_id,
+                appeal_status=appeal_status['UnderReview'],
+                appeal_message=message
+            )
+            db.session.add(appeal)
+            db.session.commit()
+            return make_response(
+                {
+                    'appeal_id': appeal.appeal_id
+                }, 200)
+    except Exception as err:
+        pass  # TODO Add exception
 
+
+@app.route('/olympiad/{olympiad_id}/stage/{stage_id}/contest/{contest_id}/appeal/{appeal_id}/reply',
+           methods=['POST'])
+@openapi
+def reply_to_user_appeal(olympiad_id, stage_id, contest_id, appeal_id):
+    try:  # TODO Add Checking
+        values = request.openapi.body
+        message = values['message']
+        accepted = values['accepted']
+        new_mark = None  # TODO change to appealMessageReply
+        if accepted:
+            appeal_new_status = appeal_status['AppealAccepted']
+            response_new_status = work_status['Accepted']
+        else:
+            appeal_new_status = appeal_status['AppealRejected']
+            response_new_status = work_status['Rejected']
+        appeal = Appeal.query.filter_by(appeal_id=appeal_id).first()
+        appeal.response = message
+        appeal.appeal_status = appeal_new_status
+        db.session.commit()
+        last_status = ResponseStatus.query.filter_by(status_id=appeal.work_status).one()
+        if 'new_mark' in values and accepted:
+            new_mark = values['new_mark']
+        else:
+            new_mark = last_status.mark
+        new_response_status = ResponseStatus(
+            work_id=last_status.work_id,
+            status=response_new_status,
+            mark=new_mark
+        )
+        db.session.add(new_response_status)
+        db.session.commit()
+        return make_response(
+            {
+                'appeal_id': appeal.appeal_id,
+                'status': appeal_status_reverse[appeal.appeal_status],
+                'appeal_message': appeal.appeal_message,
+                'appeal_response': appeal.appeal_response
+            }, 200)
+    except Exception as err:
+        pass  # TODO Add exception
