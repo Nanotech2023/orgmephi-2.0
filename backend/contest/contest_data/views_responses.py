@@ -364,7 +364,29 @@ def user_status_history_for_response(olympiad_id, stage_id, contest_id, user_id)
 @openapi
 def get_list_for_stage(olympiad_id, stage_id, contest_id):
     try:  # TODO Add Checking
-        pass
+        users_in_contest = Response.query.filter_by(contest_id=contest_id).all()
+        user_rows = []
+        for elem in users_in_contest:
+            first_name = None   # TODO Get additional info for users
+            second_name = None
+            middle_name = None
+            mark = ResponseStatus.query.filter_by(work_id=elem.work_id).order_by(ResponseStatus.timestamp.desc()).one().mark
+            user_rows.append(
+                {
+                    'user_id': elem.user_id,
+                    'first_name': first_name,
+                    'second_name': second_name,
+                    'middle_name': middle_name,
+                    'mark': mark
+                }
+            )
+        contest_name = None     # TODO get contest_name
+        return make_response(
+            {
+                'contest_id': contest_id,
+                'contest_name': contest_name,
+                'userrow': user_rows
+            }, 200)
     except Exception as err:
         pass  # TODO Add exception
 
