@@ -48,6 +48,8 @@ def olympiad_remove(id_olympiad):
         olympiad = Olympiad.query.filter_by(Olympiad.olympiad_id == id_olympiad).one()
         db.session.delete(olympiad)
         db.session.commit()
+        return make_response({}, 200)
+
     except RequestError as err:
         db.session.rollback()
         return err.to_response()
@@ -86,6 +88,7 @@ def olympiad_update(id_olympiad):
             olympiad.rules = values['rules']
 
         db.session.commit()
+        return make_response({}, 200)
 
     except RequestError as err:
         db.session.rollback()
@@ -156,10 +159,11 @@ def stage_remove(id_olympiad, id_stage):
         stage = Stage.query.filter_by(Stage.stage_id == id_stage).one()
         db.session.delete(stage)
         db.session.commit()
+        return make_response({}, 200)
+
     except RequestError as err:
         db.session.rollback()
         return err.to_response()
-
 
 
 @app.route('/olympiad/<id_olympiad>/stage/<id_stage>', methods=['GET'])
@@ -274,6 +278,8 @@ def contest_remove(id_olympiad, id_stage, id_contest):
         contest = Contest.query.filter_by(Contest.contest_id == id_contest).one()
         db.session.delete(contest)
         db.session.commit()
+        return make_response({}, 200)
+
     except RequestError as err:
         db.session.rollback()
         return err.to_response()
@@ -327,6 +333,7 @@ def contest_update(id_olympiad, id_stage, id_contest):
             contest.end_time = values['end_time']
 
         db.session.commit()
+        return make_response({}, 200)
 
     except RequestError as err:
         db.session.rollback()
@@ -407,16 +414,18 @@ def variant_remove(id_olympiad, id_stage, id_contest, id_variant):
         variant = Variant.query.filter_by(Variant.variant_id == id_variant).one()
         db.session.delete(variant)
         db.session.commit()
+        return make_response({}, 200)
+
     except RequestError as err:
         db.session.rollback()
         return err.to_response()
 
 
-@app.route('/olympiad/<id_olympiad>/stage/<id_stage>/contest/<id_contest>/variant/<id_variant>', methods=['GET'])
+@app.route('/olympiad/<id_olympiad>/stage/<id_stage>/contest/<id_contest>/variant/<variant_num>', methods=['GET'])
 @openapi
-def variant_get(id_olympiad, id_stage, id_contest, id_variant):
+def variant_get(id_olympiad, id_stage, id_contest, variant_num):
     try:
-        variant = Variant.query.filter_by(Variant.variant_id == id_variant).one()
+        variant = Variant.query.filter_by(Variant.contest_id == id_contest).filter_by(Variant.variant_num == variant_num).one()
         return make_response(
             {
                 "variant_id": variant.variant_id,
@@ -429,11 +438,11 @@ def variant_get(id_olympiad, id_stage, id_contest, id_variant):
         return err.to_response()
 
 
-@app.route('/olympiad/<id_olympiad>/stage/<id_stage>/contest/<id_contest>/variant/<id_variant>', methods=['PATCH'])
+@app.route('/olympiad/<id_olympiad>/stage/<id_stage>/contest/<id_contest>/variant/<variant_num>', methods=['PATCH'])
 @openapi
-def variant_update(id_olympiad, id_stage, id_contest, id_variant):
+def variant_update(id_olympiad, id_stage, id_contest, variant_num):
     try:
-        variant = Variant.query.filter_by(Variant.variant_id == id_variant).one()
+        variant = Variant.query.filter_by(Variant.variant_num == variant_num).one()
 
         values = request.openapi.body
 
@@ -443,6 +452,8 @@ def variant_update(id_olympiad, id_stage, id_contest, id_variant):
             variant.variant_description = values['variant_description']
 
         db.session.commit()
+        return make_response({}, 200)
+
 
     except RequestError as err:
         db.session.rollback()
@@ -474,3 +485,278 @@ def variant_all(id_olympiad, id_stage, id_contest):
     except RequestError as err:
         db.session.rollback()
         return err.to_response()
+
+
+
+# Task views
+
+
+@app.route('/olympiad/<id_olympiad>/stage/<id_stage>/contest/<id_contest>/variant/<id_variant>/task/create', methods=['POST'])
+@openapi
+def task_create(id_olympiad, id_stage, id_contest, id_variant):
+    try:
+        task = None
+        values = request.openapi.body
+
+        # TODO Checking
+        # TODO Перенести в отдельные функции
+
+        if 'recommended_answer' in values:
+            num_of_task = values['num_of_task']
+            image_of_task = values['image_of_task']
+            recommended_answer = values['image_of_task']
+            task = Task(
+                num_of_task=num_of_task,
+                image_of_task=image_of_task,
+                type=TaskType.plain_task,
+            )
+
+            db.session.add(task)
+            db.session.flush()
+
+            plainTask = PlainTask(
+                task_id = task.task_id,
+                recommended_answer=recommended_answer,
+            )
+
+            db.session.add(plainTask)
+
+
+        elif 'start_value' in values:
+            num_of_task = values['num_of_task']
+            image_of_task = values['image_of_task']
+            start_value = values['start_value']
+            end_value = values['end_value']
+
+            task = Task(
+                num_of_task=num_of_task,
+                image_of_task=image_of_task,
+                type=TaskType.range_task,
+            )
+
+            db.session.add(task)
+            db.session.flush()
+
+            rangeTask = PlainTask(
+                task_id = task.task_id,
+                start_value=start_value,
+                end_value=end_value,
+            )
+
+            db.session.add(rangeTask)
+
+        else:
+            num_of_task = values['num_of_task']
+            image_of_task = values['image_of_task']
+            answers = values['answers']
+            task = Task(
+                num_of_task=num_of_task,
+                image_of_task=image_of_task,
+                type=TaskType.multiple_task,
+            )
+
+            db.session.add(task)
+            db.session.flush()
+
+            multipleTask = MultipleTask(
+                task_id = task.task_id,
+            )
+
+            db.session.add(multipleTask)
+
+            for answer in answers:
+                answerForTask = AnswersInMultipleChoiceTask(
+                    task_id = task.task_id,
+                    answer = answer['answer'],
+                    correct = answer['is_right_answer'],
+                )
+
+                db.session.add(answerForTask)
+
+
+        db.session.commit()
+        return make_response(
+            {
+                "task_id": task.task_id,
+            }, 200)
+
+    except RequestError as err:
+        db.session.rollback()
+        return err.to_response()
+
+
+@app.route('/olympiad/<id_olympiad>/stage/<id_stage>/contest/<id_contest>/variant/<id_variant>/task/<id_task>/remove', methods=['POST'])
+@openapi
+def task_remove(id_olympiad, id_stage, id_contest, id_variant, id_task):
+    try:
+        task = Task.query.filter_by(Task.task_id == id_task).one()
+
+        if task.type == TaskType.plain_task:
+            plainTask = PlainTask.query.filter_by(PlainTask.task_id == id_task).one()
+            db.session.delete(plainTask)
+
+        if task.type == TaskType.range_task:
+            rangeTask = RangeTask.query.filter_by(RangeTask.task_id == id_task).one()
+            db.session.delete(rangeTask)
+
+        if task.type == TaskType.multiple_task:
+            multipleTask = MultipleTask.query.filter_by(MultipleTask.task_id == id_task).one()
+
+            # multipleAnswers = AnswersInMultipleChoiceTask.query.filter_by(AnswersInMultipleChoiceTask.task_id == id_task).all()
+
+            for answer in multipleTask.all_answers_in_multiple_task.all():
+                db.session.delete(answer)
+
+            db.session.delete(multipleTask)
+
+        db.session.delete(task)
+
+        db.session.commit()
+        return make_response({}, 200)
+
+    except RequestError as err:
+        db.session.rollback()
+        return err.to_response()
+
+
+@app.route('/olympiad/<id_olympiad>/stage/<id_stage>/contest/<id_contest>/variant/<id_variant>/task/<id_task>', methods=['GET'])
+@openapi
+def task_get(id_olympiad, id_stage, id_contest, id_variant, id_task):
+    try:
+        task = Task.query.filter_by(Task.task_id == id_task).one()
+
+        if task.type == TaskType.plain_task:
+            plainTask = PlainTask.query.filter_by(PlainTask.task_id == id_task).one()
+
+            return make_response(
+                {
+                    "task_id": task.task_id,
+                    "num_of_task": task.num_of_task,
+                    "image_of_task": task.image_of_task,
+                    "recommended_answer": plainTask.recommended_answer,
+                }, 200)
+
+        elif task.type == TaskType.range_task:
+            rangeTask = RangeTask.query.filter_by(RangeTask.task_id == id_task).one()
+
+            return make_response(
+                {
+                    "task_id": task.task_id,
+                    "num_of_task": task.num_of_task,
+                    "image_of_task": task.image_of_task,
+                    "start_value": rangeTask.start_value,
+                    "end_value": rangeTask.end_value,
+                }, 200)
+
+        elif task.type == TaskType.multiple_task:
+            multipleTask = MultipleTask.query.filter_by(MultipleTask.task_id == id_task).one()
+
+            answers = []
+
+            for answer in multipleTask.all_answers_in_multiple_task.all():
+                answers.append({
+                    'answer': answer.answer,
+                    'is_right_answer': answer.correct
+                })
+
+            return make_response(
+                {
+                    "task_id": task.task_id,
+                    "num_of_task": task.num_of_task,
+                    "image_of_task": task.image_of_task,
+                    "answers": answers
+                }, 200)
+
+    except RequestError as err:
+        db.session.rollback()
+        return err.to_response()
+
+
+@app.route('/olympiad/<id_olympiad>/stage/<id_stage>/contest/<id_contest>/variant/<id_variant>/task/<id_task>', methods=['PATCH'])
+@openapi
+def task_update(id_olympiad, id_stage, id_contest, id_variant, id_task):
+    try:
+        task = Task.query.filter_by(Task.task_id == variant_num).one()
+
+        values = request.openapi.body
+
+        task = Task.query.filter_by(Task.task_id == id_task).one()
+
+        if 'num_of_task' in values:
+            task.num_of_task = values['num_of_task']
+        if 'image_of_task' in values:
+            task.image_of_task = values['image_of_task']
+
+        if task.type == TaskType.plain_task:
+            plainTask = PlainTask.query.filter_by(PlainTask.task_id == id_task).one()
+
+            if 'recommended_answer' in values:
+                plainTask.recommended_answer = values['recommended_answer']
+
+        elif task.type == TaskType.plain_task:
+            rangeTask = RangeTask.query.filter_by(RangeTask.task_id == id_task).one()
+
+            if 'start_value' in values:
+                rangeTask.recommended_answer = values['start_value']
+            if 'end_value' in values:
+                rangeTask.recommended_answer = values['end_value']
+
+        elif task.type == TaskType.plain_task:
+            multipleTask = MultipleTask.query.filter_by(MultipleTask.task_id == id_task).one()
+
+            answers = []
+
+            for answer in multipleTask.all_answers_in_multiple_task.all():
+                answers.append({
+                    'answer': answer.answer,
+                    'is_right_answer': answer.correct
+                })
+
+            return make_response(
+                {
+                    "task_id": task.task_id,
+                    "num_of_task": task.num_of_task,
+                    "image_of_task": task.image_of_task,
+                    "answers": answers
+                }, 200)
+
+
+
+
+        db.session.commit()
+        return make_response({}, 200)
+
+    except RequestError as err:
+        db.session.rollback()
+        return err.to_response()
+
+
+@app.route('/olympiad/<id_olympiad>/stage/<id_stage>/contest/<id_contest>/variant/all', methods=['GET'])
+@openapi
+def task_all(id_olympiad, id_stage, id_contest):
+    try:
+        variants = Variant.query.all()
+
+        all_variants = []
+
+        for variant in variants:
+            all_variants.append(
+                {
+                    "variant_id": variant.variant_id,
+                    "variant_number": variant.variant_number,
+                    "variant_description": variant.variant_description,
+                }
+            )
+
+        return make_response(
+            {
+                "variants_list": all_variants
+            }, 200)
+
+    except RequestError as err:
+        db.session.rollback()
+        return err.to_response()
+
+
+
+# User views
