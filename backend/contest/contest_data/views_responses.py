@@ -4,6 +4,7 @@ from flask import request, make_response
 
 from contest_data.models_responses import *
 from contest_data import app, db, openapi
+from contest_data.errors import RequestError
 
 work_status = {
     'NotChecked': ResponseStatusEnum.not_checked,
@@ -60,8 +61,9 @@ def get_user_all_answers(olympiad_id, stage_id, contest_id, user_id):
                 "contest_id": user_work.contest_id,
                 "user_answer": user_answer
             }, 200)
-    except Exception as err:  # TODO Add exception
-        pass
+    except RequestError as err:
+        db.session.rollback()
+        return err.to_response()
 
 
 @app.route('/olympiad/{olympiad_id}/stage/{stage_id}/contest/{contest_id}/answer/{answer_id}', methods=['GET'])
@@ -75,8 +77,9 @@ def get_user_answer_by_id(olympiad_id, stage_id, contest_id, answer_id):
                 "user_answer": user_answer.answer,
                 "filetype": user_answer.filetype
             }, 200)
-    except Exception as err:  # TODO Add exception
-        pass
+    except RequestError as err:
+        db.session.rollback()
+        return err.to_response()
 
 
 @app.route('/olympiad/{olympiad_id}/stage/{stage_id}/contest/{contest_id}/task/{task_id}/user/self:',
@@ -130,8 +133,9 @@ def user_answer_for_task(olympiad_id, stage_id, contest_id, task_id):
                 user_answer.filetype = filetype_dict[filetype]
                 db.session.commit()
             return make_response({}, 200)
-    except Exception as err:  # TODO Add exception
-        pass
+    except RequestError as err:
+        db.session.rollback()
+        return err.to_response()
 
 
 @app.route('/olympiad/{olympiad_id}/stage/{stage_id}/contest/{contest_id}/task/{task_id}/user/{user_id}:',
@@ -184,8 +188,9 @@ def user_answer_for_task_by_id(olympiad_id, stage_id, contest_id, task_id, user_
                 user_answer.filetype = filetype
                 db.session.commit()
             return make_response({}, 200)
-    except Exception as err:  # TODO Add exception
-        pass
+    except RequestError as err:
+        db.session.rollback()
+        return err.to_response()
 
 
 @app.route('/olympiad/{olympiad_id}/stage/{stage_id}/contest/{contest_id}/user/self/status',
@@ -234,8 +239,9 @@ def user_status_and_mark_for_response(olympiad_id, stage_id, contest_id):
             db.session.add(response_status)
             db.session.commit()
             return make_response({}, 200)
-    except Exception as err:  # TODO Add exception
-        pass
+    except RequestError as err:
+        db.session.rollback()
+        return err.to_response()
 
 
 @app.route('/olympiad/{olympiad_id}/stage/{stage_id}/contest/{contest_id}/user/{user_id}/status',
@@ -282,8 +288,9 @@ def user_status_and_mark_for_response_by_id(olympiad_id, stage_id, contest_id, u
             db.session.add(response_status)
             db.session.commit()
             return make_response({}, 200)
-    except Exception as err:  # TODO Add exception
-        pass
+    except RequestError as err:
+        db.session.rollback()
+        return err.to_response()
 
 
 @app.route('/olympiad/{olympiad_id}/stage/{stage_id}/contest/{contest_id}/user/self/status/history', methods=['GET'])
@@ -319,8 +326,9 @@ def user_status_history_for_response(olympiad_id, stage_id, contest_id):
                 'contest_id': contest_id,
                 'history': history
             }, 200)
-    except Exception as err:  # TODO Add exception
-        pass
+    except RequestError as err:
+        db.session.rollback()
+        return err.to_response()
 
 
 @app.route('/olympiad/{olympiad_id}/stage/{stage_id}/contest/{contest_id}/user/{user_id}/status/history',
@@ -356,8 +364,9 @@ def user_status_history_for_response(olympiad_id, stage_id, contest_id, user_id)
                 'contest_id': contest_id,
                 'history': history
             }, 200)
-    except Exception as err:  # TODO Add exception
-        pass
+    except RequestError as err:
+        db.session.rollback()
+        return err.to_response()
 
 
 @app.route('/olympiad/{olympiad_id}/stage/{stage_id}/contest/{contest_id}/list/', methods=['GET'])
@@ -387,8 +396,9 @@ def get_list_for_stage(olympiad_id, stage_id, contest_id):
                 'contest_name': contest_name,
                 'userrow': user_rows
             }, 200)
-    except Exception as err:
-        pass  # TODO Add exception
+    except RequestError as err:
+        db.session.rollback()
+        return err.to_response()
 
 
 @app.route('/olympiad/{olympiad_id}/stage/{stage_id}/contest/{contest_id}/user/self/appeal/last',
@@ -435,8 +445,9 @@ def user_response_appeal_info(olympiad_id, stage_id, contest_id):
                 {
                     'appeal_id': appeal.appeal_id
                 }, 200)
-    except Exception as err:
-        pass  # TODO Add exception
+    except RequestError as err:
+        db.session.rollback()
+        return err.to_response()
 
 
 @app.route('/olympiad/{olympiad_id}/stage/{stage_id}/contest/{contest_id}/user/{user_id}/appeal/last',
@@ -481,8 +492,9 @@ def user_response_appeal_info_by_id(olympiad_id, stage_id, contest_id, user_id):
                 {
                     'appeal_id': appeal.appeal_id
                 }, 200)
-    except Exception as err:
-        pass  # TODO Add exception
+    except RequestError as err:
+        db.session.rollback()
+        return err.to_response()
 
 
 @app.route('/olympiad/{olympiad_id}/stage/{stage_id}/contest/{contest_id}/appeal/{appeal_id}/reply',
@@ -522,8 +534,9 @@ def reply_to_user_appeal(olympiad_id, stage_id, contest_id, appeal_id):
                 'appeal_message': appeal.appeal_message,
                 'appeal_response': appeal.appeal_response
             }, 200)
-    except Exception as err:
-        pass  # TODO Add exception
+    except RequestError as err:
+        db.session.rollback()
+        return err.to_response()
 
 
 @app.route('/olympiad/{olympiad_id}/stage/{stage_id}/contest/{contest_id}/appeal/{appeal_id}', methods=['GET'])
@@ -538,5 +551,6 @@ def get_appeal_info_by_id(olympiad_id, stage_id, contest_id, appeal_id):
                 'appeal_message': appeal.appeal_message,
                 'appeal_response': appeal.appeal_response
             }, 200)
-    except Exception as err:
-        pass  # TODO Add exception
+    except RequestError as err:
+        db.session.rollback()
+        return err.to_response()
