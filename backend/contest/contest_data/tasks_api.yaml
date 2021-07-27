@@ -1687,6 +1687,8 @@ components:
           items:
             type: object
             properties:
+              answer_id:
+                type: integer
               answer:
                 type: string
               is_right_answer:
