@@ -36,7 +36,7 @@ def init_api():
     global openapi
     spec = create_spec(spec_dict)
     openapi = FlaskOpenAPIViewDecorator.from_spec(spec)
-    if app.config['DEBUG']:
+    if app.config['ENV'] == 'development':
         from flask_swagger_ui import get_swaggerui_blueprint
         swagger_ui_blueprint = get_swaggerui_blueprint(
             '/swagger_ui',

@@ -32,7 +32,7 @@ user_types_reverse = {val: key for key, val in user_types.items()}
 
 @app.route('/api.yaml', methods=['GET'])
 def get_api():
-    if not app.config['DEBUG']:
+    if app.config['ENV'] != 'development':
         abort(404)
     api_path = app.config['ORGMEPHI_API_PATH']
     if api_path[0] != '/':
