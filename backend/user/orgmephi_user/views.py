@@ -117,7 +117,6 @@ def register():
     password_hash = hash_password(values['auth_info']['password'])
 
     user_data = values['personal_info']
-    student_data = values['student_info']
 
     try:
         user = add_user(db.session, username, password_hash, UserRoleEnum.participant, reg_type)
@@ -125,6 +124,7 @@ def register():
                           user_data['middle_name'], user_data['date_of_birth'])
 
         if reg_type == UserTypeEnum.university:
+            student_data = values['student_info']
             add_university_info(db.session, user, student_data['phone_number'], student_data['university'],
                                 grade_to_year(student_data['grade']), student_data['university_country'],
                                 student_data['citizenship'], student_data['region'], student_data['city'])
