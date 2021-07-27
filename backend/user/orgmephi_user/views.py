@@ -3,6 +3,7 @@ from os import getcwd
 from flask import request, make_response, send_file
 from flask_jwt_extended import create_access_token, set_access_cookies, create_refresh_token, set_refresh_cookies,\
     get_csrf_token, jwt_required, unset_jwt_cookies
+import sqlalchemy.exc
 
 from orgmephi_user.models import *
 from orgmephi_user.errors import RequestError, WeakPassword, NotFound, WrongCredentials, AlreadyExists, InsufficientData
@@ -39,6 +40,14 @@ def get_or_raise(entity, field, value):
     if result is None:
         raise NotFound(field, value)
     return result
+
+
+def get_missing(values, search):
+    missing = []
+    for value in search:
+        if value not in values:
+            missing.append(value)
+    return missing
 
 
 def grade_to_year(grade):
@@ -437,17 +446,7 @@ def set_user_info_admin(user_id):
     values = request.openapi.body
     user = get_or_raise(User, "id", user_id)
     if user.user_info is None:
-        missing = []
-        if 'email' not in values:
-            missing.append('email')
-        if 'first_name' not in values:
-            missing.append('first_name')
-        if 'second_name' not in values:
-            missing.append('second_name')
-        if 'middle_name' not in values:
-            missing.append('middle_name')
-        if 'date_of_birth' not in values:
-            missing.append('date_of_birth')
+        missing = get_missing(values, ['email', 'first_name', 'second_name', 'middle_name', 'date_of_birth'])
         if len(missing) > 0:
             raise InsufficientData(str(missing), 'for user %d' % user.id)
         try:
@@ -457,20 +456,61 @@ def set_user_info_admin(user_id):
             db.session.rollback()
             raise
     else:
-        user_info = user.user_info
         try:
-            if 'email' in values:
-                user_info.email = values['email']
-            if 'first_name' in values:
-                user_info.email = values['first_name']
-            if 'second_name' in values:
-                user_info.email = values['second_name']
-            if 'middle_name' in values:
-                user_info.email = values['middle_name']
-            if 'date_of_birth' in values:
-                user_info.email = values['date_of_birth']
+            user.user_info.update(**values)
         except Exception:
             db.session.rollback()
             raise
     db.session.commit()
     return make_response(user.user_info.serialize(), 200)
+
+
+@app.route('/user/self/university', methods=['GET'])
+@openapi
+@jwt_required()
+@catch_request_error
+def get_university_info_self():
+    user = get_or_raise(User, "id", jwt_get_id())
+    if user.student_info is None:
+        raise NotFound('user.university_info', 'for user %d' % user.id)
+    return make_response(user.student_info.serialize(), 200)
+
+
+@app.route('/user/<int:user_id>/university', methods=['GET'])
+@openapi
+@jwt_required_role(['Admin', 'System', 'Creator'])
+@catch_request_error
+def get_university_info_admin(user_id):
+    user = get_or_raise(User, "id", user_id)
+    if user.student_info is None:
+        raise NotFound('user.university_info', 'for user %d' % user.id)
+    return make_response(user.student_info.serialize(), 200)
+
+
+@app.route('/user/<int:user_id>/university', methods=['PATCH'])
+@openapi
+@jwt_required_role(['Admin', 'System', 'Creator'])
+@catch_request_error
+def set_university_info_admin(user_id):
+    values = request.openapi.body
+    user = get_or_raise(User, "id", user_id)
+    if user.student_info is None:
+        missing = get_missing(values, ['phone_number', 'university', 'admission_year', 'university_country',
+                                       'citizenship', 'region', 'city'])
+        if len(missing) > 0:
+            raise InsufficientData(str(missing), 'for user %d' % user.id)
+        try:
+            add_university_info(db.session, user, values['phone_number'], values['university'],
+                                values['admission_year'], values['university_country'], values['citizenship'],
+                                values['region'], values['city'])
+        except Exception:
+            db.session.rollback()
+            raise
+    else:
+        try:
+            user.student_info.update(**values)
+        except Exception:
+            db.session.rollback()
+            raise
+    db.session.commit()
+    return make_response(user.student_info.serialize(), 200)

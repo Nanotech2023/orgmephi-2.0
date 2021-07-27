@@ -3,7 +3,6 @@
 from orgmephi_user import db
 from datetime import datetime
 import enum
-import sqlalchemy.exc
 
 
 class UserRoleEnum(enum.Enum):
@@ -137,6 +136,18 @@ class UserInfo(db.Model):
                 'date_of_birth': self.date_of_birth.isoformat()
             }
 
+    def update(self, email=None, first_name=None, second_name=None, middle_name=None, date_of_birth=None):
+        if email is not None:
+            self.email = email
+        if first_name is not None:
+            self.first_name = first_name
+        if second_name is not None:
+            self.second_name = second_name
+        if middle_name is not None:
+            self.middle_name = middle_name
+        if date_of_birth is not None:
+            self.date_of_birth = date_of_birth
+
 
 class StudentInfo(db.Model):
     """
@@ -167,6 +178,45 @@ class StudentInfo(db.Model):
     citizenship = db.Column(db.Integer, db.ForeignKey('country.id'))
     region = db.Column(db.String)
     city = db.Column(db.String)
+
+    def serialize(self):
+        if self.custom_university is None:
+            university = University.query.filter(University.id == self.university).one_or_none().name
+        else:
+            university = self.custom_university
+        return \
+            {
+                'phone_number': self.phone,
+                'university': university,
+                'admission_year': self.admission_year.isoformat(),
+                'university_country': self.university_country,
+                'citizenship': self.citizenship,
+                'region': self.region,
+                'city': self.city
+            }
+
+    def update(self, phone_number=None, university=None, admission_year=None, university_country=None,
+               citizenship=None, region=None, city=None):
+        if phone_number is not None:
+            self.phone = phone_number
+        if university is not None:
+            university_obj = University.query.filter(University.name == university).one_or_none()
+            if university_obj is None:
+                self.university = None
+                self.custom_university = university
+            else:
+                self.university = university_obj.id
+                self.custom_university = None
+        if admission_year is not None:
+            self.admission_year = admission_year
+        if university_country is not None:
+            self.university_country = university_country
+        if citizenship is not None:
+            self.citizenship = citizenship
+        if region is not None:
+            self.region = region
+        if city is not None:
+            self.city = city
 
 
 class University(db.Model):
