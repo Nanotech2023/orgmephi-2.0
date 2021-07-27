@@ -112,14 +112,14 @@ class ResponseFiletypeEnum(enum.Enum):
     odt: OpenOffice format
     """
 
-    txt = 0
-    pdf = 1
-    jpg = 2
-    doc = 3
-    docx = 4
-    png = 5
-    gif = 6
-    odt = 7
+    txt = 'txt'
+    pdf = 'pdf'
+    jpg = 'jpg'
+    doc = 'doc'
+    docx = 'docx'
+    png = 'png'
+    gif = 'gif'
+    odt = 'odt'
 
 
 class ResponseAnswer(db.Model):
