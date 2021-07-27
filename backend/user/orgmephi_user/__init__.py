@@ -3,6 +3,7 @@ import os
 from flask import Flask, current_app
 from flask_sqlalchemy import SQLAlchemy
 from flask_jwt_extended import JWTManager
+from flask_cors import CORS
 
 from openapi_core.contrib.flask.decorators import FlaskOpenAPIViewDecorator
 from orgmephi_user.default_config import DefaultConfiguration
@@ -46,6 +47,7 @@ def init_api():
             }
         )
         app.register_blueprint(swagger_ui_blueprint)
+    app.config['CORS_HEADERS'] = 'Content-Type'
 
 
 def init_jwt():
@@ -71,6 +73,7 @@ init_security(app)
 init_db()
 init_api()
 jwt = init_jwt()
+cors = CORS(app)
 
 
 from orgmephi_user.views import *
