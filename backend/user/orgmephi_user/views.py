@@ -349,3 +349,21 @@ def delete_group_admin(group_id):
     db.session.delete(group)
     db.session.commit()
     return make_response({}, 200)
+
+
+@app.route('/info/universities', methods=['GET'])
+@openapi
+@catch_request_error
+def get_universities():
+    universities = get_all(University)
+    university_list = [uni.name for uni in universities]
+    return make_response({'university_list': university_list}, 200)
+
+
+@app.route('/info/countries', methods=['GET'])
+@openapi
+@catch_request_error
+def get_countries():
+    countries = get_all(Country)
+    country_list = [country.name for country in countries]
+    return make_response({'country_list': country_list}, 200)
