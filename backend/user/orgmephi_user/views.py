@@ -5,13 +5,23 @@ from flask_jwt_extended import create_access_token, set_access_cookies, create_r
     get_csrf_token, jwt_required, unset_jwt_cookies
 
 from orgmephi_user.models import *
-from orgmephi_user.errors import RequestError, WeakPassword
+from orgmephi_user.errors import RequestError, WeakPassword, NotFound, WrongCredentials
 from orgmephi_user import app, db, openapi
 from orgmephi_user.jwt_verify import *
 
 user_roles = {role.value: role for role in UserRoleEnum}
 
 user_types = {user_type.value: user_type for user_type in UserTypeEnum}
+
+
+def catch_request_error(function):
+    @wraps(function)
+    def wrapper(*args, **kwargs):
+        try:
+            return function(*args, **kwargs)
+        except RequestError as err:
+            return err.to_response()
+    return wrapper
 
 
 @app.route('/api.yaml', methods=['GET'])
@@ -22,6 +32,13 @@ def get_api():
     if api_path[0] != '/':
         api_path = '%s/%s' % (getcwd(), api_path)
     return send_file(api_path)
+
+
+def get_or_raise(entity, field, value):
+    result = get_one_or_null(entity, field, value)
+    if result is None:
+        raise NotFound(field, value)
+    return result
 
 
 def grade_to_year(grade):
@@ -45,50 +62,48 @@ def hash_password(password, force=False):
 
 @app.route('/register', methods=['POST'])
 @openapi
+@catch_request_error
 def register():
-    try:
-        values = request.openapi.body
-        username = values['auth_info']['email']
-        reg_type = user_types[values['register_type']]
-        password_hash = hash_password(values['auth_info']['password'])
+    values = request.openapi.body
+    username = values['auth_info']['email']
+    reg_type = user_types[values['register_type']]
+    password_hash = hash_password(values['auth_info']['password'])
 
+    user_data = values['personal_info']
+    student_data = values['student_info']
+
+    try:
         user = add_user(db.session, username, password_hash, UserRoleEnum.participant, reg_type)
-        user_data = values['personal_info']
         add_personal_info(db.session, user, username, user_data['first_name'], user_data['second_name'],
                           user_data['middle_name'], user_data['date_of_birth'])
 
         if reg_type == UserTypeEnum.university:
-            student_data = values['student_info']
             add_university_info(db.session, user, student_data['phone_number'], student_data['university'],
                                 grade_to_year(student_data['grade']), student_data['university_country'],
                                 student_data['citizenship'], student_data['region'], student_data['city'])
 
         db.session.commit()
-
-        return make_response(user.serialize(), 200)
-
-    except RequestError as err:
+    except Exception:
         db.session.rollback()
-        return err.to_response()
+        raise
+    return make_response(user.serialize(), 200)
 
 
 @app.route('/register/internal', methods=['POST'])
 @openapi
 @jwt_required_role(['Admin', 'System'])
+@catch_request_error
 def register_internal():
+    values = request.openapi.body
+    username = values['username']
+    password_hash = hash_password(values['password'], force=True)
     try:
-        values = request.openapi.body
-        username = values['username']
-        password_hash = hash_password(values['password'], force=True)
         user = add_user(db.session, username, password_hash, UserRoleEnum.participant, UserTypeEnum.internal)
-
         db.session.commit()
-
-        return make_response(user.serialize(), 200)
-
-    except RequestError as err:
+    except Exception:
         db.session.rollback()
-        return err.to_response()
+        raise
+    return make_response(user.serialize(), 200)
 
 
 def validate_password(password, password_hash):
@@ -117,9 +132,10 @@ def generate_refresh_token(user_id, remember_me):
 
 @app.route('/login', methods=['POST'])
 @openapi
+@catch_request_error
 def login():
     values = request.openapi.body
-    user = get_user_by_name(values['auth_credentials']['username'])
+    user = get_one_or_null(User, 'username', values['auth_credentials']['username'])
 
     if user is not None:
         validate_password(values['auth_credentials']['password'], user.password_hash)
@@ -127,7 +143,7 @@ def login():
         # align response times
         validate_password(values['auth_credentials']['password'],
                           '$pbkdf2-sha256$29000$h8DWeu8dg3CudQ4BAACg1A$JMTWWR9uLxzruMTaZObU8CJxMJoDTjJPwfL.aboeCIM')
-        abort(401)
+        raise WrongCredentials
 
     access_token, access_csrf = generate_access_token(user.id, user.username, user.role.value)
     refresh_token, refresh_csrf = generate_refresh_token(user.id, values['remember_me'])
@@ -147,11 +163,10 @@ def login():
 @app.route('/refresh', methods=['POST'])
 @openapi
 @jwt_required(refresh=True)
+@catch_request_error
 def refresh():
     user_id = jwt_get_id()
-    user = get_user_by_id(user_id)
-    if user is None:
-        abort(404)
+    user = get_or_raise(User, "id", user_id)
     access_token, access_csrf = generate_access_token(user_id, user.username, user.role.value)
     refresh_token, refresh_csrf = generate_refresh_token(user_id, get_jwt()['remember'])
 
@@ -170,6 +185,7 @@ def refresh():
 @app.route('/logout', methods=['POST'])
 @openapi
 @jwt_required()
+@catch_request_error
 def logout():
     response = make_response({}, 200)
     unset_jwt_cookies(response)
@@ -177,15 +193,10 @@ def logout():
 
 
 def update_password(user_id, new_password, old_password, admin=False):
-    user = get_user_by_id(user_id)
-    if user is None:
-        return 404
+    user = get_or_raise(User, "id", user_id)
     if not admin:
         validate_password(old_password, user.password_hash)
-    try:
-        password_hash = hash_password(new_password, force=admin)
-    except RequestError as err:
-        return err.to_response()
+    password_hash = hash_password(new_password, force=admin)
     user.password_hash = password_hash
     db.session.commit()
     return make_response({}, 200)
@@ -194,6 +205,7 @@ def update_password(user_id, new_password, old_password, admin=False):
 @app.route('/user/<int:user_id>/password', methods=['POST'])
 @openapi
 @jwt_required_role(['Admin'])
+@catch_request_error
 def change_password_admin(user_id):
     values = request.openapi.body
     return update_password(user_id, values['new_password'], None, True)
@@ -202,6 +214,7 @@ def change_password_admin(user_id):
 @app.route('/user/self/password', methods=['POST'])
 @openapi
 @jwt_required()
+@catch_request_error
 def change_password_self():
     values = request.openapi.body
     user_id = jwt_get_id()
@@ -211,19 +224,16 @@ def change_password_self():
 @app.route('/user/self', methods=['GET'])
 @openapi
 @jwt_required()
+@catch_request_error
 def get_user_self():
-    user_id = jwt_get_id()
-    user = get_user_by_id(user_id)
-    if user is None:
-        abort(404)
+    user = get_or_raise(User, "id", jwt_get_id())
     return make_response(user.serialize(), 200)
 
 
 @app.route('/user/<int:user_id>', methods=['GET'])
 @openapi
 @jwt_required_role(['Admin', 'System'])
+@catch_request_error
 def get_user_admin(user_id):
-    user = get_user_by_id(user_id)
-    if user is None:
-        abort(404)
+    user = get_or_raise(User, "id", user_id)
     return make_response(user.serialize(), 200)

@@ -237,12 +237,8 @@ def add_user(db_session, username, password_hash, role, reg_type):
     return user
 
 
-def get_user_by_name(username):
-    return User.query.filter(User.username == username).one_or_none()
-
-
-def get_user_by_id(user_id):
-    return User.query.filter(User.id == user_id).one_or_none()
+def get_one_or_null(entity, field, value):
+    return entity.query.filter_by(**{field: value}).one_or_none()
 
 
 def add_personal_info(db_session, user, email, first_name, second_name, middle_name, date_of_birth):
