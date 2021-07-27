@@ -122,7 +122,7 @@ def register_internal():
 def validate_password(password, password_hash):
     hash_policy = app.config['ORGMEPHI_PASSLIB_CONTEXT']
     if not hash_policy.verify(password, password_hash):
-        abort(401)
+        raise WrongCredentials()
 
 
 def generate_access_token(user_id, name, role):
@@ -514,3 +514,11 @@ def set_university_info_admin(user_id):
             raise
     db.session.commit()
     return make_response(user.student_info.serialize(), 200)
+
+
+@app.route('/preregister', methods=['POST'])
+@openapi
+@jwt_required_role(['Admin', 'System', 'Creator'])
+@catch_request_error
+def preregister():
+    abort(501)
