@@ -9,25 +9,9 @@ from orgmephi_user.errors import RequestError, WeakPassword
 from orgmephi_user import app, db, openapi
 from orgmephi_user.jwt_verify import *
 
-user_roles = {
-    'Participant': UserRoleEnum.participant,
-    'Creator': UserRoleEnum.creator,
-    'Admin': UserRoleEnum.admin,
-    'System': UserRoleEnum.system
-}
+user_roles = {role.value: role for role in UserRoleEnum}
 
-user_roles_reverse = {val: key for key, val in user_roles.items()}
-
-user_types = {
-    'PreUniversity': UserTypeEnum.pre_university,
-    'Enrollee': UserTypeEnum.enrollee,
-    'School': UserTypeEnum.school,
-    'University': UserTypeEnum.university,
-    'Internal': UserTypeEnum.internal,
-    'PreRegister': UserTypeEnum.pre_register
-}
-
-user_types_reverse = {val: key for key, val in user_types.items()}
+user_types = {user_type.value: user_type for user_type in UserTypeEnum}
 
 
 @app.route('/api.yaml', methods=['GET'])
@@ -81,13 +65,7 @@ def register():
 
         db.session.commit()
 
-        return make_response(
-            {
-                "id": user.id,
-                "username": user.username,
-                "role": user_roles_reverse[user.role],
-                "type": user_types_reverse[user.type]
-            }, 200)
+        return make_response(user.serialize(), 200)
 
     except RequestError as err:
         db.session.rollback()
@@ -106,13 +84,7 @@ def register_internal():
 
         db.session.commit()
 
-        return make_response(
-            {
-                "id": user.id,
-                "username": user.username,
-                "role": user_roles_reverse[user.role],
-                "type": user_types_reverse[user.type]
-            }, 200)
+        return make_response(user.serialize(), 200)
 
     except RequestError as err:
         db.session.rollback()
@@ -157,7 +129,7 @@ def login():
                           '$pbkdf2-sha256$29000$h8DWeu8dg3CudQ4BAACg1A$JMTWWR9uLxzruMTaZObU8CJxMJoDTjJPwfL.aboeCIM')
         abort(401)
 
-    access_token, access_csrf = generate_access_token(user.id, user.username, user_roles_reverse[user.role])
+    access_token, access_csrf = generate_access_token(user.id, user.username, user.role.value)
     refresh_token, refresh_csrf = generate_refresh_token(user.id, values['remember_me'])
 
     response = make_response(
@@ -180,7 +152,7 @@ def refresh():
     user = get_user_by_id(user_id)
     if user is None:
         abort(404)
-    access_token, access_csrf = generate_access_token(user_id, user.username, user_roles_reverse[user.role])
+    access_token, access_csrf = generate_access_token(user_id, user.username, user.role.value)
     refresh_token, refresh_csrf = generate_refresh_token(user_id, get_jwt()['remember'])
 
     response = make_response(
@@ -234,3 +206,24 @@ def change_password_self():
     values = request.openapi.body
     user_id = jwt_get_id()
     return update_password(user_id, values['new_password'], values['old_password'], False)
+
+
+@app.route('/user/self', methods=['GET'])
+@openapi
+@jwt_required()
+def get_user_self():
+    user_id = jwt_get_id()
+    user = get_user_by_id(user_id)
+    if user is None:
+        abort(404)
+    return make_response(user.serialize(), 200)
+
+
+@app.route('/user/<int:user_id>', methods=['GET'])
+@openapi
+@jwt_required_role(['Admin', 'System'])
+def get_user_admin(user_id):
+    user = get_user_by_id(user_id)
+    if user is None:
+        abort(404)
+    return make_response(user.serialize(), 200)

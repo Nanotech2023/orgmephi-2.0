@@ -85,6 +85,14 @@ class User(db.Model):
     userInfo = db.relationship('UserInfo', backref='user', lazy=True, uselist=False)
     studentInfo = db.relationship('StudentInfo', backref='user', lazy=True, uselist=False)
 
+    def serialize(self):
+        return {
+                "id": self.id,
+                "username": self.username,
+                "role": self.role.value,
+                "type": self.type.value
+            }
+
 
 class UserInfo(db.Model):
     """

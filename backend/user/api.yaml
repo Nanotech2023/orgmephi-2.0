@@ -203,7 +203,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/commonUserInfo'
-  /user/{id}:
+  /user/{user_id}:
     get:
       summary: Get common info for a different user
       description: Get info about any user by its id, only for admins and creators
@@ -212,7 +212,7 @@ paths:
       parameters:
         - in: path
           description: Id of the user
-          name: id
+          name: user_id
           required: true
           schema:
             type: integer
