@@ -405,3 +405,72 @@ def set_user_type(user_id):
     user.type = user_type
     db.session.commit()
     return make_response({}, 200)
+
+
+@app.route('/user/self/personal', methods=['GET'])
+@openapi
+@jwt_required()
+@catch_request_error
+def get_user_info_self():
+    user = get_or_raise(User, "id", jwt_get_id())
+    if user.user_info is None:
+        raise NotFound('user.personal_info', 'for user %d' % user.id)
+    return make_response(user.user_info.serialize(), 200)
+
+
+@app.route('/user/<int:user_id>/personal', methods=['GET'])
+@openapi
+@jwt_required_role(['Admin', 'System', 'Creator'])
+@catch_request_error
+def get_user_info_admin(user_id):
+    user = get_or_raise(User, "id", user_id)
+    if user.user_info is None:
+        raise NotFound('user.personal_info', 'for user %d' % user.id)
+    return make_response(user.user_info.serialize(), 200)
+
+
+@app.route('/user/<int:user_id>/personal', methods=['PATCH'])
+@openapi
+@jwt_required_role(['Admin', 'System', 'Creator'])
+@catch_request_error
+def set_user_info_admin(user_id):
+    values = request.openapi.body
+    user = get_or_raise(User, "id", user_id)
+    if user.user_info is None:
+        missing = []
+        if 'email' not in values:
+            missing.append('email')
+        if 'first_name' not in values:
+            missing.append('first_name')
+        if 'second_name' not in values:
+            missing.append('second_name')
+        if 'middle_name' not in values:
+            missing.append('middle_name')
+        if 'date_of_birth' not in values:
+            missing.append('date_of_birth')
+        if len(missing) > 0:
+            raise InsufficientData(str(missing), 'for user %d' % user.id)
+        try:
+            add_personal_info(db.session, user, values['email'], values['first_name'], values['second_name'],
+                              values['middle_name'], values['date_of_birth'])
+        except Exception:
+            db.session.rollback()
+            raise
+    else:
+        user_info = user.user_info
+        try:
+            if 'email' in values:
+                user_info.email = values['email']
+            if 'first_name' in values:
+                user_info.email = values['first_name']
+            if 'second_name' in values:
+                user_info.email = values['second_name']
+            if 'middle_name' in values:
+                user_info.email = values['middle_name']
+            if 'date_of_birth' in values:
+                user_info.email = values['date_of_birth']
+        except Exception:
+            db.session.rollback()
+            raise
+    db.session.commit()
+    return make_response(user.user_info.serialize(), 200)

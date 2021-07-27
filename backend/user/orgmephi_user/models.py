@@ -127,6 +127,16 @@ class UserInfo(db.Model):
     second_name = db.Column(db.String)
     date_of_birth = db.Column(db.Date)
 
+    def serialize(self):
+        return \
+            {
+                'email': self.email,
+                'first_name': self.first_name,
+                'second_name': self.second_name,
+                'middle_name': self.middle_name,
+                'date_of_birth': self.date_of_birth.isoformat()
+            }
+
 
 class StudentInfo(db.Model):
     """

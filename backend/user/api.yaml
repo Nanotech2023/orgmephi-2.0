@@ -367,8 +367,14 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/personalInfo'
-  /user/{id}/personal:
+                $ref: '#/components/schemas/personalInfoAll'
+        '404':
+          description: Personal info is not set
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+  /user/{user_id}/personal:
     get:
       summary: Get personal info for a different user
       description: Get personal info about any user by its id, only for admins and creators
@@ -377,7 +383,7 @@ paths:
       parameters:
         - in: path
           description: Id of the user
-          name: id
+          name: user_id
           required: true
           schema:
             type: integer
@@ -387,7 +393,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/personalInfo'
+                $ref: '#/components/schemas/personalInfoAll'
         '403':
           description: Invalid role of current user
           content:
@@ -409,7 +415,7 @@ paths:
       parameters:
         - in: path
           description: Id of the user
-          name: id
+          name: user_id
           required: true
           schema:
             type: integer
@@ -418,7 +424,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/personalInfoUpdate'
+              $ref: '#/components/schemas/personalInfoAll'
       responses:
         '200':
           description: OK
@@ -430,6 +436,12 @@ paths:
                 $ref: '#/components/schemas/errorResponse'
         '404':
           description: User not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+        '409':
+          description: Personal info is not set
           content:
             application/json:
               schema:
@@ -452,7 +464,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/errorResponse'
-  /user/{id}/university:
+  /user/{user_id}/university:
     get:
       summary: Get university student info for a different user
       description: Get university student info about any user by its id, only for admins and creators
@@ -461,7 +473,7 @@ paths:
       parameters:
         - in: path
           description: Id of the user
-          name: id
+          name: user_id
           required: true
           schema:
             type: integer
@@ -493,7 +505,7 @@ paths:
       parameters:
         - in: path
           description: Id of the user
-          name: id
+          name: user_id
           required: true
           schema:
             type: integer
@@ -927,10 +939,13 @@ components:
         password:
           type: string
           format: password
-    personalInfoUpdate:
-      title: 'Update request for personal info'
-      description: Set fields that should be changed
+    personalInfoAll:
+      title: 'All personal information'
+      description: For PATCH set fields that should be changed
       properties:
+        email:
+          type: string
+          pattern: '^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$'
         first_name:
           type: string
         second_name:
