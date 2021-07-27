@@ -21,7 +21,8 @@
 1. Пушить напрямую в `master`
 1. Все изменения в `master` можно добавить только через `MR` из веток `frontend` и `backend`
     * Название `Merge {{ source_branch }} to master {{ текущая_дата }}`
-    * Закрыть `MR` можно только с согласованием `Owner`, `Maintainer` от команды `frontend` и `Maintainer` от команды `backend`
+    * Закрыть `MR` можно только с согласованием `Maintainer` от команды `frontend` и `Maintainer` от команды `backend`
+1. Все изменения в API взаимодействия между `frontend` и `backend` должны проходить двойное согласование между `Maintainer` от команды `frontend` и `Maintainer` от команды `backend`
 
 ### Правила закрытия задач
 Задача считается закрытой, если:
