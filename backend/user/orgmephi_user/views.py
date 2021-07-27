@@ -132,8 +132,8 @@ def generate_access_token(user_id, name, role):
     return access_token, csrf_access_token
 
 
-def generate_refresh_token(user_id, name, role, remember_me):
-    additional_claims = {"name": name, "role": role, "remember": remember_me}
+def generate_refresh_token(user_id, remember_me):
+    additional_claims = {"remember": remember_me}
     if remember_me:
         refresh_token = create_refresh_token(identity=user_id, expires_delta=app.config['ORGMEPHI_REMEMBER_ME_TIME'],
                                              additional_claims=additional_claims)
@@ -158,8 +158,7 @@ def login():
         abort(401)
 
     access_token, access_csrf = generate_access_token(user.id, user.username, user_roles_reverse[user.role])
-    refresh_token, refresh_csrf = generate_refresh_token(user.id, user.username, user_roles_reverse[user.role],
-                                                         values['remember_me'])
+    refresh_token, refresh_csrf = generate_refresh_token(user.id, values['remember_me'])
 
     response = make_response(
         {
@@ -178,10 +177,11 @@ def login():
 @jwt_required(refresh=True)
 def refresh():
     user_id = jwt_get_id()
-    role = jwt_get_role()
-    username = jwt_get_username()
-    access_token, access_csrf = generate_access_token(user_id, username, role)
-    refresh_token, refresh_csrf = generate_refresh_token(user_id, username, role, get_jwt()['remember'])
+    user = get_user_by_id(user_id)
+    if user is None:
+        abort(404)
+    access_token, access_csrf = generate_access_token(user_id, user.username, user_roles_reverse[user.role])
+    refresh_token, refresh_csrf = generate_refresh_token(user_id, get_jwt()['remember'])
 
     response = make_response(
         {
