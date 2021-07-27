@@ -89,8 +89,8 @@ class User(db.Model):
     type = db.Column(db.Enum(UserTypeEnum), nullable=False)
     registration_date = db.Column(db.DateTime, default=datetime.utcnow)
 
-    userInfo = db.relationship('UserInfo', backref='user', lazy=True, uselist=False)
-    studentInfo = db.relationship('StudentInfo', backref='user', lazy=True, uselist=False)
+    user_info = db.relationship('UserInfo', backref='user', lazy=True, uselist=False)
+    student_info = db.relationship('StudentInfo', backref='user', lazy=True, uselist=False)
     groups = db.relationship('Group', secondary=users_in_group, lazy='select', backref=db.backref('user', lazy=True),
                              viewonly=True)
 

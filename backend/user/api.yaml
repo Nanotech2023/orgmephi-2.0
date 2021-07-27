@@ -280,7 +280,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/errorResponse'
-  /user/{id}/role:
+  /user/{user_id}/role:
     put:
       summary: Set the role of any user
       description: Set the role of another user, only for admins
@@ -290,7 +290,7 @@ paths:
       parameters:
         - in: path
           description: Id of the user
-          name: id
+          name: user_id
           required: true
           schema:
             type: integer
@@ -315,7 +315,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/errorResponse'
-  /user/{id}/type:
+  /user/{user_id}/type:
     put:
       summary: Set the type of any user
       description: Set the type of another user, only for admins
@@ -325,7 +325,7 @@ paths:
       parameters:
         - in: path
           description: Id of the user
-          name: id
+          name: user_id
           required: true
           schema:
             type: integer

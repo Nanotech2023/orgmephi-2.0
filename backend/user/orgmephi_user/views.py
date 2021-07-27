@@ -1,11 +1,11 @@
 from os import getcwd
 
-from flask import request, make_response, send_file, jsonify
+from flask import request, make_response, send_file
 from flask_jwt_extended import create_access_token, set_access_cookies, create_refresh_token, set_refresh_cookies,\
     get_csrf_token, jwt_required, unset_jwt_cookies
 
 from orgmephi_user.models import *
-from orgmephi_user.errors import RequestError, WeakPassword, NotFound, WrongCredentials, AlreadyExists
+from orgmephi_user.errors import RequestError, WeakPassword, NotFound, WrongCredentials, AlreadyExists, InsufficientData
 from orgmephi_user import app, db, openapi
 from orgmephi_user.jwt_verify import *
 
@@ -377,3 +377,31 @@ def get_user_all():
     users = get_all(User)
     user_list = [user.serialize() for user in users]
     return make_response({'users': user_list}, 200)
+
+
+@app.route('/user/<int:user_id>/role', methods=['PUT'])
+@openapi
+@jwt_required_role(['Admin', 'System'])
+@catch_request_error
+def set_user_role(user_id):
+    role = user_roles[request.openapi.body['role']]
+    user = get_or_raise(User, 'id', user_id)
+    user.role = role
+    db.session.commit()
+    return make_response({}, 200)
+
+
+@app.route('/user/<int:user_id>/type', methods=['PUT'])
+@openapi
+@jwt_required_role(['Admin', 'System'])
+@catch_request_error
+def set_user_type(user_id):
+    user_type = user_types[request.openapi.body['type']]
+    user = get_or_raise(User, 'id', user_id)
+    if user_type != UserTypeEnum.internal and user_type != UserTypeEnum.pre_register and user.user_info is None:
+        raise InsufficientData('user', 'personal info')
+    if user_type == UserTypeEnum.university and user.student_info is None:
+        raise InsufficientData('user', 'university info')
+    user.type = user_type
+    db.session.commit()
+    return make_response({}, 200)

@@ -53,3 +53,13 @@ class WrongCredentials(RequestError):
 
     def get_msg(self):
         return 'Wrong credentials'
+
+
+class InsufficientData(RequestError):
+    def __init__(self, obj, data):
+        super(InsufficientData, self).__init__(409)
+        self.obj = obj
+        self.data = data
+
+    def get_msg(self):
+        return '%s is missing %s' % (self.obj, self.data)
