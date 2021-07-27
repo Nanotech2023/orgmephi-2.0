@@ -236,7 +236,7 @@ def get_user_self():
 
 @app.route('/user/<int:user_id>', methods=['GET'])
 @openapi
-@jwt_required_role(['Admin', 'System'])
+@jwt_required_role(['Admin', 'System', 'Creator'])
 @catch_request_error
 def get_user_admin(user_id):
     user = get_or_raise(User, "id", user_id)
@@ -367,3 +367,13 @@ def get_countries():
     countries = get_all(Country)
     country_list = [country.name for country in countries]
     return make_response({'country_list': country_list}, 200)
+
+
+@app.route('/user/all', methods=['GET'])
+@openapi
+@jwt_required_role(['Admin', 'System', 'Creator'])
+@catch_request_error
+def get_user_all():
+    users = get_all(User)
+    user_list = [user.serialize() for user in users]
+    return make_response({'users': user_list}, 200)
