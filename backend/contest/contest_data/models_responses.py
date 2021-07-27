@@ -70,9 +70,9 @@ class AppealStatusEnum(enum.Enum):
     appeal_rejected: appeal rejected
     """
 
-    under_review = 0
-    appeal_accepted = 1
-    appeal_rejected = 2
+    under_review = "UnderReview"
+    appeal_accepted = "AppealAccepted"
+    appeal_rejected = "AppealRejected"
 
 
 class Appeal(db.Model):
