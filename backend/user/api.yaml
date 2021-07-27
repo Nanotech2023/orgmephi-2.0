@@ -16,6 +16,24 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/registration'
+            #Swagger does not generate example for oneOf
+            example: '{
+                      "auth_info": {
+                        "email": "string",
+                        "password": "string"
+                      },
+                      "personal_info": {
+                        "first_name": "string",
+                        "second_name": "string",
+                        "middle_name": "string",
+                        "date_of_birth": "2021-07-27"
+                      },
+                      "register_type": "PreUniversity",
+                      "register_confirm": {
+                        "registration_number": "string",
+                        "one_time_password": "string"
+                      }
+                    }'
       security: []
       responses:
         '200':
