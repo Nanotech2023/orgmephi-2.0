@@ -731,12 +731,6 @@ paths:
           required: true
           schema:
             type: integer
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/requestGroupRemove'
       responses:
         '200':
           description: OK
@@ -1372,13 +1366,6 @@ components:
       $ref: '#/components/schemas/typeGroup'
 
     # /group/{group_id}/remove
-
-    requestGroupRemove:
-      required:
-        - name
-      properties:
-        name:
-          $ref: '#/components/schemas/typeGroupName'
 
     # /user/self/groups
 
