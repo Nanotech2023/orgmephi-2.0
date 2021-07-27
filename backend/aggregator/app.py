@@ -1,4 +1,3 @@
-import requests
 from flask import Flask, send_file, redirect, abort
 from flask_cors import CORS, cross_origin
 
