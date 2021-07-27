@@ -235,7 +235,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/errorResponse'
-  /user/by-group/{id}:
+  /user/by-group/{group_id}:
     get:
       summary: Get common info for different users
       description: Get info about any user by their group, only for admins and creators
@@ -244,7 +244,7 @@ paths:
       parameters:
         - in: path
           description: ID of the group
-          name: id
+          name: group_id
           required: true
           schema:
             type: integer
@@ -550,7 +550,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/groupList'
-  /user/{id}/groups:
+  /user/{user_id}/groups:
     get:
       summary: Get groups for a different user
       description: Get group list for any user by its id, only for admins and creators
@@ -559,7 +559,7 @@ paths:
       parameters:
         - in: path
           description: Id of the user
-          name: id
+          name: user_id
           required: true
           schema:
             type: integer
@@ -582,7 +582,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/errorResponse'
-  /user/{id}/groups/add:
+  /user/{user_id}/groups/add:
     post:
       summary: Assign a user to a group
       description: Assign a user to a group, only for admins and creators
@@ -592,7 +592,7 @@ paths:
       parameters:
         - in: path
           description: Id of the user
-          name: id
+          name: user_id
           required: true
           schema:
             type: integer
@@ -617,7 +617,13 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/errorResponse'
-  /user/{id}/groups/remove:
+        '409':
+          description: User alreadyy in the group
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+  /user/{user_id}/groups/remove:
     post:
       summary: Remove a user from a group
       description: Remove a user from a group, only for admins and creators
@@ -627,7 +633,7 @@ paths:
       parameters:
         - in: path
           description: Id of the user
-          name: id
+          name: user_id
           required: true
           schema:
             type: integer
@@ -671,7 +677,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/errorResponse'
-  /group/{id}:
+  /group/{group_id}:
     get:
       summary: Get any group
       description: Get any group, only for admins and creators
@@ -680,7 +686,7 @@ paths:
       parameters:
         - in: path
           description: Id of the group
-          name: id
+          name: group_id
           required: true
           schema:
             type: integer
@@ -741,7 +747,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/errorResponse'
-  /group/{id}/delete:
+  /group/{group_id}/delete:
     post:
       summary: Delete a group
       description: Add a group, only for admins
@@ -751,7 +757,7 @@ paths:
       parameters:
         - in: path
           description: ID of the group
-          name: id
+          name: group_id
           required: true
           schema:
             type: integer

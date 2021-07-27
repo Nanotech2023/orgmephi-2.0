@@ -57,6 +57,13 @@ def _populate_table(table, values):
     db.session.commit()
 
 
+# Many-To-Many relationship for User <-> Group
+users_in_group = db.Table('user_in_group',
+                          db.Column('user_id', db.Integer, db.ForeignKey('user.id'), primary_key=True),
+                          db.Column('group_id', db.Integer, db.ForeignKey('group.id'), primary_key=True)
+                          )
+
+
 class User(db.Model):
     """
         User ORM class
@@ -84,6 +91,8 @@ class User(db.Model):
 
     userInfo = db.relationship('UserInfo', backref='user', lazy=True, uselist=False)
     studentInfo = db.relationship('StudentInfo', backref='user', lazy=True, uselist=False)
+    groups = db.relationship('Group', secondary=users_in_group, lazy='select', backref=db.backref('user', lazy=True),
+                             viewonly=True)
 
     def serialize(self):
         return {
@@ -194,13 +203,6 @@ def populate_country():
     return _populate_table(Country, open(db.get_app().config['ORGMEPHI_COUNTRY_FILE']).read().splitlines())
 
 
-# Many-To-Many relationship for User <-> Group
-users_in_group = db.Table('user_in_group',
-                          db.Column('user_id', db.Integer, db.ForeignKey('user.id'), primary_key=True),
-                          db.Column('group_id', db.Integer, db.ForeignKey('group.id'), primary_key=True)
-                          )
-
-
 class Group(db.Model):
     """
         Group ORM class
@@ -219,9 +221,11 @@ class Group(db.Model):
     users = db.relationship('User', secondary=users_in_group, lazy='subquery',
                             backref=db.backref('group', lazy=True))
 
+    def serialize(self):
+        return {'id': self.id, 'name': self.name}
+
 
 def add_user(db_session, username, password_hash, role, reg_type):
-    from orgmephi_user.errors import AlreadyExists
     user = User(
         username=username,
         password_hash=password_hash,
@@ -229,16 +233,20 @@ def add_user(db_session, username, password_hash, role, reg_type):
         type=reg_type
     )
     db_session.add(user)
-
-    try:
-        db_session.flush()
-    except sqlalchemy.exc.IntegrityError:
-        raise AlreadyExists('username', username)
+    db_session.flush()
     return user
 
 
 def get_one_or_null(entity, field, value):
     return entity.query.filter_by(**{field: value}).one_or_none()
+
+
+def get_list(entity, field, value):
+    return entity.query.filter_by(**{field: value}).all()
+
+
+def get_all(entity):
+    return entity.query.all()
 
 
 def add_personal_info(db_session, user, email, first_name, second_name, middle_name, date_of_birth):
@@ -271,6 +279,13 @@ def add_university_info(db_session, user, phone, university_name, admission_year
     db_session.add(student_info)
     db_session.flush()
     return student_info
+
+
+def add_group(db_session, name):
+    group = Group(name=name)
+    db_session.add(group)
+    db_session.flush()
+    return group
 
 
 if __name__ == "__main__":

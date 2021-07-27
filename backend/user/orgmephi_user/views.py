@@ -1,11 +1,11 @@
 from os import getcwd
 
-from flask import request, make_response, send_file
+from flask import request, make_response, send_file, jsonify
 from flask_jwt_extended import create_access_token, set_access_cookies, create_refresh_token, set_refresh_cookies,\
     get_csrf_token, jwt_required, unset_jwt_cookies
 
 from orgmephi_user.models import *
-from orgmephi_user.errors import RequestError, WeakPassword, NotFound, WrongCredentials
+from orgmephi_user.errors import RequestError, WeakPassword, NotFound, WrongCredentials, AlreadyExists
 from orgmephi_user import app, db, openapi
 from orgmephi_user.jwt_verify import *
 
@@ -83,6 +83,8 @@ def register():
                                 student_data['citizenship'], student_data['region'], student_data['city'])
 
         db.session.commit()
+    except sqlalchemy.exc.IntegrityError:
+        raise AlreadyExists('username', username)
     except Exception:
         db.session.rollback()
         raise
@@ -100,6 +102,8 @@ def register_internal():
     try:
         user = add_user(db.session, username, password_hash, UserRoleEnum.participant, UserTypeEnum.internal)
         db.session.commit()
+    except sqlalchemy.exc.IntegrityError:
+        raise AlreadyExists('username', username)
     except Exception:
         db.session.rollback()
         raise
@@ -237,3 +241,111 @@ def get_user_self():
 def get_user_admin(user_id):
     user = get_or_raise(User, "id", user_id)
     return make_response(user.serialize(), 200)
+
+
+@app.route('/user/by-group/<int:group_id>', methods=['GET'])
+@openapi
+@jwt_required_role(['Admin', 'System', 'Creator'])
+@catch_request_error
+def get_user_by_group(group_id):
+    group = get_or_raise(Group, "id", group_id)
+    users = [value.serialize() for value in group.users]
+    return make_response({'users': users}, 200)
+
+
+@app.route('/user/self/groups', methods=['GET'])
+@openapi
+@jwt_required()
+@catch_request_error
+def get_user_groups_self():
+    user = get_or_raise(User, "id", jwt_get_id())
+    groups = [grp.serialize() for grp in user.groups]
+    return make_response({'groups': groups}, 200)
+
+
+@app.route('/user/<int:user_id>/groups', methods=['GET'])
+@openapi
+@jwt_required_role(['Admin', 'System', 'Creator'])
+@catch_request_error
+def get_user_groups_admin(user_id):
+    user = get_or_raise(User, "id", user_id)
+    groups = [grp.serialize() for grp in user.groups]
+    return make_response({'groups': groups}, 200)
+
+
+@app.route('/user/<int:user_id>/groups/add', methods=['POST'])
+@openapi
+@jwt_required_role(['Admin', 'System', 'Creator'])
+@catch_request_error
+def add_user_groups(user_id):
+    values = request.openapi.body
+    user = get_or_raise(User, "id", user_id)
+    group = get_or_raise(Group, 'id', values['group_id'])
+    if user in group.users:
+        raise AlreadyExists('group.users', str(user_id))
+    group.users.append(user)
+    db.session.commit()
+    return make_response({}, 200)
+
+
+@app.route('/user/<int:user_id>/groups/remove', methods=['POST'])
+@openapi
+@jwt_required_role(['Admin', 'System', 'Creator'])
+@catch_request_error
+def remove_user_groups(user_id):
+    values = request.openapi.body
+    user = get_or_raise(User, "id", user_id)
+    group = get_or_raise(Group, 'id', values['group_id'])
+    if user not in group.users:
+        raise NotFound('group.users', str(user_id))
+    group.users.remove(user)
+    db.session.commit()
+    return make_response({}, 200)
+
+
+@app.route('/group/all', methods=['GET'])
+@openapi
+@jwt_required_role(['Admin', 'System', 'Creator'])
+@catch_request_error
+def get_groups_all():
+    groups = get_all(Group)
+    groups_dict = [grp.serialize() for grp in groups]
+    return make_response({'groups': groups_dict}, 200)
+
+
+@app.route('/group/<int:group_id>', methods=['GET'])
+@openapi
+@jwt_required_role(['Admin', 'System', 'Creator'])
+@catch_request_error
+def get_group(group_id):
+    group = get_or_raise(Group, 'id', group_id)
+    return make_response(group.serialize(), 200)
+
+
+@app.route('/group/add', methods=['POST'])
+@openapi
+@jwt_required_role(['Admin', 'System'])
+@catch_request_error
+def add_group_admin():
+    values = request.openapi.body
+    name = values['name']
+    try:
+        group = add_group(db.session, name)
+        db.session.commit()
+    except sqlalchemy.exc.IntegrityError:
+        raise AlreadyExists('name', name)
+    except Exception:
+        db.session.rollback()
+        raise
+    return make_response(group.serialize(), 200)
+
+
+@app.route('/group/<int:group_id>/delete', methods=['POST'])
+@openapi
+@jwt_required_role(['Admin', 'System'])
+@catch_request_error
+def delete_group_admin(group_id):
+    group = get_or_raise(Group, 'id', group_id)
+    db.session.delete(group)
+    db.session.commit()
+    return make_response({}, 200)
