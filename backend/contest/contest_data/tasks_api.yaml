@@ -1415,6 +1415,8 @@ components:
         - start_date
         - end_time
         - type
+        - subject
+        - target_class
       properties:
         start_time:
           type: string
@@ -1434,10 +1436,19 @@ components:
           format: float
         certificate_template:
           type: string
+          format: binary
         visibility:
           type: boolean
         type:
-          type: boolean
+          type: string
+          enum: [Simple, Composite]
+        subject:
+          type: string
+        target_class:
+          type: array
+          items:
+            type: string
+            enum: [5, 6, 7, 8, 9, 10, 11, student]
     commonContestInfo:
       title: Contest common info
       description: Request to get contest info
@@ -1452,6 +1463,8 @@ components:
         - start_date
         - end_time
         - type
+        - subject
+        - target_class
       properties:
         start_time:
           type: string
@@ -1471,10 +1484,19 @@ components:
           type: string
         certificate_template:
           type: string
+          format: binary
         visibility:
           type: boolean
         type:
-          type: boolean
+          type: string
+          enum: [Simple, Composite]
+        subject:
+          type: string
+        target_class:
+          type: array
+          items:
+            type: string
+            enum: [5, 6, 7, 8, 9, 10, 11, student]
     commonContestId:
       title: Contest id
       description: Request to get contest id as response for creation
@@ -1506,7 +1528,15 @@ components:
         visibility:
           type: boolean
         type:
-          type: boolean
+          type: string
+          enum: [Simple, Composite]
+        subject:
+          type: string
+        target_class:
+          type: array
+          items:
+            type: string
+            enum: [5, 6, 7, 8, 9, 10, 11, student]
     createVariant:
       title: Create variant
       description: Request to variant creation
@@ -1642,6 +1672,7 @@ components:
                 type: string
               certificate_template:
                 type: string
+                format: binary
               visibility:
                 type: boolean
     variantsInContest:
