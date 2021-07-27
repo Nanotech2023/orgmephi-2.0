@@ -1652,6 +1652,8 @@ components:
           items:
             type: object
             properties:
+              answer_id:
+                type: integer
               answer:
                 type: string
               is_right_answer:
@@ -1659,11 +1661,6 @@ components:
     rangeTaskInfoUpdate:
       title: Update task with range
       description: Request to update task with range
-      required:
-        - num_of_task
-        - image_of_task
-        - start_value
-        - end_value
       properties:
         num_of_task:
           type: integer
@@ -1679,10 +1676,6 @@ components:
     multipleTaskInfoUpdate:
       title: Update task with multiple choice
       description: Request to update task with multiple choice
-      required:
-        - num_of_task
-        - image_of_task
-        - answers
       properties:
         num_of_task:
           type: integer
@@ -1701,10 +1694,6 @@ components:
     plainTaskInfoUpdate:
       title: Update task with plain text
       description: Request to update task with plain text
-      required:
-        - num_of_task
-        - image_of_task
-        - recommended_answer
       properties:
         num_of_task:
           type: integer
