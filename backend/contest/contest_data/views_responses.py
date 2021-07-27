@@ -38,7 +38,8 @@ filetype_dict = {
 filetype_reverse = {val: key for key, val in filetype_dict.items()}
 
 
-@app.route('/olympiad/<olympiad_id>/stage/<stage_id>/contest/<contest_id>/user/<user_id>/response:', methods=['GET'])
+@app.route('/olympiad/<int:olympiad_id>/stage/<int:stage_id>/contest/<int:contest_id>/user/<int:user_id>/response:',
+           methods=['GET'])
 @openapi
 def get_user_all_answers(olympiad_id, stage_id, contest_id, user_id):
     try:
@@ -66,7 +67,8 @@ def get_user_all_answers(olympiad_id, stage_id, contest_id, user_id):
         return err.to_response()
 
 
-@app.route('/olympiad/{olympiad_id}/stage/{stage_id}/contest/{contest_id}/answer/{answer_id}', methods=['GET'])
+@app.route('/olympiad/<int:olympiad_id>/stage/<int:stage_id>/contest/<int:contest_id>/answer/<int:answer_id>',
+           methods=['GET'])
 @openapi
 def get_user_answer_by_id(olympiad_id, stage_id, contest_id, answer_id):
     try:
@@ -82,7 +84,7 @@ def get_user_answer_by_id(olympiad_id, stage_id, contest_id, answer_id):
         return err.to_response()
 
 
-@app.route('/olympiad/{olympiad_id}/stage/{stage_id}/contest/{contest_id}/task/{task_id}/user/self:',
+@app.route('/olympiad/<int:olympiad_id>/stage/<int:stage_id>/contest/<int:contest_id>/task/<int:task_id>/user/self:',
            methods=['GET', 'POST'])
 @openapi
 def user_answer_for_task(olympiad_id, stage_id, contest_id, task_id):
@@ -138,7 +140,8 @@ def user_answer_for_task(olympiad_id, stage_id, contest_id, task_id):
         return err.to_response()
 
 
-@app.route('/olympiad/{olympiad_id}/stage/{stage_id}/contest/{contest_id}/task/{task_id}/user/{user_id}:',
+@app.route('/olympiad/<int:olympiad_id>/stage/<int:stage_id>/contest/<int:contest_id>/task/<int:task_id>/'
+           'user/<int:user_id>:',
            methods=['GET', 'POST'])
 @openapi
 def user_answer_for_task_by_id(olympiad_id, stage_id, contest_id, task_id, user_id):
@@ -193,7 +196,7 @@ def user_answer_for_task_by_id(olympiad_id, stage_id, contest_id, task_id, user_
         return err.to_response()
 
 
-@app.route('/olympiad/{olympiad_id}/stage/{stage_id}/contest/{contest_id}/user/self/status',
+@app.route('/olympiad/<int:olympiad_id>/stage/<int:stage_id>/contest/<int:contest_id>/user/self/status',
            methods=['GET', 'POST'])
 @openapi
 def user_status_and_mark_for_response(olympiad_id, stage_id, contest_id):
@@ -244,7 +247,7 @@ def user_status_and_mark_for_response(olympiad_id, stage_id, contest_id):
         return err.to_response()
 
 
-@app.route('/olympiad/{olympiad_id}/stage/{stage_id}/contest/{contest_id}/user/{user_id}/status',
+@app.route('/olympiad/<int:olympiad_id>/stage/<int:stage_id>/contest/<int:contest_id>/user/<int:user_id>/status',
            methods=['GET', 'POST'])
 @openapi
 def user_status_and_mark_for_response_by_id(olympiad_id, stage_id, contest_id, user_id):
@@ -293,7 +296,8 @@ def user_status_and_mark_for_response_by_id(olympiad_id, stage_id, contest_id, u
         return err.to_response()
 
 
-@app.route('/olympiad/{olympiad_id}/stage/{stage_id}/contest/{contest_id}/user/self/status/history', methods=['GET'])
+@app.route('/olympiad/<int:olympiad_id>/stage/<int:stage_id>/contest/<int:contest_id>/user/self/status/history',
+           methods=['GET'])
 @openapi
 def user_status_history_for_response(olympiad_id, stage_id, contest_id):
     try:  # TODO Add Checking
@@ -303,7 +307,7 @@ def user_status_history_for_response(olympiad_id, stage_id, contest_id):
         status = user_work.statuses.order_by(ResponseStatus.timestamp.desc())
         history = []
         appeals = db.session.query(ResponseStatus, Appeal). \
-            filter(ResponseStatus.status_id == Appeal.work_status).order_by(
+            filter_by(ResponseStatus.status_id == Appeal.work_status).order_by(
             ResponseStatus.timestamp.desc())  # TODO fix query
         number = 0
         for elem in status:
@@ -331,7 +335,8 @@ def user_status_history_for_response(olympiad_id, stage_id, contest_id):
         return err.to_response()
 
 
-@app.route('/olympiad/{olympiad_id}/stage/{stage_id}/contest/{contest_id}/user/{user_id}/status/history',
+@app.route('/olympiad/<int:olympiad_id>/stage/<int:stage_id>/contest/<int:contest_id>/'
+           'user/<int:user_id>/status/history',
            methods=['GET'])
 @openapi
 def user_status_history_for_response(olympiad_id, stage_id, contest_id, user_id):
@@ -341,7 +346,7 @@ def user_status_history_for_response(olympiad_id, stage_id, contest_id, user_id)
         status = user_work.statuses.order_by(ResponseStatus.timestamp.desc())
         history = []
         appeals = db.session.query(ResponseStatus, Appeal). \
-            filter(ResponseStatus.status_id == Appeal.work_status).order_by(
+            filter_by(ResponseStatus.status_id == Appeal.work_status).order_by(
             ResponseStatus.timestamp.desc())  # TODO fix query
         number = 0
         for elem in status:
@@ -369,7 +374,7 @@ def user_status_history_for_response(olympiad_id, stage_id, contest_id, user_id)
         return err.to_response()
 
 
-@app.route('/olympiad/{olympiad_id}/stage/{stage_id}/contest/{contest_id}/list/', methods=['GET'])
+@app.route('/olympiad/<int:olympiad_id>/stage/<int:stage_id>/contest/<int:contest_id>/list/', methods=['GET'])
 @openapi
 def get_list_for_stage(olympiad_id, stage_id, contest_id):
     try:  # TODO Add Checking
@@ -401,7 +406,7 @@ def get_list_for_stage(olympiad_id, stage_id, contest_id):
         return err.to_response()
 
 
-@app.route('/olympiad/{olympiad_id}/stage/{stage_id}/contest/{contest_id}/user/self/appeal/last',
+@app.route('/olympiad/<int:olympiad_id>/stage/<int:stage_id>/contest/<int:contest_id>/user/self/appeal/last',
            methods=['GET', 'POST'])
 @openapi
 def user_response_appeal_info(olympiad_id, stage_id, contest_id):
@@ -450,7 +455,7 @@ def user_response_appeal_info(olympiad_id, stage_id, contest_id):
         return err.to_response()
 
 
-@app.route('/olympiad/{olympiad_id}/stage/{stage_id}/contest/{contest_id}/user/{user_id}/appeal/last',
+@app.route('/olympiad/<int:olympiad_id>/stage/<int:stage_id>/contest/<int:contest_id>/user/<int:user_id>/appeal/last',
            methods=['GET', 'POST'])
 @openapi
 def user_response_appeal_info_by_id(olympiad_id, stage_id, contest_id, user_id):
@@ -497,7 +502,7 @@ def user_response_appeal_info_by_id(olympiad_id, stage_id, contest_id, user_id):
         return err.to_response()
 
 
-@app.route('/olympiad/{olympiad_id}/stage/{stage_id}/contest/{contest_id}/appeal/{appeal_id}/reply',
+@app.route('/olympiad/<int:olympiad_id>/stage/<int:stage_id>/contest/<int:contest_id>/appeal/<int:appeal_id>/reply',
            methods=['POST'])
 @openapi
 def reply_to_user_appeal(olympiad_id, stage_id, contest_id, appeal_id):
@@ -539,7 +544,8 @@ def reply_to_user_appeal(olympiad_id, stage_id, contest_id, appeal_id):
         return err.to_response()
 
 
-@app.route('/olympiad/{olympiad_id}/stage/{stage_id}/contest/{contest_id}/appeal/{appeal_id}', methods=['GET'])
+@app.route('/olympiad/<int:olympiad_id>/stage/<int:stage_id>/contest/<int:contest_id>/appeal/<int:appeal_id>',
+           methods=['GET'])
 @openapi
 def get_appeal_info_by_id(olympiad_id, stage_id, contest_id, appeal_id):
     try:  # TODO Add Checking
