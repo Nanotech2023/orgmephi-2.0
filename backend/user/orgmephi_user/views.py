@@ -469,7 +469,7 @@ def add_group_admin():
 @catch_request_error
 def remove_group_admin(group_id):
     group = get_or_raise(Group, 'id', group_id)
-    db.session.remove(group)
+    db.session.delete(group)
     db.session.commit()
     return make_response({}, 200)
 
