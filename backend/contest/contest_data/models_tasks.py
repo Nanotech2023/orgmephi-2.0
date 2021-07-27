@@ -159,8 +159,8 @@ class UserInContest(db.Model):
 class TaskType(enum.Enum):
 
     plain_task = 1
-    range_task = 1
-    multiple_task = 2
+    range_task = 2
+    multiple_task = 3
 
 
 class Task(db.Model):
