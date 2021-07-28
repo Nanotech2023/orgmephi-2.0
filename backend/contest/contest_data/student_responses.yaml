@@ -1,0 +1,1090 @@
+openapi: 3.0.0
+info:
+  title: Student responses service API
+  description: API description in Markdown.
+  version: 1.0.0
+
+paths:
+  /olympiad/{olympiad_id}/stage/{stage_id}/contest/{contest_id}/user/{user_id}/response:
+    get:
+      summary: Get all user answers for the contest
+      security:
+        - cookieJWTAuth: [ ]
+      parameters:
+        - in: path
+          description: Id of the user
+          name: user_id
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the contest
+          name: contest_id
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the olympiad
+          name: olympiad_id
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the stage
+          name: stage_id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/userContestAllAnswer'
+        '403':
+          description: Not enough rights for current user
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+        '404':
+          description: User, olympiad, stage or contest not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+  /olympiad/{olympiad_id}/stage/{stage_id}/contest/{contest_id}/answer/{answer_id}:
+    get:
+      summary: Get user's answer by id
+      security:
+        - cookieJWTAuth: [ ]
+      parameters:
+        - in: path
+          description: Id of the contest
+          name: contest_id
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the olympiad
+          name: olympiad_id
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the stage
+          name: stage_id
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the answer
+          name: answer_id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/userContestAnswer'
+        '403':
+          description: Not enough rights for current user
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+        '404':
+          description: User, olympiad, stage or contest not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+  /olympiad/{olympiad_id}/stage/{stage_id}/contest/{contest_id}/task/{task_id}/user/self:
+    get:
+      summary: Get current user answer for the task
+      security:
+        - cookieJWTAuth: [ ]
+      parameters:
+        - in: path
+          description: Id of the contest
+          name: contest_id
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the task
+          name: task_id
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the olympiad
+          name: olympiad_id
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the stage
+          name: stage_id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/userContestAnswer'
+        '404':
+          description: User, contest, olympiad, stage or task not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+    post:
+      summary: Add current user answer for the task
+      security:
+        - cookieJWTAuth: [ ]
+        - CSRFToken: [ ]
+      parameters:
+        - in: path
+          description: Id of the contest
+          name: contest_id
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the task
+          name: task_id
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the olympiad
+          name: olympiad_id
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the stage
+          name: stage_id
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/userContestAnswer'
+      responses:
+        '200':
+          description: OK
+        '404':
+          description: User, olympiad, stage, contest or task not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+  /olympiad/{olympiad_id}/stage/{stage_id}/contest/{contest_id}/task/{task_id}/user/{user_id}:
+    get:
+      summary: Get user answer for the task
+      security:
+        - cookieJWTAuth: [ ]
+      parameters:
+        - in: path
+          description: Id of the user
+          name: user_id
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the contest
+          name: contest_id
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the task
+          name: task_id
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the olympiad
+          name: olympiad_id
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the stage
+          name: stage_id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/userContestAnswer'
+        '403':
+          description: Not enough rights for current user
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+        '404':
+          description: User, olympiad, stage, contest or task not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+    post:
+      summary: Add user answer for a task
+      security:
+        - cookieJWTAuth: [ ]
+        - CSRFToken: [ ]
+      parameters:
+        - in: path
+          description: Id of the user
+          name: user_id
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the contest
+          name: contest_id
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the task
+          name: task_id
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the olympiad
+          name: olympiad_id
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the stage
+          name: stage_id
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/userContestAnswer'
+      responses:
+        '200':
+          description: OK
+        '403':
+          description: Not enough rights for current user
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+        '404':
+          description: User, olympiad, stage, contest or task not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+  /olympiad/{olympiad_id}/stage/{stage_id}/contest/{contest_id}/user/self/status:
+    get:
+      summary: Get user's status and mark for reponse
+      security:
+        - cookieJWTAuth: [ ]
+      parameters:
+        - in: path
+          description: Id of the contest
+          name: contest_id
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the olympiad
+          name: olympiad_id
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the stage
+          name: stage_id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/responseStatus'
+        '403':
+          description: Invalid role of current user
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+        '404':
+          description: User, olympiad, stage or contest not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+    post:
+      summary: Set user's status and mark for reponse
+      description: Set user's status and mark for reponse, only for inspector
+      security:
+        - cookieJWTAuth: [ ]
+        - CSRFToken: [ ]
+      parameters:
+        - in: path
+          description: Id of the contest
+          name: contest_id
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the olympiad
+          name: olympiad_id
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the stage
+          name: stage_id
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/responseStatus'
+      responses:
+        '200':
+          description: OK
+        '400':
+          description: Incorrect mark or status
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+        '403':
+          description: Invalid role of current user
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+        '404':
+          description: User, olympiad, stage or contest not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+  /olympiad/{olympiad_id}/stage/{stage_id}/contest/{contest_id}/user/{user_id}/status:
+    get:
+      summary: Get user's status and mark for reponse
+      security:
+        - cookieJWTAuth: [ ]
+      parameters:
+        - in: path
+          description: Id of the contest
+          name: contest_id
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the user
+          name: user_id
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the olympiad
+          name: olympiad_id
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the stage
+          name: stage_id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/responseStatus'
+        '403':
+          description: Invalid role of current user
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+        '404':
+          description: User, olympiad, stage or contest not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+    post:
+      summary: Set user's status and mark for reponse
+      description: Set user's status and mark for reponse, only for inspector
+      security:
+        - cookieJWTAuth: [ ]
+        - CSRFToken: [ ]
+      parameters:
+        - in: path
+          description: Id of the user
+          name: user_id
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the contest
+          name: contest_id
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the olympiad
+          name: olympiad_id
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the stage
+          name: stage_id
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/responseStatus'
+      responses:
+        '200':
+          description: OK
+        '400':
+          description: Incorrect mark or status
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+        '403':
+          description: Invalid role of current user
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+        '404':
+          description: User, olympiad, stage or contest not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+  /olympiad/{olympiad_id}/stage/{stage_id}/contest/{contest_id}/user/self/status/history:
+    get:
+      summary: Get status history of current user's work
+      security:
+        - cookieJWTAuth: [ ]
+      parameters:
+        - in: path
+          description: Id of the contest
+          name: contest_id
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the olympiad
+          name: olympiad_id
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the stage
+          name: stage_id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/userResponseStatusHistory'
+        '403':
+          description: Not enough rights for current user
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+        '404':
+          description: User, olympiad, stage or contest not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+  /olympiad/{olympiad_id}/stage/{stage_id}/contest/{contest_id}/user/{user_id}/status/history:
+    get:
+      summary: Get status history of user's work
+      security:
+        - cookieJWTAuth: [ ]
+      parameters:
+        - in: path
+          description: Id of the contest
+          name: contest_id
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the user
+          name: user_id
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the olympiad
+          name: olympiad_id
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the stage
+          name: stage_id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/userResponseStatusHistory'
+        '403':
+          description: Not enough rights for current user
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+        '404':
+          description: User, olympiad, stage or contest not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+  /olympiad/{olympiad_id}/stage/{stage_id}/contest/{contest_id}/list/:
+    get:
+      summary: Get the consolidated sheets within a single competition or stage
+      security:
+        - cookieJWTAuth: [ ]
+      parameters:
+        - in: path
+          description: Id of the contest
+          name: contest_id
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the olympiad
+          name: olympiad_id
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the stage
+          name: stage_id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/contestResultSheet'
+        '404':
+          description: Olympiad, stage or contest not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+  /olympiad/{olympiad_id}/stage/{stage_id}/contest/{contest_id}/user/self/appeal/last:
+    get:
+      summary: Get appeal info for current user's response
+      security:
+        - cookieJWTAuth: [ ]
+      parameters:
+        - in: path
+          description: Id of the contest
+          name: contest_id
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the olympiad
+          name: olympiad_id
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the stage
+          name: stage_id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/commonAppealInfo'
+        '404':
+          description: User, olympiad, stage or contest not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+    post:
+      summary: Create appeal for current user's response
+      security:
+        - cookieJWTAuth: [ ]
+        - CSRFToken: [ ]
+      parameters:
+        - in: path
+          description: Id of the contest
+          name: contest_id
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the olympiad
+          name: olympiad_id
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the stage
+          name: stage_id
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/appealMessage'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/createAppealInfo'
+        '404':
+          description: User, olympiad, stage or contest not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+  /olympiad/{olympiad_id}/stage/{stage_id}/contest/{contest_id}/user/{user_id}/appeal/last:
+    get:
+      summary: Get appeal info for user's response
+      security:
+        - cookieJWTAuth: [ ]
+      parameters:
+        - in: path
+          description: Id of the contest
+          name: contest_id
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the user
+          name: user_id
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the olympiad
+          name: olympiad_id
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the stage
+          name: stage_id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/commonAppealInfo'
+        '404':
+          description: User, olympiad, stage or contest not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+    post:
+      summary: Create appeal for current user's response
+      security:
+        - cookieJWTAuth: [ ]
+        - CSRFToken: [ ]
+      parameters:
+        - in: path
+          description: Id of the contest
+          name: contest_id
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the user
+          name: user_id
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the olympiad
+          name: olympiad_id
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the stage
+          name: stage_id
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/appealMessage'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/createAppealInfo'
+        '404':
+          description: User, olympiad, stage or contest not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+  /olympiad/{olympiad_id}/stage/{stage_id}/contest/{contest_id}/appeal/{appeal_id}/reply:
+    post:
+      summary: Reply appeal for the user's response
+      security:
+        - cookieJWTAuth: [ ]
+        - CSRFToken: [ ]
+      parameters:
+        - in: path
+          description: Id of the contest
+          name: contest_id
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the appeal
+          name: appeal_id
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the olympiad
+          name: olympiad_id
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the stage
+          name: stage_id
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/appealMessageReply'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/commonAppealInfo'
+        '404':
+          description: User, olympiad, stage or contest not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+  /olympiad/{olympiad_id}/stage/{stage_id}/contest/{contest_id}/appeal/{appeal_id}:
+    get:
+      summary: Get appeal info
+      security:
+        - cookieJWTAuth: [ ]
+      parameters:
+        - in: path
+          description: Id of the contest
+          name: contest_id
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the appeal
+          name: appeal_id
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the olympiad
+          name: olympiad_id
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the stage
+          name: stage_id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/commonAppealInfo'
+        '404':
+          description: Appeal, olympiad, stage or contest not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+
+
+components:
+  securitySchemes:
+    cookieJWTAuth:
+      description: Authentication with JWT stored in cookies
+      type: apiKey
+      in: cookie
+      name: access_token_cookie
+    CSRFToken:
+      description: CSRF token
+      type: apiKey
+      in: header
+      name: X-CSRF-TOKEN
+  schemas:
+    errorResponse:
+      title: "Error response"
+      description: "Common response with error message"
+      required:
+        - error_msg
+      properties:
+        error_msg:
+          type: string
+    userContestAnswer:
+      title: "User's contest answer"
+      required:
+        - user_answer
+        - filetype
+      properties:
+        user_answer:
+          type: string
+          format: binary
+        filetype:
+          type: string
+    StatusHistoryItem:
+      title: "Item of status history"
+      required:
+        - status
+        - datetime
+      properties:
+        status:
+          type: string
+        datetime:
+          type: string
+          format: data-time
+          description: "Change date and time"
+        appeal_id:
+          type: integer
+        mark:
+          type: number
+          format: float
+    userResponseStatusHistory:
+      title: "Status history of user response"
+      required:
+        - user_id
+        - contest_id
+        - history
+      properties:
+        user_id:
+          type: integer
+        contest_id:
+          type: integer
+        history:
+          type: array
+          items:
+            $ref: '#/components/schemas/StatusHistoryItem'
+    contestResultLine:
+      title: "Line in sheet"
+      required:
+        - user_id
+        - first_name
+        - second_name
+        - middle_name
+        - mark
+      properties:
+        user_id:
+          type: integer
+        first_name:
+          type: string
+        second_name:
+          type: string
+        middle_name:
+          type: string
+        mark:
+          type: integer
+    contestResultSheet:
+      title: "Result sheet for one contest"
+      required:
+        - contest_id
+        - contest_name
+        - userrow
+      properties:
+        contest_id:
+          type: integer
+        contest_name:
+          type: string
+        userrow:
+          type: array
+          items:
+            $ref: '#/components/schemas/contestResultLine'
+    appealMessage:
+      title: Appeal message
+      required:
+        - message
+      properties:
+        message:
+          type: string
+    appealListInfo:
+      title: "All appeal for the user's response"
+      required:
+        - user_id
+        - work_id
+      properties:
+        user_id:
+          type: integer
+        work_id:
+          type: integer
+        appeal_elem:
+          type: array
+          items:
+            $ref: '#/components/schemas/commonAppealInfo'
+    commonAppealInfo:
+      title: "Common appeal info"
+      required:
+        - appeal_id
+        - status
+        - appeal_message
+        - appeal_response
+      properties:
+        appeal_id:
+          type: integer
+        status:
+          type: string
+        appeal_message:
+          type: string
+        appeal_response:
+          type: string
+    userContestAllAnswer:
+      title: "ALl user's answer for the contest"
+      required:
+        - user_id
+        - work_id
+        - contest_id
+      properties:
+        user_id:
+          type: integer
+        work_id:
+          type: integer
+        contest_id:
+          type: integer
+        user_answer:
+          type: array
+          items:
+            type: object
+            properties:
+              task_id:
+                type: integer
+              answer_id:
+                type: integer
+    responseStatus:
+      title: "User's response status and mark"
+      required:
+        - status
+      properties:
+        status:
+          type: string
+        mark:
+          type: number
+          format: float
+    createAppealInfo:
+      title: "Id of created appeal"
+      required:
+        - appeal_id
+      properties:
+        appeal_id:
+          type: integer
+    appealMessageReply:
+      title: "Reply to user's appeal"
+      required:
+        - message
+        - accepted
+      properties:
+        message:
+          type: string
+        accepted:
+          type: boolean
+        new_mark:
+          type: number
+          format: float
