@@ -1,20 +1,30 @@
-<div class="row container_main" [style.height.px]="calculateHeight()">
-    <div class="col-4">
-        <div class="container_left">
-            <a class="btn btn-danger" routerLink="/user/olymp">Заполнить анкету</a>
-        </div>
-    </div>
-    <div class="col-4">
-        <div class="container_center"></div>
-
-    </div>
-    <div class="col-4">
-        <div class="container_right">
-            <div class="row">
-                <div class="col-12 top"></div>
-                <div class="col-12 bottom"></div>
+<div class="container_main" [style.padding-bottom.px]="calculateHeight()">
+    <div class="row" id="olympiads">
+        <div class="col-md-6 title_container">
+            <svg width="283" height="283" viewBox="0 0 283 283" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <g style="mix-blend-mode:soft-light" opacity="0.5">
+                    <path
+                        d="M209.718 63.6884H186.801V40.7712H72.2156V63.6884H49.2985C36.6941 63.6884 26.3813 74.0011 26.3813 86.6055V98.0641C26.3813 127.283 48.3818 151.117 76.6845 154.669C83.9034 171.857 99.3724 184.805 118.05 188.587V224.108H72.2156V247.025H186.801V224.108H140.967V188.587C159.645 184.805 175.114 171.857 182.332 154.669C210.635 151.117 232.636 127.283 232.636 98.0641V86.6055C232.636 74.0011 222.323 63.6884 209.718 63.6884ZM49.2985 98.0641V86.6055H72.2156V130.377C58.9237 125.565 49.2985 112.96 49.2985 98.0641ZM209.718 98.0641C209.718 112.96 200.093 125.565 186.801 130.377V86.6055H209.718V98.0641Z"
+                        fill="white"/>
+                </g>
+            </svg>
+            <div class="text_container">
+                <p class="title">/ Конкурсы и олимпиады</p>
+                <p class="subtitle">_Список активных конкурсов и олимпиад</p>
             </div>
         </div>
-
+        <div class="col-md-6 collapsible_container">
+            <svg width="232" height="231" viewBox="0 0 232 231" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path
+                    d="M183.667 173.25L203 182.875V9.625H67.6667V28.875H183.667V173.25ZM164.333 48.125H29V221.375L96.6667 192.5L164.333 221.375V48.125Z"
+                    fill="#0038D2"/>
+            </svg>
+            <div class="divider"></div>
+            <button id="search-button" class="button-round">
+                <svg width="14" height="9" viewBox="0 0 14 9" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M1.645 0L7 5.34333L12.355 0L14 1.645L7 8.645L0 1.645L1.645 0Z" fill="#001E94"/>
+                </svg>
+            </button>
+        </div>
     </div>
 </div>
