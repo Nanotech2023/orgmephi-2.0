@@ -11,6 +11,6 @@ export class ParticipantComponent
 {
     calculateHeight(): number
     {
-        return footerHeight + headerHeight
+        return footerHeight
     }
 }
