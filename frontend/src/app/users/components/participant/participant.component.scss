@@ -52,13 +52,13 @@
 
     svg {
       margin: auto auto;
-      margin-right: 0;
+      margin-right: 5%;
     }
 
     .divider {
       width: 30%;
       margin: auto;
-      border: 1px dashed #CCCCCC;
+      border: 1px dashed $white;
       transform: rotate(-180deg);
       position: absolute;
     }
@@ -260,5 +260,69 @@
 
 #services {
   background: $lightblue;
-  transform: matrix(-1, 0, 0, 1, 0, 0);
+
+  .title_container, .collapsible_container {
+    display: flex;
+    align-items: center;
+  }
+
+  .title_container {
+    .text_container {
+      width: 50%;
+      color: $blue;
+      position: absolute;
+      left: 15%;
+      font-family: 'Roboto', sans-serif;
+    }
+
+    p.title {
+      font-style: normal;
+      font-size: 39.1px;
+      line-height: 36.55px;
+      letter-spacing: -0.5px;
+      word-wrap: normal;
+    }
+
+    p.subtitle {
+      font-style: normal;
+      font-size: 14px;
+      line-height: 24px;
+      letter-spacing: 0.1px;
+    }
+  }
+
+
+  .collapsible_container {
+    flex-direction: row;
+    justify-content: center;
+    justify-items: center;
+
+    svg {
+      margin: auto auto;
+      margin-right: 0;
+    }
+
+    .divider {
+      width: 30%;
+      margin: auto;
+      border: 1px dashed $blue;
+      transform: rotate(-180deg);
+      position: absolute;
+    }
+
+    #button_services {
+      position: absolute;
+      height: 40px;
+      width: 40px;
+      background-color: $blue;
+
+      svg {
+        position: absolute;
+        top: 18px;
+        right: 12px;
+
+      }
+    }
+  }
+
 }
