@@ -17,33 +17,24 @@ class User_status(db.Model):
 
 class CompositeTypeEnum(enum.Enum):
     Composite = "Composite",
-    Simple = "Simple"
+    Simple = "Simple",
 
-CompositeTypeDict = {
-    "Composite" : CompositeTypeEnum.Composite,
-    "Simple" : CompositeTypeEnum.Simple
-}
+composite_type_dict = {olymp.value: olymp for olymp in CompositeTypeEnum}
 
 
 class OlympiadTypeEnum(enum.Enum):
     Rosatom = "Rosatom",
-    Kurchatov = "Kurchatov"
+    Kurchatov = "Kurchatov",
+    Other = "Other",
 
-OlympiadTypeDict = {
-    "Rosatom" : OlympiadTypeEnum.Rosatom,
-    "Kurchatov" : OlympiadTypeEnum.Kurchatov
-}
+olympiad_type_dict = {olymp.value: olymp for olymp in OlympiadTypeEnum}
 
 class OlympiadSubjectEnum(enum.Enum):
     Math = "Math",
     Physics = "Physics",
     Informatics = "Informatics",
 
-OlympiadSubjectDict = {
-    "Math": OlympiadSubjectEnum.Math,
-    "Physics": OlympiadSubjectEnum.Physics,
-    "Informatics": OlympiadSubjectEnum.Informatics
-}
+olympiad_subject_dict = {olymp.value: olymp for olymp in OlympiadSubjectEnum}
 
 class TargetClassEnum(enum.Enum):
     class_5 = "5",
@@ -55,16 +46,7 @@ class TargetClassEnum(enum.Enum):
     class_11 = "11",
     student = "student",
 
-TargetClassDict = {
-    "5": TargetClassEnum.class_5,
-    "6": TargetClassEnum.class_6,
-    "7": TargetClassEnum.class_7,
-    "8": TargetClassEnum.class_8,
-    "9": TargetClassEnum.class_9,
-    "10": TargetClassEnum.class_10,
-    "11": TargetClassEnum.class_11,
-    "student": TargetClassEnum.student
-}
+olympiad_target_class_dict = {olymp.value: olymp for olymp in TargetClassEnum}
 
 # Contest models
 
