@@ -1,4 +1,5 @@
 import { Component } from '@angular/core'
+import { footerHeight, headerHeight } from '@/shared/consts'
 
 
 @Component( {
@@ -10,6 +11,6 @@ export class ParticipantComponent
 {
     calculateHeight(): number
     {
-        return window.innerHeight - ( 125 + 167 )
+        return footerHeight
     }
 }

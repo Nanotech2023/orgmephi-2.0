@@ -3,6 +3,7 @@ import { Store } from '@ngrx/store'
 import { AuthActions, AuthSelectors, AuthState } from '@/auth/store'
 import { Observable } from 'rxjs'
 import { AuthCredentials } from '@/auth/models'
+import { footerHeight, headerHeight } from '@/shared/consts'
 
 
 @Component( {
@@ -20,7 +21,7 @@ export class LoginComponent implements OnInit
     constructor( private readonly store: Store<AuthState.State> )
     {
         this.loginAttempt = { username: '', password: '' }
-        this.containerHeight = window.innerHeight - ( 125 + 167 )
+        this.containerHeight = window.innerHeight - ( footerHeight + headerHeight )
     }
 
     ngOnInit(): void
@@ -32,7 +33,7 @@ export class LoginComponent implements OnInit
     @HostListener( 'window:resize', [ '$event' ] )
     onResize()
     {
-        this.containerHeight = window.innerHeight - ( 125 + 167 )
+        this.containerHeight = window.innerHeight - ( footerHeight + headerHeight )
     }
 
     login( loginAttemptUser: AuthCredentials ): void
