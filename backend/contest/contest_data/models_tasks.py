@@ -1,6 +1,5 @@
 """File with models description for contests and tasks management."""
 
-import sqlalchemy.dialects.postgresql as pg
 from contest_data.app import db
 from datetime import datetime
 import enum
@@ -83,6 +82,10 @@ class Contest(db.Model):
     visibility: visibility of the contest
     start_date: start date of contest
     end_date: end date of contest
+    composite_type: composite type
+    olympiad_type: olympiad type
+    subject: subject
+    target_class: target class
     """
 
     __tablename__ = 'contest'
@@ -94,10 +97,9 @@ class Contest(db.Model):
     laureate_condition = db.Column(db.Float, nullable=False)
     certificate_template = db.Column(db.Text, nullable=True)
     visibility = db.Column(db.Boolean, default=DEFAULT_VISIBILITY, nullable=False)
-    composite_type = db.Column(db.Enum(CompositeTypeEnum))
-    olympiad_type = db.Column(db.Enum(OlympiadTypeEnum))
-    subject = db.Column(db.Enum(OlympiadSubjectEnum))
-    target_class = Column(pg.ARRAY(sa.Enum(TargetClassEnum)))
+    composite_type = db.Column(db.Enum(CompositeTypeEnum), nullable=False)
+    olympiad_type = db.Column(db.Enum(OlympiadTypeEnum), nullable=False)
+    subject = db.Column(db.Enum(OlympiadSubjectEnum), nullable=False)
 
     start_date = db.Column(db.DateTime, index=True, default=datetime.utcnow)
     end_date = db.Column(db.DateTime, index=True, default=datetime.utcnow)
@@ -111,7 +113,20 @@ class Contest(db.Model):
     stages = db.relationship('stage', lazy='select',
                             backref=db.backref('contest', lazy='joined'))
 
+    target_classes = db.relationship('target_classes', lazy='select',
+                            backref=db.backref('contest', lazy='joined'))
 
+
+
+class TargetClasses(db.Model):
+    """
+    Table describing a Target class of olympiad.
+    """
+
+    __tablename__ = 'target_classes'
+
+    contest_id = db.Column(db.Integer, db.ForeignKey('contest.contest_id'), autoincrement=True, primary_key=True)
+    target_class = db.Column(db.Enum(TargetClassEnum), nullable=False)
 
 """
 Table describing a Contests In Stage model.
