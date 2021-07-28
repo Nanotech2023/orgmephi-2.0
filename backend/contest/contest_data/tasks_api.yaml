@@ -1418,7 +1418,10 @@ components:
         - olympiad_type
         - subject
         - target_class
+        - location
       properties:
+        location:
+          type: string
         start_time:
           type: string
           format: 'date-time'
@@ -1471,7 +1474,10 @@ components:
         - olympiad_type
         - subject
         - target_class
+        - location
       properties:
+        location:
+          type: string
         start_time:
           type: string
           format: 'date-time'
@@ -1519,6 +1525,8 @@ components:
       title: Edit contest common info
       description: Request to creation contest
       properties:
+        location:
+          type: string
         start_time:
           type: string
           format: 'date-time'
