@@ -19,7 +19,7 @@ class CompositeTypeEnum(enum.Enum):
     Composite = "Composite",
     Simple = "Simple",
 
-composite_type_dict = {olymp.value: olymp for olymp in CompositeTypeEnum}
+composite_type_dict = {composite.value: composite for composite in CompositeTypeEnum}
 
 
 class OlympiadTypeEnum(enum.Enum):
@@ -27,14 +27,14 @@ class OlympiadTypeEnum(enum.Enum):
     Kurchatov = "Kurchatov",
     Other = "Other",
 
-olympiad_type_dict = {olymp.value: olymp for olymp in OlympiadTypeEnum}
+olympiad_type_dict = {type.value: type for type in OlympiadTypeEnum}
 
 class OlympiadSubjectEnum(enum.Enum):
     Math = "Math",
     Physics = "Physics",
     Informatics = "Informatics",
 
-olympiad_subject_dict = {olymp.value: olymp for olymp in OlympiadSubjectEnum}
+olympiad_subject_dict = {subject.value: subject for subject in OlympiadSubjectEnum}
 
 class TargetClassEnum(enum.Enum):
     class_5 = "5",
@@ -46,12 +46,11 @@ class TargetClassEnum(enum.Enum):
     class_11 = "11",
     student = "student",
 
-olympiad_target_class_dict = {olymp.value: olymp for olymp in TargetClassEnum}
+olympiad_target_class_dict = {target.value: target for target in TargetClassEnum}
 
 # Contest models
 
-
-class Contest(db.Model):
+class BaseContest(db.Model):
     """
     Class describing a Contest model.
 
@@ -79,25 +78,53 @@ class Contest(db.Model):
     laureate_condition = db.Column(db.Float, nullable=False)
     certificate_template = db.Column(db.Text, nullable=True)
     visibility = db.Column(db.Boolean, default=DEFAULT_VISIBILITY, nullable=False)
-    composite_type = db.Column(db.Enum(CompositeTypeEnum), nullable=False)
     olympiad_type = db.Column(db.Enum(OlympiadTypeEnum), nullable=False)
     subject = db.Column(db.Enum(OlympiadSubjectEnum), nullable=False)
 
-    start_date = db.Column(db.DateTime, index=True, default=datetime.utcnow)
-    end_date = db.Column(db.DateTime, index=True, default=datetime.utcnow)
-
-    variants = db.relationship('variant', lazy='select',
-                               backref=db.backref('contest', lazy='joined'))
 
     users = db.relationship('user_in_contest', lazy='select',
-                            backref=db.backref('contest', lazy='joined'))
-
-    stages = db.relationship('stage', lazy='select',
                             backref=db.backref('contest', lazy='joined'))
 
     target_classes = db.relationship('target_classes', lazy='select',
                             backref=db.backref('contest', lazy='joined'))
 
+    composite_type = db.Column(db.Enum(CompositeTypeEnum), nullable=False)
+    __mapper_args__ = {
+        'polymorphic_identity': 'base_contest',
+        'polymorphic_on': composite_type
+    }
+
+
+class SimpleContest(BaseContest):
+
+    __tablename__ = 'simple_contest'
+
+    contest_id = db.Column(db.Integer, db.ForeignKey('contest.contest_id'), primary_key=True)
+    start_date = db.Column(db.DateTime, index=True, default=datetime.utcnow)
+    end_date = db.Column(db.DateTime, index=True, default=datetime.utcnow)
+
+    previous_contest_id = db.Column(db.Integer, db.ForeignKey('contest.contest_id', nullable=True))
+
+    variants = db.relationship('variant', lazy='select',
+                               backref=db.backref('contest', lazy='joined'))
+
+    __mapper_args__ = {
+        'polymorphic_identity': 'simple_contest',
+    }
+
+
+class CompositeContest(BaseContest):
+
+    __tablename__ = 'composite_contest'
+
+    contest_id = db.Column(db.Integer, db.ForeignKey('contest.contest_id'), primary_key=True)
+
+    stages = db.relationship('stage', lazy='select',
+                            backref=db.backref('contest', lazy='joined'))
+
+    __mapper_args__ = {
+        'polymorphic_identity': 'composite_contest',
+    }
 
 
 class TargetClasses(db.Model):
@@ -186,6 +213,8 @@ class Variant(db.Model):
                                backref=db.backref('variant', lazy=True))
 
 
+
+
 class UserInContest(db.Model):
     """
     Class describing a User in contest model.
@@ -200,7 +229,7 @@ class UserInContest(db.Model):
     user_id = db.Column(db.Integer, primary_key=True)
     contest_id = db.Column(db.Integer, db.ForeignKey('contest.contest_id'), primary_key=True)
     variant_id = db.Column(db.Integer, db.ForeignKey('variant.variant_id'))
-    user_status = db.Column(db.Text, nullable=False)
+    user_status = db.Column(db.Text, db.ForeignKey('user_status.status_id'))
 
 
 class TaskType(enum.Enum):
