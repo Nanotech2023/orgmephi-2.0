@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core'
 import { select, Store } from '@ngrx/store'
 import { AuthSelectors, AuthState } from '@/auth/store'
 import { Observable } from 'rxjs'
-import { CommonUserInfo } from '@/auth/models'
+import { TypeUserInfo } from '@/auth/models'
 
 
 @Component( {
@@ -12,7 +12,7 @@ import { CommonUserInfo } from '@/auth/models'
 } )
 export class InnerHeaderComponent implements OnInit
 {
-    commonUserInfo$!: Observable<CommonUserInfo | null>
+    userInfo!: Observable<TypeUserInfo | null>
     isAuthorized$!: Observable<boolean>
 
     constructor( private store: Store<AuthState.State> ) { }
@@ -20,7 +20,7 @@ export class InnerHeaderComponent implements OnInit
     ngOnInit(): void
     {
         this.isAuthorized$ = this.store.pipe( select( AuthSelectors.selectIsAuthenticated ) )
-        this.commonUserInfo$ = this.store.pipe( select( AuthSelectors.selectCommonUserInfo ) )
+        this.userInfo = this.store.pipe( select( AuthSelectors.selectUserInfo ) )
     }
 
 }

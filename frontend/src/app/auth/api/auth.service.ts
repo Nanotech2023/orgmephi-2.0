@@ -15,28 +15,38 @@ import { HttpClient, HttpEvent, HttpHeaders, HttpParams, HttpResponse } from '@a
 import { CustomHttpUrlEncodingCodec } from '../encoder'
 
 import { Observable } from 'rxjs'
-
-import { AccountType } from '../models/accountType'
-import { AddGroup } from '../models/addGroup'
-import { AuthResponse } from '../models/authResponse'
-import { Authentication } from '../models/authentication'
-import { ChangePassword } from '../models/changePassword'
-import { ChangePasswordAdmin } from '../models/changePasswordAdmin'
-import { CommonUserInfo } from '../models/commonUserInfo'
-import { GetCountriesResponse } from '../models/getCountriesResponse'
-import { GetUniversitiesResponse } from '../models/getUniversitiesResponse'
-import { GroupList } from '../models/groupList'
-import { GroupType } from '../models/groupType'
-import { PersonalInfo } from '../models/personalInfo'
-import { PersonalInfoUpdate } from '../models/personalInfoUpdate'
-import { RegisterAuthInfo } from '../models/registerAuthInfo'
-import { RegisterConfirm } from '../models/registerConfirm'
-import { Registration } from '../models/registration'
-import { StudentInfo } from '../models/studentInfo'
-import { StudentInfoUpdate } from '../models/studentInfoUpdate'
-import { UpdateGroups } from '../models/updateGroups'
-import { UserList } from '../models/userList'
-import { UserRole } from '../models/userRole'
+import { RequestGroupAdd } from '@/auth/models/requestGroupAdd'
+import { RequestLogin } from '@/auth/models/requestLogin'
+import { RequestPasswordAdmin } from '@/auth/models/requestPasswordAdmin'
+import { RequestPasswordSelf } from '@/auth/models/requestPasswordSelf'
+import { RequestRegistration } from '@/auth/models/requestRegistration'
+import { RequestUserGroupsAdd } from '@/auth/models/requestUserGroupsAdd'
+import { RequestUserGroupsRemove } from '@/auth/models/requestUserGroupsRemove'
+import { RequestUserRole } from '@/auth/models/requestUserRole'
+import { RequestUserType } from '@/auth/models/requestUserType'
+import { ResponseGroup } from '@/auth/models/responseGroup'
+import { ResponseGroupAdd } from '@/auth/models/responseGroupAdd'
+import { ResponseGroupAll } from '@/auth/models/responseGroupAll'
+import { ResponseInfoCountries } from '@/auth/models/responseInfoCountries'
+import { ResponseInfoUniversities } from '@/auth/models/responseInfoUniversities'
+import { ResponseLogin } from '@/auth/models/responseLogin'
+import { ResponsePersonalAdminGet } from '@/auth/models/responsePersonalAdminGet'
+import { ResponsePersonalSelf } from '@/auth/models/responsePersonalSelf'
+import { ResponsePreregister } from '@/auth/models/responsePreregister'
+import { ResponseRefresh } from '@/auth/models/responseRefresh'
+import { ResponseRegistration } from '@/auth/models/responseRegistration'
+import { ResponseRegistrationInternal } from '@/auth/models/responseRegistrationInternal'
+import { ResponseUniversityAdminGet } from '@/auth/models/responseUniversityAdminGet'
+import { ResponseUniversitySelf } from '@/auth/models/responseUniversitySelf'
+import { ResponseUserAdmin } from '@/auth/models/responseUserAdmin'
+import { ResponseUserAdminGroup } from '@/auth/models/responseUserAdminGroup'
+import { ResponseUserAll } from '@/auth/models/responseUserAll'
+import { ResponseUserByGroup } from '@/auth/models/responseUserByGroup'
+import { ResponseUserSelf } from '@/auth/models/responseUserSelf'
+import { ResponseUserSelfGroup } from '@/auth/models/responseUserSelfGroup'
+import { TypeAuthCredentials } from '@/auth/models/typeAuthCredentials'
+import { TypePersonalInfo } from '@/auth/models/typePersonalInfo'
+import { TypeStudentInfo } from '@/auth/models/typeStudentInfo'
 
 import { BASE_PATH } from '../variables'
 import { Configuration } from '../configuration'
@@ -46,11 +56,12 @@ import { IAuthService } from '@/auth/api/auth.service.int'
 @Injectable()
 export class AuthService implements IAuthService
 {
-    basePath = '/'
-    defaultHeaders = new HttpHeaders()
-    configuration = new Configuration()
 
-    constructor( public httpClient: HttpClient, @Optional() @Inject( BASE_PATH ) basePath: string, @Optional() configuration: Configuration )
+    protected basePath = 'http://127.0.0.1:5000'
+    public defaultHeaders = new HttpHeaders()
+    public configuration = new Configuration()
+
+    constructor( protected httpClient: HttpClient, @Optional() @Inject( BASE_PATH ) basePath: string, @Optional() configuration: Configuration )
     {
         if ( basePath )
         {
@@ -88,10 +99,10 @@ export class AuthService implements IAuthService
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
      * @param reportProgress flag to report request and response progress.
      */
-    groupAddPost( body: AddGroup, observe?: 'body', reportProgress?: boolean ): Observable<GroupType>;
-    groupAddPost( body: AddGroup, observe?: 'response', reportProgress?: boolean ): Observable<HttpResponse<GroupType>>;
-    groupAddPost( body: AddGroup, observe?: 'events', reportProgress?: boolean ): Observable<HttpEvent<GroupType>>;
-    groupAddPost( body: AddGroup, observe: any = 'body', reportProgress: boolean = false ): Observable<any>
+    groupAddPost( body: RequestGroupAdd, observe?: 'body', reportProgress?: boolean ): Observable<ResponseGroupAdd>;
+    groupAddPost( body: RequestGroupAdd, observe?: 'response', reportProgress?: boolean ): Observable<HttpResponse<ResponseGroupAdd>>;
+    groupAddPost( body: RequestGroupAdd, observe?: 'events', reportProgress?: boolean ): Observable<HttpEvent<ResponseGroupAdd>>;
+    groupAddPost( body: RequestGroupAdd, observe: any = 'body', reportProgress: boolean = false ): Observable<any>
     {
 
         if ( body === null || body === undefined )
@@ -135,7 +146,7 @@ export class AuthService implements IAuthService
             headers = headers.set( 'Content-Type', httpContentTypeSelected )
         }
 
-        return this.httpClient.request<GroupType>( 'post', `${ this.basePath }/group/add`,
+        return this.httpClient.request<ResponseGroupAdd>( 'post', `${ this.basePath }/group/add`,
             {
                 body: body,
                 params: queryParameters,
@@ -153,9 +164,9 @@ export class AuthService implements IAuthService
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
      * @param reportProgress flag to report request and response progress.
      */
-    groupAllGet( observe?: 'body', reportProgress?: boolean ): Observable<GroupList>;
-    groupAllGet( observe?: 'response', reportProgress?: boolean ): Observable<HttpResponse<GroupList>>;
-    groupAllGet( observe?: 'events', reportProgress?: boolean ): Observable<HttpEvent<GroupList>>;
+    groupAllGet( observe?: 'body', reportProgress?: boolean ): Observable<ResponseGroupAll>;
+    groupAllGet( observe?: 'response', reportProgress?: boolean ): Observable<HttpResponse<ResponseGroupAll>>;
+    groupAllGet( observe?: 'events', reportProgress?: boolean ): Observable<HttpEvent<ResponseGroupAll>>;
     groupAllGet( observe: any = 'body', reportProgress: boolean = false ): Observable<any>
     {
 
@@ -182,7 +193,59 @@ export class AuthService implements IAuthService
         // to determine the Content-Type header
         const consumes: string[] = []
 
-        return this.httpClient.request<GroupList>( 'get', `${ this.basePath }/group/all`,
+        return this.httpClient.request<ResponseGroupAll>( 'get', `${ this.basePath }/group/all`,
+            {
+                params: queryParameters,
+                withCredentials: this.configuration.withCredentials,
+                headers: headers,
+                observe: observe,
+                reportProgress: reportProgress
+            }
+        )
+    }
+
+    /**
+     * Get any group
+     * Get any group, only for admins and creators
+     * @param groupId Id of the group
+     * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
+     * @param reportProgress flag to report request and response progress.
+     */
+    groupGroupIdGet( groupId: number, observe?: 'body', reportProgress?: boolean ): Observable<ResponseGroup>;
+    groupGroupIdGet( groupId: number, observe?: 'response', reportProgress?: boolean ): Observable<HttpResponse<ResponseGroup>>;
+    groupGroupIdGet( groupId: number, observe?: 'events', reportProgress?: boolean ): Observable<HttpEvent<ResponseGroup>>;
+    groupGroupIdGet( groupId: number, observe: any = 'body', reportProgress: boolean = false ): Observable<any>
+    {
+
+        if ( groupId === null || groupId === undefined )
+        {
+            throw new Error( 'Required parameter groupId was null or undefined when calling groupGroupIdGet.' )
+        }
+
+        let queryParameters = new HttpParams( { encoder: new CustomHttpUrlEncodingCodec() } )
+
+        let headers = this.defaultHeaders
+
+        // authentication (JWTAcessToken) required
+        if ( this.configuration.apiKeys && this.configuration.apiKeys[ "access_token_cookie" ] )
+        {
+            queryParameters = queryParameters.set( 'access_token_cookie', this.configuration.apiKeys[ "access_token_cookie" ] )
+        }
+
+        // to determine the Accept header
+        let httpHeaderAccepts: string[] = [
+            'application/json'
+        ]
+        const httpHeaderAcceptSelected: string | undefined = this.configuration.selectHeaderAccept( httpHeaderAccepts )
+        if ( httpHeaderAcceptSelected != undefined )
+        {
+            headers = headers.set( 'Accept', httpHeaderAcceptSelected )
+        }
+
+        // to determine the Content-Type header
+        const consumes: string[] = []
+
+        return this.httpClient.request<ResponseGroup>( 'get', `${ this.basePath }/group/${ encodeURIComponent( String( groupId ) ) }`,
             {
                 params: queryParameters,
                 withCredentials: this.configuration.withCredentials,
@@ -196,25 +259,19 @@ export class AuthService implements IAuthService
     /**
      * Delete a group
      * Add a group, only for admins
-     * @param body
-     * @param id ID of the group
+     * @param groupId ID of the group
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
      * @param reportProgress flag to report request and response progress.
      */
-    groupIdDeletePost( body: AddGroup, id: number, observe?: 'body', reportProgress?: boolean ): Observable<any>;
-    groupIdDeletePost( body: AddGroup, id: number, observe?: 'response', reportProgress?: boolean ): Observable<HttpResponse<any>>;
-    groupIdDeletePost( body: AddGroup, id: number, observe?: 'events', reportProgress?: boolean ): Observable<HttpEvent<any>>;
-    groupIdDeletePost( body: AddGroup, id: number, observe: any = 'body', reportProgress: boolean = false ): Observable<any>
+    groupGroupIdRemovePost( groupId: number, observe?: 'body', reportProgress?: boolean ): Observable<any>;
+    groupGroupIdRemovePost( groupId: number, observe?: 'response', reportProgress?: boolean ): Observable<HttpResponse<any>>;
+    groupGroupIdRemovePost( groupId: number, observe?: 'events', reportProgress?: boolean ): Observable<HttpEvent<any>>;
+    groupGroupIdRemovePost( groupId: number, observe: any = 'body', reportProgress: boolean = false ): Observable<any>
     {
 
-        if ( body === null || body === undefined )
+        if ( groupId === null || groupId === undefined )
         {
-            throw new Error( 'Required parameter body was null or undefined when calling groupIdDeletePost.' )
-        }
-
-        if ( id === null || id === undefined )
-        {
-            throw new Error( 'Required parameter id was null or undefined when calling groupIdDeletePost.' )
+            throw new Error( 'Required parameter groupId was null or undefined when calling groupGroupIdRemovePost.' )
         }
 
         let queryParameters = new HttpParams( { encoder: new CustomHttpUrlEncodingCodec() } )
@@ -244,69 +301,9 @@ export class AuthService implements IAuthService
         }
 
         // to determine the Content-Type header
-        const consumes: string[] = [
-            'application/json'
-        ]
-        const httpContentTypeSelected: string | undefined = this.configuration.selectHeaderContentType( consumes )
-        if ( httpContentTypeSelected != undefined )
-        {
-            headers = headers.set( 'Content-Type', httpContentTypeSelected )
-        }
-
-        return this.httpClient.request<any>( 'post', `${ this.basePath }/group/${ encodeURIComponent( String( id ) ) }/delete`,
-            {
-                body: body,
-                params: queryParameters,
-                withCredentials: this.configuration.withCredentials,
-                headers: headers,
-                observe: observe,
-                reportProgress: reportProgress
-            }
-        )
-    }
-
-    /**
-     * Get any group
-     * Get any group, only for admins and creators
-     * @param id Id of the group
-     * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
-     * @param reportProgress flag to report request and response progress.
-     */
-    groupIdGet( id: number, observe?: 'body', reportProgress?: boolean ): Observable<GroupType>;
-    groupIdGet( id: number, observe?: 'response', reportProgress?: boolean ): Observable<HttpResponse<GroupType>>;
-    groupIdGet( id: number, observe?: 'events', reportProgress?: boolean ): Observable<HttpEvent<GroupType>>;
-    groupIdGet( id: number, observe: any = 'body', reportProgress: boolean = false ): Observable<any>
-    {
-
-        if ( id === null || id === undefined )
-        {
-            throw new Error( 'Required parameter id was null or undefined when calling groupIdGet.' )
-        }
-
-        let queryParameters = new HttpParams( { encoder: new CustomHttpUrlEncodingCodec() } )
-
-        let headers = this.defaultHeaders
-
-        // authentication (JWTAcessToken) required
-        if ( this.configuration.apiKeys && this.configuration.apiKeys[ "access_token_cookie" ] )
-        {
-            queryParameters = queryParameters.set( 'access_token_cookie', this.configuration.apiKeys[ "access_token_cookie" ] )
-        }
-
-        // to determine the Accept header
-        let httpHeaderAccepts: string[] = [
-            'application/json'
-        ]
-        const httpHeaderAcceptSelected: string | undefined = this.configuration.selectHeaderAccept( httpHeaderAccepts )
-        if ( httpHeaderAcceptSelected != undefined )
-        {
-            headers = headers.set( 'Accept', httpHeaderAcceptSelected )
-        }
-
-        // to determine the Content-Type header
         const consumes: string[] = []
 
-        return this.httpClient.request<GroupType>( 'get', `${ this.basePath }/group/${ encodeURIComponent( String( id ) ) }`,
+        return this.httpClient.request<any>( 'post', `${ this.basePath }/group/${ encodeURIComponent( String( groupId ) ) }/remove`,
             {
                 params: queryParameters,
                 withCredentials: this.configuration.withCredentials,
@@ -323,9 +320,9 @@ export class AuthService implements IAuthService
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
      * @param reportProgress flag to report request and response progress.
      */
-    infoCountriesGet( observe?: 'body', reportProgress?: boolean ): Observable<GetCountriesResponse>;
-    infoCountriesGet( observe?: 'response', reportProgress?: boolean ): Observable<HttpResponse<GetCountriesResponse>>;
-    infoCountriesGet( observe?: 'events', reportProgress?: boolean ): Observable<HttpEvent<GetCountriesResponse>>;
+    infoCountriesGet( observe?: 'body', reportProgress?: boolean ): Observable<ResponseInfoCountries>;
+    infoCountriesGet( observe?: 'response', reportProgress?: boolean ): Observable<HttpResponse<ResponseInfoCountries>>;
+    infoCountriesGet( observe?: 'events', reportProgress?: boolean ): Observable<HttpEvent<ResponseInfoCountries>>;
     infoCountriesGet( observe: any = 'body', reportProgress: boolean = false ): Observable<any>
     {
 
@@ -344,7 +341,7 @@ export class AuthService implements IAuthService
         // to determine the Content-Type header
         const consumes: string[] = []
 
-        return this.httpClient.request<GetCountriesResponse>( 'get', `${ this.basePath }/info/countries`,
+        return this.httpClient.request<ResponseInfoCountries>( 'get', `${ this.basePath }/info/countries`,
             {
                 withCredentials: this.configuration.withCredentials,
                 headers: headers,
@@ -360,9 +357,9 @@ export class AuthService implements IAuthService
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
      * @param reportProgress flag to report request and response progress.
      */
-    infoUniversitiesGet( observe?: 'body', reportProgress?: boolean ): Observable<GetUniversitiesResponse>;
-    infoUniversitiesGet( observe?: 'response', reportProgress?: boolean ): Observable<HttpResponse<GetUniversitiesResponse>>;
-    infoUniversitiesGet( observe?: 'events', reportProgress?: boolean ): Observable<HttpEvent<GetUniversitiesResponse>>;
+    infoUniversitiesGet( observe?: 'body', reportProgress?: boolean ): Observable<ResponseInfoUniversities>;
+    infoUniversitiesGet( observe?: 'response', reportProgress?: boolean ): Observable<HttpResponse<ResponseInfoUniversities>>;
+    infoUniversitiesGet( observe?: 'events', reportProgress?: boolean ): Observable<HttpEvent<ResponseInfoUniversities>>;
     infoUniversitiesGet( observe: any = 'body', reportProgress: boolean = false ): Observable<any>
     {
 
@@ -381,7 +378,7 @@ export class AuthService implements IAuthService
         // to determine the Content-Type header
         const consumes: string[] = []
 
-        return this.httpClient.request<GetUniversitiesResponse>( 'get', `${ this.basePath }/info/universities`,
+        return this.httpClient.request<ResponseInfoUniversities>( 'get', `${ this.basePath }/info/universities`,
             {
                 withCredentials: this.configuration.withCredentials,
                 headers: headers,
@@ -398,10 +395,10 @@ export class AuthService implements IAuthService
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
      * @param reportProgress flag to report request and response progress.
      */
-    loginPost( body: Authentication, observe?: 'body', reportProgress?: boolean ): Observable<AuthResponse>;
-    loginPost( body: Authentication, observe?: 'response', reportProgress?: boolean ): Observable<HttpResponse<AuthResponse>>;
-    loginPost( body: Authentication, observe?: 'events', reportProgress?: boolean ): Observable<HttpEvent<AuthResponse>>;
-    loginPost( body: Authentication, observe: any = 'body', reportProgress: boolean = false ): Observable<any>
+    loginPost( body: RequestLogin, observe?: 'body', reportProgress?: boolean ): Observable<ResponseLogin>;
+    loginPost( body: RequestLogin, observe?: 'response', reportProgress?: boolean ): Observable<HttpResponse<ResponseLogin>>;
+    loginPost( body: RequestLogin, observe?: 'events', reportProgress?: boolean ): Observable<HttpEvent<ResponseLogin>>;
+    loginPost( body: RequestLogin, observe: any = 'body', reportProgress: boolean = false ): Observable<any>
     {
 
         if ( body === null || body === undefined )
@@ -431,7 +428,7 @@ export class AuthService implements IAuthService
             headers = headers.set( 'Content-Type', httpContentTypeSelected )
         }
 
-        return this.httpClient.request<AuthResponse>( 'post', `${ this.basePath }/login`,
+        return this.httpClient.request<ResponseLogin>( 'post', `${ this.basePath }/login`,
             {
                 body: body,
                 withCredentials: this.configuration.withCredentials,
@@ -457,6 +454,12 @@ export class AuthService implements IAuthService
         let queryParameters = new HttpParams( { encoder: new CustomHttpUrlEncodingCodec() } )
 
         let headers = this.defaultHeaders
+
+        // authentication (CSRFAcessToken) required
+        if ( this.configuration.apiKeys && this.configuration.apiKeys[ "X-CSRF-TOKEN" ] )
+        {
+            headers = headers.set( 'X-CSRF-TOKEN', this.configuration.apiKeys[ "X-CSRF-TOKEN" ] )
+        }
 
         // authentication (JWTAcessToken) required
         if ( this.configuration.apiKeys && this.configuration.apiKeys[ "access_token_cookie" ] )
@@ -492,9 +495,9 @@ export class AuthService implements IAuthService
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
      * @param reportProgress flag to report request and response progress.
      */
-    preregisterPost( observe?: 'body', reportProgress?: boolean ): Observable<RegisterConfirm>;
-    preregisterPost( observe?: 'response', reportProgress?: boolean ): Observable<HttpResponse<RegisterConfirm>>;
-    preregisterPost( observe?: 'events', reportProgress?: boolean ): Observable<HttpEvent<RegisterConfirm>>;
+    preregisterPost( observe?: 'body', reportProgress?: boolean ): Observable<ResponsePreregister>;
+    preregisterPost( observe?: 'response', reportProgress?: boolean ): Observable<HttpResponse<ResponsePreregister>>;
+    preregisterPost( observe?: 'events', reportProgress?: boolean ): Observable<HttpEvent<ResponsePreregister>>;
     preregisterPost( observe: any = 'body', reportProgress: boolean = false ): Observable<any>
     {
 
@@ -527,7 +530,7 @@ export class AuthService implements IAuthService
         // to determine the Content-Type header
         const consumes: string[] = []
 
-        return this.httpClient.request<RegisterConfirm>( 'post', `${ this.basePath }/preregister`,
+        return this.httpClient.request<ResponsePreregister>( 'post', `${ this.basePath }/preregister`,
             {
                 params: queryParameters,
                 withCredentials: this.configuration.withCredentials,
@@ -544,9 +547,9 @@ export class AuthService implements IAuthService
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
      * @param reportProgress flag to report request and response progress.
      */
-    refreshPost( observe?: 'body', reportProgress?: boolean ): Observable<AuthResponse>;
-    refreshPost( observe?: 'response', reportProgress?: boolean ): Observable<HttpResponse<AuthResponse>>;
-    refreshPost( observe?: 'events', reportProgress?: boolean ): Observable<HttpEvent<AuthResponse>>;
+    refreshPost( observe?: 'body', reportProgress?: boolean ): Observable<ResponseRefresh>;
+    refreshPost( observe?: 'response', reportProgress?: boolean ): Observable<HttpResponse<ResponseRefresh>>;
+    refreshPost( observe?: 'events', reportProgress?: boolean ): Observable<HttpEvent<ResponseRefresh>>;
     refreshPost( observe: any = 'body', reportProgress: boolean = false ): Observable<any>
     {
 
@@ -579,7 +582,7 @@ export class AuthService implements IAuthService
         // to determine the Content-Type header
         const consumes: string[] = []
 
-        return this.httpClient.request<AuthResponse>( 'post', `${ this.basePath }/refresh`,
+        return this.httpClient.request<ResponseRefresh>( 'post', `${ this.basePath }/refresh`,
             {
                 params: queryParameters,
                 withCredentials: this.configuration.withCredentials,
@@ -597,10 +600,10 @@ export class AuthService implements IAuthService
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
      * @param reportProgress flag to report request and response progress.
      */
-    registerInternalPost( body: RegisterAuthInfo, observe?: 'body', reportProgress?: boolean ): Observable<CommonUserInfo>;
-    registerInternalPost( body: RegisterAuthInfo, observe?: 'response', reportProgress?: boolean ): Observable<HttpResponse<CommonUserInfo>>;
-    registerInternalPost( body: RegisterAuthInfo, observe?: 'events', reportProgress?: boolean ): Observable<HttpEvent<CommonUserInfo>>;
-    registerInternalPost( body: RegisterAuthInfo, observe: any = 'body', reportProgress: boolean = false ): Observable<any>
+    registerInternalPost( body: TypeAuthCredentials, observe?: 'body', reportProgress?: boolean ): Observable<ResponseRegistrationInternal>;
+    registerInternalPost( body: TypeAuthCredentials, observe?: 'response', reportProgress?: boolean ): Observable<HttpResponse<ResponseRegistrationInternal>>;
+    registerInternalPost( body: TypeAuthCredentials, observe?: 'events', reportProgress?: boolean ): Observable<HttpEvent<ResponseRegistrationInternal>>;
+    registerInternalPost( body: TypeAuthCredentials, observe: any = 'body', reportProgress: boolean = false ): Observable<any>
     {
 
         if ( body === null || body === undefined )
@@ -644,7 +647,7 @@ export class AuthService implements IAuthService
             headers = headers.set( 'Content-Type', httpContentTypeSelected )
         }
 
-        return this.httpClient.request<CommonUserInfo>( 'post', `${ this.basePath }/register/internal`,
+        return this.httpClient.request<ResponseRegistrationInternal>( 'post', `${ this.basePath }/register/internal`,
             {
                 body: body,
                 params: queryParameters,
@@ -663,10 +666,10 @@ export class AuthService implements IAuthService
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
      * @param reportProgress flag to report request and response progress.
      */
-    registerPost( body: Registration, observe?: 'body', reportProgress?: boolean ): Observable<CommonUserInfo>;
-    registerPost( body: Registration, observe?: 'response', reportProgress?: boolean ): Observable<HttpResponse<CommonUserInfo>>;
-    registerPost( body: Registration, observe?: 'events', reportProgress?: boolean ): Observable<HttpEvent<CommonUserInfo>>;
-    registerPost( body: Registration, observe: any = 'body', reportProgress: boolean = false ): Observable<any>
+    registerPost( body: RequestRegistration, observe?: 'body', reportProgress?: boolean ): Observable<ResponseRegistration>;
+    registerPost( body: RequestRegistration, observe?: 'response', reportProgress?: boolean ): Observable<HttpResponse<ResponseRegistration>>;
+    registerPost( body: RequestRegistration, observe?: 'events', reportProgress?: boolean ): Observable<HttpEvent<ResponseRegistration>>;
+    registerPost( body: RequestRegistration, observe: any = 'body', reportProgress: boolean = false ): Observable<any>
     {
 
         if ( body === null || body === undefined )
@@ -696,7 +699,7 @@ export class AuthService implements IAuthService
             headers = headers.set( 'Content-Type', httpContentTypeSelected )
         }
 
-        return this.httpClient.request<CommonUserInfo>( 'post', `${ this.basePath }/register`,
+        return this.httpClient.request<ResponseRegistration>( 'post', `${ this.basePath }/register`,
             {
                 body: body,
                 withCredentials: this.configuration.withCredentials,
@@ -713,9 +716,9 @@ export class AuthService implements IAuthService
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
      * @param reportProgress flag to report request and response progress.
      */
-    userAllGet( observe?: 'body', reportProgress?: boolean ): Observable<UserList>;
-    userAllGet( observe?: 'response', reportProgress?: boolean ): Observable<HttpResponse<UserList>>;
-    userAllGet( observe?: 'events', reportProgress?: boolean ): Observable<HttpEvent<UserList>>;
+    userAllGet( observe?: 'body', reportProgress?: boolean ): Observable<ResponseUserAll>;
+    userAllGet( observe?: 'response', reportProgress?: boolean ): Observable<HttpResponse<ResponseUserAll>>;
+    userAllGet( observe?: 'events', reportProgress?: boolean ): Observable<HttpEvent<ResponseUserAll>>;
     userAllGet( observe: any = 'body', reportProgress: boolean = false ): Observable<any>
     {
 
@@ -742,7 +745,7 @@ export class AuthService implements IAuthService
         // to determine the Content-Type header
         const consumes: string[] = []
 
-        return this.httpClient.request<UserList>( 'get', `${ this.basePath }/user/all`,
+        return this.httpClient.request<ResponseUserAll>( 'get', `${ this.basePath }/user/all`,
             {
                 params: queryParameters,
                 withCredentials: this.configuration.withCredentials,
@@ -756,19 +759,19 @@ export class AuthService implements IAuthService
     /**
      * Get common info for different users
      * Get info about any user by their group, only for admins and creators
-     * @param id ID of the group
+     * @param groupId ID of the group
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
      * @param reportProgress flag to report request and response progress.
      */
-    userByGroupIdGet( id: number, observe?: 'body', reportProgress?: boolean ): Observable<UserList>;
-    userByGroupIdGet( id: number, observe?: 'response', reportProgress?: boolean ): Observable<HttpResponse<UserList>>;
-    userByGroupIdGet( id: number, observe?: 'events', reportProgress?: boolean ): Observable<HttpEvent<UserList>>;
-    userByGroupIdGet( id: number, observe: any = 'body', reportProgress: boolean = false ): Observable<any>
+    userByGroupGroupIdGet( groupId: number, observe?: 'body', reportProgress?: boolean ): Observable<ResponseUserByGroup>;
+    userByGroupGroupIdGet( groupId: number, observe?: 'response', reportProgress?: boolean ): Observable<HttpResponse<ResponseUserByGroup>>;
+    userByGroupGroupIdGet( groupId: number, observe?: 'events', reportProgress?: boolean ): Observable<HttpEvent<ResponseUserByGroup>>;
+    userByGroupGroupIdGet( groupId: number, observe: any = 'body', reportProgress: boolean = false ): Observable<any>
     {
 
-        if ( id === null || id === undefined )
+        if ( groupId === null || groupId === undefined )
         {
-            throw new Error( 'Required parameter id was null or undefined when calling userByGroupIdGet.' )
+            throw new Error( 'Required parameter groupId was null or undefined when calling userByGroupGroupIdGet.' )
         }
 
         let queryParameters = new HttpParams( { encoder: new CustomHttpUrlEncodingCodec() } )
@@ -794,718 +797,8 @@ export class AuthService implements IAuthService
         // to determine the Content-Type header
         const consumes: string[] = []
 
-        return this.httpClient.request<UserList>( 'get', `${ this.basePath }/user/by-group/${ encodeURIComponent( String( id ) ) }`,
+        return this.httpClient.request<ResponseUserByGroup>( 'get', `${ this.basePath }/user/by-group/${ encodeURIComponent( String( groupId ) ) }`,
             {
-                params: queryParameters,
-                withCredentials: this.configuration.withCredentials,
-                headers: headers,
-                observe: observe,
-                reportProgress: reportProgress
-            }
-        )
-    }
-
-    /**
-     * Get common info for a different user
-     * Get info about any user by its id, only for admins and creators
-     * @param id Id of the user
-     * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
-     * @param reportProgress flag to report request and response progress.
-     */
-    userIdGet( id: number, observe?: 'body', reportProgress?: boolean ): Observable<CommonUserInfo>;
-    userIdGet( id: number, observe?: 'response', reportProgress?: boolean ): Observable<HttpResponse<CommonUserInfo>>;
-    userIdGet( id: number, observe?: 'events', reportProgress?: boolean ): Observable<HttpEvent<CommonUserInfo>>;
-    userIdGet( id: number, observe: any = 'body', reportProgress: boolean = false ): Observable<any>
-    {
-
-        if ( id === null || id === undefined )
-        {
-            throw new Error( 'Required parameter id was null or undefined when calling userIdGet.' )
-        }
-
-        let queryParameters = new HttpParams( { encoder: new CustomHttpUrlEncodingCodec() } )
-
-        let headers = this.defaultHeaders
-
-        // authentication (JWTAcessToken) required
-        if ( this.configuration.apiKeys && this.configuration.apiKeys[ "access_token_cookie" ] )
-        {
-            queryParameters = queryParameters.set( 'access_token_cookie', this.configuration.apiKeys[ "access_token_cookie" ] )
-        }
-
-        // to determine the Accept header
-        let httpHeaderAccepts: string[] = [
-            'application/json'
-        ]
-        const httpHeaderAcceptSelected: string | undefined = this.configuration.selectHeaderAccept( httpHeaderAccepts )
-        if ( httpHeaderAcceptSelected != undefined )
-        {
-            headers = headers.set( 'Accept', httpHeaderAcceptSelected )
-        }
-
-        // to determine the Content-Type header
-        const consumes: string[] = []
-
-        return this.httpClient.request<CommonUserInfo>( 'get', `${ this.basePath }/user/${ encodeURIComponent( String( id ) ) }`,
-            {
-                params: queryParameters,
-                withCredentials: this.configuration.withCredentials,
-                headers: headers,
-                observe: observe,
-                reportProgress: reportProgress
-            }
-        )
-    }
-
-    /**
-     * Assign a user to a group
-     * Assign a user to a group, only for admins and creators
-     * @param body
-     * @param id Id of the user
-     * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
-     * @param reportProgress flag to report request and response progress.
-     */
-    userIdGroupsAddPost( body: UpdateGroups, id: number, observe?: 'body', reportProgress?: boolean ): Observable<any>;
-    userIdGroupsAddPost( body: UpdateGroups, id: number, observe?: 'response', reportProgress?: boolean ): Observable<HttpResponse<any>>;
-    userIdGroupsAddPost( body: UpdateGroups, id: number, observe?: 'events', reportProgress?: boolean ): Observable<HttpEvent<any>>;
-    userIdGroupsAddPost( body: UpdateGroups, id: number, observe: any = 'body', reportProgress: boolean = false ): Observable<any>
-    {
-
-        if ( body === null || body === undefined )
-        {
-            throw new Error( 'Required parameter body was null or undefined when calling userIdGroupsAddPost.' )
-        }
-
-        if ( id === null || id === undefined )
-        {
-            throw new Error( 'Required parameter id was null or undefined when calling userIdGroupsAddPost.' )
-        }
-
-        let queryParameters = new HttpParams( { encoder: new CustomHttpUrlEncodingCodec() } )
-
-        let headers = this.defaultHeaders
-
-        // authentication (CSRFAcessToken) required
-        if ( this.configuration.apiKeys && this.configuration.apiKeys[ "X-CSRF-TOKEN" ] )
-        {
-            headers = headers.set( 'X-CSRF-TOKEN', this.configuration.apiKeys[ "X-CSRF-TOKEN" ] )
-        }
-
-        // authentication (JWTAcessToken) required
-        if ( this.configuration.apiKeys && this.configuration.apiKeys[ "access_token_cookie" ] )
-        {
-            queryParameters = queryParameters.set( 'access_token_cookie', this.configuration.apiKeys[ "access_token_cookie" ] )
-        }
-
-        // to determine the Accept header
-        let httpHeaderAccepts: string[] = [
-            'application/json'
-        ]
-        const httpHeaderAcceptSelected: string | undefined = this.configuration.selectHeaderAccept( httpHeaderAccepts )
-        if ( httpHeaderAcceptSelected != undefined )
-        {
-            headers = headers.set( 'Accept', httpHeaderAcceptSelected )
-        }
-
-        // to determine the Content-Type header
-        const consumes: string[] = [
-            'application/json'
-        ]
-        const httpContentTypeSelected: string | undefined = this.configuration.selectHeaderContentType( consumes )
-        if ( httpContentTypeSelected != undefined )
-        {
-            headers = headers.set( 'Content-Type', httpContentTypeSelected )
-        }
-
-        return this.httpClient.request<any>( 'post', `${ this.basePath }/user/${ encodeURIComponent( String( id ) ) }/groups/add`,
-            {
-                body: body,
-                params: queryParameters,
-                withCredentials: this.configuration.withCredentials,
-                headers: headers,
-                observe: observe,
-                reportProgress: reportProgress
-            }
-        )
-    }
-
-    /**
-     * Get groups for a different user
-     * Get group list for any user by its id, only for admins and creators
-     * @param id Id of the user
-     * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
-     * @param reportProgress flag to report request and response progress.
-     */
-    userIdGroupsGet( id: number, observe?: 'body', reportProgress?: boolean ): Observable<GroupList>;
-    userIdGroupsGet( id: number, observe?: 'response', reportProgress?: boolean ): Observable<HttpResponse<GroupList>>;
-    userIdGroupsGet( id: number, observe?: 'events', reportProgress?: boolean ): Observable<HttpEvent<GroupList>>;
-    userIdGroupsGet( id: number, observe: any = 'body', reportProgress: boolean = false ): Observable<any>
-    {
-
-        if ( id === null || id === undefined )
-        {
-            throw new Error( 'Required parameter id was null or undefined when calling userIdGroupsGet.' )
-        }
-
-        let queryParameters = new HttpParams( { encoder: new CustomHttpUrlEncodingCodec() } )
-
-        let headers = this.defaultHeaders
-
-        // authentication (JWTAcessToken) required
-        if ( this.configuration.apiKeys && this.configuration.apiKeys[ "access_token_cookie" ] )
-        {
-            queryParameters = queryParameters.set( 'access_token_cookie', this.configuration.apiKeys[ "access_token_cookie" ] )
-        }
-
-        // to determine the Accept header
-        let httpHeaderAccepts: string[] = [
-            'application/json'
-        ]
-        const httpHeaderAcceptSelected: string | undefined = this.configuration.selectHeaderAccept( httpHeaderAccepts )
-        if ( httpHeaderAcceptSelected != undefined )
-        {
-            headers = headers.set( 'Accept', httpHeaderAcceptSelected )
-        }
-
-        // to determine the Content-Type header
-        const consumes: string[] = []
-
-        return this.httpClient.request<GroupList>( 'get', `${ this.basePath }/user/${ encodeURIComponent( String( id ) ) }/groups`,
-            {
-                params: queryParameters,
-                withCredentials: this.configuration.withCredentials,
-                headers: headers,
-                observe: observe,
-                reportProgress: reportProgress
-            }
-        )
-    }
-
-    /**
-     * Remove a user from a group
-     * Remove a user from a group, only for admins and creators
-     * @param body
-     * @param id Id of the user
-     * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
-     * @param reportProgress flag to report request and response progress.
-     */
-    userIdGroupsRemovePost( body: UpdateGroups, id: number, observe?: 'body', reportProgress?: boolean ): Observable<any>;
-    userIdGroupsRemovePost( body: UpdateGroups, id: number, observe?: 'response', reportProgress?: boolean ): Observable<HttpResponse<any>>;
-    userIdGroupsRemovePost( body: UpdateGroups, id: number, observe?: 'events', reportProgress?: boolean ): Observable<HttpEvent<any>>;
-    userIdGroupsRemovePost( body: UpdateGroups, id: number, observe: any = 'body', reportProgress: boolean = false ): Observable<any>
-    {
-
-        if ( body === null || body === undefined )
-        {
-            throw new Error( 'Required parameter body was null or undefined when calling userIdGroupsRemovePost.' )
-        }
-
-        if ( id === null || id === undefined )
-        {
-            throw new Error( 'Required parameter id was null or undefined when calling userIdGroupsRemovePost.' )
-        }
-
-        let queryParameters = new HttpParams( { encoder: new CustomHttpUrlEncodingCodec() } )
-
-        let headers = this.defaultHeaders
-
-        // authentication (CSRFAcessToken) required
-        if ( this.configuration.apiKeys && this.configuration.apiKeys[ "X-CSRF-TOKEN" ] )
-        {
-            headers = headers.set( 'X-CSRF-TOKEN', this.configuration.apiKeys[ "X-CSRF-TOKEN" ] )
-        }
-
-        // authentication (JWTAcessToken) required
-        if ( this.configuration.apiKeys && this.configuration.apiKeys[ "access_token_cookie" ] )
-        {
-            queryParameters = queryParameters.set( 'access_token_cookie', this.configuration.apiKeys[ "access_token_cookie" ] )
-        }
-
-        // to determine the Accept header
-        let httpHeaderAccepts: string[] = [
-            'application/json'
-        ]
-        const httpHeaderAcceptSelected: string | undefined = this.configuration.selectHeaderAccept( httpHeaderAccepts )
-        if ( httpHeaderAcceptSelected != undefined )
-        {
-            headers = headers.set( 'Accept', httpHeaderAcceptSelected )
-        }
-
-        // to determine the Content-Type header
-        const consumes: string[] = [
-            'application/json'
-        ]
-        const httpContentTypeSelected: string | undefined = this.configuration.selectHeaderContentType( consumes )
-        if ( httpContentTypeSelected != undefined )
-        {
-            headers = headers.set( 'Content-Type', httpContentTypeSelected )
-        }
-
-        return this.httpClient.request<any>( 'post', `${ this.basePath }/user/${ encodeURIComponent( String( id ) ) }/groups/remove`,
-            {
-                body: body,
-                params: queryParameters,
-                withCredentials: this.configuration.withCredentials,
-                headers: headers,
-                observe: observe,
-                reportProgress: reportProgress
-            }
-        )
-    }
-
-    /**
-     * Change password for another user
-     * Change password for another user, admins only
-     * @param body
-     * @param id Id of the user
-     * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
-     * @param reportProgress flag to report request and response progress.
-     */
-    userIdPasswordPost( body: ChangePasswordAdmin, id: number, observe?: 'body', reportProgress?: boolean ): Observable<any>;
-    userIdPasswordPost( body: ChangePasswordAdmin, id: number, observe?: 'response', reportProgress?: boolean ): Observable<HttpResponse<any>>;
-    userIdPasswordPost( body: ChangePasswordAdmin, id: number, observe?: 'events', reportProgress?: boolean ): Observable<HttpEvent<any>>;
-    userIdPasswordPost( body: ChangePasswordAdmin, id: number, observe: any = 'body', reportProgress: boolean = false ): Observable<any>
-    {
-
-        if ( body === null || body === undefined )
-        {
-            throw new Error( 'Required parameter body was null or undefined when calling userIdPasswordPost.' )
-        }
-
-        if ( id === null || id === undefined )
-        {
-            throw new Error( 'Required parameter id was null or undefined when calling userIdPasswordPost.' )
-        }
-
-        let queryParameters = new HttpParams( { encoder: new CustomHttpUrlEncodingCodec() } )
-
-        let headers = this.defaultHeaders
-
-        // authentication (CSRFAcessToken) required
-        if ( this.configuration.apiKeys && this.configuration.apiKeys[ "X-CSRF-TOKEN" ] )
-        {
-            headers = headers.set( 'X-CSRF-TOKEN', this.configuration.apiKeys[ "X-CSRF-TOKEN" ] )
-        }
-
-        // authentication (JWTAcessToken) required
-        if ( this.configuration.apiKeys && this.configuration.apiKeys[ "access_token_cookie" ] )
-        {
-            queryParameters = queryParameters.set( 'access_token_cookie', this.configuration.apiKeys[ "access_token_cookie" ] )
-        }
-
-        // to determine the Accept header
-        let httpHeaderAccepts: string[] = []
-        const httpHeaderAcceptSelected: string | undefined = this.configuration.selectHeaderAccept( httpHeaderAccepts )
-        if ( httpHeaderAcceptSelected != undefined )
-        {
-            headers = headers.set( 'Accept', httpHeaderAcceptSelected )
-        }
-
-        // to determine the Content-Type header
-        const consumes: string[] = [
-            'application/json'
-        ]
-        const httpContentTypeSelected: string | undefined = this.configuration.selectHeaderContentType( consumes )
-        if ( httpContentTypeSelected != undefined )
-        {
-            headers = headers.set( 'Content-Type', httpContentTypeSelected )
-        }
-
-        return this.httpClient.request<any>( 'post', `${ this.basePath }/user/${ encodeURIComponent( String( id ) ) }/password`,
-            {
-                body: body,
-                params: queryParameters,
-                withCredentials: this.configuration.withCredentials,
-                headers: headers,
-                observe: observe,
-                reportProgress: reportProgress
-            }
-        )
-    }
-
-    /**
-     * Get personal info for a different user
-     * Get personal info about any user by its id, only for admins and creators
-     * @param id Id of the user
-     * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
-     * @param reportProgress flag to report request and response progress.
-     */
-    userIdPersonalGet( id: number, observe?: 'body', reportProgress?: boolean ): Observable<PersonalInfo>;
-    userIdPersonalGet( id: number, observe?: 'response', reportProgress?: boolean ): Observable<HttpResponse<PersonalInfo>>;
-    userIdPersonalGet( id: number, observe?: 'events', reportProgress?: boolean ): Observable<HttpEvent<PersonalInfo>>;
-    userIdPersonalGet( id: number, observe: any = 'body', reportProgress: boolean = false ): Observable<any>
-    {
-
-        if ( id === null || id === undefined )
-        {
-            throw new Error( 'Required parameter id was null or undefined when calling userIdPersonalGet.' )
-        }
-
-        let queryParameters = new HttpParams( { encoder: new CustomHttpUrlEncodingCodec() } )
-
-        let headers = this.defaultHeaders
-
-        // authentication (JWTAcessToken) required
-        if ( this.configuration.apiKeys && this.configuration.apiKeys[ "access_token_cookie" ] )
-        {
-            queryParameters = queryParameters.set( 'access_token_cookie', this.configuration.apiKeys[ "access_token_cookie" ] )
-        }
-
-        // to determine the Accept header
-        let httpHeaderAccepts: string[] = [
-            'application/json'
-        ]
-        const httpHeaderAcceptSelected: string | undefined = this.configuration.selectHeaderAccept( httpHeaderAccepts )
-        if ( httpHeaderAcceptSelected != undefined )
-        {
-            headers = headers.set( 'Accept', httpHeaderAcceptSelected )
-        }
-
-        // to determine the Content-Type header
-        const consumes: string[] = []
-
-        return this.httpClient.request<PersonalInfo>( 'get', `${ this.basePath }/user/${ encodeURIComponent( String( id ) ) }/personal`,
-            {
-                params: queryParameters,
-                withCredentials: this.configuration.withCredentials,
-                headers: headers,
-                observe: observe,
-                reportProgress: reportProgress
-            }
-        )
-    }
-
-    /**
-     * Set personal info for a user
-     * Set personal info about any user by its id, only for admins
-     * @param body
-     * @param id Id of the user
-     * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
-     * @param reportProgress flag to report request and response progress.
-     */
-    userIdPersonalPatch( body: PersonalInfoUpdate, id: number, observe?: 'body', reportProgress?: boolean ): Observable<any>;
-    userIdPersonalPatch( body: PersonalInfoUpdate, id: number, observe?: 'response', reportProgress?: boolean ): Observable<HttpResponse<any>>;
-    userIdPersonalPatch( body: PersonalInfoUpdate, id: number, observe?: 'events', reportProgress?: boolean ): Observable<HttpEvent<any>>;
-    userIdPersonalPatch( body: PersonalInfoUpdate, id: number, observe: any = 'body', reportProgress: boolean = false ): Observable<any>
-    {
-
-        if ( body === null || body === undefined )
-        {
-            throw new Error( 'Required parameter body was null or undefined when calling userIdPersonalPatch.' )
-        }
-
-        if ( id === null || id === undefined )
-        {
-            throw new Error( 'Required parameter id was null or undefined when calling userIdPersonalPatch.' )
-        }
-
-        let queryParameters = new HttpParams( { encoder: new CustomHttpUrlEncodingCodec() } )
-
-        let headers = this.defaultHeaders
-
-        // authentication (CSRFAcessToken) required
-        if ( this.configuration.apiKeys && this.configuration.apiKeys[ "X-CSRF-TOKEN" ] )
-        {
-            headers = headers.set( 'X-CSRF-TOKEN', this.configuration.apiKeys[ "X-CSRF-TOKEN" ] )
-        }
-
-        // authentication (JWTAcessToken) required
-        if ( this.configuration.apiKeys && this.configuration.apiKeys[ "access_token_cookie" ] )
-        {
-            queryParameters = queryParameters.set( 'access_token_cookie', this.configuration.apiKeys[ "access_token_cookie" ] )
-        }
-
-        // to determine the Accept header
-        let httpHeaderAccepts: string[] = [
-            'application/json'
-        ]
-        const httpHeaderAcceptSelected: string | undefined = this.configuration.selectHeaderAccept( httpHeaderAccepts )
-        if ( httpHeaderAcceptSelected != undefined )
-        {
-            headers = headers.set( 'Accept', httpHeaderAcceptSelected )
-        }
-
-        // to determine the Content-Type header
-        const consumes: string[] = [
-            'application/json'
-        ]
-        const httpContentTypeSelected: string | undefined = this.configuration.selectHeaderContentType( consumes )
-        if ( httpContentTypeSelected != undefined )
-        {
-            headers = headers.set( 'Content-Type', httpContentTypeSelected )
-        }
-
-        return this.httpClient.request<any>( 'patch', `${ this.basePath }/user/${ encodeURIComponent( String( id ) ) }/personal`,
-            {
-                body: body,
-                params: queryParameters,
-                withCredentials: this.configuration.withCredentials,
-                headers: headers,
-                observe: observe,
-                reportProgress: reportProgress
-            }
-        )
-    }
-
-    /**
-     * Set the role of any user
-     * Set the role of another user, only for admins
-     * @param body
-     * @param id Id of the user
-     * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
-     * @param reportProgress flag to report request and response progress.
-     */
-    userIdRolePut( body: UserRole, id: number, observe?: 'body', reportProgress?: boolean ): Observable<any>;
-    userIdRolePut( body: UserRole, id: number, observe?: 'response', reportProgress?: boolean ): Observable<HttpResponse<any>>;
-    userIdRolePut( body: UserRole, id: number, observe?: 'events', reportProgress?: boolean ): Observable<HttpEvent<any>>;
-    userIdRolePut( body: UserRole, id: number, observe: any = 'body', reportProgress: boolean = false ): Observable<any>
-    {
-
-        if ( body === null || body === undefined )
-        {
-            throw new Error( 'Required parameter body was null or undefined when calling userIdRolePut.' )
-        }
-
-        if ( id === null || id === undefined )
-        {
-            throw new Error( 'Required parameter id was null or undefined when calling userIdRolePut.' )
-        }
-
-        let queryParameters = new HttpParams( { encoder: new CustomHttpUrlEncodingCodec() } )
-
-        let headers = this.defaultHeaders
-
-        // authentication (CSRFAcessToken) required
-        if ( this.configuration.apiKeys && this.configuration.apiKeys[ "X-CSRF-TOKEN" ] )
-        {
-            headers = headers.set( 'X-CSRF-TOKEN', this.configuration.apiKeys[ "X-CSRF-TOKEN" ] )
-        }
-
-        // authentication (JWTAcessToken) required
-        if ( this.configuration.apiKeys && this.configuration.apiKeys[ "access_token_cookie" ] )
-        {
-            queryParameters = queryParameters.set( 'access_token_cookie', this.configuration.apiKeys[ "access_token_cookie" ] )
-        }
-
-        // to determine the Accept header
-        let httpHeaderAccepts: string[] = [
-            'application/json'
-        ]
-        const httpHeaderAcceptSelected: string | undefined = this.configuration.selectHeaderAccept( httpHeaderAccepts )
-        if ( httpHeaderAcceptSelected != undefined )
-        {
-            headers = headers.set( 'Accept', httpHeaderAcceptSelected )
-        }
-
-        // to determine the Content-Type header
-        const consumes: string[] = [
-            'application/json'
-        ]
-        const httpContentTypeSelected: string | undefined = this.configuration.selectHeaderContentType( consumes )
-        if ( httpContentTypeSelected != undefined )
-        {
-            headers = headers.set( 'Content-Type', httpContentTypeSelected )
-        }
-
-        return this.httpClient.request<any>( 'put', `${ this.basePath }/user/${ encodeURIComponent( String( id ) ) }/role`,
-            {
-                body: body,
-                params: queryParameters,
-                withCredentials: this.configuration.withCredentials,
-                headers: headers,
-                observe: observe,
-                reportProgress: reportProgress
-            }
-        )
-    }
-
-    /**
-     * Set the type of any user
-     * Set the type of another user, only for admins
-     * @param body
-     * @param id Id of the user
-     * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
-     * @param reportProgress flag to report request and response progress.
-     */
-    userIdTypePut( body: AccountType, id: number, observe?: 'body', reportProgress?: boolean ): Observable<any>;
-    userIdTypePut( body: AccountType, id: number, observe?: 'response', reportProgress?: boolean ): Observable<HttpResponse<any>>;
-    userIdTypePut( body: AccountType, id: number, observe?: 'events', reportProgress?: boolean ): Observable<HttpEvent<any>>;
-    userIdTypePut( body: AccountType, id: number, observe: any = 'body', reportProgress: boolean = false ): Observable<any>
-    {
-
-        if ( body === null || body === undefined )
-        {
-            throw new Error( 'Required parameter body was null or undefined when calling userIdTypePut.' )
-        }
-
-        if ( id === null || id === undefined )
-        {
-            throw new Error( 'Required parameter id was null or undefined when calling userIdTypePut.' )
-        }
-
-        let queryParameters = new HttpParams( { encoder: new CustomHttpUrlEncodingCodec() } )
-
-        let headers = this.defaultHeaders
-
-        // authentication (CSRFAcessToken) required
-        if ( this.configuration.apiKeys && this.configuration.apiKeys[ "X-CSRF-TOKEN" ] )
-        {
-            headers = headers.set( 'X-CSRF-TOKEN', this.configuration.apiKeys[ "X-CSRF-TOKEN" ] )
-        }
-
-        // authentication (JWTAcessToken) required
-        if ( this.configuration.apiKeys && this.configuration.apiKeys[ "access_token_cookie" ] )
-        {
-            queryParameters = queryParameters.set( 'access_token_cookie', this.configuration.apiKeys[ "access_token_cookie" ] )
-        }
-
-        // to determine the Accept header
-        let httpHeaderAccepts: string[] = [
-            'application/json'
-        ]
-        const httpHeaderAcceptSelected: string | undefined = this.configuration.selectHeaderAccept( httpHeaderAccepts )
-        if ( httpHeaderAcceptSelected != undefined )
-        {
-            headers = headers.set( 'Accept', httpHeaderAcceptSelected )
-        }
-
-        // to determine the Content-Type header
-        const consumes: string[] = [
-            'application/json'
-        ]
-        const httpContentTypeSelected: string | undefined = this.configuration.selectHeaderContentType( consumes )
-        if ( httpContentTypeSelected != undefined )
-        {
-            headers = headers.set( 'Content-Type', httpContentTypeSelected )
-        }
-
-        return this.httpClient.request<any>( 'put', `${ this.basePath }/user/${ encodeURIComponent( String( id ) ) }/type`,
-            {
-                body: body,
-                params: queryParameters,
-                withCredentials: this.configuration.withCredentials,
-                headers: headers,
-                observe: observe,
-                reportProgress: reportProgress
-            }
-        )
-    }
-
-    /**
-     * Get university student info for a different user
-     * Get university student info about any user by its id, only for admins and creators
-     * @param id Id of the user
-     * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
-     * @param reportProgress flag to report request and response progress.
-     */
-    userIdUniversityGet( id: number, observe?: 'body', reportProgress?: boolean ): Observable<StudentInfo>;
-    userIdUniversityGet( id: number, observe?: 'response', reportProgress?: boolean ): Observable<HttpResponse<StudentInfo>>;
-    userIdUniversityGet( id: number, observe?: 'events', reportProgress?: boolean ): Observable<HttpEvent<StudentInfo>>;
-    userIdUniversityGet( id: number, observe: any = 'body', reportProgress: boolean = false ): Observable<any>
-    {
-
-        if ( id === null || id === undefined )
-        {
-            throw new Error( 'Required parameter id was null or undefined when calling userIdUniversityGet.' )
-        }
-
-        let queryParameters = new HttpParams( { encoder: new CustomHttpUrlEncodingCodec() } )
-
-        let headers = this.defaultHeaders
-
-        // authentication (JWTAcessToken) required
-        if ( this.configuration.apiKeys && this.configuration.apiKeys[ "access_token_cookie" ] )
-        {
-            queryParameters = queryParameters.set( 'access_token_cookie', this.configuration.apiKeys[ "access_token_cookie" ] )
-        }
-
-        // to determine the Accept header
-        let httpHeaderAccepts: string[] = [
-            'application/json'
-        ]
-        const httpHeaderAcceptSelected: string | undefined = this.configuration.selectHeaderAccept( httpHeaderAccepts )
-        if ( httpHeaderAcceptSelected != undefined )
-        {
-            headers = headers.set( 'Accept', httpHeaderAcceptSelected )
-        }
-
-        // to determine the Content-Type header
-        const consumes: string[] = []
-
-        return this.httpClient.request<StudentInfo>( 'get', `${ this.basePath }/user/${ encodeURIComponent( String( id ) ) }/university`,
-            {
-                params: queryParameters,
-                withCredentials: this.configuration.withCredentials,
-                headers: headers,
-                observe: observe,
-                reportProgress: reportProgress
-            }
-        )
-    }
-
-    /**
-     * Set university student info for a user
-     * Set university student info about any user by its id, only for admins
-     * @param body
-     * @param id Id of the user
-     * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
-     * @param reportProgress flag to report request and response progress.
-     */
-    userIdUniversityPatch( body: StudentInfoUpdate, id: number, observe?: 'body', reportProgress?: boolean ): Observable<any>;
-    userIdUniversityPatch( body: StudentInfoUpdate, id: number, observe?: 'response', reportProgress?: boolean ): Observable<HttpResponse<any>>;
-    userIdUniversityPatch( body: StudentInfoUpdate, id: number, observe?: 'events', reportProgress?: boolean ): Observable<HttpEvent<any>>;
-    userIdUniversityPatch( body: StudentInfoUpdate, id: number, observe: any = 'body', reportProgress: boolean = false ): Observable<any>
-    {
-
-        if ( body === null || body === undefined )
-        {
-            throw new Error( 'Required parameter body was null or undefined when calling userIdUniversityPatch.' )
-        }
-
-        if ( id === null || id === undefined )
-        {
-            throw new Error( 'Required parameter id was null or undefined when calling userIdUniversityPatch.' )
-        }
-
-        let queryParameters = new HttpParams( { encoder: new CustomHttpUrlEncodingCodec() } )
-
-        let headers = this.defaultHeaders
-
-        // authentication (CSRFAcessToken) required
-        if ( this.configuration.apiKeys && this.configuration.apiKeys[ "X-CSRF-TOKEN" ] )
-        {
-            headers = headers.set( 'X-CSRF-TOKEN', this.configuration.apiKeys[ "X-CSRF-TOKEN" ] )
-        }
-
-        // authentication (JWTAcessToken) required
-        if ( this.configuration.apiKeys && this.configuration.apiKeys[ "access_token_cookie" ] )
-        {
-            queryParameters = queryParameters.set( 'access_token_cookie', this.configuration.apiKeys[ "access_token_cookie" ] )
-        }
-
-        // to determine the Accept header
-        let httpHeaderAccepts: string[] = [
-            'application/json'
-        ]
-        const httpHeaderAcceptSelected: string | undefined = this.configuration.selectHeaderAccept( httpHeaderAccepts )
-        if ( httpHeaderAcceptSelected != undefined )
-        {
-            headers = headers.set( 'Accept', httpHeaderAcceptSelected )
-        }
-
-        // to determine the Content-Type header
-        const consumes: string[] = [
-            'application/json'
-        ]
-        const httpContentTypeSelected: string | undefined = this.configuration.selectHeaderContentType( consumes )
-        if ( httpContentTypeSelected != undefined )
-        {
-            headers = headers.set( 'Content-Type', httpContentTypeSelected )
-        }
-
-        return this.httpClient.request<any>( 'patch', `${ this.basePath }/user/${ encodeURIComponent( String( id ) ) }/university`,
-            {
-                body: body,
                 params: queryParameters,
                 withCredentials: this.configuration.withCredentials,
                 headers: headers,
@@ -1521,9 +814,9 @@ export class AuthService implements IAuthService
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
      * @param reportProgress flag to report request and response progress.
      */
-    userSelfGet( observe?: 'body', reportProgress?: boolean ): Observable<CommonUserInfo>;
-    userSelfGet( observe?: 'response', reportProgress?: boolean ): Observable<HttpResponse<CommonUserInfo>>;
-    userSelfGet( observe?: 'events', reportProgress?: boolean ): Observable<HttpEvent<CommonUserInfo>>;
+    userSelfGet( observe?: 'body', reportProgress?: boolean ): Observable<ResponseUserSelf>;
+    userSelfGet( observe?: 'response', reportProgress?: boolean ): Observable<HttpResponse<ResponseUserSelf>>;
+    userSelfGet( observe?: 'events', reportProgress?: boolean ): Observable<HttpEvent<ResponseUserSelf>>;
     userSelfGet( observe: any = 'body', reportProgress: boolean = false ): Observable<any>
     {
 
@@ -1550,7 +843,7 @@ export class AuthService implements IAuthService
         // to determine the Content-Type header
         const consumes: string[] = []
 
-        return this.httpClient.request<CommonUserInfo>( 'get', `${ this.basePath }/user/self`,
+        return this.httpClient.request<ResponseUserSelf>( 'get', `${ this.basePath }/user/self`,
             {
                 params: queryParameters,
                 withCredentials: this.configuration.withCredentials,
@@ -1567,9 +860,9 @@ export class AuthService implements IAuthService
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
      * @param reportProgress flag to report request and response progress.
      */
-    userSelfGroupsGet( observe?: 'body', reportProgress?: boolean ): Observable<GroupList>;
-    userSelfGroupsGet( observe?: 'response', reportProgress?: boolean ): Observable<HttpResponse<GroupList>>;
-    userSelfGroupsGet( observe?: 'events', reportProgress?: boolean ): Observable<HttpEvent<GroupList>>;
+    userSelfGroupsGet( observe?: 'body', reportProgress?: boolean ): Observable<ResponseUserSelfGroup>;
+    userSelfGroupsGet( observe?: 'response', reportProgress?: boolean ): Observable<HttpResponse<ResponseUserSelfGroup>>;
+    userSelfGroupsGet( observe?: 'events', reportProgress?: boolean ): Observable<HttpEvent<ResponseUserSelfGroup>>;
     userSelfGroupsGet( observe: any = 'body', reportProgress: boolean = false ): Observable<any>
     {
 
@@ -1596,7 +889,7 @@ export class AuthService implements IAuthService
         // to determine the Content-Type header
         const consumes: string[] = []
 
-        return this.httpClient.request<GroupList>( 'get', `${ this.basePath }/user/self/groups`,
+        return this.httpClient.request<ResponseUserSelfGroup>( 'get', `${ this.basePath }/user/self/groups`,
             {
                 params: queryParameters,
                 withCredentials: this.configuration.withCredentials,
@@ -1614,10 +907,10 @@ export class AuthService implements IAuthService
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
      * @param reportProgress flag to report request and response progress.
      */
-    userSelfPasswordPost( body: ChangePassword, observe?: 'body', reportProgress?: boolean ): Observable<any>;
-    userSelfPasswordPost( body: ChangePassword, observe?: 'response', reportProgress?: boolean ): Observable<HttpResponse<any>>;
-    userSelfPasswordPost( body: ChangePassword, observe?: 'events', reportProgress?: boolean ): Observable<HttpEvent<any>>;
-    userSelfPasswordPost( body: ChangePassword, observe: any = 'body', reportProgress: boolean = false ): Observable<any>
+    userSelfPasswordPost( body: RequestPasswordSelf, observe?: 'body', reportProgress?: boolean ): Observable<any>;
+    userSelfPasswordPost( body: RequestPasswordSelf, observe?: 'response', reportProgress?: boolean ): Observable<HttpResponse<any>>;
+    userSelfPasswordPost( body: RequestPasswordSelf, observe?: 'events', reportProgress?: boolean ): Observable<HttpEvent<any>>;
+    userSelfPasswordPost( body: RequestPasswordSelf, observe: any = 'body', reportProgress: boolean = false ): Observable<any>
     {
 
         if ( body === null || body === undefined )
@@ -1642,7 +935,9 @@ export class AuthService implements IAuthService
         }
 
         // to determine the Accept header
-        let httpHeaderAccepts: string[] = []
+        let httpHeaderAccepts: string[] = [
+            'application/json'
+        ]
         const httpHeaderAcceptSelected: string | undefined = this.configuration.selectHeaderAccept( httpHeaderAccepts )
         if ( httpHeaderAcceptSelected != undefined )
         {
@@ -1677,9 +972,9 @@ export class AuthService implements IAuthService
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
      * @param reportProgress flag to report request and response progress.
      */
-    userSelfPersonalGet( observe?: 'body', reportProgress?: boolean ): Observable<PersonalInfo>;
-    userSelfPersonalGet( observe?: 'response', reportProgress?: boolean ): Observable<HttpResponse<PersonalInfo>>;
-    userSelfPersonalGet( observe?: 'events', reportProgress?: boolean ): Observable<HttpEvent<PersonalInfo>>;
+    userSelfPersonalGet( observe?: 'body', reportProgress?: boolean ): Observable<ResponsePersonalSelf>;
+    userSelfPersonalGet( observe?: 'response', reportProgress?: boolean ): Observable<HttpResponse<ResponsePersonalSelf>>;
+    userSelfPersonalGet( observe?: 'events', reportProgress?: boolean ): Observable<HttpEvent<ResponsePersonalSelf>>;
     userSelfPersonalGet( observe: any = 'body', reportProgress: boolean = false ): Observable<any>
     {
 
@@ -1706,7 +1001,7 @@ export class AuthService implements IAuthService
         // to determine the Content-Type header
         const consumes: string[] = []
 
-        return this.httpClient.request<PersonalInfo>( 'get', `${ this.basePath }/user/self/personal`,
+        return this.httpClient.request<ResponsePersonalSelf>( 'get', `${ this.basePath }/user/self/personal`,
             {
                 params: queryParameters,
                 withCredentials: this.configuration.withCredentials,
@@ -1723,9 +1018,9 @@ export class AuthService implements IAuthService
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
      * @param reportProgress flag to report request and response progress.
      */
-    userSelfUniversityGet( observe?: 'body', reportProgress?: boolean ): Observable<StudentInfo>;
-    userSelfUniversityGet( observe?: 'response', reportProgress?: boolean ): Observable<HttpResponse<StudentInfo>>;
-    userSelfUniversityGet( observe?: 'events', reportProgress?: boolean ): Observable<HttpEvent<StudentInfo>>;
+    userSelfUniversityGet( observe?: 'body', reportProgress?: boolean ): Observable<ResponseUniversitySelf>;
+    userSelfUniversityGet( observe?: 'response', reportProgress?: boolean ): Observable<HttpResponse<ResponseUniversitySelf>>;
+    userSelfUniversityGet( observe?: 'events', reportProgress?: boolean ): Observable<HttpEvent<ResponseUniversitySelf>>;
     userSelfUniversityGet( observe: any = 'body', reportProgress: boolean = false ): Observable<any>
     {
 
@@ -1752,8 +1047,720 @@ export class AuthService implements IAuthService
         // to determine the Content-Type header
         const consumes: string[] = []
 
-        return this.httpClient.request<StudentInfo>( 'get', `${ this.basePath }/user/self/university`,
+        return this.httpClient.request<ResponseUniversitySelf>( 'get', `${ this.basePath }/user/self/university`,
             {
+                params: queryParameters,
+                withCredentials: this.configuration.withCredentials,
+                headers: headers,
+                observe: observe,
+                reportProgress: reportProgress
+            }
+        )
+    }
+
+    /**
+     * Get common info for a different user
+     * Get info about any user by its id, only for admins and creators
+     * @param userId Id of the user
+     * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
+     * @param reportProgress flag to report request and response progress.
+     */
+    userUserIdGet( userId: number, observe?: 'body', reportProgress?: boolean ): Observable<ResponseUserAdmin>;
+    userUserIdGet( userId: number, observe?: 'response', reportProgress?: boolean ): Observable<HttpResponse<ResponseUserAdmin>>;
+    userUserIdGet( userId: number, observe?: 'events', reportProgress?: boolean ): Observable<HttpEvent<ResponseUserAdmin>>;
+    userUserIdGet( userId: number, observe: any = 'body', reportProgress: boolean = false ): Observable<any>
+    {
+
+        if ( userId === null || userId === undefined )
+        {
+            throw new Error( 'Required parameter userId was null or undefined when calling userUserIdGet.' )
+        }
+
+        let queryParameters = new HttpParams( { encoder: new CustomHttpUrlEncodingCodec() } )
+
+        let headers = this.defaultHeaders
+
+        // authentication (JWTAcessToken) required
+        if ( this.configuration.apiKeys && this.configuration.apiKeys[ "access_token_cookie" ] )
+        {
+            queryParameters = queryParameters.set( 'access_token_cookie', this.configuration.apiKeys[ "access_token_cookie" ] )
+        }
+
+        // to determine the Accept header
+        let httpHeaderAccepts: string[] = [
+            'application/json'
+        ]
+        const httpHeaderAcceptSelected: string | undefined = this.configuration.selectHeaderAccept( httpHeaderAccepts )
+        if ( httpHeaderAcceptSelected != undefined )
+        {
+            headers = headers.set( 'Accept', httpHeaderAcceptSelected )
+        }
+
+        // to determine the Content-Type header
+        const consumes: string[] = []
+
+        return this.httpClient.request<ResponseUserAdmin>( 'get', `${ this.basePath }/user/${ encodeURIComponent( String( userId ) ) }`,
+            {
+                params: queryParameters,
+                withCredentials: this.configuration.withCredentials,
+                headers: headers,
+                observe: observe,
+                reportProgress: reportProgress
+            }
+        )
+    }
+
+    /**
+     * Assign a user to a group
+     * Assign a user to a group, only for admins and creators
+     * @param body
+     * @param userId Id of the user
+     * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
+     * @param reportProgress flag to report request and response progress.
+     */
+    userUserIdGroupsAddPost( body: RequestUserGroupsAdd, userId: number, observe?: 'body', reportProgress?: boolean ): Observable<any>;
+    userUserIdGroupsAddPost( body: RequestUserGroupsAdd, userId: number, observe?: 'response', reportProgress?: boolean ): Observable<HttpResponse<any>>;
+    userUserIdGroupsAddPost( body: RequestUserGroupsAdd, userId: number, observe?: 'events', reportProgress?: boolean ): Observable<HttpEvent<any>>;
+    userUserIdGroupsAddPost( body: RequestUserGroupsAdd, userId: number, observe: any = 'body', reportProgress: boolean = false ): Observable<any>
+    {
+
+        if ( body === null || body === undefined )
+        {
+            throw new Error( 'Required parameter body was null or undefined when calling userUserIdGroupsAddPost.' )
+        }
+
+        if ( userId === null || userId === undefined )
+        {
+            throw new Error( 'Required parameter userId was null or undefined when calling userUserIdGroupsAddPost.' )
+        }
+
+        let queryParameters = new HttpParams( { encoder: new CustomHttpUrlEncodingCodec() } )
+
+        let headers = this.defaultHeaders
+
+        // authentication (CSRFAcessToken) required
+        if ( this.configuration.apiKeys && this.configuration.apiKeys[ "X-CSRF-TOKEN" ] )
+        {
+            headers = headers.set( 'X-CSRF-TOKEN', this.configuration.apiKeys[ "X-CSRF-TOKEN" ] )
+        }
+
+        // authentication (JWTAcessToken) required
+        if ( this.configuration.apiKeys && this.configuration.apiKeys[ "access_token_cookie" ] )
+        {
+            queryParameters = queryParameters.set( 'access_token_cookie', this.configuration.apiKeys[ "access_token_cookie" ] )
+        }
+
+        // to determine the Accept header
+        let httpHeaderAccepts: string[] = [
+            'application/json'
+        ]
+        const httpHeaderAcceptSelected: string | undefined = this.configuration.selectHeaderAccept( httpHeaderAccepts )
+        if ( httpHeaderAcceptSelected != undefined )
+        {
+            headers = headers.set( 'Accept', httpHeaderAcceptSelected )
+        }
+
+        // to determine the Content-Type header
+        const consumes: string[] = [
+            'application/json'
+        ]
+        const httpContentTypeSelected: string | undefined = this.configuration.selectHeaderContentType( consumes )
+        if ( httpContentTypeSelected != undefined )
+        {
+            headers = headers.set( 'Content-Type', httpContentTypeSelected )
+        }
+
+        return this.httpClient.request<any>( 'post', `${ this.basePath }/user/${ encodeURIComponent( String( userId ) ) }/groups/add`,
+            {
+                body: body,
+                params: queryParameters,
+                withCredentials: this.configuration.withCredentials,
+                headers: headers,
+                observe: observe,
+                reportProgress: reportProgress
+            }
+        )
+    }
+
+    /**
+     * Get groups for a different user
+     * Get group list for any user by its id, only for admins and creators
+     * @param userId Id of the user
+     * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
+     * @param reportProgress flag to report request and response progress.
+     */
+    userUserIdGroupsGet( userId: number, observe?: 'body', reportProgress?: boolean ): Observable<ResponseUserAdminGroup>;
+    userUserIdGroupsGet( userId: number, observe?: 'response', reportProgress?: boolean ): Observable<HttpResponse<ResponseUserAdminGroup>>;
+    userUserIdGroupsGet( userId: number, observe?: 'events', reportProgress?: boolean ): Observable<HttpEvent<ResponseUserAdminGroup>>;
+    userUserIdGroupsGet( userId: number, observe: any = 'body', reportProgress: boolean = false ): Observable<any>
+    {
+
+        if ( userId === null || userId === undefined )
+        {
+            throw new Error( 'Required parameter userId was null or undefined when calling userUserIdGroupsGet.' )
+        }
+
+        let queryParameters = new HttpParams( { encoder: new CustomHttpUrlEncodingCodec() } )
+
+        let headers = this.defaultHeaders
+
+        // authentication (JWTAcessToken) required
+        if ( this.configuration.apiKeys && this.configuration.apiKeys[ "access_token_cookie" ] )
+        {
+            queryParameters = queryParameters.set( 'access_token_cookie', this.configuration.apiKeys[ "access_token_cookie" ] )
+        }
+
+        // to determine the Accept header
+        let httpHeaderAccepts: string[] = [
+            'application/json'
+        ]
+        const httpHeaderAcceptSelected: string | undefined = this.configuration.selectHeaderAccept( httpHeaderAccepts )
+        if ( httpHeaderAcceptSelected != undefined )
+        {
+            headers = headers.set( 'Accept', httpHeaderAcceptSelected )
+        }
+
+        // to determine the Content-Type header
+        const consumes: string[] = []
+
+        return this.httpClient.request<ResponseUserAdminGroup>( 'get', `${ this.basePath }/user/${ encodeURIComponent( String( userId ) ) }/groups`,
+            {
+                params: queryParameters,
+                withCredentials: this.configuration.withCredentials,
+                headers: headers,
+                observe: observe,
+                reportProgress: reportProgress
+            }
+        )
+    }
+
+    /**
+     * Remove a user from a group
+     * Remove a user from a group, only for admins and creators
+     * @param body
+     * @param userId Id of the user
+     * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
+     * @param reportProgress flag to report request and response progress.
+     */
+    userUserIdGroupsRemovePost( body: RequestUserGroupsRemove, userId: number, observe?: 'body', reportProgress?: boolean ): Observable<any>;
+    userUserIdGroupsRemovePost( body: RequestUserGroupsRemove, userId: number, observe?: 'response', reportProgress?: boolean ): Observable<HttpResponse<any>>;
+    userUserIdGroupsRemovePost( body: RequestUserGroupsRemove, userId: number, observe?: 'events', reportProgress?: boolean ): Observable<HttpEvent<any>>;
+    userUserIdGroupsRemovePost( body: RequestUserGroupsRemove, userId: number, observe: any = 'body', reportProgress: boolean = false ): Observable<any>
+    {
+
+        if ( body === null || body === undefined )
+        {
+            throw new Error( 'Required parameter body was null or undefined when calling userUserIdGroupsRemovePost.' )
+        }
+
+        if ( userId === null || userId === undefined )
+        {
+            throw new Error( 'Required parameter userId was null or undefined when calling userUserIdGroupsRemovePost.' )
+        }
+
+        let queryParameters = new HttpParams( { encoder: new CustomHttpUrlEncodingCodec() } )
+
+        let headers = this.defaultHeaders
+
+        // authentication (CSRFAcessToken) required
+        if ( this.configuration.apiKeys && this.configuration.apiKeys[ "X-CSRF-TOKEN" ] )
+        {
+            headers = headers.set( 'X-CSRF-TOKEN', this.configuration.apiKeys[ "X-CSRF-TOKEN" ] )
+        }
+
+        // authentication (JWTAcessToken) required
+        if ( this.configuration.apiKeys && this.configuration.apiKeys[ "access_token_cookie" ] )
+        {
+            queryParameters = queryParameters.set( 'access_token_cookie', this.configuration.apiKeys[ "access_token_cookie" ] )
+        }
+
+        // to determine the Accept header
+        let httpHeaderAccepts: string[] = [
+            'application/json'
+        ]
+        const httpHeaderAcceptSelected: string | undefined = this.configuration.selectHeaderAccept( httpHeaderAccepts )
+        if ( httpHeaderAcceptSelected != undefined )
+        {
+            headers = headers.set( 'Accept', httpHeaderAcceptSelected )
+        }
+
+        // to determine the Content-Type header
+        const consumes: string[] = [
+            'application/json'
+        ]
+        const httpContentTypeSelected: string | undefined = this.configuration.selectHeaderContentType( consumes )
+        if ( httpContentTypeSelected != undefined )
+        {
+            headers = headers.set( 'Content-Type', httpContentTypeSelected )
+        }
+
+        return this.httpClient.request<any>( 'post', `${ this.basePath }/user/${ encodeURIComponent( String( userId ) ) }/groups/remove`,
+            {
+                body: body,
+                params: queryParameters,
+                withCredentials: this.configuration.withCredentials,
+                headers: headers,
+                observe: observe,
+                reportProgress: reportProgress
+            }
+        )
+    }
+
+    /**
+     * Change password for another user
+     * Change password for another user, admins only
+     * @param body
+     * @param userId Id of the user
+     * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
+     * @param reportProgress flag to report request and response progress.
+     */
+    userUserIdPasswordPost( body: RequestPasswordAdmin, userId: number, observe?: 'body', reportProgress?: boolean ): Observable<any>;
+    userUserIdPasswordPost( body: RequestPasswordAdmin, userId: number, observe?: 'response', reportProgress?: boolean ): Observable<HttpResponse<any>>;
+    userUserIdPasswordPost( body: RequestPasswordAdmin, userId: number, observe?: 'events', reportProgress?: boolean ): Observable<HttpEvent<any>>;
+    userUserIdPasswordPost( body: RequestPasswordAdmin, userId: number, observe: any = 'body', reportProgress: boolean = false ): Observable<any>
+    {
+
+        if ( body === null || body === undefined )
+        {
+            throw new Error( 'Required parameter body was null or undefined when calling userUserIdPasswordPost.' )
+        }
+
+        if ( userId === null || userId === undefined )
+        {
+            throw new Error( 'Required parameter userId was null or undefined when calling userUserIdPasswordPost.' )
+        }
+
+        let queryParameters = new HttpParams( { encoder: new CustomHttpUrlEncodingCodec() } )
+
+        let headers = this.defaultHeaders
+
+        // authentication (CSRFAcessToken) required
+        if ( this.configuration.apiKeys && this.configuration.apiKeys[ "X-CSRF-TOKEN" ] )
+        {
+            headers = headers.set( 'X-CSRF-TOKEN', this.configuration.apiKeys[ "X-CSRF-TOKEN" ] )
+        }
+
+        // authentication (JWTAcessToken) required
+        if ( this.configuration.apiKeys && this.configuration.apiKeys[ "access_token_cookie" ] )
+        {
+            queryParameters = queryParameters.set( 'access_token_cookie', this.configuration.apiKeys[ "access_token_cookie" ] )
+        }
+
+        // to determine the Accept header
+        let httpHeaderAccepts: string[] = [
+            'application/json'
+        ]
+        const httpHeaderAcceptSelected: string | undefined = this.configuration.selectHeaderAccept( httpHeaderAccepts )
+        if ( httpHeaderAcceptSelected != undefined )
+        {
+            headers = headers.set( 'Accept', httpHeaderAcceptSelected )
+        }
+
+        // to determine the Content-Type header
+        const consumes: string[] = [
+            'application/json'
+        ]
+        const httpContentTypeSelected: string | undefined = this.configuration.selectHeaderContentType( consumes )
+        if ( httpContentTypeSelected != undefined )
+        {
+            headers = headers.set( 'Content-Type', httpContentTypeSelected )
+        }
+
+        return this.httpClient.request<any>( 'post', `${ this.basePath }/user/${ encodeURIComponent( String( userId ) ) }/password`,
+            {
+                body: body,
+                params: queryParameters,
+                withCredentials: this.configuration.withCredentials,
+                headers: headers,
+                observe: observe,
+                reportProgress: reportProgress
+            }
+        )
+    }
+
+    /**
+     * Get personal info for a different user
+     * Get personal info about any user by its id, only for admins and creators
+     * @param userId Id of the user
+     * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
+     * @param reportProgress flag to report request and response progress.
+     */
+    userUserIdPersonalGet( userId: number, observe?: 'body', reportProgress?: boolean ): Observable<ResponsePersonalAdminGet>;
+    userUserIdPersonalGet( userId: number, observe?: 'response', reportProgress?: boolean ): Observable<HttpResponse<ResponsePersonalAdminGet>>;
+    userUserIdPersonalGet( userId: number, observe?: 'events', reportProgress?: boolean ): Observable<HttpEvent<ResponsePersonalAdminGet>>;
+    userUserIdPersonalGet( userId: number, observe: any = 'body', reportProgress: boolean = false ): Observable<any>
+    {
+
+        if ( userId === null || userId === undefined )
+        {
+            throw new Error( 'Required parameter userId was null or undefined when calling userUserIdPersonalGet.' )
+        }
+
+        let queryParameters = new HttpParams( { encoder: new CustomHttpUrlEncodingCodec() } )
+
+        let headers = this.defaultHeaders
+
+        // authentication (JWTAcessToken) required
+        if ( this.configuration.apiKeys && this.configuration.apiKeys[ "access_token_cookie" ] )
+        {
+            queryParameters = queryParameters.set( 'access_token_cookie', this.configuration.apiKeys[ "access_token_cookie" ] )
+        }
+
+        // to determine the Accept header
+        let httpHeaderAccepts: string[] = [
+            'application/json'
+        ]
+        const httpHeaderAcceptSelected: string | undefined = this.configuration.selectHeaderAccept( httpHeaderAccepts )
+        if ( httpHeaderAcceptSelected != undefined )
+        {
+            headers = headers.set( 'Accept', httpHeaderAcceptSelected )
+        }
+
+        // to determine the Content-Type header
+        const consumes: string[] = []
+
+        return this.httpClient.request<ResponsePersonalAdminGet>( 'get', `${ this.basePath }/user/${ encodeURIComponent( String( userId ) ) }/personal`,
+            {
+                params: queryParameters,
+                withCredentials: this.configuration.withCredentials,
+                headers: headers,
+                observe: observe,
+                reportProgress: reportProgress
+            }
+        )
+    }
+
+    /**
+     * Set personal info for a user
+     * Set personal info about any user by its id, only for admins
+     * @param body
+     * @param userId Id of the user
+     * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
+     * @param reportProgress flag to report request and response progress.
+     */
+    userUserIdPersonalPatch( body: TypePersonalInfo, userId: number, observe?: 'body', reportProgress?: boolean ): Observable<any>;
+    userUserIdPersonalPatch( body: TypePersonalInfo, userId: number, observe?: 'response', reportProgress?: boolean ): Observable<HttpResponse<any>>;
+    userUserIdPersonalPatch( body: TypePersonalInfo, userId: number, observe?: 'events', reportProgress?: boolean ): Observable<HttpEvent<any>>;
+    userUserIdPersonalPatch( body: TypePersonalInfo, userId: number, observe: any = 'body', reportProgress: boolean = false ): Observable<any>
+    {
+
+        if ( body === null || body === undefined )
+        {
+            throw new Error( 'Required parameter body was null or undefined when calling userUserIdPersonalPatch.' )
+        }
+
+        if ( userId === null || userId === undefined )
+        {
+            throw new Error( 'Required parameter userId was null or undefined when calling userUserIdPersonalPatch.' )
+        }
+
+        let queryParameters = new HttpParams( { encoder: new CustomHttpUrlEncodingCodec() } )
+
+        let headers = this.defaultHeaders
+
+        // authentication (CSRFAcessToken) required
+        if ( this.configuration.apiKeys && this.configuration.apiKeys[ "X-CSRF-TOKEN" ] )
+        {
+            headers = headers.set( 'X-CSRF-TOKEN', this.configuration.apiKeys[ "X-CSRF-TOKEN" ] )
+        }
+
+        // authentication (JWTAcessToken) required
+        if ( this.configuration.apiKeys && this.configuration.apiKeys[ "access_token_cookie" ] )
+        {
+            queryParameters = queryParameters.set( 'access_token_cookie', this.configuration.apiKeys[ "access_token_cookie" ] )
+        }
+
+        // to determine the Accept header
+        let httpHeaderAccepts: string[] = [
+            'application/json'
+        ]
+        const httpHeaderAcceptSelected: string | undefined = this.configuration.selectHeaderAccept( httpHeaderAccepts )
+        if ( httpHeaderAcceptSelected != undefined )
+        {
+            headers = headers.set( 'Accept', httpHeaderAcceptSelected )
+        }
+
+        // to determine the Content-Type header
+        const consumes: string[] = [
+            'application/json'
+        ]
+        const httpContentTypeSelected: string | undefined = this.configuration.selectHeaderContentType( consumes )
+        if ( httpContentTypeSelected != undefined )
+        {
+            headers = headers.set( 'Content-Type', httpContentTypeSelected )
+        }
+
+        return this.httpClient.request<any>( 'patch', `${ this.basePath }/user/${ encodeURIComponent( String( userId ) ) }/personal`,
+            {
+                body: body,
+                params: queryParameters,
+                withCredentials: this.configuration.withCredentials,
+                headers: headers,
+                observe: observe,
+                reportProgress: reportProgress
+            }
+        )
+    }
+
+    /**
+     * Set the role of any user
+     * Set the role of another user, only for admins
+     * @param body
+     * @param userId Id of the user
+     * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
+     * @param reportProgress flag to report request and response progress.
+     */
+    userUserIdRolePut( body: RequestUserRole, userId: number, observe?: 'body', reportProgress?: boolean ): Observable<any>;
+    userUserIdRolePut( body: RequestUserRole, userId: number, observe?: 'response', reportProgress?: boolean ): Observable<HttpResponse<any>>;
+    userUserIdRolePut( body: RequestUserRole, userId: number, observe?: 'events', reportProgress?: boolean ): Observable<HttpEvent<any>>;
+    userUserIdRolePut( body: RequestUserRole, userId: number, observe: any = 'body', reportProgress: boolean = false ): Observable<any>
+    {
+
+        if ( body === null || body === undefined )
+        {
+            throw new Error( 'Required parameter body was null or undefined when calling userUserIdRolePut.' )
+        }
+
+        if ( userId === null || userId === undefined )
+        {
+            throw new Error( 'Required parameter userId was null or undefined when calling userUserIdRolePut.' )
+        }
+
+        let queryParameters = new HttpParams( { encoder: new CustomHttpUrlEncodingCodec() } )
+
+        let headers = this.defaultHeaders
+
+        // authentication (CSRFAcessToken) required
+        if ( this.configuration.apiKeys && this.configuration.apiKeys[ "X-CSRF-TOKEN" ] )
+        {
+            headers = headers.set( 'X-CSRF-TOKEN', this.configuration.apiKeys[ "X-CSRF-TOKEN" ] )
+        }
+
+        // authentication (JWTAcessToken) required
+        if ( this.configuration.apiKeys && this.configuration.apiKeys[ "access_token_cookie" ] )
+        {
+            queryParameters = queryParameters.set( 'access_token_cookie', this.configuration.apiKeys[ "access_token_cookie" ] )
+        }
+
+        // to determine the Accept header
+        let httpHeaderAccepts: string[] = [
+            'application/json'
+        ]
+        const httpHeaderAcceptSelected: string | undefined = this.configuration.selectHeaderAccept( httpHeaderAccepts )
+        if ( httpHeaderAcceptSelected != undefined )
+        {
+            headers = headers.set( 'Accept', httpHeaderAcceptSelected )
+        }
+
+        // to determine the Content-Type header
+        const consumes: string[] = [
+            'application/json'
+        ]
+        const httpContentTypeSelected: string | undefined = this.configuration.selectHeaderContentType( consumes )
+        if ( httpContentTypeSelected != undefined )
+        {
+            headers = headers.set( 'Content-Type', httpContentTypeSelected )
+        }
+
+        return this.httpClient.request<any>( 'put', `${ this.basePath }/user/${ encodeURIComponent( String( userId ) ) }/role`,
+            {
+                body: body,
+                params: queryParameters,
+                withCredentials: this.configuration.withCredentials,
+                headers: headers,
+                observe: observe,
+                reportProgress: reportProgress
+            }
+        )
+    }
+
+    /**
+     * Set the type of any user
+     * Set the type of another user, only for admins
+     * @param body
+     * @param userId Id of the user
+     * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
+     * @param reportProgress flag to report request and response progress.
+     */
+    userUserIdTypePut( body: RequestUserType, userId: number, observe?: 'body', reportProgress?: boolean ): Observable<any>;
+    userUserIdTypePut( body: RequestUserType, userId: number, observe?: 'response', reportProgress?: boolean ): Observable<HttpResponse<any>>;
+    userUserIdTypePut( body: RequestUserType, userId: number, observe?: 'events', reportProgress?: boolean ): Observable<HttpEvent<any>>;
+    userUserIdTypePut( body: RequestUserType, userId: number, observe: any = 'body', reportProgress: boolean = false ): Observable<any>
+    {
+
+        if ( body === null || body === undefined )
+        {
+            throw new Error( 'Required parameter body was null or undefined when calling userUserIdTypePut.' )
+        }
+
+        if ( userId === null || userId === undefined )
+        {
+            throw new Error( 'Required parameter userId was null or undefined when calling userUserIdTypePut.' )
+        }
+
+        let queryParameters = new HttpParams( { encoder: new CustomHttpUrlEncodingCodec() } )
+
+        let headers = this.defaultHeaders
+
+        // authentication (CSRFAcessToken) required
+        if ( this.configuration.apiKeys && this.configuration.apiKeys[ "X-CSRF-TOKEN" ] )
+        {
+            headers = headers.set( 'X-CSRF-TOKEN', this.configuration.apiKeys[ "X-CSRF-TOKEN" ] )
+        }
+
+        // authentication (JWTAcessToken) required
+        if ( this.configuration.apiKeys && this.configuration.apiKeys[ "access_token_cookie" ] )
+        {
+            queryParameters = queryParameters.set( 'access_token_cookie', this.configuration.apiKeys[ "access_token_cookie" ] )
+        }
+
+        // to determine the Accept header
+        let httpHeaderAccepts: string[] = [
+            'application/json'
+        ]
+        const httpHeaderAcceptSelected: string | undefined = this.configuration.selectHeaderAccept( httpHeaderAccepts )
+        if ( httpHeaderAcceptSelected != undefined )
+        {
+            headers = headers.set( 'Accept', httpHeaderAcceptSelected )
+        }
+
+        // to determine the Content-Type header
+        const consumes: string[] = [
+            'application/json'
+        ]
+        const httpContentTypeSelected: string | undefined = this.configuration.selectHeaderContentType( consumes )
+        if ( httpContentTypeSelected != undefined )
+        {
+            headers = headers.set( 'Content-Type', httpContentTypeSelected )
+        }
+
+        return this.httpClient.request<any>( 'put', `${ this.basePath }/user/${ encodeURIComponent( String( userId ) ) }/type`,
+            {
+                body: body,
+                params: queryParameters,
+                withCredentials: this.configuration.withCredentials,
+                headers: headers,
+                observe: observe,
+                reportProgress: reportProgress
+            }
+        )
+    }
+
+    /**
+     * Get university student info for a different user
+     * Get university student info about any user by its id, only for admins and creators
+     * @param userId Id of the user
+     * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
+     * @param reportProgress flag to report request and response progress.
+     */
+    userUserIdUniversityGet( userId: number, observe?: 'body', reportProgress?: boolean ): Observable<ResponseUniversityAdminGet>;
+    userUserIdUniversityGet( userId: number, observe?: 'response', reportProgress?: boolean ): Observable<HttpResponse<ResponseUniversityAdminGet>>;
+    userUserIdUniversityGet( userId: number, observe?: 'events', reportProgress?: boolean ): Observable<HttpEvent<ResponseUniversityAdminGet>>;
+    userUserIdUniversityGet( userId: number, observe: any = 'body', reportProgress: boolean = false ): Observable<any>
+    {
+
+        if ( userId === null || userId === undefined )
+        {
+            throw new Error( 'Required parameter userId was null or undefined when calling userUserIdUniversityGet.' )
+        }
+
+        let queryParameters = new HttpParams( { encoder: new CustomHttpUrlEncodingCodec() } )
+
+        let headers = this.defaultHeaders
+
+        // authentication (JWTAcessToken) required
+        if ( this.configuration.apiKeys && this.configuration.apiKeys[ "access_token_cookie" ] )
+        {
+            queryParameters = queryParameters.set( 'access_token_cookie', this.configuration.apiKeys[ "access_token_cookie" ] )
+        }
+
+        // to determine the Accept header
+        let httpHeaderAccepts: string[] = [
+            'application/json'
+        ]
+        const httpHeaderAcceptSelected: string | undefined = this.configuration.selectHeaderAccept( httpHeaderAccepts )
+        if ( httpHeaderAcceptSelected != undefined )
+        {
+            headers = headers.set( 'Accept', httpHeaderAcceptSelected )
+        }
+
+        // to determine the Content-Type header
+        const consumes: string[] = []
+
+        return this.httpClient.request<ResponseUniversityAdminGet>( 'get', `${ this.basePath }/user/${ encodeURIComponent( String( userId ) ) }/university`,
+            {
+                params: queryParameters,
+                withCredentials: this.configuration.withCredentials,
+                headers: headers,
+                observe: observe,
+                reportProgress: reportProgress
+            }
+        )
+    }
+
+    /**
+     * Set university student info for a user
+     * Set university student info about any user by its id, only for admins
+     * @param body
+     * @param userId Id of the user
+     * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
+     * @param reportProgress flag to report request and response progress.
+     */
+    userUserIdUniversityPatch( body: TypeStudentInfo, userId: number, observe?: 'body', reportProgress?: boolean ): Observable<any>;
+    userUserIdUniversityPatch( body: TypeStudentInfo, userId: number, observe?: 'response', reportProgress?: boolean ): Observable<HttpResponse<any>>;
+    userUserIdUniversityPatch( body: TypeStudentInfo, userId: number, observe?: 'events', reportProgress?: boolean ): Observable<HttpEvent<any>>;
+    userUserIdUniversityPatch( body: TypeStudentInfo, userId: number, observe: any = 'body', reportProgress: boolean = false ): Observable<any>
+    {
+
+        if ( body === null || body === undefined )
+        {
+            throw new Error( 'Required parameter body was null or undefined when calling userUserIdUniversityPatch.' )
+        }
+
+        if ( userId === null || userId === undefined )
+        {
+            throw new Error( 'Required parameter userId was null or undefined when calling userUserIdUniversityPatch.' )
+        }
+
+        let queryParameters = new HttpParams( { encoder: new CustomHttpUrlEncodingCodec() } )
+
+        let headers = this.defaultHeaders
+
+        // authentication (CSRFAcessToken) required
+        if ( this.configuration.apiKeys && this.configuration.apiKeys[ "X-CSRF-TOKEN" ] )
+        {
+            headers = headers.set( 'X-CSRF-TOKEN', this.configuration.apiKeys[ "X-CSRF-TOKEN" ] )
+        }
+
+        // authentication (JWTAcessToken) required
+        if ( this.configuration.apiKeys && this.configuration.apiKeys[ "access_token_cookie" ] )
+        {
+            queryParameters = queryParameters.set( 'access_token_cookie', this.configuration.apiKeys[ "access_token_cookie" ] )
+        }
+
+        // to determine the Accept header
+        let httpHeaderAccepts: string[] = [
+            'application/json'
+        ]
+        const httpHeaderAcceptSelected: string | undefined = this.configuration.selectHeaderAccept( httpHeaderAccepts )
+        if ( httpHeaderAcceptSelected != undefined )
+        {
+            headers = headers.set( 'Accept', httpHeaderAcceptSelected )
+        }
+
+        // to determine the Content-Type header
+        const consumes: string[] = [
+            'application/json'
+        ]
+        const httpContentTypeSelected: string | undefined = this.configuration.selectHeaderContentType( consumes )
+        if ( httpContentTypeSelected != undefined )
+        {
+            headers = headers.set( 'Content-Type', httpContentTypeSelected )
+        }
+
+        return this.httpClient.request<any>( 'patch', `${ this.basePath }/user/${ encodeURIComponent( String( userId ) ) }/university`,
+            {
+                body: body,
                 params: queryParameters,
                 withCredentials: this.configuration.withCredentials,
                 headers: headers,

@@ -1,8 +1,8 @@
 import { Component } from '@angular/core'
 import { AuthActions, AuthState } from '@/auth/store'
 import { Store } from '@ngrx/store'
+import { RequestRegistration, RequestRegistrationSchool, TypeUserType, TypeUserTypeSchool } from '@/auth/models'
 import { Agreements } from '@/auth/models/agreements'
-import { AllUserTypes, Registration, UserType } from '@/auth/models'
 
 
 @Component( {
@@ -13,12 +13,12 @@ import { AllUserTypes, Registration, UserType } from '@/auth/models'
 export class RegisterComponent
 {
     agreements: string[] = Agreements
-    registerTypes: UserType[] = AllUserTypes
+    registerTypes: TypeUserTypeSchool[] = [ TypeUserTypeSchool.PreUniversity, TypeUserTypeSchool.School, TypeUserTypeSchool.Enrollee ]
 
-    registerAttempt: Registration
+    registerAttempt: RequestRegistration // TODO switch to RequestRegistration
     isRegistered: boolean
 
-    selectedUserType: UserType | null
+    selectedUserType: TypeUserType | null
     hasRegisterNumber: boolean
     agreementAccepted: boolean
 
@@ -28,7 +28,7 @@ export class RegisterComponent
             authInfo: { email: '', password: '' },
             registerType: this.registerTypes[ 0 ],
             personalInfo: { dateOfBirth: '', firstName: '', secondName: '', middleName: '' },
-            registerConfirm: { registrationNumber: '', oneTimePassword: '' }
+            registerConfirm: { registrationNumber: '', password: '' }
         }
         this.isRegistered = false
         this.agreementAccepted = false
@@ -36,24 +36,24 @@ export class RegisterComponent
         this.hasRegisterNumber = false
     }
 
-    selectRegisterType( userType: UserType ): void
+    selectRegisterType( userType: TypeUserTypeSchool ): void
     {
         this.selectedUserType = userType
     }
 
     isAvailable(): boolean
     {
-        return this.selectedUserType !== null && this.selectedUserType == UserType.School
+        return this.selectedUserType !== null && this.selectedUserType == TypeUserTypeSchool.School
     }
 
-    isValid( registration: Registration ): boolean
+    isValid( registration: RequestRegistration ): boolean
     {
         return this.agreementAccepted
     }
 
-    register( registerUser: Registration ): void
+    register( registerUser: RequestRegistration ): void
     {
         this.isRegistered = true
-        this.store.dispatch( AuthActions.registerAttempt( { registration: registerUser } ) )
+        this.store.dispatch( AuthActions.registerAttempt( { requestRegistration: registerUser } ) )
     }
 }
