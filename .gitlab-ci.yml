@@ -19,9 +19,12 @@ stages:
   before_script:
     - npm install -g redoc-cli
   script:
-    - redoc-cli bundle -o public/user.html backend/user/api.yaml
-    - redoc-cli bundle -o public/tasks.html backend/contest/contest_data/tasks_api.yaml
-    - redoc-cli bundle -o public/students.html backend/contest/contest_data/student_responses.yaml
+    - cp backend/user/api.yaml public/user.yaml
+    - redoc-cli bundle -o public/user.html public/user.yaml
+    - cp backend/contest/contest_data/tasks_api.yaml public/tasks.yaml
+    - redoc-cli bundle -o public/tasks.html public/tasks.yaml
+    - cp backend/contest/contest_data/student_responses.yaml public/students.yaml
+    - redoc-cli bundle -o public/students.html public/students.yaml
   artifacts:
     paths:
     - public
