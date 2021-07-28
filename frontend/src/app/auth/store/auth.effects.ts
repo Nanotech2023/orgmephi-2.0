@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core'
 import { Actions, createEffect, ofType } from '@ngrx/effects'
-import { AuthServiceMock } from '@/auth/api/auth.mock.service'
+import { AuthServiceMock } from '@/auth/api/auth.service.mock'
 import { loginAttempt, loginError, loginSuccess, registerAttempt, registerSuccess } from '@/auth/store/auth.actions'
 import { catchError, concatMap, mergeMap } from 'rxjs/operators'
 import { of } from 'rxjs'

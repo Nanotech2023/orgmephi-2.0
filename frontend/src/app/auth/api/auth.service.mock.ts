@@ -3,7 +3,7 @@ import { Observable, of } from 'rxjs'
 import { Injectable } from '@angular/core'
 import { AuthState } from '@/auth/store'
 import { Store } from '@ngrx/store'
-import { IAuthService } from '@/auth/api/auth.service.int'
+import { AuthService } from '@/auth/api/auth.service'
 import {
     RequestGroupAdd,
     RequestLogin,
@@ -36,7 +36,9 @@ import {
     ResponseUserSelfGroup,
     TypeAuthCredentials,
     TypePersonalInfo,
-    TypeStudentInfo, TypeUserInfo, TypeUserRole, TypeUserType
+    TypeStudentInfo,
+    TypeUserInfo,
+    TypeUserRole
 } from '@/auth/models'
 import { pushPersonalInfo } from '@/auth/store/auth.actions'
 
@@ -44,7 +46,7 @@ import { pushPersonalInfo } from '@/auth/store/auth.actions'
 @Injectable( {
     providedIn: 'root'
 } )
-export class AuthServiceMock implements IAuthService
+export class AuthServiceMock implements AuthService
 {
     constructor( private readonly store: Store<AuthState.State> )
     {
