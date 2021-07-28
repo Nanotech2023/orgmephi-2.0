@@ -1,5 +1,6 @@
 """File with models description for contests and tasks management."""
 
+import sqlalchemy.dialects.postgresql as pg
 from contest_data.app import db
 from datetime import datetime
 import enum
@@ -9,62 +10,65 @@ import enum
 DEFAULT_VISIBILITY = False
 
 
+class User_status(db.Model):
+    __tablename__ = 'user_status'
+
+    status_id = db.Column(db.Integer, autoincrement=True, primary_key=True)
+    status = db.Column(db.Text, nullable=False)
+
+class CompositeTypeEnum(enum.Enum):
+    Composite = "Composite",
+    Simple = "Simple"
+
+CompositeTypeDict = {
+    "Composite" : CompositeTypeEnum.Composite,
+    "Simple" : CompositeTypeEnum.Simple
+}
+
+
+class OlympiadTypeEnum(enum.Enum):
+    Rosatom = "Rosatom",
+    Kurchatov = "Kurchatov"
+
+OlympiadTypeDict = {
+    "Rosatom" : OlympiadTypeEnum.Rosatom,
+    "Kurchatov" : OlympiadTypeEnum.Kurchatov
+}
+
+class OlympiadSubjectEnum(enum.Enum):
+    Math = "Math",
+    Physics = "Physics",
+    Informatics = "Informatics",
+
+OlympiadSubjectDict = {
+    "Math": OlympiadSubjectEnum.Math,
+    "Physics": OlympiadSubjectEnum.Physics,
+    "Informatics": OlympiadSubjectEnum.Informatics
+}
+
+class TargetClassEnum(enum.Enum):
+    class_5 = "5",
+    class_6 = "6",
+    class_7 = "7",
+    class_8 = "8",
+    class_9 = "9",
+    class_10 = "10",
+    class_11 = "11",
+    student = "student",
+
+TargetClassDict = {
+    "5": TargetClassEnum.class_5,
+    "6": TargetClassEnum.class_6,
+    "7": TargetClassEnum.class_7,
+    "8": TargetClassEnum.class_8,
+    "9": TargetClassEnum.class_9,
+    "10": TargetClassEnum.class_10,
+    "11": TargetClassEnum.class_11,
+    "student": TargetClassEnum.student
+}
+
 # Contest models
 
-class Olympiad(db.Model):
-    """
-    Class describing a Olympiad model.
-
-    olympiad_id: id of olympiad
-    description: description of the contest
-    rules: rules of the contest
-    """
-
-    __tablename__ = 'olympiad'
-
-    olympiad_id = db.Column(db.Integer, autoincrement=True, primary_key=True)
-    name = db.Column(db.Text, nullable=False)
-    description = db.Column(db.Text, nullable=False)
-    rules = db.Column(db.Text, nullable=False)
-    stages = db.relationship('olympiad_stage', lazy='select',
-                             backref=db.backref('olympiad', lazy='joined'))
-
-
-"""
-Table describing a Contests In Stage model.
-
-stage_id: id of the stage
-contest_id: id of contest
-location: address + room or link to online
-"""
-
-contestsInStage = db.Table('contests_in_stage',
-                           db.Column('stage_id', db.Integer, db.ForeignKey('olympiad_stage.stage_id'),
-                                     primary_key=True),
-                           db.Column('contest_id', db.Integer, db.ForeignKey('contest.contest_id'), primary_key=True),
-                           db.Column('location', db.Text, nullable=False)
-                           )
-
-
-class OlympiadStage(db.Model):
-    """
-    Class describing a Stage model.
-
-    stage_id: id of the stage
-    olympiad_id: id of olympiad
-    stage_name: name of the stage
-    next_stage_condition: condition to pass to the next stage
-    """
-
-    __tablename__ = 'olympiad_stage'
-
-    stage_id = db.Column(db.Integer, autoincrement=True, primary_key=True)
-    olympiad_id = db.Column(db.Integer, db.ForeignKey('olympiad.olympiad_id'))
-    stage_name = db.Column(db.Text, index=True, nullable=False)
-    next_stage_condition = db.Column(db.Text, nullable=False)
-
-    contests = db.relationship('contest', secondary=contestsInStage, lazy='subquery',
-                               backref=db.backref('olympiad_stage', lazy=True))
 
 
 class Contest(db.Model):
@@ -91,6 +95,10 @@ class Contest(db.Model):
     laureate_condition = db.Column(db.Float, nullable=False)
     certificate_template = db.Column(db.Text, nullable=True)
     visibility = db.Column(db.Boolean, default=DEFAULT_VISIBILITY, nullable=False)
+    composite_type = db.Column(db.Enum(CompositeTypeEnum))
+    olympiad_type = db.Column(db.Enum(OlympiadTypeEnum))
+    subject = db.Column(db.Enum(OlympiadSubjectEnum))
+    target_class = Column(pg.ARRAY(sa.Enum(TargetClassEnum)))
 
     start_date = db.Column(db.DateTime, index=True, default=datetime.utcnow)
     end_date = db.Column(db.DateTime, index=True, default=datetime.utcnow)
@@ -100,6 +108,49 @@ class Contest(db.Model):
 
     users = db.relationship('user_in_contest', lazy='select',
                             backref=db.backref('contest', lazy='joined'))
+
+    stages = db.relationship('stage', lazy='select',
+                            backref=db.backref('contest', lazy='joined'))
+
+
+
+"""
+Table describing a Contests In Stage model.
+
+stage_id: id of the stage
+contest_id: id of contest
+location: address + room or link to online
+"""
+
+contestsInStage = db.Table('contests_in_stage',
+                           db.Column('stage_id', db.Integer, db.ForeignKey('stage.stage_id'),
+                                     primary_key=True),
+                           db.Column('contest_id', db.Integer, db.ForeignKey('contest.contest_id'), primary_key=True),
+                           db.Column('location', db.Text, nullable=False)
+                           )
+
+
+class Stage(db.Model):
+    """
+    Class describing a Stage model.
+
+    stage_id: id of the stage
+    olympiad_id: id of olympiad
+    stage_name: name of the stage
+    next_stage_condition: condition to pass to the next stage
+    """
+
+    __tablename__ = 'stage'
+
+    stage_id = db.Column(db.Integer, autoincrement=True, primary_key=True)
+    olympiad_id = db.Column(db.Integer, db.ForeignKey('contest.contest_id'))
+    stage_name = db.Column(db.Text, index=True, nullable=False)
+    next_stage_condition = db.Column(db.Text, nullable=False)
+
+    contests = db.relationship('contest', secondary=contestsInStage, lazy='subquery',
+                               backref=db.backref('stage', lazy=True))
+
+
 
 
 """

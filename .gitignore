@@ -5,6 +5,7 @@ __pycache__/
 *.py[cod]
 *$py.class
 
+backend/contest/.idea/workspace.xml
 # C extensions
 *.so
 

@@ -9,7 +9,7 @@ from contest_data import app, db, openapi
 
 
 # Olympiad views
-
+"""
 @app.route('/olympiad/create', methods=['POST'])
 @openapi
 def olympiad_create():
@@ -121,6 +121,7 @@ def olympiads_all():
     except RequestError as err:
         db.session.rollback()
         return err.to_response()
+"""
 
 # Stage views
 
@@ -246,6 +247,17 @@ def contest_create(id_olympiad, id_stage):
         start_date = values['start_date']
         end_time = values['end_time']
 
+        final_composite_type = CompositeTypeDict[values['composite_type']]
+
+        final_olympiad_type = OlympiadTypeEnum[values['olympiad_type']]
+
+        final_subject = OlympiadSubjectDict[values['subject']]
+
+        final_target_class = []
+        for val in values['target_class']:
+            final_target_class.append(TargetClassDict[val])
+
+
         # TODO Checking
 
         contest = Contest(
@@ -257,8 +269,22 @@ def contest_create(id_olympiad, id_stage):
             visibility=visibility,
             start_date=start_date,
             end_time=end_time,
+            composite_type=final_composite_type,
+            olympiad_type=final_olympiad_type,
+            subject=final_subject,
+            target_class=final_target_class,
         )
         db.session.add(contest)
+
+        if final_composite_type == CompositeTypeEnum.Composite:
+            db.session.flush()
+            contestsInStage_val = contestsInStage(
+                stage_id = id_stage,
+                contest_id = contest.contest_id,
+                location = values['location']
+            )
+            db.session.add(contestsInStage_val)
+
 
         db.session.commit()
         return make_response(
@@ -301,6 +327,10 @@ def contest_get(id_olympiad, id_stage, id_contest):
                 "visibility": contest.visibility,
                 "start_date": contest.start_date,
                 "end_time": contest.end_time,
+                "composite_type": contest.composite_type,
+                "olympiad_type": contest.olympiad_type,
+                "subject": contest.subject,
+                "target_class": contest.target_class,
             }, 200)
 
     except RequestError as err:
@@ -332,6 +362,20 @@ def contest_update(id_olympiad, id_stage, id_contest):
         if 'end_time' in values:
             contest.end_time = values['end_time']
 
+        if 'composite_type' in values:
+            contest.composite_type = CompositeTypeDict[values['composite_type']]
+
+        if 'olympiad_type' in values:
+            contest.olympiad_type = OlympiadTypeEnum[values['olympiad_type']]
+
+        if 'subject' in values:
+            contest.subject = OlympiadSubjectDict[values['subject']]
+
+        if 'target_class' in values:
+            contest.target_class = []
+            for val in values['target_class']:
+                contest.target_class.append(TargetClassDict[val])
+
         db.session.commit()
         return make_response({}, 200)
 
@@ -360,6 +404,10 @@ def contests_all(id_olympiad, id_stage):
                     "visibility": contest.visibility,
                     "start_date": contest.start_date,
                     "end_time": contest.end_time,
+                    "composite_type": contest.composite_type,
+                    "olympiad_type": contest.olympiad_type,
+                    "subject": contest.subject,
+                    "target_class": contest.target_class,
                 }
             )
 
