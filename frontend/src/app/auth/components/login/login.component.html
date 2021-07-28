@@ -1,0 +1,52 @@
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-6">
+            <h2 class="mt-5 mb-5">Авторизация участников</h2>
+            <div *ngIf="!(isAuthenticated$ | async)">
+                <div class="form-floating">
+                    <input type="email" class="form-control" required email placeholder="name@example.com"
+                           [(ngModel)]="loginAttempt.username" #email="ngModel" name="email">
+                    <label>Электронная почта</label>
+                    <div *ngIf="email.invalid && (email.dirty || email.touched)"
+                         class="alert alert-danger">
+                        <div *ngIf="email.errors?.required">
+                            Поле обязательно для заполнения
+                        </div>
+                        <div *ngIf="email.errors?.email">
+                            Невалидный e-mail
+                        </div>
+                    </div>
+                </div>
+                <br/>
+                <div class="form-floating">
+                    <input type="password" class="form-control" placeholder="Пароль"
+                           [(ngModel)]="loginAttempt.password">
+                    <label>Пароль</label>
+                </div>
+                <br/>
+                <button class="w-100 btn btn-lg btn-primary" [disabled]="!isValid(this.loginAttempt)"
+                        (click)="login(this.loginAttempt)">
+                    Войти
+                </button>
+
+                <ng-container *ngIf="isAuthenticated$ | async as isAuthenticated">
+                    <div class="alert alert-success">
+                        Вы успешно вошли в систему
+                    </div>
+                </ng-container>
+
+                <p class="mt-5 mb-3 text-muted">Если у Вас еще нет учетной записи, вы можете создать её,
+                    воспользовавшись <a routerLink="/register">процедурой регистрации</a>
+                </p>
+                <p class="mb-3 text-muted">
+                    <a routerLink="/register">Забыли пароль?</a>
+                </p>
+                <p class="text-muted">
+                    <a routerLink="/register">Не пришло письмо для активации учетной записи?</a>
+                </p>
+            </div>
+
+
+        </div>
+    </div>
+</div>
