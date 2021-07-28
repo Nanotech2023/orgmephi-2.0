@@ -22,7 +22,7 @@
   .title_container {
     .text_container {
       width: 50%;
-      color: #FFFFFF;
+      color: $white;
       position: absolute;
       left: 15%;
       font-family: 'Roboto', sans-serif;
@@ -80,7 +80,7 @@
 
 
 #results {
-  background: #F7FCFF;
+  background: $lightblue;
 
   .title_container {
     display: flex;
@@ -149,21 +149,21 @@
       text-align: center;
       letter-spacing: 1.25px;
       text-transform: uppercase;
-      color: #FFFFFF;
+      color: $white;
     }
     
     .results_button:hover{
-      background-color: #001a65;
+      background-color: $blue_darker;
     }
   }
 }
 
 #application {
-  background: #0C32C6;
+  background: $blue_lighter;
   transform: matrix(-1, 0, 0, 1, 0, 0);
 }
 
 #services {
-  background: #F7FCFF;
+  background: $lightblue;
   transform: matrix(-1, 0, 0, 1, 0, 0);
 }
