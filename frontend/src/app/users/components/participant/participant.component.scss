@@ -6,7 +6,7 @@
   margin: auto;
 }
 
-#olympiads, #results, #application, #services {
+#olympiads, #results, #application, #services, #olympiads-list {
   width: 100%;
   min-height: 276px;
 }
@@ -260,6 +260,7 @@
 
 #services {
   background: $lightblue;
+  padding: 0 2%;
 
   .title_container, .collapsible_container {
     display: flex;
@@ -325,4 +326,15 @@
     }
   }
 
+}
+
+#olympiads-list {
+  ul {
+    list-style: none;
+    padding-top: 5%;
+
+    li {
+      padding-left: 10%;
+    }
+  }
 }

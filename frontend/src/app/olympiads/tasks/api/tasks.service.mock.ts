@@ -19,7 +19,7 @@ import { TaskInVariantImage } from '@/olympiads/tasks/model/taskInVariantImage'
 import { CommonContestId } from '@/olympiads/tasks/model/commonContestId'
 import { HttpEvent, HttpResponse } from '@angular/common/http'
 import { CreateVariant } from '@/olympiads/tasks/model/createVariant'
-import { Observable } from 'rxjs'
+import { Observable, of } from 'rxjs'
 import { VariantsInContest } from '@/olympiads/tasks/model/variantsInContest'
 import { ContestsInStage } from '@/olympiads/tasks/model/contestsInStage'
 import { VariantInfoId } from '@/olympiads/tasks/model/variantInfoId'
@@ -49,7 +49,25 @@ export class TasksServiceMock implements TasksService
     olympiadAllGet( observe: any, reportProgress: boolean ): Observable<any>
     olympiadAllGet( observe?: any, reportProgress?: boolean ): Observable<ContestsInStage> | Observable<HttpResponse<ContestsInStage>> | Observable<HttpEvent<ContestsInStage>> | Observable<any>
     {
-        throw new Error( 'not implemented' )
+        return of( {
+            contestsList: [
+                {
+                    contestId: 123,
+                    description: 'test description',
+                    startTime: new Date(),
+                    endTime: new Date(),
+                    laureateCondition: 'test laureateCondition',
+                    visibility: true
+                }, {
+                    contestId: 1234,
+                    description: 'test description 2',
+                    startTime: new Date(),
+                    endTime: new Date( 2022, 1, 1 ),
+                    laureateCondition: 'test laureateCondition 2',
+                    visibility: true
+                }
+            ]
+        } )
     }
 
     olympiadCreatePost( body: OlympiadCreateBody, observe?: "body", reportProgress?: boolean ): Observable<CommonContestId>
