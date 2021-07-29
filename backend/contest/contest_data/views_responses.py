@@ -1,10 +1,16 @@
 import datetime
 
 from flask import request, make_response
+from flask_jwt_extended import create_access_token, set_access_cookies, create_refresh_token, set_refresh_cookies,\
+    get_csrf_token, jwt_required, unset_jwt_cookies
+import sqlalchemy.exc
 
 from contest_data.models_responses import *
 from contest_data import app, db, openapi
 from contest_data.errors import RequestError, NotFound
+from contest_data.jwt_verify import *
+
+
 
 def catch_request_error(function):
     @wraps(function)
@@ -13,6 +19,7 @@ def catch_request_error(function):
             return function(*args, **kwargs)
         except RequestError as err:
             return err.to_response()
+
     return wrapper
 
 
@@ -27,15 +34,15 @@ def get_user_in_contest_work(user_id, contest_id):
     user_work = Response.query.filter(user_id=user_id, contest_id=contest_id).one_or_none()
     if user_work is None:
         raise NotFound(field='user_id / contest_id', value='{user_id} / {contest_id}'.format(user_id=user_id,
-                                                                                            contest_id=contest_id))
+                                                                                             contest_id=contest_id))
     return user_work
 
 
-def get_user_info(user_id):     # TODO Get additional info for users
+def get_user_info(user_id):  # TODO Get additional info for users
     return {}
 
 
-def get_contest_name(contest_id):           # TODO get contest_name
+def get_contest_name(contest_id):  # TODO get contest_name
     return ''
 
 
@@ -47,11 +54,11 @@ def get_user_all_answers(olympiad_id, stage_id, contest_id, user_id):
     # TODO Add Checking olympiad_id, stage_id
     user_work = get_user_in_contest_work(user_id, contest_id)
     if user_work.answers is None:
-        raise NotFound('user_response.answers', 'for user %d' %user_id)
+        raise NotFound('user_response.answers', 'for user %d' % user_id)
     answers = user_work.answers.all()
     user_answer = []
     for elem in answers:
-        user_answer.append(elem.all_answers_to_json())
+        user_answer.append(elem.serialize())
     return make_response(
         {
             "user_id": user_work.user_id,
@@ -78,11 +85,12 @@ def get_user_answer_by_id(olympiad_id, stage_id, contest_id, answer_id):
 @app.route('/olympiad/<int:olympiad_id>/stage/<int:stage_id>/contest/<int:contest_id>/task/<int:task_id>/user/self:',
            methods=['GET', 'POST'])
 @openapi
+@jwt_required()
 @catch_request_error
 def user_answer_for_task(olympiad_id, stage_id, contest_id, task_id):
     if request.method == 'GET':
         # TODO Add Checking olympiad_id, stage_id
-        self_user_id = None  # TODO Get current user id
+        self_user_id = jwt_get_id()
         user_work = get_user_in_contest_work(user_id, contest_id)
         if user_work.answers is None:
             raise NotFound('user_response.answers', 'for user %d' % user_id)
@@ -95,7 +103,7 @@ def user_answer_for_task(olympiad_id, stage_id, contest_id, task_id):
                 "filetype": filetype_reverse[user_answer.filetype]
             }, 200)
     elif request.method == 'POST':
-        self_user_id = None  # TODO Get current user id
+        self_user_id = jwt_get_id()
         # TODO Add Checking olympiad_id, stage_id
         values = request.openapi.body
         answer = values['user_answer']
@@ -156,17 +164,18 @@ def user_answer_for_task_by_id(olympiad_id, stage_id, contest_id, task_id, user_
 @app.route('/olympiad/<int:olympiad_id>/stage/<int:stage_id>/contest/<int:contest_id>/user/self/status',
            methods=['GET', 'POST'])
 @openapi
+@jwt_required()
 @catch_request_error
 def user_status_and_mark_for_response(olympiad_id, stage_id, contest_id):
     if request.method == 'GET':
         # TODO Add Checking olympiad_id, stage_id
-        self_user_id = None  # TODO Get current user id
+        self_user_id = jwt_get_id()
         user_work = get_user_in_contest_work(self_user_id, contest_id)
         status = user_work.statuses.order_by(ResponseStatus.timestamp.desc()).first()
-        return make_response(status.status_and_mark_to_json(), 200)
+        return make_response(status.serialize(), 200)
     elif request.method == 'POST':
         # TODO Add Checking olympiad_id, stage_id
-        self_user_id = None  # TODO Get current user id
+        self_user_id = jwt_get_id()
         values = request.openapi.body
         status = values['status']
         if 'mark' in values:
@@ -188,7 +197,7 @@ def user_status_and_mark_for_response_by_id(olympiad_id, stage_id, contest_id, u
         # TODO Add Checking olympiad_id, stage_id
         user_work = get_user_in_contest_work(user_id, contest_id)
         status = user_work.statuses.order_by(ResponseStatus.timestamp.desc()).first()
-        return make_response(status.status_and_mark_to_json(), 200)
+        return make_response(status.serialize(), 200)
     elif request.method == 'POST':
         # TODO Add Checking olympiad_id, stage_id
         values = request.openapi.body
@@ -206,10 +215,11 @@ def user_status_and_mark_for_response_by_id(olympiad_id, stage_id, contest_id, u
 @app.route('/olympiad/<int:olympiad_id>/stage/<int:stage_id>/contest/<int:contest_id>/user/self/status/history',
            methods=['GET'])
 @openapi
+@jwt_required()
 @catch_request_error
 def user_status_history_for_response(olympiad_id, stage_id, contest_id):
     # TODO Add Checking olympiad_id, stage_id
-    self_user_id = None  # TODO Get current user id
+    self_user_id = jwt_get_id()
     user_work = get_user_in_contest_work(self_user_id, contest_id)
     status = user_work.statuses.order_by(ResponseStatus.timestamp.desc())
     history = get_status_history(db.session, user_work.work_id, status)
@@ -263,20 +273,21 @@ def get_list_for_stage(olympiad_id, stage_id, contest_id):
 @app.route('/olympiad/<int:olympiad_id>/stage/<int:stage_id>/contest/<int:contest_id>/user/self/appeal/last',
            methods=['GET', 'POST'])
 @openapi
+@jwt_required()
 @catch_request_error
 def user_response_appeal_info(olympiad_id, stage_id, contest_id):
     # TODO Add Checking olympiad_id, stage_id
     if request.method == 'GET':
-        self_user_id = None  # TODO Get current user id
+        self_user_id = jwt_get_id()
         user_work = get_user_in_contest_work(self_user_id, contest_id)
         last_appeal = ResponseStatus.query.join(Appeal, ResponseStatus.status_id == Appeal.work_status). \
             filter(ResponseStatus.work_id == user_work.work_id). \
             order_by(ResponseStatus.timestamp.desc()).one_or_none()
         if last_appeal is None:
             raise NotFound('appeal', 'for user {}'.format(self_user_id))
-        return make_response(last_appeal.info_to_json(), 200)
+        return make_response(last_appeal.serialize(), 200)
     elif request.method == 'POST':
-        self_user_id = None  # TODO Get current user id
+        self_user_id = jwt_get_id()
         values = request.openapi.body
         message = values['message']
         user_work = get_user_in_contest_work(self_user_id, contest_id)
@@ -302,7 +313,7 @@ def user_response_appeal_info_by_id(olympiad_id, stage_id, contest_id, user_id):
             order_by(ResponseStatus.timestamp.desc()).one_or_none()
         if last_appeal is None:
             raise NotFound('appeal', 'for user {}'.format(user_id))
-        return make_response(last_appeal.info_to_json(), 200)
+        return make_response(last_appeal.serialize(), 200)
     elif request.method == 'POST':
         values = request.openapi.body
         message = values['message']
@@ -343,7 +354,7 @@ def reply_to_user_appeal(olympiad_id, stage_id, contest_id, appeal_id):
         new_mark = last_status.mark
     new_response_status = add_response_status(db.session, last_status.work_id, status=response_new_status,
                                               mark=new_mark)
-    return make_response(appeal.info_to_json(), 200)
+    return make_response(appeal.serialize(), 200)
 
 
 @app.route('/olympiad/<int:olympiad_id>/stage/<int:stage_id>/contest/<int:contest_id>/appeal/<int:appeal_id>',
@@ -355,4 +366,4 @@ def get_appeal_info_by_id(olympiad_id, stage_id, contest_id, appeal_id):
     appeal = Appeal.query.filter(appeal_id=appeal_id).one_or_none()
     if appeal is None:
         raise NotFound('appeal', 'by id {}'.format(appeal_id))
-    return make_response(appeal.info_to_json(), 200)
+    return make_response(appeal.serialize(), 200)

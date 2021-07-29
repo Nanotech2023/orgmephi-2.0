@@ -2,6 +2,7 @@ import os
 
 from flask import Flask, current_app
 from flask_sqlalchemy import SQLAlchemy
+from flask_jwt_extended import JWTManager
 
 
 def create_app(test_config=None):

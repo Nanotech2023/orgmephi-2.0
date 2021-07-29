@@ -64,7 +64,7 @@ class ResponseStatus(db.Model):
     status = db.Column(db.Enum(ResponseStatusEnum), nullable=False)
     mark = db.Column(db.Float)
 
-    def status_and_mark_to_json(self):
+    def serialize(self):
         if self.mark is None:
             return {
                 'status':work_status_reverse[self.status]
@@ -113,7 +113,7 @@ class Appeal(db.Model):
     appeal_message = db.Column(db.Text)
     appeal_response = db.Column(db.Text)
 
-    def info_to_json(self):
+    def serialize(self):
         return {
                 'appeal_id': self.appeal_id,
                 'status': self.work_status,
@@ -173,7 +173,7 @@ class ResponseAnswer(db.Model):
     answer = db.Column(db.LargeBinary, nullable=False)
     filetype = db.Column(db.Enum(ResponseFiletypeEnum), nullable=False)
 
-    def all_answers_to_json(self):
+    def serialize(self):
         return {
             'task_id': self.task_num,
             'answer_id': self.answer_id
