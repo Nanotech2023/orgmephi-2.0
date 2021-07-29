@@ -41,6 +41,10 @@ class ResponseStatusEnum(enum.Enum):
     revision = 'Revision'
 
 
+work_status = {status.value: status for status in ResponseStatusEnum}
+work_status_reverse = {val: key for key, val in work_status.items()}
+
+
 class ResponseStatus(db.Model):
     """
     Class describing a Response Status model.
@@ -60,6 +64,17 @@ class ResponseStatus(db.Model):
     status = db.Column(db.Enum(ResponseStatusEnum), nullable=False)
     mark = db.Column(db.Float)
 
+    def status_and_mark_to_json(self):
+        if self.mark is None:
+            return {
+                'status':work_status_reverse[self.status]
+            }
+        else:
+            return {
+                'status': work_status_reverse[self.status],
+                'mark': self.mark
+            }
+
 
 class AppealStatusEnum(enum.Enum):
     """
@@ -73,6 +88,10 @@ class AppealStatusEnum(enum.Enum):
     under_review = "UnderReview"
     appeal_accepted = "AppealAccepted"
     appeal_rejected = "AppealRejected"
+
+
+appeal_status = {status.value: status for status in AppealStatusEnum}
+appeal_status_reverse = {val: key for key, val in appeal_status.items()}
 
 
 class Appeal(db.Model):
@@ -93,6 +112,18 @@ class Appeal(db.Model):
     appeal_status = db.Column(db.Enum(AppealStatusEnum), nullable=False)
     appeal_message = db.Column(db.Text)
     appeal_response = db.Column(db.Text)
+
+    def info_to_json(self):
+        return {
+                'appeal_id': self.appeal_id,
+                'status': self.work_status,
+                'appeal_message': self.appeal_message,
+                'appeal_response': self.appeal_response
+            }
+
+    def reply_to_appeal(self, message, status):
+        self.appeal_response = message
+        self.appeal_status = status
 
 
 class ResponseFiletypeEnum(enum.Enum):
@@ -119,6 +150,10 @@ class ResponseFiletypeEnum(enum.Enum):
     odt = 'odt'
 
 
+filetype_dict = {filetype.value: filetype for filetype in ResponseFiletypeEnum}
+filetype_reverse = {val: key for key, val in filetype_dict.items()}
+
+
 class ResponseAnswer(db.Model):
     """
     Class describing user's answers in response.
@@ -138,17 +173,104 @@ class ResponseAnswer(db.Model):
     answer = db.Column(db.LargeBinary, nullable=False)
     filetype = db.Column(db.Enum(ResponseFiletypeEnum), nullable=False)
 
+    def all_answers_to_json(self):
+        return {
+            'task_id': self.task_num,
+            'answer_id': self.answer_id
+        }
 
-"""
-Возможные запросы:
-    - Получение ведомости пользователей для определенного конкурса - пользователь/ оценка
-    - Отображение переписки между проряющим и пользователем во время аппеляции
-    - Отобразить историю статусов для работы с оценками
-    - Внести / Изменить ответ пользователя
-    - Загрузить файл от пользователя
-    - Выдать все ответы пользователя + файлы
-    - Изменить статус работы
-"""
+    def update(self, answer_new=None, filetype_new=None):
+        if answer_new is not None:
+            self.answer = answer_new
+        if filetype_new is not None:
+            self.filetype = filetype_dict[filetype_new]
+
+
+def get_one_or_null(entity, field, value):
+    return entity.query.filter_by(**{field: value}).one_or_none()
+
+
+def get_list(entity, field, value):
+    return entity.query.filter_by(**{field: value}).all()
+
+
+def add_user_response(db_session, user_id, contest_id):
+    user_work = Response(
+        user_id=user_id,
+        contest_id=contest_id
+    )
+    db_session.add(user_work)
+    db_session.flush()
+    return user_work
+
+
+def add_response_status(db_session, work_id, status=None, mark=None):
+    if status is None:
+        new_status = work_status['NotChecked']
+    else:
+        new_status = work_status[status]
+    if mark is None:
+        response_status = ResponseStatus(
+            work_id=work_id,
+            status=new_status
+        )
+    else:
+        response_status = ResponseStatus(
+            work_id=work_id,
+            status=new_status,
+            mark=mark
+        )
+    db_session.add(response_status)
+    db_session.flush()
+    return response_status
+
+
+def add_response_answer(db_session, work_id, task_id, answer, filetype):
+    response_answer = ResponseAnswer(
+        work_id=work_id,
+        task_num=task_id,
+        answer=answer,
+        filetype=filetype_dict[filetype]
+    )
+    db_session.add(response_answer)
+    db_session.flush()
+    return response_answer
+
+
+def get_status_history(db_session, work_id, status):
+    history = []
+    appeals = ResponseStatus.query.join(Appeal, ResponseStatus.status_id == Appeal.work_status). \
+        filter_by(ResponseStatus.work_id == work_id). \
+        order_by(ResponseStatus.timestamp.desc()).all()
+    number = 0
+    if appeals is None:
+        appeals = []
+    for elem in status:
+        if len(appeals) > number and appeals[number].work_status == elem.status_id:
+            appeal = appeals.appeal_id
+            number += 1
+        else:
+            appeal = None
+        history.append(
+            {
+                'status:': work_status_reverse[elem.status],
+                'datetime': elem.timestamp,
+                'appeal_id': appeal,
+                'mark': elem.mark
+            }
+        )
+
+
+def add_response_appeal(db_session, status_id, message):
+    appeal = Appeal(
+        work_status=status_id,
+        appeal_status=appeal_status['UnderReview'],
+        appeal_message=message
+    )
+    db_session.add(appeal)
+    db_session.flush()
+    return response_answer
+
 
 if __name__ == '__main__':
     db.create_all()
