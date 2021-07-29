@@ -17,3 +17,11 @@ class RequestError(Exception):
             }
         ]}, self.http_code)
 
+class NotFound(RequestError):
+    def __init__(self, field, value):
+        super(NotFound, self).__init__(404)
+        self.field = field
+        self.value = value
+
+    def get_msg(self):
+        return '%s "%s" not found' % (self.field, self.value)
