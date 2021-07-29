@@ -69,6 +69,7 @@ class BaseContest(db.Model):
     composite_type: composite type
     olympiad_type: olympiad type
     subject: subject
+    certificate_template: contest certificate template
     target_class: target class
 
     """
@@ -82,6 +83,9 @@ class BaseContest(db.Model):
     rules = db.Column(db.Text, nullable=False)
     olympiad_type = db.Column(db.Enum(OlympiadTypeEnum), nullable=False)
     subject = db.Column(db.Enum(OlympiadSubjectEnum), nullable=False)
+
+    certificate_template = db.Column(db.Text, nullable=True)
+
     target_classes = db.relationship('target_classes', lazy='select',
                                      backref=db.backref('base_contest', lazy='joined'))
 
@@ -94,7 +98,6 @@ class Contest(db.Model):
     rules: rules of the contest
     winning_condition: minimum passing scores
     laureate_condition: minimum passing scores
-    certificate_template: contest certificate template
     visibility: visibility of the contest
     composite_type: composite type
     olympiad_type: olympiad type
@@ -103,12 +106,12 @@ class Contest(db.Model):
 
     __tablename__ = 'contest'
 
-    base_contest_id = db.Column(db.Integer, db.ForeignKey('base_contest.contest_id'), primary_key=True)
+    base_contest_id = db.Column(db.Integer, db.ForeignKey('base_contest.contest_id'))
     contest_id = db.Column(db.Integer, autoincrement=True, primary_key=True)
 
     winning_condition = db.Column(db.Float, nullable=False)
     laureate_condition = db.Column(db.Float, nullable=False)
-    certificate_template = db.Column(db.Text, nullable=True)
+
     visibility = db.Column(db.Boolean, default=DEFAULT_VISIBILITY, nullable=False)
 
     users = db.relationship('user_in_contest', lazy='select',
