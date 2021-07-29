@@ -62,6 +62,7 @@ class BaseContest(db.Model):
     Base Class describing a Contest model with meta information.
 
     base_contest_id: id of base contest
+    name: name of base contest
     description: description of the contest
     rules: rules of the contest
 
@@ -76,6 +77,7 @@ class BaseContest(db.Model):
 
     base_contest_id = db.Column(db.Integer, autoincrement=True, primary_key=True)
 
+    name = db.Column(db.Text, nullable=False)
     description = db.Column(db.Text, nullable=False)
     rules = db.Column(db.Text, nullable=False)
     olympiad_type = db.Column(db.Enum(OlympiadTypeEnum), nullable=False)
