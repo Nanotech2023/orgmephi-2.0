@@ -68,9 +68,10 @@ class TargetClassEnum(enum.Enum):
 
 olympiad_target_class_dict = {target.value: target for target in TargetClassEnum}
 
-def add_base_contest(db_session, description, rules, olympiad_type, subject):
+def add_base_contest(db_session, name, description, rules, olympiad_type, subject):
     baseContest = BaseContest(
         description=description,
+        name=name,
         rules=rules,
         olympiad_type=olympiad_type,
         subject=subject
@@ -85,12 +86,13 @@ class BaseContest(db.Model):
     Base Class describing a Contest model with meta information.
 
     base_contest_id: id of base contest
-
+    name: name of base contest
     description: description of the contest
     rules: rules of the contest
+
+    composite_type: composite type
     olympiad_type: olympiad type
     subject: subject
-
     target_class: target class
 
     """
@@ -99,7 +101,7 @@ class BaseContest(db.Model):
 
     base_contest_id = db.Column(db.Integer, autoincrement=True, primary_key=True)
 
-    description = db.Column(db.Text, nullable=False)
+    name = db.Column(db.Text, nullable=False)
     rules = db.Column(db.Text, nullable=False)
     olympiad_type = db.Column(db.Enum(OlympiadTypeEnum), nullable=False)
     subject = db.Column(db.Enum(OlympiadSubjectEnum), nullable=False)
@@ -113,6 +115,7 @@ class BaseContest(db.Model):
         return \
             {
                 'base_contest_id': self.base_contest_id,
+                'name': self.name,
                 'description': self.description,
                 'rules': self.rules,
                 'olympiad_type': self.olympiad_type,
@@ -121,7 +124,9 @@ class BaseContest(db.Model):
                 'child_contests': self.child_contests
             }
 
-    def update(self, description=None, rules=None, olympiad_type=None, subject=None, target_classes=None):
+    def update(self, name=None,  description=None, rules=None, olympiad_type=None, subject=None, target_classes=None):
+        if name is not None:
+            self.name = name
         if description is not None:
             self.description = description
         if rules is not None:
@@ -424,6 +429,17 @@ def add_task_in_Variant(db_session, variant_id, task_id):
     return taskInVariantObject
 
 
+def add_variant(db_session, contest_id, variant_number, variant_description):
+    variant = Variant(
+        contest_id=contest_id,
+        variant_number=variant_number,
+        variant_description=variant_description,
+    )
+    db_session.add(variant)
+    db_session.flush()
+    return variant
+
+
 class Variant(db.Model):
     """
     Class describing a Task variant model.
@@ -459,13 +475,25 @@ class Variant(db.Model):
                 'tasks': self.tasks
             }
 
-    def update(self, variant_number=None, variant_description=None):
+    def update(self, contest_id=None, variant_number=None, variant_description=None):
+        if contest_id is not None:
+            self.contest_id = contest_id
         if variant_number is not None:
             self.variant_number = variant_number
         if variant_description is not None:
             self.variant_description = variant_description
 
 
+def add_user_in_contest(db_session, nuser_id, contest_id, variant_id=None, user_status=None):
+    user = UserInContest(
+        user_id=user_id,
+        contest_id=contest_id,
+        variant_id=variant_id,
+        user_status=user_status,
+    )
+    db_session.add(user)
+    db_session.flush()
+    return user
 
 class UserInContest(db.Model):
     """
@@ -482,6 +510,23 @@ class UserInContest(db.Model):
     contest_id = db.Column(db.Integer, db.ForeignKey('contest.contest_id'), primary_key=True)
     variant_id = db.Column(db.Integer, db.ForeignKey('variant.variant_id'))
     user_status = db.Column(db.Text, db.ForeignKey('user_status.status_id'))
+
+    def serialize(self):
+        return \
+            {
+                'user_id': self.user_id,
+                'contest_id': self.contest_id,
+                'user_status': self.user_status,
+                'variant_id': self.variant_id
+            }
+
+    def update(self, contest_id=None, variant_id=None, user_status=None):
+        if contest_id is not None:
+            self.contest_id = contest_id
+        if variant_id is not None:
+            self.variant_id = variant_id
+        if user_status is not None:
+            self.user_status = user_status
 
 
 
@@ -511,6 +556,16 @@ class Task(db.Model):
         'polymorphic_on': type
     }
 
+def add_plain_task(db_session, nnum_of_task, image_of_task, type, recommended_answer):
+    task = PlainTask(
+        num_of_task=num_of_task,
+        image_of_task=image_of_task,
+        type=type,
+        recommended_answer=recommended_answer,
+    )
+    db_session.add(task)
+    db_session.flush()
+    return task
 
 class PlainTask(Task):
     """
@@ -533,13 +588,14 @@ class PlainTask(Task):
     def serialize(self):
         return \
             {
+                'task_id': self.task_id,
                 'num_of_task': self.num_of_task,
                 'image_of_task': self.image_of_task,
                 'type': self.type,
+                'recommended_answer': self.recommended_answer,
                 'plain_tasks': self.plain_tasks,
                 'multiple_tasks': self.multiple_tasks,
-                'recommended_answer': self.recommended_answer,
-                'range_tasks': self.range_tasks
+                'range_tasks': self.range_tasks,
             }
 
 
@@ -552,6 +608,18 @@ class PlainTask(Task):
             self.recommended_answer = recommended_answer
 
 
+
+def add_range_task(db_session, num_of_task, image_of_task, type, start_value, end_value):
+    task = RangeTask(
+        num_of_task=num_of_task,
+        image_of_task=image_of_task,
+        type=type,
+        start_value=start_value,
+        end_value=end_value,
+    )
+    db_session.add(task)
+    db_session.flush()
+    return task
 
 class RangeTask(Task):
     """
@@ -575,6 +643,7 @@ class RangeTask(Task):
     def serialize(self):
         return \
             {
+                'task_id': self.task_id,
                 'num_of_task': self.num_of_task,
                 'image_of_task': self.image_of_task,
                 'type': self.type,
@@ -597,6 +666,17 @@ class RangeTask(Task):
             self.end_value = end_value
 
 
+def add_multiple_task(db_session, num_of_task, image_of_task, type):
+    task = MultipleChoiceTask(
+        num_of_task=num_of_task,
+        image_of_task=image_of_task,
+        type=type
+    )
+    db_session.add(task)
+    db_session.flush()
+    return task
+
+
 class MultipleChoiceTask(Task):
     """
     Class describing a Task with multiple choice model.
@@ -617,6 +697,7 @@ class MultipleChoiceTask(Task):
     def serialize(self):
         return \
             {
+                'task_id': self.task_id,
                 'num_of_task': self.num_of_task,
                 'image_of_task': self.image_of_task,
                 'type': self.type,
@@ -634,6 +715,18 @@ class MultipleChoiceTask(Task):
         if all_answers_in_multiple_task is not None:
             self.all_answers_in_multiple_task = all_answers_in_multiple_task
 
+
+def add_answer_to_multiple_task(db_session, task_id, answer, correct):
+    answersInMultipleChoiceTask = AnswersInMultipleChoiceTask(
+        task_id=task_id,
+        answer=answer,
+        correct=correct
+    )
+    db_session.add(answersInMultipleChoiceTask)
+    db_session.flush()
+    return answersInMultipleChoiceTask
+
+
 class AnswersInMultipleChoiceTask(db.Model):
     """
     Class describing a Multiple answers for the task model.
@@ -650,6 +743,15 @@ class AnswersInMultipleChoiceTask(db.Model):
     task_id = db.Column(db.Integer, db.ForeignKey('multiple_task.task_id'), nullable=False)
     answer = db.Column(db.Text, nullable=False)
     correct = db.Column(db.Boolean, nullable=False)
+
+    def serialize(self):
+        return \
+            {
+                'answer_id': self.answer_id,
+                'task_id': self.task_id,
+                'answer': self.answer,
+                'correct': self.correct
+            }
 
     def update(self, answer=None, correct=None):
         if answer is not None:
