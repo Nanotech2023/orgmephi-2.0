@@ -3,7 +3,7 @@ import { footerHeight } from '@/shared/consts'
 import { Observable } from 'rxjs'
 import { ContestsInStage } from '@/olympiads/tasks/model/contestsInStage'
 import { TasksServiceMock } from '@/olympiads/tasks/api/tasks.service.mock'
-import { animate, query, stagger, style, transition, trigger } from '@angular/animations'
+import { animate, query, stagger, state, style, transition, trigger } from '@angular/animations'
 
 
 export const fadeAnimation = trigger( 'fadeAnimation', [
@@ -29,13 +29,20 @@ export const listAnimation = trigger( 'listAnimation', [
     ] )
 ] )
 
+export const rotatedState = trigger( 'rotatedState', [
+    state( 'true', style( { transform: 'rotate(0)' } ) ),
+    state( 'false', style( { transform: 'rotate(180deg)' } ) ),
+    transition( 'true => false', animate( '400ms ease-out' ) ),
+    transition( 'false => true', animate( '400ms ease-in' ) )
+] )
+
 
 @Component( {
     selector: 'app-participant',
     templateUrl: './participant.component.html',
     styleUrls: [ './participant.component.scss' ],
     animations: [
-        fadeAnimation, listAnimation
+        fadeAnimation, listAnimation, rotatedState
     ]
 } )
 
