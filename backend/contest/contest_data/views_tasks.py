@@ -1,20 +1,142 @@
 import datetime
 
-from flask import request, make_response
+from flask import request, make_response, abort, send_file
 import re
+from os import getcwd
+
+from flask_jwt_extended import create_access_token, set_access_cookies, create_refresh_token, set_refresh_cookies,\
+    get_csrf_token, jwt_required, unset_jwt_cookies
+
 
 from contest_data.models_task import *
 from contest_data.errors import *
+from jwt_verify import *
 from contest_data import app, db, openapi
 
 
+def get_or_raise(entity, field, value):
+    result = get_one_or_null(entity, field, value)
+    if result is None:
+        raise NotFound(field, value)
+    return result
+
+
+# Swagger UI
+
+@app.route('/tasks_api.yaml', methods=['GET'])
+def get_api():
+    if app.config['ENV'] != 'development':
+        abort(404)
+    api_path = app.config['ORGMEPHI_API_PATH']
+    if api_path[0] != '/':
+        api_path = '%s/%s' % (getcwd(), api_path)
+    return send_file(api_path)
+
+
 # Olympiad views
-"""
-@app.route('/olympiad/create', methods=['POST'])
+
+@app.route('/base_olympiad/create', methods=['POST'])
 @openapi
+@catch_request_error
+@jwt_required_role(['Admin', 'System', 'Creator'])
+def olympiad_create():
+    values = request.openapi.body
+
+    name = values['name']
+    description = values['description']
+    rules = values['rules']
+    olympiad_type = values['olympiad_type']
+    subject = values['subject']
+
+    try:
+        baseContest = add_base_contest(db.session,
+                         name,
+                         description,
+                         rules,
+                         olympiad_type,
+                         subject)
+
+        db.session.commit()
+    except sqlalchemy.exc.IntegrityError:
+        raise AlreadyExists('username', username)
+    except Exception:
+        db.session.rollback()
+        raise
+    return make_response(baseContest.serialize(), 200)
+
+
+@app.route('/base_olympiad/<id_base_olympiad>', methods=['GET'])
+@openapi
+def olympiad_get(id_base_olympiad):
+    try:
+        base_olympiad = get_or_raise(BaseContest, BaseContest.base_contest_id, id_base_olympiad)
+        return make_response(
+            {
+                base_olympiad.serialize()
+            }, 200)
+
+    except RequestError as err:
+        db.session.rollback()
+        return err.to_response()
+
+
+@app.route('/base_olympiad/<id_base_olympiad>', methods=['PATCH'])
+@openapi
+def olympiad_update(id_base_olympiad):
+    try:
+        base_olympiad = BaseContest.query.filter_by(BaseContest.base_contest_id == id_base_olympiad).one()
+
+        values = request.openapi.body
+        if 'name' in values:
+            olympiad.name = values['name']
+        if 'description' in values:
+            olympiad.description = values['description']
+        if 'rules' in values:
+            olympiad.rules = values['rules']
+
+        db.session.commit()
+        return make_response({}, 200)
+
+    except RequestError as err:
+        db.session.rollback()
+        return err.to_response()
+
+
+@app.route('/olympiad/all', methods=['GET'])
+@openapi
+def olympiads_all():
+    try:
+        olympiads = Olympiad.query.all()
+
+        all_olympiads = []
+
+        for olympiad in olympiads:
+            all_olympiads.append(
+                {
+                    "olympiad_id": olympiad.id,
+                    "name": olympiad.name,
+                    "description": olympiad.description,
+                    "rules": olympiad.rules,
+                }
+            )
+
+        return make_response(
+            {
+                "olympiad_list": all_olympiads
+            }, 200)
+
+    except RequestError as err:
+        db.session.rollback()
+        return err.to_response()
+
+@app.route('/base_olympiad/<base_olympiad_id>/olympiad/create', methods=['POST'])
+@openapi
+@catch_request_error
+@jwt_required_role(['Admin', 'System', 'Creator'])
 def olympiad_create():
     try:
         values = request.openapi.body
+
         name = values['name']
         desc = values['description']
         rules = values['rules']
@@ -37,10 +159,15 @@ def olympiad_create():
                 "olympiad_id": olympiad.olympiad_id,
             }, 200)
 
-    except RequestError as err:
+    except sqlalchemy.exc.IntegrityError:
+        raise AlreadyExists('username', username)
+    except Exception:
         db.session.rollback()
-        return err.to_response()
+        raise
+    return make_response(user.serialize(), 200)
 
+
+"""
 @app.route('/olympiad/<id_olympiad>/remove', methods=['POST'])
 @openapi
 def olympiad_remove(id_olympiad):

@@ -8,6 +8,14 @@ import enum
 
 DEFAULT_VISIBILITY = Truex
 
+def get_one_or_null(entity, field, value):
+    return entity.query.filter_by(**{field: value}).one_or_none()
+
+
+def get_all(entity):
+    return entity.query.all()
+
+
 class UserStatus(db.Model):
     __tablename__ = 'user_status'
 
