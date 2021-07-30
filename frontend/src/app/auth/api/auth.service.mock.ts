@@ -1,8 +1,4 @@
-import { HttpEvent, HttpResponse } from '@angular/common/http'
-import { Observable, of } from 'rxjs'
 import { Injectable } from '@angular/core'
-import { AuthState } from '@/auth/store'
-import { Store } from '@ngrx/store'
 import { AuthService } from '@/auth/api/auth.service'
 import {
     RequestGroupAdd,
@@ -14,33 +10,27 @@ import {
     RequestUserGroupsRemove,
     RequestUserRole,
     RequestUserType,
-    ResponseGroup,
-    ResponseGroupAdd,
     ResponseGroupAll,
     ResponseInfoCountries,
     ResponseInfoUniversities,
-    ResponseLogin,
-    ResponsePersonalAdminGet,
-    ResponsePersonalSelf,
-    ResponsePreregister,
-    ResponseRefresh,
-    ResponseRegistration,
-    ResponseRegistrationInternal,
-    ResponseUniversityAdminGet,
-    ResponseUniversitySelf,
-    ResponseUserAdmin,
     ResponseUserAdminGroup,
     ResponseUserAll,
     ResponseUserByGroup,
-    ResponseUserSelf,
     ResponseUserSelfGroup,
     TypeAuthCredentials,
+    TypeCSRFPair,
+    TypeGroup,
     TypePersonalInfo,
+    TypePreregisterInfo,
     TypeStudentInfo,
     TypeUserInfo,
     TypeUserRole
-} from '@/auth/models'
+} from '@/auth/api/models'
+import { HttpEvent, HttpParams, HttpResponse } from '@angular/common/http'
+import { Observable, of } from 'rxjs'
 import { pushPersonalInfo } from '@/auth/store/auth.actions'
+import { AuthState } from '@/auth/store'
+import { Store } from '@ngrx/store'
 
 
 @Injectable( {
@@ -52,285 +42,293 @@ export class AuthServiceMock implements AuthService
     {
     }
 
-    canConsumeForm( consumes: string[] ): boolean
-    {
-        return false
-    }
-
-    groupAddPost( body: RequestGroupAdd, observe?: "body", reportProgress?: boolean ): Observable<ResponseGroupAdd>
-    groupAddPost( body: RequestGroupAdd, observe?: "response", reportProgress?: boolean ): Observable<HttpResponse<ResponseGroupAdd>>
-    groupAddPost( body: RequestGroupAdd, observe?: "events", reportProgress?: boolean ): Observable<HttpEvent<ResponseGroupAdd>>
-    groupAddPost( body: RequestGroupAdd, observe: any, reportProgress: boolean ): Observable<any>
-    groupAddPost( body: RequestGroupAdd, observe?: any, reportProgress?: boolean ): Observable<ResponseGroupAdd> | Observable<HttpResponse<ResponseGroupAdd>> | Observable<HttpEvent<ResponseGroupAdd>> | Observable<any>
+    addToHttpParams( httpParams: HttpParams, value: any, key?: string ): HttpParams
     {
         throw new Error( 'not implemented' )
     }
 
-    groupAllGet( observe?: "body", reportProgress?: boolean ): Observable<ResponseGroupAll>
-    groupAllGet( observe?: "response", reportProgress?: boolean ): Observable<HttpResponse<ResponseGroupAll>>
-    groupAllGet( observe?: "events", reportProgress?: boolean ): Observable<HttpEvent<ResponseGroupAll>>
-    groupAllGet( observe: any, reportProgress: boolean ): Observable<any>
-    groupAllGet( observe?: any, reportProgress?: boolean ): Observable<ResponseGroupAll> | Observable<HttpResponse<ResponseGroupAll>> | Observable<HttpEvent<ResponseGroupAll>> | Observable<any>
+    addToHttpParamsRecursive( httpParams: HttpParams, value?: any, key?: string ): HttpParams
     {
         throw new Error( 'not implemented' )
     }
 
-    groupGroupIdGet( groupId: number, observe?: "body", reportProgress?: boolean ): Observable<ResponseGroup>
-    groupGroupIdGet( groupId: number, observe?: "response", reportProgress?: boolean ): Observable<HttpResponse<ResponseGroup>>
-    groupGroupIdGet( groupId: number, observe?: "events", reportProgress?: boolean ): Observable<HttpEvent<ResponseGroup>>
-    groupGroupIdGet( groupId: number, observe: any, reportProgress: boolean ): Observable<any>
-    groupGroupIdGet( groupId: number, observe?: any, reportProgress?: boolean ): Observable<ResponseGroup> | Observable<HttpResponse<ResponseGroup>> | Observable<HttpEvent<ResponseGroup>> | Observable<any>
+    groupAddPost( requestGroupAdd: RequestGroupAdd, observe?: "body", reportProgress?: boolean, options?: { httpHeaderAccept?: "application/json" } ): Observable<TypeGroup>
+    groupAddPost( requestGroupAdd: RequestGroupAdd, observe?: "response", reportProgress?: boolean, options?: { httpHeaderAccept?: "application/json" } ): Observable<HttpResponse<TypeGroup>>
+    groupAddPost( requestGroupAdd: RequestGroupAdd, observe?: "events", reportProgress?: boolean, options?: { httpHeaderAccept?: "application/json" } ): Observable<HttpEvent<TypeGroup>>
+    groupAddPost( requestGroupAdd: RequestGroupAdd, observe: any, reportProgress: boolean, options?: { httpHeaderAccept?: "application/json" } ): Observable<any>
+    groupAddPost( requestGroupAdd: RequestGroupAdd, observe?: any, reportProgress?: boolean, options?: { httpHeaderAccept?: "application/json" } ): Observable<TypeGroup> | Observable<HttpResponse<TypeGroup>> | Observable<HttpEvent<TypeGroup>> | Observable<any>
     {
         throw new Error( 'not implemented' )
     }
 
-    groupGroupIdRemovePost( groupId: number, observe?: "body", reportProgress?: boolean ): Observable<any>
-    groupGroupIdRemovePost( groupId: number, observe?: "response", reportProgress?: boolean ): Observable<HttpResponse<any>>
-    groupGroupIdRemovePost( groupId: number, observe?: "events", reportProgress?: boolean ): Observable<HttpEvent<any>>
-    groupGroupIdRemovePost( groupId: number, observe: any, reportProgress: boolean ): Observable<any>
-    groupGroupIdRemovePost( groupId: number, observe?: any, reportProgress?: boolean ): Observable<any> | Observable<HttpResponse<any>> | Observable<HttpEvent<any>>
+    groupAllGet( observe?: "body", reportProgress?: boolean, options?: { httpHeaderAccept?: "application/json" } ): Observable<ResponseGroupAll>
+    groupAllGet( observe?: "response", reportProgress?: boolean, options?: { httpHeaderAccept?: "application/json" } ): Observable<HttpResponse<ResponseGroupAll>>
+    groupAllGet( observe?: "events", reportProgress?: boolean, options?: { httpHeaderAccept?: "application/json" } ): Observable<HttpEvent<ResponseGroupAll>>
+    groupAllGet( observe: any, reportProgress: boolean, options?: { httpHeaderAccept?: "application/json" } ): Observable<any>
+    groupAllGet( observe?: any, reportProgress?: boolean, options?: { httpHeaderAccept?: "application/json" } ): Observable<ResponseGroupAll> | Observable<HttpResponse<ResponseGroupAll>> | Observable<HttpEvent<ResponseGroupAll>> | Observable<any>
     {
         throw new Error( 'not implemented' )
     }
 
-    infoCountriesGet( observe?: "body", reportProgress?: boolean ): Observable<ResponseInfoCountries>
-    infoCountriesGet( observe?: "response", reportProgress?: boolean ): Observable<HttpResponse<ResponseInfoCountries>>
-    infoCountriesGet( observe?: "events", reportProgress?: boolean ): Observable<HttpEvent<ResponseInfoCountries>>
-    infoCountriesGet( observe: any, reportProgress: boolean ): Observable<any>
-    infoCountriesGet( observe?: any, reportProgress?: boolean ): Observable<ResponseInfoCountries> | Observable<HttpResponse<ResponseInfoCountries>> | Observable<HttpEvent<ResponseInfoCountries>> | Observable<any>
+    groupGroupIdGet( groupId: number, observe?: "body", reportProgress?: boolean, options?: { httpHeaderAccept?: "application/json" } ): Observable<TypeGroup>
+    groupGroupIdGet( groupId: number, observe?: "response", reportProgress?: boolean, options?: { httpHeaderAccept?: "application/json" } ): Observable<HttpResponse<TypeGroup>>
+    groupGroupIdGet( groupId: number, observe?: "events", reportProgress?: boolean, options?: { httpHeaderAccept?: "application/json" } ): Observable<HttpEvent<TypeGroup>>
+    groupGroupIdGet( groupId: number, observe: any, reportProgress: boolean, options?: { httpHeaderAccept?: "application/json" } ): Observable<any>
+    groupGroupIdGet( groupId: number, observe?: any, reportProgress?: boolean, options?: { httpHeaderAccept?: "application/json" } ): Observable<TypeGroup> | Observable<HttpResponse<TypeGroup>> | Observable<HttpEvent<TypeGroup>> | Observable<any>
     {
         throw new Error( 'not implemented' )
     }
 
-    infoUniversitiesGet( observe?: "body", reportProgress?: boolean ): Observable<ResponseInfoUniversities>
-    infoUniversitiesGet( observe?: "response", reportProgress?: boolean ): Observable<HttpResponse<ResponseInfoUniversities>>
-    infoUniversitiesGet( observe?: "events", reportProgress?: boolean ): Observable<HttpEvent<ResponseInfoUniversities>>
-    infoUniversitiesGet( observe: any, reportProgress: boolean ): Observable<any>
-    infoUniversitiesGet( observe?: any, reportProgress?: boolean ): Observable<ResponseInfoUniversities> | Observable<HttpResponse<ResponseInfoUniversities>> | Observable<HttpEvent<ResponseInfoUniversities>> | Observable<any>
+    groupGroupIdRemovePost( groupId: number, observe?: "body", reportProgress?: boolean, options?: { httpHeaderAccept?: "application/json" } ): Observable<any>
+    groupGroupIdRemovePost( groupId: number, observe?: "response", reportProgress?: boolean, options?: { httpHeaderAccept?: "application/json" } ): Observable<HttpResponse<any>>
+    groupGroupIdRemovePost( groupId: number, observe?: "events", reportProgress?: boolean, options?: { httpHeaderAccept?: "application/json" } ): Observable<HttpEvent<any>>
+    groupGroupIdRemovePost( groupId: number, observe: any, reportProgress: boolean, options?: { httpHeaderAccept?: "application/json" } ): Observable<any>
+    groupGroupIdRemovePost( groupId: number, observe?: any, reportProgress?: boolean, options?: { httpHeaderAccept?: "application/json" } ): Observable<any> | Observable<HttpResponse<any>> | Observable<HttpEvent<any>>
     {
         throw new Error( 'not implemented' )
     }
 
-    loginPost( body: RequestLogin, observe?: "body", reportProgress?: boolean ): Observable<ResponseLogin>
-    loginPost( body: RequestLogin, observe?: "response", reportProgress?: boolean ): Observable<HttpResponse<ResponseLogin>>
-    loginPost( body: RequestLogin, observe?: "events", reportProgress?: boolean ): Observable<HttpEvent<ResponseLogin>>
-    loginPost( body: RequestLogin, observe: any, reportProgress: boolean ): Observable<any>
-    loginPost( body: RequestLogin, observe?: any, reportProgress?: boolean ): Observable<ResponseLogin> | Observable<HttpResponse<ResponseLogin>> | Observable<HttpEvent<ResponseLogin>> | Observable<any>
+    infoCountriesGet( observe?: "body", reportProgress?: boolean, options?: { httpHeaderAccept?: "application/json" } ): Observable<ResponseInfoCountries>
+    infoCountriesGet( observe?: "response", reportProgress?: boolean, options?: { httpHeaderAccept?: "application/json" } ): Observable<HttpResponse<ResponseInfoCountries>>
+    infoCountriesGet( observe?: "events", reportProgress?: boolean, options?: { httpHeaderAccept?: "application/json" } ): Observable<HttpEvent<ResponseInfoCountries>>
+    infoCountriesGet( observe: any, reportProgress: boolean, options?: { httpHeaderAccept?: "application/json" } ): Observable<any>
+    infoCountriesGet( observe?: any, reportProgress?: boolean, options?: { httpHeaderAccept?: "application/json" } ): Observable<ResponseInfoCountries> | Observable<HttpResponse<ResponseInfoCountries>> | Observable<HttpEvent<ResponseInfoCountries>> | Observable<any>
     {
-        const result: ResponseLogin = {}
+        throw new Error( 'not implemented' )
+    }
+
+    infoUniversitiesGet( observe?: "body", reportProgress?: boolean, options?: { httpHeaderAccept?: "application/json" } ): Observable<ResponseInfoUniversities>
+    infoUniversitiesGet( observe?: "response", reportProgress?: boolean, options?: { httpHeaderAccept?: "application/json" } ): Observable<HttpResponse<ResponseInfoUniversities>>
+    infoUniversitiesGet( observe?: "events", reportProgress?: boolean, options?: { httpHeaderAccept?: "application/json" } ): Observable<HttpEvent<ResponseInfoUniversities>>
+    infoUniversitiesGet( observe: any, reportProgress: boolean, options?: { httpHeaderAccept?: "application/json" } ): Observable<any>
+    infoUniversitiesGet( observe?: any, reportProgress?: boolean, options?: { httpHeaderAccept?: "application/json" } ): Observable<ResponseInfoUniversities> | Observable<HttpResponse<ResponseInfoUniversities>> | Observable<HttpEvent<ResponseInfoUniversities>> | Observable<any>
+    {
+        throw new Error( 'not implemented' )
+    }
+
+    loginPost( requestLogin: RequestLogin, observe?: "body", reportProgress?: boolean, options?: { httpHeaderAccept?: "application/json" } ): Observable<TypeCSRFPair>
+    loginPost( requestLogin: RequestLogin, observe?: "response", reportProgress?: boolean, options?: { httpHeaderAccept?: "application/json" } ): Observable<HttpResponse<TypeCSRFPair>>
+    loginPost( requestLogin: RequestLogin, observe?: "events", reportProgress?: boolean, options?: { httpHeaderAccept?: "application/json" } ): Observable<HttpEvent<TypeCSRFPair>>
+    loginPost( requestLogin: RequestLogin, observe: any, reportProgress: boolean, options?: { httpHeaderAccept?: "application/json" } ): Observable<any>
+    loginPost( requestLogin: RequestLogin, observe?: any, reportProgress?: boolean, options?: { httpHeaderAccept?: "application/json" } ): Observable<TypeCSRFPair> | Observable<HttpResponse<TypeCSRFPair>> | Observable<HttpEvent<TypeCSRFPair>> | Observable<any>
+    {
+        const result: TypeCSRFPair = {
+            csrf_access_token: 'access token value',
+            csrf_refresh_token: 'refresh token value'
+        }
         return of( result )
     }
 
-    logoutPost( observe?: "body", reportProgress?: boolean ): Observable<any>
-    logoutPost( observe?: "response", reportProgress?: boolean ): Observable<HttpResponse<any>>
-    logoutPost( observe?: "events", reportProgress?: boolean ): Observable<HttpEvent<any>>
-    logoutPost( observe: any, reportProgress: boolean ): Observable<any>
-    logoutPost( observe?: any, reportProgress?: boolean ): Observable<any> | Observable<HttpResponse<any>> | Observable<HttpEvent<any>>
+    logoutPost( observe?: "body", reportProgress?: boolean, options?: { httpHeaderAccept?: undefined } ): Observable<any>
+    logoutPost( observe?: "response", reportProgress?: boolean, options?: { httpHeaderAccept?: undefined } ): Observable<HttpResponse<any>>
+    logoutPost( observe?: "events", reportProgress?: boolean, options?: { httpHeaderAccept?: undefined } ): Observable<HttpEvent<any>>
+    logoutPost( observe: any, reportProgress: boolean, options?: { httpHeaderAccept?: undefined } ): Observable<any>
+    logoutPost( observe?: any, reportProgress?: boolean, options?: { httpHeaderAccept?: undefined } ): Observable<any> | Observable<HttpResponse<any>> | Observable<HttpEvent<any>>
     {
         throw new Error( 'not implemented' )
     }
 
-    preregisterPost( observe?: "body", reportProgress?: boolean ): Observable<ResponsePreregister>
-    preregisterPost( observe?: "response", reportProgress?: boolean ): Observable<HttpResponse<ResponsePreregister>>
-    preregisterPost( observe?: "events", reportProgress?: boolean ): Observable<HttpEvent<ResponsePreregister>>
-    preregisterPost( observe: any, reportProgress: boolean ): Observable<any>
-    preregisterPost( observe?: any, reportProgress?: boolean ): Observable<ResponsePreregister> | Observable<HttpResponse<ResponsePreregister>> | Observable<HttpEvent<ResponsePreregister>> | Observable<any>
+    preregisterPost( observe?: "body", reportProgress?: boolean, options?: { httpHeaderAccept?: "application/json" } ): Observable<TypePreregisterInfo>
+    preregisterPost( observe?: "response", reportProgress?: boolean, options?: { httpHeaderAccept?: "application/json" } ): Observable<HttpResponse<TypePreregisterInfo>>
+    preregisterPost( observe?: "events", reportProgress?: boolean, options?: { httpHeaderAccept?: "application/json" } ): Observable<HttpEvent<TypePreregisterInfo>>
+    preregisterPost( observe: any, reportProgress: boolean, options?: { httpHeaderAccept?: "application/json" } ): Observable<any>
+    preregisterPost( observe?: any, reportProgress?: boolean, options?: { httpHeaderAccept?: "application/json" } ): Observable<TypePreregisterInfo> | Observable<HttpResponse<TypePreregisterInfo>> | Observable<HttpEvent<TypePreregisterInfo>> | Observable<any>
     {
         throw new Error( 'not implemented' )
     }
 
-    refreshPost( observe?: "body", reportProgress?: boolean ): Observable<ResponseRefresh>
-    refreshPost( observe?: "response", reportProgress?: boolean ): Observable<HttpResponse<ResponseRefresh>>
-    refreshPost( observe?: "events", reportProgress?: boolean ): Observable<HttpEvent<ResponseRefresh>>
-    refreshPost( observe: any, reportProgress: boolean ): Observable<any>
-    refreshPost( observe?: any, reportProgress?: boolean ): Observable<ResponseRefresh> | Observable<HttpResponse<ResponseRefresh>> | Observable<HttpEvent<ResponseRefresh>> | Observable<any>
+    refreshPost( observe?: "body", reportProgress?: boolean, options?: { httpHeaderAccept?: "application/json" } ): Observable<TypeCSRFPair>
+    refreshPost( observe?: "response", reportProgress?: boolean, options?: { httpHeaderAccept?: "application/json" } ): Observable<HttpResponse<TypeCSRFPair>>
+    refreshPost( observe?: "events", reportProgress?: boolean, options?: { httpHeaderAccept?: "application/json" } ): Observable<HttpEvent<TypeCSRFPair>>
+    refreshPost( observe: any, reportProgress: boolean, options?: { httpHeaderAccept?: "application/json" } ): Observable<any>
+    refreshPost( observe?: any, reportProgress?: boolean, options?: { httpHeaderAccept?: "application/json" } ): Observable<TypeCSRFPair> | Observable<HttpResponse<TypeCSRFPair>> | Observable<HttpEvent<TypeCSRFPair>> | Observable<any>
     {
         throw new Error( 'not implemented' )
     }
 
-    registerInternalPost( body: TypeAuthCredentials, observe?: "body", reportProgress?: boolean ): Observable<ResponseRegistrationInternal>
-    registerInternalPost( body: TypeAuthCredentials, observe?: "response", reportProgress?: boolean ): Observable<HttpResponse<ResponseRegistrationInternal>>
-    registerInternalPost( body: TypeAuthCredentials, observe?: "events", reportProgress?: boolean ): Observable<HttpEvent<ResponseRegistrationInternal>>
-    registerInternalPost( body: TypeAuthCredentials, observe: any, reportProgress: boolean ): Observable<any>
-    registerInternalPost( body: TypeAuthCredentials, observe?: any, reportProgress?: boolean ): Observable<ResponseRegistrationInternal> | Observable<HttpResponse<ResponseRegistrationInternal>> | Observable<HttpEvent<ResponseRegistrationInternal>> | Observable<any>
+    registerInternalPost( body: TypeAuthCredentials, observe?: "body", reportProgress?: boolean, options?: { httpHeaderAccept?: "application/json" } ): Observable<TypeUserInfo>
+    registerInternalPost( body: TypeAuthCredentials, observe?: "response", reportProgress?: boolean, options?: { httpHeaderAccept?: "application/json" } ): Observable<HttpResponse<TypeUserInfo>>
+    registerInternalPost( body: TypeAuthCredentials, observe?: "events", reportProgress?: boolean, options?: { httpHeaderAccept?: "application/json" } ): Observable<HttpEvent<TypeUserInfo>>
+    registerInternalPost( body: TypeAuthCredentials, observe: any, reportProgress: boolean, options?: { httpHeaderAccept?: "application/json" } ): Observable<any>
+    registerInternalPost( body: TypeAuthCredentials, observe?: any, reportProgress?: boolean, options?: { httpHeaderAccept?: "application/json" } ): Observable<TypeUserInfo> | Observable<HttpResponse<TypeUserInfo>> | Observable<HttpEvent<TypeUserInfo>> | Observable<any>
     {
         throw new Error( 'not implemented' )
     }
 
-    registerPost( body: RequestRegistration, observe?: "body", reportProgress?: boolean ): Observable<ResponseRegistration>
-    registerPost( body: RequestRegistration, observe?: "response", reportProgress?: boolean ): Observable<HttpResponse<ResponseRegistration>>
-    registerPost( body: RequestRegistration, observe?: "events", reportProgress?: boolean ): Observable<HttpEvent<ResponseRegistration>>
-    registerPost( body: RequestRegistration, observe: any, reportProgress: boolean ): Observable<any>
-    registerPost( body: RequestRegistration, observe?: any, reportProgress?: boolean ): Observable<ResponseRegistration> | Observable<HttpResponse<ResponseRegistration>> | Observable<HttpEvent<ResponseRegistration>> | Observable<any>
+    registerPost( requestRegistration: RequestRegistration, observe?: "body", reportProgress?: boolean, options?: { httpHeaderAccept?: "application/json" } ): Observable<TypeUserInfo>
+    registerPost( requestRegistration: RequestRegistration, observe?: "response", reportProgress?: boolean, options?: { httpHeaderAccept?: "application/json" } ): Observable<HttpResponse<TypeUserInfo>>
+    registerPost( requestRegistration: RequestRegistration, observe?: "events", reportProgress?: boolean, options?: { httpHeaderAccept?: "application/json" } ): Observable<HttpEvent<TypeUserInfo>>
+    registerPost( requestRegistration: RequestRegistration, observe: any, reportProgress: boolean, options?: { httpHeaderAccept?: "application/json" } ): Observable<any>
+    registerPost( requestRegistration: RequestRegistration, observe?: any, reportProgress?: boolean, options?: { httpHeaderAccept?: "application/json" } ): Observable<TypeUserInfo> | Observable<HttpResponse<TypeUserInfo>> | Observable<HttpEvent<TypeUserInfo>> | Observable<any>
     {
         const result: TypeUserInfo = {
-            username: body.authInfo.email,
+            username: requestRegistration.auth_info.email,
             role: TypeUserRole.Participant,
-            type: body.registerType,
+            type: requestRegistration.register_type,
             id: 12345
         }
-        this.store.dispatch( pushPersonalInfo( { personalInfo: body.personalInfo } ) )
+        this.store.dispatch( pushPersonalInfo( { personalInfo: requestRegistration.personal_info } ) )
         return of( result )
     }
 
-    userAllGet( observe?: "body", reportProgress?: boolean ): Observable<ResponseUserAll>
-    userAllGet( observe?: "response", reportProgress?: boolean ): Observable<HttpResponse<ResponseUserAll>>
-    userAllGet( observe?: "events", reportProgress?: boolean ): Observable<HttpEvent<ResponseUserAll>>
-    userAllGet( observe: any, reportProgress: boolean ): Observable<any>
-    userAllGet( observe?: any, reportProgress?: boolean ): Observable<ResponseUserAll> | Observable<HttpResponse<ResponseUserAll>> | Observable<HttpEvent<ResponseUserAll>> | Observable<any>
+    userAllGet( observe?: "body", reportProgress?: boolean, options?: { httpHeaderAccept?: "application/json" } ): Observable<ResponseUserAll>
+    userAllGet( observe?: "response", reportProgress?: boolean, options?: { httpHeaderAccept?: "application/json" } ): Observable<HttpResponse<ResponseUserAll>>
+    userAllGet( observe?: "events", reportProgress?: boolean, options?: { httpHeaderAccept?: "application/json" } ): Observable<HttpEvent<ResponseUserAll>>
+    userAllGet( observe: any, reportProgress: boolean, options?: { httpHeaderAccept?: "application/json" } ): Observable<any>
+    userAllGet( observe?: any, reportProgress?: boolean, options?: { httpHeaderAccept?: "application/json" } ): Observable<ResponseUserAll> | Observable<HttpResponse<ResponseUserAll>> | Observable<HttpEvent<ResponseUserAll>> | Observable<any>
     {
         throw new Error( 'not implemented' )
     }
 
-    userByGroupGroupIdGet( groupId: number, observe?: "body", reportProgress?: boolean ): Observable<ResponseUserByGroup>
-    userByGroupGroupIdGet( groupId: number, observe?: "response", reportProgress?: boolean ): Observable<HttpResponse<ResponseUserByGroup>>
-    userByGroupGroupIdGet( groupId: number, observe?: "events", reportProgress?: boolean ): Observable<HttpEvent<ResponseUserByGroup>>
-    userByGroupGroupIdGet( groupId: number, observe: any, reportProgress: boolean ): Observable<any>
-    userByGroupGroupIdGet( groupId: number, observe?: any, reportProgress?: boolean ): Observable<ResponseUserByGroup> | Observable<HttpResponse<ResponseUserByGroup>> | Observable<HttpEvent<ResponseUserByGroup>> | Observable<any>
+    userByGroupGroupIdGet( groupId: number, observe?: "body", reportProgress?: boolean, options?: { httpHeaderAccept?: "application/json" } ): Observable<ResponseUserByGroup>
+    userByGroupGroupIdGet( groupId: number, observe?: "response", reportProgress?: boolean, options?: { httpHeaderAccept?: "application/json" } ): Observable<HttpResponse<ResponseUserByGroup>>
+    userByGroupGroupIdGet( groupId: number, observe?: "events", reportProgress?: boolean, options?: { httpHeaderAccept?: "application/json" } ): Observable<HttpEvent<ResponseUserByGroup>>
+    userByGroupGroupIdGet( groupId: number, observe: any, reportProgress: boolean, options?: { httpHeaderAccept?: "application/json" } ): Observable<any>
+    userByGroupGroupIdGet( groupId: number, observe?: any, reportProgress?: boolean, options?: { httpHeaderAccept?: "application/json" } ): Observable<ResponseUserByGroup> | Observable<HttpResponse<ResponseUserByGroup>> | Observable<HttpEvent<ResponseUserByGroup>> | Observable<any>
     {
         throw new Error( 'not implemented' )
     }
 
-    userSelfGet( observe?: "body", reportProgress?: boolean ): Observable<ResponseUserSelf>
-    userSelfGet( observe?: "response", reportProgress?: boolean ): Observable<HttpResponse<ResponseUserSelf>>
-    userSelfGet( observe?: "events", reportProgress?: boolean ): Observable<HttpEvent<ResponseUserSelf>>
-    userSelfGet( observe: any, reportProgress: boolean ): Observable<any>
-    userSelfGet( observe?: any, reportProgress?: boolean ): Observable<ResponseUserSelf> | Observable<HttpResponse<ResponseUserSelf>> | Observable<HttpEvent<ResponseUserSelf>> | Observable<any>
+    userSelfGet( observe?: "body", reportProgress?: boolean, options?: { httpHeaderAccept?: "application/json" } ): Observable<TypeUserInfo>
+    userSelfGet( observe?: "response", reportProgress?: boolean, options?: { httpHeaderAccept?: "application/json" } ): Observable<HttpResponse<TypeUserInfo>>
+    userSelfGet( observe?: "events", reportProgress?: boolean, options?: { httpHeaderAccept?: "application/json" } ): Observable<HttpEvent<TypeUserInfo>>
+    userSelfGet( observe: any, reportProgress: boolean, options?: { httpHeaderAccept?: "application/json" } ): Observable<any>
+    userSelfGet( observe?: any, reportProgress?: boolean, options?: { httpHeaderAccept?: "application/json" } ): Observable<TypeUserInfo> | Observable<HttpResponse<TypeUserInfo>> | Observable<HttpEvent<TypeUserInfo>> | Observable<any>
     {
         throw new Error( 'not implemented' )
     }
 
-    userSelfGroupsGet( observe?: "body", reportProgress?: boolean ): Observable<ResponseUserSelfGroup>
-    userSelfGroupsGet( observe?: "response", reportProgress?: boolean ): Observable<HttpResponse<ResponseUserSelfGroup>>
-    userSelfGroupsGet( observe?: "events", reportProgress?: boolean ): Observable<HttpEvent<ResponseUserSelfGroup>>
-    userSelfGroupsGet( observe: any, reportProgress: boolean ): Observable<any>
-    userSelfGroupsGet( observe?: any, reportProgress?: boolean ): Observable<ResponseUserSelfGroup> | Observable<HttpResponse<ResponseUserSelfGroup>> | Observable<HttpEvent<ResponseUserSelfGroup>> | Observable<any>
+    userSelfGroupsGet( observe?: "body", reportProgress?: boolean, options?: { httpHeaderAccept?: "application/json" } ): Observable<ResponseUserSelfGroup>
+    userSelfGroupsGet( observe?: "response", reportProgress?: boolean, options?: { httpHeaderAccept?: "application/json" } ): Observable<HttpResponse<ResponseUserSelfGroup>>
+    userSelfGroupsGet( observe?: "events", reportProgress?: boolean, options?: { httpHeaderAccept?: "application/json" } ): Observable<HttpEvent<ResponseUserSelfGroup>>
+    userSelfGroupsGet( observe: any, reportProgress: boolean, options?: { httpHeaderAccept?: "application/json" } ): Observable<any>
+    userSelfGroupsGet( observe?: any, reportProgress?: boolean, options?: { httpHeaderAccept?: "application/json" } ): Observable<ResponseUserSelfGroup> | Observable<HttpResponse<ResponseUserSelfGroup>> | Observable<HttpEvent<ResponseUserSelfGroup>> | Observable<any>
     {
         throw new Error( 'not implemented' )
     }
 
-    userSelfPasswordPost( body: RequestPasswordSelf, observe?: "body", reportProgress?: boolean ): Observable<any>
-    userSelfPasswordPost( body: RequestPasswordSelf, observe?: "response", reportProgress?: boolean ): Observable<HttpResponse<any>>
-    userSelfPasswordPost( body: RequestPasswordSelf, observe?: "events", reportProgress?: boolean ): Observable<HttpEvent<any>>
-    userSelfPasswordPost( body: RequestPasswordSelf, observe: any, reportProgress: boolean ): Observable<any>
-    userSelfPasswordPost( body: RequestPasswordSelf, observe?: any, reportProgress?: boolean ): Observable<any> | Observable<HttpResponse<any>> | Observable<HttpEvent<any>>
+    userSelfPasswordPost( requestPasswordSelf: RequestPasswordSelf, observe?: "body", reportProgress?: boolean, options?: { httpHeaderAccept?: "application/json" } ): Observable<any>
+    userSelfPasswordPost( requestPasswordSelf: RequestPasswordSelf, observe?: "response", reportProgress?: boolean, options?: { httpHeaderAccept?: "application/json" } ): Observable<HttpResponse<any>>
+    userSelfPasswordPost( requestPasswordSelf: RequestPasswordSelf, observe?: "events", reportProgress?: boolean, options?: { httpHeaderAccept?: "application/json" } ): Observable<HttpEvent<any>>
+    userSelfPasswordPost( requestPasswordSelf: RequestPasswordSelf, observe: any, reportProgress: boolean, options?: { httpHeaderAccept?: "application/json" } ): Observable<any>
+    userSelfPasswordPost( requestPasswordSelf: RequestPasswordSelf, observe?: any, reportProgress?: boolean, options?: { httpHeaderAccept?: "application/json" } ): Observable<any> | Observable<HttpResponse<any>> | Observable<HttpEvent<any>>
     {
         throw new Error( 'not implemented' )
     }
 
-    userSelfPersonalGet( observe?: "body", reportProgress?: boolean ): Observable<ResponsePersonalSelf>
-    userSelfPersonalGet( observe?: "response", reportProgress?: boolean ): Observable<HttpResponse<ResponsePersonalSelf>>
-    userSelfPersonalGet( observe?: "events", reportProgress?: boolean ): Observable<HttpEvent<ResponsePersonalSelf>>
-    userSelfPersonalGet( observe: any, reportProgress: boolean ): Observable<any>
-    userSelfPersonalGet( observe?: any, reportProgress?: boolean ): Observable<ResponsePersonalSelf> | Observable<HttpResponse<ResponsePersonalSelf>> | Observable<HttpEvent<ResponsePersonalSelf>> | Observable<any>
+    userSelfPersonalGet( observe?: "body", reportProgress?: boolean, options?: { httpHeaderAccept?: "application/json" } ): Observable<TypePersonalInfo>
+    userSelfPersonalGet( observe?: "response", reportProgress?: boolean, options?: { httpHeaderAccept?: "application/json" } ): Observable<HttpResponse<TypePersonalInfo>>
+    userSelfPersonalGet( observe?: "events", reportProgress?: boolean, options?: { httpHeaderAccept?: "application/json" } ): Observable<HttpEvent<TypePersonalInfo>>
+    userSelfPersonalGet( observe: any, reportProgress: boolean, options?: { httpHeaderAccept?: "application/json" } ): Observable<any>
+    userSelfPersonalGet( observe?: any, reportProgress?: boolean, options?: { httpHeaderAccept?: "application/json" } ): Observable<TypePersonalInfo> | Observable<HttpResponse<TypePersonalInfo>> | Observable<HttpEvent<TypePersonalInfo>> | Observable<any>
     {
         throw new Error( 'not implemented' )
     }
 
-    userSelfUniversityGet( observe?: "body", reportProgress?: boolean ): Observable<ResponseUniversitySelf>
-    userSelfUniversityGet( observe?: "response", reportProgress?: boolean ): Observable<HttpResponse<ResponseUniversitySelf>>
-    userSelfUniversityGet( observe?: "events", reportProgress?: boolean ): Observable<HttpEvent<ResponseUniversitySelf>>
-    userSelfUniversityGet( observe: any, reportProgress: boolean ): Observable<any>
-    userSelfUniversityGet( observe?: any, reportProgress?: boolean ): Observable<ResponseUniversitySelf> | Observable<HttpResponse<ResponseUniversitySelf>> | Observable<HttpEvent<ResponseUniversitySelf>> | Observable<any>
+    userSelfUniversityGet( observe?: "body", reportProgress?: boolean, options?: { httpHeaderAccept?: "application/json" } ): Observable<TypePersonalInfo>
+    userSelfUniversityGet( observe?: "response", reportProgress?: boolean, options?: { httpHeaderAccept?: "application/json" } ): Observable<HttpResponse<TypePersonalInfo>>
+    userSelfUniversityGet( observe?: "events", reportProgress?: boolean, options?: { httpHeaderAccept?: "application/json" } ): Observable<HttpEvent<TypePersonalInfo>>
+    userSelfUniversityGet( observe: any, reportProgress: boolean, options?: { httpHeaderAccept?: "application/json" } ): Observable<any>
+    userSelfUniversityGet( observe?: any, reportProgress?: boolean, options?: { httpHeaderAccept?: "application/json" } ): Observable<TypePersonalInfo> | Observable<HttpResponse<TypePersonalInfo>> | Observable<HttpEvent<TypePersonalInfo>> | Observable<any>
     {
         throw new Error( 'not implemented' )
     }
 
-    userUserIdGet( userId: number, observe?: "body", reportProgress?: boolean ): Observable<ResponseUserAdmin>
-    userUserIdGet( userId: number, observe?: "response", reportProgress?: boolean ): Observable<HttpResponse<ResponseUserAdmin>>
-    userUserIdGet( userId: number, observe?: "events", reportProgress?: boolean ): Observable<HttpEvent<ResponseUserAdmin>>
-    userUserIdGet( userId: number, observe: any, reportProgress: boolean ): Observable<any>
-    userUserIdGet( userId: number, observe?: any, reportProgress?: boolean ): Observable<ResponseUserAdmin> | Observable<HttpResponse<ResponseUserAdmin>> | Observable<HttpEvent<ResponseUserAdmin>> | Observable<any>
+    userUserIdGet( userId: number, observe?: "body", reportProgress?: boolean, options?: { httpHeaderAccept?: "application/json" } ): Observable<TypeUserInfo>
+    userUserIdGet( userId: number, observe?: "response", reportProgress?: boolean, options?: { httpHeaderAccept?: "application/json" } ): Observable<HttpResponse<TypeUserInfo>>
+    userUserIdGet( userId: number, observe?: "events", reportProgress?: boolean, options?: { httpHeaderAccept?: "application/json" } ): Observable<HttpEvent<TypeUserInfo>>
+    userUserIdGet( userId: number, observe: any, reportProgress: boolean, options?: { httpHeaderAccept?: "application/json" } ): Observable<any>
+    userUserIdGet( userId: number, observe?: any, reportProgress?: boolean, options?: { httpHeaderAccept?: "application/json" } ): Observable<TypeUserInfo> | Observable<HttpResponse<TypeUserInfo>> | Observable<HttpEvent<TypeUserInfo>> | Observable<any>
     {
         throw new Error( 'not implemented' )
     }
 
-    userUserIdGroupsAddPost( body: RequestUserGroupsAdd, userId: number, observe?: "body", reportProgress?: boolean ): Observable<any>
-    userUserIdGroupsAddPost( body: RequestUserGroupsAdd, userId: number, observe?: "response", reportProgress?: boolean ): Observable<HttpResponse<any>>
-    userUserIdGroupsAddPost( body: RequestUserGroupsAdd, userId: number, observe?: "events", reportProgress?: boolean ): Observable<HttpEvent<any>>
-    userUserIdGroupsAddPost( body: RequestUserGroupsAdd, userId: number, observe: any, reportProgress: boolean ): Observable<any>
-    userUserIdGroupsAddPost( body: RequestUserGroupsAdd, userId: number, observe?: any, reportProgress?: boolean ): Observable<any> | Observable<HttpResponse<any>> | Observable<HttpEvent<any>>
+    userUserIdGroupsAddPost( userId: number, requestUserGroupsAdd: RequestUserGroupsAdd, observe?: "body", reportProgress?: boolean, options?: { httpHeaderAccept?: "application/json" } ): Observable<any>
+    userUserIdGroupsAddPost( userId: number, requestUserGroupsAdd: RequestUserGroupsAdd, observe?: "response", reportProgress?: boolean, options?: { httpHeaderAccept?: "application/json" } ): Observable<HttpResponse<any>>
+    userUserIdGroupsAddPost( userId: number, requestUserGroupsAdd: RequestUserGroupsAdd, observe?: "events", reportProgress?: boolean, options?: { httpHeaderAccept?: "application/json" } ): Observable<HttpEvent<any>>
+    userUserIdGroupsAddPost( userId: number, requestUserGroupsAdd: RequestUserGroupsAdd, observe: any, reportProgress: boolean, options?: { httpHeaderAccept?: "application/json" } ): Observable<any>
+    userUserIdGroupsAddPost( userId: number, requestUserGroupsAdd: RequestUserGroupsAdd, observe?: any, reportProgress?: boolean, options?: { httpHeaderAccept?: "application/json" } ): Observable<any> | Observable<HttpResponse<any>> | Observable<HttpEvent<any>>
     {
         throw new Error( 'not implemented' )
     }
 
-    userUserIdGroupsGet( userId: number, observe?: "body", reportProgress?: boolean ): Observable<ResponseUserAdminGroup>
-    userUserIdGroupsGet( userId: number, observe?: "response", reportProgress?: boolean ): Observable<HttpResponse<ResponseUserAdminGroup>>
-    userUserIdGroupsGet( userId: number, observe?: "events", reportProgress?: boolean ): Observable<HttpEvent<ResponseUserAdminGroup>>
-    userUserIdGroupsGet( userId: number, observe: any, reportProgress: boolean ): Observable<any>
-    userUserIdGroupsGet( userId: number, observe?: any, reportProgress?: boolean ): Observable<ResponseUserAdminGroup> | Observable<HttpResponse<ResponseUserAdminGroup>> | Observable<HttpEvent<ResponseUserAdminGroup>> | Observable<any>
+    userUserIdGroupsGet( userId: number, observe?: "body", reportProgress?: boolean, options?: { httpHeaderAccept?: "application/json" } ): Observable<ResponseUserAdminGroup>
+    userUserIdGroupsGet( userId: number, observe?: "response", reportProgress?: boolean, options?: { httpHeaderAccept?: "application/json" } ): Observable<HttpResponse<ResponseUserAdminGroup>>
+    userUserIdGroupsGet( userId: number, observe?: "events", reportProgress?: boolean, options?: { httpHeaderAccept?: "application/json" } ): Observable<HttpEvent<ResponseUserAdminGroup>>
+    userUserIdGroupsGet( userId: number, observe: any, reportProgress: boolean, options?: { httpHeaderAccept?: "application/json" } ): Observable<any>
+    userUserIdGroupsGet( userId: number, observe?: any, reportProgress?: boolean, options?: { httpHeaderAccept?: "application/json" } ): Observable<ResponseUserAdminGroup> | Observable<HttpResponse<ResponseUserAdminGroup>> | Observable<HttpEvent<ResponseUserAdminGroup>> | Observable<any>
     {
         throw new Error( 'not implemented' )
     }
 
-    userUserIdGroupsRemovePost( body: RequestUserGroupsRemove, userId: number, observe?: "body", reportProgress?: boolean ): Observable<any>
-    userUserIdGroupsRemovePost( body: RequestUserGroupsRemove, userId: number, observe?: "response", reportProgress?: boolean ): Observable<HttpResponse<any>>
-    userUserIdGroupsRemovePost( body: RequestUserGroupsRemove, userId: number, observe?: "events", reportProgress?: boolean ): Observable<HttpEvent<any>>
-    userUserIdGroupsRemovePost( body: RequestUserGroupsRemove, userId: number, observe: any, reportProgress: boolean ): Observable<any>
-    userUserIdGroupsRemovePost( body: RequestUserGroupsRemove, userId: number, observe?: any, reportProgress?: boolean ): Observable<any> | Observable<HttpResponse<any>> | Observable<HttpEvent<any>>
+    userUserIdGroupsRemovePost( userId: number, requestUserGroupsRemove: RequestUserGroupsRemove, observe?: "body", reportProgress?: boolean, options?: { httpHeaderAccept?: "application/json" } ): Observable<any>
+    userUserIdGroupsRemovePost( userId: number, requestUserGroupsRemove: RequestUserGroupsRemove, observe?: "response", reportProgress?: boolean, options?: { httpHeaderAccept?: "application/json" } ): Observable<HttpResponse<any>>
+    userUserIdGroupsRemovePost( userId: number, requestUserGroupsRemove: RequestUserGroupsRemove, observe?: "events", reportProgress?: boolean, options?: { httpHeaderAccept?: "application/json" } ): Observable<HttpEvent<any>>
+    userUserIdGroupsRemovePost( userId: number, requestUserGroupsRemove: RequestUserGroupsRemove, observe: any, reportProgress: boolean, options?: { httpHeaderAccept?: "application/json" } ): Observable<any>
+    userUserIdGroupsRemovePost( userId: number, requestUserGroupsRemove: RequestUserGroupsRemove, observe?: any, reportProgress?: boolean, options?: { httpHeaderAccept?: "application/json" } ): Observable<any> | Observable<HttpResponse<any>> | Observable<HttpEvent<any>>
     {
         throw new Error( 'not implemented' )
     }
 
-    userUserIdPasswordPost( body: RequestPasswordAdmin, userId: number, observe?: "body", reportProgress?: boolean ): Observable<any>
-    userUserIdPasswordPost( body: RequestPasswordAdmin, userId: number, observe?: "response", reportProgress?: boolean ): Observable<HttpResponse<any>>
-    userUserIdPasswordPost( body: RequestPasswordAdmin, userId: number, observe?: "events", reportProgress?: boolean ): Observable<HttpEvent<any>>
-    userUserIdPasswordPost( body: RequestPasswordAdmin, userId: number, observe: any, reportProgress: boolean ): Observable<any>
-    userUserIdPasswordPost( body: RequestPasswordAdmin, userId: number, observe?: any, reportProgress?: boolean ): Observable<any> | Observable<HttpResponse<any>> | Observable<HttpEvent<any>>
+    userUserIdPasswordPost( userId: number, requestPasswordAdmin: RequestPasswordAdmin, observe?: "body", reportProgress?: boolean, options?: { httpHeaderAccept?: "application/json" } ): Observable<any>
+    userUserIdPasswordPost( userId: number, requestPasswordAdmin: RequestPasswordAdmin, observe?: "response", reportProgress?: boolean, options?: { httpHeaderAccept?: "application/json" } ): Observable<HttpResponse<any>>
+    userUserIdPasswordPost( userId: number, requestPasswordAdmin: RequestPasswordAdmin, observe?: "events", reportProgress?: boolean, options?: { httpHeaderAccept?: "application/json" } ): Observable<HttpEvent<any>>
+    userUserIdPasswordPost( userId: number, requestPasswordAdmin: RequestPasswordAdmin, observe: any, reportProgress: boolean, options?: { httpHeaderAccept?: "application/json" } ): Observable<any>
+    userUserIdPasswordPost( userId: number, requestPasswordAdmin: RequestPasswordAdmin, observe?: any, reportProgress?: boolean, options?: { httpHeaderAccept?: "application/json" } ): Observable<any> | Observable<HttpResponse<any>> | Observable<HttpEvent<any>>
     {
         throw new Error( 'not implemented' )
     }
 
-    userUserIdPersonalGet( userId: number, observe?: "body", reportProgress?: boolean ): Observable<ResponsePersonalAdminGet>
-    userUserIdPersonalGet( userId: number, observe?: "response", reportProgress?: boolean ): Observable<HttpResponse<ResponsePersonalAdminGet>>
-    userUserIdPersonalGet( userId: number, observe?: "events", reportProgress?: boolean ): Observable<HttpEvent<ResponsePersonalAdminGet>>
-    userUserIdPersonalGet( userId: number, observe: any, reportProgress: boolean ): Observable<any>
-    userUserIdPersonalGet( userId: number, observe?: any, reportProgress?: boolean ): Observable<ResponsePersonalAdminGet> | Observable<HttpResponse<ResponsePersonalAdminGet>> | Observable<HttpEvent<ResponsePersonalAdminGet>> | Observable<any>
+    userUserIdPersonalGet( userId: number, observe?: "body", reportProgress?: boolean, options?: { httpHeaderAccept?: "application/json" } ): Observable<TypePersonalInfo>
+    userUserIdPersonalGet( userId: number, observe?: "response", reportProgress?: boolean, options?: { httpHeaderAccept?: "application/json" } ): Observable<HttpResponse<TypePersonalInfo>>
+    userUserIdPersonalGet( userId: number, observe?: "events", reportProgress?: boolean, options?: { httpHeaderAccept?: "application/json" } ): Observable<HttpEvent<TypePersonalInfo>>
+    userUserIdPersonalGet( userId: number, observe: any, reportProgress: boolean, options?: { httpHeaderAccept?: "application/json" } ): Observable<any>
+    userUserIdPersonalGet( userId: number, observe?: any, reportProgress?: boolean, options?: { httpHeaderAccept?: "application/json" } ): Observable<TypePersonalInfo> | Observable<HttpResponse<TypePersonalInfo>> | Observable<HttpEvent<TypePersonalInfo>> | Observable<any>
     {
         throw new Error( 'not implemented' )
     }
 
-    userUserIdPersonalPatch( body: TypePersonalInfo, userId: number, observe?: "body", reportProgress?: boolean ): Observable<any>
-    userUserIdPersonalPatch( body: TypePersonalInfo, userId: number, observe?: "response", reportProgress?: boolean ): Observable<HttpResponse<any>>
-    userUserIdPersonalPatch( body: TypePersonalInfo, userId: number, observe?: "events", reportProgress?: boolean ): Observable<HttpEvent<any>>
-    userUserIdPersonalPatch( body: TypePersonalInfo, userId: number, observe: any, reportProgress: boolean ): Observable<any>
-    userUserIdPersonalPatch( body: TypePersonalInfo, userId: number, observe?: any, reportProgress?: boolean ): Observable<any> | Observable<HttpResponse<any>> | Observable<HttpEvent<any>>
+    userUserIdPersonalPatch( userId: number, body: TypePersonalInfo, observe?: "body", reportProgress?: boolean, options?: { httpHeaderAccept?: "application/json" } ): Observable<any>
+    userUserIdPersonalPatch( userId: number, body: TypePersonalInfo, observe?: "response", reportProgress?: boolean, options?: { httpHeaderAccept?: "application/json" } ): Observable<HttpResponse<any>>
+    userUserIdPersonalPatch( userId: number, body: TypePersonalInfo, observe?: "events", reportProgress?: boolean, options?: { httpHeaderAccept?: "application/json" } ): Observable<HttpEvent<any>>
+    userUserIdPersonalPatch( userId: number, body: TypePersonalInfo, observe: any, reportProgress: boolean, options?: { httpHeaderAccept?: "application/json" } ): Observable<any>
+    userUserIdPersonalPatch( userId: number, body: TypePersonalInfo, observe?: any, reportProgress?: boolean, options?: { httpHeaderAccept?: "application/json" } ): Observable<any> | Observable<HttpResponse<any>> | Observable<HttpEvent<any>>
     {
         throw new Error( 'not implemented' )
     }
 
-    userUserIdRolePut( body: RequestUserRole, userId: number, observe?: "body", reportProgress?: boolean ): Observable<any>
-    userUserIdRolePut( body: RequestUserRole, userId: number, observe?: "response", reportProgress?: boolean ): Observable<HttpResponse<any>>
-    userUserIdRolePut( body: RequestUserRole, userId: number, observe?: "events", reportProgress?: boolean ): Observable<HttpEvent<any>>
-    userUserIdRolePut( body: RequestUserRole, userId: number, observe: any, reportProgress: boolean ): Observable<any>
-    userUserIdRolePut( body: RequestUserRole, userId: number, observe?: any, reportProgress?: boolean ): Observable<any> | Observable<HttpResponse<any>> | Observable<HttpEvent<any>>
+    userUserIdRolePut( userId: number, requestUserRole: RequestUserRole, observe?: "body", reportProgress?: boolean, options?: { httpHeaderAccept?: "application/json" } ): Observable<any>
+    userUserIdRolePut( userId: number, requestUserRole: RequestUserRole, observe?: "response", reportProgress?: boolean, options?: { httpHeaderAccept?: "application/json" } ): Observable<HttpResponse<any>>
+    userUserIdRolePut( userId: number, requestUserRole: RequestUserRole, observe?: "events", reportProgress?: boolean, options?: { httpHeaderAccept?: "application/json" } ): Observable<HttpEvent<any>>
+    userUserIdRolePut( userId: number, requestUserRole: RequestUserRole, observe: any, reportProgress: boolean, options?: { httpHeaderAccept?: "application/json" } ): Observable<any>
+    userUserIdRolePut( userId: number, requestUserRole: RequestUserRole, observe?: any, reportProgress?: boolean, options?: { httpHeaderAccept?: "application/json" } ): Observable<any> | Observable<HttpResponse<any>> | Observable<HttpEvent<any>>
     {
         throw new Error( 'not implemented' )
     }
 
-    userUserIdTypePut( body: RequestUserType, userId: number, observe?: "body", reportProgress?: boolean ): Observable<any>
-    userUserIdTypePut( body: RequestUserType, userId: number, observe?: "response", reportProgress?: boolean ): Observable<HttpResponse<any>>
-    userUserIdTypePut( body: RequestUserType, userId: number, observe?: "events", reportProgress?: boolean ): Observable<HttpEvent<any>>
-    userUserIdTypePut( body: RequestUserType, userId: number, observe: any, reportProgress: boolean ): Observable<any>
-    userUserIdTypePut( body: RequestUserType, userId: number, observe?: any, reportProgress?: boolean ): Observable<any> | Observable<HttpResponse<any>> | Observable<HttpEvent<any>>
+    userUserIdTypePut( userId: number, requestUserType: RequestUserType, observe?: "body", reportProgress?: boolean, options?: { httpHeaderAccept?: "application/json" } ): Observable<any>
+    userUserIdTypePut( userId: number, requestUserType: RequestUserType, observe?: "response", reportProgress?: boolean, options?: { httpHeaderAccept?: "application/json" } ): Observable<HttpResponse<any>>
+    userUserIdTypePut( userId: number, requestUserType: RequestUserType, observe?: "events", reportProgress?: boolean, options?: { httpHeaderAccept?: "application/json" } ): Observable<HttpEvent<any>>
+    userUserIdTypePut( userId: number, requestUserType: RequestUserType, observe: any, reportProgress: boolean, options?: { httpHeaderAccept?: "application/json" } ): Observable<any>
+    userUserIdTypePut( userId: number, requestUserType: RequestUserType, observe?: any, reportProgress?: boolean, options?: { httpHeaderAccept?: "application/json" } ): Observable<any> | Observable<HttpResponse<any>> | Observable<HttpEvent<any>>
     {
         throw new Error( 'not implemented' )
     }
 
-    userUserIdUniversityGet( userId: number, observe?: "body", reportProgress?: boolean ): Observable<ResponseUniversityAdminGet>
-    userUserIdUniversityGet( userId: number, observe?: "response", reportProgress?: boolean ): Observable<HttpResponse<ResponseUniversityAdminGet>>
-    userUserIdUniversityGet( userId: number, observe?: "events", reportProgress?: boolean ): Observable<HttpEvent<ResponseUniversityAdminGet>>
-    userUserIdUniversityGet( userId: number, observe: any, reportProgress: boolean ): Observable<any>
-    userUserIdUniversityGet( userId: number, observe?: any, reportProgress?: boolean ): Observable<ResponseUniversityAdminGet> | Observable<HttpResponse<ResponseUniversityAdminGet>> | Observable<HttpEvent<ResponseUniversityAdminGet>> | Observable<any>
+    userUserIdUniversityGet( userId: number, observe?: "body", reportProgress?: boolean, options?: { httpHeaderAccept?: "application/json" } ): Observable<TypeStudentInfo>
+    userUserIdUniversityGet( userId: number, observe?: "response", reportProgress?: boolean, options?: { httpHeaderAccept?: "application/json" } ): Observable<HttpResponse<TypeStudentInfo>>
+    userUserIdUniversityGet( userId: number, observe?: "events", reportProgress?: boolean, options?: { httpHeaderAccept?: "application/json" } ): Observable<HttpEvent<TypeStudentInfo>>
+    userUserIdUniversityGet( userId: number, observe: any, reportProgress: boolean, options?: { httpHeaderAccept?: "application/json" } ): Observable<any>
+    userUserIdUniversityGet( userId: number, observe?: any, reportProgress?: boolean, options?: { httpHeaderAccept?: "application/json" } ): Observable<TypeStudentInfo> | Observable<HttpResponse<TypeStudentInfo>> | Observable<HttpEvent<TypeStudentInfo>> | Observable<any>
     {
         throw new Error( 'not implemented' )
     }
 
-    userUserIdUniversityPatch( body: TypeStudentInfo, userId: number, observe?: "body", reportProgress?: boolean ): Observable<any>
-    userUserIdUniversityPatch( body: TypeStudentInfo, userId: number, observe?: "response", reportProgress?: boolean ): Observable<HttpResponse<any>>
-    userUserIdUniversityPatch( body: TypeStudentInfo, userId: number, observe?: "events", reportProgress?: boolean ): Observable<HttpEvent<any>>
-    userUserIdUniversityPatch( body: TypeStudentInfo, userId: number, observe: any, reportProgress: boolean ): Observable<any>
-    userUserIdUniversityPatch( body: TypeStudentInfo, userId: number, observe?: any, reportProgress?: boolean ): Observable<any> | Observable<HttpResponse<any>> | Observable<HttpEvent<any>>
+    userUserIdUniversityPatch( userId: number, body: TypeStudentInfo, observe?: "body", reportProgress?: boolean, options?: { httpHeaderAccept?: "application/json" } ): Observable<any>
+    userUserIdUniversityPatch( userId: number, body: TypeStudentInfo, observe?: "response", reportProgress?: boolean, options?: { httpHeaderAccept?: "application/json" } ): Observable<HttpResponse<any>>
+    userUserIdUniversityPatch( userId: number, body: TypeStudentInfo, observe?: "events", reportProgress?: boolean, options?: { httpHeaderAccept?: "application/json" } ): Observable<HttpEvent<any>>
+    userUserIdUniversityPatch( userId: number, body: TypeStudentInfo, observe: any, reportProgress: boolean, options?: { httpHeaderAccept?: "application/json" } ): Observable<any>
+    userUserIdUniversityPatch( userId: number, body: TypeStudentInfo, observe?: any, reportProgress?: boolean, options?: { httpHeaderAccept?: "application/json" } ): Observable<any> | Observable<HttpResponse<any>> | Observable<HttpEvent<any>>
     {
         throw new Error( 'not implemented' )
     }

@@ -1,10 +1,10 @@
 import { Injectable } from '@angular/core'
 import { Actions, createEffect, ofType } from '@ngrx/effects'
-import { AuthServiceMock } from '@/auth/api/auth.service.mock'
+import { AuthServiceReal } from '@/auth/api/auth.service.real'
 import { loginAttempt, loginError, loginSuccess, registerAttempt, registerSuccess } from '@/auth/store/auth.actions'
 import { catchError, concatMap, mergeMap } from 'rxjs/operators'
 import { of } from 'rxjs'
-import { ResponseLogin, ResponseRegistration, TypeUserInfo } from '@/auth/models'
+import { TypeCSRFPair, TypeUserInfo } from '@/auth/api/models'
 import { Router } from '@angular/router'
 
 
@@ -12,7 +12,7 @@ import { Router } from '@angular/router'
 @Injectable()
 export class AuthEffects
 {
-    constructor( private actions$: Actions, private authService: AuthServiceMock, private router: Router )
+    constructor( private actions$: Actions, private authService: AuthServiceReal, private router: Router )
     {
     }
 
@@ -22,14 +22,14 @@ export class AuthEffects
             ofType( loginAttempt ),
             concatMap( ( { requestLogin } ) =>
                 this.authService.loginPost( requestLogin ).pipe(
-                    mergeMap( ( authResult: ResponseLogin ) =>
+                    mergeMap( ( csrfPair: TypeCSRFPair ) =>
                         {
+                            this.authService.configuration.credentials[ "CSRFAcessToken" ] = csrfPair.csrf_access_token
                             this.router.navigate( [ '/users' ] )
                             return of( loginSuccess( {
-                                responseLogin: {
-                                    // TODO CSRF Tokens???
-                                    // csrfAccessToken: authResult.csrfAccessToken,
-                                    // csrfRefreshToken: authResult.csrfRefreshToken
+                                csrfPair: {
+                                    csrf_access_token: csrfPair.csrf_access_token,
+                                    csrf_refresh_token: csrfPair.csrf_refresh_token
                                 }
                             } ) )
                         }
@@ -49,8 +49,8 @@ export class AuthEffects
             ofType( registerAttempt ),
             concatMap( ( { requestRegistration } ) =>
                 this.authService.registerPost( requestRegistration ).pipe(
-                    mergeMap( ( responseRegistration: ResponseRegistration ) =>
-                        of( registerSuccess( { responseRegistration: responseRegistration } ) ) ),
+                    mergeMap( ( userInfo: TypeUserInfo ) =>
+                        of( registerSuccess( { userInfo: userInfo } ) ) ),
                     catchError(
                         error =>
                             of( loginError( { error: error } ) )

@@ -1,3 +1,4 @@
+import { HttpEvent, HttpParams, HttpResponse } from '@angular/common/http'
 import {
     RequestGroupAdd,
     RequestLogin,
@@ -8,56 +9,44 @@ import {
     RequestUserGroupsRemove,
     RequestUserRole,
     RequestUserType,
-    ResponseGroup,
-    ResponseGroupAdd,
     ResponseGroupAll,
     ResponseInfoCountries,
     ResponseInfoUniversities,
-    ResponseLogin,
-    ResponsePersonalAdminGet,
-    ResponsePersonalSelf,
-    ResponsePreregister,
-    ResponseRefresh,
-    ResponseRegistration,
-    ResponseRegistrationInternal,
-    ResponseUniversityAdminGet,
-    ResponseUniversitySelf,
-    ResponseUserAdmin,
     ResponseUserAdminGroup,
     ResponseUserAll,
     ResponseUserByGroup,
-    ResponseUserSelf,
     ResponseUserSelfGroup,
     TypeAuthCredentials,
+    TypeCSRFPair,
+    TypeGroup,
     TypePersonalInfo,
-    TypeStudentInfo
-} from '@/auth/models'
+    TypePreregisterInfo,
+    TypeStudentInfo,
+    TypeUserInfo
+} from '@/auth/api/models'
 import { Observable } from 'rxjs'
-import { HttpEvent, HttpResponse } from '@angular/common/http'
 
 
 export interface AuthService
 {
-    /**
-     * @param consumes string[] mime-types
-     * @return true: consumes contains 'multipart/form-data', false: otherwise
-     */
-    canConsumeForm( consumes: string[] ): boolean
+    addToHttpParams( httpParams: HttpParams, value: any, key?: string ): HttpParams
+
+    addToHttpParamsRecursive( httpParams: HttpParams, value?: any, key?: string ): HttpParams
 
     /**
      * Add a group
      * Add a group, only for admins
-     * @param body
+     * @param requestGroupAdd
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
      * @param reportProgress flag to report request and response progress.
      */
-    groupAddPost( body: RequestGroupAdd, observe?: 'body', reportProgress?: boolean ): Observable<ResponseGroupAdd>;
+    groupAddPost( requestGroupAdd: RequestGroupAdd, observe?: 'body', reportProgress?: boolean, options?: { httpHeaderAccept?: 'application/json' } ): Observable<TypeGroup>;
 
-    groupAddPost( body: RequestGroupAdd, observe?: 'response', reportProgress?: boolean ): Observable<HttpResponse<ResponseGroupAdd>>;
+    groupAddPost( requestGroupAdd: RequestGroupAdd, observe?: 'response', reportProgress?: boolean, options?: { httpHeaderAccept?: 'application/json' } ): Observable<HttpResponse<TypeGroup>>;
 
-    groupAddPost( body: RequestGroupAdd, observe?: 'events', reportProgress?: boolean ): Observable<HttpEvent<ResponseGroupAdd>>;
+    groupAddPost( requestGroupAdd: RequestGroupAdd, observe?: 'events', reportProgress?: boolean, options?: { httpHeaderAccept?: 'application/json' } ): Observable<HttpEvent<TypeGroup>>;
 
-    groupAddPost( body: RequestGroupAdd, observe: any, reportProgress: boolean ): Observable<any>
+    groupAddPost( requestGroupAdd: RequestGroupAdd, observe: any, reportProgress: boolean, options?: { httpHeaderAccept?: 'application/json' } ): Observable<any>
 
     /**
      * Get all groups
@@ -65,13 +54,13 @@ export interface AuthService
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
      * @param reportProgress flag to report request and response progress.
      */
-    groupAllGet( observe?: 'body', reportProgress?: boolean ): Observable<ResponseGroupAll>;
+    groupAllGet( observe?: 'body', reportProgress?: boolean, options?: { httpHeaderAccept?: 'application/json' } ): Observable<ResponseGroupAll>;
 
-    groupAllGet( observe?: 'response', reportProgress?: boolean ): Observable<HttpResponse<ResponseGroupAll>>;
+    groupAllGet( observe?: 'response', reportProgress?: boolean, options?: { httpHeaderAccept?: 'application/json' } ): Observable<HttpResponse<ResponseGroupAll>>;
 
-    groupAllGet( observe?: 'events', reportProgress?: boolean ): Observable<HttpEvent<ResponseGroupAll>>;
+    groupAllGet( observe?: 'events', reportProgress?: boolean, options?: { httpHeaderAccept?: 'application/json' } ): Observable<HttpEvent<ResponseGroupAll>>;
 
-    groupAllGet( observe: any, reportProgress: boolean ): Observable<any>
+    groupAllGet( observe: any, reportProgress: boolean, options?: { httpHeaderAccept?: 'application/json' } ): Observable<any>
 
     /**
      * Get any group
@@ -80,13 +69,13 @@ export interface AuthService
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
      * @param reportProgress flag to report request and response progress.
      */
-    groupGroupIdGet( groupId: number, observe?: 'body', reportProgress?: boolean ): Observable<ResponseGroup>;
+    groupGroupIdGet( groupId: number, observe?: 'body', reportProgress?: boolean, options?: { httpHeaderAccept?: 'application/json' } ): Observable<TypeGroup>;
 
-    groupGroupIdGet( groupId: number, observe?: 'response', reportProgress?: boolean ): Observable<HttpResponse<ResponseGroup>>;
+    groupGroupIdGet( groupId: number, observe?: 'response', reportProgress?: boolean, options?: { httpHeaderAccept?: 'application/json' } ): Observable<HttpResponse<TypeGroup>>;
 
-    groupGroupIdGet( groupId: number, observe?: 'events', reportProgress?: boolean ): Observable<HttpEvent<ResponseGroup>>;
+    groupGroupIdGet( groupId: number, observe?: 'events', reportProgress?: boolean, options?: { httpHeaderAccept?: 'application/json' } ): Observable<HttpEvent<TypeGroup>>;
 
-    groupGroupIdGet( groupId: number, observe: any, reportProgress: boolean ): Observable<any>
+    groupGroupIdGet( groupId: number, observe: any, reportProgress: boolean, options?: { httpHeaderAccept?: 'application/json' } ): Observable<any>
 
     /**
      * Delete a group
@@ -95,70 +84,66 @@ export interface AuthService
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
      * @param reportProgress flag to report request and response progress.
      */
-    groupGroupIdRemovePost( groupId: number, observe?: 'body', reportProgress?: boolean ): Observable<any>;
+    groupGroupIdRemovePost( groupId: number, observe?: 'body', reportProgress?: boolean, options?: { httpHeaderAccept?: 'application/json' } ): Observable<any>;
 
-    groupGroupIdRemovePost( groupId: number, observe?: 'response', reportProgress?: boolean ): Observable<HttpResponse<any>>;
+    groupGroupIdRemovePost( groupId: number, observe?: 'response', reportProgress?: boolean, options?: { httpHeaderAccept?: 'application/json' } ): Observable<HttpResponse<any>>;
 
-    groupGroupIdRemovePost( groupId: number, observe?: 'events', reportProgress?: boolean ): Observable<HttpEvent<any>>;
+    groupGroupIdRemovePost( groupId: number, observe?: 'events', reportProgress?: boolean, options?: { httpHeaderAccept?: 'application/json' } ): Observable<HttpEvent<any>>;
 
-    groupGroupIdRemovePost( groupId: number, observe: any, reportProgress: boolean ): Observable<any>
+    groupGroupIdRemovePost( groupId: number, observe: any, reportProgress: boolean, options?: { httpHeaderAccept?: 'application/json' } ): Observable<any>
 
     /**
      * Get known country list
-     *
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
      * @param reportProgress flag to report request and response progress.
      */
-    infoCountriesGet( observe?: 'body', reportProgress?: boolean ): Observable<ResponseInfoCountries>;
+    infoCountriesGet( observe?: 'body', reportProgress?: boolean, options?: { httpHeaderAccept?: 'application/json' } ): Observable<ResponseInfoCountries>;
 
-    infoCountriesGet( observe?: 'response', reportProgress?: boolean ): Observable<HttpResponse<ResponseInfoCountries>>;
+    infoCountriesGet( observe?: 'response', reportProgress?: boolean, options?: { httpHeaderAccept?: 'application/json' } ): Observable<HttpResponse<ResponseInfoCountries>>;
 
-    infoCountriesGet( observe?: 'events', reportProgress?: boolean ): Observable<HttpEvent<ResponseInfoCountries>>;
+    infoCountriesGet( observe?: 'events', reportProgress?: boolean, options?: { httpHeaderAccept?: 'application/json' } ): Observable<HttpEvent<ResponseInfoCountries>>;
 
-    infoCountriesGet( observe: any, reportProgress: boolean ): Observable<any>
+    infoCountriesGet( observe: any, reportProgress: boolean, options?: { httpHeaderAccept?: 'application/json' } ): Observable<any>
 
     /**
      * Get known university list
-     *
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
      * @param reportProgress flag to report request and response progress.
      */
-    infoUniversitiesGet( observe?: 'body', reportProgress?: boolean ): Observable<ResponseInfoUniversities>;
+    infoUniversitiesGet( observe?: 'body', reportProgress?: boolean, options?: { httpHeaderAccept?: 'application/json' } ): Observable<ResponseInfoUniversities>;
 
-    infoUniversitiesGet( observe?: 'response', reportProgress?: boolean ): Observable<HttpResponse<ResponseInfoUniversities>>;
+    infoUniversitiesGet( observe?: 'response', reportProgress?: boolean, options?: { httpHeaderAccept?: 'application/json' } ): Observable<HttpResponse<ResponseInfoUniversities>>;
 
-    infoUniversitiesGet( observe?: 'events', reportProgress?: boolean ): Observable<HttpEvent<ResponseInfoUniversities>>;
+    infoUniversitiesGet( observe?: 'events', reportProgress?: boolean, options?: { httpHeaderAccept?: 'application/json' } ): Observable<HttpEvent<ResponseInfoUniversities>>;
 
-    infoUniversitiesGet( observe: any, reportProgress: boolean ): Observable<any>
+    infoUniversitiesGet( observe: any, reportProgress: boolean, options?: { httpHeaderAccept?: 'application/json' } ): Observable<any>
 
     /**
      * Authenticate a user
-     *
-     * @param body
+     * @param requestLogin
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
      * @param reportProgress flag to report request and response progress.
      */
-    loginPost( body: RequestLogin, observe?: 'body', reportProgress?: boolean ): Observable<ResponseLogin>;
+    loginPost( requestLogin: RequestLogin, observe?: 'body', reportProgress?: boolean, options?: { httpHeaderAccept?: 'application/json' } ): Observable<TypeCSRFPair>;
 
-    loginPost( body: RequestLogin, observe?: 'response', reportProgress?: boolean ): Observable<HttpResponse<ResponseLogin>>;
+    loginPost( requestLogin: RequestLogin, observe?: 'response', reportProgress?: boolean, options?: { httpHeaderAccept?: 'application/json' } ): Observable<HttpResponse<TypeCSRFPair>>;
 
-    loginPost( body: RequestLogin, observe?: 'events', reportProgress?: boolean ): Observable<HttpEvent<ResponseLogin>>;
+    loginPost( requestLogin: RequestLogin, observe?: 'events', reportProgress?: boolean, options?: { httpHeaderAccept?: 'application/json' } ): Observable<HttpEvent<TypeCSRFPair>>;
 
-    loginPost( body: RequestLogin, observe: any, reportProgress: boolean ): Observable<any>
+    loginPost( requestLogin: RequestLogin, observe: any, reportProgress: boolean, options?: { httpHeaderAccept?: 'application/json' } ): Observable<any>
 
     /**
      * Logout current user
-     *
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
      * @param reportProgress flag to report request and response progress.
      */
-    logoutPost( observe?: 'body', reportProgress?: boolean ): Observable<any>;
+    logoutPost( observe?: 'body', reportProgress?: boolean, options?: { httpHeaderAccept?: undefined } ): Observable<any>;
 
-    logoutPost( observe?: 'response', reportProgress?: boolean ): Observable<HttpResponse<any>>;
+    logoutPost( observe?: 'response', reportProgress?: boolean, options?: { httpHeaderAccept?: undefined } ): Observable<HttpResponse<any>>;
 
-    logoutPost( observe?: 'events', reportProgress?: boolean ): Observable<HttpEvent<any>>;
+    logoutPost( observe?: 'events', reportProgress?: boolean, options?: { httpHeaderAccept?: undefined } ): Observable<HttpEvent<any>>;
 
-    logoutPost( observe: any, reportProgress: boolean ): Observable<any>
+    logoutPost( observe: any, reportProgress: boolean, options?: { httpHeaderAccept?: undefined } ): Observable<any>
 
     /**
      * Register an unconfirmed user with a one-time password
@@ -166,27 +151,26 @@ export interface AuthService
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
      * @param reportProgress flag to report request and response progress.
      */
-    preregisterPost( observe?: 'body', reportProgress?: boolean ): Observable<ResponsePreregister>;
+    preregisterPost( observe?: 'body', reportProgress?: boolean, options?: { httpHeaderAccept?: 'application/json' } ): Observable<TypePreregisterInfo>;
 
-    preregisterPost( observe?: 'response', reportProgress?: boolean ): Observable<HttpResponse<ResponsePreregister>>;
+    preregisterPost( observe?: 'response', reportProgress?: boolean, options?: { httpHeaderAccept?: 'application/json' } ): Observable<HttpResponse<TypePreregisterInfo>>;
 
-    preregisterPost( observe?: 'events', reportProgress?: boolean ): Observable<HttpEvent<ResponsePreregister>>;
+    preregisterPost( observe?: 'events', reportProgress?: boolean, options?: { httpHeaderAccept?: 'application/json' } ): Observable<HttpEvent<TypePreregisterInfo>>;
 
-    preregisterPost( observe: any, reportProgress: boolean ): Observable<any>
+    preregisterPost( observe: any, reportProgress: boolean, options?: { httpHeaderAccept?: 'application/json' } ): Observable<any>
 
     /**
      * Refresh JWT token for current user
-     *
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
      * @param reportProgress flag to report request and response progress.
      */
-    refreshPost( observe?: 'body', reportProgress?: boolean ): Observable<ResponseRefresh>;
+    refreshPost( observe?: 'body', reportProgress?: boolean, options?: { httpHeaderAccept?: 'application/json' } ): Observable<TypeCSRFPair>;
 
-    refreshPost( observe?: 'response', reportProgress?: boolean ): Observable<HttpResponse<ResponseRefresh>>;
+    refreshPost( observe?: 'response', reportProgress?: boolean, options?: { httpHeaderAccept?: 'application/json' } ): Observable<HttpResponse<TypeCSRFPair>>;
 
-    refreshPost( observe?: 'events', reportProgress?: boolean ): Observable<HttpEvent<ResponseRefresh>>;
+    refreshPost( observe?: 'events', reportProgress?: boolean, options?: { httpHeaderAccept?: 'application/json' } ): Observable<HttpEvent<TypeCSRFPair>>;
 
-    refreshPost( observe: any, reportProgress: boolean ): Observable<any>
+    refreshPost( observe: any, reportProgress: boolean, options?: { httpHeaderAccept?: 'application/json' } ): Observable<any>
 
     /**
      * Register an internal user
@@ -195,28 +179,27 @@ export interface AuthService
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
      * @param reportProgress flag to report request and response progress.
      */
-    registerInternalPost( body: TypeAuthCredentials, observe?: 'body', reportProgress?: boolean ): Observable<ResponseRegistrationInternal>;
+    registerInternalPost( body: TypeAuthCredentials, observe?: 'body', reportProgress?: boolean, options?: { httpHeaderAccept?: 'application/json' } ): Observable<TypeUserInfo>;
 
-    registerInternalPost( body: TypeAuthCredentials, observe?: 'response', reportProgress?: boolean ): Observable<HttpResponse<ResponseRegistrationInternal>>;
+    registerInternalPost( body: TypeAuthCredentials, observe?: 'response', reportProgress?: boolean, options?: { httpHeaderAccept?: 'application/json' } ): Observable<HttpResponse<TypeUserInfo>>;
 
-    registerInternalPost( body: TypeAuthCredentials, observe?: 'events', reportProgress?: boolean ): Observable<HttpEvent<ResponseRegistrationInternal>>;
+    registerInternalPost( body: TypeAuthCredentials, observe?: 'events', reportProgress?: boolean, options?: { httpHeaderAccept?: 'application/json' } ): Observable<HttpEvent<TypeUserInfo>>;
 
-    registerInternalPost( body: TypeAuthCredentials, observe: any, reportProgress: boolean ): Observable<any>
+    registerInternalPost( body: TypeAuthCredentials, observe: any, reportProgress: boolean, options?: { httpHeaderAccept?: 'application/json' } ): Observable<any>
 
     /**
      * Register a new user
-     *
-     * @param body
+     * @param requestRegistration
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
      * @param reportProgress flag to report request and response progress.
      */
-    registerPost( body: RequestRegistration, observe?: 'body', reportProgress?: boolean ): Observable<ResponseRegistration>;
+    registerPost( requestRegistration: RequestRegistration, observe?: 'body', reportProgress?: boolean, options?: { httpHeaderAccept?: 'application/json' } ): Observable<TypeUserInfo>;
 
-    registerPost( body: RequestRegistration, observe?: 'response', reportProgress?: boolean ): Observable<HttpResponse<ResponseRegistration>>;
+    registerPost( requestRegistration: RequestRegistration, observe?: 'response', reportProgress?: boolean, options?: { httpHeaderAccept?: 'application/json' } ): Observable<HttpResponse<TypeUserInfo>>;
 
-    registerPost( body: RequestRegistration, observe?: 'events', reportProgress?: boolean ): Observable<HttpEvent<ResponseRegistration>>;
+    registerPost( requestRegistration: RequestRegistration, observe?: 'events', reportProgress?: boolean, options?: { httpHeaderAccept?: 'application/json' } ): Observable<HttpEvent<TypeUserInfo>>;
 
-    registerPost( body: RequestRegistration, observe: any, reportProgress: boolean ): Observable<any>
+    registerPost( requestRegistration: RequestRegistration, observe: any, reportProgress: boolean, options?: { httpHeaderAccept?: 'application/json' } ): Observable<any>
 
     /**
      * Get common info for all users
@@ -224,13 +207,13 @@ export interface AuthService
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
      * @param reportProgress flag to report request and response progress.
      */
-    userAllGet( observe?: 'body', reportProgress?: boolean ): Observable<ResponseUserAll>;
+    userAllGet( observe?: 'body', reportProgress?: boolean, options?: { httpHeaderAccept?: 'application/json' } ): Observable<ResponseUserAll>;
 
-    userAllGet( observe?: 'response', reportProgress?: boolean ): Observable<HttpResponse<ResponseUserAll>>;
+    userAllGet( observe?: 'response', reportProgress?: boolean, options?: { httpHeaderAccept?: 'application/json' } ): Observable<HttpResponse<ResponseUserAll>>;
 
-    userAllGet( observe?: 'events', reportProgress?: boolean ): Observable<HttpEvent<ResponseUserAll>>;
+    userAllGet( observe?: 'events', reportProgress?: boolean, options?: { httpHeaderAccept?: 'application/json' } ): Observable<HttpEvent<ResponseUserAll>>;
 
-    userAllGet( observe: any, reportProgress: boolean ): Observable<any>
+    userAllGet( observe: any, reportProgress: boolean, options?: { httpHeaderAccept?: 'application/json' } ): Observable<any>
 
     /**
      * Get common info for different users
@@ -239,84 +222,79 @@ export interface AuthService
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
      * @param reportProgress flag to report request and response progress.
      */
-    userByGroupGroupIdGet( groupId: number, observe?: 'body', reportProgress?: boolean ): Observable<ResponseUserByGroup>;
+    userByGroupGroupIdGet( groupId: number, observe?: 'body', reportProgress?: boolean, options?: { httpHeaderAccept?: 'application/json' } ): Observable<ResponseUserByGroup>;
 
-    userByGroupGroupIdGet( groupId: number, observe?: 'response', reportProgress?: boolean ): Observable<HttpResponse<ResponseUserByGroup>>;
+    userByGroupGroupIdGet( groupId: number, observe?: 'response', reportProgress?: boolean, options?: { httpHeaderAccept?: 'application/json' } ): Observable<HttpResponse<ResponseUserByGroup>>;
 
-    userByGroupGroupIdGet( groupId: number, observe?: 'events', reportProgress?: boolean ): Observable<HttpEvent<ResponseUserByGroup>>;
+    userByGroupGroupIdGet( groupId: number, observe?: 'events', reportProgress?: boolean, options?: { httpHeaderAccept?: 'application/json' } ): Observable<HttpEvent<ResponseUserByGroup>>;
 
-    userByGroupGroupIdGet( groupId: number, observe: any, reportProgress: boolean ): Observable<any>
+    userByGroupGroupIdGet( groupId: number, observe: any, reportProgress: boolean, options?: { httpHeaderAccept?: 'application/json' } ): Observable<any>
 
     /**
      * Get common info for current user
-     *
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
      * @param reportProgress flag to report request and response progress.
      */
-    userSelfGet( observe?: 'body', reportProgress?: boolean ): Observable<ResponseUserSelf>;
+    userSelfGet( observe?: 'body', reportProgress?: boolean, options?: { httpHeaderAccept?: 'application/json' } ): Observable<TypeUserInfo>;
 
-    userSelfGet( observe?: 'response', reportProgress?: boolean ): Observable<HttpResponse<ResponseUserSelf>>;
+    userSelfGet( observe?: 'response', reportProgress?: boolean, options?: { httpHeaderAccept?: 'application/json' } ): Observable<HttpResponse<TypeUserInfo>>;
 
-    userSelfGet( observe?: 'events', reportProgress?: boolean ): Observable<HttpEvent<ResponseUserSelf>>;
+    userSelfGet( observe?: 'events', reportProgress?: boolean, options?: { httpHeaderAccept?: 'application/json' } ): Observable<HttpEvent<TypeUserInfo>>;
 
-    userSelfGet( observe: any, reportProgress: boolean ): Observable<any>
+    userSelfGet( observe: any, reportProgress: boolean, options?: { httpHeaderAccept?: 'application/json' } ): Observable<any>
 
     /**
      * Get groups for current user
-     *
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
      * @param reportProgress flag to report request and response progress.
      */
-    userSelfGroupsGet( observe?: 'body', reportProgress?: boolean ): Observable<ResponseUserSelfGroup>;
+    userSelfGroupsGet( observe?: 'body', reportProgress?: boolean, options?: { httpHeaderAccept?: 'application/json' } ): Observable<ResponseUserSelfGroup>;
 
-    userSelfGroupsGet( observe?: 'response', reportProgress?: boolean ): Observable<HttpResponse<ResponseUserSelfGroup>>;
+    userSelfGroupsGet( observe?: 'response', reportProgress?: boolean, options?: { httpHeaderAccept?: 'application/json' } ): Observable<HttpResponse<ResponseUserSelfGroup>>;
 
-    userSelfGroupsGet( observe?: 'events', reportProgress?: boolean ): Observable<HttpEvent<ResponseUserSelfGroup>>;
+    userSelfGroupsGet( observe?: 'events', reportProgress?: boolean, options?: { httpHeaderAccept?: 'application/json' } ): Observable<HttpEvent<ResponseUserSelfGroup>>;
 
-    userSelfGroupsGet( observe: any, reportProgress: boolean ): Observable<any>
+    userSelfGroupsGet( observe: any, reportProgress: boolean, options?: { httpHeaderAccept?: 'application/json' } ): Observable<any>
 
     /**
      * Change password for current user
-     *
-     * @param body
+     * @param requestPasswordSelf
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
      * @param reportProgress flag to report request and response progress.
      */
-    userSelfPasswordPost( body: RequestPasswordSelf, observe?: 'body', reportProgress?: boolean ): Observable<any>;
+    userSelfPasswordPost( requestPasswordSelf: RequestPasswordSelf, observe?: 'body', reportProgress?: boolean, options?: { httpHeaderAccept?: 'application/json' } ): Observable<any>;
 
-    userSelfPasswordPost( body: RequestPasswordSelf, observe?: 'response', reportProgress?: boolean ): Observable<HttpResponse<any>>;
+    userSelfPasswordPost( requestPasswordSelf: RequestPasswordSelf, observe?: 'response', reportProgress?: boolean, options?: { httpHeaderAccept?: 'application/json' } ): Observable<HttpResponse<any>>;
 
-    userSelfPasswordPost( body: RequestPasswordSelf, observe?: 'events', reportProgress?: boolean ): Observable<HttpEvent<any>>;
+    userSelfPasswordPost( requestPasswordSelf: RequestPasswordSelf, observe?: 'events', reportProgress?: boolean, options?: { httpHeaderAccept?: 'application/json' } ): Observable<HttpEvent<any>>;
 
-    userSelfPasswordPost( body: RequestPasswordSelf, observe: any, reportProgress: boolean ): Observable<any>
+    userSelfPasswordPost( requestPasswordSelf: RequestPasswordSelf, observe: any, reportProgress: boolean, options?: { httpHeaderAccept?: 'application/json' } ): Observable<any>
 
     /**
      * Get personal info for current user
-     *
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
      * @param reportProgress flag to report request and response progress.
      */
-    userSelfPersonalGet( observe?: 'body', reportProgress?: boolean ): Observable<ResponsePersonalSelf>;
+    userSelfPersonalGet( observe?: 'body', reportProgress?: boolean, options?: { httpHeaderAccept?: 'application/json' } ): Observable<TypePersonalInfo>;
 
-    userSelfPersonalGet( observe?: 'response', reportProgress?: boolean ): Observable<HttpResponse<ResponsePersonalSelf>>;
+    userSelfPersonalGet( observe?: 'response', reportProgress?: boolean, options?: { httpHeaderAccept?: 'application/json' } ): Observable<HttpResponse<TypePersonalInfo>>;
 
-    userSelfPersonalGet( observe?: 'events', reportProgress?: boolean ): Observable<HttpEvent<ResponsePersonalSelf>>;
+    userSelfPersonalGet( observe?: 'events', reportProgress?: boolean, options?: { httpHeaderAccept?: 'application/json' } ): Observable<HttpEvent<TypePersonalInfo>>;
 
-    userSelfPersonalGet( observe: any, reportProgress: boolean ): Observable<any>
+    userSelfPersonalGet( observe: any, reportProgress: boolean, options?: { httpHeaderAccept?: 'application/json' } ): Observable<any>
 
     /**
      * Get university student info for current user
-     *
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
      * @param reportProgress flag to report request and response progress.
      */
-    userSelfUniversityGet( observe?: 'body', reportProgress?: boolean ): Observable<ResponseUniversitySelf>;
+    userSelfUniversityGet( observe?: 'body', reportProgress?: boolean, options?: { httpHeaderAccept?: 'application/json' } ): Observable<TypePersonalInfo>;
 
-    userSelfUniversityGet( observe?: 'response', reportProgress?: boolean ): Observable<HttpResponse<ResponseUniversitySelf>>;
+    userSelfUniversityGet( observe?: 'response', reportProgress?: boolean, options?: { httpHeaderAccept?: 'application/json' } ): Observable<HttpResponse<TypePersonalInfo>>;
 
-    userSelfUniversityGet( observe?: 'events', reportProgress?: boolean ): Observable<HttpEvent<ResponseUniversitySelf>>;
+    userSelfUniversityGet( observe?: 'events', reportProgress?: boolean, options?: { httpHeaderAccept?: 'application/json' } ): Observable<HttpEvent<TypePersonalInfo>>;
 
-    userSelfUniversityGet( observe: any, reportProgress: boolean ): Observable<any>
+    userSelfUniversityGet( observe: any, reportProgress: boolean, options?: { httpHeaderAccept?: 'application/json' } ): Observable<any>
 
     /**
      * Get common info for a different user
@@ -325,29 +303,29 @@ export interface AuthService
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
      * @param reportProgress flag to report request and response progress.
      */
-    userUserIdGet( userId: number, observe?: 'body', reportProgress?: boolean ): Observable<ResponseUserAdmin>;
+    userUserIdGet( userId: number, observe?: 'body', reportProgress?: boolean, options?: { httpHeaderAccept?: 'application/json' } ): Observable<TypeUserInfo>;
 
-    userUserIdGet( userId: number, observe?: 'response', reportProgress?: boolean ): Observable<HttpResponse<ResponseUserAdmin>>;
+    userUserIdGet( userId: number, observe?: 'response', reportProgress?: boolean, options?: { httpHeaderAccept?: 'application/json' } ): Observable<HttpResponse<TypeUserInfo>>;
 
-    userUserIdGet( userId: number, observe?: 'events', reportProgress?: boolean ): Observable<HttpEvent<ResponseUserAdmin>>;
+    userUserIdGet( userId: number, observe?: 'events', reportProgress?: boolean, options?: { httpHeaderAccept?: 'application/json' } ): Observable<HttpEvent<TypeUserInfo>>;
 
-    userUserIdGet( userId: number, observe: any, reportProgress: boolean ): Observable<any>
+    userUserIdGet( userId: number, observe: any, reportProgress: boolean, options?: { httpHeaderAccept?: 'application/json' } ): Observable<any>
 
     /**
      * Assign a user to a group
      * Assign a user to a group, only for admins and creators
-     * @param body
      * @param userId Id of the user
+     * @param requestUserGroupsAdd
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
      * @param reportProgress flag to report request and response progress.
      */
-    userUserIdGroupsAddPost( body: RequestUserGroupsAdd, userId: number, observe?: 'body', reportProgress?: boolean ): Observable<any>;
+    userUserIdGroupsAddPost( userId: number, requestUserGroupsAdd: RequestUserGroupsAdd, observe?: 'body', reportProgress?: boolean, options?: { httpHeaderAccept?: 'application/json' } ): Observable<any>;
 
-    userUserIdGroupsAddPost( body: RequestUserGroupsAdd, userId: number, observe?: 'response', reportProgress?: boolean ): Observable<HttpResponse<any>>;
+    userUserIdGroupsAddPost( userId: number, requestUserGroupsAdd: RequestUserGroupsAdd, observe?: 'response', reportProgress?: boolean, options?: { httpHeaderAccept?: 'application/json' } ): Observable<HttpResponse<any>>;
 
-    userUserIdGroupsAddPost( body: RequestUserGroupsAdd, userId: number, observe?: 'events', reportProgress?: boolean ): Observable<HttpEvent<any>>;
+    userUserIdGroupsAddPost( userId: number, requestUserGroupsAdd: RequestUserGroupsAdd, observe?: 'events', reportProgress?: boolean, options?: { httpHeaderAccept?: 'application/json' } ): Observable<HttpEvent<any>>;
 
-    userUserIdGroupsAddPost( body: RequestUserGroupsAdd, userId: number, observe: any, reportProgress: boolean ): Observable<any>
+    userUserIdGroupsAddPost( userId: number, requestUserGroupsAdd: RequestUserGroupsAdd, observe: any, reportProgress: boolean, options?: { httpHeaderAccept?: 'application/json' } ): Observable<any>
 
     /**
      * Get groups for a different user
@@ -356,45 +334,45 @@ export interface AuthService
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
      * @param reportProgress flag to report request and response progress.
      */
-    userUserIdGroupsGet( userId: number, observe?: 'body', reportProgress?: boolean ): Observable<ResponseUserAdminGroup>;
+    userUserIdGroupsGet( userId: number, observe?: 'body', reportProgress?: boolean, options?: { httpHeaderAccept?: 'application/json' } ): Observable<ResponseUserAdminGroup>;
 
-    userUserIdGroupsGet( userId: number, observe?: 'response', reportProgress?: boolean ): Observable<HttpResponse<ResponseUserAdminGroup>>;
+    userUserIdGroupsGet( userId: number, observe?: 'response', reportProgress?: boolean, options?: { httpHeaderAccept?: 'application/json' } ): Observable<HttpResponse<ResponseUserAdminGroup>>;
 
-    userUserIdGroupsGet( userId: number, observe?: 'events', reportProgress?: boolean ): Observable<HttpEvent<ResponseUserAdminGroup>>;
+    userUserIdGroupsGet( userId: number, observe?: 'events', reportProgress?: boolean, options?: { httpHeaderAccept?: 'application/json' } ): Observable<HttpEvent<ResponseUserAdminGroup>>;
 
-    userUserIdGroupsGet( userId: number, observe: any, reportProgress: boolean ): Observable<any>
+    userUserIdGroupsGet( userId: number, observe: any, reportProgress: boolean, options?: { httpHeaderAccept?: 'application/json' } ): Observable<any>
 
     /**
      * Remove a user from a group
      * Remove a user from a group, only for admins and creators
-     * @param body
      * @param userId Id of the user
+     * @param requestUserGroupsRemove
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
      * @param reportProgress flag to report request and response progress.
      */
-    userUserIdGroupsRemovePost( body: RequestUserGroupsRemove, userId: number, observe?: 'body', reportProgress?: boolean ): Observable<any>;
+    userUserIdGroupsRemovePost( userId: number, requestUserGroupsRemove: RequestUserGroupsRemove, observe?: 'body', reportProgress?: boolean, options?: { httpHeaderAccept?: 'application/json' } ): Observable<any>;
 
-    userUserIdGroupsRemovePost( body: RequestUserGroupsRemove, userId: number, observe?: 'response', reportProgress?: boolean ): Observable<HttpResponse<any>>;
+    userUserIdGroupsRemovePost( userId: number, requestUserGroupsRemove: RequestUserGroupsRemove, observe?: 'response', reportProgress?: boolean, options?: { httpHeaderAccept?: 'application/json' } ): Observable<HttpResponse<any>>;
 
-    userUserIdGroupsRemovePost( body: RequestUserGroupsRemove, userId: number, observe?: 'events', reportProgress?: boolean ): Observable<HttpEvent<any>>;
+    userUserIdGroupsRemovePost( userId: number, requestUserGroupsRemove: RequestUserGroupsRemove, observe?: 'events', reportProgress?: boolean, options?: { httpHeaderAccept?: 'application/json' } ): Observable<HttpEvent<any>>;
 
-    userUserIdGroupsRemovePost( body: RequestUserGroupsRemove, userId: number, observe: any, reportProgress: boolean ): Observable<any>
+    userUserIdGroupsRemovePost( userId: number, requestUserGroupsRemove: RequestUserGroupsRemove, observe: any, reportProgress: boolean, options?: { httpHeaderAccept?: 'application/json' } ): Observable<any>
 
     /**
      * Change password for another user
      * Change password for another user, admins only
-     * @param body
      * @param userId Id of the user
+     * @param requestPasswordAdmin
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
      * @param reportProgress flag to report request and response progress.
      */
-    userUserIdPasswordPost( body: RequestPasswordAdmin, userId: number, observe?: 'body', reportProgress?: boolean ): Observable<any>;
+    userUserIdPasswordPost( userId: number, requestPasswordAdmin: RequestPasswordAdmin, observe?: 'body', reportProgress?: boolean, options?: { httpHeaderAccept?: 'application/json' } ): Observable<any>;
 
-    userUserIdPasswordPost( body: RequestPasswordAdmin, userId: number, observe?: 'response', reportProgress?: boolean ): Observable<HttpResponse<any>>;
+    userUserIdPasswordPost( userId: number, requestPasswordAdmin: RequestPasswordAdmin, observe?: 'response', reportProgress?: boolean, options?: { httpHeaderAccept?: 'application/json' } ): Observable<HttpResponse<any>>;
 
-    userUserIdPasswordPost( body: RequestPasswordAdmin, userId: number, observe?: 'events', reportProgress?: boolean ): Observable<HttpEvent<any>>;
+    userUserIdPasswordPost( userId: number, requestPasswordAdmin: RequestPasswordAdmin, observe?: 'events', reportProgress?: boolean, options?: { httpHeaderAccept?: 'application/json' } ): Observable<HttpEvent<any>>;
 
-    userUserIdPasswordPost( body: RequestPasswordAdmin, userId: number, observe: any, reportProgress: boolean ): Observable<any>
+    userUserIdPasswordPost( userId: number, requestPasswordAdmin: RequestPasswordAdmin, observe: any, reportProgress: boolean, options?: { httpHeaderAccept?: 'application/json' } ): Observable<any>
 
     /**
      * Get personal info for a different user
@@ -403,61 +381,61 @@ export interface AuthService
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
      * @param reportProgress flag to report request and response progress.
      */
-    userUserIdPersonalGet( userId: number, observe?: 'body', reportProgress?: boolean ): Observable<ResponsePersonalAdminGet>;
+    userUserIdPersonalGet( userId: number, observe?: 'body', reportProgress?: boolean, options?: { httpHeaderAccept?: 'application/json' } ): Observable<TypePersonalInfo>;
 
-    userUserIdPersonalGet( userId: number, observe?: 'response', reportProgress?: boolean ): Observable<HttpResponse<ResponsePersonalAdminGet>>;
+    userUserIdPersonalGet( userId: number, observe?: 'response', reportProgress?: boolean, options?: { httpHeaderAccept?: 'application/json' } ): Observable<HttpResponse<TypePersonalInfo>>;
 
-    userUserIdPersonalGet( userId: number, observe?: 'events', reportProgress?: boolean ): Observable<HttpEvent<ResponsePersonalAdminGet>>;
+    userUserIdPersonalGet( userId: number, observe?: 'events', reportProgress?: boolean, options?: { httpHeaderAccept?: 'application/json' } ): Observable<HttpEvent<TypePersonalInfo>>;
 
-    userUserIdPersonalGet( userId: number, observe: any, reportProgress: boolean ): Observable<any>
+    userUserIdPersonalGet( userId: number, observe: any, reportProgress: boolean, options?: { httpHeaderAccept?: 'application/json' } ): Observable<any>
 
     /**
      * Set personal info for a user
      * Set personal info about any user by its id, only for admins
-     * @param body
      * @param userId Id of the user
+     * @param body
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
      * @param reportProgress flag to report request and response progress.
      */
-    userUserIdPersonalPatch( body: TypePersonalInfo, userId: number, observe?: 'body', reportProgress?: boolean ): Observable<any>;
+    userUserIdPersonalPatch( userId: number, body: TypePersonalInfo, observe?: 'body', reportProgress?: boolean, options?: { httpHeaderAccept?: 'application/json' } ): Observable<any>;
 
-    userUserIdPersonalPatch( body: TypePersonalInfo, userId: number, observe?: 'response', reportProgress?: boolean ): Observable<HttpResponse<any>>;
+    userUserIdPersonalPatch( userId: number, body: TypePersonalInfo, observe?: 'response', reportProgress?: boolean, options?: { httpHeaderAccept?: 'application/json' } ): Observable<HttpResponse<any>>;
 
-    userUserIdPersonalPatch( body: TypePersonalInfo, userId: number, observe?: 'events', reportProgress?: boolean ): Observable<HttpEvent<any>>;
+    userUserIdPersonalPatch( userId: number, body: TypePersonalInfo, observe?: 'events', reportProgress?: boolean, options?: { httpHeaderAccept?: 'application/json' } ): Observable<HttpEvent<any>>;
 
-    userUserIdPersonalPatch( body: TypePersonalInfo, userId: number, observe: any, reportProgress: boolean ): Observable<any>
+    userUserIdPersonalPatch( userId: number, body: TypePersonalInfo, observe: any, reportProgress: boolean, options?: { httpHeaderAccept?: 'application/json' } ): Observable<any>
 
     /**
      * Set the role of any user
      * Set the role of another user, only for admins
-     * @param body
      * @param userId Id of the user
+     * @param requestUserRole
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
      * @param reportProgress flag to report request and response progress.
      */
-    userUserIdRolePut( body: RequestUserRole, userId: number, observe?: 'body', reportProgress?: boolean ): Observable<any>;
+    userUserIdRolePut( userId: number, requestUserRole: RequestUserRole, observe?: 'body', reportProgress?: boolean, options?: { httpHeaderAccept?: 'application/json' } ): Observable<any>;
 
-    userUserIdRolePut( body: RequestUserRole, userId: number, observe?: 'response', reportProgress?: boolean ): Observable<HttpResponse<any>>;
+    userUserIdRolePut( userId: number, requestUserRole: RequestUserRole, observe?: 'response', reportProgress?: boolean, options?: { httpHeaderAccept?: 'application/json' } ): Observable<HttpResponse<any>>;
 
-    userUserIdRolePut( body: RequestUserRole, userId: number, observe?: 'events', reportProgress?: boolean ): Observable<HttpEvent<any>>;
+    userUserIdRolePut( userId: number, requestUserRole: RequestUserRole, observe?: 'events', reportProgress?: boolean, options?: { httpHeaderAccept?: 'application/json' } ): Observable<HttpEvent<any>>;
 
-    userUserIdRolePut( body: RequestUserRole, userId: number, observe: any, reportProgress: boolean ): Observable<any>
+    userUserIdRolePut( userId: number, requestUserRole: RequestUserRole, observe: any, reportProgress: boolean, options?: { httpHeaderAccept?: 'application/json' } ): Observable<any>
 
     /**
      * Set the type of any user
      * Set the type of another user, only for admins
-     * @param body
      * @param userId Id of the user
+     * @param requestUserType
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
      * @param reportProgress flag to report request and response progress.
      */
-    userUserIdTypePut( body: RequestUserType, userId: number, observe?: 'body', reportProgress?: boolean ): Observable<any>;
+    userUserIdTypePut( userId: number, requestUserType: RequestUserType, observe?: 'body', reportProgress?: boolean, options?: { httpHeaderAccept?: 'application/json' } ): Observable<any>;
 
-    userUserIdTypePut( body: RequestUserType, userId: number, observe?: 'response', reportProgress?: boolean ): Observable<HttpResponse<any>>;
+    userUserIdTypePut( userId: number, requestUserType: RequestUserType, observe?: 'response', reportProgress?: boolean, options?: { httpHeaderAccept?: 'application/json' } ): Observable<HttpResponse<any>>;
 
-    userUserIdTypePut( body: RequestUserType, userId: number, observe?: 'events', reportProgress?: boolean ): Observable<HttpEvent<any>>;
+    userUserIdTypePut( userId: number, requestUserType: RequestUserType, observe?: 'events', reportProgress?: boolean, options?: { httpHeaderAccept?: 'application/json' } ): Observable<HttpEvent<any>>;
 
-    userUserIdTypePut( body: RequestUserType, userId: number, observe: any, reportProgress: boolean ): Observable<any>
+    userUserIdTypePut( userId: number, requestUserType: RequestUserType, observe: any, reportProgress: boolean, options?: { httpHeaderAccept?: 'application/json' } ): Observable<any>
 
     /**
      * Get university student info for a different user
@@ -466,27 +444,27 @@ export interface AuthService
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
      * @param reportProgress flag to report request and response progress.
      */
-    userUserIdUniversityGet( userId: number, observe?: 'body', reportProgress?: boolean ): Observable<ResponseUniversityAdminGet>;
+    userUserIdUniversityGet( userId: number, observe?: 'body', reportProgress?: boolean, options?: { httpHeaderAccept?: 'application/json' } ): Observable<TypeStudentInfo>;
 
-    userUserIdUniversityGet( userId: number, observe?: 'response', reportProgress?: boolean ): Observable<HttpResponse<ResponseUniversityAdminGet>>;
+    userUserIdUniversityGet( userId: number, observe?: 'response', reportProgress?: boolean, options?: { httpHeaderAccept?: 'application/json' } ): Observable<HttpResponse<TypeStudentInfo>>;
 
-    userUserIdUniversityGet( userId: number, observe?: 'events', reportProgress?: boolean ): Observable<HttpEvent<ResponseUniversityAdminGet>>;
+    userUserIdUniversityGet( userId: number, observe?: 'events', reportProgress?: boolean, options?: { httpHeaderAccept?: 'application/json' } ): Observable<HttpEvent<TypeStudentInfo>>;
 
-    userUserIdUniversityGet( userId: number, observe: any, reportProgress: boolean ): Observable<any>
+    userUserIdUniversityGet( userId: number, observe: any, reportProgress: boolean, options?: { httpHeaderAccept?: 'application/json' } ): Observable<any>
 
     /**
      * Set university student info for a user
      * Set university student info about any user by its id, only for admins
-     * @param body
      * @param userId Id of the user
+     * @param body
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
      * @param reportProgress flag to report request and response progress.
      */
-    userUserIdUniversityPatch( body: TypeStudentInfo, userId: number, observe?: 'body', reportProgress?: boolean ): Observable<any>;
+    userUserIdUniversityPatch( userId: number, body: TypeStudentInfo, observe?: 'body', reportProgress?: boolean, options?: { httpHeaderAccept?: 'application/json' } ): Observable<any>;
 
-    userUserIdUniversityPatch( body: TypeStudentInfo, userId: number, observe?: 'response', reportProgress?: boolean ): Observable<HttpResponse<any>>;
+    userUserIdUniversityPatch( userId: number, body: TypeStudentInfo, observe?: 'response', reportProgress?: boolean, options?: { httpHeaderAccept?: 'application/json' } ): Observable<HttpResponse<any>>;
 
-    userUserIdUniversityPatch( body: TypeStudentInfo, userId: number, observe?: 'events', reportProgress?: boolean ): Observable<HttpEvent<any>>;
+    userUserIdUniversityPatch( userId: number, body: TypeStudentInfo, observe?: 'events', reportProgress?: boolean, options?: { httpHeaderAccept?: 'application/json' } ): Observable<HttpEvent<any>>;
 
-    userUserIdUniversityPatch( body: TypeStudentInfo, userId: number, observe: any, reportProgress: boolean ): Observable<any>
+    userUserIdUniversityPatch( userId: number, body: TypeStudentInfo, observe: any, reportProgress: boolean, options?: { httpHeaderAccept?: 'application/json' } ): Observable<any>
 }

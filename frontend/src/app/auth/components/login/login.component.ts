@@ -2,7 +2,7 @@ import { Component, HostListener, OnInit } from '@angular/core'
 import { Store } from '@ngrx/store'
 import { AuthActions, AuthSelectors, AuthState } from '@/auth/store'
 import { Observable } from 'rxjs'
-import { ErrorValue, TypeAuthCredentials } from '@/auth/models'
+import { ErrorValue, RequestLogin } from '@/auth/api/models'
 import { fixedHeight } from '@/shared/consts'
 
 
@@ -13,14 +13,14 @@ import { fixedHeight } from '@/shared/consts'
 } )
 export class LoginComponent implements OnInit
 {
-    loginAttempt: TypeAuthCredentials
+    loginAttempt: RequestLogin
     isAuthenticated$!: Observable<boolean>
     error$!: Observable<ErrorValue[] | null>
     containerHeight: number
 
     constructor( private readonly store: Store<AuthState.State> )
     {
-        this.loginAttempt = { username: '', password: '' }
+        this.loginAttempt = { auth_credentials: { username: '', password: '' }, remember_me: false }
         this.containerHeight = fixedHeight
     }
 
@@ -36,16 +36,14 @@ export class LoginComponent implements OnInit
         this.containerHeight = fixedHeight
     }
 
-    login( loginAttemptUser: TypeAuthCredentials ): void
+    login( loginAttempt: RequestLogin ): void
     {
-        const authentication = { authentication: { authCredentials: loginAttemptUser } }
-        const requestLogin = { authCredentials: loginAttemptUser, rememberMe: true }
-        this.store.dispatch( AuthActions.loginAttempt( { requestLogin: requestLogin } ) )
+        this.store.dispatch( AuthActions.loginAttempt( { requestLogin: loginAttempt } ) )
     }
 
-    isValid( loginAttemptUser: TypeAuthCredentials ): boolean
+    isValid( loginAttemptUser: RequestLogin ): boolean
     {
         // TODO enforce email regex check
-        return !!( loginAttemptUser.password && loginAttemptUser.username )
+        return !!( loginAttemptUser.auth_credentials.username && loginAttemptUser.auth_credentials.password )
     }
 }

@@ -2,11 +2,9 @@ import { createAction, props } from '@ngrx/store'
 import {
     ErrorResponse,
     RequestLogin,
-    RequestRegistration,
-    ResponseLogin,
-    ResponseRegistration, TypeRegistrationPersonalInfo,
-    TypeUserInfo
-} from '@/auth/models'
+    RequestRegistration, TypeCSRFPair,
+    TypeRegistrationPersonalInfo, TypeUserInfo
+} from '@/auth/api/models'
 
 
 export const loginAttempt = createAction(
@@ -16,7 +14,7 @@ export const loginAttempt = createAction(
 
 export const loginSuccess = createAction(
     '[Auth] Login Success',
-    props<{ responseLogin: ResponseLogin }>()
+    props<{ csrfPair: TypeCSRFPair }>()
 )
 
 export const loginError = createAction(
@@ -31,7 +29,7 @@ export const registerAttempt = createAction(
 
 export const registerSuccess = createAction(
     '[Auth] Register Success',
-    props<{ responseRegistration: ResponseRegistration }>()
+    props<{ userInfo: TypeUserInfo }>()
 )
 
 export const registerError = createAction(
