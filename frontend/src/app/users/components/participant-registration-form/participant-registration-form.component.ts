@@ -10,7 +10,6 @@ import { ParticipantService } from '@/users/services/participant.service'
 } )
 export class ParticipantRegistrationFormComponent implements OnInit
 {
-
     // @ts-ignore
     participant: ParticipantRegister
     currentStage: number

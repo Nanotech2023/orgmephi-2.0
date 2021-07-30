@@ -1,15 +1,22 @@
 import { createAction, props } from '@ngrx/store'
-import { Authentication, AuthResponse, CommonUserInfo, ErrorResponse, PersonalInfo, Registration } from '@/auth/models'
+import {
+    ErrorResponse,
+    RequestLogin,
+    RequestRegistration,
+    ResponseLogin,
+    ResponseRegistration, TypeRegistrationPersonalInfo,
+    TypeUserInfo
+} from '@/auth/models'
 
 
 export const loginAttempt = createAction(
     '[Auth] Login Attempt',
-    props<{ authentication: Authentication }>()
+    props<{ requestLogin: RequestLogin }>()
 )
 
 export const loginSuccess = createAction(
     '[Auth] Login Success',
-    props<{ authResponse: AuthResponse }>()
+    props<{ responseLogin: ResponseLogin }>()
 )
 
 export const loginError = createAction(
@@ -19,12 +26,12 @@ export const loginError = createAction(
 
 export const registerAttempt = createAction(
     '[Auth] Register Attempt',
-    props<{ registration: Registration }>()
+    props<{ requestRegistration: RequestRegistration }>()
 )
 
 export const registerSuccess = createAction(
     '[Auth] Register Success',
-    props<{ commonUserInfo: CommonUserInfo }>()
+    props<{ responseRegistration: ResponseRegistration }>()
 )
 
 export const registerError = createAction(
@@ -34,5 +41,5 @@ export const registerError = createAction(
 
 export const pushPersonalInfo = createAction(
     '[Auth] Push Personal Info',
-    props<{ personalInfo: PersonalInfo }>()
+    props<{ personalInfo: TypeRegistrationPersonalInfo }>()
 )

@@ -6,6 +6,7 @@ import { ParticipantRegistrationFormComponent } from '@/users/components/partici
 import { SharedModule } from '@/shared/shared.module'
 import { ParticipantRegistrationFormPersonalComponent } from '@/users/components/participant-registration-form-personal/participant-registration-form-personal.component'
 import { ParticipantRegistrationFormEducationComponent } from '@/users/components/participant-registration-form-education/participant-registration-form-education.component'
+import { ParticipantCabinetComponent } from '@/users/components/participant-cabinet/participant-cabinet.component'
 
 
 const COMPONENTS = [
@@ -13,7 +14,8 @@ const COMPONENTS = [
     HomeComponent,
     ParticipantRegistrationFormComponent,
     ParticipantRegistrationFormPersonalComponent,
-    ParticipantRegistrationFormEducationComponent
+    ParticipantRegistrationFormEducationComponent,
+    ParticipantCabinetComponent
 ]
 
 

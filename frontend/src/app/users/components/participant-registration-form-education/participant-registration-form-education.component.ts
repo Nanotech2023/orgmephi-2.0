@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core'
+import { Component, EventEmitter, Input, Output } from '@angular/core'
 import { ParticipantRegister } from '@/users/models/participant'
 import { ParticipantService } from '@/users/services/participant.service'
 import { SchoolType } from '@/users/models/participant/education'
@@ -9,7 +9,7 @@ import { SchoolType } from '@/users/models/participant/education'
     templateUrl: './participant-registration-form-education.component.html',
     styleUrls: [ './participant-registration-form-education.component.scss' ]
 } )
-export class ParticipantRegistrationFormEducationComponent implements OnInit
+export class ParticipantRegistrationFormEducationComponent
 {
     // @ts-ignore
     @Input() participant: ParticipantRegister
@@ -23,10 +23,6 @@ export class ParticipantRegistrationFormEducationComponent implements OnInit
     classes = [ ...Array( 7 ) ].map( ( _, index ) => 5 + index )
 
     constructor( private service: ParticipantService ) { }
-
-    ngOnInit(): void
-    {
-    }
 
     getFilteredRegions()
     {
