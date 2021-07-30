@@ -21,6 +21,14 @@ def get_or_raise(entity, field, value):
     return result
 
 
+def get_missing(values, search):
+    missing = []
+    for value in search:
+        if value not in values:
+            missing.append(value)
+    return missing
+
+
 # Swagger UI
 
 @app.route('/tasks_api.yaml', methods=['GET'])
@@ -39,7 +47,7 @@ def get_api():
 @openapi
 @catch_request_error
 @jwt_required_role(['Admin', 'System', 'Creator'])
-def olympiad_create():
+def base_olympiad_create():
     values = request.openapi.body
 
     name = values['name']
@@ -67,104 +75,105 @@ def olympiad_create():
 
 @app.route('/base_olympiad/<id_base_olympiad>', methods=['GET'])
 @openapi
-def olympiad_get(id_base_olympiad):
-    try:
-        base_olympiad = get_or_raise(BaseContest, BaseContest.base_contest_id, id_base_olympiad)
-        return make_response(
-            {
-                base_olympiad.serialize()
-            }, 200)
+@catch_request_error
+@jwt_required()
+def base_olympiad_get(id_base_olympiad):
+    baseContest = get_or_raise(BaseContest, BaseContest.base_contest_id, id_base_olympiad)
+    return make_response(baseContest.serialize(), 200)
 
-    except RequestError as err:
-        db.session.rollback()
-        return err.to_response()
 
 
 @app.route('/base_olympiad/<id_base_olympiad>', methods=['PATCH'])
 @openapi
-def olympiad_update(id_base_olympiad):
+@catch_request_error
+@jwt_required_role(['Admin', 'System', 'Creator'])
+def base_olympiad_update(id_base_olympiad):
+    base_olympiad = get_or_raise(BaseContest, BaseContest.base_contest_id, id_base_olympiad)
+    values = request.openapi.body
+
     try:
-        base_olympiad = BaseContest.query.filter_by(BaseContest.base_contest_id == id_base_olympiad).one()
-
-        values = request.openapi.body
-        if 'name' in values:
-            olympiad.name = values['name']
-        if 'description' in values:
-            olympiad.description = values['description']
-        if 'rules' in values:
-            olympiad.rules = values['rules']
-
-        db.session.commit()
-        return make_response({}, 200)
-
-    except RequestError as err:
+        base_olympiad.update(**values)
+    except Exception:
         db.session.rollback()
-        return err.to_response()
+        raise
+    db.session.commit()
+    return make_response(base_olympiad.serialize(), 200)
 
 
-@app.route('/olympiad/all', methods=['GET'])
+@app.route('/base_olympiad/all', methods=['GET'])
 @openapi
-def olympiads_all():
-    try:
-        olympiads = Olympiad.query.all()
+@catch_request_error
+@jwt_required()
+def base_olympiads_all():
+    olympiads = get_all(Olympiad)
+    all_olympiads = [olympiad.serialize() for olympiad in olympiads]
 
-        all_olympiads = []
+    return make_response(
+        { "olympiad_list": all_olympiads }, 200)
 
-        for olympiad in olympiads:
-            all_olympiads.append(
-                {
-                    "olympiad_id": olympiad.id,
-                    "name": olympiad.name,
-                    "description": olympiad.description,
-                    "rules": olympiad.rules,
-                }
-            )
-
-        return make_response(
-            {
-                "olympiad_list": all_olympiads
-            }, 200)
-
-    except RequestError as err:
-        db.session.rollback()
-        return err.to_response()
 
 @app.route('/base_olympiad/<base_olympiad_id>/olympiad/create', methods=['POST'])
 @openapi
 @catch_request_error
 @jwt_required_role(['Admin', 'System', 'Creator'])
 def olympiad_create():
+    values = request.openapi.body
+
+    composite_type = values['composite_type']
+    base_contest_id = values['base_contest_id']
+    winning_condition = values['winning_condition']
+    laureate_condition = values['laureate_condition']
+    visibility = values['visibility']
+    start_date = values['start_date']
+
     try:
-        values = request.openapi.body
 
-        name = values['name']
-        desc = values['description']
-        rules = values['rules']
+        if composite_type == "Composite":
 
-        # TODO Checking
+            end_date = values['end_date']
+            previous_contest_id = values['previous_contest_id']
+            previous_participation_condition = values['previous_participation_condition']
 
-        olympiad = Olympiad(
-            name=name,
-            description=desc,
-            rules=rules,
-        )
-        db.session.add(olympiad)
+            add_simple_contest(db.session,
+                               base_contest_id,
+                               winning_condition,
+                               laureate_condition,
+                               visibility,
+                               start_date,
+                               end_date,
+                               previous_contest_id,
+                               previous_participation_condition)
 
-        # Generate olympiad.id
-        # db.session.flush()
+
+        else:
+
+            base_contest_id = values['base_contest_id']
+            winning_condition = values['winning_condition']
+            laureate_condition = values['laureate_condition']
+            visibility = values['visibility']
+            start_date = values['start_date']
+            end_date = values['end_date']
+            previous_contest_id = values['previous_contest_id']
+            previous_participation_condition = values['previous_participation_condition']
+
+            add_composite_contest(db_session,
+                                  base_contest_id,
+                                  winning_condition,
+                                  laureate_condition,
+                                  certificate_template,
+                                  visibility)
 
         db.session.commit()
         return make_response(
             {
                 "olympiad_id": olympiad.olympiad_id,
             }, 200)
-
     except sqlalchemy.exc.IntegrityError:
         raise AlreadyExists('username', username)
     except Exception:
         db.session.rollback()
         raise
-    return make_response(user.serialize(), 200)
+    return make_response(baseContest.serialize(), 200)
 
 
 """
