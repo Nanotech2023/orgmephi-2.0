@@ -16,7 +16,7 @@
         </ul>
         <div class="actions">
             <div class="button_container">
-                <div class="user-info" *ngIf="commonUserInfo$ | async as userInfo">
+                <div class="user-info" *ngIf="userInfo | async as userInfo">
                     {{ userInfo.username }}
                 </div>
             </div>

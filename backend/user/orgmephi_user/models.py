@@ -14,10 +14,10 @@ class UserRoleEnum(enum.Enum):
         admin: administrator user
         system: may be used for maintenance or by connected services
     """
-    user = 1
-    creator = 2
-    admin = 3
-    system = 4
+    participant = 'Participant'
+    creator = 'Creator'
+    admin = 'Admin'
+    system = 'System'
 
 
 class UserTypeEnum(enum.Enum):
@@ -31,12 +31,12 @@ class UserTypeEnum(enum.Enum):
         internal: internal MEPhI user (e.g. creator or admin)
         pre_register: unconfirmed preregistered account
     """
-    pre_university = 1
-    enrollee = 2
-    school = 3
-    university = 4
-    internal = 5
-    pre_register = 6
+    pre_university = 'PreUniversity'
+    enrollee = 'Enrollee'
+    school = 'School'
+    university = 'University'
+    internal = 'Internal'
+    pre_register = 'PreRegister'
 
 
 def _populate_table(table, values):
@@ -54,6 +54,13 @@ def _populate_table(table, values):
             instance = table(name=value)
             db.session.add(instance)
     db.session.commit()
+
+
+# Many-To-Many relationship for User <-> Group
+users_in_group = db.Table('user_in_group',
+                          db.Column('user_id', db.Integer, db.ForeignKey('user.id'), primary_key=True),
+                          db.Column('group_id', db.Integer, db.ForeignKey('group.id'), primary_key=True)
+                          )
 
 
 class User(db.Model):
@@ -81,8 +88,18 @@ class User(db.Model):
     type = db.Column(db.Enum(UserTypeEnum), nullable=False)
     registration_date = db.Column(db.DateTime, default=datetime.utcnow)
 
-    userInfo = db.relationship('UserInfo', backref='user', lazy=True, uselist=False)
-    studentInfo = db.relationship('StudentInfo', backref='user', lazy=True, uselist=False)
+    user_info = db.relationship('UserInfo', backref='user', lazy=True, uselist=False)
+    student_info = db.relationship('StudentInfo', backref='user', lazy=True, uselist=False)
+    groups = db.relationship('Group', secondary=users_in_group, lazy='select', backref=db.backref('user', lazy=True),
+                             viewonly=True)
+
+    def serialize(self):
+        return {
+                "id": self.id,
+                "username": self.username,
+                "role": self.role.value,
+                "type": self.type.value
+            }
 
 
 class UserInfo(db.Model):
@@ -108,6 +125,28 @@ class UserInfo(db.Model):
     middle_name = db.Column(db.String)
     second_name = db.Column(db.String)
     date_of_birth = db.Column(db.Date)
+
+    def serialize(self):
+        return \
+            {
+                'email': self.email,
+                'first_name': self.first_name,
+                'second_name': self.second_name,
+                'middle_name': self.middle_name,
+                'date_of_birth': self.date_of_birth.isoformat()
+            }
+
+    def update(self, email=None, first_name=None, second_name=None, middle_name=None, date_of_birth=None):
+        if email is not None:
+            self.email = email
+        if first_name is not None:
+            self.first_name = first_name
+        if second_name is not None:
+            self.second_name = second_name
+        if middle_name is not None:
+            self.middle_name = middle_name
+        if date_of_birth is not None:
+            self.date_of_birth = date_of_birth
 
 
 class StudentInfo(db.Model):
@@ -139,6 +178,45 @@ class StudentInfo(db.Model):
     citizenship = db.Column(db.Integer, db.ForeignKey('country.id'))
     region = db.Column(db.String)
     city = db.Column(db.String)
+
+    def serialize(self):
+        if self.custom_university is None:
+            university = University.query.filter(University.id == self.university).one_or_none().name
+        else:
+            university = self.custom_university
+        return \
+            {
+                'phone_number': self.phone,
+                'university': university,
+                'admission_year': self.admission_year.isoformat(),
+                'university_country': self.university_country,
+                'citizenship': self.citizenship,
+                'region': self.region,
+                'city': self.city
+            }
+
+    def update(self, phone_number=None, university=None, admission_year=None, university_country=None,
+               citizenship=None, region=None, city=None):
+        if phone_number is not None:
+            self.phone = phone_number
+        if university is not None:
+            university_obj = University.query.filter(University.name == university).one_or_none()
+            if university_obj is None:
+                self.university = None
+                self.custom_university = university
+            else:
+                self.university = university_obj.id
+                self.custom_university = None
+        if admission_year is not None:
+            self.admission_year = admission_year
+        if university_country is not None:
+            self.university_country = university_country
+        if citizenship is not None:
+            self.citizenship = citizenship
+        if region is not None:
+            self.region = region
+        if city is not None:
+            self.city = city
 
 
 class University(db.Model):
@@ -185,13 +263,6 @@ def populate_country():
     return _populate_table(Country, open(db.get_app().config['ORGMEPHI_COUNTRY_FILE']).read().splitlines())
 
 
-# Many-To-Many relationship for User <-> Group
-users_in_group = db.Table('user_in_group',
-                          db.Column('user_id', db.Integer, db.ForeignKey('user.id'), primary_key=True),
-                          db.Column('group_id', db.Integer, db.ForeignKey('group.id'), primary_key=True)
-                          )
-
-
 class Group(db.Model):
     """
         Group ORM class
@@ -209,6 +280,72 @@ class Group(db.Model):
 
     users = db.relationship('User', secondary=users_in_group, lazy='subquery',
                             backref=db.backref('group', lazy=True))
+
+    def serialize(self):
+        return {'id': self.id, 'name': self.name}
+
+
+def add_user(db_session, username, password_hash, role, reg_type):
+    user = User(
+        username=username,
+        password_hash=password_hash,
+        role=role,
+        type=reg_type
+    )
+    db_session.add(user)
+    db_session.flush()
+    return user
+
+
+def get_one_or_null(entity, field, value):
+    return entity.query.filter_by(**{field: value}).one_or_none()
+
+
+def get_list(entity, field, value):
+    return entity.query.filter_by(**{field: value}).all()
+
+
+def get_all(entity):
+    return entity.query.all()
+
+
+def add_personal_info(db_session, user, email, first_name, second_name, middle_name, date_of_birth):
+    user_info = UserInfo(
+        user_id=user.id,
+        email=email,
+        first_name=first_name,
+        second_name=second_name,
+        middle_name=middle_name,
+        date_of_birth=date_of_birth
+    )
+    db_session.add(user_info)
+    db_session.flush()
+
+
+def add_university_info(db_session, user, phone, university_name, admission_year, university_country, citizenship,
+                        region, city):
+    university = University.query.filter(University.name == university_name).one_or_none()
+    student_info = StudentInfo(
+        user_id=user.id,
+        phone=phone,
+        university=(university.id if university is not None else None),
+        custom_university=(university_name if university is None else None),
+        admission_year=admission_year,
+        university_country=university_country,
+        citizenship=citizenship,
+        region=region,
+        city=city
+    )
+    db_session.add(student_info)
+    db_session.flush()
+    return student_info
+
+
+def add_group(db_session, name):
+    group = Group(name=name)
+    db_session.add(group)
+    db_session.flush()
+    return group
 
 
 if __name__ == "__main__":

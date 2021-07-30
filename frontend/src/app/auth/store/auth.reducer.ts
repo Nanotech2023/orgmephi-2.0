@@ -8,7 +8,7 @@ import {
     registerError,
     registerSuccess
 } from '@/auth/store/auth.actions'
-import { AuthResponse, CommonUserInfo, PersonalInfo } from '@/auth/models'
+import { ErrorValue, TypeCSRFPair, TypePersonalInfo, TypeUserInfo } from '@/auth/models'
 
 
 export const featureKey: string = 'auth'
@@ -16,18 +16,18 @@ export const featureKey: string = 'auth'
 
 export interface State
 {
-    apiKeys: AuthResponse | null
-    commonUserInfo: CommonUserInfo | null
-    personalInfo: PersonalInfo | null
-    error: string | null
+    csrfTokens: TypeCSRFPair | null
+    userInfo: TypeUserInfo | null
+    personalInfo: TypePersonalInfo | null
+    errors: ErrorValue[] | null
 }
 
 
 export const initialState: State = {
-    apiKeys: null,
-    commonUserInfo: null,
+    csrfTokens: null,
+    userInfo: null,
     personalInfo: null,
-    error: null
+    errors: null
 }
 
 export const reducer =
@@ -38,19 +38,19 @@ export const reducer =
                 ( { ...state } )
         ),
         on( loginSuccess,
-            ( state, { authResponse } ) =>
-                ( { ...state, apiKeys: authResponse } )
+            ( state, { responseLogin } ) =>
+                ( { ...state, csrfTokens: { csrfAccessToken: '', csrfRefreshToken: '' } } ) // TODO tokens in responseLogin?
         ),
         on( registerSuccess,
-            ( state, { commonUserInfo } ) =>
-                ( { ...state, commonUserInfo: commonUserInfo } )
+            ( state, { responseRegistration } ) =>
+                ( { ...state, userInfo: responseRegistration } ) // TODO remove assign userInfo
         ),
         on( loginError, registerError,
             ( state, { error } ) =>
-                ( { ...state, error: error.errorMsg } )
+                ( { ...state, error: error.errors } )
         ),
         on( pushPersonalInfo,
             ( state, { personalInfo } ) =>
-                ( { ...state, personalInfo: personalInfo } )
+                ( { ...state, personalInfo: personalInfo } ) // TODO this is mock action. Should be removed on production
         )
     )
