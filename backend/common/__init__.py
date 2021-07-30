@@ -9,6 +9,7 @@ import os
 
 from .module import OrgMephiModule
 from .password import OrgMephiPassword
+from .access_levels import OrgMephiAccessLevel
 
 
 def _path_to_absolute(path):
@@ -19,12 +20,12 @@ def _path_to_absolute(path):
 
 class OrgMephiApp:
 
-    def __init__(self, service_name: str, modules: list[str], security: bool = False, default_config: object = None,
+    def __init__(self, service_name: str, security: bool = False, default_config: object = None,
                  test_config: object = None):
         self._service_name: str = service_name
         self._db_prepare_actions: list[Callable] = []
         self._init_app(default_config, test_config)
-        self._init_modules(modules)
+        self._modules: dict[str, OrgMephiModule] = {}
         self._init_db()
         self._init_jwt()
         self._init_cors()
@@ -40,13 +41,14 @@ class OrgMephiApp:
         elif config_var in os.environ:
             self._app.config.from_envvar(config_var)
 
-    def _init_modules(self, modules: list[str]):
-        self._modules: dict[str, OrgMephiModule] = {}
+    def create_module(self, name: str, path: str, access_level: OrgMephiAccessLevel = OrgMephiAccessLevel.visitor):
         api_var = 'ORGMEPHI_%s_API_PATH' % self._service_name.upper()
-        api_path = _path_to_absolute(self._app.config[api_var])
-        for mod in modules:
-            development = self._app.config['ENV'] == 'development'
-            self._modules[mod] = OrgMephiModule(self._service_name, mod, api_path, development)
+        if api_var in self._app.config:
+            api_path = _path_to_absolute(self._app.config[api_var])
+        else:
+            api_path = None
+        development = self._app.config['ENV'] == 'development'
+        self._modules[name] = OrgMephiModule(self._service_name, name, path, access_level, api_path, development)
 
     def _init_db(self):
         self._db = SQLAlchemy(self._app)
@@ -109,14 +111,28 @@ class OrgMephiApp:
         return self._app.config
 
     def prepare(self):
-        for name, mod in self._modules.items():
-            mod.load(self._service_name)
-        self._db.create_all()
-        for name, mod in self._modules.items():
-            mod.prepare_db()
-            self._app.register_blueprint(mod.blueprint)
-            if mod.swagger is not None:
-                self._app.register_blueprint(mod.swagger)
+        last_app = get_current_app()
+        self.set_current()
+        try:
+            for name, mod in self._modules.items():
+                mod.load()
+            self._db.create_all()
+            for act in self._db_prepare_actions:
+                act()
+            for name, mod in self._modules.items():
+                self._app.register_blueprint(mod.blueprint)
+                if mod.swagger is not None:
+                    self._app.register_blueprint(mod.swagger)
+            if self._app.config['ENV'] == 'development':
+                @self._app.route('/swagger_ui/', methods=['GET'])
+                def get_swagger():
+                    template = '<p><a title="{mod}" href="/{mod}/swagger_ui">/{mod}/swagger_ui</a></p>'
+                    # noinspection StrFormat
+                    refs = [template.format(mod=m.name) for m in self._modules.values()]
+                    page = ''.join(refs)
+                    return page, 200
+        finally:
+            _orgmephi_current_app.set(last_app)
 
     def run(self, **options: Any):
         self._app.run(**options)
@@ -127,6 +143,12 @@ class OrgMephiApp:
     def get_module(self, name: str) -> Union[OrgMephiModule, None]:
         if name in self._modules:
             return self._modules[name]
+
+    def db_prepare_action(self):
+        def decorator(f: Callable) -> Callable:
+            self._db_prepare_actions.append(f)
+            return f
+        return decorator
 
 
 _orgmephi_current_app: ContextVar[Union[OrgMephiApp, None]] = ContextVar('orgmephi_current_app', default=None)
@@ -142,3 +164,8 @@ def get_current_flask_app() -> Flask:
 
 def get_current_db() -> SQLAlchemy:
     return _orgmephi_current_app.get().db
+
+
+def get_module(name: str) -> OrgMephiModule:
+    from . import _orgmephi_current_app
+    return _orgmephi_current_app.get().get_module(name)

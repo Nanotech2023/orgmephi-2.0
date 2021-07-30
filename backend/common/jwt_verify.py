@@ -4,11 +4,11 @@ from typing import Callable
 from .errors import PermissionDenied
 
 
-def jwt_required_role(roles: list[str]) -> Callable:
+def jwt_required_role(roles: list[str], refresh: bool = False) -> Callable:
     def decorator(function: Callable) -> Callable:
         @wraps(function)
         def wrapper(*args, **kwargs):
-            verify_jwt_in_request()
+            verify_jwt_in_request(refresh=refresh)
             claims = get_jwt()
             if claims['role'] not in roles:
                 raise PermissionDenied(roles)

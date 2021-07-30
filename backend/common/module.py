@@ -1,28 +1,32 @@
-import os
 import importlib
 
 from openapi_core.contrib.flask.decorators import FlaskOpenAPIViewDecorator
 from flask import Blueprint, send_file
 from typing import Callable, Any, Union
 
+from .access_levels import OrgMephiAccessLevel
+
 
 class OrgMephiModule:
-    def __init__(self, service_name: str, name: str, api_path: Union[str, None] = None, development=False):
+    def __init__(self, service_name: str, name: str, path: str, access_level: OrgMephiAccessLevel,
+                 api_path: Union[str, None] = None, development=False):
         self._name = name
-        self._db_prepare_actions: list[Callable] = []
         self._blueprint = Blueprint(name, __name__, url_prefix='/%s' % name)
         self._init_api(api_path, service_name, development)
+        self._path = path
+        self._access_level = access_level
 
     def _init_api(self, api_path: Union[str, None], service_name: str, development: bool):
         if not development or api_path is None:
             self._openapi = None
             self._swagger = None
-        api_doc_path = '%s/%s_%s.yaml' % (api_path, service_name, self._name)
-        self._init_openapi(api_doc_path)
-        if development:
-            self._init_swagger(api_doc_path, service_name)
         else:
-            self._swagger = None
+            api_doc_path = '%s/%s_%s.yaml' % (api_path, service_name, self._name)
+            self._init_openapi(api_doc_path)
+            if development:
+                self._init_swagger(api_doc_path, service_name)
+            else:
+                self._swagger = None
 
     def _init_openapi(self, api_path: str):
         import yaml
@@ -51,13 +55,8 @@ class OrgMephiModule:
 
         self._swagger = swagger_ui_blueprint
 
-    def load(self, service_name):
-        importlib.import_module('.models', '%s.%s' % (service_name, self._name))
-        importlib.import_module('.views', '%s.%s' % (service_name, self._name))
-
-    def prepare_db(self):
-        for act in self._db_prepare_actions:
-            act()
+    def load(self):
+        importlib.import_module('.views', self._path)
 
     @property
     def name(self):
@@ -73,20 +72,24 @@ class OrgMephiModule:
 
     def route(self, rule: str, **options: Any) -> Callable:
         def decorator(f: Callable) -> Callable:
+            if 'refresh' in options:
+                refresh = options.pop('refresh')
+            else:
+                refresh = False
+            from .jwt_verify import jwt_required, jwt_required_role
             from .errors import _catch_request_error
-            catch_error_wrap = _catch_request_error(f)
-            openapi_wrap = self._openapi(catch_error_wrap)
+            if self._access_level == OrgMephiAccessLevel.visitor:
+                jwt_wrap = f
+            elif self._access_level == OrgMephiAccessLevel.participant:
+                jwt_wrap = jwt_required(refresh=refresh)(f)
+            else:
+                roles = [v.value[1] for v in OrgMephiAccessLevel if v.value[0] >= self._access_level.value[0]]
+                jwt_wrap = jwt_required_role(roles=roles, refresh=refresh)(f)
+            catch_error_wrap = _catch_request_error(jwt_wrap)
+            if self._openapi is not None:
+                openapi_wrap = self._openapi(catch_error_wrap)
+            else:
+                openapi_wrap = catch_error_wrap
             self._blueprint.route(rule, **options)(openapi_wrap)
             return f
         return decorator
-
-    def db_prepare_action(self):
-        def decorator(f: Callable) -> Callable:
-            self._db_prepare_actions.append(f)
-            return f
-        return decorator
-
-
-def get_module(name: str) -> OrgMephiModule:
-    from . import _orgmephi_current_app
-    return _orgmephi_current_app.get().get_module(name)
