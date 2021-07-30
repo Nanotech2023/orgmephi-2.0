@@ -9,11 +9,10 @@ import enum
 DEFAULT_VISIBILITY = False
 
 
-class User_status(db.Model):
-    __tablename__ = 'user_status'
-
-    status_id = db.Column(db.Integer, autoincrement=True, primary_key=True)
-    status = db.Column(db.Text, nullable=False)
+class UserStatusEnum(enum.Enum):
+    Participant = "Participant",
+    Laureate = "Laureate",
+    Winner = "Winner",
 
 
 class CompositeTypeEnum(enum.Enum):
@@ -66,6 +65,8 @@ class BaseContest(db.Model):
     description: description of the contest
     rules: rules of the contest
 
+    winning_condition: minimum passing scores
+    laureate_condition: minimum passing scores
     composite_type: composite type
     olympiad_type: olympiad type
     subject: subject
@@ -84,6 +85,8 @@ class BaseContest(db.Model):
     olympiad_type = db.Column(db.Enum(OlympiadTypeEnum), nullable=False)
     subject = db.Column(db.Enum(OlympiadSubjectEnum), nullable=False)
 
+    winning_condition = db.Column(db.Float, nullable=False)
+    laureate_condition = db.Column(db.Float, nullable=False)
     certificate_template = db.Column(db.Text, nullable=True)
 
     target_classes = db.relationship('target_classes', lazy='select',
@@ -96,8 +99,6 @@ class Contest(db.Model):
     contest_id: id of contest
     description: description of the contest
     rules: rules of the contest
-    winning_condition: minimum passing scores
-    laureate_condition: minimum passing scores
     visibility: visibility of the contest
     composite_type: composite type
     olympiad_type: olympiad type
@@ -108,9 +109,6 @@ class Contest(db.Model):
 
     base_contest_id = db.Column(db.Integer, db.ForeignKey('base_contest.contest_id'))
     contest_id = db.Column(db.Integer, autoincrement=True, primary_key=True)
-
-    winning_condition = db.Column(db.Float, nullable=False)
-    laureate_condition = db.Column(db.Float, nullable=False)
 
     visibility = db.Column(db.Boolean, default=DEFAULT_VISIBILITY, nullable=False)
 
@@ -138,7 +136,7 @@ class SimpleContest(BaseContest):
     end_date = db.Column(db.DateTime, index=True, default=datetime.utcnow)
 
     previous_contest_id = db.Column(db.Integer, db.ForeignKey('simple_contest.contest_id'), nullable=True)
-    previous_participation_condition = db.Column(db.Text, db.ForeignKey('user_status.status_id'), nullable=True)
+    previous_participation_condition = db.Column(db.Enum(UserStatusEnum), nullable=True)
 
     variants = db.relationship('variant', lazy='select',
                                backref=db.backref('simple_contest', lazy='joined'))
@@ -261,9 +259,8 @@ class UserInContest(db.Model):
     user_id = db.Column(db.Integer, primary_key=True)
     contest_id = db.Column(db.Integer, db.ForeignKey('contest.contest_id'), primary_key=True)
     variant_id = db.Column(db.Integer, db.ForeignKey('variant.variant_id'))
-    user_status = db.Column(db.Text, db.ForeignKey('user_status.status_id'))
+    user_status = db.Column(db.Enum(UserStatusEnum))
     
-
 
 class TaskType(enum.Enum):
     plain_task = 1
