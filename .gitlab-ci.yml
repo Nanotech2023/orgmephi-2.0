@@ -19,6 +19,7 @@ stages:
   before_script:
     - npm install -g redoc-cli
   script:
+    - mkdir public
     - cp backend/user/api.yaml public/user.yaml
     - redoc-cli bundle -o public/user.html public/user.yaml
     - cp backend/contest/contest_data/tasks_api.yaml public/tasks.yaml
