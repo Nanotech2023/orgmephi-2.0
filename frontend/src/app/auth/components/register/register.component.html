@@ -38,11 +38,12 @@
                 </label>
             </div>
             <br/>
-            <div class="form-group row" id="have_id" *ngIf="hasRegisterNumber">
+            <div class="form-group row" id="have_id"
+                 *ngIf="hasRegisterNumber">
                 <label class="col-sm-4 col-form-label">Регистрационный номер</label>
                 <div class="col-sm-4">
-                    <input class="form-control" type="text"
-                           [(ngModel)]="registerAttempt.registerConfirm.registrationNumber">
+                    <input class="form-control" type="text">
+                    <!-- TODO Property 'registerConfirm' does not exist on type 'RequestRegistration' [(ngModel)]="registerAttempt.registerConfirm.registrationNumber"-->
                 </div>
             </div>
             <br/>
@@ -50,8 +51,8 @@
                 <label class="col-sm-4 col-form-label">Код активации (вводится с учетом
                     регистра и только латинскими буквами)</label>
                 <div class="col-sm-4">
-                    <input class="form-control" type="text"
-                           [(ngModel)]="registerAttempt.registerConfirm.oneTimePassword">
+                    <input class="form-control" type="text">
+                    <!-- TODO Property 'registerConfirm' does not exist on type 'RequestRegistration' [(ngModel)]="registerAttempt.registerConfirm.password">-->
                 </div>
             </div>
         </fieldset>
@@ -100,7 +101,8 @@
             <div class="form-group row">
                 <label class="col-sm-4 col-form-label">Имя <span class="accent_red">*</span>:</label>
                 <div class="col-sm-4">
-                    <input class="form-control" type="text" required [(ngModel)]="registerAttempt.personalInfo.firstName"
+                    <input class="form-control" type="text" required
+                           [(ngModel)]="registerAttempt.personalInfo.firstName"
                            #name="ngModel"
                            name="name">
                     <div *ngIf="name.invalid && (name.dirty || name.touched)"
@@ -115,7 +117,8 @@
             <div class="form-group row">
                 <label class="col-sm-4 col-form-label">Фамилия <span class="accent_red">*</span>:</label>
                 <div class="col-sm-4">
-                    <input class="form-control" type="text" required [(ngModel)]="registerAttempt.personalInfo.secondName"
+                    <input class="form-control" type="text" required
+                           [(ngModel)]="registerAttempt.personalInfo.secondName"
                            #surname="ngModel"
                            name="surname">
                     <div *ngIf="surname.invalid && (surname.dirty || surname.touched)"
@@ -130,7 +133,8 @@
             <div class="form-group row">
                 <label class="col-sm-4 col-form-label">Отчество <span class="accent_red">*</span>:</label>
                 <div class="col-sm-4">
-                    <input class="form-control" type="text" required [(ngModel)]="registerAttempt.personalInfo.middleName"
+                    <input class="form-control" type="text" required
+                           [(ngModel)]="registerAttempt.personalInfo.middleName"
                            #lastName="ngModel"
                            name="lastName">
                     <div *ngIf="lastName.invalid && (lastName.dirty || lastName.touched)"
@@ -145,7 +149,8 @@
             <div class="form-group row">
                 <label class="col-sm-4 col-form-label">Дата рождения <span class="accent_red">*</span>:</label>
                 <div class="col-sm-4">
-                    <input class="form-control" type="date" required [(ngModel)]="registerAttempt.personalInfo.dateOfBirth"
+                    <input class="form-control" type="date" required
+                           [(ngModel)]="registerAttempt.personalInfo.dateOfBirth"
                            #birthDate="ngModel"
                            name="birthDate">
                     <div *ngIf="birthDate.invalid && (birthDate.dirty || birthDate.touched)"

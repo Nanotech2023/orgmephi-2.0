@@ -1,25 +1,30 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing'
 
-import { ParticipantRegistrationFormPersonalComponent } from './participant-registration-form-personal.component';
+import { ParticipantRegistrationFormPersonalComponent } from './participant-registration-form-personal.component'
 
-describe('ParticipantRegistrationFormPersonalComponent', () => {
-  let component: ParticipantRegistrationFormPersonalComponent;
-  let fixture: ComponentFixture<ParticipantRegistrationFormPersonalComponent>;
 
-  beforeEach(async () => {
-    await TestBed.configureTestingModule({
-      declarations: [ ParticipantRegistrationFormPersonalComponent ]
-    })
-    .compileComponents();
-  });
+describe( 'ParticipantRegistrationFormPersonalComponent', () =>
+{
+    let component: ParticipantRegistrationFormPersonalComponent
+    let fixture: ComponentFixture<ParticipantRegistrationFormPersonalComponent>
 
-  beforeEach(() => {
-    fixture = TestBed.createComponent(ParticipantRegistrationFormPersonalComponent);
-    component = fixture.componentInstance;
-    fixture.detectChanges();
-  });
+    beforeEach( async () =>
+    {
+        await TestBed.configureTestingModule( {
+            declarations: [ ParticipantRegistrationFormPersonalComponent ]
+        } )
+            .compileComponents()
+    } )
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
-  });
-});
+    beforeEach( () =>
+    {
+        fixture = TestBed.createComponent( ParticipantRegistrationFormPersonalComponent )
+        component = fixture.componentInstance
+        fixture.detectChanges()
+    } )
+
+    it( 'should create', () =>
+    {
+        expect( component ).toBeTruthy()
+    } )
+} )

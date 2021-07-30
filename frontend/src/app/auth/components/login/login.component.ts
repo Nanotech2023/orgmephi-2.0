@@ -1,8 +1,9 @@
-import { Component, OnInit } from '@angular/core'
+import { Component, HostListener, OnInit } from '@angular/core'
 import { Store } from '@ngrx/store'
 import { AuthActions, AuthSelectors, AuthState } from '@/auth/store'
 import { Observable } from 'rxjs'
-import { AuthCredentials } from '@/auth/models'
+import { ErrorValue, TypeAuthCredentials } from '@/auth/models'
+import { fixedHeight } from '@/shared/consts'
 
 
 @Component( {
@@ -12,13 +13,15 @@ import { AuthCredentials } from '@/auth/models'
 } )
 export class LoginComponent implements OnInit
 {
-    loginAttempt: AuthCredentials
+    loginAttempt: TypeAuthCredentials
     isAuthenticated$!: Observable<boolean>
-    error$!: Observable<string | null>
+    error$!: Observable<ErrorValue[] | null>
+    containerHeight: number
 
     constructor( private readonly store: Store<AuthState.State> )
     {
         this.loginAttempt = { username: '', password: '' }
+        this.containerHeight = fixedHeight
     }
 
     ngOnInit(): void
@@ -27,13 +30,20 @@ export class LoginComponent implements OnInit
         this.error$ = this.store.select( AuthSelectors.selectError )
     }
 
-    login( loginAttemptUser: AuthCredentials ): void
+    @HostListener( 'window:resize', [ '$event' ] )
+    onResize()
     {
-        const authentication = { authentication: { authCredentials: loginAttemptUser } }
-        this.store.dispatch( AuthActions.loginAttempt( authentication ) )
+        this.containerHeight = fixedHeight
     }
 
-    isValid( loginAttemptUser: AuthCredentials ): boolean
+    login( loginAttemptUser: TypeAuthCredentials ): void
+    {
+        const authentication = { authentication: { authCredentials: loginAttemptUser } }
+        const requestLogin = { authCredentials: loginAttemptUser, rememberMe: true }
+        this.store.dispatch( AuthActions.loginAttempt( { requestLogin: requestLogin } ) )
+    }
+
+    isValid( loginAttemptUser: TypeAuthCredentials ): boolean
     {
         // TODO enforce email regex check
         return !!( loginAttemptUser.password && loginAttemptUser.username )
