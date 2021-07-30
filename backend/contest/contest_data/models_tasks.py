@@ -9,26 +9,166 @@ import enum
 DEFAULT_VISIBILITY = False
 
 
+class UserStatusEnum(enum.Enum):
+    Participant = "Participant",
+    Laureate = "Laureate",
+    Winner = "Winner",
+
+
+class CompositeTypeEnum(enum.Enum):
+    Composite = "Composite",
+    Simple = "Simple",
+
+
+composite_type_dict = {composite.value: composite for composite in CompositeTypeEnum}
+
+
+class OlympiadTypeEnum(enum.Enum):
+    Rosatom = "Rosatom",
+    Kurchatov = "Kurchatov",
+    Other = "Other",
+
+
+olympiad_type_dict = {type.value: type for type in OlympiadTypeEnum}
+
+
+class OlympiadSubjectEnum(enum.Enum):
+    Math = "Math",
+    Physics = "Physics",
+    Informatics = "Informatics",
+
+
+olympiad_subject_dict = {subject.value: subject for subject in OlympiadSubjectEnum}
+
+
+class TargetClassEnum(enum.Enum):
+    class_5 = "5",
+    class_6 = "6",
+    class_7 = "7",
+    class_8 = "8",
+    class_9 = "9",
+    class_10 = "10",
+    class_11 = "11",
+    student = "student",
+
+
+olympiad_target_class_dict = {target.value: target for target in TargetClassEnum}
+
+
 # Contest models
-
-class Olympiad(db.Model):
+class BaseContest(db.Model):
     """
-    Class describing a Olympiad model.
+    Base Class describing a Contest model with meta information.
 
-    olympiad_id: id of olympiad
+    base_contest_id: id of base contest
+    name: name of base contest
     description: description of the contest
     rules: rules of the contest
+
+    winning_condition: minimum passing scores
+    laureate_condition: minimum passing scores
+    composite_type: composite type
+    olympiad_type: olympiad type
+    subject: subject
+    certificate_template: contest certificate template
+    target_class: target class
+
     """
 
-    __tablename__ = 'olympiad'
+    __tablename__ = 'base_contest'
 
-    olympiad_id = db.Column(db.Integer, autoincrement=True, primary_key=True)
+    base_contest_id = db.Column(db.Integer, autoincrement=True, primary_key=True)
+
     name = db.Column(db.Text, nullable=False)
     description = db.Column(db.Text, nullable=False)
     rules = db.Column(db.Text, nullable=False)
-    stages = db.relationship('olympiad_stage', lazy='select',
-                             backref=db.backref('olympiad', lazy='joined'))
+    olympiad_type = db.Column(db.Enum(OlympiadTypeEnum), nullable=False)
+    subject = db.Column(db.Enum(OlympiadSubjectEnum), nullable=False)
 
+    winning_condition = db.Column(db.Float, nullable=False)
+    laureate_condition = db.Column(db.Float, nullable=False)
+    certificate_template = db.Column(db.Text, nullable=True)
+
+    target_classes = db.relationship('target_classes', lazy='select',
+                                     backref=db.backref('base_contest', lazy='joined'))
+
+class Contest(db.Model):
+    """
+    Class describing a Contest model.
+
+    contest_id: id of contest
+    description: description of the contest
+    rules: rules of the contest
+    visibility: visibility of the contest
+    composite_type: composite type
+    olympiad_type: olympiad type
+    subject: subject
+    """
+
+    __tablename__ = 'contest'
+
+    base_contest_id = db.Column(db.Integer, db.ForeignKey('base_contest.contest_id'))
+    contest_id = db.Column(db.Integer, autoincrement=True, primary_key=True)
+
+    visibility = db.Column(db.Boolean, default=DEFAULT_VISIBILITY, nullable=False)
+
+    users = db.relationship('user_in_contest', lazy='select',
+                            backref=db.backref('contest', lazy='joined'))
+
+    composite_type = db.Column(db.Enum(CompositeTypeEnum), nullable=False)
+    __mapper_args__ = {
+        'polymorphic_identity': 'base_contest',
+        'polymorphic_on': composite_type
+    }
+
+
+class SimpleContest(BaseContest):
+    """
+    Simple contest model.
+
+    start_date: start date of contest
+    end_date: end date of contest
+    """
+    __tablename__ = 'simple_contest'
+
+    contest_id = db.Column(db.Integer, db.ForeignKey('contest.contest_id'), primary_key=True)
+    start_date = db.Column(db.DateTime, index=True, default=datetime.utcnow)
+    end_date = db.Column(db.DateTime, index=True, default=datetime.utcnow)
+
+    previous_contest_id = db.Column(db.Integer, db.ForeignKey('simple_contest.contest_id'), nullable=True)
+    previous_participation_condition = db.Column(db.Enum(UserStatusEnum), nullable=True)
+
+    variants = db.relationship('variant', lazy='select',
+                               backref=db.backref('simple_contest', lazy='joined'))
+
+    __mapper_args__ = {
+        'polymorphic_identity': 'simple_contest',
+    }
+
+
+class CompositeContest(BaseContest):
+    __tablename__ = 'composite_contest'
+
+    contest_id = db.Column(db.Integer, db.ForeignKey('contest.contest_id'), primary_key=True)
+
+    stages = db.relationship('stage', lazy='select',
+                             backref=db.backref('composite_contest', lazy='joined'))
+
+    __mapper_args__ = {
+        'polymorphic_identity': 'composite_contest',
+    }
+
+
+class TargetClasses(db.Model):
+    """
+    Table describing a Target class of olympiad.
+    """
+
+    __tablename__ = 'target_classes'
+
+    contest_id = db.Column(db.Integer, db.ForeignKey('contest.contest_id'), primary_key=True)
+    target_class = db.Column(db.Enum(TargetClassEnum), primary_key=True)
+    
 
 """
 Table describing a Contests In Stage model.
@@ -39,14 +179,14 @@ location: address + room or link to online
 """
 
 contestsInStage = db.Table('contests_in_stage',
-                           db.Column('stage_id', db.Integer, db.ForeignKey('olympiad_stage.stage_id'),
+                           db.Column('stage_id', db.Integer, db.ForeignKey('stage.stage_id'),
                                      primary_key=True),
                            db.Column('contest_id', db.Integer, db.ForeignKey('contest.contest_id'), primary_key=True),
                            db.Column('location', db.Text, nullable=False)
                            )
 
 
-class OlympiadStage(db.Model):
+class Stage(db.Model):
     """
     Class describing a Stage model.
 
@@ -56,51 +196,16 @@ class OlympiadStage(db.Model):
     next_stage_condition: condition to pass to the next stage
     """
 
-    __tablename__ = 'olympiad_stage'
+    __tablename__ = 'stage'
 
     stage_id = db.Column(db.Integer, autoincrement=True, primary_key=True)
-    olympiad_id = db.Column(db.Integer, db.ForeignKey('olympiad.olympiad_id'))
+    olympiad_id = db.Column(db.Integer, db.ForeignKey('contest.contest_id'))
     stage_name = db.Column(db.Text, index=True, nullable=False)
     next_stage_condition = db.Column(db.Text, nullable=False)
 
     contests = db.relationship('contest', secondary=contestsInStage, lazy='subquery',
-                               backref=db.backref('olympiad_stage', lazy=True))
-
-
-class Contest(db.Model):
-    """
-    Class describing a Contest model.
-
-    contest_id: id of contest
-    description: description of the contest
-    rules: rules of the contest
-    winning_condition: minimum passing scores
-    laureate_condition: minimum passing scores
-    certificate_template: contest certificate template
-    visibility: visibility of the contest
-    start_date: start date of contest
-    end_date: end date of contest
-    """
-
-    __tablename__ = 'contest'
-
-    contest_id = db.Column(db.Integer, autoincrement=True, primary_key=True)
-    description = db.Column(db.Text, nullable=False)
-    rules = db.Column(db.Text, nullable=False)
-    winning_condition = db.Column(db.Float, nullable=False)
-    laureate_condition = db.Column(db.Float, nullable=False)
-    certificate_template = db.Column(db.Text, nullable=True)
-    visibility = db.Column(db.Boolean, default=DEFAULT_VISIBILITY, nullable=False)
-
-    start_date = db.Column(db.DateTime, index=True, default=datetime.utcnow)
-    end_date = db.Column(db.DateTime, index=True, default=datetime.utcnow)
-
-    variants = db.relationship('variant', lazy='select',
-                               backref=db.backref('contest', lazy='joined'))
-
-    users = db.relationship('user_in_contest', lazy='select',
-                            backref=db.backref('contest', lazy='joined'))
-
+                               backref=db.backref('stage', lazy=True))
+    
 
 """
 Class describing a Task in variant model.
@@ -137,6 +242,7 @@ class Variant(db.Model):
 
     contests = db.relationship('base_task', secondary=taskInVariant, lazy='subquery',
                                backref=db.backref('variant', lazy=True))
+    
 
 
 class UserInContest(db.Model):
@@ -153,14 +259,13 @@ class UserInContest(db.Model):
     user_id = db.Column(db.Integer, primary_key=True)
     contest_id = db.Column(db.Integer, db.ForeignKey('contest.contest_id'), primary_key=True)
     variant_id = db.Column(db.Integer, db.ForeignKey('variant.variant_id'))
-    user_status = db.Column(db.Text, nullable=False)
-
+    user_status = db.Column(db.Enum(UserStatusEnum))
+    
 
 class TaskType(enum.Enum):
-
     plain_task = 1
-    range_task = 1
-    multiple_task = 2
+    range_task = 2
+    multiple_task = 3
 
 
 class Task(db.Model):
