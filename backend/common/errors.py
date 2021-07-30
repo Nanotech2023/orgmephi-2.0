@@ -14,13 +14,30 @@ def _catch_request_error(function: Callable) -> Callable:
 
 
 class RequestError(Exception):
+    """
+    Base request error type, should not be raised on it's own, use child classes
+
+    Request errors are raised when invalid or conflicting data is provided from client (normally 4xx http statuses)
+    """
     def __init__(self, http_code: int = 400):
+        """
+        Create a request error
+        :param http_code: http status code
+        """
         self.http_code = http_code
 
     def get_msg(self) -> str:
+        """
+        Get error message
+        :return: Error message
+        """
         return ''
 
     def to_response(self) -> Response:
+        """
+        Convert error to flask response
+        :return: Flask response
+        """
         return make_response({"errors": [
             {
                 "class": str(type(self)),
@@ -31,7 +48,16 @@ class RequestError(Exception):
 
 
 class AlreadyExists(RequestError):
+    """
+    Requested data can not be posted because a conflicting object is already posted (e.g. entity with the same value of
+        a unique attribute)
+    """
     def __init__(self, field: str, value: str):
+        """
+        Create error object
+        :param field: name of the conflicting attribute
+        :param value: value of the conflicting attribute
+        """
         super(AlreadyExists, self).__init__(409)
         self.field = field
         self.value = value
@@ -41,7 +67,15 @@ class AlreadyExists(RequestError):
 
 
 class NotFound(RequestError):
+    """
+    Requested data is not found (e.g. id does not exist)
+    """
     def __init__(self, field: str, value: str):
+        """
+        Create error object
+        :param field: name of the searched attribute
+        :param value: value of the searched attribute
+        """
         super(NotFound, self).__init__(404)
         self.field = field
         self.value = value
@@ -51,7 +85,14 @@ class NotFound(RequestError):
 
 
 class WeakPassword(RequestError):
+    """
+    Provided password is too weak according to password policy
+    """
     def __init__(self, errors):
+        """
+        Create error object
+        :param errors: List of errors (see password_strength.PasswordPolicy)
+        """
         super(WeakPassword, self).__init__(400)
         self.errors = errors
 
@@ -60,7 +101,13 @@ class WeakPassword(RequestError):
 
 
 class WrongCredentials(RequestError):
+    """
+    CAn not authenticate user because of non-matching credentials
+    """
     def __init__(self):
+        """
+        Create error object
+        """
         super(WrongCredentials, self).__init__(401)
 
     def get_msg(self) -> str:
@@ -68,7 +115,15 @@ class WrongCredentials(RequestError):
 
 
 class InsufficientData(RequestError):
+    """
+    Required data was not found in the request body
+    """
     def __init__(self, obj: str, data: str):
+        """
+        Create error object
+        :param obj: what object is missing data
+        :param data: what data is missing
+        """
         super(InsufficientData, self).__init__(409)
         self.obj = obj
         self.data = data
@@ -78,7 +133,14 @@ class InsufficientData(RequestError):
 
 
 class PermissionDenied(RequestError):
+    """
+    User hos insufficient permissions to perform the operation
+    """
     def __init__(self, roles: list[str]):
+        """
+        Create error object
+        :param roles: List of roles that can perform the operation
+        """
         super(PermissionDenied, self).__init__(403)
         self.roles = roles
 
