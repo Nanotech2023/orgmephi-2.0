@@ -6,7 +6,7 @@ import enum
 
 # Constants
 
-DEFAULT_VISIBILITY = Truex
+DEFAULT_VISIBILITY = True
 
 def get_one_or_null(entity, field, value):
     return entity.query.filter_by(**{field: value}).one_or_none()
@@ -202,7 +202,7 @@ def add_simple_contest(db_session, base_contest_id, winning_condition, laureate_
     return simpleContest
 
 
-class SimpleContest(BaseContest):
+class SimpleContest(Contest):
     """
     Simple contest model.
 
@@ -275,7 +275,7 @@ def add_composite_contest(db_session, base_contest_id, winning_condition, laurea
     return compositeContest
 
 
-class CompositeContest(BaseContest):
+class CompositeContest(Contest):
     __tablename__ = 'composite_contest'
 
     contest_id = db.Column(db.Integer, db.ForeignKey('contest.contest_id'), primary_key=True)
@@ -289,20 +289,17 @@ class CompositeContest(BaseContest):
                 'contest_id': self.contest_id,
                 'winning_condition': self.winning_condition,
                 'laureate_condition': self.laureate_condition,
-                'certificate_template': self.certificate_template,
                 'visibility': self.visibility,
                 'users': self.users,
                 'stages': self.stages,
                 'composite_type': self.composite_type
             }
 
-    def update(self, winning_condition=None, laureate_condition=None, certificate_template=None, visibility=None, users=None, composite_type=None):
+    def update(self, winning_condition=None, laureate_condition=None, visibility=None, users=None, composite_type=None):
         if winning_condition is not None:
             self.winning_condition = winning_condition
         if laureate_condition is not None:
             self.laureate_condition = laureate_condition
-        if certificate_template is not None:
-            self.certificate_template = certificate_template
         if visibility is not None:
             self.visibility = visibility
         if composite_type is not None:

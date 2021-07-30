@@ -112,11 +112,11 @@ def base_olympiads_all():
         { "olympiad_list": all_olympiads }, 200)
 
 
-@app.route('/base_olympiad/<base_olympiad_id>/olympiad/create', methods=['POST'])
+@app.route('/base_olympiad/<id_base_olympiad>/olympiad/create', methods=['POST'])
 @openapi
 @catch_request_error
 @jwt_required_role(['Admin', 'System', 'Creator'])
-def olympiad_create():
+def olympiad_create(id_base_olympiad):
     values = request.openapi.body
 
     composite_type = values['composite_type']
@@ -124,12 +124,12 @@ def olympiad_create():
     winning_condition = values['winning_condition']
     laureate_condition = values['laureate_condition']
     visibility = values['visibility']
-    start_date = values['start_date']
 
     try:
 
         if composite_type == "Composite":
 
+            start_date = values['start_date']
             end_date = values['end_date']
             previous_contest_id = values['previous_contest_id']
             previous_participation_condition = values['previous_participation_condition']
@@ -147,14 +147,6 @@ def olympiad_create():
 
         else:
 
-            base_contest_id = values['base_contest_id']
-            winning_condition = values['winning_condition']
-            laureate_condition = values['laureate_condition']
-            visibility = values['visibility']
-            start_date = values['start_date']
-            end_date = values['end_date']
-            previous_contest_id = values['previous_contest_id']
-            previous_participation_condition = values['previous_participation_condition']
 
             add_composite_contest(db_session,
                                   base_contest_id,
@@ -164,10 +156,7 @@ def olympiad_create():
                                   visibility)
 
         db.session.commit()
-        return make_response(
-            {
-                "olympiad_id": olympiad.olympiad_id,
-            }, 200)
+
     except sqlalchemy.exc.IntegrityError:
         raise AlreadyExists('username', username)
     except Exception:
@@ -176,88 +165,44 @@ def olympiad_create():
     return make_response(baseContest.serialize(), 200)
 
 
-"""
-@app.route('/olympiad/<id_olympiad>/remove', methods=['POST'])
+@app.route('/base_olympiad/<id_base_olympiad>/olympiad/<id_olympiad>', methods=['GET'])
 @openapi
-def olympiad_remove(id_olympiad):
-    try:
-        olympiad = Olympiad.query.filter_by(Olympiad.olympiad_id == id_olympiad).one()
-        db.session.delete(olympiad)
-        db.session.commit()
-        return make_response({}, 200)
+@catch_request_error
+@jwt_required()
+def base_olympiad_get(id_base_olympiad, id_olympiad):
+    contest = get_or_raise(Contest, Contest.contest_id, id_olympiad)
+    if contest.composite_type == CompositeTypeEnum.Composite:
+        contest = get_or_raise(SimpleContest, SimpleContest.contest_id, id_olympiad)
+        return make_response(contest.serialize(), 200)
+    else:
+        contest = get_or_raise(CompositeContest, CompositeContest.contest_id, id_olympiad)
+        return make_response(contest.serialize(), 200)
 
-    except RequestError as err:
-        db.session.rollback()
-        return err.to_response()
 
 
-@app.route('/olympiad/<id_olympiad>', methods=['GET'])
+@app.route('/base_olympiad/<id_base_olympiad>', methods=['PATCH'])
 @openapi
-def olympiad_get(id_olympiad):
+@catch_request_error
+@jwt_required_role(['Admin', 'System', 'Creator'])
+def base_olympiad_update(id_base_olympiad):
+    contest = get_or_raise(Contest, Contest.contest_id, id_olympiad)
+    values = request.openapi.body
+
     try:
-        olympiad = Olympiad.query.filter_by(Olympiad.olympiad_id == id_olympiad).one()
-        return make_response(
-            {
-                "olympiad_id": olympiad.olympiad_id,
-                "name": olympiad.name,
-                "description": olympiad.description,
-                "rules": olympiad.rules,
-            }, 200)
+        if contest.composite_type == CompositeTypeEnum.Composite:
+            contest = get_or_raise(SimpleContest, SimpleContest.contest_id, id_olympiad)
+            return make_response(contest.serialize(), 200)
+        else:
+            contest = get_or_raise(CompositeContest, CompositeContest.contest_id, id_olympiad)
+            return make_response(contest.serialize(), 200)
 
-    except RequestError as err:
+
+    except Exception:
         db.session.rollback()
-        return err.to_response()
+        raise
+    db.session.commit()
+    return make_response(base_olympiad.serialize(), 200)
 
-
-@app.route('/olympiad/<id_olympiad>', methods=['PATCH'])
-@openapi
-def olympiad_update(id_olympiad):
-    try:
-        olympiad = Olympiad.query.filter_by(Olympiad.olympiad_id == id_olympiad).one()
-
-        values = request.openapi.body
-        if 'name' in values:
-            olympiad.name = values['name']
-        if 'description' in values:
-            olympiad.description = values['description']
-        if 'rules' in values:
-            olympiad.rules = values['rules']
-
-        db.session.commit()
-        return make_response({}, 200)
-
-    except RequestError as err:
-        db.session.rollback()
-        return err.to_response()
-
-
-@app.route('/olympiad/all', methods=['GET'])
-@openapi
-def olympiads_all():
-    try:
-        olympiads = Olympiad.query.all()
-
-        all_olympiads = []
-
-        for olympiad in olympiads:
-            all_olympiads.append(
-                {
-                    "olympiad_id": olympiad.id,
-                    "name": olympiad.name,
-                    "description": olympiad.description,
-                    "rules": olympiad.rules,
-                }
-            )
-
-        return make_response(
-            {
-                "olympiad_list": all_olympiads
-            }, 200)
-
-    except RequestError as err:
-        db.session.rollback()
-        return err.to_response()
-"""
 
 # Stage views
 
