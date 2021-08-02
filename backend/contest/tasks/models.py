@@ -1,8 +1,11 @@
 """File with models description for contests and tasks management."""
 
-from contest_data.app import db
 from datetime import datetime
 import enum
+from common import get_current_db
+
+db = get_current_db()
+
 
 # Constants
 
@@ -92,6 +95,7 @@ class BaseContest(db.Model):
     target_classes = db.relationship('target_classes', lazy='select',
                                      backref=db.backref('base_contest', lazy='joined'))
 
+
 class Contest(db.Model):
     """
     Class describing a Contest model.
@@ -107,7 +111,7 @@ class Contest(db.Model):
 
     __tablename__ = 'contest'
 
-    base_contest_id = db.Column(db.Integer, db.ForeignKey('base_contest.contest_id'))
+    base_contest_id = db.Column(db.Integer, db.ForeignKey('base_contest.base_contest_id'))
     contest_id = db.Column(db.Integer, autoincrement=True, primary_key=True)
 
     visibility = db.Column(db.Boolean, default=DEFAULT_VISIBILITY, nullable=False)
@@ -122,7 +126,7 @@ class Contest(db.Model):
     }
 
 
-class SimpleContest(BaseContest):
+class SimpleContest(Contest):
     """
     Simple contest model.
 
@@ -146,7 +150,7 @@ class SimpleContest(BaseContest):
     }
 
 
-class CompositeContest(BaseContest):
+class CompositeContest(Contest):
     __tablename__ = 'composite_contest'
 
     contest_id = db.Column(db.Integer, db.ForeignKey('contest.contest_id'), primary_key=True)
@@ -243,7 +247,6 @@ class Variant(db.Model):
     contests = db.relationship('base_task', secondary=taskInVariant, lazy='subquery',
                                backref=db.backref('variant', lazy=True))
     
-
 
 class UserInContest(db.Model):
     """

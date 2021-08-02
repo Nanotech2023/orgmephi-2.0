@@ -1412,7 +1412,7 @@ components:
         - laureate_condition
         - certificate_template
         - visibility
-        - start_date
+        - start_time
         - end_time
         - composite_type
         - olympiad_type
@@ -1468,7 +1468,7 @@ components:
         - laureate_condition
         - certificate_template
         - visibility
-        - start_date
+        - start_time
         - end_time
         - composite_type
         - olympiad_type

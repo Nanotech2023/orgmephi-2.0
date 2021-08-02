@@ -1,8 +1,10 @@
 """File with models description for response management."""
 
-from contest_data.app import db
 from datetime import datetime
 import enum
+from common import get_current_db
+
+db = get_current_db()
 
 
 class Response(db.Model):
