@@ -1,8 +1,10 @@
 """Database models of user management service."""
 
-from orgmephi_user import db
+from common import get_current_db
 from datetime import datetime
 import enum
+
+db = get_current_db()
 
 
 class UserRoleEnum(enum.Enum):

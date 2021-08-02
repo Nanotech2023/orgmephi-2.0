@@ -1,14 +1,19 @@
-from os import getcwd
+from functools import wraps
 
-from flask import request, make_response, send_file
+from flask import request, make_response, abort
 from flask_jwt_extended import create_access_token, set_access_cookies, create_refresh_token, set_refresh_cookies,\
-    get_csrf_token, jwt_required, unset_jwt_cookies
+    get_csrf_token, unset_jwt_cookies, get_jwt
 import sqlalchemy.exc
 
-from orgmephi_user.models import *
-from orgmephi_user.errors import RequestError, WeakPassword, NotFound, WrongCredentials, AlreadyExists, InsufficientData
-from orgmephi_user import app, db, openapi
-from orgmephi_user.jwt_verify import *
+from common.errors import RequestError, NotFound, WrongCredentials, AlreadyExists, InsufficientData
+from common import get_current_app, get_current_module
+from common.jwt_verify import jwt_required, jwt_required_role, jwt_get_id
+
+from .models import *
+
+db = get_current_db()
+module = get_current_module()
+app = get_current_app()
 
 user_roles = {role.value: role for role in UserRoleEnum}
 
@@ -49,27 +54,11 @@ def grade_to_year(grade):
     return admission_date
 
 
-def hash_password(password, force=False):
-    if not force:
-        pass_check = app.config['ORGMEPHI_PASSWORD_POLICY'].test(password)
-        if pass_check:
-            raise WeakPassword(pass_check)
-    hash_policy = app.config['ORGMEPHI_PASSLIB_CONTEXT']
-    password_hash = hash_policy.hash(password)
-    return password_hash
-
-
-def validate_password(password, password_hash):
-    hash_policy = app.config['ORGMEPHI_PASSLIB_CONTEXT']
-    if not hash_policy.verify(password, password_hash):
-        raise WrongCredentials()
-
-
 def update_password(user_id, new_password, old_password, admin=False):
     user = get_or_raise(User, "id", user_id)
     if not admin:
-        validate_password(old_password, user.password_hash)
-    password_hash = hash_password(new_password, force=admin)
+        app.password_policy.validate_password(old_password, user.password_hash)
+    password_hash = app.password_policy.hash_password(new_password, check=not admin)
     user.password_hash = password_hash
     db.session.commit()
     return make_response({}, 200)
@@ -93,28 +82,14 @@ def generate_refresh_token(user_id, remember_me):
     return refresh_token, csrf_refresh_token
 
 
-# Swagger UI
-
-@app.route('/api.yaml', methods=['GET'])
-def get_api():
-    if app.config['ENV'] != 'development':
-        abort(404)
-    api_path = app.config['ORGMEPHI_API_PATH']
-    if api_path[0] != '/':
-        api_path = '%s/%s' % (getcwd(), api_path)
-    return send_file(api_path)
-
-
 # Registration
 
-@app.route('/register', methods=['POST'])
-@openapi
-@catch_request_error
+@module.route('/register', methods=['POST'])
 def register():
     values = request.openapi.body
     username = values['auth_info']['email']
     reg_type = user_types[values['register_type']]
-    password_hash = hash_password(values['auth_info']['password'])
+    password_hash = app.password_policy.hash_password(values['auth_info']['password'], check=True)
 
     user_data = values['personal_info']
 
@@ -138,14 +113,12 @@ def register():
     return make_response(user.serialize(), 200)
 
 
-@app.route('/register/internal', methods=['POST'])
-@openapi
+@module.route('/register/internal', methods=['POST'])
 @jwt_required_role(['Admin', 'System'])
-@catch_request_error
 def register_internal():
     values = request.openapi.body
     username = values['username']
-    password_hash = hash_password(values['password'], force=True)
+    password_hash = app.password_policy.hash_password(values['password'], check=False)
     try:
         user = add_user(db.session, username, password_hash, UserRoleEnum.participant, UserTypeEnum.internal)
         db.session.commit()
@@ -157,29 +130,26 @@ def register_internal():
     return make_response(user.serialize(), 200)
 
 
-@app.route('/preregister', methods=['POST'])
-@openapi
+@module.route('/preregister', methods=['POST'])
 @jwt_required_role(['Admin', 'System', 'Creator'])
-@catch_request_error
 def preregister():
     abort(501)
 
 
 # Authentication
 
-@app.route('/login', methods=['POST'])
-@openapi
-@catch_request_error
+@module.route('/login', methods=['POST'])
 def login():
     values = request.openapi.body
     user = get_one_or_null(User, 'username', values['auth_credentials']['username'])
 
     if user is not None:
-        validate_password(values['auth_credentials']['password'], user.password_hash)
+        app.password_policy.validate_password(values['auth_credentials']['password'], user.password_hash)
     else:
         # align response times
-        validate_password(values['auth_credentials']['password'],
-                          '$pbkdf2-sha256$29000$h8DWeu8dg3CudQ4BAACg1A$JMTWWR9uLxzruMTaZObU8CJxMJoDTjJPwfL.aboeCIM')
+        app.password_policy.validate_password(values['auth_credentials']['password'],
+                                              '$pbkdf2-sha256$29000$h8DWeu8dg3CudQ4BAACg1A'
+                                              '$JMTWWR9uLxzruMTaZObU8CJxMJoDTjJPwfL.aboeCIM')
         raise WrongCredentials
 
     access_token, access_csrf = generate_access_token(user.id, user.username, user.role.value)
@@ -197,10 +167,8 @@ def login():
     return response
 
 
-@app.route('/refresh', methods=['POST'])
-@openapi
+@module.route('/refresh', methods=['POST'])
 @jwt_required(refresh=True)
-@catch_request_error
 def refresh():
     user_id = jwt_get_id()
     user = get_or_raise(User, "id", user_id)
@@ -219,10 +187,8 @@ def refresh():
     return response
 
 
-@app.route('/logout', methods=['POST'])
-@openapi
+@module.route('/logout', methods=['POST'])
 @jwt_required()
-@catch_request_error
 def logout():
     response = make_response({}, 200)
     unset_jwt_cookies(response)
@@ -231,38 +197,30 @@ def logout():
 
 # User info
 
-@app.route('/user/self', methods=['GET'])
-@openapi
+@module.route('/user/self', methods=['GET'])
 @jwt_required()
-@catch_request_error
 def get_user_self():
     user = get_or_raise(User, "id", jwt_get_id())
     return make_response(user.serialize(), 200)
 
 
-@app.route('/user/<int:user_id>', methods=['GET'])
-@openapi
+@module.route('/user/<int:user_id>', methods=['GET'])
 @jwt_required_role(['Admin', 'System', 'Creator'])
-@catch_request_error
 def get_user_admin(user_id):
     user = get_or_raise(User, "id", user_id)
     return make_response(user.serialize(), 200)
 
 
-@app.route('/user/all', methods=['GET'])
-@openapi
+@module.route('/user/all', methods=['GET'])
 @jwt_required_role(['Admin', 'System', 'Creator'])
-@catch_request_error
 def get_user_all():
     users = get_all(User)
     user_list = [user.serialize() for user in users]
     return make_response({'users': user_list}, 200)
 
 
-@app.route('/user/by-group/<int:group_id>', methods=['GET'])
-@openapi
+@module.route('/user/by-group/<int:group_id>', methods=['GET'])
 @jwt_required_role(['Admin', 'System', 'Creator'])
-@catch_request_error
 def get_user_by_group(group_id):
     group = get_or_raise(Group, "id", group_id)
     users = [value.serialize() for value in group.users]
@@ -271,20 +229,16 @@ def get_user_by_group(group_id):
 
 # Password
 
-@app.route('/user/self/password', methods=['POST'])
-@openapi
+@module.route('/user/self/password', methods=['POST'])
 @jwt_required()
-@catch_request_error
 def change_password_self():
     values = request.openapi.body
     user_id = jwt_get_id()
     return update_password(user_id, values['new_password'], values['old_password'], False)
 
 
-@app.route('/user/<int:user_id>/password', methods=['POST'])
-@openapi
+@module.route('/user/<int:user_id>/password', methods=['POST'])
 @jwt_required_role(['Admin'])
-@catch_request_error
 def change_password_admin(user_id):
     values = request.openapi.body
     return update_password(user_id, values['new_password'], None, True)
@@ -292,10 +246,8 @@ def change_password_admin(user_id):
 
 # Permissions
 
-@app.route('/user/<int:user_id>/role', methods=['PUT'])
-@openapi
+@module.route('/user/<int:user_id>/role', methods=['PUT'])
 @jwt_required_role(['Admin', 'System'])
-@catch_request_error
 def set_user_role(user_id):
     role = user_roles[request.openapi.body['role']]
     user = get_or_raise(User, 'id', user_id)
@@ -304,10 +256,8 @@ def set_user_role(user_id):
     return make_response({}, 200)
 
 
-@app.route('/user/<int:user_id>/type', methods=['PUT'])
-@openapi
+@module.route('/user/<int:user_id>/type', methods=['PUT'])
 @jwt_required_role(['Admin', 'System'])
-@catch_request_error
 def set_user_type(user_id):
     user_type = user_types[request.openapi.body['type']]
     user = get_or_raise(User, 'id', user_id)
@@ -322,10 +272,8 @@ def set_user_type(user_id):
 
 # Personal info
 
-@app.route('/user/self/personal', methods=['GET'])
-@openapi
+@module.route('/user/self/personal', methods=['GET'])
 @jwt_required()
-@catch_request_error
 def get_user_info_self():
     user = get_or_raise(User, "id", jwt_get_id())
     if user.user_info is None:
@@ -333,10 +281,8 @@ def get_user_info_self():
     return make_response(user.user_info.serialize(), 200)
 
 
-@app.route('/user/<int:user_id>/personal', methods=['GET'])
-@openapi
+@module.route('/user/<int:user_id>/personal', methods=['GET'])
 @jwt_required_role(['Admin', 'System', 'Creator'])
-@catch_request_error
 def get_user_info_admin(user_id):
     user = get_or_raise(User, "id", user_id)
     if user.user_info is None:
@@ -344,10 +290,8 @@ def get_user_info_admin(user_id):
     return make_response(user.user_info.serialize(), 200)
 
 
-@app.route('/user/<int:user_id>/personal', methods=['PATCH'])
-@openapi
+@module.route('/user/<int:user_id>/personal', methods=['PATCH'])
 @jwt_required_role(['Admin', 'System', 'Creator'])
-@catch_request_error
 def set_user_info_admin(user_id):
     values = request.openapi.body
     user = get_or_raise(User, "id", user_id)
@@ -373,10 +317,8 @@ def set_user_info_admin(user_id):
 
 # University info
 
-@app.route('/user/self/university', methods=['GET'])
-@openapi
+@module.route('/user/self/university', methods=['GET'])
 @jwt_required()
-@catch_request_error
 def get_university_info_self():
     user = get_or_raise(User, "id", jwt_get_id())
     if user.student_info is None:
@@ -384,10 +326,8 @@ def get_university_info_self():
     return make_response(user.student_info.serialize(), 200)
 
 
-@app.route('/user/<int:user_id>/university', methods=['GET'])
-@openapi
+@module.route('/user/<int:user_id>/university', methods=['GET'])
 @jwt_required_role(['Admin', 'System', 'Creator'])
-@catch_request_error
 def get_university_info_admin(user_id):
     user = get_or_raise(User, "id", user_id)
     if user.student_info is None:
@@ -395,10 +335,8 @@ def get_university_info_admin(user_id):
     return make_response(user.student_info.serialize(), 200)
 
 
-@app.route('/user/<int:user_id>/university', methods=['PATCH'])
-@openapi
+@module.route('/user/<int:user_id>/university', methods=['PATCH'])
 @jwt_required_role(['Admin', 'System', 'Creator'])
-@catch_request_error
 def set_university_info_admin(user_id):
     values = request.openapi.body
     user = get_or_raise(User, "id", user_id)
@@ -426,29 +364,23 @@ def set_university_info_admin(user_id):
 
 # Groups
 
-@app.route('/group/<int:group_id>', methods=['GET'])
-@openapi
+@module.route('/group/<int:group_id>', methods=['GET'])
 @jwt_required_role(['Admin', 'System', 'Creator'])
-@catch_request_error
 def get_group(group_id):
     group = get_or_raise(Group, 'id', group_id)
     return make_response(group.serialize(), 200)
 
 
-@app.route('/group/all', methods=['GET'])
-@openapi
+@module.route('/group/all', methods=['GET'])
 @jwt_required_role(['Admin', 'System', 'Creator'])
-@catch_request_error
 def get_groups_all():
     groups = get_all(Group)
     groups_dict = [grp.serialize() for grp in groups]
     return make_response({'groups': groups_dict}, 200)
 
 
-@app.route('/group/add', methods=['POST'])
-@openapi
+@module.route('/group/add', methods=['POST'])
 @jwt_required_role(['Admin', 'System'])
-@catch_request_error
 def add_group_admin():
     values = request.openapi.body
     name = values['name']
@@ -463,10 +395,8 @@ def add_group_admin():
     return make_response(group.serialize(), 200)
 
 
-@app.route('/group/<int:group_id>/remove', methods=['POST'])
-@openapi
+@module.route('/group/<int:group_id>/remove', methods=['POST'])
 @jwt_required_role(['Admin', 'System'])
-@catch_request_error
 def remove_group_admin(group_id):
     group = get_or_raise(Group, 'id', group_id)
     db.session.delete(group)
@@ -476,30 +406,24 @@ def remove_group_admin(group_id):
 
 # User group management
 
-@app.route('/user/self/groups', methods=['GET'])
-@openapi
+@module.route('/user/self/groups', methods=['GET'])
 @jwt_required()
-@catch_request_error
 def get_user_groups_self():
     user = get_or_raise(User, "id", jwt_get_id())
     groups = [grp.serialize() for grp in user.groups]
     return make_response({'groups': groups}, 200)
 
 
-@app.route('/user/<int:user_id>/groups', methods=['GET'])
-@openapi
+@module.route('/user/<int:user_id>/groups', methods=['GET'])
 @jwt_required_role(['Admin', 'System', 'Creator'])
-@catch_request_error
 def get_user_groups_admin(user_id):
     user = get_or_raise(User, "id", user_id)
     groups = [grp.serialize() for grp in user.groups]
     return make_response({'groups': groups}, 200)
 
 
-@app.route('/user/<int:user_id>/groups/add', methods=['POST'])
-@openapi
+@module.route('/user/<int:user_id>/groups/add', methods=['POST'])
 @jwt_required_role(['Admin', 'System', 'Creator'])
-@catch_request_error
 def add_user_groups(user_id):
     values = request.openapi.body
     user = get_or_raise(User, "id", user_id)
@@ -511,10 +435,8 @@ def add_user_groups(user_id):
     return make_response({}, 200)
 
 
-@app.route('/user/<int:user_id>/groups/remove', methods=['POST'])
-@openapi
+@module.route('/user/<int:user_id>/groups/remove', methods=['POST'])
 @jwt_required_role(['Admin', 'System', 'Creator'])
-@catch_request_error
 def remove_user_groups(user_id):
     values = request.openapi.body
     user = get_or_raise(User, "id", user_id)
@@ -528,18 +450,14 @@ def remove_user_groups(user_id):
 
 # Reference Information
 
-@app.route('/info/universities', methods=['GET'])
-@openapi
-@catch_request_error
+@module.route('/info/universities', methods=['GET'])
 def get_universities():
     universities = get_all(University)
     university_list = [uni.name for uni in universities]
     return make_response({'university_list': university_list}, 200)
 
 
-@app.route('/info/countries', methods=['GET'])
-@openapi
-@catch_request_error
+@module.route('/info/countries', methods=['GET'])
 def get_countries():
     countries = get_all(Country)
     country_list = [country.name for country in countries]
