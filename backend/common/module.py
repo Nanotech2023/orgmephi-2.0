@@ -60,7 +60,7 @@ class OrgMephiModule:
     @property
     def full_name(self) -> str:
         """
-        Full name of self, i.e. name that includes al parent names in format <parent.full_name>_<self.name>
+        Full name of self, i.e. name that includes all parent names in format <parent.full_name>_<self.name>
         :return: Full name of self
         """
         return '_'.join(self._get_parents())
