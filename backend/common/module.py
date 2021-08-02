@@ -143,13 +143,11 @@ class OrgMephiModule:
         _orgmephi_current_module.set(self)
 
         try:
+            self._init_api(api_path, development)
             try:
                 importlib.import_module('.views', self._package)
             except ModuleNotFoundError:
                 pass
-
-            self._init_api(api_path, development)
-
             for module in self._modules:
                 module.prepare(api_path, development)
                 self._blueprint.register_blueprint(module.blueprint)
