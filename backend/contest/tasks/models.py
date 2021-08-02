@@ -92,7 +92,7 @@ class BaseContest(db.Model):
     laureate_condition = db.Column(db.Float, nullable=False)
     certificate_template = db.Column(db.Text, nullable=True)
 
-    target_classes = db.relationship('target_classes', lazy='select',
+    target_classes = db.relationship('TargetClasses', lazy='select',
                                      backref=db.backref('base_contest', lazy='joined'))
 
 
@@ -116,7 +116,7 @@ class Contest(db.Model):
 
     visibility = db.Column(db.Boolean, default=DEFAULT_VISIBILITY, nullable=False)
 
-    users = db.relationship('user_in_contest', lazy='select',
+    users = db.relationship('UserInContest', lazy='select',
                             backref=db.backref('contest', lazy='joined'))
 
     composite_type = db.Column(db.Enum(CompositeTypeEnum), nullable=False)
@@ -142,7 +142,7 @@ class SimpleContest(Contest):
     previous_contest_id = db.Column(db.Integer, db.ForeignKey('simple_contest.contest_id'), nullable=True)
     previous_participation_condition = db.Column(db.Enum(UserStatusEnum), nullable=True)
 
-    variants = db.relationship('variant', lazy='select',
+    variants = db.relationship('Variant', lazy='select',
                                backref=db.backref('simple_contest', lazy='joined'))
 
     __mapper_args__ = {
@@ -155,7 +155,7 @@ class CompositeContest(Contest):
 
     contest_id = db.Column(db.Integer, db.ForeignKey('contest.contest_id'), primary_key=True)
 
-    stages = db.relationship('stage', lazy='select',
+    stages = db.relationship('Stage', lazy='select',
                              backref=db.backref('composite_contest', lazy='joined'))
 
     __mapper_args__ = {
@@ -170,7 +170,7 @@ class TargetClasses(db.Model):
 
     __tablename__ = 'target_classes'
 
-    contest_id = db.Column(db.Integer, db.ForeignKey('contest.contest_id'), primary_key=True)
+    base_contest_id = db.Column(db.Integer, db.ForeignKey('base_contest.base_contest_id'), primary_key=True)
     target_class = db.Column(db.Enum(TargetClassEnum), primary_key=True)
     
 
@@ -207,7 +207,7 @@ class Stage(db.Model):
     stage_name = db.Column(db.Text, index=True, nullable=False)
     next_stage_condition = db.Column(db.Text, nullable=False)
 
-    contests = db.relationship('contest', secondary=contestsInStage, lazy='subquery',
+    contests = db.relationship('Contest', secondary=contestsInStage, lazy='subquery',
                                backref=db.backref('stage', lazy=True))
     
 
@@ -220,7 +220,7 @@ task_id: id of the task
 
 taskInVariant = db.Table('task_in_variant',
                          db.Column('variant_id', db.Integer, db.ForeignKey('variant.variant_id'), primary_key=True),
-                         db.Column('task_id', db.ForeignKey('base_task.task_id'), primary_key=True)
+                         db.Column('base_contest_id', db.ForeignKey('base_contest.base_contest_id'), primary_key=True)
                          )
 
 
@@ -241,10 +241,10 @@ class Variant(db.Model):
     variant_number = db.Column(db.Integer)
     variant_description = db.Column(db.Text)
 
-    users = db.relationship('user_in_contest', lazy='select',
+    users = db.relationship('UserInContest', lazy='select',
                             backref=db.backref('variant', lazy='joined'))
 
-    contests = db.relationship('base_task', secondary=taskInVariant, lazy='subquery',
+    contests = db.relationship('BaseContest', secondary=taskInVariant, lazy='subquery',
                                backref=db.backref('variant', lazy=True))
     
 
@@ -286,11 +286,11 @@ class Task(db.Model):
     image_of_task = db.Column(db.LargeBinary, nullable=True)
     type = db.Column(db.Enum(TaskType))
 
-    plain_tasks = db.relationship('plain_task', lazy='select',
+    plain_tasks = db.relationship('PlainTask', lazy='select',
                                   backref=db.backref('base_task', lazy='joined'))
-    range_tasks = db.relationship('range_task', lazy='select',
+    range_tasks = db.relationship('RangeTask', lazy='select',
                                   backref=db.backref('base_task', lazy='joined'))
-    multiple_tasks = db.relationship('multiple_task', lazy='select',
+    multiple_tasks = db.relationship('MultipleChoiceTask', lazy='select',
                                      backref=db.backref('base_task', lazy='joined'))
 
     __mapper_args__ = {
@@ -347,7 +347,7 @@ class MultipleChoiceTask(Task):
     __tablename__ = 'multiple_task'
 
     task_id = db.Column(db.Integer, db.ForeignKey('base_task.task_id'), primary_key=True)
-    all_answers_in_multiple_task = db.relationship('answers_in_multiple_task', lazy='select',
+    all_answers_in_multiple_task = db.relationship('AnswersInMultipleChoiceTask', lazy='select',
                                                    backref=db.backref('multiple_task', lazy='joined'))
 
     __mapper_args__ = {
