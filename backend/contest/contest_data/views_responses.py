@@ -1,15 +1,19 @@
 import datetime
+from functools import wraps
 
 from flask import request, make_response
-from flask_jwt_extended import create_access_token, set_access_cookies, create_refresh_token, set_refresh_cookies,\
-    get_csrf_token, jwt_required, unset_jwt_cookies
+from flask_jwt_extended import get_jwt
 import sqlalchemy.exc
 
-from contest_data.models_responses import *
-from contest_data import app, db, openapi
-from contest_data.errors import RequestError, NotFound
-from contest_data.jwt_verify import *
+from .models_responses import *
+from common.errors import RequestError, NotFound, InsufficientData
+from common import get_current_app, get_current_module
+from common.jwt_verify import jwt_required, jwt_required_role, jwt_get_id
 
+
+db = get_current_db()
+module = get_current_module()
+app = get_current_app()
 
 
 def catch_request_error(function):
@@ -38,6 +42,15 @@ def get_user_in_contest_work(user_id, contest_id):
     return user_work
 
 
+def get_missing(values, search):
+    missing = []
+    for value in search:
+        if value not in values:
+            missing.append(value)
+    return missing
+
+
+
 def get_user_info(user_id):  # TODO Get additional info for users
     return {}
 
@@ -46,12 +59,14 @@ def get_contest_name(contest_id):  # TODO get contest_name
     return ''
 
 
-@app.route('/olympiad/<int:olympiad_id>/stage/<int:stage_id>/contest/<int:contest_id>/user/<int:user_id>/response:',
+def check_olympiad_and_stage(olympiad_id, stage_id):        # TODO Add Checking olympiad_id, stage_id
+    return ''
+
+
+@module.route('/olympiad/<int:olympiad_id>/stage/<int:stage_id>/contest/<int:contest_id>/user/<int:user_id>/response:',
            methods=['GET'])
-@openapi
-@catch_request_error
 def get_user_all_answers(olympiad_id, stage_id, contest_id, user_id):
-    # TODO Add Checking olympiad_id, stage_id
+    check_olympiad_and_stage(olympiad_id, stage_id)
     user_work = get_user_in_contest_work(user_id, contest_id)
     if user_work.answers is None:
         raise NotFound('user_response.answers', 'for user %d' % user_id)
@@ -68,12 +83,10 @@ def get_user_all_answers(olympiad_id, stage_id, contest_id, user_id):
         }, 200)
 
 
-@app.route('/olympiad/<int:olympiad_id>/stage/<int:stage_id>/contest/<int:contest_id>/answer/<int:answer_id>',
+@module.route('/olympiad/<int:olympiad_id>/stage/<int:stage_id>/contest/<int:contest_id>/answer/<int:answer_id>',
            methods=['GET'])
-@openapi
-@catch_request_error
 def get_user_answer_by_id(olympiad_id, stage_id, contest_id, answer_id):
-    # TODO Add Checking olympiad_id, stage_id
+    check_olympiad_and_stage(olympiad_id, stage_id)
     user_answer = get_one_or_raise(ResponseAnswer, 'answer_id', answer_id)
     return make_response(
         {
@@ -82,14 +95,12 @@ def get_user_answer_by_id(olympiad_id, stage_id, contest_id, answer_id):
         }, 200)
 
 
-@app.route('/olympiad/<int:olympiad_id>/stage/<int:stage_id>/contest/<int:contest_id>/task/<int:task_id>/user/self:',
+@module.route('/olympiad/<int:olympiad_id>/stage/<int:stage_id>/contest/<int:contest_id>/task/<int:task_id>/user/self:',
            methods=['GET', 'POST'])
-@openapi
 @jwt_required()
-@catch_request_error
 def user_answer_for_task(olympiad_id, stage_id, contest_id, task_id):
     if request.method == 'GET':
-        # TODO Add Checking olympiad_id, stage_id
+        check_olympiad_and_stage(olympiad_id, stage_id)
         self_user_id = jwt_get_id()
         user_work = get_user_in_contest_work(user_id, contest_id)
         if user_work.answers is None:
@@ -104,8 +115,11 @@ def user_answer_for_task(olympiad_id, stage_id, contest_id, task_id):
             }, 200)
     elif request.method == 'POST':
         self_user_id = jwt_get_id()
-        # TODO Add Checking olympiad_id, stage_id
+        check_olympiad_and_stage(olympiad_id, stage_id)
         values = request.openapi.body
+        missing = get_missing(values, ['user_answer', 'filetype'])
+        if len(missing) > 0:
+            raise InsufficientData(str(missing), 'for user %d' %self_user_id)
         answer = values['user_answer']
         filetype = values['filetype']
         try:
@@ -122,15 +136,12 @@ def user_answer_for_task(olympiad_id, stage_id, contest_id, task_id):
         return make_response({}, 200)
 
 
-@app.route('/olympiad/<int:olympiad_id>/stage/<int:stage_id>/contest/<int:contest_id>/task/<int:task_id>/'
+@module.route('/olympiad/<int:olympiad_id>/stage/<int:stage_id>/contest/<int:contest_id>/task/<int:task_id>/'
            'user/<int:user_id>:',
            methods=['GET', 'POST'])
-@openapi
-@catch_request_error
 def user_answer_for_task_by_id(olympiad_id, stage_id, contest_id, task_id, user_id):
     if request.method == 'GET':
-        # TODO Add Checking olympiad_id, stage_id
-        self_user_id = None  # TODO Get current user id
+        check_olympiad_and_stage(olympiad_id, stage_id)
         user_work = get_user_in_contest_work(user_id, contest_id)
         if user_work.answers is None:
             raise NotFound('user_response.answers', 'for user %d' % user_id)
@@ -143,8 +154,11 @@ def user_answer_for_task_by_id(olympiad_id, stage_id, contest_id, task_id, user_
                 "filetype": filetype_reverse[user_answer.filetype]
             }, 200)
     elif request.method == 'POST':
-        # TODO Add Checking olympiad_id, stage_id
+        check_olympiad_and_stage(olympiad_id, stage_id)
         values = request.openapi.body
+        missing = get_missing(values, ['user_answer', 'filetype'])
+        if len(missing) > 0:
+            raise InsufficientData(str(missing), 'for user %d' %user_id)
         answer = values['user_answer']
         filetype = values['filetype']
         try:
@@ -161,23 +175,24 @@ def user_answer_for_task_by_id(olympiad_id, stage_id, contest_id, task_id, user_
         return make_response({}, 200)
 
 
-@app.route('/olympiad/<int:olympiad_id>/stage/<int:stage_id>/contest/<int:contest_id>/user/self/status',
+@module.route('/olympiad/<int:olympiad_id>/stage/<int:stage_id>/contest/<int:contest_id>/user/self/status',
            methods=['GET', 'POST'])
-@openapi
 @jwt_required()
-@catch_request_error
 def user_status_and_mark_for_response(olympiad_id, stage_id, contest_id):
     if request.method == 'GET':
-        # TODO Add Checking olympiad_id, stage_id
+        check_olympiad_and_stage(olympiad_id, stage_id)
         self_user_id = jwt_get_id()
         user_work = get_user_in_contest_work(self_user_id, contest_id)
         status = user_work.statuses.order_by(ResponseStatus.timestamp.desc()).first()
         return make_response(status.serialize(), 200)
     elif request.method == 'POST':
-        # TODO Add Checking olympiad_id, stage_id
+        check_olympiad_and_stage(olympiad_id, stage_id)
         self_user_id = jwt_get_id()
         values = request.openapi.body
-        status = values['status']
+        if 'status' in values:
+            status = values['status']
+        else:
+            raise InsufficientData('status' , 'for user %d' %self_user_id)
         if 'mark' in values:
             mark = values['mark']
         else:
@@ -188,20 +203,21 @@ def user_status_and_mark_for_response(olympiad_id, stage_id, contest_id):
         return make_response({}, 200)
 
 
-@app.route('/olympiad/<int:olympiad_id>/stage/<int:stage_id>/contest/<int:contest_id>/user/<int:user_id>/status',
+@module.route('/olympiad/<int:olympiad_id>/stage/<int:stage_id>/contest/<int:contest_id>/user/<int:user_id>/status',
            methods=['GET', 'POST'])
-@openapi
-@catch_request_error
 def user_status_and_mark_for_response_by_id(olympiad_id, stage_id, contest_id, user_id):
     if request.method == 'GET':
-        # TODO Add Checking olympiad_id, stage_id
+        check_olympiad_and_stage(olympiad_id, stage_id)
         user_work = get_user_in_contest_work(user_id, contest_id)
         status = user_work.statuses.order_by(ResponseStatus.timestamp.desc()).first()
         return make_response(status.serialize(), 200)
     elif request.method == 'POST':
-        # TODO Add Checking olympiad_id, stage_id
+        check_olympiad_and_stage(olympiad_id, stage_id)
         values = request.openapi.body
-        status = values['status']
+        if 'status' in values:
+            status = values['status']
+        else:
+            raise InsufficientData('status' , 'for user %d' %user_id)
         if 'mark' in values:
             mark = values['mark']
         else:
@@ -212,13 +228,11 @@ def user_status_and_mark_for_response_by_id(olympiad_id, stage_id, contest_id, u
         return make_response({}, 200)
 
 
-@app.route('/olympiad/<int:olympiad_id>/stage/<int:stage_id>/contest/<int:contest_id>/user/self/status/history',
+@module.route('/olympiad/<int:olympiad_id>/stage/<int:stage_id>/contest/<int:contest_id>/user/self/status/history',
            methods=['GET'])
-@openapi
 @jwt_required()
-@catch_request_error
 def user_status_history_for_response(olympiad_id, stage_id, contest_id):
-    # TODO Add Checking olympiad_id, stage_id
+    check_olympiad_and_stage(olympiad_id, stage_id)
     self_user_id = jwt_get_id()
     user_work = get_user_in_contest_work(self_user_id, contest_id)
     status = user_work.statuses.order_by(ResponseStatus.timestamp.desc())
@@ -231,13 +245,11 @@ def user_status_history_for_response(olympiad_id, stage_id, contest_id):
         }, 200)
 
 
-@app.route('/olympiad/<int:olympiad_id>/stage/<int:stage_id>/contest/<int:contest_id>/'
+@module.route('/olympiad/<int:olympiad_id>/stage/<int:stage_id>/contest/<int:contest_id>/'
            'user/<int:user_id>/status/history',
            methods=['GET'])
-@openapi
-@catch_request_error
 def user_status_history_for_response(olympiad_id, stage_id, contest_id, user_id):
-    # TODO Add Checking olympiad_id, stage_id
+    check_olympiad_and_stage(olympiad_id, stage_id)
     user_work = get_user_in_contest_work(user_id, contest_id)
     status = user_work.statuses.order_by(ResponseStatus.timestamp.desc())
     history = get_status_history(db.session, user_work.work_id, status)
@@ -249,11 +261,10 @@ def user_status_history_for_response(olympiad_id, stage_id, contest_id, user_id)
         }, 200)
 
 
-@app.route('/olympiad/<int:olympiad_id>/stage/<int:stage_id>/contest/<int:contest_id>/list/', methods=['GET'])
-@openapi
-@catch_request_error
+@module.route('/olympiad/<int:olympiad_id>/stage/<int:stage_id>/contest/<int:contest_id>/list/', methods=['GET'])
+@jwt_required_role(['Admin', 'System', 'Creator'])
 def get_list_for_stage(olympiad_id, stage_id, contest_id):
-    # TODO Add Checking olympiad_id, stage_id
+    check_olympiad_and_stage(olympiad_id, stage_id)
     user_in_contest = get_list(Response, 'contest_id', contest_id)
     user_rows = []
     for elem in users_in_contest:
@@ -270,13 +281,11 @@ def get_list_for_stage(olympiad_id, stage_id, contest_id):
         }, 200)
 
 
-@app.route('/olympiad/<int:olympiad_id>/stage/<int:stage_id>/contest/<int:contest_id>/user/self/appeal/last',
+@module.route('/olympiad/<int:olympiad_id>/stage/<int:stage_id>/contest/<int:contest_id>/user/self/appeal/last',
            methods=['GET', 'POST'])
-@openapi
 @jwt_required()
-@catch_request_error
 def user_response_appeal_info(olympiad_id, stage_id, contest_id):
-    # TODO Add Checking olympiad_id, stage_id
+    check_olympiad_and_stage(olympiad_id, stage_id)
     if request.method == 'GET':
         self_user_id = jwt_get_id()
         user_work = get_user_in_contest_work(self_user_id, contest_id)
@@ -289,7 +298,10 @@ def user_response_appeal_info(olympiad_id, stage_id, contest_id):
     elif request.method == 'POST':
         self_user_id = jwt_get_id()
         values = request.openapi.body
-        message = values['message']
+        if 'message' in values:
+            message = values['message']
+        else:
+            raise InsufficientData('message' , 'for user %d' %self_user_id)
         user_work = get_user_in_contest_work(self_user_id, contest_id)
         new_status = add_response_status(db.session, user_work.work_id, 'Appeal')
         appeal = add_response_appeal(db.session, new_status.status_id, message)
@@ -300,13 +312,11 @@ def user_response_appeal_info(olympiad_id, stage_id, contest_id):
             }, 200)
 
 
-@app.route('/olympiad/<int:olympiad_id>/stage/<int:stage_id>/contest/<int:contest_id>/user/<int:user_id>/appeal/last',
+@module.route('/olympiad/<int:olympiad_id>/stage/<int:stage_id>/contest/<int:contest_id>/user/<int:user_id>/appeal/last',
            methods=['GET', 'POST'])
-@openapi
-@catch_request_error
 def user_response_appeal_info_by_id(olympiad_id, stage_id, contest_id, user_id):
-    # TODO Add Checking olympiad_id, stage_id
     if request.method == 'GET':
+        check_olympiad_and_stage(olympiad_id, stage_id)
         user_work = get_user_in_contest_work(user_id, contest_id)
         last_appeal = ResponseStatus.query.join(Appeal, ResponseStatus.status_id == Appeal.work_status). \
             filter(ResponseStatus.work_id == user_work.work_id). \
@@ -315,8 +325,12 @@ def user_response_appeal_info_by_id(olympiad_id, stage_id, contest_id, user_id):
             raise NotFound('appeal', 'for user {}'.format(user_id))
         return make_response(last_appeal.serialize(), 200)
     elif request.method == 'POST':
+        check_olympiad_and_stage(olympiad_id, stage_id)
         values = request.openapi.body
-        message = values['message']
+        if 'message' in values:
+            message = values['message']
+        else:
+            raise InsufficientData('message', 'for user %d' % user_id)
         user_work = get_user_in_contest_work(user_id, contest_id)
         new_status = add_response_status(db.session, user_work.work_id, 'Appeal')
         appeal = add_response_appeal(db.session, new_status.status_id, message)
@@ -327,13 +341,15 @@ def user_response_appeal_info_by_id(olympiad_id, stage_id, contest_id, user_id):
             }, 200)
 
 
-@app.route('/olympiad/<int:olympiad_id>/stage/<int:stage_id>/contest/<int:contest_id>/appeal/<int:appeal_id>/reply',
+@module.route('/olympiad/<int:olympiad_id>/stage/<int:stage_id>/contest/<int:contest_id>/appeal/<int:appeal_id>/reply',
            methods=['POST'])
-@openapi
-@catch_request_error
+@jwt_required_role(['Admin', 'System', 'Creator'])
 def reply_to_user_appeal(olympiad_id, stage_id, contest_id, appeal_id):
-    # TODO Add Checking olympiad_id, stage_id
+    check_olympiad_and_stage(olympiad_id, stage_id)
     values = request.openapi.body
+    missing = get_missing(values, ['message', 'accepted'])
+    if len(missing) > 0:
+        raise InsufficientData(str(missing), 'for user %d' % self_user_id)
     message = values['message']
     accepted = values['accepted']
     if accepted:
@@ -357,12 +373,10 @@ def reply_to_user_appeal(olympiad_id, stage_id, contest_id, appeal_id):
     return make_response(appeal.serialize(), 200)
 
 
-@app.route('/olympiad/<int:olympiad_id>/stage/<int:stage_id>/contest/<int:contest_id>/appeal/<int:appeal_id>',
+@module.route('/olympiad/<int:olympiad_id>/stage/<int:stage_id>/contest/<int:contest_id>/appeal/<int:appeal_id>',
            methods=['GET'])
-@openapi
-@catch_request_error
 def get_appeal_info_by_id(olympiad_id, stage_id, contest_id, appeal_id):
-    # TODO Add Checking
+    check_olympiad_and_stage(olympiad_id, stage_id)
     appeal = Appeal.query.filter(appeal_id=appeal_id).one_or_none()
     if appeal is None:
         raise NotFound('appeal', 'by id {}'.format(appeal_id))
