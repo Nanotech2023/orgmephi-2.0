@@ -172,6 +172,8 @@ class OrgMephiApp:
         if test_config is not None:
             self._app.config.from_object(test_config)
         elif config_var in os.environ:
+            path = _path_to_absolute(os.environ[config_var])
+            os.environ[config_var] = path
             self._app.config.from_envvar(config_var)
 
     def _init_db(self):
