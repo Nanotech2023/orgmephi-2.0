@@ -46,11 +46,12 @@ def get_missing(values, search):
 
 
 def grade_to_year(grade):
+    from datetime import date
     now = datetime.utcnow().date()
-    last_admission = datetime(now.year, 9, 1)
-    if now > last_admission:
-        last_admission = datetime(now.year - 1, 9, 1)
-    admission_date = datetime(last_admission.year - grade + 1, 9, 1)
+    last_admission = date(now.year, 9, 1)
+    if now < last_admission:
+        last_admission = date(now.year - 1, 9, 1)
+    admission_date = date(last_admission.year - grade + 1, 9, 1)
     return admission_date
 
 
