@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core'
 import { select, Store } from '@ngrx/store'
 import { AuthSelectors, AuthState } from '@/auth/store'
 import { Observable } from 'rxjs'
+import { fixedHeight } from '@/shared/consts'
 
 
 @Component( {

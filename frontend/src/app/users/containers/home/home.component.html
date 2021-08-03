@@ -1,2 +1,1 @@
-<!--TODO Render Component Depending on the User Role-->
-<app-participant></app-participant>
+<app-participant *ngIf="isStudent(user$ | async)"></app-participant>

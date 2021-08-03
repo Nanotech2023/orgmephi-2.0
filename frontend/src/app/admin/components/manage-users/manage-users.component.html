@@ -1,0 +1,11 @@
+<div class="container_main" [style.padding-top]="headerHeight" [style.padding-bottom]="footerHeight">
+    <div id="table-header"></div>
+    <div id="table-container" *ngIf="users$ | async as users">
+        <ag-grid-angular
+            id="table-users"
+            class="ag-theme-alpine"
+            [rowData]="users.users"
+            [columnDefs]="columnDefs">
+        </ag-grid-angular>
+    </div>
+</div>

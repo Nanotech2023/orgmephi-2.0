@@ -11,6 +11,7 @@ import { environment } from '@environments/environment'
 import { AppComponent } from '@/app.component'
 import { UsersModule } from '@/users/users.module';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations'
+import { AdminModule } from '@/admin/admin.module'
 
 
 @NgModule( {
@@ -23,6 +24,7 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations'
         AuthModule,
         OlympiadsModule,
         UsersModule,
+        AdminModule,
         AppRoutingModule,
         StoreModule.forRoot( {} ),
         EffectsModule.forRoot( [] ),

@@ -179,7 +179,24 @@ export class AuthServiceMock implements AuthService
     userAllGet( observe: any, reportProgress: boolean ): Observable<any>
     userAllGet( observe?: any, reportProgress?: boolean ): Observable<ResponseUserAll> | Observable<HttpResponse<ResponseUserAll>> | Observable<HttpEvent<ResponseUserAll>> | Observable<any>
     {
-        throw new Error( 'not implemented' )
+        const users: ResponseUserAll = {
+            users: [
+                {
+                    id: 123,
+                    role: 'Participant',
+                    type: 'School',
+                    username: 'Test Testing'
+                },
+                {
+                    id: 12356,
+                    role: 'Participant',
+                    type: 'School',
+                    username: 'Test 123'
+                }
+            ]
+        }
+
+        return of( users )
     }
 
     userByGroupGroupIdGet( groupId: number, observe?: "body", reportProgress?: boolean ): Observable<ResponseUserByGroup>
