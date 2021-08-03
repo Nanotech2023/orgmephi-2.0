@@ -326,9 +326,11 @@ class TargetClass(db.Model):
     def update(self, target_class):
         self.target_class = target_class
 
-def add_target_class(db_session, target_class):
+
+def add_target_class(db_session, contest_id, target_class_):
     target_class = TargetClass(
-        target_class=target_class
+        contest_id = contest_id,
+        target_class=target_class_
     )
     db_session.add(target_class)
     db_session.flush()
@@ -485,7 +487,7 @@ class Variant(db.Model):
             self.variant_description = variant_description
 
 
-def add_user_in_contest(db_session, nuser_id, contest_id, variant_id=None, user_status=None):
+def add_user_in_contest(db_session, user_id, contest_id, variant_id=None, user_status=None):
     user = UserInContest(
         user_id=user_id,
         contest_id=contest_id,
