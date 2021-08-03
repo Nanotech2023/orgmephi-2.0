@@ -190,9 +190,14 @@ class OrgMephiApp:
 
     def _init_jwt(self):
         self._app.config['JWT_TOKEN_LOCATION'] = ["cookies"]
-        self._app.config['JWT_COOKIE_SAMESITE'] = "Strict"
         self._app.config['JWT_CSRF_IN_COOKIES'] = False
-        
+        if 'ORGMEPHI_JWT_SAMESITE' in self._app.config and self._app.config['ORGMEPHI_JWT_SAMESITE'] is not None:
+            self._app.config['JWT_COOKIE_SAMESITE'] = self._app.config['ORGMEPHI_JWT_SAMESITE']
+        else:
+            self._app.config['JWT_COOKIE_SAMESITE'] = "Strict"
+
+        # TODO: self._app.config['JWT_COOKIE_SECURE'] = True When https enabled and FLASK_ENV != 'development'
+
         self._read_key('SECRET')
         self._read_key('PRIVATE')
         self._read_key('PUBLIC')

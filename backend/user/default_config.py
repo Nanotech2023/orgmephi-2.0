@@ -19,3 +19,6 @@ class DefaultConfiguration:
     JWT_ALGORITHM = 'RS256'
     ORGMEPHI_PUBLIC_KEY = 'id_rsa.pub'
     ORGMEPHI_PRIVATE_KEY = 'id_rsa'
+    # Values: 'Strict', 'Lax', 'None' ('None' is a string, not a NoneType)
+    # Warning: in most browsers 'None' only works over https
+    ORGMEPHI_JWT_SAMESITE = 'Strict'
