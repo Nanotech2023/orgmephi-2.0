@@ -14,33 +14,15 @@ paths:
 
   # Registration
 
-  /register:
+  /register/school:
     post:
-      summary: Register a new user
+      summary: Register a new school student
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/requestRegistration'
-            #Swagger does not generate example for oneOf
-            example: '{
-                      "auth_info": {
-                        "email": "string",
-                        "password": "string"
-                      },
-                      "personal_info": {
-                        "first_name": "string",
-                        "second_name": "string",
-                        "middle_name": "string",
-                        "date_of_birth": "2021-07-27"
-                      },
-                      "register_type": "PreUniversity",
-                      "register_confirm": {
-                        "registration_number": "string",
-                        "one_time_password": "string"
-                      }
-                    }'
+              $ref: '#/components/schemas/requestRegistrationSchool'
       security: []
       responses:
         '200':
@@ -48,7 +30,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/responseRegistration'
+                $ref: '#/components/schemas/responseRegistrationSchool'
         '400':
           description: Bad request or weak password
           content:
@@ -61,6 +43,36 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/errorResponse'
+  /register/university:
+    post:
+      summary: Register a new university student
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/requestRegistrationUniversity'
+      security: [ ]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/responseRegistrationUniversity'
+        '400':
+          description: Bad request or weak password
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+        '409':
+          description: Username already in use
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+
   /register/internal:
     post:
       summary: Register an internal user
@@ -1162,13 +1174,8 @@ components:
   ##                                             Path schemas                                                         ##
   ######################################################################################################################
 
-    # /register
+    # /register/school
 
-    requestRegistration:
-      title: 'Registration request info'
-      oneOf:
-        - $ref: '#/components/schemas/requestRegistrationSchool'
-        - $ref: '#/components/schemas/requestRegistrationUniversity'
     requestRegistrationSchool:
       title: 'Registration data for school students'
       required:
@@ -1184,6 +1191,11 @@ components:
           $ref: '#/components/schemas/typeUserTypeSchool'
         register_confirm:
           $ref: '#/components/schemas/typePreregisterInfo'
+    responseRegistrationSchool:
+      $ref: '#/components/schemas/typeUserInfo'
+
+    # /register/university
+
     requestRegistrationUniversity:
       title: 'Registration data for university students'
       required:
@@ -1200,7 +1212,7 @@ components:
           $ref: '#/components/schemas/typeUserTypeUniversity'
         student_info:
           $ref: '#/components/schemas/typeRegistrationStudentInfo'
-    responseRegistration:
+    responseRegistrationUniversity:
       $ref: '#/components/schemas/typeUserInfo'
 
     # /register/internal

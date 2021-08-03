@@ -84,7 +84,6 @@ def generate_refresh_token(user_id, remember_me):
 
 # Registration
 
-@module.route('/register', methods=['POST'])
 def register():
     values = request.openapi.body
     username = values['auth_info']['email']
@@ -111,6 +110,16 @@ def register():
         db.session.rollback()
         raise
     return make_response(user.serialize(), 200)
+
+
+@module.route('/register/school', methods=['POST'])
+def register_school():
+    return register()
+
+
+@module.route('/register/university', methods=['POST'])
+def register_university():
+    return register()
 
 
 @module.route('/register/internal', methods=['POST'])
