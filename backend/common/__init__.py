@@ -140,7 +140,7 @@ class OrgMephiApp:
         last_app = get_current_app()
         self.set_current()
         try:
-            api_var = 'ORGMEPHI_%s_API_PATH' % self._service_name.upper()
+            api_var = 'ORGMEPHI_API_PATH'
             if api_var in self._app.config:
                 api_path = _path_to_absolute(self._app.config[api_var])
             else:
@@ -206,14 +206,13 @@ class OrgMephiApp:
         if not security:
             self._password = None
         else:
-            prefix = 'ORGMEPHI_%s_PASSWORD_' % self._service_name.upper()
             self._password = OrgMephiPassword(
-                hash_schemes=self.app.config[prefix + 'HASH'],
-                length=self.app.config[prefix + 'LENGTH'],
-                uppercase=self.app.config[prefix + 'UPPERCASE'],
-                numbers=self.app.config[prefix + 'NUMBERS'],
-                special=self.app.config[prefix + 'SPECIAL'],
-                nonletters=self.app.config[prefix + 'NONLETTERS']
+                hash_schemes=self.app.config['ORGMEPHI_PASSWORD_HASH'],
+                length=self.app.config['ORGMEPHI_PASSWORD_LENGTH'],
+                uppercase=self.app.config['ORGMEPHI_PASSWORD_UPPERCASE'],
+                numbers=self.app.config['ORGMEPHI_PASSWORD_NUMBERS'],
+                special=self.app.config['ORGMEPHI_PASSWORD_SPECIAL'],
+                nonletters=self.app.config['ORGMEPHI_PASSWORD_NONLETTERS']
             )
 
 
