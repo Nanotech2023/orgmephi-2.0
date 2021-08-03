@@ -25,7 +25,7 @@ def init_db():
 def init_api():
     import yaml
     from openapi_core import create_spec
-    api_path = current_app.config['ORGMEPHI_API_PATH']
+    api_path = current_app.config['TASKS_API_PATH']
     with open(api_path, 'r') as spec_file:
         spec_dict = yaml.safe_load(spec_file)
     global openapi
@@ -42,12 +42,10 @@ init_db()
 init_api()
 
 
-@app.route('/login', methods=['POST'])
-def kek():
-    return 'keks', 502
-
-
-from contest_data.views_tasks import *
+import contest_data.models_tasks
+import contest_data.models_responses
+from views_tasks import *
 
 if __name__ == "__main__":
     app.run()
+

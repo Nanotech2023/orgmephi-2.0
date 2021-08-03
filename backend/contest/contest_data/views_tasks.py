@@ -4,15 +4,27 @@ from flask import request, make_response, abort, send_file
 import re
 from os import getcwd
 
-from flask_jwt_extended import create_access_token, set_access_cookies, create_refresh_token, set_refresh_cookies,\
-    get_csrf_token, jwt_required, unset_jwt_cookies
+import sqlalchemy.exc
+
+from common.errors import RequestError, NotFound, InsufficientData
+from common import get_current_app, get_current_module
+from common.jwt_verify import jwt_required, jwt_required_role, jwt_get_id
 
 
-from contest_data.models_task import *
-from contest_data.errors import *
-from jwt_verify import *
-from contest_data import app, db, openapi
+db = get_current_db()
+module = get_current_module()
+app = get_current_app()
 
+
+def catch_request_error(function):
+    @wraps(function)
+    def wrapper(*args, **kwargs):
+        try:
+            return function(*args, **kwargs)
+        except RequestError as err:
+            return err.to_response()
+
+    return wrapper
 
 def get_or_raise(entity, field, value):
     result = get_one_or_null(entity, field, value)
@@ -31,7 +43,7 @@ def get_missing(values, search):
 
 # Swagger UI
 
-@app.route('/tasks_api.yaml', methods=['GET'])
+@module.route('/tasks_api.yaml', methods=['GET'])
 def get_api():
     if app.config['ENV'] != 'development':
         abort(404)
@@ -43,9 +55,7 @@ def get_api():
 
 # Olympiad views
 
-@app.route('/base_olympiad/create', methods=['POST'])
-@openapi
-@catch_request_error
+@module.route('/base_olympiad/create', methods=['POST'])
 @jwt_required_role(['Admin', 'System', 'Creator'])
 def base_olympiad_create():
     values = request.openapi.body
@@ -66,43 +76,34 @@ def base_olympiad_create():
 
         db.session.commit()
     except sqlalchemy.exc.IntegrityError:
-        raise AlreadyExists('username', username)
+        raise AlreadyExists('name', name)
     except Exception:
         db.session.rollback()
         raise
     return make_response(baseContest.serialize(), 200)
 
 
-@app.route('/base_olympiad/<id_base_olympiad>', methods=['GET'])
-@openapi
-@catch_request_error
-@jwt_required()
-def base_olympiad_get(id_base_olympiad):
-    baseContest = get_or_raise(BaseContest, BaseContest.base_contest_id, id_base_olympiad)
-    return make_response(baseContest.serialize(), 200)
-
-
-
-@app.route('/base_olympiad/<id_base_olympiad>', methods=['PATCH'])
-@openapi
-@catch_request_error
+@module.route('/base_olympiad/<int:id_base_olympiad>', methods=['GET', 'PATCH'])
 @jwt_required_role(['Admin', 'System', 'Creator'])
-def base_olympiad_update(id_base_olympiad):
-    base_olympiad = get_or_raise(BaseContest, BaseContest.base_contest_id, id_base_olympiad)
-    values = request.openapi.body
+def base_olympiad_response(id_base_olympiad):
+    baseContest = get_or_raise(BaseContest, BaseContest.base_contest_id, id_base_olympiad)
 
-    try:
-        base_olympiad.update(**values)
-    except Exception:
-        db.session.rollback()
-        raise
-    db.session.commit()
-    return make_response(base_olympiad.serialize(), 200)
+    if request.method == 'GET':
+        return make_response(baseContest.serialize(), 200)
+
+    elif request.method == 'PATCH':
+        values = request.openapi.body
+
+        try:
+            base_olympiad.update(**values)
+        except Exception:
+            db.session.rollback()
+            raise
+        db.session.commit()
+        return make_response(base_olympiad.serialize(), 200)
 
 
-@app.route('/base_olympiad/all', methods=['GET'])
-@openapi
-@catch_request_error
+@module.route('/base_olympiad/all', methods=['GET'])
 @jwt_required()
 def base_olympiads_all():
     olympiads = get_all(Olympiad)
@@ -112,9 +113,7 @@ def base_olympiads_all():
         { "olympiad_list": all_olympiads }, 200)
 
 
-@app.route('/base_olympiad/<id_base_olympiad>/olympiad/create', methods=['POST'])
-@openapi
-@catch_request_error
+@module.route('/base_olympiad/<int:id_base_olympiad>/olympiad/create', methods=['POST'])
 @jwt_required_role(['Admin', 'System', 'Creator'])
 def olympiad_create(id_base_olympiad):
     values = request.openapi.body
@@ -165,9 +164,7 @@ def olympiad_create(id_base_olympiad):
     return make_response(baseContest.serialize(), 200)
 
 
-@app.route('/base_olympiad/<id_base_olympiad>/olympiad/<id_olympiad>', methods=['GET'])
-@openapi
-@catch_request_error
+@module.route('/base_olympiad/<int:id_base_olympiad>/olympiad/<int:id_olympiad>', methods=['GET'])
 @jwt_required()
 def base_olympiad_get(id_base_olympiad, id_olympiad):
     contest = get_or_raise(Contest, Contest.contest_id, id_olympiad)
@@ -180,7 +177,7 @@ def base_olympiad_get(id_base_olympiad, id_olympiad):
 
 
 
-@app.route('/base_olympiad/<id_base_olympiad>', methods=['PATCH'])
+@module.route('/base_olympiad/<int:id_base_olympiad>', methods=['PATCH'])
 @openapi
 @catch_request_error
 @jwt_required_role(['Admin', 'System', 'Creator'])
@@ -200,13 +197,14 @@ def base_olympiad_update(id_base_olympiad):
     except Exception:
         db.session.rollback()
         raise
+
     db.session.commit()
     return make_response(base_olympiad.serialize(), 200)
 
 
 # Stage views
 
-@app.route('/olympiad/<id_olympiad>/stage/create', methods=['POST'])
+@module.route('/olympiad/<int:id_olympiad>/stage/create', methods=['POST'])
 @openapi
 def stage_create(id_olympiad):
     try:
@@ -234,7 +232,7 @@ def stage_create(id_olympiad):
         return err.to_response()
 
 
-@app.route('/olympiad/<id_olympiad>/stage/<id_stage>/remove', methods=['POST'])
+@module.route('/olympiad/<int:id_olympiad>/stage/<int:id_stage>/remove', methods=['POST'])
 @openapi
 def stage_remove(id_olympiad, id_stage):
     try:
@@ -248,7 +246,7 @@ def stage_remove(id_olympiad, id_stage):
         return err.to_response()
 
 
-@app.route('/olympiad/<id_olympiad>/stage/<id_stage>', methods=['GET'])
+@module.route('/olympiad/<int:id_olympiad>/stage/<int:id_stage>', methods=['GET'])
 @openapi
 def stage_get(id_olympiad, id_stage):
     try:
@@ -265,7 +263,7 @@ def stage_get(id_olympiad, id_stage):
         return err.to_response()
 
 
-@app.route('/olympiad/<id_olympiad>/stage/<id_stage>', methods=['PATCH'])
+@module.route('/olympiad/<int:id_olympiad>/stage/<int:id_stage>', methods=['PATCH'])
 @openapi
 def stage_update(id_olympiad, id_stage):
     try:
@@ -284,7 +282,7 @@ def stage_update(id_olympiad, id_stage):
         return err.to_response()
 
 
-@app.route('/olympiad/<id_olympiad>/stage/all', methods=['GET'])
+@module.route('/olympiad/<int:id_olympiad>/stage/all', methods=['GET'])
 @openapi
 def stages_all(id_olympiad):
     try:
@@ -314,7 +312,7 @@ def stages_all(id_olympiad):
 # Contest views
 
 
-@app.route('/olympiad/<id_olympiad>/stage/<id_stage>/contest/create', methods=['POST'])
+@module.route('/olympiad/<int:id_olympiad>/stage/<int:id_stage>/contest/create', methods=['POST'])
 @openapi
 def contest_create(id_olympiad, id_stage):
     try:
@@ -378,7 +376,7 @@ def contest_create(id_olympiad, id_stage):
         return err.to_response()
 
 
-@app.route('/olympiad/<id_olympiad>/stage/<id_stage>/contest/<id_contest>/remove', methods=['POST'])
+@module.route('/olympiad/<int:id_olympiad>/stage/<int:id_stage>/contest/<int:id_contest>/remove', methods=['POST'])
 @openapi
 def contest_remove(id_olympiad, id_stage, id_contest):
     try:
@@ -392,7 +390,7 @@ def contest_remove(id_olympiad, id_stage, id_contest):
         return err.to_response()
 
 
-@app.route('/olympiad/<id_olympiad>/stage/<id_stage>/contest/<id_contest>', methods=['GET'])
+@module.route('/olympiad/<int:id_olympiad>/stage/<int:id_stage>/contest/<int:id_contest>', methods=['GET'])
 @openapi
 def contest_get(id_olympiad, id_stage, id_contest):
     try:
@@ -419,7 +417,7 @@ def contest_get(id_olympiad, id_stage, id_contest):
         return err.to_response()
 
 
-@app.route('/olympiad/<id_olympiad>/stage/<id_stage>/contest/<id_contest>', methods=['PATCH'])
+@module.route('/olympiad/<int:id_olympiad>/stage/<int:id_stage>/contest/<int:id_contest>', methods=['PATCH'])
 @openapi
 def contest_update(id_olympiad, id_stage, id_contest):
     try:
@@ -465,7 +463,7 @@ def contest_update(id_olympiad, id_stage, id_contest):
         return err.to_response()
 
 
-@app.route('/olympiad/<id_olympiad>/stage/<id_stage>/contest/all', methods=['GET'])
+@module.route('/olympiad/<int:id_olympiad>/stage/<int:id_stage>/contest/all', methods=['GET'])
 @openapi
 def contests_all(id_olympiad, id_stage):
     try:
@@ -505,7 +503,7 @@ def contests_all(id_olympiad, id_stage):
 # Variant views
 
 
-@app.route('/olympiad/<id_olympiad>/stage/<id_stage>/contest/<id_contest>/variant/create', methods=['POST'])
+@module.route('/olympiad/<int:id_olympiad>/stage/<int:id_stage>/contest/<int:id_contest>/variant/create', methods=['POST'])
 @openapi
 def variant_create(id_olympiad, id_stage, id_contest):
     try:
@@ -536,7 +534,7 @@ def variant_create(id_olympiad, id_stage, id_contest):
         return err.to_response()
 
 
-@app.route('/olympiad/<id_olympiad>/stage/<id_stage>/contest/<id_contest>/variant/<id_variant>/remove', methods=['POST'])
+@module.route('/olympiad/<int:id_olympiad>/stage/<int:id_stage>/contest/<int:id_contest>/variant/<int:id_variant>/remove', methods=['POST'])
 @openapi
 def variant_remove(id_olympiad, id_stage, id_contest, id_variant):
     try:
@@ -550,7 +548,7 @@ def variant_remove(id_olympiad, id_stage, id_contest, id_variant):
         return err.to_response()
 
 
-@app.route('/olympiad/<id_olympiad>/stage/<id_stage>/contest/<id_contest>/variant/<variant_num>', methods=['GET'])
+@module.route('/olympiad/<int:id_olympiad>/stage/<int:id_stage>/contest/<int:id_contest>/variant/<int:variant_num>', methods=['GET'])
 @openapi
 def variant_get(id_olympiad, id_stage, id_contest, variant_num):
     try:
@@ -567,7 +565,7 @@ def variant_get(id_olympiad, id_stage, id_contest, variant_num):
         return err.to_response()
 
 
-@app.route('/olympiad/<id_olympiad>/stage/<id_stage>/contest/<id_contest>/variant/<variant_num>', methods=['PATCH'])
+@module.route('/olympiad/<int:id_olympiad>/stage/<int:id_stage>/contest/<int:id_contest>/variant/<int:variant_num>', methods=['PATCH'])
 @openapi
 def variant_update(id_olympiad, id_stage, id_contest, variant_num):
     try:
@@ -589,7 +587,7 @@ def variant_update(id_olympiad, id_stage, id_contest, variant_num):
         return err.to_response()
 
 
-@app.route('/olympiad/<id_olympiad>/stage/<id_stage>/contest/<id_contest>/variant/all', methods=['GET'])
+@module.route('/olympiad/<int:id_olympiad>/stage/<int:id_stage>/contest/<int:id_contest>/variant/all', methods=['GET'])
 @openapi
 def variant_all(id_olympiad, id_stage, id_contest):
     try:
@@ -620,7 +618,7 @@ def variant_all(id_olympiad, id_stage, id_contest):
 # Task views
 
 
-@app.route('/olympiad/<id_olympiad>/stage/<id_stage>/contest/<id_contest>/variant/<id_variant>/task/create', methods=['POST'])
+@module.route('/olympiad/<int:id_olympiad>/stage/<int:id_stage>/contest/<int:id_contest>/variant/<int:id_variant>/task/create', methods=['POST'])
 @openapi
 def task_create(id_olympiad, id_stage, id_contest, id_variant):
     try:
@@ -714,7 +712,7 @@ def task_create(id_olympiad, id_stage, id_contest, id_variant):
         return err.to_response()
 
 
-@app.route('/olympiad/<id_olympiad>/stage/<id_stage>/contest/<id_contest>/variant/<id_variant>/task/<id_task>/remove', methods=['POST'])
+@module.route('/olympiad/<int:id_olympiad>/stage/<int:id_stage>/contest/<int:id_contest>/variant/<int:id_variant>/task/<int:id_task>/remove', methods=['POST'])
 @openapi
 def task_remove(id_olympiad, id_stage, id_contest, id_variant, id_task):
     try:
@@ -748,7 +746,7 @@ def task_remove(id_olympiad, id_stage, id_contest, id_variant, id_task):
         return err.to_response()
 
 
-@app.route('/olympiad/<id_olympiad>/stage/<id_stage>/contest/<id_contest>/variant/<id_variant>/task/<id_task>', methods=['GET'])
+@module.route('/olympiad/<int:id_olympiad>/stage/<int:id_stage>/contest/<int:id_contest>/variant/<int:id_variant>/task/<int:id_task>', methods=['GET'])
 @openapi
 def task_get(id_olympiad, id_stage, id_contest, id_variant, id_task):
     try:
@@ -801,7 +799,7 @@ def task_get(id_olympiad, id_stage, id_contest, id_variant, id_task):
         return err.to_response()
 
 
-@app.route('/olympiad/<id_olympiad>/stage/<id_stage>/contest/<id_contest>/variant/<id_variant>/task/<id_task>', methods=['PATCH'])
+@module.route('/olympiad/<int:id_olympiad>/stage/<int:id_stage>/contest/<int:id_contest>/variant/<int:id_variant>/task/<int:id_task>', methods=['PATCH'])
 @openapi
 def task_update(id_olympiad, id_stage, id_contest, id_variant, id_task):
     try:
@@ -845,7 +843,7 @@ def task_update(id_olympiad, id_stage, id_contest, id_variant, id_task):
         return err.to_response()
 
 
-@app.route('/olympiad/<id_olympiad>/stage/<id_stage>/contest/<id_contest>/variant/<id_variant>/task/all', methods=['GET'])
+@module.route('/olympiad/<int:id_olympiad>/stage/<int:id_stage>/contest/<int:id_contest>/variant/<int:id_variant>/task/all', methods=['GET'])
 @openapi
 def task_all(id_olympiad, id_stage, id_contest, id_variant):
     try:
@@ -872,7 +870,7 @@ def task_all(id_olympiad, id_stage, id_contest, id_variant):
 
 
 
-@app.route('/olympiad/<id_olympiad>/stage/<id_stage>/contest/<id_contest>/variant/<id_variant>/task/<id_task>/taskimage', methods=['GET'])
+@module.route('/olympiad/<int:id_olympiad>/stage/<int:id_stage>/contest/<int:id_contest>/variant/<int:id_variant>/task/<int:id_task>/taskimage', methods=['GET'])
 @openapi
 def task_image(id_olympiad, id_stage, id_contest, id_variant, id_task):
     try:
@@ -891,7 +889,7 @@ def task_image(id_olympiad, id_stage, id_contest, id_variant, id_task):
 
 # User views
 
-@app.route('/olympiad/<id_olympiad>/stage/<id_stage>/contest/<id_contest>/adduser', methods=['POST'])
+@module.route('/olympiad/<int:id_olympiad>/stage/<int:id_stage>/contest/<int:id_contest>/adduser', methods=['POST'])
 @openapi
 def add_user_to_contest(id_olympiad, id_stage, id_contest):
     try:
@@ -923,7 +921,7 @@ def add_user_to_contest(id_olympiad, id_stage, id_contest):
         return err.to_response()
 
 
-@app.route('/olympiad/<id_olympiad>/stage/<id_stage>/contest/<id_contest>/{id_contest}/removeuser:', methods=['POST'])
+@module.route('/olympiad/<int:id_olympiad>/stage/<int:id_stage>/contest/<int:id_contest>/{id_contest}/removeuser:', methods=['POST'])
 @openapi
 def remove_user_from_contest(id_olympiad, id_stage, id_contest):
     try:
@@ -945,7 +943,7 @@ def remove_user_from_contest(id_olympiad, id_stage, id_contest):
         return err.to_response()
 
 
-@app.route('/olympiad/<id_olympiad>/stage/<id_stage>/contest/<id_contest>/{id_contest}/user/all', methods=['GET'])
+@module.route('/olympiad/<int:id_olympiad>/stage/<int:id_stage>/contest/<int:id_contest>/{id_contest}/user/all', methods=['GET'])
 @openapi
 def users_all(id_olympiad, id_stage, id_contest):
     try:
@@ -972,7 +970,7 @@ def users_all(id_olympiad, id_stage, id_contest):
         return err.to_response()
 
 
-@app.route('/olympiad/<id_olympiad>/stage/<id_stage>/contest/<id_contest>/{id_contest}/user/<id_user>/certificate', methods=['GET'])
+@module.route('/olympiad/<int:id_olympiad>/stage/<int:id_stage>/contest/<int:id_contest>/{id_contest}/user/<int:id_user>/certificate', methods=['GET'])
 @openapi
 def users_all(id_olympiad, id_stage, id_contest, id_user):
     try:

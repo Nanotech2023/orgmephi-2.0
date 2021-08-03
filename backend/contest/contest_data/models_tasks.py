@@ -155,13 +155,12 @@ class Contest(db.Model):
     Class describing a Contest model.
 
     contest_id: id of contest
-    description: description of the contest
-    rules: rules of the contest
+
     winning_condition: minimum passing scores
     laureate_condition: minimum passing scores
     visibility: visibility of the contest
     composite_type: composite type
-    olympiad_type: olympiad type
+
     subject: subject
     """
 
