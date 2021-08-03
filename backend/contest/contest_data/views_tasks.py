@@ -14,6 +14,14 @@ db = get_current_db()
 module = get_current_module()
 app = get_current_app()
 
+#TODO
+# - move user to another stage
+# - get real certificate for user
+# - open contest for user
+# - check everything linked with api
+# - check everything linked with model
+# - close other TODO
+
 
 def catch_request_error(function):
     @wraps(function)
