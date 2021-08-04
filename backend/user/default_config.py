@@ -22,3 +22,4 @@ class DefaultConfiguration:
     # Values: 'Strict', 'Lax', 'None' ('None' is a string, not a NoneType)
     # Warning: in most browsers 'None' only works over https
     ORGMEPHI_JWT_SAMESITE = 'Strict'
+    ORGMEPHI_CORS_ENABLED = True

@@ -205,7 +205,11 @@ class OrgMephiApp:
         self._jwt = JWTManager(self._app)
     
     def _init_cors(self):
-        self._cors = CORS(self._app)
+        if self._app.config['ORGMEPHI_CORS_ENABLED']:
+            self._app.config['CORS_SUPPORTS_CREDENTIALS'] = True
+            self._cors = CORS(self._app)
+        else:
+            self._cors = None
 
     def _init_security(self, security: bool):
         if not security:
