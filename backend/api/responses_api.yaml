@@ -3,6 +3,9 @@ info:
   title: Student responses service API
   description: API description in Markdown.
   version: 1.0.0
+servers:
+  - url: http://127.0.0.1:5000
+  - url: http://127.0.0.1:5000/contest
 
 paths:
   /olympiad/{olympiad_id}/stage/{stage_id}/contest/{contest_id}/user/{user_id}/response:

@@ -1,8 +1,10 @@
 """File with models description for response management."""
 
-from contest_data.app import db
 from datetime import datetime
 import enum
+from common import get_current_db
+
+db = get_current_db()
 
 
 class Response(db.Model):
@@ -19,8 +21,8 @@ class Response(db.Model):
     work_id = db.Column(db.Integer, autoincrement=True, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user_in_contest.user_id'))
     contest_id = db.Column(db.Integer, db.ForeignKey('user_in_contest.contest_id'))
-    statuses = db.relationship('responsestatus', backref='response', lazy=True)
-    answers = db.relationship('responseanswer', backref='response', lazy=True)
+    statuses = db.relationship('ResponseStatus', backref='response', lazy=True)
+    answers = db.relationship('ResponseAnswer', backref='response', lazy=True)
 
 
 class ResponseStatusEnum(enum.Enum):

@@ -3,6 +3,9 @@ info:
   title: Tasks service API
   description: API description in Markdown.
   version: 1.0.0
+servers:
+  - url: http://127.0.0.1:5000
+  - url: http://127.0.0.1:5000/contest
 
 paths:
   /olympiad/create:
@@ -1412,7 +1415,7 @@ components:
         - laureate_condition
         - certificate_template
         - visibility
-        - start_date
+        - start_time
         - end_time
         - composite_type
         - olympiad_type
@@ -1468,7 +1471,7 @@ components:
         - laureate_condition
         - certificate_template
         - visibility
-        - start_date
+        - start_time
         - end_time
         - composite_type
         - olympiad_type

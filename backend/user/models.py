@@ -1,10 +1,11 @@
 """Database models of user management service."""
 
-from common import get_current_db
+from common import get_current_db, get_current_app
 from datetime import datetime
 import enum
 
 db = get_current_db()
+app = get_current_app()
 
 
 class UserRoleEnum(enum.Enum):
@@ -236,6 +237,7 @@ class University(db.Model):
     name = db.Column(db.String, nullable=False, unique=True)
 
 
+@app.db_prepare_action()
 def populate_university():
     """
     pre-populate known university table with predefined values
@@ -258,6 +260,7 @@ class Country(db.Model):
     name = db.Column(db.String, nullable=False, unique=True)
 
 
+@app.db_prepare_action()
 def populate_country():
     """
      pre-populate known country table with predefined values
