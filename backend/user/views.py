@@ -305,6 +305,10 @@ def get_user_info_admin(user_id):
 def set_user_info_admin(user_id):
     values = request.openapi.body
     user = get_or_raise(User, "id", user_id)
+    if 'email' in values:
+        info = get_one_or_null(UserInfo, 'email', values['email'])
+        if info is not None and info.user_id != user_id:
+            raise AlreadyExists('user.email', values['email'])
     if user.user_info is None:
         missing = get_missing(values, ['email', 'first_name', 'second_name', 'middle_name', 'date_of_birth'])
         if len(missing) > 0:
