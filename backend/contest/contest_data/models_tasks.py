@@ -521,7 +521,6 @@ class UserInContest(db.Model):
         return \
             {
                 'user_id': self.user_id,
-                'contest_id': self.contest_id,
                 'user_status': self.user_status,
                 'variant_id': self.variant_id
             }
