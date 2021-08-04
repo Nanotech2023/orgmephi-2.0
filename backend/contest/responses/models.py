@@ -3,6 +3,7 @@
 from datetime import datetime
 import enum
 from common import get_current_db
+from contest.tasks.models import UserInContest
 
 db = get_current_db()
 
@@ -19,8 +20,8 @@ class Response(db.Model):
     __tablename__ = 'response'
 
     work_id = db.Column(db.Integer, autoincrement=True, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('user_in_contest.user_id'))
-    contest_id = db.Column(db.Integer, db.ForeignKey('user_in_contest.contest_id'))
+    user_id = db.Column(db.Integer, db.ForeignKey(UserInContest.__tablename__ + '.user_id'))
+    contest_id = db.Column(db.Integer, db.ForeignKey(UserInContest.__tablename__ + '.contest_id'))
     statuses = db.relationship('ResponseStatus', backref='response', lazy=True)
     answers = db.relationship('ResponseAnswer', backref='response', lazy=True)
 
@@ -271,7 +272,7 @@ def add_response_appeal(db_session, status_id, message):
     )
     db_session.add(appeal)
     db_session.flush()
-    return response_answer
+    return appeal
 
 
 if __name__ == '__main__':
