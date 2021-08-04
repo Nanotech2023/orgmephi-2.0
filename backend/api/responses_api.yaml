@@ -982,7 +982,7 @@ components:
       title: "Result sheet for one contest"
       required:
         - contest_id
-        - userrow
+        - user_row
       properties:
         contest_id:
           type: integer
