@@ -8,6 +8,12 @@ servers:
   - url: http://127.0.0.1:5000/contest/tasks
 
 paths:
+  ######################################################################################################################
+  ##                                             Path definition                                                      ##
+  ######################################################################################################################
+
+  # Base olympiad
+
   /base_olympiad/create:
     post:
       summary: Create a new base olympiad (main contest)
@@ -131,6 +137,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/errorResponse'
+
+  # Olympiad
 
   /base_olympiad/{id_base_olympiad}/olympiad/create:
     post:
@@ -288,6 +296,8 @@ paths:
               schema:
                 $ref: '#/components/schemas/errorResponse'
 
+  # Stage
+
   /base_olympiad/{id_base_olympiad}/olympiad/{id_olympiad}/stage/create:
     post:
       summary: Create a new stage in olympiad
@@ -362,52 +372,6 @@ paths:
               schema:
                 $ref: '#/components/schemas/errorResponse'
 
-
-  /base_olympiad/{id_base_olympiad}/olympiad/{id_olympiad}/stage/{id_stage}/contest/create:
-    post:
-      summary: Create a new contest
-      parameters:
-        - in: path
-          description: Id of the base olympiad
-          name: id_base_olympiad
-          required: true
-          schema:
-            type: integer
-        - in: path
-          description: Id of the stage
-          name: id_stage
-          required: true
-          schema:
-            type: integer
-        - in: path
-          description: Id of the olympiad
-          name: id_olympiad
-          required: true
-          schema:
-            type: integer
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/createContest'
-      security:
-        - cookieJWTAuth: [ ]
-        - CSRFToken: [ ]
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/commonContestId'
-
-        '400':
-          description: Bad request
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errorResponse'
 
   /base_olympiad/{id_base_olympiad}/olympiad/{id_olympiad}/stage/{id_stage}/remove:
     post:
@@ -516,6 +480,55 @@ paths:
           description: OK
         '404':
           description: Stage not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+
+
+  # Contest
+
+  /base_olympiad/{id_base_olympiad}/olympiad/{id_olympiad}/stage/{id_stage}/contest/create:
+    post:
+      summary: Create a new contest
+      parameters:
+        - in: path
+          description: Id of the base olympiad
+          name: id_base_olympiad
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the stage
+          name: id_stage
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the olympiad
+          name: id_olympiad
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/createContest'
+      security:
+        - cookieJWTAuth: [ ]
+        - CSRFToken: [ ]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/commonContestId'
+
+        '400':
+          description: Bad request
           content:
             application/json:
               schema:
@@ -691,6 +704,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/errorResponse'
+
+  # Users
 
   /base_olympiad/{id_base_olympiad}/olympiad/{id_olympiad}/stage/{id_stage}/contest/{id_contest}/adduser:
     post:
@@ -941,6 +956,8 @@ paths:
               schema:
                 $ref: '#/components/schemas/errorResponse'
 
+  # Variant
+
   /base_olympiad/{id_base_olympiad}/olympiad/{id_olympiad}/stage/{id_stage}/contest/{id_contest}/variant/create:
     post:
       summary: Create a new variant
@@ -1185,6 +1202,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/errorResponse'
+
+  # Tasks
 
   /base_olympiad/{id_base_olympiad}/olympiad/{id_olympiad}/stage/{id_stage}/contest/{id_contest}/variant/{id_variant}/task/create:
     post:
@@ -1527,6 +1546,9 @@ paths:
               schema:
                 $ref: '#/components/schemas/errorResponse'
 
+  ######################################################################################################################
+  ##                                             Path schemas                                                         ##
+  ######################################################################################################################
 
 components:
   securitySchemes:
