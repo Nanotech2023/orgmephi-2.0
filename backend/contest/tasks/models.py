@@ -1,10 +1,13 @@
 """File with models description for contests and tasks management."""
 
-from contest_data.app import db
 from datetime import datetime
 import enum
+from common import get_current_db, get_current_app
 
 # Constants
+
+db = get_current_db()
+app = get_current_app()
 
 DEFAULT_VISIBILITY = True
 
@@ -16,10 +19,12 @@ def get_one_or_null(entity, field, value):
 def get_all(entity):
     return entity.query.all()
 
+
 class UserStatusEnum(enum.Enum):
     Participant = "Participant",
     Laureate = "Laureate",
     Winner = "Winner",
+
 
 class CompositeTypeEnum(enum.Enum):
     Composite = "Composite",
@@ -61,7 +66,8 @@ class TargetClassEnum(enum.Enum):
 olympiad_target_class_dict = {target.value: target for target in TargetClassEnum}
 
 
-def add_base_contest(db_session, name, laureate_condition, winning_condition, description, rules, olympiad_type, subject, certificate_template):
+def add_base_contest(db_session, name, laureate_condition, winning_condition, description, rules, olympiad_type,
+                     subject, certificate_template):
     baseContest = BaseContest(
         description=description,
         name=name,
@@ -101,6 +107,7 @@ class BaseContest(db.Model):
 
     name = db.Column(db.Text, nullable=False)
     rules = db.Column(db.Text, nullable=False)
+    description = db.Column(db.Text, nullable=False)
     olympiad_type = db.Column(db.Enum(OlympiadTypeEnum), nullable=False)
     subject = db.Column(db.Enum(OlympiadSubjectEnum), nullable=False)
     certificate_template = db.Column(db.Text, nullable=True)
@@ -108,9 +115,9 @@ class BaseContest(db.Model):
     winning_condition = db.Column(db.Float, nullable=False)
     laureate_condition = db.Column(db.Float, nullable=False)
 
-    target_classes = db.relationship('target_classes', lazy='select',
+    target_classes = db.relationship('TargetClass', lazy='select',
                                      backref=db.backref('base_contest', lazy='joined'))
-    child_contests = db.relationship('contest', lazy='select',
+    child_contests = db.relationship('Contest', lazy='select',
                                      backref=db.backref('base_contest', lazy='joined'))
 
     def serialize(self):
@@ -135,8 +142,7 @@ class BaseContest(db.Model):
                olympiad_type=None,
                subject=None,
                winning_condition=None,
-               laureate_condition=None,
-               target_classes=None):
+               laureate_condition=None):
         if name is not None:
             self.name = name
         if description is not None:
@@ -162,8 +168,8 @@ def update_target_class(db_session, base_contest_id, target_classes):
 
     for target_class_ in target_classes:
         target_class = TargetClass(
-            contest_id=contest_id,
-            target_class=target_class_
+            contest_id=base_contest_id,
+            target_class=olympiad_target_class_dict[target_class_]
         )
         db_session.add(target_class)
         db_session.flush()
@@ -174,9 +180,9 @@ class TargetClass(db.Model):
     Table describing a Target class of olympiad.
     """
 
-    __tablename__ = 'target_classes'
+    __tablename__ = 'target_class'
 
-    contest_id = db.Column(db.Integer, db.ForeignKey('contest.contest_id'), primary_key=True)
+    contest_id = db.Column(db.Integer, db.ForeignKey('base_contest.base_contest_id'), primary_key=True)
     target_class = db.Column(db.Enum(TargetClassEnum), primary_key=True)
 
     def serialize(self):
@@ -212,11 +218,11 @@ class Contest(db.Model):
 
     __tablename__ = 'contest'
 
-    base_contest_id = db.Column(db.Integer, db.ForeignKey('base_contest.contest_id'), primary_key=True)
+    base_contest_id = db.Column(db.Integer, db.ForeignKey('base_contest.base_contest_id'))
     contest_id = db.Column(db.Integer, autoincrement=True, primary_key=True)
     visibility = db.Column(db.Boolean, default=DEFAULT_VISIBILITY, nullable=False)
 
-    users = db.relationship('user_in_contest', lazy='select',
+    users = db.relationship('UserInContest', lazy='select',
                             backref=db.backref('contest', lazy='joined'))
 
     composite_type = db.Column(db.Enum(CompositeTypeEnum), nullable=False)
@@ -259,7 +265,7 @@ class SimpleContest(Contest):
     previous_contest_id = db.Column(db.Integer, db.ForeignKey('simple_contest.contest_id'), nullable=True)
     previous_participation_condition = db.Column(db.Enum(UserStatusEnum))
 
-    variants = db.relationship('variant', lazy='select',
+    variants = db.relationship('Variant', lazy='select',
                                backref=db.backref('simple_contest', lazy='joined'))
 
     __mapper_args__ = {
@@ -276,8 +282,8 @@ class SimpleContest(Contest):
                 'end_date': self.end_date.isoformat(),
             }
 
-    def update(self, start_date=None, end_date=None, variants=None, previous_contest_id=None,
-               previous_participation_condition=None,visibility=None, users=None, composite_type=None):
+    def update(self, start_date=None, end_date=None, previous_contest_id=None,
+               previous_participation_condition=None, visibility=None, composite_type=None):
         if start_date is not None:
             self.start_date = start_date
         if end_date is not None:
@@ -292,13 +298,9 @@ class SimpleContest(Contest):
             self.composite_type = composite_type
 
 
-def add_composite_contest(db_session, base_contest_id, certificate_template,
-                          visibility):
+def add_composite_contest(db_session, base_contest_id, visibility):
     compositeContest = CompositeContest(
         base_contest_id=base_contest_id,
-        winning_condition=winning_condition,
-        laureate_condition=laureate_condition,
-        certificate_template=certificate_template,
         visibility=visibility,
     )
     db_session.add(compositeContest)
@@ -311,7 +313,7 @@ class CompositeContest(Contest):
 
     contest_id = db.Column(db.Integer, db.ForeignKey('contest.contest_id'), primary_key=True)
 
-    stages = db.relationship('stage', lazy='select',
+    stages = db.relationship('Stage', lazy='select',
                              backref=db.backref('composite_contest', lazy='joined'))
 
     def serialize(self):
@@ -324,7 +326,7 @@ class CompositeContest(Contest):
                 'composite_type': self.composite_type
             }
 
-    def update(self, winning_condition=None, laureate_condition=None, visibility=None, users=None, composite_type=None):
+    def update(self, visibility=None, composite_type=None):
         if visibility is not None:
             self.visibility = visibility
         if composite_type is not None:
@@ -333,8 +335,6 @@ class CompositeContest(Contest):
     __mapper_args__ = {
         'polymorphic_identity': 'composite_contest',
     }
-
-
 
 
 """
@@ -354,14 +354,11 @@ contestsInStage = db.Table('contests_in_stage',
 
 
 def add_contest_in_stage(db_session, stage_id, contest_id, location):
-    contestsInStageObject = contestsInStage(
-        stage_id=stage_id,
-        contest_id=contest_id,
-        location=location,
-    )
-    db_session.add(contestsInStageObject)
+    contestsInStage.insert().values(stage_id=stage_id,
+                                    contest_id=contest_id,
+                                    location=location)
+    db_session.add()
     db_session.flush()
-    return contestsInStageObject
 
 
 class Stage(db.Model):
@@ -381,7 +378,7 @@ class Stage(db.Model):
     stage_name = db.Column(db.Text, index=True, nullable=False)
     next_stage_condition = db.Column(db.Text, nullable=False)
 
-    contests = db.relationship('contest', secondary=contestsInStage, lazy='subquery',
+    contests = db.relationship('Contest', secondary=contestsInStage, lazy='subquery',
                                backref=db.backref('stage', lazy=True))
 
     def serialize(self):
@@ -394,7 +391,7 @@ class Stage(db.Model):
                 'contests': self.contests
             }
 
-    def update(self, stage_name=None, next_stage_condition=None, contests=None):
+    def update(self, stage_name=None, next_stage_condition=None):
         if stage_name is not None:
             self.stage_name = stage_name
         if next_stage_condition is not None:
@@ -425,14 +422,11 @@ taskInVariant = db.Table('task_in_variant',
                          )
 
 
-def add_task_in_Variant(db_session, variant_id, task_id):
-    taskInVariantObject = taskInVariant(
+def add_task_in_Variant(variant_id, task_id):
+    taskInVariant.insert().values(
         variant_id=variant_id,
         task_id=task_id,
     )
-    db_session.add(taskInVariantObject)
-    db_session.flush()
-    return taskInVariantObject
 
 
 def add_variant(db_session, contest_id, variant_number, variant_description):
@@ -463,10 +457,10 @@ class Variant(db.Model):
     variant_number = db.Column(db.Integer)
     variant_description = db.Column(db.Text)
 
-    users = db.relationship('user_in_contest', lazy='select',
+    users = db.relationship('UserInContest', lazy='select',
                             backref=db.backref('variant', lazy='joined'))
 
-    tasks = db.relationship('base_task', secondary=taskInVariant, lazy='subquery',
+    tasks = db.relationship('Task', secondary=taskInVariant, lazy='subquery',
                             backref=db.backref('variant', lazy=True))
 
     def serialize(self):
@@ -553,19 +547,19 @@ class Task(db.Model):
     task_id = db.Column(db.Integer, autoincrement=True, primary_key=True)
     num_of_task = db.Column(db.Integer, nullable=False)
     image_of_task = db.Column(db.LargeBinary, nullable=True)
-    type = db.Column(db.Enum(TaskType))
+    task_type = db.Column(db.Enum(TaskType))
 
     __mapper_args__ = {
         'polymorphic_identity': 'base_task',
-        'polymorphic_on': type
+        'polymorphic_on': task_type
     }
 
 
-def add_plain_task(db_session, nnum_of_task, image_of_task, type, recommended_answer):
+def add_plain_task(db_session, num_of_task, image_of_task, task_type, recommended_answer):
     task = PlainTask(
         num_of_task=num_of_task,
         image_of_task=image_of_task,
-        type=type,
+        task_type=task_type,
         recommended_answer=recommended_answer,
     )
     db_session.add(task)
@@ -596,7 +590,7 @@ class PlainTask(Task):
                 'task_id': self.task_id,
                 'num_of_task': self.num_of_task,
                 'image_of_task': self.image_of_task,
-                'type': self.type,
+                'task_type': self.type,
                 'recommended_answer': self.recommended_answer,
                 'plain_tasks': self.plain_tasks,
                 'multiple_tasks': self.multiple_tasks,
@@ -612,11 +606,11 @@ class PlainTask(Task):
             self.recommended_answer = recommended_answer
 
 
-def add_range_task(db_session, num_of_task, image_of_task, type, start_value, end_value):
+def add_range_task(db_session, num_of_task, image_of_task, task_type, start_value, end_value):
     task = RangeTask(
         num_of_task=num_of_task,
         image_of_task=image_of_task,
-        type=type,
+        task_type=task_type,
         start_value=start_value,
         end_value=end_value,
     )
@@ -650,7 +644,7 @@ class RangeTask(Task):
                 'task_id': self.task_id,
                 'num_of_task': self.num_of_task,
                 'image_of_task': self.image_of_task,
-                'type': self.type,
+                'task_type': self.type,
                 'plain_tasks': self.plain_tasks,
                 'multiple_tasks': self.multiple_tasks,
                 'recommended_answer': self.recommended_answer,
@@ -670,11 +664,11 @@ class RangeTask(Task):
             self.end_value = end_value
 
 
-def add_multiple_task(db_session, num_of_task, image_of_task, type):
+def add_multiple_task(db_session, num_of_task, image_of_task, task_type):
     task = MultipleChoiceTask(
         num_of_task=num_of_task,
         image_of_task=image_of_task,
-        type=type
+        task_type=task_type
     )
     db_session.add(task)
     db_session.flush()
@@ -691,7 +685,7 @@ class MultipleChoiceTask(Task):
     __tablename__ = 'multiple_task'
 
     task_id = db.Column(db.Integer, db.ForeignKey('base_task.task_id'), primary_key=True)
-    all_answers_in_multiple_task = db.relationship('answers_in_multiple_task', lazy='select',
+    all_answers_in_multiple_task = db.relationship('AnswersInMultipleChoiceTask', lazy='select',
                                                    backref=db.backref('multiple_task', lazy='joined'))
 
     __mapper_args__ = {
@@ -704,7 +698,7 @@ class MultipleChoiceTask(Task):
                 'task_id': self.task_id,
                 'num_of_task': self.num_of_task,
                 'image_of_task': self.image_of_task,
-                'type': self.type,
+                'task_type': self.type,
                 'plain_tasks': self.plain_tasks,
                 'multiple_tasks': self.multiple_tasks,
                 'all_answers_in_multiple_task': self.all_answers_in_multiple_task,
@@ -763,16 +757,17 @@ class AnswersInMultipleChoiceTask(db.Model):
         if correct is not None:
             self.correct = correct
 
+
 def updateMultipleChoiceTask(db_session, task_id, answers):
     answers_ = AnswersInMultipleChoiceTask.query.filter_by(AnswersInMultipleChoiceTask.task_id == task_id).all()
-    for tc in target_classes_:
-        db.session.delete(answers_)
+    for answer in answers_:
+        db.session.delete(answer)
 
-    for answers_ in answers_:
-        answers = AnswersInMultipleChoiceTask(
-            task_id=contest_id,
-            answer=answers_['answer'],
-            correct=answers_['correct']
+    for answer_ in answers:
+        answer = AnswersInMultipleChoiceTask(
+            task_id=task_id,
+            answer=answer_['answer'],
+            correct=answer_['correct']
         )
-        db_session.add(answers)
+        db_session.add(answer)
         db_session.flush()
