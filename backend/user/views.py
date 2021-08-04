@@ -46,11 +46,12 @@ def get_missing(values, search):
 
 
 def grade_to_year(grade):
+    from datetime import date
     now = datetime.utcnow().date()
-    last_admission = datetime(now.year, 9, 1)
-    if now > last_admission:
-        last_admission = datetime(now.year - 1, 9, 1)
-    admission_date = datetime(last_admission.year - grade + 1, 9, 1)
+    last_admission = date(now.year, 9, 1)
+    if now < last_admission:
+        last_admission = date(now.year - 1, 9, 1)
+    admission_date = date(last_admission.year - grade + 1, 9, 1)
     return admission_date
 
 
@@ -84,7 +85,6 @@ def generate_refresh_token(user_id, remember_me):
 
 # Registration
 
-@module.route('/register', methods=['POST'])
 def register():
     values = request.openapi.body
     username = values['auth_info']['email']
@@ -111,6 +111,16 @@ def register():
         db.session.rollback()
         raise
     return make_response(user.serialize(), 200)
+
+
+@module.route('/register/school', methods=['POST'])
+def register_school():
+    return register()
+
+
+@module.route('/register/university', methods=['POST'])
+def register_university():
+    return register()
 
 
 @module.route('/register/internal', methods=['POST'])
