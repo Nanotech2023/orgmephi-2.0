@@ -5,7 +5,7 @@ info:
   version: 1.0.0
 servers:
   - url: http://127.0.0.1:5000
-  - url: http://127.0.0.1:5000/contest
+  - url: http://127.0.0.1:5000/contest/responses
 
 paths:
   /olympiad/{olympiad_id}/stage/{stage_id}/contest/{contest_id}/user/{user_id}/response:
@@ -972,33 +972,21 @@ components:
       title: "Line in sheet"
       required:
         - user_id
-        - first_name
-        - second_name
-        - middle_name
         - mark
       properties:
         user_id:
           type: integer
-        first_name:
-          type: string
-        second_name:
-          type: string
-        middle_name:
-          type: string
         mark:
           type: integer
     contestResultSheet:
       title: "Result sheet for one contest"
       required:
         - contest_id
-        - contest_name
         - userrow
       properties:
         contest_id:
           type: integer
-        contest_name:
-          type: string
-        userrow:
+        user_row:
           type: array
           items:
             $ref: '#/components/schemas/contestResultLine'

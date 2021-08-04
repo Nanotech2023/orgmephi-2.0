@@ -4,6 +4,7 @@ from datetime import datetime
 import enum
 from contest.tasks.models import UserInContest
 from common import get_current_db
+from contest.tasks.models import UserInContest
 
 db = get_current_db()
 
@@ -272,7 +273,7 @@ def add_response_appeal(db_session, status_id, message):
     )
     db_session.add(appeal)
     db_session.flush()
-    return response_answer
+    return appeal
 
 
 if __name__ == '__main__':
