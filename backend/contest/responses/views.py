@@ -50,6 +50,7 @@ def check_olympiad_and_stage(olympiad_id, stage_id, contest_id):
 
 @module.route('/olympiad/<int:olympiad_id>/stage/<int:stage_id>/contest/<int:contest_id>/user/<int:user_id>/response:',
               methods=['GET'])
+@jwt_required_role(['Admin', 'System', 'Creator', 'Participant'])
 def get_user_all_answers(olympiad_id, stage_id, contest_id, user_id):
     check_olympiad_and_stage(olympiad_id, stage_id, contest_id)
     user_work = get_user_in_contest_work(user_id, contest_id)
@@ -70,6 +71,7 @@ def get_user_all_answers(olympiad_id, stage_id, contest_id, user_id):
 
 @module.route('/olympiad/<int:olympiad_id>/stage/<int:stage_id>/contest/<int:contest_id>/answer/<int:answer_id>',
               methods=['GET'])
+@jwt_required_role(['Admin', 'System', 'Creator', 'Participant'])
 def get_user_answer_by_id(olympiad_id, stage_id, contest_id, answer_id):
     check_olympiad_and_stage(olympiad_id, stage_id, contest_id)
     user_answer = db_get_or_raise(ResponseAnswer, 'answer_id', answer_id)
@@ -82,7 +84,7 @@ def get_user_answer_by_id(olympiad_id, stage_id, contest_id, answer_id):
 
 @module.route('/olympiad/<int:olympiad_id>/stage/<int:stage_id>/contest/<int:contest_id>/task/<int:task_id>/user/self:',
               methods=['GET', 'POST'])
-@jwt_required()
+@jwt_required_role(['Participant'])
 def user_answer_for_task(olympiad_id, stage_id, contest_id, task_id):
     check_olympiad_and_stage(olympiad_id, stage_id, contest_id)
     self_user_id = jwt_get_id()
@@ -107,7 +109,7 @@ def user_answer_for_task(olympiad_id, stage_id, contest_id, task_id):
         filetype = values['filetype']
         try:
             user_work = get_user_in_contest_work(self_user_id, contest_id)
-        except NotFound as err:
+        except NotFound:
             user_work = add_user_response(db.session, self_user_id, contest_id)
             response_status = add_response_status(db.session, user_work.work_id)
         user_answer = user_work.answers.filter(task_num=task_id).one_or_none()
@@ -122,6 +124,7 @@ def user_answer_for_task(olympiad_id, stage_id, contest_id, task_id):
 @module.route('/olympiad/<int:olympiad_id>/stage/<int:stage_id>/contest/<int:contest_id>/task/<int:task_id>/'
               'user/<int:user_id>:',
               methods=['GET', 'POST'])
+@jwt_required_role(['Participant'])
 def user_answer_for_task_by_id(olympiad_id, stage_id, contest_id, task_id, user_id):
     check_olympiad_and_stage(olympiad_id, stage_id, contest_id)
     if request.method == 'GET':
@@ -145,7 +148,7 @@ def user_answer_for_task_by_id(olympiad_id, stage_id, contest_id, task_id, user_
         filetype = values['filetype']
         try:
             user_work = get_user_in_contest_work(user_id, contest_id)
-        except NotFound as err:
+        except NotFound:
             user_work = add_user_response(db.session, user_id, contest_id)
             response_status = add_response_status(db.session, user_work.work_id)
         user_answer = user_work.answers.filter(task_num=task_id).one_or_none()
@@ -185,6 +188,7 @@ def user_status_and_mark_for_response(olympiad_id, stage_id, contest_id):
 
 @module.route('/olympiad/<int:olympiad_id>/stage/<int:stage_id>/contest/<int:contest_id>/user/<int:user_id>/status',
               methods=['GET', 'POST'])
+@jwt_required()
 def user_status_and_mark_for_response_by_id(olympiad_id, stage_id, contest_id, user_id):
     check_olympiad_and_stage(olympiad_id, stage_id, contest_id)
     if request.method == 'GET':
@@ -209,7 +213,7 @@ def user_status_and_mark_for_response_by_id(olympiad_id, stage_id, contest_id, u
 
 @module.route('/olympiad/<int:olympiad_id>/stage/<int:stage_id>/contest/<int:contest_id>/user/self/status/history',
               methods=['GET'])
-@jwt_required()
+@jwt_required_role(['Admin', 'System', 'Creator', 'Participant'])
 def user_status_history_for_response(olympiad_id, stage_id, contest_id):
     check_olympiad_and_stage(olympiad_id, stage_id, contest_id)
     self_user_id = jwt_get_id()
@@ -227,6 +231,7 @@ def user_status_history_for_response(olympiad_id, stage_id, contest_id):
 @module.route('/olympiad/<int:olympiad_id>/stage/<int:stage_id>/contest/<int:contest_id>/'
               'user/<int:user_id>/status/history',
               methods=['GET'])
+@jwt_required_role(['Admin', 'System', 'Creator', 'Participant'])
 def user_status_history_for_response_by_id(olympiad_id, stage_id, contest_id, user_id):
     check_olympiad_and_stage(olympiad_id, stage_id, contest_id)
     user_work = get_user_in_contest_work(user_id, contest_id)
@@ -293,6 +298,7 @@ def user_response_appeal_info(olympiad_id, stage_id, contest_id):
 @module.route(
     '/olympiad/<int:olympiad_id>/stage/<int:stage_id>/contest/<int:contest_id>/user/<int:user_id>/appeal/last',
     methods=['GET', 'POST'])
+@jwt_required()
 def user_response_appeal_info_by_id(olympiad_id, stage_id, contest_id, user_id):
     check_olympiad_and_stage(olympiad_id, stage_id, contest_id)
     if request.method == 'GET':
@@ -353,6 +359,7 @@ def reply_to_user_appeal(olympiad_id, stage_id, contest_id, appeal_id):
 
 @module.route('/olympiad/<int:olympiad_id>/stage/<int:stage_id>/contest/<int:contest_id>/appeal/<int:appeal_id>',
               methods=['GET'])
+@jwt_required()
 def get_appeal_info_by_id(olympiad_id, stage_id, contest_id, appeal_id):
     check_olympiad_and_stage(olympiad_id, stage_id, contest_id)
     appeal = Appeal.query.filter(appeal_id=appeal_id).one_or_none()

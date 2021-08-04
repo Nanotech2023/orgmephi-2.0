@@ -20,8 +20,8 @@ class Response(db.Model):
     __tablename__ = 'response'
 
     work_id = db.Column(db.Integer, autoincrement=True, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey(UserInContest.__tablename__ + '.user_id'))
-    contest_id = db.Column(db.Integer, db.ForeignKey(UserInContest.__tablename__ + '.contest_id'))
+    user_id = db.Column(db.Integer, db.ForeignKey(f'{UserInContest.__tablename__}.user_id'))
+    contest_id = db.Column(db.Integer, db.ForeignKey(f'{UserInContest.__tablename__}.user_id'))
     statuses = db.relationship('ResponseStatus', backref='response', lazy=True)
     answers = db.relationship('ResponseAnswer', backref='response', lazy=True)
 
