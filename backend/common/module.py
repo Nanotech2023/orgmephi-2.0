@@ -57,22 +57,21 @@ class OrgMephiModule:
         """
         return self._swagger
 
-    @property
-    def full_name(self) -> str:
+    def get_full_name(self, top=None) -> str:
         """
         Full name of self, i.e. name that includes all parent names in format <parent.full_name>_<self.name>
         :return: Full name of self
         """
-        return '_'.join(self._get_parents())
+        return '_'.join(self._get_parents(top))
 
-    @property
-    def prefix(self) -> str:
+    def get_prefix(self, top=None) -> str:
         """
         URL prefix of self, equal to <this module prefix>/<child module name> except for top-level module, that has no
             prefix
         :return: URL prefix of self
         """
-        return '' if self._parent is None else '%s/%s' % (self._parent.prefix, self._name)
+        prefix = '/'.join(self._get_parents(top)[1:])
+        return '' if prefix == '' else '/' + prefix
 
     def route(self, rule: str, **options: Any) -> Callable:
         """
@@ -121,7 +120,7 @@ class OrgMephiModule:
         self._modules.append(module)
         module._parent = self
 
-    def prepare(self, api_path: str, development: bool):
+    def prepare(self, api_path: str, development: bool, top):
         """
         Prepare this module for execution
 
@@ -131,6 +130,7 @@ class OrgMephiModule:
 
         :param api_path: directory with ap files
         :param development: If True development-only options will be enabled (e.g. swagger ui wil be generated)
+        :param top: Top-level module
         """
         from . import _orgmephi_current_module
 
@@ -143,13 +143,13 @@ class OrgMephiModule:
         _orgmephi_current_module.set(self)
 
         try:
-            self._init_api(api_path, development)
+            self._init_api(api_path, development, top)
             try:
                 importlib.import_module('.views', self._package)
             except ModuleNotFoundError:
                 pass
             for module in self._modules:
-                module.prepare(api_path, development)
+                module.prepare(api_path, development, top)
                 self._blueprint.register_blueprint(module.blueprint)
         finally:
             _orgmephi_current_module.set(last_module)
@@ -169,13 +169,13 @@ class OrgMephiModule:
         else:
             return list(itertools.chain([self._swagger], *[mod.get_swagger_blueprints() for mod in self._modules]))
 
-    def _init_api(self, api_path: Optional[str], development: bool):
+    def _init_api(self, api_path: Optional[str], development: bool, top):
         if api_path is None or self._api_file is None:
             return
         api_doc_path = '%s/%s' % (api_path, self._api_file)
         self._init_openapi(api_doc_path)
         if development:
-            self._init_swagger(api_doc_path)
+            self._init_swagger(api_doc_path, top)
         else:
             self._swagger = None
 
@@ -187,10 +187,10 @@ class OrgMephiModule:
         spec = create_spec(spec_dict)
         self._openapi = FlaskOpenAPIViewDecorator.from_spec(spec)
 
-    def _init_swagger(self, api_doc_path: str):
+    def _init_swagger(self, api_doc_path: str, top):
         from flask_swagger_ui import get_swaggerui_blueprint
-        full_name = self.full_name
-        full_path = self.prefix
+        full_name = self.get_full_name(top)
+        full_path = self.get_prefix(top)
         swagger_ui_blueprint = get_swaggerui_blueprint(
             '%s/swagger_ui' % full_path,
             '%s/swagger_ui/api.yaml' % full_path,
@@ -207,7 +207,7 @@ class OrgMephiModule:
 
         self._swagger = swagger_ui_blueprint
 
-    def _get_parents(self):
-        if self._parent is None:
+    def _get_parents(self, top=None):
+        if self._parent is None or self == top:
             return [self._name]
         return self._parent._get_parents() + [self._name]

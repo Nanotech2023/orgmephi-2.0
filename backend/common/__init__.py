@@ -146,7 +146,7 @@ class OrgMephiApp:
             else:
                 api_path = None
             development = self._app.config['ENV'] == 'development'
-            self._module.prepare(api_path, development)
+            self._module.prepare(api_path, development, self._module)
             self._app.register_blueprint(self._module.blueprint)
             # swagger-ui does not work with nested blueprints
             for bp in self._module.get_swagger_blueprints():
