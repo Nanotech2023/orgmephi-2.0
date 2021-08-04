@@ -19,3 +19,4 @@ class DefaultConfiguration:
     JWT_ACCESS_TOKEN_EXPIRES = timedelta(hours=1)
     JWT_REFRESH_TOKEN_EXPIRES = timedelta(hours=1)
     ORGMEPHI_REMEMBER_ME_TIME = timedelta(days=30)
+    ORGMEPHI_CORS_ENABLED = True
