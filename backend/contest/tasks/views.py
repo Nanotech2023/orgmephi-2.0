@@ -1,3 +1,4 @@
+import flask
 from flask import request, make_response, abort, send_file
 from os import getcwd
 
@@ -6,22 +7,11 @@ from common import get_current_app, get_current_module
 from common.jwt_verify import jwt_required_role
 from common import get_current_db
 from common.util import db_get_all, db_get_or_raise, db_get_one_or_none
+from flask import abort
 
 db = get_current_db()
 module = get_current_module()
 app = get_current_app()
-
-
-# Swagger UI
-
-@module.route('/tasks_api.yaml', methods=['GET'])
-def get_api():
-    if app.config['ENV'] != 'development':
-        abort(404)
-    api_path = app.config['ORGMEPHI_API_PATH']
-    if api_path[0] != '/':
-        api_path = '%s/%s' % (getcwd(), api_path)
-    return send_file(api_path)
 
 
 # Olympiad views
@@ -53,10 +43,10 @@ def base_olympiad_create():
                                        subject=subject)
 
         for target_class in target_classes:
-            target_class = add_target_class(db.session,
-                                            contest_id=baseContest.contest_id,
-                                            target_class_=olympiad_target_class_dict[target_class],
-                                            )
+            baseContest.target_classes.append(TargetClass(
+                contest_id=baseContest.contest_id,
+                target_class_=olympiad_target_class_dict[target_class],
+            ))
 
         db.session.commit()
     except Exception:
@@ -72,10 +62,10 @@ def base_olympiad_remove(id_base_olympiad):
         baseContest = db_get_or_raise(BaseContest, BaseContest.base_contest_id, id_base_olympiad)
         db.session.delete(baseContest)
         db.session.commit()
-        return make_response({}, 200)
     except Exception:
         db.session.rollback()
         raise
+    return make_response({}, 200)
 
 
 @module.route('/base_olympiad/<int:id_base_olympiad>', methods=['GET', 'PATCH'])
@@ -111,7 +101,6 @@ def base_olympiads_all():
         return make_response(
             {"olympiad_list": all_olympiads}, 200)
     except Exception:
-        db.session.rollback()
         raise
 
 
@@ -164,10 +153,10 @@ def olympiad_remove(id_base_olympiad, id_olympiad):
         contest = db_get_or_raise(Contest, Contest.contest_id, id_olympiad)
         db.session.delete(contest)
         db.session.commit()
-        return make_response({}, 200)
     except Exception:
         db.session.rollback()
         raise
+    return make_response({}, 200)
 
 
 @module.route('/base_olympiad/<int:id_base_olympiad>/olympiad/<int:id_olympiad>', methods=['GET', 'PATCH'])
@@ -229,10 +218,10 @@ def stage_remove(id_base_olympiad, id_olympiad, id_stage):
         stage = db_get_or_raise(Stage, Stage.stage_id, id_stage)
         db.session.delete(stage)
         db.session.commit()
-        return make_response({}, 200)
     except Exception:
         db.session.rollback()
         raise
+    return make_response({}, 200)
 
 
 @module.route('/base_olympiad/<int:id_base_olympiad>/olympiad/<int:id_olympiad>/stage/<int:id_stage>',
@@ -277,7 +266,6 @@ def stages_all(id_base_olympiad, id_olympiad):
             }, 200)
 
     except Exception:
-        db.session.rollback()
         raise
 
 
@@ -317,8 +305,7 @@ def contest_create(id_base_olympiad, id_olympiad, id_stage):
                                             base_contest_id,
                                             visibility)
 
-        contestsInStageObject = add_contest_in_stage(db.session,
-                                                     stage_id=id_stage,
+        contestsInStageObject = add_contest_in_stage(stage_id=id_stage,
                                                      contest_id=contest.contest_id,
                                                      location=location,
                                                      )
@@ -341,11 +328,11 @@ def contest_remove(id_base_olympiad, id_olympiad, id_stage, id_contest):
         contest = db_get_or_raise(Contest, Contest.contest_id, id_olympiad)
         db.session.delete(contest)
         db.session.commit()
-        return make_response({}, 200)
 
     except Exception:
         db.session.rollback()
         raise
+    return make_response({}, 200)
 
 
 @module.route(
@@ -380,12 +367,9 @@ def contest_response(id_base_olympiad, id_olympiad, id_stage, id_contest):
               methods=['GET'])
 @jwt_required_role(['Admin', 'System', 'Creator'])
 def contests_all(id_base_olympiad, id_olympiad, id_stage):
-    contest_ids = contestsInStage.query.filter_by(contestsInStage.stage_id == id_stage).all()
+    stage = db_get_or_raise(Stage, Stage.stage_id, id_stage)
 
-    all_contests = []
-    for contest_id in contest_ids:
-        contest = db_get_or_raise(Contest, Contest.contest_id, contest_id)
-        all_contests.append(contest)
+    all_contests = stage.contests
 
     return make_response(
         {"olympiad_list": all_contests}, 200)
@@ -403,14 +387,14 @@ def variant_create(id_base_olympiad, id_olympiad, id_stage, id_contest):
     values = request.openapi.body
 
     contest = db_get_or_raise(Contest, Contest.contest_id, id_contest)
-    contest.variants.all()
+    variants = contest.variants
 
     variant_description = values['variant_description']
 
     try:
         variant = add_variant(db.session,
                               contest_id=id_contest,
-                              variant_number=len(contest) + 1,
+                              variant_number=len(variants) + 1,
                               variant_description=variant_description,
                               )
 
@@ -437,10 +421,10 @@ def variant_remove(id_base_olympiad, id_olympiad, id_stage, id_contest, id_varia
         variant = db_get_or_raise(Variant, Variant.variant_id, id_variant)
         db.session.delete(variant)
         db.session.commit()
-        return make_response({}, 200)
     except Exception:
         db.session.rollback()
         raise
+    return make_response({}, 200)
 
 
 @module.route(
@@ -487,7 +471,6 @@ def variant_all(id_base_olympiad, id_olympiad, id_stage, id_contest):
                 "variants_list": all_variants
             }, 200)
     except Exception:
-        db.session.rollback()
         raise
 
 
@@ -508,7 +491,7 @@ def task_create(id_base_olympiad, id_olympiad, id_stage, id_contest, id_variant)
         image_of_task = values['image_of_task']
 
         if 'recommended_answer' in values:
-            recommended_answer = values['image_of_task']
+            recommended_answer = values['recommended_answer']
 
             task = add_plain_task(db.session,
                                   num_of_task=num_of_task,
@@ -565,28 +548,18 @@ def task_remove(id_base_olympiad, id_olympiad, id_stage, id_contest, id_variant,
     try:
         task = Task.query.filter_by(Task.task_id == id_task).one()
 
-        if task.type == TaskType.plain_task:
-            plainTask = PlainTask.query.filter_by(PlainTask.task_id == id_task).one()
-            db.session.delete(plainTask)
-
-        if task.type == TaskType.range_task:
-            rangeTask = RangeTask.query.filter_by(RangeTask.task_id == id_task).one()
-            db.session.delete(rangeTask)
-
         if task.type == TaskType.multiple_task:
-            multipleTask = MultipleChoiceTask.query.filter_by(MultipleChoiceTask.task_id == id_task).one()
-
-            for answer in multipleTask.all_answers_in_multiple_task.all():
+            for answer in task.all_answers_in_multiple_task:
                 db.session.delete(answer)
 
-            db.session.delete(multipleTask)
+        db.session.delete(task)
 
         db.session.commit()
-        return make_response({}, 200)
 
     except Exception:
         db.session.rollback()
         raise
+    return make_response({}, 200)
 
 
 @module.route(
@@ -648,11 +621,11 @@ def task_get(id_base_olympiad, id_olympiad, id_stage, id_contest, id_variant, id
                 updateMultipleChoiceTask(db.session, id_task, answers)
 
             db.session.commit()
-            return make_response({}, 200)
 
         except Exception:
             db.session.rollback()
             raise
+    return make_response({}, 200)
 
 
 @module.route(
@@ -671,7 +644,6 @@ def task_all(id_base_olympiad, id_olympiad, id_stage, id_contest, id_variant):
             }, 200)
 
     except Exception:
-        db.session.rollback()
         raise
 
 
@@ -691,7 +663,6 @@ def task_image(id_base_olympiad, id_olympiad, id_stage, id_contest, id_variant, 
             }, 200)
 
     except Exception:
-        db.session.rollback()
         raise
 
 
@@ -743,11 +714,11 @@ def remove_user_from_contest(id_base_olympiad, id_olympiad, id_stage, id_contest
             db.session.delete(user)
 
         db.session.commit()
-        return make_response({}, 200)
 
     except Exception:
         db.session.rollback()
         raise
+    return make_response({}, 200)
 
 
 @module.route(
@@ -772,11 +743,11 @@ def move_user(id_base_olympiad, id_olympiad, id_stage, id_contest):
                                        )
 
         db.session.commit()
-        return make_response({}, 200)
 
     except Exception:
         db.session.rollback()
         raise
+    return make_response({}, 200)
 
 
 @module.route(
@@ -788,14 +759,7 @@ def users_all(id_base_olympiad, id_olympiad, id_stage, id_contest):
     try:
         users = db_get_all(UserInContest)
 
-        all_users = []
-
-        for user in users:
-            all_users.append(
-                {
-                    user.serialize()
-                }
-            )
+        all_users = [u.serialize() for u in users]
 
         return make_response(
             {
@@ -803,7 +767,6 @@ def users_all(id_base_olympiad, id_olympiad, id_stage, id_contest):
             }, 200)
 
     except Exception:
-        db.session.rollback()
         raise
 
 
@@ -817,13 +780,14 @@ def users_certificate(id_base_olympiad, id_olympiad, id_stage, id_contest, id_us
         # contest = db_get_or_raise(Contest, Contest.contest_id, id_contest)
         # user = db_get_or_raise(UserInContest, UserInContest.user_id, id_user)
 
-        certificate = None
+        # certificate = None
 
-        return make_response(
+        abort(502)
+
+        """return make_response(
             {
                 "certificate": certificate
-            }, 200)
+            }, 200)"""
 
     except Exception:
-        db.session.rollback()
         raise
