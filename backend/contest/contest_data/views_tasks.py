@@ -16,11 +16,9 @@ app = get_current_app()
 
 #TODO
 # - move user to another stage
-# - get real certificate for user
 # - open contest for user
 # - check everything linked with api
 # - check everything linked with model
-# - close other TODO
 
 
 def catch_request_error(function):
@@ -74,6 +72,7 @@ def base_olympiad_create():
     olympiad_type = values['olympiad_type']
     certificate_template = values['certificate_template']
     subject = values['subject']
+    target_classes = values['target_classes']
 
     try:
         baseContest = add_base_contest(db.session,
@@ -83,6 +82,12 @@ def base_olympiad_create():
                                        rules=rules,
                                        olympiad_type=olympiad_type,
                                        subject=subject)
+
+        for target_class in target_classes:
+            target_class = add_target_class(db.session,
+                                            contest_id=contest.contest_id,
+                                            target_class=olympiad_target_class_dict[target_class],
+                                            )
 
         db.session.commit()
     except Exception:
@@ -117,6 +122,9 @@ def base_olympiad_response(id_base_olympiad):
 
         try:
             base_olympiad.update(**values)
+            target_classes = values["target_classes"]
+            if target_classes is not None:
+                update_target_class(db.session, id_base_olympiad, target_classes)
         except Exception:
             db.session.rollback()
             raise
@@ -325,7 +333,6 @@ def contest_create(id_base_olympiad, id_olympiad, id_stage):
     laureate_condition = values['laureate_condition']
     visibility = values['visibility']
     location = values['location']
-    target_classes = values['target_class']
 
     try:
 
@@ -361,11 +368,7 @@ def contest_create(id_base_olympiad, id_olympiad, id_stage):
                                                      location=location,
                                                      )
 
-        for target_class in target_classes:
-            target_class = add_target_class(db.session,
-                                            contest_id=contest.contest_id,
-                                            target_class=olympiad_target_class_dict[target_class],
-                                            )
+
 
         db.session.commit()
 
@@ -393,9 +396,9 @@ def contest_remove(id_base_olympiad, id_olympiad, id_stage, id_contest):
 
 @module.route(
     '/base_olympiad/<int:id_base_olympiad>/olympiad/<int:id_olympiad>/stage/<int:id_stage>/contest/<int:id_contest>',
-    methods=['GET'])
+    methods=['GET','PATCH'])
 @jwt_required_role(['Admin', 'System', 'Creator'])
-def contest_get(id_base_olympiad, id_olympiad, id_stage, id_contest):
+def contest_response(id_base_olympiad, id_olympiad, id_stage, id_contest):
     contest = get_or_raise(Contest, Contest.contest_id, id_olympiad)
     if request.method == 'GET':
         try:
@@ -409,7 +412,7 @@ def contest_get(id_base_olympiad, id_olympiad, id_stage, id_contest):
         values = request.openapi.body
 
         try:
-            contest.update(**values)  # TODO UPDATE METHOD UPDATES TARGET CLASSES IN MODEL
+            contest.update(**values)
         except Exception:
             db.session.rollback()
             raise
@@ -679,7 +682,8 @@ def task_get(id_base_olympiad, id_olympiad, id_stage, id_contest, id_variant, id
             elif task.type == TaskType.multiple_task:
                 multipleTask = get_or_raise(MultipleTask, MultipleTask.task_id, id_task)
                 multipleTask.update(**values)
-                #TODO IMPLEMENT UPDATE ANSWERS
+                answers = values['answers']
+                updateMultipleChoiceTask(db.session, task_id, answers)
 
             db.session.commit()
             return make_response({}, 200)
@@ -744,8 +748,8 @@ def add_user_to_contest(id_base_olympiad, id_olympiad, id_stage, id_contest):
             user = add_user_in_contest(
                 user_id=user_id,
                 contest_id=id_contest,
-                variant_id=None,  # TODO
-                user_status=None  # TODO
+                variant_id=None,  # TODO HOW TO CHOOSE VARIANT
+                user_status= UserStatusEnum.Participant
 
             )
 
@@ -795,7 +799,6 @@ def users_all(id_base_olympiad, id_olympiad, id_stage, id_contest):
             all_users.append(
                 {
                     user.serialize()
-                    #TODO add correct attribute to api
                 }
             )
 
@@ -815,10 +818,10 @@ def users_all(id_base_olympiad, id_olympiad, id_stage, id_contest):
 @jwt_required_role(['Admin', 'System', 'Creator'])
 def users_all(id_base_olympiad, id_olympiad, id_stage, id_contest, id_user):
     try:
-        users = get_all(UserInContest)
         contest = get_or_raise(Contest, Contest.contest_id, id_contest)
+        user = get_or_raise(UserInContest, UserInContest.user_id, id_user)
 
-        certificate = getCertificateFromTemplate(user, contest.certificate_template) #TODO Function to ...
+        certificate = getCertificateFromTemplate(user, contest.certificate_template) #TODO Function to generate it
 
         return make_response(
             {
