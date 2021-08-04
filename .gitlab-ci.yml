@@ -1,0 +1,65 @@
+stages:
+  - build
+
+
+
+.job_template: &build-frontend
+  image: node:lts-slim
+  stage: build
+  before_script:
+    - 'yarn --cwd frontend install'
+  script:
+    - 'yarn --cwd frontend run build'
+  artifacts:
+    paths:
+      - frontend/dist
+.job_template: &build-openapi
+  image: node:lts-slim
+  stage: build
+  before_script:
+    - npm install -g redoc-cli
+  script:
+    - mkdir public
+    - cp backend/api/user_api.yaml public/user.yaml
+    - redoc-cli bundle -o public/user.html public/user.yaml
+    - cp backend/api/tasks_api.yaml public/tasks.yaml
+    - redoc-cli bundle -o public/tasks.html public/tasks.yaml
+    - cp backend/api/responses_api.yaml public/students.yaml
+    - redoc-cli bundle -o public/students.html public/students.yaml
+  artifacts:
+    paths:
+    - public
+
+
+.dev:
+  when: manual
+  except:
+    - master
+    - frontend
+    - backend
+    - tags
+.prod:
+  only:
+    - master
+    - frontend
+    - backend
+    - tags
+
+
+
+build-frontend-prod:
+  <<: *build-frontend
+  extends: .prod
+
+build-frontend-dev:
+  <<: *build-frontend
+  extends: .dev
+
+
+build-openapi-prod:
+  <<: *build-openapi
+  extends: .prod
+
+build-openapi-dev:
+  <<: *build-openapi
+  extends: .dev
