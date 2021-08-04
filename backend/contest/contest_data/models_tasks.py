@@ -61,12 +61,14 @@ class TargetClassEnum(enum.Enum):
 olympiad_target_class_dict = {target.value: target for target in TargetClassEnum}
 
 
-def add_base_contest(db_session, name, description, rules, olympiad_type, subject, certificate_template):
+def add_base_contest(db_session, name, laureate_condition, winning_condition, description, rules, olympiad_type, subject, certificate_template):
     baseContest = BaseContest(
         description=description,
         name=name,
         certificate_template=certificate_template,
         rules=rules,
+        winning_condition=winning_condition,
+        laureate_condition=laureate_condition,
         olympiad_type=olympiad_type,
         subject=subject
     )
@@ -103,6 +105,9 @@ class BaseContest(db.Model):
     subject = db.Column(db.Enum(OlympiadSubjectEnum), nullable=False)
     certificate_template = db.Column(db.Text, nullable=True)
 
+    winning_condition = db.Column(db.Float, nullable=False)
+    laureate_condition = db.Column(db.Float, nullable=False)
+
     target_classes = db.relationship('target_classes', lazy='select',
                                      backref=db.backref('base_contest', lazy='joined'))
     child_contests = db.relationship('contest', lazy='select',
@@ -118,6 +123,8 @@ class BaseContest(db.Model):
                 'olympiad_type': self.olympiad_type,
                 'subject': self.subject,
                 'certificate_template': self.certificate_template,
+                'winning_condition': self.winning_condition,
+                'laureate_condition': self.laureate_condition,
                 'target_classes': self.target_classes,
                 'child_contests': self.child_contests
             }
@@ -127,11 +134,17 @@ class BaseContest(db.Model):
                rules=None,
                olympiad_type=None,
                subject=None,
+               winning_condition=None,
+               laureate_condition=None,
                target_classes=None):
         if name is not None:
             self.name = name
         if description is not None:
             self.description = description
+        if winning_condition is not None:
+            self.winning_condition = winning_condition
+        if laureate_condition is not None:
+            self.laureate_condition = laureate_condition
         if rules is not None:
             self.rules = rules
         if certificate_template is not None:
@@ -201,9 +214,6 @@ class Contest(db.Model):
 
     base_contest_id = db.Column(db.Integer, db.ForeignKey('base_contest.contest_id'), primary_key=True)
     contest_id = db.Column(db.Integer, autoincrement=True, primary_key=True)
-
-    winning_condition = db.Column(db.Float, nullable=False)
-    laureate_condition = db.Column(db.Float, nullable=False)
     visibility = db.Column(db.Boolean, default=DEFAULT_VISIBILITY, nullable=False)
 
     users = db.relationship('user_in_contest', lazy='select',
@@ -217,13 +227,11 @@ class Contest(db.Model):
     }
 
 
-def add_simple_contest(db_session, base_contest_id, winning_condition, laureate_condition,
+def add_simple_contest(db_session, base_contest_id,
                        visibility, start_date, end_date, previous_contest_id=None,
                        previous_participation_condition=None):
     simpleContest = SimpleContest(
         base_contest_id=base_contest_id,
-        winning_condition=winning_condition,
-        laureate_condition=laureate_condition,
         visibility=visibility,
         start_date=start_date,
         end_date=end_date,
@@ -262,21 +270,14 @@ class SimpleContest(Contest):
         return \
             {
                 'contest_id': self.contest_id,
-                'winning_condition': self.winning_condition,
-                'laureate_condition': self.laureate_condition,
                 'visibility': self.visibility,
-                'users': self.users,
                 'composite_type': self.composite_type,
                 'start_date': self.description.isoformat(),
                 'end_date': self.end_date.isoformat(),
-                'variants': self.variants,
-                'previous_contest_id': self.previous_contest_id,
-                'previous_participation_condition': self.previous_participation_condition
             }
 
     def update(self, start_date=None, end_date=None, variants=None, previous_contest_id=None,
-               previous_participation_condition=None,
-               winning_condition=None, laureate_condition=None, visibility=None, users=None, composite_type=None):
+               previous_participation_condition=None,visibility=None, users=None, composite_type=None):
         if start_date is not None:
             self.start_date = start_date
         if end_date is not None:
@@ -285,17 +286,13 @@ class SimpleContest(Contest):
             self.previous_contest_id = previous_contest_id
         if previous_participation_condition is not None:
             self.previous_participation_condition = previous_participation_condition
-        if winning_condition is not None:
-            self.winning_condition = winning_condition
-        if laureate_condition is not None:
-            self.laureate_condition = laureate_condition
         if visibility is not None:
             self.visibility = visibility
         if composite_type is not None:
             self.composite_type = composite_type
 
 
-def add_composite_contest(db_session, base_contest_id, winning_condition, laureate_condition, certificate_template,
+def add_composite_contest(db_session, base_contest_id, certificate_template,
                           visibility):
     compositeContest = CompositeContest(
         base_contest_id=base_contest_id,
@@ -321,8 +318,6 @@ class CompositeContest(Contest):
         return \
             {
                 'contest_id': self.contest_id,
-                'winning_condition': self.winning_condition,
-                'laureate_condition': self.laureate_condition,
                 'visibility': self.visibility,
                 'users': self.users,
                 'stages': self.stages,
@@ -330,10 +325,6 @@ class CompositeContest(Contest):
             }
 
     def update(self, winning_condition=None, laureate_condition=None, visibility=None, users=None, composite_type=None):
-        if winning_condition is not None:
-            self.winning_condition = winning_condition
-        if laureate_condition is not None:
-            self.laureate_condition = laureate_condition
         if visibility is not None:
             self.visibility = visibility
         if composite_type is not None:

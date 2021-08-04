@@ -14,12 +14,6 @@ db = get_current_db()
 module = get_current_module()
 app = get_current_app()
 
-#TODO
-# - move user to another stage
-# - open contest for user
-# - check everything linked with api
-# - check everything linked with model
-
 
 def catch_request_error(function):
     @wraps(function)
@@ -71,6 +65,8 @@ def base_olympiad_create():
     rules = values['rules']
     olympiad_type = values['olympiad_type']
     certificate_template = values['certificate_template']
+    winning_condition = values['winning_condition']
+    laureate_condition = values['laureate_condition']
     subject = values['subject']
     target_classes = values['target_classes']
 
@@ -79,6 +75,8 @@ def base_olympiad_create():
                                        description=description,
                                        name=name,
                                        certificate_template=certificate_template,
+                                       winning_condition=winning_condition,
+                                       laureate_condition=laureate_condition,
                                        rules=rules,
                                        olympiad_type=olympiad_type,
                                        subject=subject)
@@ -155,8 +153,6 @@ def olympiad_create(id_base_olympiad):
 
     composite_type = values['composite_type']
     base_contest_id = values['base_contest_id']
-    winning_condition = values['winning_condition']
-    laureate_condition = values['laureate_condition']
     visibility = values['visibility']
 
     try:
@@ -170,8 +166,6 @@ def olympiad_create(id_base_olympiad):
 
             contest = add_simple_contest(db.session,
                                          base_contest_id,
-                                         winning_condition,
-                                         laureate_condition,
                                          visibility,
                                          start_date,
                                          end_date,
@@ -182,8 +176,6 @@ def olympiad_create(id_base_olympiad):
         else:
             contest = add_composite_contest(db_session,
                                             base_contest_id,
-                                            winning_condition,
-                                            laureate_condition,
                                             certificate_template,
                                             visibility)
 
@@ -329,8 +321,6 @@ def contest_create(id_base_olympiad, id_olympiad, id_stage):
 
     composite_type = values['composite_type']
     base_contest_id = values['base_contest_id']
-    winning_condition = values['winning_condition']
-    laureate_condition = values['laureate_condition']
     visibility = values['visibility']
     location = values['location']
 
@@ -345,8 +335,6 @@ def contest_create(id_base_olympiad, id_olympiad, id_stage):
 
             contest = add_simple_contest(db.session,
                                          base_contest_id,
-                                         winning_condition,
-                                         laureate_condition,
                                          visibility,
                                          start_date,
                                          end_date,
@@ -357,8 +345,6 @@ def contest_create(id_base_olympiad, id_olympiad, id_stage):
         else:
             contest = add_composite_contest(db_session,
                                             base_contest_id,
-                                            winning_condition,
-                                            laureate_condition,
                                             certificate_template,
                                             visibility)
 
@@ -786,6 +772,35 @@ def remove_user_from_contest(id_base_olympiad, id_olympiad, id_stage, id_contest
 
 
 @module.route(
+    '/base_olympiad/<int:id_base_olympiad>/olympiad/<int:id_olympiad>/stage/<int:id_stage>/contest/<int:id_contest>/{id_contest}/moveuser:',
+    methods=['POST'])
+@jwt_required_role(['Admin', 'System', 'Creator'])
+def move_user(id_base_olympiad, id_olympiad, id_stage, id_contest):
+    values = request.openapi.body
+    user_ids = values['users_id']
+    next_stage_id = values['next_stage_id']
+    next_contest_id = values['next_contest_id']
+
+    try:
+        for user_id in user_ids:
+
+            user = add_user_in_contest(
+                user_id=user_id,
+                contest_id=next_contest_id,
+                variant_id=None,  # TODO HOW TO CHOOSE VARIANT
+                user_status= UserStatusEnum.Participant
+
+            )
+
+        db.session.commit()
+        return make_response({}, 200)
+
+    except Exception:
+        db.session.rollback()
+        raise
+
+
+@module.route(
     '/base_olympiad/<int:id_base_olympiad>/olympiad/<int:id_olympiad>/stage/<int:id_stage>/contest/<int:id_contest>/{id_contest}/user/all',
     methods=['GET'])
 @jwt_required_role(['Admin', 'System', 'Creator'])
@@ -816,7 +831,7 @@ def users_all(id_base_olympiad, id_olympiad, id_stage, id_contest):
     '/base_olympiad/<int:id_base_olympiad>/olympiad/<int:id_olympiad>/stage/<int:id_stage>/contest/<int:id_contest>/{id_contest}/user/<int:id_user>/certificate',
     methods=['GET'])
 @jwt_required_role(['Admin', 'System', 'Creator'])
-def users_all(id_base_olympiad, id_olympiad, id_stage, id_contest, id_user):
+def users_certificate(id_base_olympiad, id_olympiad, id_stage, id_contest, id_user):
     try:
         contest = get_or_raise(Contest, Contest.contest_id, id_contest)
         user = get_or_raise(UserInContest, UserInContest.user_id, id_user)

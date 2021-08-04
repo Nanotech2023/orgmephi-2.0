@@ -1,0 +1,2213 @@
+openapi: 3.0.0
+info:
+  title: Tasks service API
+  description: API description in Markdown.
+  version: 1.0.0
+
+paths:
+  /base_olympiad/create:
+    post:
+      summary: Create a new base olympiad (main contest)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              oneOf:
+                - $ref: '#/components/schemas/createBaseContest'
+      security:
+        - cookieJWTAuth: [ ]
+        - CSRFToken: [ ]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/commonBaseContestId'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+  /base_olympiad/all:
+    get:
+      summary: list of base olympiads (main contests)
+      security:
+        - cookieJWTAuth: [ ]
+        - CSRFToken: [ ]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/allBaseContest'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+
+  /base_olympiad/{id_base_olympiad}/remove:
+    post:
+      summary: Remove base olympiad (main contest)
+      parameters:
+        - in: path
+          description: Id of the base olympiad
+          name: id_base_olympiad
+          required: true
+          schema:
+            type: integer
+      security:
+        - cookieJWTAuth: [ ]
+        - CSRFToken: [ ]
+      responses:
+        '200':
+          description: OK
+        '404':
+          description: Stage not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+
+  /base_olympiad/{id_base_olympiad}:
+    get:
+      summary: Get info for the base olympiad (main contest)
+      security:
+        - cookieJWTAuth: [ ]
+        - CSRFToken: [ ]
+      parameters:
+        - in: path
+          description: Id of the olympiad
+          name: id_base_olympiad
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/commonBaseContestInfo'
+
+        '404':
+          description: Contest not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+    patch:
+      summary: Edit base olympiad info
+      security:
+        - cookieJWTAuth: [ ]
+        - CSRFToken: [ ]
+      parameters:
+        - in: path
+          description: Id of the base olympiad
+          name: id_base_olympiad
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/baseContestInfoUpdate'
+      responses:
+        '200':
+          description: OK
+        '404':
+          description: Stage not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+
+  /base_olympiad/{id_base_olympiad}/olympiad/create:
+    post:
+      summary: Create a new olympiad (main contest)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              oneOf:
+                - $ref: '#/components/schemas/createContest'
+      parameters:
+        - in: path
+          description: Id of the base olympiad
+          name: id_base_olympiad
+          required: true
+          schema:
+            type: integer
+      security:
+        - cookieJWTAuth: [ ]
+        - CSRFToken: [ ]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/commonContestId'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+  /base_olympiad/{id_base_olympiad}/olympiad/all:
+    get:
+      summary: list of olympiads (main contests)
+      security:
+        - cookieJWTAuth: [ ]
+        - CSRFToken: [ ]
+      parameters:
+        - in: path
+          description: Id of the base olympiad
+          name: id_base_olympiad
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/contestsInStage'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+
+  /base_olympiad/{id_base_olympiad}/olympiad/{id_olympiad}/remove:
+    post:
+      summary: Remove olympiad (main contest)
+      parameters:
+        - in: path
+          description: Id of the base olympiad
+          name: id_base_olympiad
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the olympiad
+          name: id_olympiad
+          required: true
+          schema:
+            type: integer
+      security:
+        - cookieJWTAuth: [ ]
+        - CSRFToken: [ ]
+      responses:
+        '200':
+          description: OK
+        '404':
+          description: Stage not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+
+  /base_olympiad/{id_base_olympiad}/olympiad/{id_olympiad}:
+    get:
+      summary: Get info for the olympiad (main contest)
+      security:
+        - cookieJWTAuth: [ ]
+        - CSRFToken: [ ]
+      parameters:
+        - in: path
+          description: Id of the base olympiad
+          name: id_base_olympiad
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the olympiad
+          name: id_olympiad
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/commonContestInfo'
+
+        '404':
+          description: Contest not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+    patch:
+      summary: Edit olympiad info
+      security:
+        - cookieJWTAuth: [ ]
+        - CSRFToken: [ ]
+      parameters:
+        - in: path
+          description: Id of the base olympiad
+          name: id_base_olympiad
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the olympiad
+          name: id_olympiad
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/contestInfoUpdate'
+      responses:
+        '200':
+          description: OK
+        '404':
+          description: Stage not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+
+  /base_olympiad/{id_base_olympiad}/olympiad/{id_olympiad}/stage/create:
+    post:
+      summary: Create a new stage in olympiad
+      parameters:
+        - in: path
+          description: Id of the base olympiad
+          name: id_base_olympiad
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the olympiad
+          name: id_olympiad
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/createStage'
+      security:
+        - cookieJWTAuth: [ ]
+        - CSRFToken: [ ]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/stageInfoId'
+
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+
+
+  /base_olympiad/{id_base_olympiad}/olympiad/{id_olympiad}/stage/all:
+    get:
+      summary: list of stages in olympiad
+      parameters:
+        - in: path
+          description: Id of the base olympiad
+          name: id_base_olympiad
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the olympiad
+          name: id_olympiad
+          required: true
+          schema:
+            type: integer
+      security:
+        - cookieJWTAuth: [ ]
+        - CSRFToken: [ ]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/stagesInOlympiad'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+
+
+  /base_olympiad/{id_base_olympiad}/olympiad/{id_olympiad}/stage/{id_stage}/contest/create:
+    post:
+      summary: Create a new contest
+      parameters:
+        - in: path
+          description: Id of the base olympiad
+          name: id_base_olympiad
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the stage
+          name: id_stage
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the olympiad
+          name: id_olympiad
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/createContest'
+      security:
+        - cookieJWTAuth: [ ]
+        - CSRFToken: [ ]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/commonContestId'
+
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+
+  /base_olympiad/{id_base_olympiad}/olympiad/{id_olympiad}/stage/{id_stage}/remove:
+    post:
+      summary: Remove stage from olympiad
+      parameters:
+        - in: path
+          description: Id of the base olympiad
+          name: id_base_olympiad
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the olympiad
+          name: id_olympiad
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the stage
+          name: id_stage
+          required: true
+          schema:
+            type: integer
+      security:
+        - cookieJWTAuth: [ ]
+        - CSRFToken: [ ]
+      responses:
+        '200':
+          description: OK
+        '404':
+          description: Stage not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+
+  /base_olympiad/{id_base_olympiad}/olympiad/{id_olympiad}/stage/{id_stage}:
+    get:
+      summary: Get common info for a different stage
+      security: []
+      parameters:
+        - in: path
+          description: Id of the base olympiad
+          name: id_base_olympiad
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the olympiad
+          name: id_olympiad
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the stage
+          name: id_stage
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/stageInfo'
+        '404':
+          description: Stage not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+
+    patch:
+      summary: Set stage info for a olympiad
+      security:
+        - cookieJWTAuth: [ ]
+        - CSRFToken: [ ]
+      parameters:
+        - in: path
+          description: Id of the base olympiad
+          name: id_base_olympiad
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the olympiad
+          name: id_olympiad
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the stage
+          name: id_stage
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/stageInfoUpdate'
+      responses:
+        '200':
+          description: OK
+        '404':
+          description: Stage not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+
+  /base_olympiad/{id_base_olympiad}/olympiad/{id_olympiad}/stage/{id_stage}/contest/{id_contest}/remove:
+    post:
+      summary: Remove contest
+      parameters:
+        - in: path
+          description: Id of the base olympiad
+          name: id_base_olympiad
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the olympiad
+          name: id_olympiad
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the stage
+          name: id_stage
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the contest
+          name: id_contest
+          required: true
+          schema:
+            type: integer
+      security:
+        - cookieJWTAuth: [ ]
+        - CSRFToken: [ ]
+      responses:
+        '200':
+          description: OK
+        '404':
+          description: Stage not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+
+  /base_olympiad/{id_base_olympiad}/olympiad/{id_olympiad}/stage/{id_stage}/contest/{id_contest}:
+    get:
+      summary: Get common info for a contest
+      security:
+        - cookieJWTAuth: [ ]
+        - CSRFToken: [ ]
+      parameters:
+        - in: path
+          description: Id of the base olympiad
+          name: id_base_olympiad
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the olympiad
+          name: id_olympiad
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the stage
+          name: id_stage
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the contest
+          name: id_contest
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/commonContestInfo'
+
+        '404':
+          description: Contest not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+    patch:
+      summary: Edit contest info
+      security:
+        - cookieJWTAuth: [ ]
+        - CSRFToken: [ ]
+      parameters:
+        - in: path
+          description: Id of the base olympiad
+          name: id_base_olympiad
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the olympiad
+          name: id_olympiad
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the stage
+          name: id_stage
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the contest
+          name: id_contest
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/contestInfoUpdate'
+      responses:
+        '200':
+          description: OK
+        '404':
+          description: Stage not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+
+  /base_olympiad/{id_base_olympiad}/olympiad/{id_olympiad}/stage/{id_stage}/contest/all:
+    get:
+      summary: list of contests in stage
+      parameters:
+        - in: path
+          description: Id of the base olympiad
+          name: id_base_olympiad
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the olympiad
+          name: id_olympiad
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the stage
+          name: id_stage
+          required: true
+          schema:
+            type: integer
+      security:
+        - cookieJWTAuth: [ ]
+        - CSRFToken: [ ]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/contestsInStage'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+
+  /base_olympiad/{id_base_olympiad}/olympiad/{id_olympiad}/stage/{id_stage}/contest/{id_contest}/adduser:
+    post:
+      summary: Add user to contest
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/updateUserInContest'
+      parameters:
+        - in: path
+          description: Id of the base olympiad
+          name: id_base_olympiad
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the olympiad
+          name: id_olympiad
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the stage
+          name: id_stage
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the contest
+          name: id_contest
+          required: true
+          schema:
+            type: integer
+      security:
+        - cookieJWTAuth: [ ]
+        - CSRFToken: [ ]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/updateUserInContest'
+        '404':
+          description: User or group not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+
+  /base_olympiad/{id_base_olympiad}/olympiad/{id_olympiad}/stage/{id_stage}/contest/{id_contest}/moveuser:
+    post:
+      summary: Add user to contest
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/moveUserToNextStage'
+      parameters:
+        - in: path
+          description: Id of the base olympiad
+          name: id_base_olympiad
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the olympiad
+          name: id_olympiad
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the stage
+          name: id_stage
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the contest
+          name: id_contest
+          required: true
+          schema:
+            type: integer
+      security:
+        - cookieJWTAuth: [ ]
+        - CSRFToken: [ ]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/updateUserInContest'
+        '404':
+          description: User or group not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+
+  /base_olympiad/{id_base_olympiad}/olympiad/{id_olympiad}/stage/{id_stage}/contest/{id_contest}/removeuser:
+    post:
+      summary: Remove user from contest
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/updateUserInContest'
+      parameters:
+        - in: path
+          description: Id of the base olympiad
+          name: id_base_olympiad
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the olympiad
+          name: id_olympiad
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the stage
+          name: id_stage
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the contest
+          name: id_contest
+          required: true
+          schema:
+            type: integer
+      security:
+        - cookieJWTAuth: [ ]
+        - CSRFToken: [ ]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/updateUserInContest'
+        '404':
+          description: User or group not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+
+  /base_olympiad/{id_base_olympiad}/olympiad/{id_olympiad}/stage/{id_stage}/contest/{id_contest}/user/all:
+    get:
+      summary: list of user in contest
+      parameters:
+        - in: path
+          description: Id of the base olympiad
+          name: id_base_olympiad
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the olympiad
+          name: id_olympiad
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the stage
+          name: id_stage
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the contest
+          name: id_contest
+          required: true
+          schema:
+            type: integer
+      security:
+        - cookieJWTAuth: [ ]
+        - CSRFToken: [ ]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/usersInContest'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+
+  /base_olympiad/{id_base_olympiad}/olympiad/{id_olympiad}/stage/{id_stage}/contest/{id_contest}/user/{id_user}/certificate:
+    get:
+      summary: certificate of user in contest
+      parameters:
+        - in: path
+          description: Id of the base olympiad
+          name: id_base_olympiad
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the olympiad
+          name: id_olympiad
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the stage
+          name: id_stage
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the contest
+          name: id_contest
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the user
+          name: id_user
+          required: true
+          schema:
+            type: integer
+      security:
+        - cookieJWTAuth: [ ]
+        - CSRFToken: [ ]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/userCertificate'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+
+  /base_olympiad/{id_base_olympiad}/olympiad/{id_olympiad}/stage/{id_stage}/contest/{id_contest}/variant/create:
+    post:
+      summary: Create a new variant
+      parameters:
+        - in: path
+          description: Id of the base olympiad
+          name: id_base_olympiad
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the olympiad
+          name: id_olympiad
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the stage
+          name: id_stage
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the contest
+          name: id_contest
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/createVariant'
+      security:
+        - cookieJWTAuth: [ ]
+        - CSRFToken: [ ]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/variantInfoId'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+
+  /base_olympiad/{id_base_olympiad}/olympiad/{id_olympiad}/stage/{id_stage}/contest/{id_contest}/variant/all:
+    get:
+      summary: list of variants in contest
+      parameters:
+        - in: path
+          description: Id of the base olympiad
+          name: id_base_olympiad
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the olympiad
+          name: id_olympiad
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the stage
+          name: id_stage
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the contest
+          name: id_contest
+          required: true
+          schema:
+            type: integer
+      security:
+        - cookieJWTAuth: [ ]
+        - CSRFToken: [ ]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/variantsInContest'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+
+  /base_olympiad/{id_base_olympiad}/olympiad/{id_olympiad}/stage/{id_stage}/contest/{id_contest}/variant/{id_variant}/remove:
+    post:
+      summary: Remove variant
+      parameters:
+        - in: path
+          description: Id of the base olympiad
+          name: id_base_olympiad
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the olympiad
+          name: id_olympiad
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the stage
+          name: id_stage
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the contest
+          name: id_contest
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the variant
+          name: id_variant
+          required: true
+          schema:
+            type: integer
+      security:
+        - cookieJWTAuth: [ ]
+        - CSRFToken: [ ]
+      responses:
+        '200':
+          description: OK
+        '404':
+          description: Stage not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+
+  /base_olympiad/{id_base_olympiad}/olympiad/{id_olympiad}/stage/{id_stage}/contest/{id_contest}/variant/{variant_num}:
+    get:
+      summary: Get info for a different variant
+      security:
+        - cookieJWTAuth: [ ]
+        - CSRFToken: [ ]
+      parameters:
+        - in: path
+          description: Id of the base olympiad
+          name: id_base_olympiad
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the olympiad
+          name: id_olympiad
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the stage
+          name: id_stage
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the contest
+          name: id_contest
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Number of the variant in contest
+          name: variant_num
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/variantInfo'
+        '404':
+          description: Variant not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+    patch:
+      summary: Edit variant
+      security:
+        - cookieJWTAuth: [ ]
+        - CSRFToken: [ ]
+      parameters:
+        - in: path
+          description: Id of the base olympiad
+          name: id_base_olympiad
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the olympiad
+          name: id_olympiad
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the stage
+          name: id_stage
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the contest
+          name: id_contest
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Number of the variant in contest
+          name: variant_num
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/variantInfoUpdate'
+      responses:
+        '200':
+          description: OK
+        '404':
+          description: Variant not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+
+  /base_olympiad/{id_base_olympiad}/olympiad/{id_olympiad}/stage/{id_stage}/contest/{id_contest}/variant/{id_variant}/task/create:
+    post:
+      summary: Create a new task
+      parameters:
+        - in: path
+          description: Id of the base olympiad
+          name: id_base_olympiad
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the olympiad
+          name: id_olympiad
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the stage
+          name: id_stage
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the contest
+          name: id_contest
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the variant
+          name: id_variant
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              oneOf:
+                - $ref: '#/components/schemas/createPlainTask'
+                - $ref: '#/components/schemas/createRangeTask'
+                - $ref: '#/components/schemas/createMultipleTask'
+      security:
+        - cookieJWTAuth: [ ]
+        - CSRFToken: [ ]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/taskId'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+
+  /base_olympiad/{id_base_olympiad}/olympiad/{id_olympiad}/stage/{id_stage}/contest/{id_contest}/variant/{id_variant}/task/{id_task}/remove:
+    post:
+      summary: Remove task
+      parameters:
+        - in: path
+          description: Id of the base olympiad
+          name: id_base_olympiad
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the olympiad
+          name: id_olympiad
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the stage
+          name: id_stage
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the contest
+          name: id_contest
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the variant
+          name: id_variant
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the task
+          name: id_task
+          required: true
+          schema:
+            type: integer
+      security:
+        - cookieJWTAuth: [ ]
+        - CSRFToken: [ ]
+      responses:
+        '200':
+          description: OK
+        '404':
+          description: Task not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+
+  /base_olympiad/{id_base_olympiad}/olympiad/{id_olympiad}/stage/{id_stage}/contest/{id_contest}/variant/{id_variant}/task/{id_task}:
+    get:
+      summary: Get info for a different tasks
+      security:
+        - cookieJWTAuth: [ ]
+        - CSRFToken: [ ]
+      parameters:
+        - in: path
+          description: Id of the base olympiad
+          name: id_base_olympiad
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the olympiad
+          name: id_olympiad
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the stage
+          name: id_stage
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the contest
+          name: id_contest
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the variant
+          name: id_variant
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the task
+          name: id_task
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/plainTaskInfo'
+                  - $ref: '#/components/schemas/rangeTaskInfo'
+                  - $ref: '#/components/schemas/multipleTaskInfo'
+        '404':
+          description: Task not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+    patch:
+      summary: Update task info
+      security:
+        - cookieJWTAuth: [ ]
+        - CSRFToken: [ ]
+      parameters:
+        - in: path
+          description: Id of the base olympiad
+          name: id_base_olympiad
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the olympiad
+          name: id_olympiad
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the stage
+          name: id_stage
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the contest
+          name: id_contest
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the variant
+          name: id_variant
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the task
+          name: id_task
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+                oneOf:
+                  - $ref: '#/components/schemas/plainTaskInfoUpdate'
+                  - $ref: '#/components/schemas/rangeTaskInfoUpdate'
+                  - $ref: '#/components/schemas/multipleTaskInfoUpdate'
+      responses:
+        '200':
+          description: OK
+        '404':
+          description: Stage not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+
+  /base_olympiad/{id_base_olympiad}/olympiad/{id_olympiad}/stage/{id_stage}/contest/{id_contest}/variant/{id_variant}/tasks/all:
+    get:
+      summary: list of tasks in variant
+      parameters:
+        - in: path
+          description: Id of the base olympiad
+          name: id_base_olympiad
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the olympiad
+          name: id_olympiad
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the stage
+          name: id_stage
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the contest
+          name: id_contest
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the variant
+          name: id_variant
+          required: true
+          schema:
+            type: integer
+      security:
+        - cookieJWTAuth: [ ]
+        - CSRFToken: [ ]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/tasksInVariant'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+
+  /base_olympiad/{id_base_olympiad}/olympiad/{id_olympiad}/stage/{id_stage}/contest/{id_contest}/variant/{id_variant}/tasks/{id_task}/taskimage:
+    get:
+      summary: Task image
+      parameters:
+        - in: path
+          description: Id of the base olympiad
+          name: id_base_olympiad
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the olympiad
+          name: id_olympiad
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the stage
+          name: id_stage
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the contest
+          name: id_contest
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the variant
+          name: id_variant
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the task
+          name: id_task
+          required: true
+          schema:
+            type: integer
+      security:
+        - cookieJWTAuth: [ ]
+        - CSRFToken: [ ]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/taskInVariantImage'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+
+
+components:
+  securitySchemes:
+    cookieJWTAuth:
+      description: Authentication with JWT stored in cookies
+      type: apiKey
+      in: cookie
+      name: access_token_cookie
+    CSRFToken:
+      description: CSRF token
+      type: apiKey
+      in: header
+      name: X-CSRF-TOKEN
+  schemas:
+    errorResponse:
+      title: Error response
+      description: 'Common response with error message'
+      required:
+        - error_msg
+      properties:
+        error_msg:
+          type: string
+    allBaseContest:
+      title: Get olympiads
+      description: Request to get olympiads
+      properties:
+        olympiad_list:
+          type: array
+          items:
+            type: object
+            properties:
+              base_contest_id:
+                type: integer
+              name:
+                type: string
+              description:
+                type: string
+              rules:
+                type: string
+              winning_condition:
+                type: number
+                format: float
+              laureate_condition:
+                type: number
+                format: float
+              certificate_template:
+                type: string
+                format: binary
+              olympiad_type:
+                type: string
+                enum: [Rosatom, Kurchatov, Other]
+              subject:
+                type: string
+                enum: [Math, Physics, Informatics]
+              target_classes:
+                type: array
+                items:
+                  type: string
+                  enum: [5, 6, 7, 8, 9, 10, 11, student]
+    createBaseContest:
+      title: Create base contest
+      description: Request to base contest creation
+      required:
+        - name
+        - description
+        - rules
+        - winning_condition
+        - laureate_condition
+        - certificate_template
+        - olympiad_type
+        - subject
+        - target_classes
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        rules:
+          type: string
+        winning_condition:
+          type: number
+          format: float
+        laureate_condition:
+          type: number
+          format: float
+        certificate_template:
+          type: string
+          format: binary
+        olympiad_type:
+          type: string
+          enum: [Rosatom, Kurchatov, Other]
+        subject:
+          type: string
+          enum: [Math, Physics, Informatics]
+        target_classes:
+          type: array
+          items:
+            type: string
+            enum: [5, 6, 7, 8, 9, 10, 11, student]
+    commonBaseContestInfo:
+      title: Base contest common info
+      description: Request to get base contest info
+      required:
+        - base_contest_id
+        - name
+        - description
+        - rules
+        - winning_condition
+        - laureate_condition
+        - certificate_template
+        - olympiad_type
+        - subject
+        - target_classes
+      properties:
+        base_contest_id:
+          type: integer
+        name:
+          type: string
+        description:
+          type: string
+        rules:
+          type: string
+        winning_condition:
+          type: number
+          format: float
+        laureate_condition:
+          type: number
+          format: float
+        certificate_template:
+          type: string
+          format: binary
+        olympiad_type:
+          type: string
+          enum: [Rosatom, Kurchatov, Other]
+        subject:
+          type: string
+          enum: [Math, Physics, Informatics]
+        target_classes:
+          type: array
+          items:
+            type: string
+            enum: [5, 6, 7, 8, 9, 10, 11, student]
+    commonBaseContestId:
+      title: Base contest id
+      description: Request to get base contest id as response for creation
+      required:
+        - base_contest_id
+      properties:
+        contest_id:
+          type: integer
+    baseContestInfoUpdate:
+      title: Edit contest base common info
+      description: Request to creation base contest
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        rules:
+          type: string
+        winning_condition:
+          type: number
+          format: float
+        laureate_condition:
+          type: number
+          format: float
+        certificate_template:
+          type: string
+          format: binary
+        olympiad_type:
+          type: string
+          enum: [Rosatom, Kurchatov, Other]
+        subject:
+          type: string
+          enum: [Math, Physics, Informatics]
+        target_classes:
+          type: array
+          items:
+            type: string
+            enum: [5, 6, 7, 8, 9, 10, 11, student]
+
+    createStage:
+      title: Create stage
+      description: Request to stage creation
+      required:
+        - stage_name
+        - next_stage_condition
+      properties:
+        stage_name:
+          type: string
+        next_stage_condition:
+          type: string
+    stageInfo:
+      title: Stage common info
+      description: Request to get stage info
+      required:
+        - stage_id
+        - stage_name
+        - next_stage_condition
+      properties:
+        stage_id:
+          type: integer
+        stage_name:
+          type: string
+        next_stage_condition:
+          type: string
+    stageInfoId:
+      title: Stage id
+      description: Request to get stage id as response to creation
+      required:
+        - stage_id
+      properties:
+        stage_id:
+          type: integer
+    stageInfoUpdate:
+      title: Edit stage common info
+      description: Request to edit stage
+      properties:
+        stage_name:
+          type: string
+        next_stage_condition:
+          type: string
+    createContest:
+      title: Create contest
+      description: Request to contest creation
+      required:
+        - visibility
+        - start_date
+        - end_time
+        - composite_type
+        - location
+      properties:
+        location:
+          type: string
+        start_time:
+          type: string
+          format: 'date-time'
+        end_time:
+          type: string
+          format: 'date-time'
+        visibility:
+          type: boolean
+        composite_type:
+          type: string
+          enum: [Simple, Composite]
+        olympiad_type:
+          type: string
+          enum: [Rosatom, Kurchatov]
+        subject:
+          type: string
+          enum: [Math, Physics, Informatics]
+        target_class:
+          type: array
+          items:
+            type: string
+            enum: [5, 6, 7, 8, 9, 10, 11, student]
+    commonContestInfo:
+      title: Contest common info
+      description: Request to get contest info
+      required:
+        - contest_id
+        - description
+        - visibility
+        - start_date
+        - end_time
+        - composite_type
+        - location
+      properties:
+        location:
+          type: string
+        start_time:
+          type: string
+          format: 'date-time'
+        end_time:
+          type: string
+          format: 'date-time'
+        contest_id:
+          type: integer
+        visibility:
+          type: boolean
+    commonContestId:
+      title: Contest id
+      description: Request to get contest id as response for creation
+      required:
+        - contest_id
+      properties:
+        contest_id:
+          type: integer
+    contestInfoUpdate:
+      title: Edit contest common info
+      description: Request to creation contest
+      properties:
+        location:
+          type: string
+        start_time:
+          type: string
+          format: 'date-time'
+        end_time:
+          type: string
+          format: 'date-time'
+        visibility:
+          type: boolean
+
+    createVariant:
+      title: Create variant
+      description: Request to variant creation
+      required:
+        - variant_description
+      properties:
+        variant_description:
+          type: string
+    variantInfo:
+      title: Common variant info
+      description: Request to get variant info
+      required:
+        - variant_id
+        - variant_number
+        - variant_description
+      properties:
+        variant_id:
+          type: integer
+        variant_number:
+          type: integer
+        variant_description:
+          type: string
+    variantInfoId:
+      title: Common variant id
+      description: Request to get variant id as response for creation
+      required:
+        - variant_id
+      properties:
+        variant_id:
+          type: integer
+    variantInfoUpdate:
+      title: Edit variant
+      description: Request to edit variant
+      properties:
+        variant_number:
+          type: integer
+        variant_description:
+          type: string
+    usersInContest:
+      title: Get users in contest
+      description: Request to get users in contest
+      properties:
+        user_list:
+          type: array
+          items:
+            type: object
+            properties:
+              user_id:
+                type: integer
+              variant_id:
+                type: integer
+              user_status:
+                type: string
+    updateUserInContest:
+      title: Add or removeuser to contest or stage
+      description: Request to add or remove user user to contest or stage
+      required:
+        - users_id
+      properties:
+        users_id:
+          type: array
+          items:
+            type: integer
+    stagesInOlympiad:
+      title: Get stages in olympiad
+      description: Request to get stages in olympiad
+      properties:
+        stages_list:
+          type: array
+          items:
+            type: object
+            properties:
+              stage_id:
+                type: integer
+              stage_name:
+                type: string
+              next_stage_condition:
+                type: string
+    tasksInVariant:
+      title: Get contests in stage
+      description: Request to get contests in stage
+      properties:
+        tasks_list:
+          type: array
+          items:
+            type: object
+            properties:
+              task_id:
+                type: integer
+              num_of_task:
+                type: integer
+    contestsInStage:
+      title: Get contests in stage
+      description: Request to get contests in stage
+      properties:
+        contests_list:
+          type: array
+          items:
+            type: object
+            properties:
+              start_time:
+                type: string
+                format: 'date-time'
+              end_time:
+                type: string
+                format: 'date-time'
+              contest_id:
+                type: integer
+              visibility:
+                type: boolean
+              composite_type:
+                type: string
+                enum: [Simple, Composite]
+    variantsInContest:
+      title: Get variants in contest
+      description: Request to get variants in contest
+      properties:
+        variants_list:
+          type: array
+          items:
+            type: object
+            properties:
+              variant_id:
+                type: integer
+              variant_number:
+                type: integer
+              variant_description:
+                type: string
+    taskId:
+      title: Get task id
+      description: Request to get task id
+      required:
+        - task_id
+      properties:
+        task_id:
+          type: integer
+    createPlainTask:
+      title: Create task with plain text
+      description: Request to creation task with plain text
+      required:
+        - num_of_task
+        - image_of_task
+        - recommended_answer
+      properties:
+        num_of_task:
+          type: integer
+        image_of_task:
+          type: string
+          format: binary
+        recommended_answer:
+          type: string
+    createRangeTask:
+      title: Create task with range
+      description: Request to creation task with range
+      required:
+        - num_of_task
+        - image_of_task
+        - start_value
+        - end_value
+      properties:
+        num_of_task:
+          type: integer
+        image_of_task:
+          type: string
+          format: binary
+        start_value:
+          type: number
+          format: float
+        end_value:
+          type: number
+          format: float
+    createMultipleTask:
+      title: Create task with multiple choice
+      description: Request to creation task with multiple choice
+      required:
+        - num_of_task
+        - image_of_task
+        - answers
+      properties:
+        num_of_task:
+          type: integer
+        image_of_task:
+          type: string
+          format: binary
+        answers:
+          type: array
+          items:
+            type: object
+            properties:
+              answer:
+                type: string
+              is_right_answer:
+                type: boolean
+    plainTaskInfo:
+      title: Get info of task with plain text
+      description: Request to get info of task with plain text
+      required:
+        - task_id
+        - num_of_task
+        - image_of_task
+        - recommended_answer
+      properties:
+        task_id:
+          type: integer
+        num_of_task:
+          type: integer
+        image_of_task:
+          type: string
+          format: binary
+        recommended_answer:
+          type: string
+    rangeTaskInfo:
+      title: Get info of task with range
+      description: Request to get info of task with range
+      required:
+        - task_id
+        - num_of_task
+        - image_of_task
+        - start_value
+        - end_value
+      properties:
+        task_id:
+          type: integer
+        num_of_task:
+          type: integer
+        image_of_task:
+          type: string
+          format: binary
+        start_value:
+          type: number
+          format: float
+        end_value:
+          type: number
+          format: float
+    multipleTaskInfo:
+      title: Get info of task with multiple choice
+      description: Request to get info of task with multiple choice
+      required:
+        - task_id
+        - num_of_task
+        - image_of_task
+        - answers
+      properties:
+        task_id:
+          type: integer
+        num_of_task:
+          type: integer
+        image_of_task:
+          type: string
+          format: binary
+        answers:
+          type: array
+          items:
+            type: object
+            properties:
+              answer_id:
+                type: integer
+              answer:
+                type: string
+              is_right_answer:
+                type: boolean
+    rangeTaskInfoUpdate:
+      title: Update task with range
+      description: Request to update task with range
+      properties:
+        num_of_task:
+          type: integer
+        image_of_task:
+          type: string
+          format: binary
+        start_value:
+          type: number
+          format: float
+        end_value:
+          type: number
+          format: float
+    multipleTaskInfoUpdate:
+      title: Update task with multiple choice
+      description: Request to update task with multiple choice
+      properties:
+        num_of_task:
+          type: integer
+        image_of_task:
+          type: string
+          format: binary
+        answers:
+          type: array
+          items:
+            type: object
+            properties:
+              answer_id:
+                type: integer
+              answer:
+                type: string
+              is_right_answer:
+                type: boolean
+    plainTaskInfoUpdate:
+      title: Update task with plain text
+      description: Request to update task with plain text
+      properties:
+        num_of_task:
+          type: integer
+        image_of_task:
+          type: string
+          format: binary
+        recommended_answer:
+          type: string
+    userCertificate:
+      title: Get certificate of the user
+      description: Request to get certificate of the user
+      required:
+        - certificate
+      properties:
+        certificate:
+          type: string
+          format: binary
+    taskInVariantImage:
+      title: Get image of the task
+      description: Request to get task image
+      required:
+        - task_id
+        - image_of_task
+      properties:
+        task_id:
+          type: integer
+        image_of_task:
+          type: string
+          format: binary
+    addStatus:
+      title: Add user status
+      description: Request to add user status
+      required:
+        - status
+      properties:
+        status:
+          type: string
+    statusInfo:
+      title: get user status info
+      description: Request to add user status
+      required:
+        - status
+        - status_id
+      properties:
+        status:
+          type: string
+        status_id:
+          type: integer
+    statusInfoUpdate:
+      title: edit user status info
+      description: Request to edt user status
+      properties:
+        status:
+          type: string
+    allStatus:
+      title: get all user status info
+      description: Request to get all user status
+      required:
+        - answers
+      properties:
+        answers:
+          type: array
+          items:
+            type: object
+            properties:
+              status_id:
+                type: integer
+              status:
+                type: string
+    moveUserToNextStage:
+      title: Move user to contest or stage
+      description: Request to move user to contest or stage
+      required:
+        - users_id
+        - next_stage_id
+        - next_contest_id
+      properties:
+        users_id:
+          type: array
+          items:
+            type: integer
+        next_stage_id:
+          type: integer
+        next_contest_id:
+          type: integer
