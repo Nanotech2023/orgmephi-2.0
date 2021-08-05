@@ -3,7 +3,7 @@ import random
 from flask import abort
 from flask import request, make_response
 
-from common import get_current_app, get_current_module
+from common import get_current_module
 from common.jwt_verify import jwt_required_role
 from common.util import db_get_all, db_get_or_raise, db_get_list
 from common.errors import RequestError
@@ -11,7 +11,6 @@ from .models import *
 
 db = get_current_db()
 module = get_current_module()
-app = get_current_app()
 
 
 # Olympiad views
@@ -128,21 +127,18 @@ def base_olympiads_all():
 def olympiad_create_simple(id_base_olympiad):
     values = request.openapi.body
 
-    composite_type = values['composite_type']
-    base_contest_id = values['base_contest_id']
     visibility = values['visibility']
-    start_date = values['start_date']
-    end_date = values['end_date']
-    previous_contest_id = values['previous_contest_id']
-    previous_participation_condition = values['previous_participation_condition']
+    start_time = values['start_time']
+    end_time = values['end_time']
+    previous_contest_id = values.get('previous_contest_id', None)
+    previous_participation_condition = values.get('previous_participation_condition', None)
 
     try:
         contest = add_simple_contest(db.session,
-                                     base_contest_id,
+                                     id_base_olympiad,
                                      visibility,
-                                     start_date,
-                                     end_date,
-                                     composite_type,
+                                     start_time,
+                                     end_time,
                                      previous_contest_id,
                                      previous_participation_condition)
 
@@ -151,7 +147,11 @@ def olympiad_create_simple(id_base_olympiad):
     except Exception:
         db.session.rollback()
         raise
-    return make_response(contest.serialize(), 200)
+    return make_response(
+        {
+            'contest_id': contest.contest_id
+        }
+        , 200)
 
 
 @module.route('/base_olympiad/<int:id_base_olympiad>/olympiad/createcomposite', methods=['POST'])
@@ -159,14 +159,11 @@ def olympiad_create_simple(id_base_olympiad):
 def olympiad_create_composite(id_base_olympiad):
     values = request.openapi.body
 
-    composite_type = values['composite_type']
-    base_contest_id = values['base_contest_id']
     visibility = values['visibility']
 
     try:
         contest = add_composite_contest(db.session,
-                                        base_contest_id,
-                                        composite_type,
+                                        id_base_olympiad,
                                         visibility)
 
         db.session.commit()
@@ -174,14 +171,31 @@ def olympiad_create_composite(id_base_olympiad):
     except Exception:
         db.session.rollback()
         raise
-    return make_response(contest.serialize(), 200)
+    return make_response(
+        {
+            'contest_id': contest.contest_id
+        }
+        , 200)
+
+
+@module.route('/base_olympiad/<int:id_base_olympiad>/olympiad/all', methods=['GET'])
+@jwt_required_role(['Admin', 'System', 'Creator'])
+def olympiads_all(id_base_olympiad):
+    try:
+        base_contest = db_get_or_raise(BaseContest, "base_contest_id", str(id_base_olympiad))
+        all_olympiads = [olympiad.serialize() for olympiad in base_contest.child_contests]
+    except Exception:
+        raise
+    return make_response(
+        {"olympiad_list": all_olympiads}, 200)
 
 
 @module.route('/base_olympiad/<int:id_base_olympiad>/olympiad/<int:id_olympiad>/remove', methods=['POST'])
 @jwt_required_role(['Admin', 'System', 'Creator'])
 def olympiad_remove(id_base_olympiad, id_olympiad):
     try:
-        Contest.query.filter_by(Contest.contest_id == id_olympiad).delete()
+        contest = db_get_or_raise(Contest, "contest_id", str(id_olympiad))
+        db.session.delete(contest)
         db.session.commit()
     except Exception:
         db.session.rollback()
@@ -192,7 +206,7 @@ def olympiad_remove(id_base_olympiad, id_olympiad):
 @module.route('/base_olympiad/<int:id_base_olympiad>/olympiad/<int:id_olympiad>', methods=['GET', 'PATCH'])
 @jwt_required_role(['Admin', 'System', 'Creator'])
 def olympiad_response(id_base_olympiad, id_olympiad):
-    contest = db_get_or_raise(Contest, Contest.contest_id, id_olympiad)
+    contest = db_get_or_raise(Contest, "contest_id", id_olympiad)
 
     if request.method == 'GET':
         return make_response(contest.serialize(), 200)
@@ -301,19 +315,18 @@ def contest_create_simple(id_base_olympiad, id_olympiad, id_stage):
 
     location = values['location']
     composite_type = values['composite_type']
-    base_contest_id = values['base_contest_id']
     visibility = values['visibility']
-    start_date = values['start_date']
-    end_date = values['end_date']
+    start_time = values['start_time']
+    end_time = values['end_time']
     previous_contest_id = values['previous_contest_id']
     previous_participation_condition = values['previous_participation_condition']
 
     try:
         contest = add_simple_contest(db.session,
-                                     base_contest_id,
+                                     id_base_olympiad,
                                      visibility,
-                                     start_date,
-                                     end_date,
+                                     start_time,
+                                     end_time,
                                      composite_type,
                                      previous_contest_id,
                                      previous_participation_condition,
@@ -339,12 +352,11 @@ def contest_create_composite(id_base_olympiad, id_olympiad, id_stage):
 
     location = values['location']
     composite_type = values['composite_type']
-    base_contest_id = values['base_contest_id']
     visibility = values['visibility']
 
     try:
         contest = add_composite_contest(db.session,
-                                        base_contest_id,
+                                        id_base_olympiad,
                                         composite_type,
                                         visibility)
 

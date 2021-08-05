@@ -13,52 +13,52 @@ DEFAULT_VISIBILITY = True
 
 
 class UserStatusEnum(enum.Enum):
-    Participant = "Participant",
-    Laureate = "Laureate",
-    Winner = "Winner",
+    Participant = "Participant"
+    Laureate = "Laureate"
+    Winner = "Winner"
 
 
-user_status_dict = {status.value[0]: status for status in UserStatusEnum}
+user_status_dict = {status.value: status for status in UserStatusEnum}
 
 
 class CompositeTypeEnum(enum.Enum):
-    Composite = "Composite",
-    Simple = "Simple",
+    composite = "composite"
+    simple = "simple"
 
 
-composite_type_dict = {composite.value[0]: composite for composite in CompositeTypeEnum}
+composite_type_dict = {composite.value: composite for composite in CompositeTypeEnum}
 
 
 class OlympiadTypeEnum(enum.Enum):
-    Rosatom = "Rosatom",
-    Kurchatov = "Kurchatov",
-    Other = "Other",
+    Rosatom = "Rosatom"
+    Kurchatov = "Kurchatov"
+    Other = "Other"
 
 
-olympiad_type_dict = {_type.value[0]: _type for _type in OlympiadTypeEnum}
+olympiad_type_dict = {_type.value: _type for _type in OlympiadTypeEnum}
 
 
 class OlympiadSubjectEnum(enum.Enum):
-    Math = "Math",
-    Physics = "Physics",
-    Informatics = "Informatics",
+    Math = "Math"
+    Physics = "Physics"
+    Informatics = "Informatics"
 
 
-olympiad_subject_dict = {subject.value[0]: subject for subject in OlympiadSubjectEnum}
+olympiad_subject_dict = {subject.value: subject for subject in OlympiadSubjectEnum}
 
 
 class TargetClassEnum(enum.Enum):
-    class_5 = "5",
-    class_6 = "6",
-    class_7 = "7",
-    class_8 = "8",
-    class_9 = "9",
-    class_10 = "10",
-    class_11 = "11",
-    student = "student",
+    class_5 = "5"
+    class_6 = "6"
+    class_7 = "7"
+    class_8 = "8"
+    class_9 = "9"
+    class_10 = "10"
+    class_11 = "11"
+    student = "student"
 
 
-olympiad_target_class_dict = {target.value[0]: target for target in TargetClassEnum}
+olympiad_target_class_dict = {target.value: target for target in TargetClassEnum}
 
 
 def add_base_contest(db_session, name, laureate_condition, winning_condition, description, rules, olympiad_type,
@@ -125,8 +125,8 @@ class BaseContest(db.Model):
                 'name': self.name,
                 'description': self.description,
                 'rules': self.rules,
-                'olympiad_type': self.olympiad_type.value[0],
-                'subject': self.subject.value[0],
+                'olympiad_type': self.olympiad_type.value,
+                'subject': self.subject.value,
                 'certificate_template': self.certificate_template,
                 'winning_condition': self.winning_condition,
                 'laureate_condition': self.laureate_condition,
@@ -223,30 +223,30 @@ class Contest(db.Model):
 
     base_contest_id = db.Column(db.Integer, db.ForeignKey('base_contest.base_contest_id'))
     contest_id = db.Column(db.Integer, autoincrement=True, primary_key=True)
-    composite_type = db.Column(db.Enum(CompositeTypeEnum), nullable=False)
+    composite_type = db.Column(db.Unicode(256))
     visibility = db.Column(db.Boolean, default=DEFAULT_VISIBILITY, nullable=False)
 
     users = db.relationship('UserInContest', lazy='select',
                             backref=db.backref('contest', lazy='joined'))
 
     __mapper_args__ = {
-        'polymorphic_identity': 'base_contest',
+        'polymorphic_identity': 'contest',
         'polymorphic_on': composite_type
     }
 
 
 def add_simple_contest(db_session, base_contest_id,
-                       visibility, start_date, end_date, composite_type, previous_contest_id=None,
+                       visibility, start_date, end_date, previous_contest_id=None,
                        previous_participation_condition=None, location=None):
     simpleContest = SimpleContest(
         base_contest_id=base_contest_id,
         visibility=visibility,
         start_date=start_date,
         end_date=end_date,
-        composite_type=composite_type,
         previous_contest_id=previous_contest_id,
         previous_participation_condition=previous_participation_condition,
         location=location,
+        composite_type=SimpleContest.__name__,
     )
     db_session.add(simpleContest)
     db_session.flush()
@@ -279,7 +279,7 @@ class SimpleContest(Contest):
                                backref=db.backref('simple_contest', lazy='joined'))
 
     __mapper_args__ = {
-        'polymorphic_identity': 'simple_contest',
+        'polymorphic_identity': 'SimpleContest',
     }
 
     def serialize(self):
@@ -287,8 +287,7 @@ class SimpleContest(Contest):
             {
                 'contest_id': self.contest_id,
                 'visibility': self.visibility,
-                'composite_type': self.composite_type.value[0],
-                'start_date': self.description.isoformat(),
+                'start_date': self.start_date.isoformat(),
                 'end_date': self.end_date.isoformat(),
                 'location': self.location,
             }
@@ -311,11 +310,11 @@ class SimpleContest(Contest):
             self.location = location
 
 
-def add_composite_contest(db_session, base_contest_id, composite_type, visibility):
+def add_composite_contest(db_session, base_contest_id, visibility):
     compositeContest = CompositeContest(
         base_contest_id=base_contest_id,
-        composite_type=composite_type,
         visibility=visibility,
+        composite_type=CompositeContest.__name__,
     )
     db_session.add(compositeContest)
     db_session.flush()
@@ -335,7 +334,6 @@ class CompositeContest(Contest):
             {
                 'contest_id': self.contest_id,
                 'visibility': self.visibility,
-                'composite_type': self.composite_type
             }
 
     def serialize_users(self):
@@ -359,7 +357,7 @@ class CompositeContest(Contest):
             self.composite_type = composite_type
 
     __mapper_args__ = {
-        'polymorphic_identity': 'composite_contest',
+        'polymorphic_identity': 'CompositeContest',
     }
 
 
@@ -557,7 +555,7 @@ class UserInContest(db.Model):
         return \
             {
                 'user_id': self.user_id,
-                'user_status': self.user_status.value[0],
+                'user_status': self.user_status.value,
                 'variant_id': self.variant_id
             }
 

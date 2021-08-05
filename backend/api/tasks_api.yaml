@@ -4,8 +4,8 @@ info:
   description: API description in Markdown.
   version: 1.0.0
 servers:
-  - url: http://127.0.0.1:5000
   - url: http://127.0.0.1:5000/contest/tasks
+  - url: http://127.0.0.1:5000
 
 paths:
   ######################################################################################################################
@@ -58,7 +58,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/errorResponse'
-
   /base_olympiad/{id_base_olympiad}/remove:
     post:
       summary: Remove base olympiad (main contest)
@@ -81,7 +80,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/errorResponse'
-
   /base_olympiad/{id_base_olympiad}:
     get:
       summary: Get info for the base olympiad (main contest)
@@ -171,7 +169,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/errorResponse'
-
   /base_olympiad/{id_base_olympiad}/olympiad/createcomposite:
     post:
       summary: Create a new composite olympiad (main contest)
@@ -2026,7 +2023,6 @@ components:
         - visibility
         - start_time
         - end_time
-        - composite_type
         - location
       properties:
         location:
@@ -2039,12 +2035,9 @@ components:
           format: 'date-time'
         visibility:
           type: boolean
-        composite_type:
-          type: string
-          enum: ["Simple", "Composite"]
         previous_contest_id:
           type: integer
-        user_status:
+        previous_participation_condition:
           type: string
           enum: ["Participant", "Laureate", "Winner"]
 
@@ -2053,35 +2046,30 @@ components:
       description: Request to contest creation
       required:
         - visibility
-        - composite_type
         - location
       properties:
         location:
           type: string
         visibility:
           type: boolean
-        composite_type:
-          type: string
-          enum: [Simple, Composite]
     commonContestInfo:
       title: Contest common info
       description: Request to get contest info
       required:
         - contest_id
         - visibility
-        - composite_type
       properties:
-        composite_type:
-          type: string
-          enum: ["Simple", "Composite"]
         location:
           type: string
+          nullable: true
         start_time:
           type: string
           format: 'date-time'
+          nullable: true
         end_time:
           type: string
           format: 'date-time'
+          nullable: true
         contest_id:
           type: integer
         visibility:
@@ -2100,10 +2088,10 @@ components:
       properties:
         location:
           type: string
-        start_time:
+        start_date:
           type: string
           format: 'date-time'
-        end_time:
+        end_date:
           type: string
           format: 'date-time'
         visibility:
@@ -2222,9 +2210,6 @@ components:
                 type: integer
               visibility:
                 type: boolean
-              composite_type:
-                type: string
-                enum: ["Simple", "Composite"]
     variantsInContest:
       title: Get variants in contest
       description: Request to get variants in contest
