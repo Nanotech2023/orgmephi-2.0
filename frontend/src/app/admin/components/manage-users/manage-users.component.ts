@@ -15,13 +15,12 @@ export class ManageUsersComponent implements OnInit
     users$!: Observable<ResponseUserAll>
     minContainerHeight = fixedHeight
     columnDefs = [
-        { field: 'id', sortable: true },
-        { field: 'username', sortable: true },
-        { field: 'role', sortable: true },
-        { field: 'type', sortable: true }
+        { field: 'id', sortable: true, filter: true, headerName: 'ID' },
+        { field: 'username', sortable: true, filter: true, headerName: 'Имя пользовтаеля' },
+        { field: 'role', sortable: true, filter: true, headerName: 'Роль' },
+        { field: 'type', sortable: true, filter: true, headerName: 'Тип регистрации' },
+        { headerName: 'Действия', cellRenderer: 'btnCellRenderer' }
     ]
-    headerHeight = headerHeight
-    footerHeight = footerHeight
 
     constructor( private service: AuthServiceMock ) { }
 
