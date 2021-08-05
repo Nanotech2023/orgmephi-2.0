@@ -2,6 +2,7 @@ import random
 
 from flask import abort
 from flask import request, make_response
+from sqlalchemy import func, desc
 
 from common import get_current_module
 from common.jwt_verify import jwt_required_role
@@ -322,7 +323,6 @@ def contest_create_simple(id_base_olympiad, id_olympiad, id_stage):
     previous_contest_id = values.get('previous_contest_id', None)
     previous_participation_condition = values.get('previous_participation_condition', None)
 
-
     try:
         contest = add_simple_contest(db.session,
                                      id_base_olympiad,
@@ -437,20 +437,24 @@ def contests_all(id_base_olympiad, id_olympiad, id_stage):
 def variant_create(id_base_olympiad, id_olympiad, id_stage, id_contest):
     values = request.openapi.body
 
-    contest = db_get_or_raise(Contest, Contest.contest_id, id_contest)
+    # TODO QUERY FOR MAX
+    contest = db_get_or_raise(Contest, "contest_id", str(id_contest))
     variants = contest.variants
+    new_variant = 0
+    for var in variants:
+        if var.variant_number > new_variant:
+            new_variant = var.variant_number
 
     variant_description = values['variant_description']
 
     try:
         variant = add_variant(db.session,
                               contest_id=id_contest,
-                              variant_number=len(variants) + 1,
+                              variant_number=new_variant + 1,
                               variant_description=variant_description,
                               )
 
         db.session.add(variant)
-
         db.session.commit()
 
     except Exception:
@@ -469,7 +473,7 @@ def variant_create(id_base_olympiad, id_olympiad, id_stage, id_contest):
 @jwt_required_role(['Admin', 'System', 'Creator'])
 def variant_remove(id_base_olympiad, id_olympiad, id_stage, id_contest, id_variant):
     try:
-        variant = db_get_or_raise(Variant, Variant.variant_id, id_variant)
+        variant = db_get_or_raise(Variant, "variant_id", str(id_variant))
         db.session.delete(variant)
         db.session.commit()
     except Exception:
@@ -483,14 +487,12 @@ def variant_remove(id_base_olympiad, id_olympiad, id_stage, id_contest, id_varia
     '>/variant/<int:variant_num>',
     methods=['GET', 'PATCH'])
 @jwt_required_role(['Admin', 'System', 'Creator'])
-def variant_get(id_base_olympiad, id_olympiad, id_stage, id_contest, variant_num):
-    variant = db_get_or_raise(Variant, Variant.variant_number, variant_num)
-
+def variant_response(id_base_olympiad, id_olympiad, id_stage, id_contest, variant_num):
+    variant = db_get_or_raise(Variant, "variant_number", variant_num)
     if request.method == 'GET':
         return make_response(
-            {
-                variant.serialize()
-            }, 200)
+            variant.serialize()
+            , 200)
     elif request.method == 'PATCH':
         try:
             values = request.openapi.body
@@ -510,9 +512,8 @@ def variant_get(id_base_olympiad, id_olympiad, id_stage, id_contest, variant_num
     methods=['GET'])
 @jwt_required_role(['Admin', 'System', 'Creator'])
 def variant_all(id_base_olympiad, id_olympiad, id_stage, id_contest):
-    contest = db_get_or_raise(Contest, Contest.contest_id, id_contest)
-    variants = contest.variants
-    all_variants = [variant.serialize() for variant in variants]
+    contest = db_get_or_raise(Contest, "contest_id", id_contest)
+    all_variants = [variant.serialize() for variant in contest.variants]
     return make_response(
         {
             "variants_list": all_variants
