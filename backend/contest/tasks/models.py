@@ -130,6 +130,7 @@ class BaseContest(db.Model):
                 'certificate_template': self.certificate_template,
                 'winning_condition': self.winning_condition,
                 'laureate_condition': self.laureate_condition,
+                'target_classes': [target.serialize()['target_class'] for target in self.target_classes],
             }
 
     def serialize_target(self):
@@ -139,6 +140,7 @@ class BaseContest(db.Model):
                 'target_classes': self.target_classes,
             }
 
+    # useless for now
     def serialize_child(self):
         return \
             {
@@ -336,6 +338,7 @@ class CompositeContest(Contest):
                 'visibility': self.visibility,
             }
 
+    # useless for now
     def serialize_users(self):
         return \
             {
@@ -343,6 +346,7 @@ class CompositeContest(Contest):
                 'users': self.users,
             }
 
+    # useless for now
     def serialize_stages(self):
         return \
             {
@@ -410,6 +414,7 @@ class Stage(db.Model):
                 'next_stage_condition': self.next_stage_condition,
             }
 
+    # useless for now
     def serialize_contests(self):
         return \
             {
@@ -500,6 +505,7 @@ class Variant(db.Model):
                 'variant_description': self.variant_description,
             }
 
+    # useless for now
     def serialize_tasks(self):
         return \
             {
@@ -507,6 +513,7 @@ class Variant(db.Model):
                 'tasks': self.tasks
             }
 
+    # useless for now
     def serialize_users(self):
         return \
             {

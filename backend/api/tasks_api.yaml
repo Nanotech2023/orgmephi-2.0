@@ -1919,6 +1919,11 @@ components:
         subject:
           type: string
           enum: ["Math", "Physics", "Informatics"]
+        target_classes:
+          type: array
+          items:
+            type: string
+            enum: [ "5", "6", "7", "8", "9", "10", "11", "student" ]
     commonBaseContestId:
       title: Base contest id
       description: Request to get base contest id as response for creation
