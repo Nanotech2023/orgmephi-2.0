@@ -121,8 +121,7 @@ class UserInfo(db.Model):
 
     __table_name__ = 'user_info'
 
-    id = db.Column(db.Integer, autoincrement=True, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), primary_key=True)
     email = db.Column(db.String, unique=True)
     first_name = db.Column(db.String)
     middle_name = db.Column(db.String)
@@ -171,8 +170,7 @@ class StudentInfo(db.Model):
 
     __table_name__ = 'student_info'
 
-    id = db.Column(db.Integer, autoincrement=True, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), primary_key=True)
     phone = db.Column(db.String)
     university = db.Column(db.Integer, db.ForeignKey('university.id'))
     custom_university = db.Column(db.String)
