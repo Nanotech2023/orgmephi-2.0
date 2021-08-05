@@ -26,7 +26,7 @@ class Response(db.Model):
     answers = db.relationship('ResponseAnswer', backref='response', lazy=True)
 
     def prepare_for_list(self):
-        mark = ResponseStatus.query.filter(work_id=self.work_id).order_by(ResponseStatus.timestamp.desc()).one().mark
+        mark = self.statuses[-1].mark
         return {
             'user_id': self.user_id,
             'mark': mark
@@ -87,9 +87,10 @@ class ResponseStatus(db.Model):
 
     def status_for_history(self):
         appeal_id = self.appeal[0].appeal_id if len(self.appeal) > 0 else None
+
         return {
-            'status:': self.status.value,
-            'datetime': self.timestamp,
+            'status': self.status.value,
+            'datetime': self.timestamp.isoformat(),
             'appeal_id': appeal_id,
             'mark': self.mark
         }
@@ -134,7 +135,8 @@ class Appeal(db.Model):
     def serialize(self):
         return {
                 'appeal_id': self.appeal_id,
-                'status': self.work_status,
+                'status_id': self.work_status,
+                'appeal_status': self.appeal_status.value,
                 'appeal_message': self.appeal_message,
                 'appeal_response': self.appeal_response
             }

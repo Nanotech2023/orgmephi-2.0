@@ -761,7 +761,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/errorResponse'
     post:
-      summary: Create appeal for current user's response
+      summary: Create appeal for user's response
       security:
         - cookieJWTAuth: [ ]
         - CSRFToken: [ ]
@@ -933,7 +933,7 @@ components:
       properties:
         user_answer:
           type: string
-          format: binary
+          # format: binary
         filetype:
           type: string
     StatusHistoryItem:
@@ -946,13 +946,15 @@ components:
           type: string
         datetime:
           type: string
-          format: data-time
+          format: date-time
           description: "Change date and time"
         appeal_id:
           type: integer
+          nullable: true
         mark:
           type: number
           format: float
+          nullable: true
     userResponseStatusHistory:
       title: "Status history of user response"
       required:
@@ -977,7 +979,9 @@ components:
         user_id:
           type: integer
         mark:
-          type: integer
+          type: number
+          format: float
+          nullable: true
     contestResultSheet:
       title: "Result sheet for one contest"
       required:
@@ -1015,18 +1019,22 @@ components:
       title: "Common appeal info"
       required:
         - appeal_id
-        - status
+        - status_id
+        - appeal_status
         - appeal_message
         - appeal_response
       properties:
         appeal_id:
           type: integer
-        status:
+        status_id:
+          type: integer
+        appeal_status:
           type: string
         appeal_message:
           type: string
         appeal_response:
           type: string
+          nullable: true
     userContestAllAnswer:
       title: "ALl user's answer for the contest"
       required:
