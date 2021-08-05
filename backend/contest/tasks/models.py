@@ -17,6 +17,9 @@ class UserStatusEnum(enum.Enum):
     Winner = "Winner",
 
 
+user_status_dict = {status.value: status for status in UserStatusEnum}
+
+
 class CompositeTypeEnum(enum.Enum):
     Composite = "Composite",
     Simple = "Simple",
@@ -206,12 +209,11 @@ class Contest(db.Model):
 
     base_contest_id = db.Column(db.Integer, db.ForeignKey('base_contest.base_contest_id'))
     contest_id = db.Column(db.Integer, autoincrement=True, primary_key=True)
+    composite_type = db.Column(db.Enum(CompositeTypeEnum), nullable=False)
     visibility = db.Column(db.Boolean, default=DEFAULT_VISIBILITY, nullable=False)
 
     users = db.relationship('UserInContest', lazy='select',
                             backref=db.backref('contest', lazy='joined'))
-
-    composite_type = db.Column(db.Enum(CompositeTypeEnum), nullable=False)
 
     __mapper_args__ = {
         'polymorphic_identity': 'base_contest',
@@ -220,15 +222,17 @@ class Contest(db.Model):
 
 
 def add_simple_contest(db_session, base_contest_id,
-                       visibility, start_date, end_date, previous_contest_id=None,
-                       previous_participation_condition=None):
+                       visibility, start_date, end_date, composite_type, previous_contest_id=None,
+                       previous_participation_condition=None, location=None):
     simpleContest = SimpleContest(
         base_contest_id=base_contest_id,
         visibility=visibility,
         start_date=start_date,
         end_date=end_date,
+        composite_type=composite_type,
         previous_contest_id=previous_contest_id,
         previous_participation_condition=previous_participation_condition,
+        location=location,
     )
     db_session.add(simpleContest)
     db_session.flush()
@@ -245,12 +249,14 @@ class SimpleContest(Contest):
     visibility: visibility of the contest
     start_date: start date of contest
     end_date: end date of contest
+    location: location of the olympiad
     """
     __tablename__ = 'simple_contest'
 
     contest_id = db.Column(db.Integer, db.ForeignKey('contest.contest_id'), primary_key=True)
     start_date = db.Column(db.DateTime, index=True, default=datetime.utcnow)
     end_date = db.Column(db.DateTime, index=True, default=datetime.utcnow)
+    location = db.Column(db.Text, index=True, nullable=True)
 
     previous_contest_id = db.Column(db.Integer, db.ForeignKey('simple_contest.contest_id'), nullable=True)
     previous_participation_condition = db.Column(db.Enum(UserStatusEnum))
@@ -270,10 +276,11 @@ class SimpleContest(Contest):
                 'composite_type': self.composite_type,
                 'start_date': self.description.isoformat(),
                 'end_date': self.end_date.isoformat(),
+                'location': self.location,
             }
 
     def update(self, start_date=None, end_date=None, previous_contest_id=None,
-               previous_participation_condition=None, visibility=None, composite_type=None):
+               previous_participation_condition=None, visibility=None, composite_type=None, location=None):
         if start_date is not None:
             self.start_date = start_date
         if end_date is not None:
@@ -286,11 +293,14 @@ class SimpleContest(Contest):
             self.visibility = visibility
         if composite_type is not None:
             self.composite_type = composite_type
+        if location is not None:
+            self.location = location
 
 
-def add_composite_contest(db_session, base_contest_id, visibility):
+def add_composite_contest(db_session, base_contest_id, composite_type, visibility):
     compositeContest = CompositeContest(
         base_contest_id=base_contest_id,
+        composite_type=composite_type,
         visibility=visibility,
     )
     db_session.add(compositeContest)
@@ -357,8 +367,7 @@ contestsInStage = db.Table('contests_in_stage',
 
 def add_contest_in_stage(stage_id, contest_id, location):
     contestsInStage.insert().values(stage_id=stage_id,
-                                    contest_id=contest_id,
-                                    location=location)
+                                    contest_id=contest_id)
 
 
 class Stage(db.Model):
@@ -731,7 +740,6 @@ def add_answer_to_multiple_task(db_session, task_id, answer, correct):
         correct=correct
     )
     db_session.add(answersInMultipleChoiceTask)
-    return answersInMultipleChoiceTask
 
 
 class AnswersInMultipleChoiceTask(db.Model):
@@ -768,7 +776,7 @@ class AnswersInMultipleChoiceTask(db.Model):
 
 
 def updateMultipleChoiceTask(db_session, task_id, answers):
-    answers_ = AnswersInMultipleChoiceTask.query.filter_by(AnswersInMultipleChoiceTask.task_id == task_id).delete()
+    AnswersInMultipleChoiceTask.query.filter_by(AnswersInMultipleChoiceTask.task_id == task_id).delete()
 
     for answer_ in answers:
         answer = AnswersInMultipleChoiceTask(

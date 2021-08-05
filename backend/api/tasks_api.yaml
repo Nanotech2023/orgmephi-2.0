@@ -140,16 +140,16 @@ paths:
 
   # Olympiad
 
-  /base_olympiad/{id_base_olympiad}/olympiad/create:
+  /base_olympiad/{id_base_olympiad}/olympiad/createsimple:
     post:
-      summary: Create a new olympiad (main contest)
+      summary: Create a new simple olympiad (main contest)
       requestBody:
         required: true
         content:
           application/json:
             schema:
               oneOf:
-                - $ref: '#/components/schemas/createContest'
+                - $ref: '#/components/schemas/createSimpleContest'
       parameters:
         - in: path
           description: Id of the base olympiad
@@ -173,6 +173,42 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/errorResponse'
+
+  /base_olympiad/{id_base_olympiad}/olympiad/createcomposite:
+    post:
+      summary: Create a new composite olympiad (main contest)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              oneOf:
+                - $ref: '#/components/schemas/createCompositeContest'
+      parameters:
+        - in: path
+          description: Id of the base olympiad
+          name: id_base_olympiad
+          required: true
+          schema:
+            type: integer
+      security:
+        - cookieJWTAuth: [ ]
+        - CSRFToken: [ ]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/commonContestId'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+
+
   /base_olympiad/{id_base_olympiad}/olympiad/all:
     get:
       summary: list of olympiads (main contests)
@@ -488,9 +524,56 @@ paths:
 
   # Contest
 
-  /base_olympiad/{id_base_olympiad}/olympiad/{id_olympiad}/stage/{id_stage}/contest/create:
+  /base_olympiad/{id_base_olympiad}/olympiad/{id_olympiad}/stage/{id_stage}/contest/createsimple:
     post:
       summary: Create a new contest
+      parameters:
+        - in: path
+          description: Id of the base simple olympiad
+          name: id_base_olympiad
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the stage
+          name: id_stage
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the olympiad
+          name: id_olympiad
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/createSimpleContest'
+      security:
+        - cookieJWTAuth: [ ]
+        - CSRFToken: [ ]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/commonContestId'
+
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+
+
+  /base_olympiad/{id_base_olympiad}/olympiad/{id_olympiad}/stage/{id_stage}/contest/createcomposite:
+    post:
+      summary: Create a new composite contest
       parameters:
         - in: path
           description: Id of the base olympiad
@@ -515,7 +598,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/createContest'
+              $ref: '#/components/schemas/createCompositeContest'
       security:
         - cookieJWTAuth: [ ]
         - CSRFToken: [ ]
@@ -758,15 +841,67 @@ paths:
               schema:
                 $ref: '#/components/schemas/errorResponse'
 
-  /base_olympiad/{id_base_olympiad}/olympiad/{id_olympiad}/stage/{id_stage}/contest/{id_contest}/moveuser:
+  /base_olympiad/{id_base_olympiad}/olympiad/{id_olympiad}/stage/{id_stage}/contest/{id_contest}/moveusercustom:
     post:
-      summary: Add user to contest
+      summary: Move users to the next stage (custom)
       requestBody:
         required: true
         content:
           application/json:
             schema:
               $ref: '#/components/schemas/moveUserToNextStage'
+      parameters:
+        - in: path
+          description: Id of the base olympiad
+          name: id_base_olympiad
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the olympiad
+          name: id_olympiad
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the stage
+          name: id_stage
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the contest
+          name: id_contest
+          required: true
+          schema:
+            type: integer
+      security:
+        - cookieJWTAuth: [ ]
+        - CSRFToken: [ ]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/updateUserInContest'
+        '404':
+          description: User or group not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+
+
+  /base_olympiad/{id_base_olympiad}/olympiad/{id_olympiad}/stage/{id_stage}/contest/{id_contest}/moveallpossibleusers:
+    post:
+      summary: Move all possible users to the next stage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/movePossibleUserToNextStage'
       parameters:
         - in: path
           description: Id of the base olympiad
@@ -1205,9 +1340,9 @@ paths:
 
   # Tasks
 
-  /base_olympiad/{id_base_olympiad}/olympiad/{id_olympiad}/stage/{id_stage}/contest/{id_contest}/variant/{id_variant}/task/create:
+  /base_olympiad/{id_base_olympiad}/olympiad/{id_olympiad}/stage/{id_stage}/contest/{id_contest}/variant/{id_variant}/task/createplain:
     post:
-      summary: Create a new task
+      summary: Create a new plain task
       parameters:
         - in: path
           description: Id of the base olympiad
@@ -1246,7 +1381,123 @@ paths:
             schema:
               oneOf:
                 - $ref: '#/components/schemas/createPlainTask'
+      security:
+        - cookieJWTAuth: [ ]
+        - CSRFToken: [ ]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/taskId'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+
+
+  /base_olympiad/{id_base_olympiad}/olympiad/{id_olympiad}/stage/{id_stage}/contest/{id_contest}/variant/{id_variant}/task/createrange:
+    post:
+      summary: Create a new range task
+      parameters:
+        - in: path
+          description: Id of the base olympiad
+          name: id_base_olympiad
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the olympiad
+          name: id_olympiad
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the stage
+          name: id_stage
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the contest
+          name: id_contest
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the variant
+          name: id_variant
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              oneOf:
                 - $ref: '#/components/schemas/createRangeTask'
+      security:
+        - cookieJWTAuth: [ ]
+        - CSRFToken: [ ]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/taskId'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+
+
+  /base_olympiad/{id_base_olympiad}/olympiad/{id_olympiad}/stage/{id_stage}/contest/{id_contest}/variant/{id_variant}/task/createmultiple:
+    post:
+      summary: Create a new multiple task
+      parameters:
+        - in: path
+          description: Id of the base olympiad
+          name: id_base_olympiad
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the olympiad
+          name: id_olympiad
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the stage
+          name: id_stage
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the contest
+          name: id_contest
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the variant
+          name: id_variant
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              oneOf:
                 - $ref: '#/components/schemas/createMultipleTask'
       security:
         - cookieJWTAuth: [ ]
@@ -1771,7 +2022,8 @@ components:
           type: string
         next_stage_condition:
           type: string
-    createContest:
+
+    createSimpleContest:
       title: Create contest
       description: Request to contest creation
       required:
@@ -1794,27 +2046,34 @@ components:
         composite_type:
           type: string
           enum: [Simple, Composite]
-        olympiad_type:
+        previous_contest_id:
+          type: integer
+        user_status:
           type: string
-          enum: [Rosatom, Kurchatov]
-        subject:
+          enum: [Participant, Laureate, Winner]
+
+    createCompositeContest:
+      title: Create contest
+      description: Request to contest creation
+      required:
+        - visibility
+        - composite_type
+        - location
+      properties:
+        location:
           type: string
-          enum: [Math, Physics, Informatics]
-        target_class:
-          type: array
-          items:
-            type: string
-            enum: [5, 6, 7, 8, 9, 10, 11, student]
+        visibility:
+          type: boolean
+        composite_type:
+          type: string
+          enum: [Simple, Composite]
     commonContestInfo:
       title: Contest common info
       description: Request to get contest info
       required:
         - contest_id
         - visibility
-        - start_time
-        - end_time
         - composite_type
-        - location
       properties:
         composite_type:
           type: string
@@ -1907,6 +2166,7 @@ components:
                 type: integer
               user_status:
                 type: string
+                enum: [Participant, Laureate, Winner]
     updateUserInContest:
       title: Add or removeuser to contest or stage
       description: Request to add or remove user user to contest or stage
@@ -1954,6 +2214,8 @@ components:
           items:
             type: object
             properties:
+              location:
+                type: String
               start_time:
                 type: string
                 format: 'date-time'
@@ -2182,59 +2444,28 @@ components:
         image_of_task:
           type: string
           format: binary
-    addStatus:
-      title: Add user status
-      description: Request to add user status
-      required:
-        - status
-      properties:
-        status:
-          type: string
-    statusInfo:
-      title: get user status info
-      description: Request to add user status
-      required:
-        - status
-        - status_id
-      properties:
-        status:
-          type: string
-        status_id:
-          type: integer
-    statusInfoUpdate:
-      title: edit user status info
-      description: Request to edt user status
-      properties:
-        status:
-          type: string
-    allStatus:
-      title: get all user status info
-      description: Request to get all user status
-      required:
-        - answers
-      properties:
-        answers:
-          type: array
-          items:
-            type: object
-            properties:
-              status_id:
-                type: integer
-              status:
-                type: string
     moveUserToNextStage:
-      title: Move user to contest or stage
-      description: Request to move user to contest or stage
+      title: Move user to contest
+      description: Request to move user to contest
       required:
         - users_id
-        - next_stage_id
         - next_contest_id
       properties:
         users_id:
           type: array
           items:
             type: integer
-        next_stage_id:
+        next_contest_id:
           type: integer
+    movePossibleUserToNextStage:
+      title: Move all possible users to contest
+      description: Request to move all possible user to contest
+      required:
+        - next_contest_id
+      properties:
+        users_id:
+          type: array
+          items:
+            type: integer
         next_contest_id:
           type: integer
