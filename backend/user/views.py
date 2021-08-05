@@ -8,6 +8,7 @@ import sqlalchemy.exc
 from common.errors import RequestError, NotFound, WrongCredentials, AlreadyExists, InsufficientData
 from common import get_current_app, get_current_module
 from common.jwt_verify import jwt_required, jwt_required_role, jwt_get_id
+from common.util import db_get_or_raise
 
 from .models import *
 
@@ -20,29 +21,8 @@ user_roles = {role.value: role for role in UserRoleEnum}
 user_types = {user_type.value: user_type for user_type in UserTypeEnum}
 
 
-def catch_request_error(function):
-    @wraps(function)
-    def wrapper(*args, **kwargs):
-        try:
-            return function(*args, **kwargs)
-        except RequestError as err:
-            return err.to_response()
-    return wrapper
-
-
-def get_or_raise(entity, field, value):
-    result = get_one_or_null(entity, field, value)
-    if result is None:
-        raise NotFound(field, value)
-    return result
-
-
 def get_missing(values, search):
-    missing = []
-    for value in search:
-        if value not in values:
-            missing.append(value)
-    return missing
+    return [value for value in search if value not in values]
 
 
 def grade_to_year(grade):
@@ -56,7 +36,7 @@ def grade_to_year(grade):
 
 
 def update_password(user_id, new_password, old_password, admin=False):
-    user = get_or_raise(User, "id", user_id)
+    user = db_get_or_raise(User, "id", user_id)
     if not admin:
         app.password_policy.validate_password(old_password, user.password_hash)
     password_hash = app.password_policy.hash_password(new_password, check=not admin)
@@ -181,7 +161,7 @@ def login():
 @jwt_required(refresh=True)
 def refresh():
     user_id = jwt_get_id()
-    user = get_or_raise(User, "id", user_id)
+    user = db_get_or_raise(User, "id", user_id)
     access_token, access_csrf = generate_access_token(user_id, user.username, user.role.value)
     refresh_token, refresh_csrf = generate_refresh_token(user_id, get_jwt()['remember'])
 
@@ -210,14 +190,14 @@ def logout():
 @module.route('/user/self', methods=['GET'])
 @jwt_required()
 def get_user_self():
-    user = get_or_raise(User, "id", jwt_get_id())
+    user = db_get_or_raise(User, "id", jwt_get_id())
     return make_response(user.serialize(), 200)
 
 
 @module.route('/user/<int:user_id>', methods=['GET'])
 @jwt_required_role(['Admin', 'System', 'Creator'])
 def get_user_admin(user_id):
-    user = get_or_raise(User, "id", user_id)
+    user = db_get_or_raise(User, "id", user_id)
     return make_response(user.serialize(), 200)
 
 
@@ -232,7 +212,7 @@ def get_user_all():
 @module.route('/user/by-group/<int:group_id>', methods=['GET'])
 @jwt_required_role(['Admin', 'System', 'Creator'])
 def get_user_by_group(group_id):
-    group = get_or_raise(Group, "id", group_id)
+    group = db_get_or_raise(Group, "id", group_id)
     users = [value.serialize() for value in group.users]
     return make_response({'users': users}, 200)
 
@@ -260,7 +240,7 @@ def change_password_admin(user_id):
 @jwt_required_role(['Admin', 'System'])
 def set_user_role(user_id):
     role = user_roles[request.openapi.body['role']]
-    user = get_or_raise(User, 'id', user_id)
+    user = db_get_or_raise(User, 'id', user_id)
     user.role = role
     db.session.commit()
     return make_response({}, 200)
@@ -270,7 +250,7 @@ def set_user_role(user_id):
 @jwt_required_role(['Admin', 'System'])
 def set_user_type(user_id):
     user_type = user_types[request.openapi.body['type']]
-    user = get_or_raise(User, 'id', user_id)
+    user = db_get_or_raise(User, 'id', user_id)
     if user_type != UserTypeEnum.internal and user_type != UserTypeEnum.pre_register and user.user_info is None:
         raise InsufficientData('user', 'personal info')
     if user_type == UserTypeEnum.university and user.student_info is None:
@@ -285,7 +265,7 @@ def set_user_type(user_id):
 @module.route('/user/self/personal', methods=['GET'])
 @jwt_required()
 def get_user_info_self():
-    user = get_or_raise(User, "id", jwt_get_id())
+    user = db_get_or_raise(User, "id", jwt_get_id())
     if user.user_info is None:
         raise NotFound('user.personal_info', 'for user %d' % user.id)
     return make_response(user.user_info.serialize(), 200)
@@ -294,7 +274,7 @@ def get_user_info_self():
 @module.route('/user/<int:user_id>/personal', methods=['GET'])
 @jwt_required_role(['Admin', 'System', 'Creator'])
 def get_user_info_admin(user_id):
-    user = get_or_raise(User, "id", user_id)
+    user = db_get_or_raise(User, "id", user_id)
     if user.user_info is None:
         raise NotFound('user.personal_info', 'for user %d' % user.id)
     return make_response(user.user_info.serialize(), 200)
@@ -304,7 +284,7 @@ def get_user_info_admin(user_id):
 @jwt_required_role(['Admin', 'System', 'Creator'])
 def set_user_info_admin(user_id):
     values = request.openapi.body
-    user = get_or_raise(User, "id", user_id)
+    user = db_get_or_raise(User, "id", user_id)
     if 'email' in values:
         info = get_one_or_null(UserInfo, 'email', values['email'])
         if info is not None and info.user_id != user_id:
@@ -334,7 +314,7 @@ def set_user_info_admin(user_id):
 @module.route('/user/self/university', methods=['GET'])
 @jwt_required()
 def get_university_info_self():
-    user = get_or_raise(User, "id", jwt_get_id())
+    user = db_get_or_raise(User, "id", jwt_get_id())
     if user.student_info is None:
         raise NotFound('user.university_info', 'for user %d' % user.id)
     return make_response(user.student_info.serialize(), 200)
@@ -343,7 +323,7 @@ def get_university_info_self():
 @module.route('/user/<int:user_id>/university', methods=['GET'])
 @jwt_required_role(['Admin', 'System', 'Creator'])
 def get_university_info_admin(user_id):
-    user = get_or_raise(User, "id", user_id)
+    user = db_get_or_raise(User, "id", user_id)
     if user.student_info is None:
         raise NotFound('user.university_info', 'for user %d' % user.id)
     return make_response(user.student_info.serialize(), 200)
@@ -353,7 +333,7 @@ def get_university_info_admin(user_id):
 @jwt_required_role(['Admin', 'System', 'Creator'])
 def set_university_info_admin(user_id):
     values = request.openapi.body
-    user = get_or_raise(User, "id", user_id)
+    user = db_get_or_raise(User, "id", user_id)
     if user.student_info is None:
         missing = get_missing(values, ['phone_number', 'university', 'admission_year', 'university_country',
                                        'citizenship', 'region', 'city'])
@@ -381,7 +361,7 @@ def set_university_info_admin(user_id):
 @module.route('/group/<int:group_id>', methods=['GET'])
 @jwt_required_role(['Admin', 'System', 'Creator'])
 def get_group(group_id):
-    group = get_or_raise(Group, 'id', group_id)
+    group = db_get_or_raise(Group, 'id', group_id)
     return make_response(group.serialize(), 200)
 
 
@@ -412,7 +392,7 @@ def add_group_admin():
 @module.route('/group/<int:group_id>/remove', methods=['POST'])
 @jwt_required_role(['Admin', 'System'])
 def remove_group_admin(group_id):
-    group = get_or_raise(Group, 'id', group_id)
+    group = db_get_or_raise(Group, 'id', group_id)
     db.session.delete(group)
     db.session.commit()
     return make_response({}, 200)
@@ -423,7 +403,7 @@ def remove_group_admin(group_id):
 @module.route('/user/self/groups', methods=['GET'])
 @jwt_required()
 def get_user_groups_self():
-    user = get_or_raise(User, "id", jwt_get_id())
+    user = db_get_or_raise(User, "id", jwt_get_id())
     groups = [grp.serialize() for grp in user.groups]
     return make_response({'groups': groups}, 200)
 
@@ -431,7 +411,7 @@ def get_user_groups_self():
 @module.route('/user/<int:user_id>/groups', methods=['GET'])
 @jwt_required_role(['Admin', 'System', 'Creator'])
 def get_user_groups_admin(user_id):
-    user = get_or_raise(User, "id", user_id)
+    user = db_get_or_raise(User, "id", user_id)
     groups = [grp.serialize() for grp in user.groups]
     return make_response({'groups': groups}, 200)
 
@@ -440,8 +420,8 @@ def get_user_groups_admin(user_id):
 @jwt_required_role(['Admin', 'System', 'Creator'])
 def add_user_groups(user_id):
     values = request.openapi.body
-    user = get_or_raise(User, "id", user_id)
-    group = get_or_raise(Group, 'id', values['group_id'])
+    user = db_get_or_raise(User, "id", user_id)
+    group = db_get_or_raise(Group, 'id', values['group_id'])
     if user in group.users:
         raise AlreadyExists('group.users', str(user_id))
     group.users.append(user)
@@ -453,8 +433,8 @@ def add_user_groups(user_id):
 @jwt_required_role(['Admin', 'System', 'Creator'])
 def remove_user_groups(user_id):
     values = request.openapi.body
-    user = get_or_raise(User, "id", user_id)
-    group = get_or_raise(Group, 'id', values['group_id'])
+    user = db_get_or_raise(User, "id", user_id)
+    group = db_get_or_raise(Group, 'id', values['group_id'])
     if user not in group.users:
         raise NotFound('group.users', str(user_id))
     group.users.remove(user)
