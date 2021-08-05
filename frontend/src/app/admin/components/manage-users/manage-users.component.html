@@ -1,11 +1,14 @@
 <div class="container_main" [style]="{'min-height': minContainerHeight + 'px'}">
     <div id="table-header">
         <div class="row">
-            <div class="col-md-4"></div>
+            <div class="col-md-4">
+            </div>
             <div class="col-md-1">
                 <button class="button-round" id="sertificate-button">
                     <svg width="21" height="21" viewBox="0 0 21 21" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M14 0.875H3.5C2.5375 0.875 1.75 1.6625 1.75 2.625V14.875H3.5V2.625H14V0.875ZM13.125 4.375L18.375 9.625V18.375C18.375 19.3375 17.5875 20.125 16.625 20.125H6.99125C6.02875 20.125 5.25 19.3375 5.25 18.375L5.25875 6.125C5.25875 5.1625 6.0375 4.375 7 4.375H13.125ZM12.25 10.5H17.0625L12.25 5.6875V10.5Z" fill="white"/>
+                        <path
+                            d="M14 0.875H3.5C2.5375 0.875 1.75 1.6625 1.75 2.625V14.875H3.5V2.625H14V0.875ZM13.125 4.375L18.375 9.625V18.375C18.375 19.3375 17.5875 20.125 16.625 20.125H6.99125C6.02875 20.125 5.25 19.3375 5.25 18.375L5.25875 6.125C5.25875 5.1625 6.0375 4.375 7 4.375H13.125ZM12.25 10.5H17.0625L12.25 5.6875V10.5Z"
+                            fill="white"/>
                     </svg>
                 </button>
             </div>
@@ -24,7 +27,7 @@
                 <span>Статистика</span>
             </div>
             <div class="col-md-1">
-                <button class="button-round" id="add-button">
+                <button class="button-round" id="add-button" (click)="modalVisible = true">
                     <svg width="21" height="21" viewBox="0 0 21 21" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <path
                             d="M16.625 11.375H11.375V16.625H9.625V11.375H4.375V9.625H9.625V4.375H11.375V9.625H16.625V11.375Z"
@@ -58,5 +61,20 @@
             [rowData]="users.users"
             [columnDefs]="columnDefs">
         </ag-grid-angular>
+    </div>
+</div>
+
+<div #modal class="add-user-modal" *ngIf="modalVisible">
+    <div class="add-user-modal-content">
+        <svg (click)="modalVisible = false" width="22" height="23" viewBox="0 0 22 23" fill="none"
+             xmlns="http://www.w3.org/2000/svg">
+            <path d="M5.5 5.92773L17.2097 17.6374" stroke="#14142B" stroke-width="2" stroke-linecap="round"
+                  stroke-linejoin="round"/>
+            <path d="M4.5 17.6367L16.2097 5.92702" stroke="#14142B" stroke-width="2" stroke-linecap="round"
+                  stroke-linejoin="round"/>
+        </svg>
+        <div class="add-user-form-container">
+            <h2>пользователя</h2>
+        </div>
     </div>
 </div>
