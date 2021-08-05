@@ -967,10 +967,6 @@ paths:
       responses:
         '200':
           description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/updateUserInContest'
         '404':
           description: User or group not found
           content:
@@ -1669,7 +1665,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/errorResponse'
 
-  /base_olympiad/{id_base_olympiad}/olympiad/{id_olympiad}/stage/{id_stage}/contest/{id_contest}/variant/{id_variant}/tasks/all:
+  /base_olympiad/{id_base_olympiad}/olympiad/{id_olympiad}/stage/{id_stage}/contest/{id_contest}/variant/{id_variant}/task/all:
     get:
       summary: list of tasks in variant
       parameters:
@@ -2176,6 +2172,27 @@ components:
                 type: integer
               num_of_task:
                 type: integer
+              recommended_answer:
+                type: string
+              start_value:
+                type: number
+                format: float
+                example:
+                  1.0
+              end_value:
+                type: number
+                format: float
+                example:
+                  2.0
+              all_answers_in_multiple_task:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    answer:
+                      type: string
+                    is_right_answer:
+                      type: boolean
     contestsInStage:
       title: Get contests in stage
       description: Request to get contests in stage
@@ -2233,6 +2250,9 @@ components:
         image_of_task:
           type: string
           format: binary
+          nullable: true
+          example:
+            null
         recommended_answer:
           type: string
     createRangeTask:
@@ -2249,12 +2269,19 @@ components:
         image_of_task:
           type: string
           format: binary
+          nullable: true
+          example:
+            null
         start_value:
           type: number
           format: float
+          example:
+            1.0
         end_value:
           type: number
           format: float
+          example:
+            2.0
     createMultipleTask:
       title: Create task with multiple choice
       description: Request to creation task with multiple choice
@@ -2268,12 +2295,15 @@ components:
         image_of_task:
           type: string
           format: binary
+          nullable: true
+          example:
+            null
         answers:
           type: array
           items:
             type: object
             properties:
-              answer:
+              task_answer:
                 type: string
               is_right_answer:
                 type: boolean
@@ -2293,6 +2323,7 @@ components:
         image_of_task:
           type: string
           format: binary
+          nullable: true
         recommended_answer:
           type: string
     rangeTaskInfo:
@@ -2312,6 +2343,7 @@ components:
         image_of_task:
           type: string
           format: binary
+          nullable: true
         start_value:
           type: number
           format: float
@@ -2412,6 +2444,7 @@ components:
         image_of_task:
           type: string
           format: binary
+          nullable: true
     moveUserToNextStage:
       title: Move user to contest
       description: Request to move user to contest

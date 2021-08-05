@@ -5,7 +5,7 @@ import enum
 from common import get_current_db
 
 # Constants
-from common.util import db_get_list, db_get_filter_all
+from common.util import db_get_list, db_get_filter_all, db_get_or_raise
 
 db = get_current_db()
 
@@ -448,9 +448,9 @@ taskInVariant = db.Table('task_in_variant',
 
 
 def add_task_in_Variant(variant_id, task_id):
-    variant = Variant.query.filter_by(Variant.variant_id == variant_id).one_or_none()
-    task = Task.query.filter_by(Task.task_id == task_id).one_or_none()
-    task.variants.append(variant)
+    variant = db_get_or_raise(Variant, "variant_id", str(variant_id))
+    task = db_get_or_raise(Task, "variant_id", str(task_id))
+    variant.tasks.append(task)
 
     """   taskInVariant.insert().values(
         variant_id=variant_id,
@@ -567,12 +567,6 @@ class UserInContest(db.Model):
             self.user_status = user_status
 
 
-class TaskType(enum.Enum):
-    plain_task = 1
-    range_task = 2
-    multiple_task = 3
-
-
 class Task(db.Model):
     """
     Class describing a Base Task model.
@@ -586,7 +580,7 @@ class Task(db.Model):
     task_id = db.Column(db.Integer, autoincrement=True, primary_key=True)
     num_of_task = db.Column(db.Integer, nullable=False)
     image_of_task = db.Column(db.LargeBinary, nullable=True)
-    task_type = db.Column(db.Enum(TaskType))
+    task_type = db.Column(db.Unicode(256))
 
     __mapper_args__ = {
         'polymorphic_identity': 'base_task',
@@ -594,11 +588,11 @@ class Task(db.Model):
     }
 
 
-def add_plain_task(db_session, num_of_task, image_of_task, task_type, recommended_answer):
+def add_plain_task(db_session, num_of_task, image_of_task, recommended_answer):
     task = PlainTask(
         num_of_task=num_of_task,
         image_of_task=image_of_task,
-        task_type=task_type,
+        task_type=PlainTask.__name__,
         recommended_answer=recommended_answer,
     )
     db_session.add(task)
@@ -620,7 +614,7 @@ class PlainTask(Task):
     recommended_answer = db.Column(db.Text, nullable=False)
 
     __mapper_args__ = {
-        'polymorphic_identity': 'plain_task',
+        'polymorphic_identity': 'PlainTask',
     }
 
     def serialize(self):
@@ -628,8 +622,6 @@ class PlainTask(Task):
             {
                 'task_id': self.task_id,
                 'num_of_task': self.num_of_task,
-                'image_of_task': self.image_of_task,
-                'task_type': self.task_type,
                 'recommended_answer': self.recommended_answer,
             }
 
@@ -642,11 +634,11 @@ class PlainTask(Task):
             self.recommended_answer = recommended_answer
 
 
-def add_range_task(db_session, num_of_task, image_of_task, task_type, start_value, end_value):
+def add_range_task(db_session, num_of_task, image_of_task, start_value, end_value):
     task = RangeTask(
         num_of_task=num_of_task,
         image_of_task=image_of_task,
-        task_type=task_type,
+        task_type=RangeTask.__name__,
         start_value=start_value,
         end_value=end_value,
     )
@@ -671,7 +663,7 @@ class RangeTask(Task):
     end_value = db.Column(db.Float, nullable=False)
 
     __mapper_args__ = {
-        'polymorphic_identity': 'range_task',
+        'polymorphic_identity': 'RangeTask',
     }
 
     def serialize(self):
@@ -679,9 +671,6 @@ class RangeTask(Task):
             {
                 'task_id': self.task_id,
                 'num_of_task': self.num_of_task,
-                'image_of_task': self.image_of_task,
-                'task_type': self.task_type,
-                'recommended_answer': self.recommended_answer,
                 'start_value': self.start_value,
                 'end_value': self.end_value,
             }
@@ -697,11 +686,11 @@ class RangeTask(Task):
             self.end_value = end_value
 
 
-def add_multiple_task(db_session, num_of_task, image_of_task, task_type):
+def add_multiple_task(db_session, num_of_task, image_of_task):
     task = MultipleChoiceTask(
         num_of_task=num_of_task,
         image_of_task=image_of_task,
-        task_type=task_type
+        task_type=MultipleChoiceTask.__name__
     )
     db_session.add(task)
     db_session.flush()
@@ -722,7 +711,7 @@ class MultipleChoiceTask(Task):
                                                    backref=db.backref('multiple_task', lazy='joined'))
 
     __mapper_args__ = {
-        'polymorphic_identity': 'multiple_task',
+        'polymorphic_identity': 'MultipleChoiceTask',
     }
 
     def serialize(self):
@@ -730,9 +719,7 @@ class MultipleChoiceTask(Task):
             {
                 'task_id': self.task_id,
                 'num_of_task': self.num_of_task,
-                'image_of_task': self.image_of_task,
-                'task_type': self.task_type,
-                'all_answers_in_multiple_task': self.all_answers_in_multiple_task,
+                'all_answers_in_multiple_task': [answer.serialize() for answer in self.all_answers_in_multiple_task],
             }
 
     def update(self, num_of_task=None, image_of_task=None, all_answers_in_multiple_task=None):
