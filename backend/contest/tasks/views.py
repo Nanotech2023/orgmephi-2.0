@@ -131,6 +131,7 @@ def olympiad_create_simple(id_base_olympiad):
     start_time = values['start_time']
     end_time = values['end_time']
     previous_contest_id = values.get('previous_contest_id', None)
+    location = values.get('location', None)
     previous_participation_condition = values.get('previous_participation_condition', None)
 
     try:
@@ -140,7 +141,8 @@ def olympiad_create_simple(id_base_olympiad):
                                      start_time,
                                      end_time,
                                      previous_contest_id,
-                                     previous_participation_condition)
+                                     previous_participation_condition,
+                                     location)
 
         db.session.commit()
 
@@ -181,11 +183,8 @@ def olympiad_create_composite(id_base_olympiad):
 @module.route('/base_olympiad/<int:id_base_olympiad>/olympiad/all', methods=['GET'])
 @jwt_required_role(['Admin', 'System', 'Creator'])
 def olympiads_all(id_base_olympiad):
-    try:
-        base_contest = db_get_or_raise(BaseContest, "base_contest_id", str(id_base_olympiad))
-        all_olympiads = [olympiad.serialize() for olympiad in base_contest.child_contests]
-    except Exception:
-        raise
+    base_contest = db_get_or_raise(BaseContest, "base_contest_id", str(id_base_olympiad))
+    all_olympiads = [olympiad.serialize() for olympiad in base_contest.child_contests]
     return make_response(
         {"olympiad_list": all_olympiads}, 200)
 
@@ -309,7 +308,6 @@ def stages_all(id_base_olympiad, id_olympiad):
 
 
 # Contest views
-
 @module.route('/base_olympiad/<int:id_base_olympiad>/olympiad/<int:id_olympiad>/stage/<int:id_stage>/contest'
               '/createsimple',
               methods=['POST'])
@@ -317,13 +315,13 @@ def stages_all(id_base_olympiad, id_olympiad):
 def contest_create_simple(id_base_olympiad, id_olympiad, id_stage):
     values = request.openapi.body
 
-    location = values['location']
-    composite_type = values['composite_type']
     visibility = values['visibility']
     start_time = values['start_time']
     end_time = values['end_time']
-    previous_contest_id = values['previous_contest_id']
-    previous_participation_condition = values['previous_participation_condition']
+    location = values.get('location', None)
+    previous_contest_id = values.get('previous_contest_id', None)
+    previous_participation_condition = values.get('previous_participation_condition', None)
+
 
     try:
         contest = add_simple_contest(db.session,
@@ -331,12 +329,11 @@ def contest_create_simple(id_base_olympiad, id_olympiad, id_stage):
                                      visibility,
                                      start_time,
                                      end_time,
-                                     composite_type,
                                      previous_contest_id,
                                      previous_participation_condition,
                                      location)
 
-        stage = db_get_or_raise(Stage, Stage.stage_id, id_stage)
+        stage = db_get_or_raise(Stage, "stage_id", str(id_stage))
         stage.contests.append(contest)
 
         db.session.commit()
@@ -344,7 +341,11 @@ def contest_create_simple(id_base_olympiad, id_olympiad, id_stage):
     except Exception:
         db.session.rollback()
         raise
-    return make_response(contest.serialize(), 200)
+    return make_response(
+        {
+            'contest_id': contest.contest_id
+        }
+        , 200)
 
 
 @module.route('/base_olympiad/<int:id_base_olympiad>/olympiad/<int:id_olympiad>/stage/<int:id_stage>/contest'
@@ -354,26 +355,26 @@ def contest_create_simple(id_base_olympiad, id_olympiad, id_stage):
 def contest_create_composite(id_base_olympiad, id_olympiad, id_stage):
     values = request.openapi.body
 
-    location = values['location']
-    composite_type = values['composite_type']
     visibility = values['visibility']
 
     try:
         contest = add_composite_contest(db.session,
                                         id_base_olympiad,
-                                        composite_type,
                                         visibility)
 
-        add_contest_in_stage(stage_id=id_stage,
-                             contest_id=contest.contest_id,
-                             location=location)
+        stage = db_get_or_raise(Stage, "stage_id", str(id_stage))
+        stage.contests.append(contest)
 
         db.session.commit()
 
     except Exception:
         db.session.rollback()
         raise
-    return make_response(contest.serialize(), 200)
+    return make_response(
+        {
+            'contest_id': contest.contest_id
+        }
+        , 200)
 
 
 @module.route(
@@ -383,7 +384,7 @@ def contest_create_composite(id_base_olympiad, id_olympiad, id_stage):
 @jwt_required_role(['Admin', 'System', 'Creator'])
 def contest_remove(id_base_olympiad, id_olympiad, id_stage, id_contest):
     try:
-        contest = db_get_or_raise(Contest, Contest.contest_id, id_olympiad)
+        contest = db_get_or_raise(Contest, "contest_id", str(id_contest))
         db.session.delete(contest)
         db.session.commit()
 
@@ -398,7 +399,7 @@ def contest_remove(id_base_olympiad, id_olympiad, id_stage, id_contest):
     methods=['GET', 'PATCH'])
 @jwt_required_role(['Admin', 'System', 'Creator'])
 def contest_response(id_base_olympiad, id_olympiad, id_stage, id_contest):
-    contest = db_get_or_raise(Contest, Contest.contest_id, id_olympiad)
+    contest = db_get_or_raise(Contest, "contest_id", id_contest)
     if request.method == 'GET':
         return make_response(contest.serialize(), 200)
 
@@ -419,10 +420,8 @@ def contest_response(id_base_olympiad, id_olympiad, id_stage, id_contest):
               methods=['GET'])
 @jwt_required_role(['Admin', 'System', 'Creator'])
 def contests_all(id_base_olympiad, id_olympiad, id_stage):
-    stage = db_get_or_raise(Stage, Stage.stage_id, id_stage)
-
-    all_contests = stage.contests
-
+    stage = db_get_or_raise(Stage, "stage_id", str(id_stage))
+    all_contests = [contest.serialize() for contest in stage.contests]
     return make_response(
         {"olympiad_list": all_contests}, 200)
 

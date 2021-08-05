@@ -201,8 +201,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/errorResponse'
-
-
   /base_olympiad/{id_base_olympiad}/olympiad/all:
     get:
       summary: list of olympiads (main contests)
@@ -229,7 +227,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/errorResponse'
-
   /base_olympiad/{id_base_olympiad}/olympiad/{id_olympiad}/remove:
     post:
       summary: Remove olympiad (main contest)
@@ -258,7 +255,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/errorResponse'
-
   /base_olympiad/{id_base_olympiad}/olympiad/{id_olympiad}:
     get:
       summary: Get info for the olympiad (main contest)
@@ -367,8 +363,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/errorResponse'
-
-
   /base_olympiad/{id_base_olympiad}/olympiad/{id_olympiad}/stage/all:
     get:
       summary: list of stages in olympiad
@@ -401,8 +395,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/errorResponse'
-
-
   /base_olympiad/{id_base_olympiad}/olympiad/{id_olympiad}/stage/{id_stage}/remove:
     post:
       summary: Remove stage from olympiad
@@ -437,7 +429,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/errorResponse'
-
   /base_olympiad/{id_base_olympiad}/olympiad/{id_olympiad}/stage/{id_stage}:
     get:
       summary: Get common info for a different stage
@@ -520,7 +511,7 @@ paths:
 
   /base_olympiad/{id_base_olympiad}/olympiad/{id_olympiad}/stage/{id_stage}/contest/createsimple:
     post:
-      summary: Create a new contest
+      summary: Create a new simple contest
       parameters:
         - in: path
           description: Id of the base simple olympiad
@@ -529,14 +520,14 @@ paths:
           schema:
             type: integer
         - in: path
-          description: Id of the stage
-          name: id_stage
+          description: Id of the olympiad
+          name: id_olympiad
           required: true
           schema:
             type: integer
         - in: path
-          description: Id of the olympiad
-          name: id_olympiad
+          description: Id of the stage
+          name: id_stage
           required: true
           schema:
             type: integer
@@ -563,8 +554,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/errorResponse'
-
-
   /base_olympiad/{id_base_olympiad}/olympiad/{id_olympiad}/stage/{id_stage}/contest/createcomposite:
     post:
       summary: Create a new composite contest
@@ -576,14 +565,14 @@ paths:
           schema:
             type: integer
         - in: path
-          description: Id of the stage
-          name: id_stage
+          description: Id of the olympiad
+          name: id_olympiad
           required: true
           schema:
             type: integer
         - in: path
-          description: Id of the olympiad
-          name: id_olympiad
+          description: Id of the stage
+          name: id_stage
           required: true
           schema:
             type: integer
@@ -2017,8 +2006,8 @@ components:
           type: string
 
     createSimpleContest:
-      title: Create contest
-      description: Request to contest creation
+      title: Create simple contest
+      description: Request to simplecontest creation
       required:
         - visibility
         - start_time
@@ -2042,16 +2031,14 @@ components:
           enum: ["Participant", "Laureate", "Winner"]
 
     createCompositeContest:
-      title: Create contest
-      description: Request to contest creation
+      title: Create composite contest
+      description: Request to composite contest creation
       required:
         - visibility
-        - location
       properties:
-        location:
-          type: string
         visibility:
           type: boolean
+
     commonContestInfo:
       title: Contest common info
       description: Request to get contest info

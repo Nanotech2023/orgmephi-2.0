@@ -372,8 +372,7 @@ location: address + room or link to online
 contestsInStage = db.Table('contests_in_stage',
                            db.Column('stage_id', db.Integer, db.ForeignKey('stage.stage_id'),
                                      primary_key=True),
-                           db.Column('contest_id', db.Integer, db.ForeignKey('contest.contest_id'), primary_key=True),
-                           db.Column('location', db.Text, nullable=False)
+                           db.Column('contest_id', db.Integer, db.ForeignKey('contest.contest_id'), primary_key=True)
                            )
 
 
