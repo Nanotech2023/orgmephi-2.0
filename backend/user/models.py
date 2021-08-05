@@ -298,7 +298,6 @@ def add_user(db_session, username, password_hash, role, reg_type):
         type=reg_type
     )
     db_session.add(user)
-    db_session.flush()
     return user
 
 
@@ -316,22 +315,19 @@ def get_all(entity):
 
 def add_personal_info(db_session, user, email, first_name, second_name, middle_name, date_of_birth):
     user_info = UserInfo(
-        user_id=user.id,
         email=email,
         first_name=first_name,
         second_name=second_name,
         middle_name=middle_name,
         date_of_birth=date_of_birth
     )
-    db_session.add(user_info)
-    db_session.flush()
+    user.user_info = user_info
 
 
 def add_university_info(db_session, user, phone, university_name, admission_year, university_country, citizenship,
                         region, city):
     university = University.query.filter(University.name == university_name).one_or_none()
     student_info = StudentInfo(
-        user_id=user.id,
         phone=phone,
         university=(university.id if university is not None else None),
         custom_university=(university_name if university is None else None),
@@ -341,15 +337,12 @@ def add_university_info(db_session, user, phone, university_name, admission_year
         region=region,
         city=city
     )
-    db_session.add(student_info)
-    db_session.flush()
-    return student_info
+    user.university_info = university
 
 
 def add_group(db_session, name):
     group = Group(name=name)
     db_session.add(group)
-    db_session.flush()
     return group
 
 
