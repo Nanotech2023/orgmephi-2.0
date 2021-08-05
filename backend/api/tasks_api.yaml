@@ -22,8 +22,7 @@ paths:
         content:
           application/json:
             schema:
-              oneOf:
-                - $ref: '#/components/schemas/createBaseContest'
+              $ref: '#/components/schemas/createBaseContest'
       security:
         - cookieJWTAuth: [ ]
         - CSRFToken: [ ]
@@ -148,8 +147,7 @@ paths:
         content:
           application/json:
             schema:
-              oneOf:
-                - $ref: '#/components/schemas/createSimpleContest'
+              $ref: '#/components/schemas/createSimpleContest'
       parameters:
         - in: path
           description: Id of the base olympiad
@@ -182,8 +180,7 @@ paths:
         content:
           application/json:
             schema:
-              oneOf:
-                - $ref: '#/components/schemas/createCompositeContest'
+              $ref: '#/components/schemas/createCompositeContest'
       parameters:
         - in: path
           description: Id of the base olympiad
@@ -1379,8 +1376,7 @@ paths:
         content:
           application/json:
             schema:
-              oneOf:
-                - $ref: '#/components/schemas/createPlainTask'
+              $ref: '#/components/schemas/createPlainTask'
       security:
         - cookieJWTAuth: [ ]
         - CSRFToken: [ ]
@@ -1438,8 +1434,7 @@ paths:
         content:
           application/json:
             schema:
-              oneOf:
-                - $ref: '#/components/schemas/createRangeTask'
+              $ref: '#/components/schemas/createRangeTask'
       security:
         - cookieJWTAuth: [ ]
         - CSRFToken: [ ]
@@ -1497,8 +1492,7 @@ paths:
         content:
           application/json:
             schema:
-              oneOf:
-                - $ref: '#/components/schemas/createMultipleTask'
+              $ref: '#/components/schemas/createMultipleTask'
       security:
         - cookieJWTAuth: [ ]
         - CSRFToken: [ ]
@@ -2215,7 +2209,7 @@ components:
             type: object
             properties:
               location:
-                type: String
+                type: string
               start_time:
                 type: string
                 format: 'date-time'
