@@ -5,7 +5,8 @@ from flask import request, make_response
 
 from common import get_current_app, get_current_module
 from common.jwt_verify import jwt_required_role
-from common.util import db_get_all, db_get_or_raise
+from common.util import db_get_all, db_get_or_raise, db_get_list
+from common.errors import RequestError
 from .models import *
 
 db = get_current_db()
@@ -24,7 +25,13 @@ def base_olympiad_create():
     description = values['description']
     rules = values['rules']
     olympiad_type = values['olympiad_type']
-    certificate_template = values['certificate_template']
+
+    # TODO CORRECT BINARY EXAMPLE
+
+    if 'certificate_template' not in values:
+        certificate_template = None
+    else:
+        certificate_template = values['certificate_template']
     winning_condition = values['winning_condition']
     laureate_condition = values['laureate_condition']
     subject = values['subject']
@@ -43,22 +50,33 @@ def base_olympiad_create():
 
         for target_class in target_classes:
             baseContest.target_classes.append(TargetClass(
-                contest_id=baseContest.contest_id,
-                target_class_=olympiad_target_class_dict[target_class],
+                contest_id=baseContest.base_contest_id,
+                target_class=olympiad_target_class_dict[target_class],
             ))
 
         db.session.commit()
+    except RequestError as req:
+        req.to_response()
+        db.session.rollback()
+        raise
     except Exception:
         db.session.rollback()
         raise
-    return make_response(baseContest.serialize(), 200)
+    return make_response(
+        {
+            'base_contest_id': baseContest.base_contest_id
+        }
+        , 200)
 
 
 @module.route('/base_olympiad/<int:id_base_olympiad>/remove', methods=['POST'])
 @jwt_required_role(['Admin', 'System', 'Creator'])
 def base_olympiad_remove(id_base_olympiad):
     try:
-        baseContest = db_get_or_raise(BaseContest, BaseContest.base_contest_id, id_base_olympiad)
+        target_classes = db_get_list(TargetClass, "contest_id", id_base_olympiad)
+        for target_class in target_classes:
+            db.session.delete(target_class)
+        baseContest = db_get_or_raise(BaseContest, "base_contest_id", str(id_base_olympiad))
         db.session.delete(baseContest)
         db.session.commit()
     except Exception:
@@ -70,7 +88,7 @@ def base_olympiad_remove(id_base_olympiad):
 @module.route('/base_olympiad/<int:id_base_olympiad>', methods=['GET', 'PATCH'])
 @jwt_required_role(['Admin', 'System', 'Creator'])
 def base_olympiad_response(id_base_olympiad):
-    baseContest = db_get_or_raise(BaseContest, BaseContest.base_contest_id, id_base_olympiad)
+    baseContest = db_get_or_raise(BaseContest, "base_contest_id", id_base_olympiad)
 
     if request.method == 'GET':
         return make_response(baseContest.serialize(), 200)
@@ -79,8 +97,9 @@ def base_olympiad_response(id_base_olympiad):
         values = request.openapi.body
 
         try:
-            baseContest.update(**values)
             target_classes = values["target_classes"]
+            del values["target_classes"]
+            baseContest.update(**values)
             if target_classes is not None:
                 update_target_class(db.session, id_base_olympiad, target_classes)
             db.session.commit()

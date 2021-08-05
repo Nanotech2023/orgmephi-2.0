@@ -40,6 +40,18 @@ def db_get_list(table: Type[Model], field: str, value: str):
     return table.query.filter_by(**{field: value}).all()
 
 
+def db_get_filter_all(table: Type[Model], field: str, value: str):
+    """
+
+    Retrieve objects from the database
+    :param table: table class
+    :param field: attribute to filter by
+    :param value: value to filter by
+    :return: Table instances that match the provided filter
+    """
+    return table.query.filter_by(**{field: value})
+
+
 def db_get_all(table: Type[Model]):
     """
     Retrieve all objects from the same table of the database

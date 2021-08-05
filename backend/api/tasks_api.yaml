@@ -1842,17 +1842,18 @@ components:
               certificate_template:
                 type: string
                 format: binary
+                nullable: true
               olympiad_type:
                 type: string
-                enum: [Rosatom, Kurchatov, Other]
+                enum: ["Rosatom", "Kurchatov", "Other"]
               subject:
                 type: string
-                enum: [Math, Physics, Informatics]
+                enum: ["Math", "Physics", "Informatics"]
               target_classes:
                 type: array
                 items:
                   type: string
-                  enum: [5, 6, 7, 8, 9, 10, 11, student]
+                  enum: ["5", "6", "7", "8", "9", "10", "11", "student"]
     createBaseContest:
       title: Create base contest
       description: Request to base contest creation
@@ -1862,7 +1863,6 @@ components:
         - rules
         - winning_condition
         - laureate_condition
-        - certificate_template
         - olympiad_type
         - subject
         - target_classes
@@ -1876,23 +1876,29 @@ components:
         winning_condition:
           type: number
           format: float
+          example:
+            0.5
         laureate_condition:
           type: number
           format: float
+          example:
+            0.5
         certificate_template:
           type: string
           format: binary
+          example:
+            000
         olympiad_type:
           type: string
-          enum: [Rosatom, Kurchatov, Other]
+          enum: ["Rosatom", "Kurchatov", "Other"]
         subject:
           type: string
-          enum: [Math, Physics, Informatics]
+          enum: ["Math", "Physics", "Informatics"]
         target_classes:
           type: array
           items:
             type: string
-            enum: [5, 6, 7, 8, 9, 10, 11, student]
+            enum: ["5", "6", "7", "8", "9", "10", "11", "student"]
     commonBaseContestInfo:
       title: Base contest common info
       description: Request to get base contest info
@@ -1906,7 +1912,6 @@ components:
         - certificate_template
         - olympiad_type
         - subject
-        - target_classes
       properties:
         base_contest_id:
           type: integer
@@ -1925,17 +1930,13 @@ components:
         certificate_template:
           type: string
           format: binary
+          nullable: true
         olympiad_type:
           type: string
-          enum: [Rosatom, Kurchatov, Other]
+          enum: ["Rosatom", "Kurchatov", "Other"]
         subject:
           type: string
-          enum: [Math, Physics, Informatics]
-        target_classes:
-          type: array
-          items:
-            type: string
-            enum: [5, 6, 7, 8, 9, 10, 11, student]
+          enum: ["Math", "Physics", "Informatics"]
     commonBaseContestId:
       title: Base contest id
       description: Request to get base contest id as response for creation
@@ -1963,17 +1964,18 @@ components:
         certificate_template:
           type: string
           format: binary
+          nullable: true
         olympiad_type:
           type: string
-          enum: [Rosatom, Kurchatov, Other]
+          enum: ["Rosatom", "Kurchatov", "Other"]
         subject:
           type: string
-          enum: [Math, Physics, Informatics]
+          enum: ['Math', "Physics", "Informatics"]
         target_classes:
           type: array
           items:
             type: string
-            enum: [5, 6, 7, 8, 9, 10, 11, student]
+            enum: ["5", "6", "7", "8", "9", "10", "11", "student"]
 
     createStage:
       title: Create stage
@@ -2039,12 +2041,12 @@ components:
           type: boolean
         composite_type:
           type: string
-          enum: [Simple, Composite]
+          enum: ["Simple", "Composite"]
         previous_contest_id:
           type: integer
         user_status:
           type: string
-          enum: [Participant, Laureate, Winner]
+          enum: ["Participant", "Laureate", "Winner"]
 
     createCompositeContest:
       title: Create contest
@@ -2071,7 +2073,7 @@ components:
       properties:
         composite_type:
           type: string
-          enum: [Simple, Composite]
+          enum: ["Simple", "Composite"]
         location:
           type: string
         start_time:
@@ -2160,7 +2162,7 @@ components:
                 type: integer
               user_status:
                 type: string
-                enum: [Participant, Laureate, Winner]
+                enum: ["Participant", "Laureate", "Winner"]
     updateUserInContest:
       title: Add or removeuser to contest or stage
       description: Request to add or remove user user to contest or stage
@@ -2222,7 +2224,7 @@ components:
                 type: boolean
               composite_type:
                 type: string
-                enum: [Simple, Composite]
+                enum: ["Simple", "Composite"]
     variantsInContest:
       title: Get variants in contest
       description: Request to get variants in contest

@@ -5,6 +5,7 @@ import enum
 from common import get_current_db
 
 # Constants
+from common.util import db_get_list, db_get_filter_all
 
 db = get_current_db()
 
@@ -17,7 +18,7 @@ class UserStatusEnum(enum.Enum):
     Winner = "Winner",
 
 
-user_status_dict = {status.value: status for status in UserStatusEnum}
+user_status_dict = {status.value[0]: status for status in UserStatusEnum}
 
 
 class CompositeTypeEnum(enum.Enum):
@@ -25,7 +26,7 @@ class CompositeTypeEnum(enum.Enum):
     Simple = "Simple",
 
 
-composite_type_dict = {composite.value: composite for composite in CompositeTypeEnum}
+composite_type_dict = {composite.value[0]: composite for composite in CompositeTypeEnum}
 
 
 class OlympiadTypeEnum(enum.Enum):
@@ -34,7 +35,7 @@ class OlympiadTypeEnum(enum.Enum):
     Other = "Other",
 
 
-olympiad_type_dict = {type.value: type for type in OlympiadTypeEnum}
+olympiad_type_dict = {_type.value[0]: _type for _type in OlympiadTypeEnum}
 
 
 class OlympiadSubjectEnum(enum.Enum):
@@ -43,7 +44,7 @@ class OlympiadSubjectEnum(enum.Enum):
     Informatics = "Informatics",
 
 
-olympiad_subject_dict = {subject.value: subject for subject in OlympiadSubjectEnum}
+olympiad_subject_dict = {subject.value[0]: subject for subject in OlympiadSubjectEnum}
 
 
 class TargetClassEnum(enum.Enum):
@@ -57,7 +58,7 @@ class TargetClassEnum(enum.Enum):
     student = "student",
 
 
-olympiad_target_class_dict = {target.value: target for target in TargetClassEnum}
+olympiad_target_class_dict = {target.value[0]: target for target in TargetClassEnum}
 
 
 def add_base_contest(db_session, name, laureate_condition, winning_condition, description, rules, olympiad_type,
@@ -124,12 +125,24 @@ class BaseContest(db.Model):
                 'name': self.name,
                 'description': self.description,
                 'rules': self.rules,
-                'olympiad_type': self.olympiad_type,
-                'subject': self.subject,
+                'olympiad_type': self.olympiad_type.value[0],
+                'subject': self.subject.value[0],
                 'certificate_template': self.certificate_template,
                 'winning_condition': self.winning_condition,
                 'laureate_condition': self.laureate_condition,
+            }
+
+    def serialize_target(self):
+        return \
+            {
+                'base_contest_id': self.base_contest_id,
                 'target_classes': self.target_classes,
+            }
+
+    def serialize_child(self):
+        return \
+            {
+                'base_contest_id': self.base_contest_id,
                 'child_contests': self.child_contests
             }
 
@@ -159,7 +172,7 @@ class BaseContest(db.Model):
 
 
 def update_target_class(db_session, base_contest_id, target_classes):
-    TargetClass.query.filter_by(TargetClass.contest_id == base_contest_id).delete()
+    db_get_filter_all(TargetClass, "contest_id", base_contest_id).delete()
 
     for target_class_ in target_classes:
         target_class = TargetClass(
@@ -180,7 +193,8 @@ class TargetClass(db.Model):
     target_class = db.Column(db.Enum(TargetClassEnum), primary_key=True)
 
     def serialize(self):
-        return {'contest_id': self.contest_id, 'target_class': self.target_class}
+        return {'contest_id': self.contest_id,
+                'target_class': self.target_class.value}
 
 
 def add_target_class(db_session, contest_id, target_class_):
@@ -273,7 +287,7 @@ class SimpleContest(Contest):
             {
                 'contest_id': self.contest_id,
                 'visibility': self.visibility,
-                'composite_type': self.composite_type,
+                'composite_type': self.composite_type.value[0],
                 'start_date': self.description.isoformat(),
                 'end_date': self.end_date.isoformat(),
                 'location': self.location,
@@ -543,7 +557,7 @@ class UserInContest(db.Model):
         return \
             {
                 'user_id': self.user_id,
-                'user_status': self.user_status,
+                'user_status': self.user_status.value[0],
                 'variant_id': self.variant_id
             }
 
