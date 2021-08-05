@@ -247,7 +247,11 @@ def stage_create(id_base_olympiad, id_olympiad):
         db.session.rollback()
         raise
 
-    return make_response(stage.serialize(), 200)
+    return make_response(
+        {
+            'stage_id': stage.stage_id
+        }
+        , 200)
 
 
 @module.route('/base_olympiad/<int:id_base_olympiad>/olympiad/<int:id_olympiad>/stage/<int:id_stage>/remove',
@@ -255,7 +259,8 @@ def stage_create(id_base_olympiad, id_olympiad):
 @jwt_required_role(['Admin', 'System', 'Creator'])
 def stage_remove(id_base_olympiad, id_olympiad, id_stage):
     try:
-        Stage.query.filter_by(Stage.stage_id == id_stage).delete()
+        stage = db_get_or_raise(Stage, "stage_id", str(id_stage))
+        db.session.delete(stage)
         db.session.commit()
     except Exception:
         db.session.rollback()
@@ -267,12 +272,12 @@ def stage_remove(id_base_olympiad, id_olympiad, id_stage):
               methods=['GET', 'PATCH'])
 @jwt_required_role(['Admin', 'System', 'Creator'])
 def stage_response(id_base_olympiad, id_olympiad, id_stage):
-    stage = db_get_or_raise(Stage, Stage.stage_id, id_stage)
+    stage = db_get_or_raise(Stage, "stage_id", str(id_stage))
+
     if request.method == 'GET':
         return make_response(
-            {
-                stage.serialize()
-            }, 200)
+            stage.serialize()
+            , 200)
 
     elif request.method == 'PATCH':
         try:
@@ -291,17 +296,16 @@ def stage_response(id_base_olympiad, id_olympiad, id_stage):
 def stages_all(id_base_olympiad, id_olympiad):
     try:
 
-        contest = db_get_or_raise(CompositeContest, CompositeContest.contest_id, id_olympiad)
-        stages = contest.stages
-        all_stages = [stage.serialize() for stage in stages]
-
-        return make_response(
-            {
-                "stages_list": all_stages
-            }, 200)
+        contest = db_get_or_raise(CompositeContest, "contest_id", str(id_olympiad))
+        all_stages = [stage.serialize() for stage in contest.stages]
 
     except Exception:
         raise
+
+    return make_response(
+        {
+            "stages_list": all_stages
+        }, 200)
 
 
 # Contest views
