@@ -26,6 +26,13 @@ class Response(db.Model):
     statuses = db.relationship('ResponseStatus', backref='response', lazy=True)
     answers = db.relationship('ResponseAnswer', backref='response', lazy=True)
 
+    def prepare_for_list(self):
+        mark = ResponseStatus.query.filter(work_id=self.work_id).order_by(ResponseStatus.timestamp.desc()).one().mark
+        return {
+            'user_id': self.user_id,
+            'mark': mark
+        }
+
 
 class ResponseStatusEnum(enum.Enum):
     """
@@ -46,7 +53,6 @@ class ResponseStatusEnum(enum.Enum):
 
 
 work_status = {status.value: status for status in ResponseStatusEnum}
-work_status_reverse = {val: key for key, val in work_status.items()}
 
 
 class ResponseStatus(db.Model):
@@ -67,17 +73,27 @@ class ResponseStatus(db.Model):
     timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
     status = db.Column(db.Enum(ResponseStatusEnum), nullable=False)
     mark = db.Column(db.Float)
+    appeal = db.relationship('Appeal', backref='status', lazy=True)
 
     def serialize(self):
         if self.mark is None:
             return {
-                'status':work_status_reverse[self.status]
+                'status': self.status.value
             }
         else:
             return {
-                'status': work_status_reverse[self.status],
+                'status': self.status.value,
                 'mark': self.mark
             }
+
+    def status_for_history(self):
+        appeal_id = self.appeal[0].appeal_id if len(self.appeal) > 0 else None
+        return {
+            'status:': self.status.value,
+            'datetime': self.timestamp,
+            'appeal_id': appeal_id,
+            'mark': self.mark
+        }
 
 
 class AppealStatusEnum(enum.Enum):
@@ -95,7 +111,6 @@ class AppealStatusEnum(enum.Enum):
 
 
 appeal_status = {status.value: status for status in AppealStatusEnum}
-appeal_status_reverse = {val: key for key, val in appeal_status.items()}
 
 
 class Appeal(db.Model):
@@ -155,7 +170,6 @@ class ResponseFiletypeEnum(enum.Enum):
 
 
 filetype_dict = {filetype.value: filetype for filetype in ResponseFiletypeEnum}
-filetype_reverse = {val: key for key, val in filetype_dict.items()}
 
 
 class ResponseAnswer(db.Model):
@@ -188,14 +202,6 @@ class ResponseAnswer(db.Model):
             self.answer = answer_new
         if filetype_new is not None:
             self.filetype = filetype_dict[filetype_new]
-
-
-def get_one_or_null(entity, field, value):
-    return entity.query.filter_by(**{field: value}).one_or_none()
-
-
-def get_list(entity, field, value):
-    return entity.query.filter_by(**{field: value}).all()
 
 
 def add_user_response(db_session, user_id, contest_id):
@@ -239,30 +245,6 @@ def add_response_answer(db_session, work_id, task_id, answer, filetype):
     db_session.add(response_answer)
     db_session.flush()
     return response_answer
-
-
-def get_status_history(db_session, work_id, status):
-    history = []
-    appeals = ResponseStatus.query.join(Appeal, ResponseStatus.status_id == Appeal.work_status). \
-        filter_by(ResponseStatus.work_id == work_id). \
-        order_by(ResponseStatus.timestamp.desc()).all()
-    number = 0
-    if appeals is None:
-        appeals = []
-    for elem in status:
-        if len(appeals) > number and appeals[number].work_status == elem.status_id:
-            appeal = appeals.appeal_id
-            number += 1
-        else:
-            appeal = None
-        history.append(
-            {
-                'status:': work_status_reverse[elem.status],
-                'datetime': elem.timestamp,
-                'appeal_id': appeal,
-                'mark': elem.mark
-            }
-        )
 
 
 def add_response_appeal(db_session, status_id, message):
