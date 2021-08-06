@@ -50,7 +50,6 @@ def base_olympiad_create():
 
         for target_class in target_classes:
             baseContest.target_classes.append(TargetClass(
-                contest_id=baseContest.base_contest_id,
                 target_class=olympiad_target_class_dict[target_class],
             ))
 
@@ -611,8 +610,7 @@ def task_create_multiple(id_base_olympiad, id_olympiad, id_stage, id_contest, id
                                  )
         add_task_in_Variant(id_variant, task.task_id)
         for answer in answers:
-            task.all_answers_in_multiple_task.append(AnswersInMultipleChoiceTask(task_id=task.task_id,
-                                                                                 answer=answer['task_answer'],
+            task.all_answers_in_multiple_task.append(AnswersInMultipleChoiceTask(answer=answer['task_answer'],
                                                                                  correct=answer['is_right_answer']))
 
         db.session.commit()

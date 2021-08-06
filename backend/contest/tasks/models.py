@@ -74,7 +74,6 @@ def add_base_contest(db_session, name, laureate_condition, winning_condition, de
         subject=subject
     )
     db_session.add(baseContest)
-    db_session.flush()
     return baseContest
 
 
@@ -700,7 +699,6 @@ def add_multiple_task(db_session, num_of_task, image_of_task):
         task_type=MultipleChoiceTask.__name__
     )
     db_session.add(task)
-    db_session.flush()
     return task
 
 
