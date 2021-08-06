@@ -250,7 +250,6 @@ def add_simple_contest(db_session, base_contest_id,
         composite_type=SimpleContest.__name__,
     )
     db_session.add(simpleContest)
-    db_session.flush()
     return simpleContest
 
 
@@ -318,7 +317,6 @@ def add_composite_contest(db_session, base_contest_id, visibility):
         composite_type=CompositeContest.__name__,
     )
     db_session.add(compositeContest)
-    db_session.flush()
     return compositeContest
 
 
@@ -451,9 +449,8 @@ taskInVariant = db.Table('task_in_variant',
                          )
 
 
-def add_task_in_Variant(variant_id, task_id):
+def add_task_in_Variant(variant_id, task):
     variant = db_get_or_raise(Variant, "variant_id", str(variant_id))
-    task = db_get_or_raise(Task, "variant_id", str(task_id))
     variant.tasks.append(task)
 
     """   taskInVariant.insert().values(
@@ -602,7 +599,6 @@ def add_plain_task(db_session, num_of_task, image_of_task, recommended_answer):
         recommended_answer=recommended_answer,
     )
     db_session.add(task)
-    db_session.flush()
     return task
 
 
@@ -649,7 +645,6 @@ def add_range_task(db_session, num_of_task, image_of_task, start_value, end_valu
         end_value=end_value,
     )
     db_session.add(task)
-    db_session.flush()
     return task
 
 

@@ -544,7 +544,7 @@ def task_create_plain(id_base_olympiad, id_olympiad, id_stage, id_contest, id_va
                               recommended_answer=recommended_answer,
                               )
 
-        add_task_in_Variant(id_variant, task.task_id)
+        add_task_in_Variant(id_variant, task)
 
         db.session.commit()
 
@@ -578,7 +578,7 @@ def task_create_range(id_base_olympiad, id_olympiad, id_stage, id_contest, id_va
                               start_value=start_value,
                               end_value=end_value
                               )
-        add_task_in_Variant(id_variant, task.task_id)
+        add_task_in_Variant(id_variant, task)
         db.session.commit()
 
     except Exception:
@@ -608,7 +608,7 @@ def task_create_multiple(id_base_olympiad, id_olympiad, id_stage, id_contest, id
                                  num_of_task=num_of_task,
                                  image_of_task=image_of_task
                                  )
-        add_task_in_Variant(id_variant, task.task_id)
+        add_task_in_Variant(id_variant, task)
         for answer in answers:
             task.all_answers_in_multiple_task.append(AnswersInMultipleChoiceTask(answer=answer['task_answer'],
                                                                                  correct=answer['is_right_answer']))
