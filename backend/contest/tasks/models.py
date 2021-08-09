@@ -139,7 +139,6 @@ class BaseContest(db.Model):
                 'rules': self.rules,
                 'olympiad_type_id': self.olympiad_type_id,
                 'subject': self.subject.value,
-                'certificate_template': self.certificate_template,
                 'winning_condition': self.winning_condition,
                 'laureate_condition': self.laureate_condition,
                 'target_classes': [target.target_class.value for target in self.target_classes],

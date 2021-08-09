@@ -77,23 +77,20 @@ def olympiad_type_all():
 @module.route('/base_olympiad/create', methods=['POST'])
 @jwt_required_role(['Admin', 'System', 'Creator'])
 def base_olympiad_create():
-    values = request.openapi.body
+    values = request.form
+    files = request.files
 
     name = values['name']
     description = values['description']
     rules = values['rules']
     olympiad_type_id = values['olympiad_type_id']
 
-    # TODO CORRECT BINARY EXAMPLE
-
-    if 'certificate_template' not in values:
-        certificate_template = None
-    else:
-        certificate_template = values['certificate_template']
+    certificate_template = files['certificate_template'].stream.read()
     winning_condition = values['winning_condition']
     laureate_condition = values['laureate_condition']
     subject = values['subject']
     target_classes = set(values['target_classes'])
+    target_classes.remove(',')
 
     try:
         base_contest = add_base_contest(db.session,
@@ -107,7 +104,7 @@ def base_olympiad_create():
                                         subject=subject)
 
         base_contest.target_classes = [TargetClass(
-            target_class=olympiad_target_class_dict[target_class],
+            target_class=olympiad_target_class_dict[target_class]
         ) for target_class in target_classes]
 
         db.session.commit()
@@ -145,17 +142,18 @@ def base_olympiad_get(id_base_olympiad):
 @jwt_required_role(['Admin', 'System', 'Creator'])
 def base_olympiad_patch(id_base_olympiad):
     base_contest = db_get_or_raise(BaseContest, "base_contest_id", id_base_olympiad)
-    values = request.openapi.body
+    values = {**request.form, 'certificate_template': request.files['certificate_template'].stream.read()}
 
     try:
-        target_classes = values["target_classes"]
+        target_classes = set(values["target_classes"])
+        target_classes.remove(',')
         del values["target_classes"]
         base_contest.update(**values)
         if target_classes is not None:
             classes = [TargetClass(
                 contest_id=id_base_olympiad,
                 target_class=olympiad_target_class_dict[target_class]
-            ) for target_class in set(target_classes)]
+            ) for target_class in target_classes]
             base_contest.target_classes = classes
 
         db.session.commit()

@@ -126,11 +126,11 @@ paths:
     post:
       summary: Create a new base olympiad (main contest)
       requestBody:
-        required: true
         content:
-          application/json:
+          multipart/form-data:
             schema:
               $ref: '#/components/schemas/createBaseContest'
+
       security:
         - cookieJWTAuth: [ ]
         - CSRFToken: [ ]
@@ -239,9 +239,8 @@ paths:
           schema:
             type: integer
       requestBody:
-        required: true
         content:
-          application/json:
+          multipart/form-data:
             schema:
               $ref: '#/components/schemas/baseContestInfoUpdate'
       responses:
@@ -2140,10 +2139,6 @@ components:
               laureate_condition:
                 type: number
                 format: float
-              certificate_template:
-                type: string
-                format: binary
-                nullable: true
               olympiad_type_id:
                 type: integer
               subject:
@@ -2157,6 +2152,7 @@ components:
     createBaseContest:
       title: Create base contest
       description: Request to base contest creation
+      type: object
       required:
         - name
         - description
@@ -2208,7 +2204,6 @@ components:
         - rules
         - winning_condition
         - laureate_condition
-        - certificate_template
         - olympiad_type_id
         - subject
         - target_classes
@@ -2227,10 +2222,6 @@ components:
         laureate_condition:
           type: number
           format: float
-        certificate_template:
-          type: string
-          format: binary
-          nullable: true
         olympiad_type_id:
           type: integer
         subject:
@@ -2252,6 +2243,7 @@ components:
     baseContestInfoUpdate:
       title: Edit contest base common info
       description: Request to creation base contest
+      type: object
       properties:
         name:
           type: string
