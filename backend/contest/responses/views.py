@@ -36,12 +36,12 @@ def user_answer_get(user_id, contest_id, task_id):
     user_work = get_user_in_contest_work(user_id, contest_id)
     if user_work.answers is None:
         raise NotFound('user_response.answers', 'for user %d' % user_id)
-    user_answer = [elem for elem in user_work.answers if elem.task_num == task_id]
-    if len(user_answer) == 0:
+    user_answer = user_work.answers.filter(ResponseAnswer.task_num == task_id).one_or_none()
+    if user_answer is None:
         raise NotFound('response_answer', 'for task_id %d' % task_id)
     return {
-        "user_answer": str(user_answer[0].answer),   # TODO BLOB not for json
-        "filetype": user_answer[0].filetype.value
+        "user_answer": str(user_answer.answer),  # TODO BLOB not for json
+        "filetype": user_answer.filetype.value
     }
 
 
@@ -56,13 +56,50 @@ def user_answer_post(values, user_id, contest_id, task_id):
         user_work = get_user_in_contest_work(user_id, contest_id)
     except NotFound:
         user_work = add_user_response(db.session, user_id, contest_id)
-        response_status = add_response_status(db.session, user_work.work_id)
-    user_answer = [elem for elem in user_work.answers if elem.task_num == task_id]
-    if len(user_answer) == 0:
-        response_answer = add_response_answer(db.session, user_work.work_id, task_id, answer, filetype)
+        response_status = add_response_status(user_work.work_id)
+        user_work.statuses.append(response_status)
+    user_answer = user_work.answers.filter(ResponseAnswer.task_num == task_id).one_or_none()
+    if user_answer is None:
+        response_answer = add_response_answer(user_work.work_id, task_id, answer, filetype)
+        user_work.answers.append(response_answer)
     else:
-        user_answer[0].update(answer_new=answer, filetype_new=filetype)
+        user_answer.update(answer_new=answer, filetype_new=filetype)
     db.session.commit()
+
+
+def user_answer_status_get(user_id, contest_id):
+    user_work = get_user_in_contest_work(user_id, contest_id)
+    status = user_work.statuses[-1]
+    return status.serialize()
+
+
+def user_answer_status_post(values, user_id, contest_id):
+    if 'status' in values:
+        status = values['status']
+    else:
+        raise InsufficientData('status', 'for user %d' % user_id)
+    if 'mark' in values:
+        mark = values['mark']
+    else:
+        mark = None
+    user_work = get_user_in_contest_work(user_id, contest_id)
+    response_status = add_response_status(user_work.work_id, status, mark)
+    user_work.statuses.append(response_status)
+    db.session.commit()
+
+
+def user_response_appeal_create(values, user_id, contest_id):
+    if 'message' in values:
+        message = values['message']
+    else:
+        raise InsufficientData('message', 'for user %d' % user_id)
+    user_work = get_user_in_contest_work(user_id, contest_id)
+    new_status = add_response_status(user_work.work_id, 'Appeal')
+    user_work.statuses.append(new_status)
+    appeal = add_response_appeal(new_status.status_id, message)
+    new_status.appeal = appeal
+    db.session.commit()
+    return appeal.appeal_id
 
 
 @module.route('/olympiad/<int:olympiad_id>/stage/<int:stage_id>/contest/<int:contest_id>/user/<int:user_id>/response',
@@ -92,7 +129,7 @@ def get_user_answer_by_id(olympiad_id, stage_id, contest_id, answer_id):
     user_answer = db_get_or_raise(ResponseAnswer, 'answer_id', answer_id)
     return make_response(
         {
-            "user_answer": str(user_answer.answer),     # TODO BLOB not for json
+            "user_answer": str(user_answer.answer),  # TODO BLOB not for json
             "filetype": user_answer.filetype.value
         }, 200)
 
@@ -134,22 +171,10 @@ def user_status_and_mark_for_response(olympiad_id, stage_id, contest_id):
     check_olympiad_and_stage(olympiad_id, stage_id, contest_id)
     self_user_id = jwt_get_id()
     if request.method == 'GET':
-        user_work = get_user_in_contest_work(self_user_id, contest_id)
-        status = user_work.statuses[-1]
-        return make_response(status.serialize(), 200)
+        return make_response(user_answer_status_get(self_user_id, contest_id), 200)
     elif request.method == 'POST':
         values = request.openapi.body
-        if 'status' in values:
-            status = values['status']
-        else:
-            raise InsufficientData('status', 'for user %d' % self_user_id)
-        if 'mark' in values:
-            mark = values['mark']
-        else:
-            mark = None
-        user_work = get_user_in_contest_work(self_user_id, contest_id)
-        response_status = add_response_status(db.session, user_work.work_id, status, mark)
-        db.session.commit()
+        user_answer_status_post(values, self_user_id, contest_id)
         return make_response({}, 200)
 
 
@@ -159,22 +184,10 @@ def user_status_and_mark_for_response(olympiad_id, stage_id, contest_id):
 def user_status_and_mark_for_response_by_id(olympiad_id, stage_id, contest_id, user_id):
     check_olympiad_and_stage(olympiad_id, stage_id, contest_id)
     if request.method == 'GET':
-        user_work = get_user_in_contest_work(user_id, contest_id)
-        status = user_work.statuses[-1]     # TODO Верно ли то, что самый новый статус всегда последний будет? или  написать доп функцию для проверки
-        return make_response(status.serialize(), 200)
+        return make_response(user_answer_status_get(user_id, contest_id), 200)
     elif request.method == 'POST':
         values = request.openapi.body
-        if 'status' in values:
-            status = values['status']
-        else:
-            raise InsufficientData('status', 'for user %d' % user_id)
-        if 'mark' in values:
-            mark = values['mark']
-        else:
-            mark = None
-        user_work = get_user_in_contest_work(user_id, contest_id)
-        response_status = add_response_status(db.session, user_work.work_id, status, mark)
-        db.session.commit()
+        user_answer_status_post(values, user_id, contest_id)
         return make_response({}, 200)
 
 
@@ -225,65 +238,30 @@ def get_list_for_stage(olympiad_id, stage_id, contest_id):
         }, 200)
 
 
-@module.route('/olympiad/<int:olympiad_id>/stage/<int:stage_id>/contest/<int:contest_id>/user/self/appeal/last',
-              methods=['GET', 'POST'])
+@module.route('/olympiad/<int:olympiad_id>/stage/<int:stage_id>/contest/<int:contest_id>/user/self/appeal',
+              methods=['POST'])
 @jwt_required()
-def user_response_appeal_info(olympiad_id, stage_id, contest_id):
+def user_response_appeal(olympiad_id, stage_id, contest_id):
     check_olympiad_and_stage(olympiad_id, stage_id, contest_id)
     self_user_id = jwt_get_id()
-    if request.method == 'GET':
-        user_work = get_user_in_contest_work(self_user_id, contest_id)
-        last_appeal = ResponseStatus.query.join(Appeal, ResponseStatus.status_id == Appeal.work_status). \
-            filter(ResponseStatus.work_id == user_work.work_id). \
-            order_by(ResponseStatus.timestamp.desc()).one_or_none()
-        if last_appeal is None:
-            raise NotFound('appeal', 'for user {}'.format(self_user_id))
-        return make_response(last_appeal.serialize(), 200)
-    elif request.method == 'POST':
-        values = request.openapi.body
-        if 'message' in values:
-            message = values['message']
-        else:
-            raise InsufficientData('message', 'for user %d' % self_user_id)
-        user_work = get_user_in_contest_work(self_user_id, contest_id)
-        new_status = add_response_status(db.session, user_work.work_id, 'Appeal')
-        appeal = add_response_appeal(db.session, new_status.status_id, message)
-        db.session.commit()
-        return make_response(
-            {
-                'appeal_id': appeal.appeal_id
-            }, 200)
+    values = request.openapi.body
+    return make_response(
+        {
+            'appeal_id': user_response_appeal_create(values, self_user_id, contest_id)
+        }, 200)
 
 
 @module.route(
-    '/olympiad/<int:olympiad_id>/stage/<int:stage_id>/contest/<int:contest_id>/user/<int:user_id>/appeal/last',
-    methods=['GET', 'POST'])
+    '/olympiad/<int:olympiad_id>/stage/<int:stage_id>/contest/<int:contest_id>/user/<int:user_id>/appeal',
+    methods=['POST'])
 @jwt_required()
-def user_response_appeal_info_by_id(olympiad_id, stage_id, contest_id, user_id):
+def user_response_appeal_by_id(olympiad_id, stage_id, contest_id, user_id):
     check_olympiad_and_stage(olympiad_id, stage_id, contest_id)
-    if request.method == 'GET':
-        user_work = get_user_in_contest_work(user_id, contest_id)
-        last_status_appeal = ResponseStatus.query.join(Appeal, ResponseStatus.status_id == Appeal.work_status). \
-            filter(ResponseStatus.work_id == user_work.work_id). \
-            order_by(ResponseStatus.timestamp.desc()).one_or_none()
-        last_appeal = last_status_appeal.appeal
-        if len(last_appeal) == 0:
-            raise NotFound('appeal', 'for user {}'.format(user_id))
-        return make_response(last_appeal[0].serialize(), 200)
-    elif request.method == 'POST':
-        values = request.openapi.body
-        if 'message' in values:
-            message = values['message']
-        else:
-            raise InsufficientData('message', 'for user %d' % user_id)
-        user_work = get_user_in_contest_work(user_id, contest_id)
-        new_status = add_response_status(db.session, user_work.work_id, 'Appeal')
-        appeal = add_response_appeal(db.session, new_status.status_id, message)
-        db.session.commit()
-        return make_response(
-            {
-                'appeal_id': appeal.appeal_id
-            }, 200)
+    values = request.openapi.body
+    return make_response(
+        {
+            'appeal_id': user_response_appeal_create(values, user_id, contest_id)
+        }, 200)
 
 
 @module.route('/olympiad/<int:olympiad_id>/stage/<int:stage_id>/contest/<int:contest_id>/appeal/<int:appeal_id>/reply',
@@ -312,8 +290,10 @@ def reply_to_user_appeal(olympiad_id, stage_id, contest_id, appeal_id):
         new_mark = values['new_mark']
     else:
         new_mark = last_status.mark
-    new_response_status = add_response_status(db.session, last_status.work_id, status=response_new_status,
+    new_response_status = add_response_status(last_status.work_id, status=response_new_status,
                                               mark=new_mark)
+    db.session.add(new_response_status)
+    db.session.commit()
     return make_response(appeal.serialize(), 200)
 
 

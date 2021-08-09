@@ -24,7 +24,7 @@ class Response(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey(f'{UserInContest.__tablename__}.user_id'))
     contest_id = db.Column(db.Integer, db.ForeignKey(f'{UserInContest.__tablename__}.contest_id'))
     statuses = db.relationship('ResponseStatus', backref='response', lazy=True)
-    answers = db.relationship('ResponseAnswer', backref='response', lazy=True)
+    answers = db.relationship('ResponseAnswer', backref='response', lazy='dynamic')
 
     def prepare_for_list(self):
         mark = self.statuses[-1].mark
@@ -73,7 +73,7 @@ class ResponseStatus(db.Model):
     timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
     status = db.Column(db.Enum(ResponseStatusEnum), nullable=False)
     mark = db.Column(db.Float)
-    appeal = db.relationship('Appeal', backref='status', lazy=True)
+    appeal = db.relationship('Appeal', backref='status', lazy=True, uselist=False)
 
     def serialize(self):
         if self.mark is None:
@@ -87,7 +87,7 @@ class ResponseStatus(db.Model):
             }
 
     def status_for_history(self):
-        appeal_id = self.appeal[0].appeal_id if len(self.appeal) > 0 else None
+        appeal_id = self.appeal.appeal_id if self.appeal is not None else None
 
         return {
             'status': self.status.value,
@@ -212,11 +212,10 @@ def add_user_response(db_session, user_id, contest_id):
         contest_id=contest_id
     )
     db_session.add(user_work)
-    db_session.flush()
     return user_work
 
 
-def add_response_status(db_session, work_id, status=None, mark=None):
+def add_response_status(work_id, status=None, mark=None):
     if status is None:
         new_status = work_status['NotChecked']
     else:
@@ -232,31 +231,25 @@ def add_response_status(db_session, work_id, status=None, mark=None):
             status=new_status,
             mark=mark
         )
-    db_session.add(response_status)
-    db_session.flush()
     return response_status
 
 
-def add_response_answer(db_session, work_id, task_id, answer, filetype):
+def add_response_answer(work_id, task_id, answer, filetype):
     response_answer = ResponseAnswer(
         work_id=work_id,
         task_num=task_id,
         answer=answer,
         filetype=filetype_dict[filetype]
     )
-    db_session.add(response_answer)
-    db_session.flush()
     return response_answer
 
 
-def add_response_appeal(db_session, status_id, message):
+def add_response_appeal(status_id, message):
     appeal = Appeal(
         work_status=status_id,
         appeal_status=appeal_status['UnderReview'],
         appeal_message=message
     )
-    db_session.add(appeal)
-    db_session.flush()
     return appeal
 
 
