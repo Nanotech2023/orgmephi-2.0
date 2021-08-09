@@ -8,7 +8,7 @@ import {
     registerError,
     registerSuccess
 } from '@/auth/store/auth.actions'
-import { ErrorValue, TypeCSRFPair, TypePersonalInfo, TypeUserInfo } from '@/auth/models'
+import { ErrorValue, TypeCSRFPair, TypePersonalInfo, TypeUserInfo } from '@/auth/api/models'
 
 
 export const featureKey: string = 'auth'
@@ -38,12 +38,12 @@ export const reducer =
                 ( { ...state } )
         ),
         on( loginSuccess,
-            ( state, { responseLogin } ) =>
-                ( { ...state, csrfTokens: { csrfAccessToken: '', csrfRefreshToken: '' } } ) // TODO tokens in responseLogin?
+            ( state, { csrfPair } ) =>
+                ( { ...state, csrfTokens: csrfPair } )
         ),
         on( registerSuccess,
-            ( state, { responseRegistration } ) =>
-                ( { ...state, userInfo: responseRegistration } ) // TODO remove assign userInfo
+            ( state, { userInfo } ) =>
+                ( { ...state, userInfo: userInfo } )
         ),
         on( loginError, registerError,
             ( state, { error } ) =>
