@@ -205,6 +205,7 @@ def add_target_class(db_session, contest_id, target_class_):
 
 
 class ContestTypeEnum(enum.Enum):
+    Contest = "Contest"
     SimpleContest = "SimpleContest"
     CompositeContest = "CompositeContest"
 
@@ -226,14 +227,14 @@ class Contest(db.Model):
 
     base_contest_id = db.Column(db.Integer, db.ForeignKey('base_contest.base_contest_id'))
     contest_id = db.Column(db.Integer, autoincrement=True, primary_key=True)
-    composite_type = db.Column(db.Enum(ContestTypeEnum))
+    composite_type = db.Column(db.Unicode(256))
     visibility = db.Column(db.Boolean, default=DEFAULT_VISIBILITY, nullable=False)
 
     users = db.relationship('UserInContest', lazy='select',
                             backref=db.backref('contest', lazy='joined'))
 
     __mapper_args__ = {
-        'polymorphic_identity': 'contest',
+        'polymorphic_identity': 'Contest',
         'polymorphic_on': composite_type
     }
 
@@ -557,7 +558,7 @@ class Task(db.Model):
     task_id = db.Column(db.Integer, autoincrement=True, primary_key=True)
     num_of_task = db.Column(db.Integer, nullable=False)
     image_of_task = db.Column(db.LargeBinary, nullable=True)
-    task_type = db.Column(db.Enum(TaskTypeEnum))
+    task_type = db.Column(db.Unicode(256))
 
     __mapper_args__ = {
         'polymorphic_identity': 'base_task',

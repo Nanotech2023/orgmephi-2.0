@@ -5,7 +5,7 @@ from flask import request, make_response
 
 from common import get_current_module
 from common.jwt_verify import jwt_required_role
-from common.errors import NotFound
+from common.errors import NotFound, AlreadyExists
 from common.util import db_get_all
 from .models import *
 
@@ -390,7 +390,6 @@ def contest_create_simple(id_base_olympiad, id_olympiad, id_stage):
         db_get_or_raise(BaseContest, "base_contest_id", str(id_base_olympiad))
         db_get_or_raise(Contest, "contest_id", str(id_olympiad))
         contest = add_simple_contest(db.session,
-                                     id_base_olympiad,
                                      visibility,
                                      start_time,
                                      end_time,
@@ -425,7 +424,6 @@ def contest_create_composite(id_base_olympiad, id_olympiad, id_stage):
         db_get_or_raise(BaseContest, "base_contest_id", str(id_base_olympiad))
         db_get_or_raise(Contest, "contest_id", str(id_olympiad))
         contest = add_composite_contest(db.session,
-                                        id_base_olympiad,
                                         visibility)
 
         stage = db_get_or_raise(Stage, "stage_id", str(id_stage))
@@ -891,8 +889,11 @@ def add_user_to_contest(id_base_olympiad, id_olympiad, id_stage, id_contest):
         db_get_or_raise(BaseContest, "base_contest_id", str(id_base_olympiad))
         db_get_or_raise(Contest, "contest_id", str(id_olympiad))
         db_get_or_raise(Stage, "stage_id", str(id_stage))
-        db_get_or_raise(Contest, "contest_id", str(id_contest))
+        contest = db_get_or_raise(Contest, "contest_id", str(id_contest))
+        all_users = [u.serialize()['user_id'] for u in contest.users]
         for user_id in user_ids:
+            if user_id in all_users:
+                raise AlreadyExists('user_id', user_id)
             add_user_in_contest(db.session,
                                 user_id=user_id,
                                 contest_id=id_contest,

@@ -1040,6 +1040,18 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/errorResponse'
+        '409':
+          description: User is already exists in this contest
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+        '400':
+          description: Request error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
 
   /base_olympiad/{id_base_olympiad}/olympiad/{id_olympiad}/stage/{id_stage}/contest/{id_contest}/removeuser:
     post:
@@ -1953,13 +1965,25 @@ components:
       name: X-CSRF-TOKEN
   schemas:
     errorResponse:
-      title: Error response
-      description: 'Common response with error message'
+      title: 'Error response'
       required:
-        - error_msg
+        - errors
       properties:
-        error_msg:
-          type: string
+        errors:
+          type: array
+          items:
+            type: object
+            title: 'Error value'
+            required:
+              - status
+              - title
+            properties:
+              class:
+                type: string
+              status:
+                type: integer
+              title:
+                type: string
     allBaseContest:
       title: Get olympiads
       description: Request to get olympiads
@@ -2393,6 +2417,10 @@ components:
                 type: integer
               visibility:
                 type: boolean
+              composite_type:
+                type: string
+                nullable: true
+                enum: [ "SimpleContest", "CompositeContest"]
     variantsInContest:
       title: Get variants in contest
       description: Request to get variants in contest
