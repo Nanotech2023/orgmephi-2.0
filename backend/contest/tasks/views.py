@@ -96,17 +96,17 @@ def base_olympiad_create():
     target_classes = set(values['target_classes'])
 
     try:
-        baseContest = add_base_contest(db.session,
-                                       description=description,
-                                       name=name,
-                                       certificate_template=certificate_template,
-                                       winning_condition=winning_condition,
-                                       laureate_condition=laureate_condition,
-                                       rules=rules,
-                                       olympiad_type_id=olympiad_type_id,
-                                       subject=subject)
+        base_contest = add_base_contest(db.session,
+                                        description=description,
+                                        name=name,
+                                        certificate_template=certificate_template,
+                                        winning_condition=winning_condition,
+                                        laureate_condition=laureate_condition,
+                                        rules=rules,
+                                        olympiad_type_id=olympiad_type_id,
+                                        subject=subject)
 
-        baseContest.target_classes = [TargetClass(
+        base_contest.target_classes = [TargetClass(
             target_class=olympiad_target_class_dict[target_class],
         ) for target_class in target_classes]
 
@@ -116,7 +116,7 @@ def base_olympiad_create():
         raise
     return make_response(
         {
-            'base_contest_id': baseContest.base_contest_id
+            'base_contest_id': base_contest.base_contest_id
         }, 200)
 
 
@@ -124,8 +124,8 @@ def base_olympiad_create():
 @jwt_required_role(['Admin', 'System', 'Creator'])
 def base_olympiad_remove(id_base_olympiad):
     try:
-        baseContest = db_get_or_raise(BaseContest, "base_contest_id", str(id_base_olympiad))
-        db.session.delete(baseContest)
+        base_contest = db_get_or_raise(BaseContest, "base_contest_id", str(id_base_olympiad))
+        db.session.delete(base_contest)
         db.session.commit()
     except Exception:
         db.session.rollback()
@@ -136,33 +136,33 @@ def base_olympiad_remove(id_base_olympiad):
 @module.route('/base_olympiad/<int:id_base_olympiad>', methods=['GET'])
 @jwt_required_role(['Admin', 'System', 'Creator', 'Participant'])
 def base_olympiad_get(id_base_olympiad):
-    baseContest = db_get_or_raise(BaseContest, "base_contest_id", id_base_olympiad)
+    base_contest = db_get_or_raise(BaseContest, "base_contest_id", id_base_olympiad)
 
-    return make_response(baseContest.serialize(), 200)
+    return make_response(base_contest.serialize(), 200)
 
 
 @module.route('/base_olympiad/<int:id_base_olympiad>', methods=['PATCH'])
 @jwt_required_role(['Admin', 'System', 'Creator'])
 def base_olympiad_patch(id_base_olympiad):
-    baseContest = db_get_or_raise(BaseContest, "base_contest_id", id_base_olympiad)
+    base_contest = db_get_or_raise(BaseContest, "base_contest_id", id_base_olympiad)
     values = request.openapi.body
 
     try:
         target_classes = values["target_classes"]
         del values["target_classes"]
-        baseContest.update(**values)
+        base_contest.update(**values)
         if target_classes is not None:
             classes = [TargetClass(
                 contest_id=id_base_olympiad,
                 target_class=olympiad_target_class_dict[target_class]
             ) for target_class in set(target_classes)]
-            baseContest.target_classes = classes
-            # update_target_class(db.session, id_base_olympiad, target_classes)
+            base_contest.target_classes = classes
+
         db.session.commit()
     except Exception:
         db.session.rollback()
         raise
-    return make_response(baseContest.serialize(), 200)
+    return make_response(base_contest.serialize(), 200)
 
 
 @module.route('/base_olympiad/all', methods=['GET'])
@@ -191,12 +191,12 @@ def olympiad_create_simple(id_base_olympiad):
     try:
         base_contest = db_get_or_raise(BaseContest, "base_contest_id", str(id_base_olympiad))
         contest = add_simple_contest(db.session,
-                                     visibility,
-                                     start_time,
-                                     end_time,
-                                     previous_contest_id,
-                                     previous_participation_condition,
-                                     location,
+                                     visibility=visibility,
+                                     start_date=start_time,
+                                     end_date=end_time,
+                                     previous_contest_id=previous_contest_id,
+                                     previous_participation_condition=previous_participation_condition,
+                                     location=location,
                                      )
         base_contest.child_contests.append(contest)
 
@@ -221,7 +221,7 @@ def olympiad_create_composite(id_base_olympiad):
     try:
         base_contest = db_get_or_raise(BaseContest, "base_contest_id", str(id_base_olympiad))
         contest = add_composite_contest(db.session,
-                                        visibility)
+                                        visibility=visibility)
         base_contest.child_contests.append(contest)
 
         db.session.commit()
@@ -298,11 +298,12 @@ def stage_create(id_base_olympiad, id_olympiad):
 
     try:
         db_get_or_raise(BaseContest, "base_contest_id", str(id_base_olympiad))
+        contest = db_get_or_raise(Contest, "contest_id", str(id_olympiad))
         stage = add_stage(db.session,
-                          olympiad_id=id_olympiad,
                           stage_name=stage_name,
                           next_stage_condition=next_stage_condition,
                           )
+        contest.stages.append(stage)
         db.session.commit()
 
     except Exception:
@@ -390,12 +391,12 @@ def contest_create_simple(id_base_olympiad, id_olympiad, id_stage):
         db_get_or_raise(BaseContest, "base_contest_id", str(id_base_olympiad))
         db_get_or_raise(Contest, "contest_id", str(id_olympiad))
         contest = add_simple_contest(db.session,
-                                     visibility,
-                                     start_time,
-                                     end_time,
-                                     previous_contest_id,
-                                     previous_participation_condition,
-                                     location)
+                                     visibility=visibility,
+                                     start_date=start_time,
+                                     end_date=end_time,
+                                     previous_contest_id=previous_contest_id,
+                                     previous_participation_condition=previous_participation_condition,
+                                     location=location)
 
         stage = db_get_or_raise(Stage, "stage_id", str(id_stage))
         stage.contests.append(contest)
@@ -424,7 +425,7 @@ def contest_create_composite(id_base_olympiad, id_olympiad, id_stage):
         db_get_or_raise(BaseContest, "base_contest_id", str(id_base_olympiad))
         db_get_or_raise(Contest, "contest_id", str(id_olympiad))
         contest = add_composite_contest(db.session,
-                                        visibility)
+                                        visibility=visibility)
 
         stage = db_get_or_raise(Stage, "stage_id", str(id_stage))
         stage.contests.append(contest)
@@ -549,11 +550,13 @@ def variant_create(id_base_olympiad, id_olympiad, id_stage, id_contest):
         db_get_or_raise(BaseContest, "base_contest_id", str(id_base_olympiad))
         db_get_or_raise(Contest, "contest_id", str(id_olympiad))
         db_get_or_raise(Stage, "stage_id", str(id_stage))
+        contest = db_get_or_raise(Contest, "contest_id", str(id_contest))
+
         variant = add_variant(db.session,
-                              contest_id=id_contest,
                               variant_number=new_variant + 1,
                               variant_description=variant_description,
                               )
+        contest.variants.append(variant)
 
         db.session.add(variant)
         db.session.commit()
@@ -613,9 +616,9 @@ def variant_get(id_base_olympiad, id_olympiad, id_stage, id_contest, variant_num
     methods=['PATCH'])
 @jwt_required_role(['Admin', 'System', 'Creator'])
 def variant_patch(id_base_olympiad, id_olympiad, id_stage, id_contest, variant_num):
-    variant = Variant.query.filter_by(**{"contest_id": str(id_contest),
-                                         "variant_number": str(variant_num)}).one_or_none()
     try:
+        variant = Variant.query.filter_by(**{"contest_id": str(id_contest),
+                                             "variant_number": str(variant_num)}).one_or_none()
         db_get_or_raise(BaseContest, "base_contest_id", str(id_base_olympiad))
         db_get_or_raise(Contest, "contest_id", str(id_olympiad))
         db_get_or_raise(Stage, "stage_id", str(id_stage))
@@ -677,7 +680,7 @@ def task_create_plain(id_base_olympiad, id_olympiad, id_stage, id_contest, id_va
                               recommended_answer=recommended_answer,
                               )
 
-        add_task_in_Variant(id_variant, task)
+        add_task_in_variant(id_variant, task)
 
         db.session.commit()
 
@@ -712,7 +715,7 @@ def task_create_range(id_base_olympiad, id_olympiad, id_stage, id_contest, id_va
                               start_value=start_value,
                               end_value=end_value
                               )
-        add_task_in_Variant(id_variant, task)
+        add_task_in_variant(id_variant, task)
         db.session.commit()
 
     except Exception:
@@ -743,7 +746,7 @@ def task_create_multiple(id_base_olympiad, id_olympiad, id_stage, id_contest, id
                                  num_of_task=num_of_task,
                                  image_of_task=image_of_task
                                  )
-        add_task_in_Variant(id_variant, task)
+        add_task_in_variant(id_variant, task)
 
         task.all_answers_in_multiple_task = [AnswersInMultipleChoiceTask(answer=answer['task_answer'],
                                                                          correct=answer['is_right_answer'])
@@ -817,7 +820,7 @@ def task_patch(id_base_olympiad, id_olympiad, id_stage, id_contest, id_variant, 
 
         if task.task_type == MultipleChoiceTask.__name__:
             answers = values['answers']
-            updateMultipleChoiceTask(db.session, id_task, answers)
+            update_multiple_choice_task(db.session, id_task, answers)
 
         db.session.commit()
 

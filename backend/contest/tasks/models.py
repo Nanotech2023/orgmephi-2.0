@@ -76,7 +76,7 @@ class OlympiadType(db.Model):
 
 def add_base_contest(db_session, name, laureate_condition, winning_condition, description, rules, olympiad_type_id,
                      subject, certificate_template):
-    baseContest = BaseContest(
+    base_contest = BaseContest(
         description=description,
         name=name,
         certificate_template=certificate_template,
@@ -86,8 +86,8 @@ def add_base_contest(db_session, name, laureate_condition, winning_condition, de
         olympiad_type_id=olympiad_type_id,
         subject=subject
     )
-    db_session.add(baseContest)
-    return baseContest
+    db_session.add(base_contest)
+    return base_contest
 
 
 # Contest models
@@ -242,7 +242,7 @@ class Contest(db.Model):
 def add_simple_contest(db_session,
                        visibility, start_date, end_date, previous_contest_id=None,
                        previous_participation_condition=None, location=None, base_contest_id=None):
-    simpleContest = SimpleContest(
+    simple_contest = SimpleContest(
         base_contest_id=base_contest_id,
         visibility=visibility,
         start_date=start_date,
@@ -251,8 +251,8 @@ def add_simple_contest(db_session,
         previous_participation_condition=previous_participation_condition,
         location=location,
     )
-    db_session.add(simpleContest)
-    return simpleContest
+    db_session.add(simple_contest)
+    return simple_contest
 
 
 class SimpleContest(Contest):
@@ -319,13 +319,13 @@ class SimpleContest(Contest):
             self.location = location
 
 
-def add_composite_contest(db_session, visibility, base_contest_id = None):
-    compositeContest = CompositeContest(
+def add_composite_contest(db_session, visibility, base_contest_id=None):
+    composite_contest = CompositeContest(
         base_contest_id=base_contest_id,
         visibility=visibility,
     )
-    db_session.add(compositeContest)
-    return compositeContest
+    db_session.add(composite_contest)
+    return composite_contest
 
 
 class CompositeContest(Contest):
@@ -411,11 +411,11 @@ class Stage(db.Model):
             self.next_stage_condition = next_stage_condition
 
 
-def add_stage(db_session, olympiad_id, stage_name, next_stage_condition):
+def add_stage(db_session, stage_name, next_stage_condition, olympiad_id=None):
     stage = Stage(
-        olympiad_id=olympiad_id,
         stage_name=stage_name,
-        next_stage_condition=next_stage_condition
+        next_stage_condition=next_stage_condition,
+        olympiad_id=olympiad_id,
     )
     db_session.add(stage)
     return stage
@@ -434,7 +434,7 @@ taskInVariant = db.Table('task_in_variant',
                          )
 
 
-def add_task_in_Variant(variant_id, task):
+def add_task_in_variant(variant_id, task):
     variant = db_get_or_raise(Variant, "variant_id", str(variant_id))
     variant.tasks.append(task)
 
@@ -444,7 +444,7 @@ def add_task_in_Variant(variant_id, task):
     )"""
 
 
-def add_variant(db_session, contest_id, variant_number, variant_description):
+def add_variant(db_session, variant_number, variant_description, contest_id=None):
     variant = Variant(
         contest_id=contest_id,
         variant_number=variant_number,
@@ -705,12 +705,12 @@ class MultipleChoiceTask(Task):
 
 
 def add_answer_to_multiple_task(db_session, task_id, answer, correct):
-    answersInMultipleChoiceTask = AnswersInMultipleChoiceTask(
+    answers_in_multiple_choice_task = AnswersInMultipleChoiceTask(
         task_id=task_id,
         answer=answer,
         correct=correct
     )
-    db_session.add(answersInMultipleChoiceTask)
+    db_session.add(answers_in_multiple_choice_task)
 
 
 class AnswersInMultipleChoiceTask(db.Model):
@@ -745,12 +745,12 @@ class AnswersInMultipleChoiceTask(db.Model):
             self.correct = correct
 
 
-def updateMultipleChoiceTask(db_session, task_id, answers):
+def update_multiple_choice_task(db_session, task_id, answers):
     AnswersInMultipleChoiceTask.query.filter_by(AnswersInMultipleChoiceTask.task_id == task_id).delete()
 
     all_answers = [AnswersInMultipleChoiceTask(
-            task_id=task_id,
-            answer=answer_['answer'],
-            correct=answer_['correct']
+        task_id=task_id,
+        answer=answer_['answer'],
+        correct=answer_['correct']
     ) for answer_ in answers]
     db_session.bulk_save_objects(all_answers)
