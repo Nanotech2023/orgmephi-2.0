@@ -637,43 +637,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/errorResponse'
-  /olympiad/{olympiad_id}/stage/{stage_id}/contest/{contest_id}/user/self/appeal/last:
-    get:
-      summary: Get appeal info for current user's response
-      security:
-        - cookieJWTAuth: [ ]
-      parameters:
-        - in: path
-          description: Id of the contest
-          name: contest_id
-          required: true
-          schema:
-            type: integer
-        - in: path
-          description: Id of the olympiad
-          name: olympiad_id
-          required: true
-          schema:
-            type: integer
-        - in: path
-          description: Id of the stage
-          name: stage_id
-          required: true
-          schema:
-            type: integer
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/commonAppealInfo'
-        '404':
-          description: User, olympiad, stage or contest not found
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errorResponse'
+  /olympiad/{olympiad_id}/stage/{stage_id}/contest/{contest_id}/user/self/appeal:
     post:
       summary: Create appeal for current user's response
       security:
@@ -717,49 +681,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/errorResponse'
-  /olympiad/{olympiad_id}/stage/{stage_id}/contest/{contest_id}/user/{user_id}/appeal/last:
-    get:
-      summary: Get appeal info for user's response
-      security:
-        - cookieJWTAuth: [ ]
-      parameters:
-        - in: path
-          description: Id of the contest
-          name: contest_id
-          required: true
-          schema:
-            type: integer
-        - in: path
-          description: Id of the user
-          name: user_id
-          required: true
-          schema:
-            type: integer
-        - in: path
-          description: Id of the olympiad
-          name: olympiad_id
-          required: true
-          schema:
-            type: integer
-        - in: path
-          description: Id of the stage
-          name: stage_id
-          required: true
-          schema:
-            type: integer
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/commonAppealInfo'
-        '404':
-          description: User, olympiad, stage or contest not found
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errorResponse'
+  /olympiad/{olympiad_id}/stage/{stage_id}/contest/{contest_id}/user/{user_id}/appeal:
     post:
       summary: Create appeal for user's response
       security:
