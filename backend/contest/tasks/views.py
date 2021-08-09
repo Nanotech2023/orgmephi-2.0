@@ -541,7 +541,7 @@ def variant_create(id_base_olympiad, id_olympiad, id_stage, id_contest):
     values = request.openapi.body
 
     contest = db_get_or_raise(Contest, "contest_id", str(id_contest))
-    variants = contest.variants
+    variants = contest.variants.all()
     if len(variants) > 0:
         new_variant = max(variant.variant_number for variant in variants)
     else:
@@ -584,8 +584,8 @@ def variant_remove(id_base_olympiad, id_olympiad, id_stage, id_contest, id_varia
         db_get_or_raise(BaseContest, "base_contest_id", str(id_base_olympiad))
         db_get_or_raise(Contest, "contest_id", str(id_olympiad))
         db_get_or_raise(Stage, "stage_id", str(id_stage))
-        variant = Variant.query.filter_by(**{"contest_id": str(id_contest),
-                                             "variant_id": str(id_variant)}).one_or_none()
+        contest = db_get_or_raise(Contest, "contest_id", str(id_contest))
+        variant = contest.variants.filter_by(**{"variant_id": str(id_variant)}).one_or_none()
 
         db.session.delete(variant)
         db.session.commit()
@@ -605,8 +605,12 @@ def variant_get(id_base_olympiad, id_olympiad, id_stage, id_contest, variant_num
         db_get_or_raise(BaseContest, "base_contest_id", str(id_base_olympiad))
         db_get_or_raise(Contest, "contest_id", str(id_olympiad))
         db_get_or_raise(Stage, "stage_id", str(id_stage))
-        variant = Variant.query.filter_by(**{"contest_id": str(id_contest),
-                                             "variant_number": str(variant_num)}).one_or_none()
+        contest = db_get_or_raise(Contest, "contest_id", str(id_contest))
+        variant = contest.variants.filter_by(**{"variant_number": str(variant_num)}).one_or_none()
+
+        if variant is None:
+            raise NotFound("variant_number", str(variant_num))
+
         return make_response(
             variant.serialize(), 200)
     except Exception:
@@ -620,11 +624,12 @@ def variant_get(id_base_olympiad, id_olympiad, id_stage, id_contest, variant_num
 @jwt_required_role(['Admin', 'System', 'Creator'])
 def variant_patch(id_base_olympiad, id_olympiad, id_stage, id_contest, variant_num):
     try:
-        variant = Variant.query.filter_by(**{"contest_id": str(id_contest),
-                                             "variant_number": str(variant_num)}).one_or_none()
         db_get_or_raise(BaseContest, "base_contest_id", str(id_base_olympiad))
         db_get_or_raise(Contest, "contest_id", str(id_olympiad))
         db_get_or_raise(Stage, "stage_id", str(id_stage))
+        contest = db_get_or_raise(Contest, "contest_id", str(id_contest))
+        variant = contest.variants.filter_by(**{"variant_number": str(variant_num)}).one_or_none()
+
         values = request.openapi.body
         variant.update(**values)
         db.session.commit()
@@ -647,7 +652,7 @@ def variant_all(id_base_olympiad, id_olympiad, id_stage, id_contest):
         db_get_or_raise(Contest, "contest_id", str(id_olympiad))
         db_get_or_raise(Stage, "stage_id", str(id_stage))
         contest = db_get_or_raise(Contest, "contest_id", id_contest)
-        all_variants = [variant.serialize() for variant in contest.variants]
+        all_variants = [variant.serialize() for variant in contest.variants.all()]
         return make_response(
             {
                 "variants_list": all_variants
@@ -666,10 +671,8 @@ def variant_all(id_base_olympiad, id_olympiad, id_stage, id_contest):
 @jwt_required_role(['Admin', 'System', 'Creator'])
 def task_create_plain(id_base_olympiad, id_olympiad, id_stage, id_contest, id_variant):
     try:
-        db_get_or_raise(BaseContest, "base_contest_id", str(id_base_olympiad))
-        db_get_or_raise(Contest, "contest_id", str(id_olympiad))
-        db_get_or_raise(Stage, "stage_id", str(id_stage))
-        db_get_or_raise(Contest, "contest_id", str(id_contest))
+        check_existence(id_base_olympiad, id_olympiad, id_stage, id_contest, id_variant)
+        variant = db_get_or_raise(Variant, "variant_id", str(id_variant))
         values = request.openapi.body
 
         num_of_task = values['num_of_task']
@@ -683,7 +686,7 @@ def task_create_plain(id_base_olympiad, id_olympiad, id_stage, id_contest, id_va
                               recommended_answer=recommended_answer,
                               )
 
-        add_task_in_variant(id_variant, task)
+        variant.tasks.append(task)
 
         db.session.commit()
 
@@ -704,6 +707,8 @@ def task_create_plain(id_base_olympiad, id_olympiad, id_stage, id_contest, id_va
 def task_create_range(id_base_olympiad, id_olympiad, id_stage, id_contest, id_variant):
     try:
         check_existence(id_base_olympiad, id_olympiad, id_stage, id_contest, id_variant)
+        variant = db_get_or_raise(Variant, "variant_id", str(id_variant))
+
         values = request.openapi.body
 
         num_of_task = values['num_of_task']
@@ -718,7 +723,7 @@ def task_create_range(id_base_olympiad, id_olympiad, id_stage, id_contest, id_va
                               start_value=start_value,
                               end_value=end_value
                               )
-        add_task_in_variant(id_variant, task)
+        variant.tasks.append(task)
         db.session.commit()
 
     except Exception:
@@ -738,6 +743,8 @@ def task_create_range(id_base_olympiad, id_olympiad, id_stage, id_contest, id_va
 def task_create_multiple(id_base_olympiad, id_olympiad, id_stage, id_contest, id_variant):
     try:
         check_existence(id_base_olympiad, id_olympiad, id_stage, id_contest, id_variant)
+        variant = db_get_or_raise(Variant, "variant_id", str(id_variant))
+
         values = request.openapi.body
 
         num_of_task = values['num_of_task']
@@ -749,7 +756,7 @@ def task_create_multiple(id_base_olympiad, id_olympiad, id_stage, id_contest, id
                                  num_of_task=num_of_task,
                                  image_of_task=image_of_task
                                  )
-        add_task_in_variant(id_variant, task)
+        variant.tasks.append(task)
 
         task.all_answers_in_multiple_task = [AnswersInMultipleChoiceTask(answer=answer['task_answer'],
                                                                          correct=answer['is_right_answer'])
@@ -817,6 +824,7 @@ def check_existence(id_base_olympiad, id_olympiad, id_stage, id_contest, id_vari
 def task_patch_plain(id_base_olympiad, id_olympiad, id_stage, id_contest, id_variant, id_task):
     try:
         check_existence(id_base_olympiad, id_olympiad, id_stage, id_contest, id_variant)
+
         task = db_get_or_raise(PlainTask, "task_id", str(id_task))
         values = request.openapi.body
         task.update(**values)
@@ -916,7 +924,7 @@ def task_image(id_base_olympiad, id_olympiad, id_stage, id_contest, id_variant, 
 
 def generate_variant(id_contest, user_id):
     contest = db_get_or_raise(Contest, "contest_id", id_contest)
-    variants_number = len(contest.variants)
+    variants_number = len(contest.variants.all())
     if variants_number == 0:
         raise InsufficientData('variant', 'variants_number')
     random_number = random.randint(0, variants_number * 2)
@@ -937,9 +945,8 @@ def add_user_to_contest(id_base_olympiad, id_olympiad, id_stage, id_contest):
         db_get_or_raise(Contest, "contest_id", str(id_olympiad))
         db_get_or_raise(Stage, "stage_id", str(id_stage))
         contest = db_get_or_raise(Contest, "contest_id", str(id_contest))
-        all_users = [u.serialize()['user_id'] for u in contest.users]
         for user_id in user_ids:
-            if user_id in all_users:
+            if contest.users.filter_by(**{"user_id": str(user_id)}).one_or_none() is not None:
                 raise AlreadyExists('user_id', user_id)
             add_user_in_contest(db.session,
                                 user_id=user_id,
@@ -969,10 +976,10 @@ def remove_user_from_contest(id_base_olympiad, id_olympiad, id_stage, id_contest
         db_get_or_raise(BaseContest, "base_contest_id", str(id_base_olympiad))
         db_get_or_raise(Contest, "contest_id", str(id_olympiad))
         db_get_or_raise(Stage, "stage_id", str(id_stage))
-        db_get_or_raise(Contest, "contest_id", str(id_contest))
+        contest = db_get_or_raise(Contest, "contest_id", str(id_contest))
+
         for user_id in user_ids:
-            user = UserInContest.query.filter_by(**{"contest_id": id_contest,
-                                                    "user_id": user_id}).one_or_none()
+            user = contest.users.filter_by(**{"user_id": str(user_id)}).one_or_none()
             db.session.delete(user)
 
         db.session.commit()
@@ -995,7 +1002,7 @@ def users_all(id_base_olympiad, id_olympiad, id_stage, id_contest):
         db_get_or_raise(Stage, "stage_id", str(id_stage))
         db_get_or_raise(Contest, "contest_id", str(id_contest))
         contest = db_get_or_raise(Contest, "contest_id", id_contest)
-        all_users = [u.serialize() for u in contest.users]
+        all_users = [u.serialize() for u in contest.users.all()]
         return make_response(
             {
                 "user_list": all_users
@@ -1014,9 +1021,8 @@ def users_certificate(id_base_olympiad, id_olympiad, id_stage, id_contest, id_us
         db_get_or_raise(BaseContest, "base_contest_id", str(id_base_olympiad))
         db_get_or_raise(Contest, "contest_id", str(id_olympiad))
         db_get_or_raise(Stage, "stage_id", str(id_stage))
-        db_get_or_raise(Contest, "contest_id", str(id_contest))
-        UserInContest.query.filter_by(**{"contest_id": id_contest,
-                                         "user_id": id_user}).one_or_none()
+        contest = db_get_or_raise(Contest, "contest_id", str(id_contest))
+        contest.users.filter_by(**{"user_id": str(id_user)}).one_or_none()
         # contest = db_get_or_raise(Contest, Contest.contest_id, id_contest)
         # user = db_get_or_raise(UserInContest, UserInContest.user_id, id_user)
 

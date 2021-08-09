@@ -220,7 +220,7 @@ class Contest(db.Model):
     composite_type = db.Column(db.Enum(ContestTypeEnum))
     visibility = db.Column(db.Boolean, default=DEFAULT_VISIBILITY, nullable=False)
 
-    users = db.relationship('UserInContest', lazy='select',
+    users = db.relationship('UserInContest', lazy='dynamic',
                             backref=db.backref('contest', lazy='joined'))
 
     __mapper_args__ = {
@@ -267,7 +267,7 @@ class SimpleContest(Contest):
     previous_contest_id = db.Column(db.Integer, db.ForeignKey('simple_contest.contest_id'), nullable=True)
     previous_participation_condition = db.Column(db.Enum(UserStatusEnum))
 
-    variants = db.relationship('Variant', lazy='select',
+    variants = db.relationship('Variant', lazy='dynamic',
                                backref=db.backref('simple_contest', lazy='joined'))
 
     __mapper_args__ = {
@@ -417,16 +417,6 @@ taskInVariant = db.Table('task_in_variant',
                          db.Column('variant_id', db.Integer, db.ForeignKey('variant.variant_id'), primary_key=True),
                          db.Column('task_id', db.ForeignKey('base_task.task_id'), primary_key=True)
                          )
-
-
-def add_task_in_variant(variant_id, task):
-    variant = db_get_or_raise(Variant, "variant_id", str(variant_id))
-    variant.tasks.append(task)
-
-    """   taskInVariant.insert().values(
-        variant_id=variant_id,
-        task_id=task_id,
-    )"""
 
 
 def add_variant(db_session, variant_number, variant_description, contest_id=None):
