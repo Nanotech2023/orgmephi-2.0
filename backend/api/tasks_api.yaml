@@ -2091,10 +2091,18 @@ components:
       description: Request to stage creation
       required:
         - stage_name
+        - stage_num
         - next_stage_condition
+        - condition
       properties:
+        condition:
+          type: string
+          enum: [ "No", "And", "Or" ]
+          nullable: true
         stage_name:
           type: string
+        stage_num:
+          type: integer
         next_stage_condition:
           type: string
     stageInfo:
@@ -2103,12 +2111,20 @@ components:
       required:
         - stage_id
         - stage_name
+        - stage_num
         - next_stage_condition
+        - condition
       properties:
+        condition:
+          type: string
+          enum: [ "No", "And", "Or" ]
+          nullable: true
         stage_id:
           type: integer
         stage_name:
           type: string
+        stage_num:
+          type: integer
         next_stage_condition:
           type: string
     stageInfoId:
@@ -2123,10 +2139,17 @@ components:
       title: Edit stage common info
       description: Request to edit stage
       properties:
+        condition:
+          type: string
+          enum: [ "No", "And", "Or" ]
+          nullable: true
         stage_name:
           type: string
+        stage_num:
+          type: integer
         next_stage_condition:
           type: string
+
     addPreviousForSimpleContest:
       title: Change previous contest for simple contest
       description: Request to change previous contest for simple contest
@@ -2295,10 +2318,16 @@ components:
           items:
             type: object
             properties:
+              condition:
+                type: string
+                enum: [ "No", "And", "Or" ]
+                nullable: true
               stage_id:
                 type: integer
               stage_name:
                 type: string
+              stage_num:
+                type: integer
               next_stage_condition:
                 type: string
     tasksInVariant:

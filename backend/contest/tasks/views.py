@@ -46,9 +46,6 @@ def olympiad_type_remove(id_olympiad_type):
     except Exception:
         db.session.rollback()
         raise
-    except NotFound:
-        db.session.rollback()
-        raise
     return make_response({}, 200)
 
 
@@ -62,11 +59,8 @@ def olympiad_type_get(id_olympiad_type):
 @module.route('/olympiad_type/all', methods=['GET'])
 @jwt_required_role(['Admin', 'System', 'Creator'])
 def olympiad_type_all():
-    try:
-        olympiad_types = db_get_all(OlympiadType)
-        all_olympiad_types = [olympiad_type.serialize() for olympiad_type in olympiad_types]
-    except Exception:
-        raise
+    olympiad_types = db_get_all(OlympiadType)
+    all_olympiad_types = [olympiad_type.serialize() for olympiad_type in olympiad_types]
     return make_response(
         {"olympiad_types": all_olympiad_types}, 200)
 
@@ -294,12 +288,16 @@ def olympiad_patch(id_base_olympiad, id_olympiad):
 def stage_create(id_olympiad):
     values = request.openapi.body
     stage_name = values['stage_name']
+    stage_num = values['stage_num']
+    condition = values['condition']
     next_stage_condition = values['next_stage_condition']
 
     try:
         contest = db_get_or_raise(Contest, "contest_id", str(id_olympiad))
         stage = add_stage(db.session,
                           stage_name=stage_name,
+                          stage_num=stage_num,
+                          condition=condition,
                           next_stage_condition=next_stage_condition,
                           )
         contest.stages.append(stage)

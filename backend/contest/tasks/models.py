@@ -362,6 +362,12 @@ contestsInStage = db.Table('contests_in_stage',
                            )
 
 
+class StageConditionEnum(enum.Enum):
+    No = "No"
+    And = "And"
+    Or = "Or"
+
+
 class Stage(db.Model):
     """
     Class describing a Stage model.
@@ -377,6 +383,8 @@ class Stage(db.Model):
     stage_id = db.Column(db.Integer, autoincrement=True, primary_key=True)
     olympiad_id = db.Column(db.Integer, db.ForeignKey('contest.contest_id'))
     stage_name = db.Column(db.Text, index=True, nullable=False)
+    stage_num = db.Column(db.Integer, nullable=False)
+    condition = db.Column(db.Enum(StageConditionEnum), nullable=True)
     next_stage_condition = db.Column(db.Text, nullable=False)
 
     contests = db.relationship('Contest', secondary=contestsInStage, lazy='subquery',
@@ -388,19 +396,27 @@ class Stage(db.Model):
                 'stage_id': self.stage_id,
                 'olympiad_id': self.olympiad_id,
                 'stage_name': self.stage_name,
+                'condition': self.condition.value,
+                'stage_num': self.stage_num,
                 'next_stage_condition': self.next_stage_condition,
             }
 
-    def update(self, stage_name=None, next_stage_condition=None):
+    def update(self, stage_name=None, stage_num=None, condition=None, next_stage_condition=None):
         if stage_name is not None:
             self.stage_name = stage_name
         if next_stage_condition is not None:
             self.next_stage_condition = next_stage_condition
+        if stage_num is not None:
+            self.stage_num = stage_num
+        if condition is not None:
+            self.condition = condition
 
 
-def add_stage(db_session, stage_name, next_stage_condition, olympiad_id=None):
+def add_stage(db_session, stage_name, condition, stage_num, next_stage_condition, olympiad_id=None):
     stage = Stage(
         stage_name=stage_name,
+        stage_num=stage_num,
+        condition=condition,
         next_stage_condition=next_stage_condition,
         olympiad_id=olympiad_id,
     )
