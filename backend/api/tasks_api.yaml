@@ -713,6 +713,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/errorResponse'
+        '404':
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
 
   /base_olympiad/{id_base_olympiad}/olympiad/{id_olympiad}/stage/{id_stage}/contest/createsimple:
     post:
@@ -1526,7 +1532,6 @@ paths:
               schema:
                 $ref: '#/components/schemas/errorResponse'
 
-
   /base_olympiad/{id_base_olympiad}/olympiad/{id_olympiad}/stage/{id_stage}/contest/{id_contest}/variant/{id_variant}/task/createrange:
     post:
       summary: Create a new range task
@@ -1583,7 +1588,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/errorResponse'
-
 
   /base_olympiad/{id_base_olympiad}/olympiad/{id_olympiad}/stage/{id_stage}/contest/{id_contest}/variant/{id_variant}/task/createmultiple:
     post:
@@ -1766,8 +1770,10 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/errorResponse'
+
+  /base_olympiad/{id_base_olympiad}/olympiad/{id_olympiad}/stage/{id_stage}/contest/{id_contest}/variant/{id_variant}/task/{id_task}/plain:
     patch:
-      summary: Update task info
+      summary: Update plain task info
       security:
         - cookieJWTAuth: [ ]
         - CSRFToken: [ ]
@@ -1813,10 +1819,137 @@ paths:
         content:
           application/json:
             schema:
-              oneOf:
-                - $ref: '#/components/schemas/plainTaskInfoUpdate'
-                - $ref: '#/components/schemas/rangeTaskInfoUpdate'
-                - $ref: '#/components/schemas/multipleTaskInfoUpdate'
+              $ref: '#/components/schemas/plainTaskInfoUpdate'
+      responses:
+        '200':
+          description: OK
+        '404':
+          description: Task not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+
+  /base_olympiad/{id_base_olympiad}/olympiad/{id_olympiad}/stage/{id_stage}/contest/{id_contest}/variant/{id_variant}/task/{id_task}/range:
+    patch:
+      summary: Update range task info
+      security:
+        - cookieJWTAuth: [ ]
+        - CSRFToken: [ ]
+      parameters:
+        - in: path
+          description: Id of the base olympiad
+          name: id_base_olympiad
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the olympiad
+          name: id_olympiad
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the stage
+          name: id_stage
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the contest
+          name: id_contest
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the variant
+          name: id_variant
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the task
+          name: id_task
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/rangeTaskInfoUpdate'
+      responses:
+        '200':
+          description: OK
+        '404':
+          description: Task not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+
+  /base_olympiad/{id_base_olympiad}/olympiad/{id_olympiad}/stage/{id_stage}/contest/{id_contest}/variant/{id_variant}/task/{id_task}/multiple:
+    patch:
+      summary: Update multiple task info
+      security:
+        - cookieJWTAuth: [ ]
+        - CSRFToken: [ ]
+      parameters:
+        - in: path
+          description: Id of the base olympiad
+          name: id_base_olympiad
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the olympiad
+          name: id_olympiad
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the stage
+          name: id_stage
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the contest
+          name: id_contest
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the variant
+          name: id_variant
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the task
+          name: id_task
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/multipleTaskInfoUpdate'
       responses:
         '200':
           description: OK
@@ -2579,6 +2712,9 @@ components:
         image_of_task:
           type: string
           format: binary
+          nullable: true
+          example:
+            null
         start_value:
           type: number
           format: float
@@ -2594,14 +2730,15 @@ components:
         image_of_task:
           type: string
           format: binary
+          nullable: true
+          example:
+            null
         answers:
           type: array
           items:
             type: object
             properties:
-              answer_id:
-                type: integer
-              answer:
+              task_answer:
                 type: string
               is_right_answer:
                 type: boolean
@@ -2614,6 +2751,9 @@ components:
         image_of_task:
           type: string
           format: binary
+          nullable: true
+          example:
+            null
         recommended_answer:
           type: string
     userCertificate:

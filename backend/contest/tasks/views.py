@@ -494,7 +494,7 @@ def contest_response(id_base_olympiad, id_olympiad, id_stage, id_contest):
 
 @module.route(
     '/base_olympiad/<int:id_base_olympiad>/olympiad/<int:id_olympiad>/stage/<int:id_stage>/contest/'
-    '<int:id_contest>/addPreviousForSimpleContest',
+    '<int:id_contest>/addprevious',
     methods=['PATCH'])
 @jwt_required_role(['Admin', 'System', 'Creator'])
 def contest_add_previous(id_base_olympiad, id_olympiad, id_stage, id_contest):
@@ -542,7 +542,10 @@ def variant_create(id_base_olympiad, id_olympiad, id_stage, id_contest):
 
     contest = db_get_or_raise(Contest, "contest_id", str(id_contest))
     variants = contest.variants
-    new_variant = max(variant.variant_number for variant in variants)
+    if len(variants) > 0:
+        new_variant = max(variant.variant_number for variant in variants)
+    else:
+        new_variant = 0
 
     variant_description = values['variant_description']
 
@@ -808,19 +811,61 @@ def check_existence(id_base_olympiad, id_olympiad, id_stage, id_contest, id_vari
 
 @module.route(
     '/base_olympiad/<int:id_base_olympiad>/olympiad/<int:id_olympiad>/stage/<int:id_stage>/contest/<int:id_contest'
-    '>/variant/<int:id_variant>/task/<int:id_task>',
+    '>/variant/<int:id_variant>/task/<int:id_task>/plain',
     methods=['PATCH'])
 @jwt_required_role(['Admin', 'System', 'Creator'])
-def task_patch(id_base_olympiad, id_olympiad, id_stage, id_contest, id_variant, id_task):
-    task = db_get_or_raise(Task, "task_id", str(id_task))
+def task_patch_plain(id_base_olympiad, id_olympiad, id_stage, id_contest, id_variant, id_task):
     try:
+        check_existence(id_base_olympiad, id_olympiad, id_stage, id_contest, id_variant)
+        task = db_get_or_raise(PlainTask, "task_id", str(id_task))
+        values = request.openapi.body
+        task.update(**values)
+        db.session.commit()
+
+    except Exception:
+        db.session.rollback()
+        raise
+    return make_response({}, 200)
+
+
+@module.route(
+    '/base_olympiad/<int:id_base_olympiad>/olympiad/<int:id_olympiad>/stage/<int:id_stage>/contest/<int:id_contest'
+    '>/variant/<int:id_variant>/task/<int:id_task>/range',
+    methods=['PATCH'])
+@jwt_required_role(['Admin', 'System', 'Creator'])
+def task_patch_range(id_base_olympiad, id_olympiad, id_stage, id_contest, id_variant, id_task):
+    try:
+        task = db_get_or_raise(RangeTask, "task_id", str(id_task))
         check_existence(id_base_olympiad, id_olympiad, id_stage, id_contest, id_variant)
         values = request.openapi.body
         task.update(**values)
 
-        if task.task_type == MultipleChoiceTask.__name__:
-            answers = values['answers']
-            update_multiple_choice_task(db.session, id_task, answers)
+        db.session.commit()
+
+    except Exception:
+        db.session.rollback()
+        raise
+    return make_response({}, 200)
+
+
+@module.route(
+    '/base_olympiad/<int:id_base_olympiad>/olympiad/<int:id_olympiad>/stage/<int:id_stage>/contest/<int:id_contest'
+    '>/variant/<int:id_variant>/task/<int:id_task>/multiple',
+    methods=['PATCH'])
+@jwt_required_role(['Admin', 'System', 'Creator'])
+def task_patch_multiple(id_base_olympiad, id_olympiad, id_stage, id_contest, id_variant, id_task):
+    try:
+        check_existence(id_base_olympiad, id_olympiad, id_stage, id_contest, id_variant)
+        task = db_get_or_raise(MultipleChoiceTask, "task_id", str(id_task))
+        values = request.openapi.body
+        answers = values['answers']
+        del values['answers']
+        task.update(**values)
+
+        task.all_answers_in_multiple_task = [AnswersInMultipleChoiceTask(
+            answer=answer_['task_answer'],
+            correct=answer_['is_right_answer']
+        ) for answer_ in answers]
 
         db.session.commit()
 
