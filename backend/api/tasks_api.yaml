@@ -39,7 +39,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/errorResponse'
-
   /olympiad_type/{id_olympiad_type}/remove:
     post:
       summary: remove olympiad type
@@ -62,7 +61,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/errorResponse'
-
+        '404':
+          description: Olympiad type not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
   /olympiad_type/all:
     get:
       summary: list of all olympiad types
@@ -82,7 +86,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/errorResponse'
-
   /olympiad_type/{id_olympiad_type}:
     get:
       summary: get olympiad type
@@ -105,6 +108,12 @@ paths:
                 $ref: '#/components/schemas/olympiadTypeInfo'
         '400':
           description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+        '404':
+          description: Olympiad type not found
           content:
             application/json:
               schema:
@@ -173,8 +182,14 @@ paths:
       responses:
         '200':
           description: OK
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
         '404':
-          description: Stage not found
+          description: Base olympiad not found
           content:
             application/json:
               schema:
@@ -199,9 +214,14 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/commonBaseContestInfo'
-
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
         '404':
-          description: Contest not found
+          description: Base olympiad not found
           content:
             application/json:
               schema:
@@ -227,8 +247,14 @@ paths:
       responses:
         '200':
           description: OK
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
         '404':
-          description: Stage not found
+          description: Base olympiad not found
           content:
             application/json:
               schema:
@@ -349,7 +375,13 @@ paths:
         '200':
           description: OK
         '404':
-          description: Stage not found
+          description: Contest not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+        '400':
+          description: Bad request
           content:
             application/json:
               schema:
@@ -380,9 +412,14 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/commonContestInfo'
-
         '404':
           description: Contest not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+        '400':
+          description: Bad request
           content:
             application/json:
               schema:
@@ -415,7 +452,13 @@ paths:
         '200':
           description: OK
         '404':
-          description: Stage not found
+          description: Contest not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+        '400':
+          description: Bad request
           content:
             application/json:
               schema:
@@ -455,7 +498,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/stageInfoId'
-
         '400':
           description: Bad request
           content:
@@ -528,10 +570,16 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/errorResponse'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
   /base_olympiad/{id_base_olympiad}/olympiad/{id_olympiad}/stage/{id_stage}:
     get:
       summary: Get common info for a different stage
-      security: []
+      security: [ ]
       parameters:
         - in: path
           description: Id of the base olympiad
@@ -560,6 +608,12 @@ paths:
                 $ref: '#/components/schemas/stageInfo'
         '404':
           description: Stage not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+        '400':
+          description: Bad request
           content:
             application/json:
               schema:
@@ -600,6 +654,12 @@ paths:
           description: OK
         '404':
           description: Stage not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+        '400':
+          description: Bad request
           content:
             application/json:
               schema:
@@ -646,7 +706,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/commonContestId'
-
         '400':
           description: Bad request
           content:
@@ -734,7 +793,13 @@ paths:
         '200':
           description: OK
         '404':
-          description: Stage not found
+          description: Contest not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+        '400':
+          description: Bad request
           content:
             application/json:
               schema:
@@ -778,9 +843,14 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/commonContestInfo'
-
         '404':
           description: Contest not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+        '400':
+          description: Bad request
           content:
             application/json:
               schema:
@@ -825,7 +895,13 @@ paths:
         '200':
           description: OK
         '404':
-          description: Stage not found
+          description: Contest not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+        '400':
+          description: Bad request
           content:
             application/json:
               schema:
@@ -912,113 +988,6 @@ paths:
       responses:
         '200':
           description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/updateUserInContest'
-        '404':
-          description: User or group not found
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errorResponse'
-
-  /base_olympiad/{id_base_olympiad}/olympiad/{id_olympiad}/stage/{id_stage}/contest/{id_contest}/moveusercustom:
-    post:
-      summary: Move users to the next stage (custom)
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/moveUserToNextStage'
-      parameters:
-        - in: path
-          description: Id of the base olympiad
-          name: id_base_olympiad
-          required: true
-          schema:
-            type: integer
-        - in: path
-          description: Id of the olympiad
-          name: id_olympiad
-          required: true
-          schema:
-            type: integer
-        - in: path
-          description: Id of the stage
-          name: id_stage
-          required: true
-          schema:
-            type: integer
-        - in: path
-          description: Id of the contest
-          name: id_contest
-          required: true
-          schema:
-            type: integer
-      security:
-        - cookieJWTAuth: [ ]
-        - CSRFToken: [ ]
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/updateUserInContest'
-        '404':
-          description: User or group not found
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errorResponse'
-
-
-  /base_olympiad/{id_base_olympiad}/olympiad/{id_olympiad}/stage/{id_stage}/contest/{id_contest}/moveallpossibleusers:
-    post:
-      summary: Move all possible users to the next stage
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/movePossibleUserToNextStage'
-      parameters:
-        - in: path
-          description: Id of the base olympiad
-          name: id_base_olympiad
-          required: true
-          schema:
-            type: integer
-        - in: path
-          description: Id of the olympiad
-          name: id_olympiad
-          required: true
-          schema:
-            type: integer
-        - in: path
-          description: Id of the stage
-          name: id_stage
-          required: true
-          schema:
-            type: integer
-        - in: path
-          description: Id of the contest
-          name: id_contest
-          required: true
-          schema:
-            type: integer
-      security:
-        - cookieJWTAuth: [ ]
-        - CSRFToken: [ ]
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/updateUserInContest'
         '404':
           description: User or group not found
           content:
@@ -1162,6 +1131,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/userCertificate'
+        '404':
+          description: User not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
         '400':
           description: Bad request
           content:
@@ -1308,7 +1283,13 @@ paths:
         '200':
           description: OK
         '404':
-          description: Stage not found
+          description: Variant not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+        '400':
+          description: Bad request
           content:
             application/json:
               schema:
@@ -1364,6 +1345,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/errorResponse'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
     patch:
       summary: Edit variant
       security:
@@ -1411,6 +1398,12 @@ paths:
           description: OK
         '404':
           description: Variant not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+        '400':
+          description: Bad request
           content:
             application/json:
               schema:
@@ -1643,6 +1636,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/errorResponse'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
 
   /base_olympiad/{id_base_olympiad}/olympiad/{id_olympiad}/stage/{id_stage}/contest/{id_contest}/variant/{id_variant}/task/{id_task}:
     get:
@@ -1703,6 +1702,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/errorResponse'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
     patch:
       summary: Update task info
       security:
@@ -1750,15 +1755,21 @@ paths:
         content:
           application/json:
             schema:
-                oneOf:
-                  - $ref: '#/components/schemas/plainTaskInfoUpdate'
-                  - $ref: '#/components/schemas/rangeTaskInfoUpdate'
-                  - $ref: '#/components/schemas/multipleTaskInfoUpdate'
+              oneOf:
+                - $ref: '#/components/schemas/plainTaskInfoUpdate'
+                - $ref: '#/components/schemas/rangeTaskInfoUpdate'
+                - $ref: '#/components/schemas/multipleTaskInfoUpdate'
       responses:
         '200':
           description: OK
         '404':
-          description: Stage not found
+          description: Task not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+        '400':
+          description: Bad request
           content:
             application/json:
               schema:
@@ -1865,6 +1876,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/taskInVariantImage'
+        '404':
+          description: Task not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
         '400':
           description: Bad request
           content:
@@ -1928,12 +1945,12 @@ components:
                 type: integer
               subject:
                 type: string
-                enum: ["Math", "Physics", "Informatics"]
+                enum: [ "Math", "Physics", "Informatics" ]
               target_classes:
                 type: array
                 items:
                   type: string
-                  enum: ["5", "6", "7", "8", "9", "10", "11", "student"]
+                  enum: [ "5", "6", "7", "8", "9", "10", "11", "student" ]
     createBaseContest:
       title: Create base contest
       description: Request to base contest creation
@@ -1972,12 +1989,12 @@ components:
           type: integer
         subject:
           type: string
-          enum: ["Math", "Physics", "Informatics"]
+          enum: [ "Math", "Physics", "Informatics" ]
         target_classes:
           type: array
           items:
             type: string
-            enum: ["5", "6", "7", "8", "9", "10", "11", "student"]
+            enum: [ "5", "6", "7", "8", "9", "10", "11", "student" ]
     commonBaseContestInfo:
       title: Base contest common info
       description: Request to get base contest info
@@ -1991,6 +2008,7 @@ components:
         - certificate_template
         - olympiad_type_id
         - subject
+        - target_classes
       properties:
         base_contest_id:
           type: integer
@@ -2014,7 +2032,7 @@ components:
           type: integer
         subject:
           type: string
-          enum: ["Math", "Physics", "Informatics"]
+          enum: [ "Math", "Physics", "Informatics" ]
         target_classes:
           type: array
           items:
@@ -2052,12 +2070,12 @@ components:
           type: integer
         subject:
           type: string
-          enum: ['Math', "Physics", "Informatics"]
+          enum: [ 'Math', "Physics", "Informatics" ]
         target_classes:
           type: array
           items:
             type: string
-            enum: ["5", "6", "7", "8", "9", "10", "11", "student"]
+            enum: [ "5", "6", "7", "8", "9", "10", "11", "student" ]
 
     createStage:
       title: Create stage
@@ -2124,7 +2142,7 @@ components:
           type: integer
         previous_participation_condition:
           type: string
-          enum: ["Participant", "Laureate", "Winner"]
+          enum: [ "Participant", "Laureate", "Winner" ]
 
     createCompositeContest:
       title: Create composite contest
@@ -2233,9 +2251,9 @@ components:
                 type: integer
               user_status:
                 type: string
-                enum: ["Participant", "Laureate", "Winner"]
+                enum: [ "Participant", "Laureate", "Winner" ]
     updateUserInContest:
-      title: Add or removeuser to contest or stage
+      title: Add or remove user to contest or stage
       description: Request to add or remove user user to contest or stage
       required:
         - users_id
@@ -2413,17 +2431,12 @@ components:
       required:
         - task_id
         - num_of_task
-        - image_of_task
         - recommended_answer
       properties:
         task_id:
           type: integer
         num_of_task:
           type: integer
-        image_of_task:
-          type: string
-          format: binary
-          nullable: true
         recommended_answer:
           type: string
     rangeTaskInfo:
@@ -2432,7 +2445,6 @@ components:
       required:
         - task_id
         - num_of_task
-        - image_of_task
         - start_value
         - end_value
       properties:
@@ -2440,10 +2452,6 @@ components:
           type: integer
         num_of_task:
           type: integer
-        image_of_task:
-          type: string
-          format: binary
-          nullable: true
         start_value:
           type: number
           format: float
@@ -2456,17 +2464,13 @@ components:
       required:
         - task_id
         - num_of_task
-        - image_of_task
-        - answers
+        - all_answers_in_multiple_task
       properties:
         task_id:
           type: integer
         num_of_task:
           type: integer
-        image_of_task:
-          type: string
-          format: binary
-        answers:
+        all_answers_in_multiple_task:
           type: array
           items:
             type: object
@@ -2475,7 +2479,7 @@ components:
                 type: integer
               answer:
                 type: string
-              is_right_answer:
+              correct:
                 type: boolean
     rangeTaskInfoUpdate:
       title: Update task with range
@@ -2545,31 +2549,6 @@ components:
           type: string
           format: binary
           nullable: true
-    moveUserToNextStage:
-      title: Move user to contest
-      description: Request to move user to contest
-      required:
-        - users_id
-        - next_contest_id
-      properties:
-        users_id:
-          type: array
-          items:
-            type: integer
-        next_contest_id:
-          type: integer
-    movePossibleUserToNextStage:
-      title: Move all possible users to contest
-      description: Request to move all possible user to contest
-      required:
-        - next_contest_id
-      properties:
-        users_id:
-          type: array
-          items:
-            type: integer
-        next_contest_id:
-          type: integer
     olympiadTypes:
       title: All olympiad types
       description: Request to get all olympiad types

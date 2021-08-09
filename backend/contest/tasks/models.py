@@ -3,8 +3,6 @@
 from datetime import datetime
 import enum
 from common import get_current_db
-
-# Constants
 from common.util import db_get_filter_all, db_get_or_raise
 
 db = get_current_db()
@@ -128,9 +126,9 @@ class BaseContest(db.Model):
     laureate_condition = db.Column(db.Float, nullable=False)
 
     target_classes = db.relationship('TargetClass', lazy='select',
-                                     backref=db.backref('base_contest', lazy='joined'))
+                                     backref=db.backref('base_contest', lazy='joined'), cascade="all,delete")
     child_contests = db.relationship('Contest', lazy='select',
-                                     backref=db.backref('base_contest', lazy='joined'))
+                                     backref=db.backref('base_contest', lazy='joined'), cascade="all,delete")
 
     def serialize(self):
         return \
@@ -144,22 +142,7 @@ class BaseContest(db.Model):
                 'certificate_template': self.certificate_template,
                 'winning_condition': self.winning_condition,
                 'laureate_condition': self.laureate_condition,
-                'target_classes': [target.serialize()['target_class'] for target in self.target_classes],
-            }
-
-    def serialize_target(self):
-        return \
-            {
-                'base_contest_id': self.base_contest_id,
-                'target_classes': self.target_classes,
-            }
-
-    # useless for now
-    def serialize_child(self):
-        return \
-            {
-                'base_contest_id': self.base_contest_id,
-                'child_contests': self.child_contests
+                'target_classes': [target.target_class.value for target in self.target_classes],
             }
 
     def update(self, name=None, certificate_template=None,
@@ -190,12 +173,11 @@ class BaseContest(db.Model):
 def update_target_class(db_session, base_contest_id, target_classes):
     db_get_filter_all(TargetClass, "contest_id", base_contest_id).delete()
 
-    for target_class_ in target_classes:
-        target_class = TargetClass(
-            contest_id=base_contest_id,
-            target_class=olympiad_target_class_dict[target_class_]
-        )
-        db_session.add(target_class)
+    classes = [TargetClass(
+        contest_id=base_contest_id,
+        target_class=olympiad_target_class_dict[target_class]
+    ) for target_class in set(target_classes)]
+    db_session.bulk_save_objects(classes)
 
 
 class TargetClass(db.Model):
@@ -222,6 +204,11 @@ def add_target_class(db_session, contest_id, target_class_):
     return target_class
 
 
+class ContestTypeEnum(enum.Enum):
+    SimpleContest = "SimpleContest"
+    CompositeContest = "CompositeContest"
+
+
 class Contest(db.Model):
     """
     Class describing a Contest model.
@@ -239,7 +226,7 @@ class Contest(db.Model):
 
     base_contest_id = db.Column(db.Integer, db.ForeignKey('base_contest.base_contest_id'))
     contest_id = db.Column(db.Integer, autoincrement=True, primary_key=True)
-    composite_type = db.Column(db.Unicode(256))
+    composite_type = db.Column(db.Enum(ContestTypeEnum))
     visibility = db.Column(db.Boolean, default=DEFAULT_VISIBILITY, nullable=False)
 
     users = db.relationship('UserInContest', lazy='select',
@@ -262,7 +249,6 @@ def add_simple_contest(db_session, base_contest_id,
         previous_contest_id=previous_contest_id,
         previous_participation_condition=previous_participation_condition,
         location=location,
-        composite_type=SimpleContest.__name__,
     )
     db_session.add(simpleContest)
     return simpleContest
@@ -329,7 +315,6 @@ def add_composite_contest(db_session, base_contest_id, visibility):
     compositeContest = CompositeContest(
         base_contest_id=base_contest_id,
         visibility=visibility,
-        composite_type=CompositeContest.__name__,
     )
     db_session.add(compositeContest)
     return compositeContest
@@ -348,22 +333,6 @@ class CompositeContest(Contest):
             {
                 'contest_id': self.contest_id,
                 'visibility': self.visibility,
-            }
-
-    # useless for now
-    def serialize_users(self):
-        return \
-            {
-                'contest_id': self.contest_id,
-                'users': self.users,
-            }
-
-    # useless for now
-    def serialize_stages(self):
-        return \
-            {
-                'contest_id': self.contest_id,
-                'stages': self.stages,
             }
 
     def update(self, visibility=None, composite_type=None):
@@ -424,14 +393,6 @@ class Stage(db.Model):
                 'olympiad_id': self.olympiad_id,
                 'stage_name': self.stage_name,
                 'next_stage_condition': self.next_stage_condition,
-            }
-
-    # useless for now
-    def serialize_contests(self):
-        return \
-            {
-                'stage_id': self.stage_id,
-                'contests': self.contests
             }
 
     def update(self, stage_name=None, next_stage_condition=None):
@@ -516,22 +477,6 @@ class Variant(db.Model):
                 'variant_description': self.variant_description,
             }
 
-    # useless for now
-    def serialize_tasks(self):
-        return \
-            {
-                'variant_id': self.variant_id,
-                'tasks': self.tasks
-            }
-
-    # useless for now
-    def serialize_users(self):
-        return \
-            {
-                'variant_id': self.variant_id,
-                'users': self.users,
-            }
-
     def update(self, contest_id=None, variant_number=None, variant_description=None):
         if contest_id is not None:
             self.contest_id = contest_id
@@ -585,6 +530,12 @@ class UserInContest(db.Model):
             self.user_status = user_status
 
 
+class TaskTypeEnum(enum.Enum):
+    PlainTask = "PlainTask"
+    RangeTask = "RangeTask"
+    MultipleChoiceTask = "MultipleChoiceTask"
+
+
 class Task(db.Model):
     """
     Class describing a Base Task model.
@@ -598,7 +549,7 @@ class Task(db.Model):
     task_id = db.Column(db.Integer, autoincrement=True, primary_key=True)
     num_of_task = db.Column(db.Integer, nullable=False)
     image_of_task = db.Column(db.LargeBinary, nullable=True)
-    task_type = db.Column(db.Unicode(256))
+    task_type = db.Column(db.Enum(TaskTypeEnum))
 
     __mapper_args__ = {
         'polymorphic_identity': 'base_task',
@@ -610,7 +561,6 @@ def add_plain_task(db_session, num_of_task, image_of_task, recommended_answer):
     task = PlainTask(
         num_of_task=num_of_task,
         image_of_task=image_of_task,
-        task_type=PlainTask.__name__,
         recommended_answer=recommended_answer,
     )
     db_session.add(task)
@@ -655,7 +605,6 @@ def add_range_task(db_session, num_of_task, image_of_task, start_value, end_valu
     task = RangeTask(
         num_of_task=num_of_task,
         image_of_task=image_of_task,
-        task_type=RangeTask.__name__,
         start_value=start_value,
         end_value=end_value,
     )
@@ -706,7 +655,6 @@ def add_multiple_task(db_session, num_of_task, image_of_task):
     task = MultipleChoiceTask(
         num_of_task=num_of_task,
         image_of_task=image_of_task,
-        task_type=MultipleChoiceTask.__name__
     )
     db_session.add(task)
     return task
@@ -723,7 +671,8 @@ class MultipleChoiceTask(Task):
 
     task_id = db.Column(db.Integer, db.ForeignKey('base_task.task_id'), primary_key=True)
     all_answers_in_multiple_task = db.relationship('AnswersInMultipleChoiceTask', lazy='select',
-                                                   backref=db.backref('multiple_task', lazy='joined'))
+                                                   backref=db.backref('multiple_task', lazy='joined'), cascade="all, "
+                                                                                                               "delete")
 
     __mapper_args__ = {
         'polymorphic_identity': 'MultipleChoiceTask',
@@ -776,7 +725,6 @@ class AnswersInMultipleChoiceTask(db.Model):
         return \
             {
                 'answer_id': self.answer_id,
-                'task_id': self.task_id,
                 'answer': self.answer,
                 'correct': self.correct
             }
@@ -791,10 +739,9 @@ class AnswersInMultipleChoiceTask(db.Model):
 def updateMultipleChoiceTask(db_session, task_id, answers):
     AnswersInMultipleChoiceTask.query.filter_by(AnswersInMultipleChoiceTask.task_id == task_id).delete()
 
-    for answer_ in answers:
-        answer = AnswersInMultipleChoiceTask(
+    all_answers = [AnswersInMultipleChoiceTask(
             task_id=task_id,
             answer=answer_['answer'],
             correct=answer_['correct']
-        )
-        db_session.add(answer)
+    ) for answer_ in answers]
+    db_session.bulk_save_objects(all_answers)

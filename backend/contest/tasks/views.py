@@ -2,12 +2,10 @@ import random
 
 from flask import abort
 from flask import request, make_response
-from sqlalchemy import func, desc
 
 from common import get_current_module
 from common.jwt_verify import jwt_required_role
 from common.util import db_get_all, db_get_or_raise, db_get_list
-from common.errors import RequestError
 from .models import *
 
 db = get_current_db()
@@ -92,7 +90,7 @@ def base_olympiad_create():
     winning_condition = values['winning_condition']
     laureate_condition = values['laureate_condition']
     subject = values['subject']
-    target_classes = values['target_classes']
+    target_classes = set(values['target_classes'])
 
     try:
         baseContest = add_base_contest(db.session,
@@ -105,16 +103,11 @@ def base_olympiad_create():
                                        olympiad_type_id=olympiad_type_id,
                                        subject=subject)
 
-        for target_class in target_classes:
-            baseContest.target_classes.append(TargetClass(
-                target_class=olympiad_target_class_dict[target_class],
-            ))
+        baseContest.target_classes = [TargetClass(
+            target_class=olympiad_target_class_dict[target_class],
+        ) for target_class in target_classes]
 
         db.session.commit()
-    except RequestError as req:
-        req.to_response()
-        db.session.rollback()
-        raise
     except Exception:
         db.session.rollback()
         raise
@@ -129,9 +122,6 @@ def base_olympiad_create():
 @jwt_required_role(['Admin', 'System', 'Creator'])
 def base_olympiad_remove(id_base_olympiad):
     try:
-        target_classes = db_get_list(TargetClass, "contest_id", id_base_olympiad)
-        for target_class in target_classes:
-            db.session.delete(target_class)
         baseContest = db_get_or_raise(BaseContest, "base_contest_id", str(id_base_olympiad))
         db.session.delete(baseContest)
         db.session.commit()
@@ -141,38 +131,38 @@ def base_olympiad_remove(id_base_olympiad):
     return make_response({}, 200)
 
 
-@module.route('/base_olympiad/<int:id_base_olympiad>', methods=['GET', 'PATCH'])
-@jwt_required_role(['Admin', 'System', 'Creator'])
-def base_olympiad_response(id_base_olympiad):
+@module.route('/base_olympiad/<int:id_base_olympiad>', methods=['GET'])
+@jwt_required_role(['Admin', 'System', 'Creator', 'Participant'])
+def base_olympiad_get(id_base_olympiad):
     baseContest = db_get_or_raise(BaseContest, "base_contest_id", id_base_olympiad)
 
-    if request.method == 'GET':
-        return make_response(baseContest.serialize(), 200)
+    return make_response(baseContest.serialize(), 200)
 
-    elif request.method == 'PATCH':
-        values = request.openapi.body
 
-        try:
-            target_classes = values["target_classes"]
-            del values["target_classes"]
-            baseContest.update(**values)
-            if target_classes is not None:
-                update_target_class(db.session, id_base_olympiad, target_classes)
-            db.session.commit()
-        except Exception:
-            db.session.rollback()
-            raise
-        return make_response(baseContest.serialize(), 200)
+@module.route('/base_olympiad/<int:id_base_olympiad>', methods=['PATCH'])
+@jwt_required_role(['Admin', 'System', 'Creator'])
+def base_olympiad_patch(id_base_olympiad):
+    baseContest = db_get_or_raise(BaseContest, "base_contest_id", id_base_olympiad)
+    values = request.openapi.body
+
+    try:
+        target_classes = values["target_classes"]
+        del values["target_classes"]
+        baseContest.update(**values)
+        if target_classes is not None:
+            update_target_class(db.session, id_base_olympiad, target_classes)
+        db.session.commit()
+    except Exception:
+        db.session.rollback()
+        raise
+    return make_response(baseContest.serialize(), 200)
 
 
 @module.route('/base_olympiad/all', methods=['GET'])
 @jwt_required_role(['Admin', 'System', 'Creator'])
 def base_olympiads_all():
-    try:
-        olympiads = db_get_all(BaseContest)
-        all_olympiads = [olympiad.serialize() for olympiad in olympiads]
-    except Exception:
-        raise
+    olympiads = db_get_all(BaseContest)
+    all_olympiads = [olympiad.serialize() for olympiad in olympiads]
     return make_response(
         {"olympiad_list": all_olympiads}, 200)
 
@@ -296,7 +286,6 @@ def stage_create(id_base_olympiad, id_olympiad):
                           stage_name=stage_name,
                           next_stage_condition=next_stage_condition,
                           )
-        db.session.add(stage)
         db.session.commit()
 
     except Exception:
@@ -350,14 +339,8 @@ def stage_response(id_base_olympiad, id_olympiad, id_stage):
 @module.route('/base_olympiad/<int:id_base_olympiad>/olympiad/<int:id_olympiad>/stage/all', methods=['GET'])
 @jwt_required_role(['Admin', 'System', 'Creator'])
 def stages_all(id_base_olympiad, id_olympiad):
-    try:
-
-        contest = db_get_or_raise(CompositeContest, "contest_id", str(id_olympiad))
-        all_stages = [stage.serialize() for stage in contest.stages]
-
-    except Exception:
-        raise
-
+    contest = db_get_or_raise(CompositeContest, "contest_id", str(id_olympiad))
+    all_stages = [stage.serialize() for stage in contest.stages]
     return make_response(
         {
             "stages_list": all_stages
@@ -496,10 +479,7 @@ def variant_create(id_base_olympiad, id_olympiad, id_stage, id_contest):
     # TODO QUERY FOR MAX
     contest = db_get_or_raise(Contest, "contest_id", str(id_contest))
     variants = contest.variants
-    new_variant = 0
-    for var in variants:
-        if var.variant_number > new_variant:
-            new_variant = var.variant_number
+    new_variant = max(variant.variant_number for variant in variants)
 
     variant_description = values['variant_description']
 
@@ -529,7 +509,10 @@ def variant_create(id_base_olympiad, id_olympiad, id_stage, id_contest):
 @jwt_required_role(['Admin', 'System', 'Creator'])
 def variant_remove(id_base_olympiad, id_olympiad, id_stage, id_contest, id_variant):
     try:
-        variant = db_get_or_raise(Variant, "variant_id", str(id_variant))
+
+        variant = Variant.query.filter_by(**{"contest_id": str(id_contest),
+                                             "variant_id": str(id_variant)}).one_or_none()
+
         db.session.delete(variant)
         db.session.commit()
     except Exception:
@@ -544,7 +527,8 @@ def variant_remove(id_base_olympiad, id_olympiad, id_stage, id_contest, id_varia
     methods=['GET', 'PATCH'])
 @jwt_required_role(['Admin', 'System', 'Creator'])
 def variant_response(id_base_olympiad, id_olympiad, id_stage, id_contest, variant_num):
-    variant = db_get_or_raise(Variant, "variant_number", variant_num)
+    variant = Variant.query.filter_by(**{"contest_id": str(id_contest),
+                                         "variant_number": str(variant_num)}).one_or_none()
     if request.method == 'GET':
         return make_response(
             variant.serialize()
@@ -587,8 +571,6 @@ def variant_all(id_base_olympiad, id_olympiad, id_stage, id_contest):
 def task_create_plain(id_base_olympiad, id_olympiad, id_stage, id_contest, id_variant):
     try:
         values = request.openapi.body
-
-        variant = db_get_or_raise(Variant, "variant_id", str(id_variant))
 
         num_of_task = values['num_of_task']
         image_of_task = values['image_of_task']
@@ -666,9 +648,10 @@ def task_create_multiple(id_base_olympiad, id_olympiad, id_stage, id_contest, id
                                  image_of_task=image_of_task
                                  )
         add_task_in_Variant(id_variant, task)
-        for answer in answers:
-            task.all_answers_in_multiple_task.append(AnswersInMultipleChoiceTask(answer=answer['task_answer'],
-                                                                                 correct=answer['is_right_answer']))
+
+        task.all_answers_in_multiple_task = [AnswersInMultipleChoiceTask(answer=answer['task_answer'],
+                                                                         correct=answer['is_right_answer'])
+                                             for answer in answers]
 
         db.session.commit()
 
@@ -690,13 +673,7 @@ def task_create_multiple(id_base_olympiad, id_olympiad, id_stage, id_contest, id
 def task_remove(id_base_olympiad, id_olympiad, id_stage, id_contest, id_variant, id_task):
     try:
         task = db_get_or_raise(Task, "task_id", str(id_task))
-
-        if task.task_type == MultipleChoiceTask.__name__:
-            for answer in task.all_answers_in_multiple_task:
-                db.session.delete(answer)
-
         db.session.delete(task)
-
         db.session.commit()
 
     except Exception:
@@ -714,9 +691,7 @@ def task_get(id_base_olympiad, id_olympiad, id_stage, id_contest, id_variant, id
     task = db_get_or_raise(Task, "task_id", str(id_task))
     if request.method == 'GET':
         return make_response(
-            {
-                task.serialize()
-            }, 200)
+            task.serialize(), 200)
 
     elif request.method == 'PATCH':
         try:
@@ -742,9 +717,10 @@ def task_get(id_base_olympiad, id_olympiad, id_stage, id_contest, id_variant, id
     methods=['GET'])
 @jwt_required_role(['Admin', 'System', 'Creator'])
 def task_all(id_base_olympiad, id_olympiad, id_stage, id_contest, id_variant):
-    variant = db_get_or_raise(Variant, "variant_id", str(id_variant))
-    all_tasks = [task.serialize() for task in variant.tasks]
 
+    variant = Variant.query.filter_by(**{"contest_id": str(id_contest),
+                                         "variant_id": str(id_variant)}).one_or_none()
+    all_tasks = [task.serialize() for task in variant.tasks]
     return make_response(
         {
             "tasks_list": all_tasks
@@ -771,6 +747,8 @@ def task_image(id_base_olympiad, id_olympiad, id_stage, id_contest, id_variant, 
 def generate_variant(id_contest, user_id):
     contest = db_get_or_raise(Contest, "contest_id", id_contest)
     variants_number = len(contest.variants)
+    if variants_number == 0:
+        return 0
     random_number = random.randint(0, variants_number * 2)
     variant = (user_id + random_number) % variants_number
     return variant
@@ -788,12 +766,12 @@ def add_user_to_contest(id_base_olympiad, id_olympiad, id_stage, id_contest):
     try:
 
         for user_id in user_ids:
-            user = add_user_in_contest(db.session,
-                                       user_id=user_id,
-                                       contest_id=id_contest,
-                                       variant_id=generate_variant(id_contest, user_id),
-                                       user_status=UserStatusEnum.Participant
-                                       )
+            add_user_in_contest(db.session,
+                                user_id=user_id,
+                                contest_id=id_contest,
+                                variant_id=generate_variant(id_contest, user_id),
+                                user_status=UserStatusEnum.Participant
+                                )
 
         db.session.commit()
 
@@ -801,9 +779,7 @@ def add_user_to_contest(id_base_olympiad, id_olympiad, id_stage, id_contest):
         db.session.rollback()
         raise
     return make_response(
-        {
-            "users_id": user_ids,
-        }, 200)
+        {}, 200)
 
 
 @module.route(
@@ -816,7 +792,6 @@ def remove_user_from_contest(id_base_olympiad, id_olympiad, id_stage, id_contest
     user_ids = values['users_id']
 
     try:
-        contest = db_get_or_raise(Contest, "contest_id", id_contest)
 
         for user_id in user_ids:
             user = UserInContest.query.filter_by(**{"contest_id": id_contest,
@@ -832,64 +807,6 @@ def remove_user_from_contest(id_base_olympiad, id_olympiad, id_stage, id_contest
 
 
 @module.route(
-    '/base_olympiad/<int:id_base_olympiad>/olympiad/<int:id_olympiad>/stage/<int:id_stage>/contest/<'
-    'id_contest>/moveusercustom',
-    methods=['POST'])
-@jwt_required_role(['Admin', 'System', 'Creator'])
-def move_user(id_base_olympiad, id_olympiad, id_stage, id_contest):
-    values = request.openapi.body
-    user_ids = values['users_id']
-    next_contest_id = values['next_contest_id']
-
-    try:
-        for user_id in user_ids:
-            add_user_in_contest(db.session,
-                                user_id=user_id,
-                                contest_id=next_contest_id,
-                                variant_id=generate_variant(id_contest, user_id),
-                                user_status=UserStatusEnum.Participant
-                                )
-
-        db.session.commit()
-
-    except Exception:
-        db.session.rollback()
-        raise
-    return make_response({"users_id": user_ids}, 200)
-
-
-@module.route(
-    '/base_olympiad/<int:id_base_olympiad>/olympiad/<int:id_olympiad>/stage/<int:id_stage>/contest/<'
-    'id_contest>/moveallpossibleusers',
-    methods=['POST'])
-@jwt_required_role(['Admin', 'System', 'Creator'])
-def move_all_user(id_base_olympiad, id_olympiad, id_stage, id_contest):
-    contest = db_get_or_raise(Contest, "contest_id", id_contest)
-    users = contest.users
-
-    values = request.openapi.body
-    next_contest_id = values['next_contest_id']
-    user_ids = []
-    new_contest = db_get_or_raise(Contest, "previous_contest_id", id_contest)
-    moving_condition = new_contest.previous_participation_condition
-
-    try:
-        for user in users:
-            if user_status_dict[user.user_status] >= moving_condition:
-                user_ids.append(user.user_id)
-                new_contest.users.append(UserInContest(user_id=user.user_id,
-                                                       contest_id=next_contest_id,
-                                                       variant_id=generate_variant(id_contest, user.user_id),
-                                                       user_status=UserStatusEnum.Participant))
-        db.session.commit()
-
-    except Exception:
-        db.session.rollback()
-        raise
-    return make_response({"users_id": user_ids}, 200)
-
-
-@module.route(
     '/base_olympiad/<int:id_base_olympiad>/olympiad/<int:id_olympiad>/stage/<int:id_stage>/contest/<int:id_contest'
     '>/user/all',
     methods=['GET'])
@@ -897,7 +814,6 @@ def move_all_user(id_base_olympiad, id_olympiad, id_stage, id_contest):
 def users_all(id_base_olympiad, id_olympiad, id_stage, id_contest):
     contest = db_get_or_raise(Contest, "contest_id", id_contest)
     all_users = [u.serialize() for u in contest.users]
-
     return make_response(
         {
             "user_list": all_users
