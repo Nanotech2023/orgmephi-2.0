@@ -3,7 +3,7 @@ import { Gender, ParticipantRegister } from '@/users/models/participant'
 import { ParticipantService } from '@/users/services/participant.service'
 import { select, Store } from '@ngrx/store'
 import { AuthSelectors, AuthState } from '@/auth/store'
-import { TypeUserInfo, TypePersonalInfo } from '@/auth/models'
+import { TypeUserInfo, TypePersonalInfo } from '@/auth/api/models'
 import { Observable } from 'rxjs'
 
 

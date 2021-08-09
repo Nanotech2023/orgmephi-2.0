@@ -1,6 +1,6 @@
 import { Component, ElementRef, OnInit, ViewChild } from '@angular/core'
 import { AuthServiceMock } from '@/auth/api/auth.service.mock'
-import { ResponseUserAll } from '@/auth/models'
+import { ResponseUserAll } from '@/auth/api/models'
 import { Observable } from 'rxjs'
 import { fixedHeight } from '@/shared/consts'
 

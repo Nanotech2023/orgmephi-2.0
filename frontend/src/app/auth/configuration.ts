@@ -1,22 +1,51 @@
+import { HttpParameterCodec } from '@angular/common/http'
+
+
 export interface ConfigurationParameters
 {
+    /**
+     *  @deprecated Since 5.0. Use credentials instead
+     */
     apiKeys?: { [ key: string ]: string };
     username?: string;
     password?: string;
+    /**
+     *  @deprecated Since 5.0. Use credentials instead
+     */
     accessToken?: string | ( () => string );
     basePath?: string;
     withCredentials?: boolean;
+    encoder?: HttpParameterCodec;
+    /**
+     * The keys are the names in the securitySchemes section of the OpenAPI
+     * document. They should map to the value used for authentication
+     * minus any standard prefixes such as 'Basic' or 'Bearer'.
+     */
+    credentials?: { [ key: string ]: string | ( () => string | undefined ) };
 }
 
 
 export class Configuration
 {
+    /**
+     *  @deprecated Since 5.0. Use credentials instead
+     */
     apiKeys?: { [ key: string ]: string }
     username?: string
     password?: string
+    /**
+     *  @deprecated Since 5.0. Use credentials instead
+     */
     accessToken?: string | ( () => string )
     basePath?: string
     withCredentials?: boolean
+    encoder?: HttpParameterCodec
+    /**
+     * The keys are the names in the securitySchemes section of the OpenAPI
+     * document. They should map to the value used for authentication
+     * minus any standard prefixes such as 'Basic' or 'Bearer'.
+     */
+    credentials: { [ key: string ]: string | ( () => string | undefined ) }
 
     constructor( configurationParameters: ConfigurationParameters = {} )
     {
@@ -26,6 +55,79 @@ export class Configuration
         this.accessToken = configurationParameters.accessToken
         this.basePath = configurationParameters.basePath
         this.withCredentials = configurationParameters.withCredentials
+        this.encoder = configurationParameters.encoder
+        if ( configurationParameters.credentials )
+        {
+            this.credentials = configurationParameters.credentials
+        }
+        else
+        {
+            this.credentials = {}
+        }
+
+        // init default CSRFAcessToken credential
+        if ( !this.credentials[ 'CSRFAcessToken' ] )
+        {
+            this.credentials[ 'CSRFAcessToken' ] = () =>
+            {
+                if ( this.apiKeys === null || this.apiKeys === undefined )
+                {
+                    return undefined
+                }
+                else
+                {
+                    return this.apiKeys[ 'CSRFAcessToken' ] || this.apiKeys[ 'X-CSRF-TOKEN' ]
+                }
+            }
+        }
+
+        // init default CSRFRefreshToken credential
+        if ( !this.credentials[ 'CSRFRefreshToken' ] )
+        {
+            this.credentials[ 'CSRFRefreshToken' ] = () =>
+            {
+                if ( this.apiKeys === null || this.apiKeys === undefined )
+                {
+                    return undefined
+                }
+                else
+                {
+                    return this.apiKeys[ 'CSRFRefreshToken' ] || this.apiKeys[ 'X-CSRF-TOKEN' ]
+                }
+            }
+        }
+
+        // init default JWTAcessToken credential
+        if ( !this.credentials[ 'JWTAcessToken' ] )
+        {
+            this.credentials[ 'JWTAcessToken' ] = () =>
+            {
+                if ( this.apiKeys === null || this.apiKeys === undefined )
+                {
+                    return undefined
+                }
+                else
+                {
+                    return this.apiKeys[ 'JWTAcessToken' ] || this.apiKeys[ 'access_token_cookie' ]
+                }
+            }
+        }
+
+        // init default JWTRefreshToken credential
+        if ( !this.credentials[ 'JWTRefreshToken' ] )
+        {
+            this.credentials[ 'JWTRefreshToken' ] = () =>
+            {
+                if ( this.apiKeys === null || this.apiKeys === undefined )
+                {
+                    return undefined
+                }
+                else
+                {
+                    return this.apiKeys[ 'JWTRefreshToken' ] || this.apiKeys[ 'refresh_token_cookie' ]
+                }
+            }
+        }
     }
 
     /**
@@ -37,12 +139,12 @@ export class Configuration
      */
     public selectHeaderContentType( contentTypes: string[] ): string | undefined
     {
-        if ( contentTypes.length == 0 )
+        if ( contentTypes.length === 0 )
         {
             return undefined
         }
 
-        let type = contentTypes.find( x => this.isJsonMime( x ) )
+        const type = contentTypes.find( ( x: string ) => this.isJsonMime( x ) )
         if ( type === undefined )
         {
             return contentTypes[ 0 ]
@@ -59,12 +161,12 @@ export class Configuration
      */
     public selectHeaderAccept( accepts: string[] ): string | undefined
     {
-        if ( accepts.length == 0 )
+        if ( accepts.length === 0 )
         {
             return undefined
         }
 
-        let type = accepts.find( x => this.isJsonMime( x ) )
+        const type = accepts.find( ( x: string ) => this.isJsonMime( x ) )
         if ( type === undefined )
         {
             return accepts[ 0 ]
@@ -85,6 +187,14 @@ export class Configuration
     public isJsonMime( mime: string ): boolean
     {
         const jsonMime: RegExp = new RegExp( '^(application\/json|[^;/ \t]+\/[^;/ \t]+[+]json)[ \t]*(;.*)?$', 'i' )
-        return mime != null && ( jsonMime.test( mime ) || mime.toLowerCase() === 'application/json-patch+json' )
+        return mime !== null && ( jsonMime.test( mime ) || mime.toLowerCase() === 'application/json-patch+json' )
+    }
+
+    public lookupCredential( key: string ): string | undefined
+    {
+        const value = this.credentials[ key ]
+        return typeof value === 'function'
+            ? value()
+            : value
     }
 }
