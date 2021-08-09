@@ -5,7 +5,7 @@ from flask import request, make_response
 
 from common import get_current_module
 from common.jwt_verify import jwt_required_role
-from common.errors import NotFound, AlreadyExists
+from common.errors import NotFound, AlreadyExists, InsufficientData
 from common.util import db_get_all
 from .models import *
 
@@ -918,7 +918,7 @@ def generate_variant(id_contest, user_id):
     contest = db_get_or_raise(Contest, "contest_id", id_contest)
     variants_number = len(contest.variants)
     if variants_number == 0:
-        return 0
+        raise InsufficientData('variant', 'variants_number')
     random_number = random.randint(0, variants_number * 2)
     variant = (user_id + random_number) % variants_number
     return variant
@@ -932,7 +932,6 @@ def generate_variant(id_contest, user_id):
 def add_user_to_contest(id_base_olympiad, id_olympiad, id_stage, id_contest):
     values = request.openapi.body
     user_ids = values['users_id']
-
     try:
         db_get_or_raise(BaseContest, "base_contest_id", str(id_base_olympiad))
         db_get_or_raise(Contest, "contest_id", str(id_olympiad))
@@ -950,7 +949,6 @@ def add_user_to_contest(id_base_olympiad, id_olympiad, id_stage, id_contest):
                                 )
 
         db.session.commit()
-
     except Exception:
         db.session.rollback()
         raise

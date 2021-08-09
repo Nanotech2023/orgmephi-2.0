@@ -1047,7 +1047,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/errorResponse'
         '409':
-          description: User is already exists in this contest
+          description: User is already exists or no variants for this contest
           content:
             application/json:
               schema:
