@@ -238,9 +238,9 @@ class Contest(db.Model):
     }
 
 
-def add_simple_contest(db_session, base_contest_id,
+def add_simple_contest(db_session,
                        visibility, start_date, end_date, previous_contest_id=None,
-                       previous_participation_condition=None, location=None):
+                       previous_participation_condition=None, location=None, base_contest_id=None):
     simpleContest = SimpleContest(
         base_contest_id=base_contest_id,
         visibility=visibility,
@@ -283,11 +283,18 @@ class SimpleContest(Contest):
         'polymorphic_identity': 'SimpleContest',
     }
 
+    def change_previous(self, previous_contest_id=None, previous_participation_condition=None):
+        if previous_contest_id is not None:
+            self.previous_contest_id = previous_contest_id
+        if previous_participation_condition is not None:
+            self.previous_participation_condition = previous_participation_condition
+
     def serialize(self):
         return \
             {
                 'contest_id': self.contest_id,
                 'visibility': self.visibility,
+                'composite_type': self.composite_type.value,
                 'start_date': self.start_date.isoformat(),
                 'end_date': self.end_date.isoformat(),
                 'location': self.location,
@@ -311,7 +318,7 @@ class SimpleContest(Contest):
             self.location = location
 
 
-def add_composite_contest(db_session, base_contest_id, visibility):
+def add_composite_contest(db_session, visibility, base_contest_id = None):
     compositeContest = CompositeContest(
         base_contest_id=base_contest_id,
         visibility=visibility,
@@ -332,6 +339,7 @@ class CompositeContest(Contest):
         return \
             {
                 'contest_id': self.contest_id,
+                'composite_type': self.composite_type.value,
                 'visibility': self.visibility,
             }
 

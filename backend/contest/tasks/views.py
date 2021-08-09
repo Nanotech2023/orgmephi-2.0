@@ -5,7 +5,8 @@ from flask import request, make_response
 
 from common import get_current_module
 from common.jwt_verify import jwt_required_role
-from common.util import db_get_all, db_get_or_raise, db_get_list
+from common.errors import NotFound
+from common.util import db_get_all
 from .models import *
 
 db = get_current_db()
@@ -32,8 +33,7 @@ def olympiad_type_create():
     return make_response(
         {
             'olympiad_type_id': olympiad.olympiad_type_id
-        }
-        , 200)
+        }, 200)
 
 
 @module.route('/olympiad_type/<int:id_olympiad_type>/remove', methods=['POST'])
@@ -44,6 +44,9 @@ def olympiad_type_remove(id_olympiad_type):
         db.session.delete(olympiad)
         db.session.commit()
     except Exception:
+        db.session.rollback()
+        raise
+    except NotFound:
         db.session.rollback()
         raise
     return make_response({}, 200)
@@ -114,8 +117,7 @@ def base_olympiad_create():
     return make_response(
         {
             'base_contest_id': baseContest.base_contest_id
-        }
-        , 200)
+        }, 200)
 
 
 @module.route('/base_olympiad/<int:id_base_olympiad>/remove', methods=['POST'])
@@ -150,7 +152,12 @@ def base_olympiad_patch(id_base_olympiad):
         del values["target_classes"]
         baseContest.update(**values)
         if target_classes is not None:
-            update_target_class(db.session, id_base_olympiad, target_classes)
+            classes = [TargetClass(
+                contest_id=id_base_olympiad,
+                target_class=olympiad_target_class_dict[target_class]
+            ) for target_class in set(target_classes)]
+            baseContest.target_classes = classes
+            # update_target_class(db.session, id_base_olympiad, target_classes)
         db.session.commit()
     except Exception:
         db.session.rollback()
@@ -159,7 +166,7 @@ def base_olympiad_patch(id_base_olympiad):
 
 
 @module.route('/base_olympiad/all', methods=['GET'])
-@jwt_required_role(['Admin', 'System', 'Creator'])
+@jwt_required_role(['Admin', 'System', 'Creator', 'Participant'])
 def base_olympiads_all():
     olympiads = db_get_all(BaseContest)
     all_olympiads = [olympiad.serialize() for olympiad in olympiads]
@@ -182,14 +189,16 @@ def olympiad_create_simple(id_base_olympiad):
     previous_participation_condition = values.get('previous_participation_condition', None)
 
     try:
+        base_contest = db_get_or_raise(BaseContest, "base_contest_id", str(id_base_olympiad))
         contest = add_simple_contest(db.session,
-                                     id_base_olympiad,
                                      visibility,
                                      start_time,
                                      end_time,
                                      previous_contest_id,
                                      previous_participation_condition,
-                                     location)
+                                     location,
+                                     )
+        base_contest.child_contests.append(contest)
 
         db.session.commit()
 
@@ -199,8 +208,7 @@ def olympiad_create_simple(id_base_olympiad):
     return make_response(
         {
             'contest_id': contest.contest_id
-        }
-        , 200)
+        }, 200)
 
 
 @module.route('/base_olympiad/<int:id_base_olympiad>/olympiad/createcomposite', methods=['POST'])
@@ -211,9 +219,10 @@ def olympiad_create_composite(id_base_olympiad):
     visibility = values['visibility']
 
     try:
+        base_contest = db_get_or_raise(BaseContest, "base_contest_id", str(id_base_olympiad))
         contest = add_composite_contest(db.session,
-                                        id_base_olympiad,
                                         visibility)
+        base_contest.child_contests.append(contest)
 
         db.session.commit()
 
@@ -223,12 +232,11 @@ def olympiad_create_composite(id_base_olympiad):
     return make_response(
         {
             'contest_id': contest.contest_id
-        }
-        , 200)
+        }, 200)
 
 
 @module.route('/base_olympiad/<int:id_base_olympiad>/olympiad/all', methods=['GET'])
-@jwt_required_role(['Admin', 'System', 'Creator'])
+@jwt_required_role(['Admin', 'System', 'Creator', 'Participant'])
 def olympiads_all(id_base_olympiad):
     base_contest = db_get_or_raise(BaseContest, "base_contest_id", str(id_base_olympiad))
     all_olympiads = [olympiad.serialize() for olympiad in base_contest.child_contests]
@@ -240,6 +248,7 @@ def olympiads_all(id_base_olympiad):
 @jwt_required_role(['Admin', 'System', 'Creator'])
 def olympiad_remove(id_base_olympiad, id_olympiad):
     try:
+        db_get_or_raise(BaseContest, "base_contest_id", str(id_base_olympiad))
         contest = db_get_or_raise(Contest, "contest_id", str(id_olympiad))
         db.session.delete(contest)
         db.session.commit()
@@ -249,26 +258,33 @@ def olympiad_remove(id_base_olympiad, id_olympiad):
     return make_response({}, 200)
 
 
-@module.route('/base_olympiad/<int:id_base_olympiad>/olympiad/<int:id_olympiad>', methods=['GET', 'PATCH'])
+@module.route('/base_olympiad/<int:id_base_olympiad>/olympiad/<int:id_olympiad>', methods=['GET'])
+@jwt_required_role(['Admin', 'System', 'Creator', 'Participant'])
+def olympiad_get(id_base_olympiad, id_olympiad):
+    try:
+        db_get_or_raise(BaseContest, "base_contest_id", str(id_base_olympiad))
+        contest = db_get_or_raise(Contest, "contest_id", id_olympiad)
+        return make_response(contest.serialize(), 200)
+    except Exception:
+        raise
+
+
+@module.route('/base_olympiad/<int:id_base_olympiad>/olympiad/<int:id_olympiad>', methods=['PATCH'])
 @jwt_required_role(['Admin', 'System', 'Creator'])
-def olympiad_response(id_base_olympiad, id_olympiad):
+def olympiad_patch(id_base_olympiad, id_olympiad):
     contest = db_get_or_raise(Contest, "contest_id", id_olympiad)
+    values = request.openapi.body
 
-    if request.method == 'GET':
-        return make_response(contest.serialize(), 200)
+    try:
+        db_get_or_raise(BaseContest, "base_contest_id", str(id_base_olympiad))
+        contest.update(**values)
+        db.session.commit()
 
-    elif request.method == 'PATCH':
-        values = request.openapi.body
+    except Exception:
+        db.session.rollback()
+        raise
 
-        try:
-            contest.update(**values)
-            db.session.commit()
-
-        except Exception:
-            db.session.rollback()
-            raise
-
-        return make_response(contest.serialize(), 200)
+    return make_response(contest.serialize(), 200)
 
 
 # Stage views
@@ -281,6 +297,7 @@ def stage_create(id_base_olympiad, id_olympiad):
     next_stage_condition = values['next_stage_condition']
 
     try:
+        db_get_or_raise(BaseContest, "base_contest_id", str(id_base_olympiad))
         stage = add_stage(db.session,
                           olympiad_id=id_olympiad,
                           stage_name=stage_name,
@@ -295,8 +312,7 @@ def stage_create(id_base_olympiad, id_olympiad):
     return make_response(
         {
             'stage_id': stage.stage_id
-        }
-        , 200)
+        }, 200)
 
 
 @module.route('/base_olympiad/<int:id_base_olympiad>/olympiad/<int:id_olympiad>/stage/<int:id_stage>/remove',
@@ -304,6 +320,8 @@ def stage_create(id_base_olympiad, id_olympiad):
 @jwt_required_role(['Admin', 'System', 'Creator'])
 def stage_remove(id_base_olympiad, id_olympiad, id_stage):
     try:
+        db_get_or_raise(BaseContest, "base_contest_id", str(id_base_olympiad))
+        db_get_or_raise(Contest, "contest_id", str(id_olympiad))
         stage = db_get_or_raise(Stage, "stage_id", str(id_stage))
         db.session.delete(stage)
         db.session.commit()
@@ -321,11 +339,12 @@ def stage_response(id_base_olympiad, id_olympiad, id_stage):
 
     if request.method == 'GET':
         return make_response(
-            stage.serialize()
-            , 200)
+            stage.serialize(), 200)
 
     elif request.method == 'PATCH':
         try:
+            db_get_or_raise(BaseContest, "base_contest_id", str(id_base_olympiad))
+            db_get_or_raise(Contest, "contest_id", str(id_olympiad))
             values = request.openapi.body
             stage.update(**values)
             db.session.commit()
@@ -337,14 +356,19 @@ def stage_response(id_base_olympiad, id_olympiad, id_stage):
 
 
 @module.route('/base_olympiad/<int:id_base_olympiad>/olympiad/<int:id_olympiad>/stage/all', methods=['GET'])
-@jwt_required_role(['Admin', 'System', 'Creator'])
+@jwt_required_role(['Admin', 'System', 'Creator', 'Participant'])
 def stages_all(id_base_olympiad, id_olympiad):
-    contest = db_get_or_raise(CompositeContest, "contest_id", str(id_olympiad))
-    all_stages = [stage.serialize() for stage in contest.stages]
-    return make_response(
-        {
-            "stages_list": all_stages
-        }, 200)
+    try:
+        db_get_or_raise(BaseContest, "base_contest_id", str(id_base_olympiad))
+        db_get_or_raise(Contest, "contest_id", str(id_olympiad))
+        contest = db_get_or_raise(CompositeContest, "contest_id", str(id_olympiad))
+        all_stages = [stage.serialize() for stage in contest.stages]
+        return make_response(
+            {
+                "stages_list": all_stages
+            }, 200)
+    except Exception:
+        raise
 
 
 # Contest views
@@ -363,6 +387,8 @@ def contest_create_simple(id_base_olympiad, id_olympiad, id_stage):
     previous_participation_condition = values.get('previous_participation_condition', None)
 
     try:
+        db_get_or_raise(BaseContest, "base_contest_id", str(id_base_olympiad))
+        db_get_or_raise(Contest, "contest_id", str(id_olympiad))
         contest = add_simple_contest(db.session,
                                      id_base_olympiad,
                                      visibility,
@@ -383,8 +409,7 @@ def contest_create_simple(id_base_olympiad, id_olympiad, id_stage):
     return make_response(
         {
             'contest_id': contest.contest_id
-        }
-        , 200)
+        }, 200)
 
 
 @module.route('/base_olympiad/<int:id_base_olympiad>/olympiad/<int:id_olympiad>/stage/<int:id_stage>/contest'
@@ -397,6 +422,8 @@ def contest_create_composite(id_base_olympiad, id_olympiad, id_stage):
     visibility = values['visibility']
 
     try:
+        db_get_or_raise(BaseContest, "base_contest_id", str(id_base_olympiad))
+        db_get_or_raise(Contest, "contest_id", str(id_olympiad))
         contest = add_composite_contest(db.session,
                                         id_base_olympiad,
                                         visibility)
@@ -412,8 +439,7 @@ def contest_create_composite(id_base_olympiad, id_olympiad, id_stage):
     return make_response(
         {
             'contest_id': contest.contest_id
-        }
-        , 200)
+        }, 200)
 
 
 @module.route(
@@ -423,6 +449,9 @@ def contest_create_composite(id_base_olympiad, id_olympiad, id_stage):
 @jwt_required_role(['Admin', 'System', 'Creator'])
 def contest_remove(id_base_olympiad, id_olympiad, id_stage, id_contest):
     try:
+        db_get_or_raise(BaseContest, "base_contest_id", str(id_base_olympiad))
+        db_get_or_raise(Contest, "contest_id", str(id_olympiad))
+        db_get_or_raise(Stage, "stage_id", str(id_stage))
         contest = db_get_or_raise(Contest, "contest_id", str(id_contest))
         db.session.delete(contest)
         db.session.commit()
@@ -440,12 +469,21 @@ def contest_remove(id_base_olympiad, id_olympiad, id_stage, id_contest):
 def contest_response(id_base_olympiad, id_olympiad, id_stage, id_contest):
     contest = db_get_or_raise(Contest, "contest_id", id_contest)
     if request.method == 'GET':
-        return make_response(contest.serialize(), 200)
+        try:
+            db_get_or_raise(BaseContest, "base_contest_id", str(id_base_olympiad))
+            db_get_or_raise(Contest, "contest_id", str(id_olympiad))
+            db_get_or_raise(Stage, "stage_id", str(id_stage))
+            return make_response(contest.serialize(), 200)
+        except Exception:
+            raise
 
     if request.method == 'PATCH':
         values = request.openapi.body
 
         try:
+            db_get_or_raise(BaseContest, "base_contest_id", str(id_base_olympiad))
+            db_get_or_raise(Contest, "contest_id", str(id_olympiad))
+            db_get_or_raise(Stage, "stage_id", str(id_stage))
             contest.update(**values)
             db.session.commit()
         except Exception:
@@ -455,14 +493,41 @@ def contest_response(id_base_olympiad, id_olympiad, id_stage, id_contest):
         return make_response(contest.serialize(), 200)
 
 
+@module.route(
+    '/base_olympiad/<int:id_base_olympiad>/olympiad/<int:id_olympiad>/stage/<int:id_stage>/contest/'
+    '<int:id_contest>/addPreviousForSimpleContest',
+    methods=['PATCH'])
+@jwt_required_role(['Admin', 'System', 'Creator'])
+def contest_add_previous(id_base_olympiad, id_olympiad, id_stage, id_contest):
+    contest = db_get_or_raise(Contest, "contest_id", id_contest)
+    values = request.openapi.body
+    try:
+        db_get_or_raise(BaseContest, "base_contest_id", str(id_base_olympiad))
+        db_get_or_raise(Contest, "contest_id", str(id_olympiad))
+        db_get_or_raise(Stage, "stage_id", str(id_stage))
+        contest.change_previous(**values)
+        db.session.commit()
+    except Exception:
+        db.session.rollback()
+        raise
+
+    return make_response({}, 200)
+
+
 @module.route('/base_olympiad/<int:id_base_olympiad>/olympiad/<int:id_olympiad>/stage/<int:id_stage>/contest/all',
               methods=['GET'])
 @jwt_required_role(['Admin', 'System', 'Creator'])
 def contests_all(id_base_olympiad, id_olympiad, id_stage):
-    stage = db_get_or_raise(Stage, "stage_id", str(id_stage))
-    all_contests = [contest.serialize() for contest in stage.contests]
-    return make_response(
-        {"olympiad_list": all_contests}, 200)
+    try:
+        db_get_or_raise(BaseContest, "base_contest_id", str(id_base_olympiad))
+        db_get_or_raise(Contest, "contest_id", str(id_olympiad))
+        db_get_or_raise(Stage, "stage_id", str(id_stage))
+        stage = db_get_or_raise(Stage, "stage_id", str(id_stage))
+        all_contests = [contest.serialize() for contest in stage.contests]
+        return make_response(
+            {"olympiad_list": all_contests}, 200)
+    except Exception:
+        raise
 
 
 # Variant views
@@ -476,7 +541,6 @@ def contests_all(id_base_olympiad, id_olympiad, id_stage):
 def variant_create(id_base_olympiad, id_olympiad, id_stage, id_contest):
     values = request.openapi.body
 
-    # TODO QUERY FOR MAX
     contest = db_get_or_raise(Contest, "contest_id", str(id_contest))
     variants = contest.variants
     new_variant = max(variant.variant_number for variant in variants)
@@ -484,6 +548,9 @@ def variant_create(id_base_olympiad, id_olympiad, id_stage, id_contest):
     variant_description = values['variant_description']
 
     try:
+        db_get_or_raise(BaseContest, "base_contest_id", str(id_base_olympiad))
+        db_get_or_raise(Contest, "contest_id", str(id_olympiad))
+        db_get_or_raise(Stage, "stage_id", str(id_stage))
         variant = add_variant(db.session,
                               contest_id=id_contest,
                               variant_number=new_variant + 1,
@@ -510,6 +577,9 @@ def variant_create(id_base_olympiad, id_olympiad, id_stage, id_contest):
 def variant_remove(id_base_olympiad, id_olympiad, id_stage, id_contest, id_variant):
     try:
 
+        db_get_or_raise(BaseContest, "base_contest_id", str(id_base_olympiad))
+        db_get_or_raise(Contest, "contest_id", str(id_olympiad))
+        db_get_or_raise(Stage, "stage_id", str(id_stage))
         variant = Variant.query.filter_by(**{"contest_id": str(id_contest),
                                              "variant_id": str(id_variant)}).one_or_none()
 
@@ -524,26 +594,42 @@ def variant_remove(id_base_olympiad, id_olympiad, id_stage, id_contest, id_varia
 @module.route(
     '/base_olympiad/<int:id_base_olympiad>/olympiad/<int:id_olympiad>/stage/<int:id_stage>/contest/<int:id_contest'
     '>/variant/<int:variant_num>',
-    methods=['GET', 'PATCH'])
+    methods=['GET'])
+@jwt_required_role(['Admin', 'System', 'Creator', 'Participant'])
+def variant_get(id_base_olympiad, id_olympiad, id_stage, id_contest, variant_num):
+    try:
+        db_get_or_raise(BaseContest, "base_contest_id", str(id_base_olympiad))
+        db_get_or_raise(Contest, "contest_id", str(id_olympiad))
+        db_get_or_raise(Stage, "stage_id", str(id_stage))
+        variant = Variant.query.filter_by(**{"contest_id": str(id_contest),
+                                             "variant_number": str(variant_num)}).one_or_none()
+        return make_response(
+            variant.serialize(), 200)
+    except Exception:
+        raise
+
+
+@module.route(
+    '/base_olympiad/<int:id_base_olympiad>/olympiad/<int:id_olympiad>/stage/<int:id_stage>/contest/<int:id_contest'
+    '>/variant/<int:variant_num>',
+    methods=['PATCH'])
 @jwt_required_role(['Admin', 'System', 'Creator'])
-def variant_response(id_base_olympiad, id_olympiad, id_stage, id_contest, variant_num):
+def variant_patch(id_base_olympiad, id_olympiad, id_stage, id_contest, variant_num):
     variant = Variant.query.filter_by(**{"contest_id": str(id_contest),
                                          "variant_number": str(variant_num)}).one_or_none()
-    if request.method == 'GET':
-        return make_response(
-            variant.serialize()
-            , 200)
-    elif request.method == 'PATCH':
-        try:
-            values = request.openapi.body
-            variant.update(**values)
-            db.session.commit()
+    try:
+        db_get_or_raise(BaseContest, "base_contest_id", str(id_base_olympiad))
+        db_get_or_raise(Contest, "contest_id", str(id_olympiad))
+        db_get_or_raise(Stage, "stage_id", str(id_stage))
+        values = request.openapi.body
+        variant.update(**values)
+        db.session.commit()
 
-        except Exception:
-            db.session.rollback()
-            raise
+    except Exception:
+        db.session.rollback()
+        raise
 
-        return make_response(variant.serialize(), 200)
+    return make_response(variant.serialize(), 200)
 
 
 @module.route(
@@ -552,12 +638,18 @@ def variant_response(id_base_olympiad, id_olympiad, id_stage, id_contest, varian
     methods=['GET'])
 @jwt_required_role(['Admin', 'System', 'Creator'])
 def variant_all(id_base_olympiad, id_olympiad, id_stage, id_contest):
-    contest = db_get_or_raise(Contest, "contest_id", id_contest)
-    all_variants = [variant.serialize() for variant in contest.variants]
-    return make_response(
-        {
-            "variants_list": all_variants
-        }, 200)
+    try:
+        db_get_or_raise(BaseContest, "base_contest_id", str(id_base_olympiad))
+        db_get_or_raise(Contest, "contest_id", str(id_olympiad))
+        db_get_or_raise(Stage, "stage_id", str(id_stage))
+        contest = db_get_or_raise(Contest, "contest_id", id_contest)
+        all_variants = [variant.serialize() for variant in contest.variants]
+        return make_response(
+            {
+                "variants_list": all_variants
+            }, 200)
+    except Exception:
+        raise
 
 
 # Task views
@@ -570,6 +662,10 @@ def variant_all(id_base_olympiad, id_olympiad, id_stage, id_contest):
 @jwt_required_role(['Admin', 'System', 'Creator'])
 def task_create_plain(id_base_olympiad, id_olympiad, id_stage, id_contest, id_variant):
     try:
+        db_get_or_raise(BaseContest, "base_contest_id", str(id_base_olympiad))
+        db_get_or_raise(Contest, "contest_id", str(id_olympiad))
+        db_get_or_raise(Stage, "stage_id", str(id_stage))
+        db_get_or_raise(Contest, "contest_id", str(id_contest))
         values = request.openapi.body
 
         num_of_task = values['num_of_task']
@@ -603,6 +699,7 @@ def task_create_plain(id_base_olympiad, id_olympiad, id_stage, id_contest, id_va
 @jwt_required_role(['Admin', 'System', 'Creator'])
 def task_create_range(id_base_olympiad, id_olympiad, id_stage, id_contest, id_variant):
     try:
+        check_existence(id_base_olympiad, id_olympiad, id_stage, id_contest, id_variant)
         values = request.openapi.body
 
         num_of_task = values['num_of_task']
@@ -636,6 +733,7 @@ def task_create_range(id_base_olympiad, id_olympiad, id_stage, id_contest, id_va
 @jwt_required_role(['Admin', 'System', 'Creator'])
 def task_create_multiple(id_base_olympiad, id_olympiad, id_stage, id_contest, id_variant):
     try:
+        check_existence(id_base_olympiad, id_olympiad, id_stage, id_contest, id_variant)
         values = request.openapi.body
 
         num_of_task = values['num_of_task']
@@ -672,6 +770,7 @@ def task_create_multiple(id_base_olympiad, id_olympiad, id_stage, id_contest, id
 @jwt_required_role(['Admin', 'System', 'Creator'])
 def task_remove(id_base_olympiad, id_olympiad, id_stage, id_contest, id_variant, id_task):
     try:
+        check_existence(id_base_olympiad, id_olympiad, id_stage, id_contest, id_variant)
         task = db_get_or_raise(Task, "task_id", str(id_task))
         db.session.delete(task)
         db.session.commit()
@@ -685,29 +784,48 @@ def task_remove(id_base_olympiad, id_olympiad, id_stage, id_contest, id_variant,
 @module.route(
     '/base_olympiad/<int:id_base_olympiad>/olympiad/<int:id_olympiad>/stage/<int:id_stage>/contest/<int:id_contest'
     '>/variant/<int:id_variant>/task/<int:id_task>',
-    methods=['GET', 'PATCH'])
-@jwt_required_role(['Admin', 'System', 'Creator'])
+    methods=['GET'])
+@jwt_required_role(['Admin', 'System', 'Creator', 'Participant'])
 def task_get(id_base_olympiad, id_olympiad, id_stage, id_contest, id_variant, id_task):
-    task = db_get_or_raise(Task, "task_id", str(id_task))
-    if request.method == 'GET':
+    try:
+        check_existence(id_base_olympiad, id_olympiad, id_stage, id_contest, id_variant)
+        task = db_get_or_raise(Task, "task_id", str(id_task))
+
         return make_response(
             task.serialize(), 200)
+    except Exception:
+        raise
 
-    elif request.method == 'PATCH':
-        try:
 
-            values = request.openapi.body
-            task.update(**values)
+def check_existence(id_base_olympiad, id_olympiad, id_stage, id_contest, id_variant):
+    db_get_or_raise(BaseContest, "base_contest_id", str(id_base_olympiad))
+    db_get_or_raise(Contest, "contest_id", str(id_olympiad))
+    db_get_or_raise(Stage, "stage_id", str(id_stage))
+    db_get_or_raise(Contest, "contest_id", str(id_contest))
+    db_get_or_raise(Variant, "variant_id", str(id_variant))
 
-            if task.task_type == MultipleChoiceTask.__name__:
-                answers = values['answers']
-                updateMultipleChoiceTask(db.session, id_task, answers)
 
-            db.session.commit()
+@module.route(
+    '/base_olympiad/<int:id_base_olympiad>/olympiad/<int:id_olympiad>/stage/<int:id_stage>/contest/<int:id_contest'
+    '>/variant/<int:id_variant>/task/<int:id_task>',
+    methods=['PATCH'])
+@jwt_required_role(['Admin', 'System', 'Creator'])
+def task_patch(id_base_olympiad, id_olympiad, id_stage, id_contest, id_variant, id_task):
+    task = db_get_or_raise(Task, "task_id", str(id_task))
+    try:
+        check_existence(id_base_olympiad, id_olympiad, id_stage, id_contest, id_variant)
+        values = request.openapi.body
+        task.update(**values)
 
-        except Exception:
-            db.session.rollback()
-            raise
+        if task.task_type == MultipleChoiceTask.__name__:
+            answers = values['answers']
+            updateMultipleChoiceTask(db.session, id_task, answers)
+
+        db.session.commit()
+
+    except Exception:
+        db.session.rollback()
+        raise
     return make_response({}, 200)
 
 
@@ -717,14 +835,16 @@ def task_get(id_base_olympiad, id_olympiad, id_stage, id_contest, id_variant, id
     methods=['GET'])
 @jwt_required_role(['Admin', 'System', 'Creator'])
 def task_all(id_base_olympiad, id_olympiad, id_stage, id_contest, id_variant):
-
-    variant = Variant.query.filter_by(**{"contest_id": str(id_contest),
-                                         "variant_id": str(id_variant)}).one_or_none()
-    all_tasks = [task.serialize() for task in variant.tasks]
-    return make_response(
-        {
-            "tasks_list": all_tasks
-        }, 200)
+    try:
+        check_existence(id_base_olympiad, id_olympiad, id_stage, id_contest, id_variant)
+        variant = db_get_or_raise(Variant, "variant_id", str(id_variant))
+        all_tasks = [task.serialize() for task in variant.tasks]
+        return make_response(
+            {
+                "tasks_list": all_tasks
+            }, 200)
+    except Exception:
+        raise
 
 
 @module.route(
@@ -733,13 +853,17 @@ def task_all(id_base_olympiad, id_olympiad, id_stage, id_contest, id_variant):
     methods=['GET'])
 @jwt_required_role(['Admin', 'System', 'Creator'])
 def task_image(id_base_olympiad, id_olympiad, id_stage, id_contest, id_variant, id_task):
-    task = db_get_or_raise(Task, "task_id", str(id_task))
+    try:
+        check_existence(id_base_olympiad, id_olympiad, id_stage, id_contest, id_variant)
+        task = db_get_or_raise(Task, "task_id", str(id_task))
 
-    return make_response(
-        {
-            "task_id": task.task_id,
-            "image_of_task": task.image_of_task
-        }, 200)
+        return make_response(
+            {
+                "task_id": task.task_id,
+                "image_of_task": task.image_of_task
+            }, 200)
+    except Exception:
+        raise
 
 
 # User views
@@ -764,7 +888,10 @@ def add_user_to_contest(id_base_olympiad, id_olympiad, id_stage, id_contest):
     user_ids = values['users_id']
 
     try:
-
+        db_get_or_raise(BaseContest, "base_contest_id", str(id_base_olympiad))
+        db_get_or_raise(Contest, "contest_id", str(id_olympiad))
+        db_get_or_raise(Stage, "stage_id", str(id_stage))
+        db_get_or_raise(Contest, "contest_id", str(id_contest))
         for user_id in user_ids:
             add_user_in_contest(db.session,
                                 user_id=user_id,
@@ -792,7 +919,10 @@ def remove_user_from_contest(id_base_olympiad, id_olympiad, id_stage, id_contest
     user_ids = values['users_id']
 
     try:
-
+        db_get_or_raise(BaseContest, "base_contest_id", str(id_base_olympiad))
+        db_get_or_raise(Contest, "contest_id", str(id_olympiad))
+        db_get_or_raise(Stage, "stage_id", str(id_stage))
+        db_get_or_raise(Contest, "contest_id", str(id_contest))
         for user_id in user_ids:
             user = UserInContest.query.filter_by(**{"contest_id": id_contest,
                                                     "user_id": user_id}).one_or_none()
@@ -812,12 +942,19 @@ def remove_user_from_contest(id_base_olympiad, id_olympiad, id_stage, id_contest
     methods=['GET'])
 @jwt_required_role(['Admin', 'System', 'Creator'])
 def users_all(id_base_olympiad, id_olympiad, id_stage, id_contest):
-    contest = db_get_or_raise(Contest, "contest_id", id_contest)
-    all_users = [u.serialize() for u in contest.users]
-    return make_response(
-        {
-            "user_list": all_users
-        }, 200)
+    try:
+        db_get_or_raise(BaseContest, "base_contest_id", str(id_base_olympiad))
+        db_get_or_raise(Contest, "contest_id", str(id_olympiad))
+        db_get_or_raise(Stage, "stage_id", str(id_stage))
+        db_get_or_raise(Contest, "contest_id", str(id_contest))
+        contest = db_get_or_raise(Contest, "contest_id", id_contest)
+        all_users = [u.serialize() for u in contest.users]
+        return make_response(
+            {
+                "user_list": all_users
+            }, 200)
+    except Exception:
+        raise
 
 
 @module.route(
@@ -827,6 +964,12 @@ def users_all(id_base_olympiad, id_olympiad, id_stage, id_contest):
 @jwt_required_role(['Admin', 'System', 'Creator'])
 def users_certificate(id_base_olympiad, id_olympiad, id_stage, id_contest, id_user):
     try:
+        db_get_or_raise(BaseContest, "base_contest_id", str(id_base_olympiad))
+        db_get_or_raise(Contest, "contest_id", str(id_olympiad))
+        db_get_or_raise(Stage, "stage_id", str(id_stage))
+        db_get_or_raise(Contest, "contest_id", str(id_contest))
+        UserInContest.query.filter_by(**{"contest_id": id_contest,
+                                         "user_id": id_user}).one_or_none()
         # contest = db_get_or_raise(Contest, Contest.contest_id, id_contest)
         # user = db_get_or_raise(UserInContest, UserInContest.user_id, id_user)
 

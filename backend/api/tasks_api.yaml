@@ -667,6 +667,52 @@ paths:
 
 
   # Contest
+  /base_olympiad/{id_base_olympiad}/olympiad/{id_olympiad}/stage/{id_stage}/contest/{id_contest}/addprevious:
+    patch:
+      summary: Change previous contest simple contest
+      parameters:
+        - in: path
+          description: Id of the base simple olympiad
+          name: id_base_olympiad
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the olympiad
+          name: id_olympiad
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the stage
+          name: id_stage
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the contest
+          name: id_contest
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/addPreviousForSimpleContest'
+      security:
+        - cookieJWTAuth: [ ]
+        - CSRFToken: [ ]
+      responses:
+        '200':
+          description: OK
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
 
   /base_olympiad/{id_base_olympiad}/olympiad/{id_olympiad}/stage/{id_stage}/contest/createsimple:
     post:
@@ -2118,7 +2164,18 @@ components:
           type: string
         next_stage_condition:
           type: string
-
+    addPreviousForSimpleContest:
+      title: Change previous contest for simple contest
+      description: Request to change previous contest for simple contest
+      required:
+        - previous_contest_id
+        - previous_participation_condition
+      properties:
+        previous_contest_id:
+          type: integer
+        previous_participation_condition:
+          type: string
+          enum: [ "Participant", "Laureate", "Winner" ]
     createSimpleContest:
       title: Create simple contest
       description: Request to simplecontest creation
@@ -2163,6 +2220,10 @@ components:
         location:
           type: string
           nullable: true
+        composite_type:
+          type: string
+          nullable: true
+          enum: [ "SimpleContest", "CompositeContest"]
         start_time:
           type: string
           format: 'date-time'
