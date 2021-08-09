@@ -289,15 +289,14 @@ def olympiad_patch(id_base_olympiad, id_olympiad):
 
 # Stage views
 
-@module.route('/base_olympiad/<int:id_base_olympiad>/olympiad/<int:id_olympiad>/stage/create', methods=['POST'])
+@module.route('/olympiad/<int:id_olympiad>/stage/create', methods=['POST'])
 @jwt_required_role(['Admin', 'System', 'Creator'])
-def stage_create(id_base_olympiad, id_olympiad):
+def stage_create(id_olympiad):
     values = request.openapi.body
     stage_name = values['stage_name']
     next_stage_condition = values['next_stage_condition']
 
     try:
-        db_get_or_raise(BaseContest, "base_contest_id", str(id_base_olympiad))
         contest = db_get_or_raise(Contest, "contest_id", str(id_olympiad))
         stage = add_stage(db.session,
                           stage_name=stage_name,
@@ -316,12 +315,11 @@ def stage_create(id_base_olympiad, id_olympiad):
         }, 200)
 
 
-@module.route('/base_olympiad/<int:id_base_olympiad>/olympiad/<int:id_olympiad>/stage/<int:id_stage>/remove',
+@module.route('/olympiad/<int:id_olympiad>/stage/<int:id_stage>/remove',
               methods=['POST'])
 @jwt_required_role(['Admin', 'System', 'Creator'])
-def stage_remove(id_base_olympiad, id_olympiad, id_stage):
+def stage_remove(id_olympiad, id_stage):
     try:
-        db_get_or_raise(BaseContest, "base_contest_id", str(id_base_olympiad))
         db_get_or_raise(Contest, "contest_id", str(id_olympiad))
         stage = db_get_or_raise(Stage, "stage_id", str(id_stage))
         db.session.delete(stage)
@@ -332,10 +330,10 @@ def stage_remove(id_base_olympiad, id_olympiad, id_stage):
     return make_response({}, 200)
 
 
-@module.route('/base_olympiad/<int:id_base_olympiad>/olympiad/<int:id_olympiad>/stage/<int:id_stage>',
+@module.route('/olympiad/<int:id_olympiad>/stage/<int:id_stage>',
               methods=['GET', 'PATCH'])
 @jwt_required_role(['Admin', 'System', 'Creator'])
-def stage_response(id_base_olympiad, id_olympiad, id_stage):
+def stage_response(id_olympiad, id_stage):
     stage = db_get_or_raise(Stage, "stage_id", str(id_stage))
 
     if request.method == 'GET':
@@ -344,7 +342,6 @@ def stage_response(id_base_olympiad, id_olympiad, id_stage):
 
     elif request.method == 'PATCH':
         try:
-            db_get_or_raise(BaseContest, "base_contest_id", str(id_base_olympiad))
             db_get_or_raise(Contest, "contest_id", str(id_olympiad))
             values = request.openapi.body
             stage.update(**values)
@@ -356,11 +353,10 @@ def stage_response(id_base_olympiad, id_olympiad, id_stage):
         return make_response(stage.serialize(), 200)
 
 
-@module.route('/base_olympiad/<int:id_base_olympiad>/olympiad/<int:id_olympiad>/stage/all', methods=['GET'])
+@module.route('/olympiad/<int:id_olympiad>/stage/all', methods=['GET'])
 @jwt_required_role(['Admin', 'System', 'Creator', 'Participant'])
-def stages_all(id_base_olympiad, id_olympiad):
+def stages_all(id_olympiad):
     try:
-        db_get_or_raise(BaseContest, "base_contest_id", str(id_base_olympiad))
         db_get_or_raise(Contest, "contest_id", str(id_olympiad))
         contest = db_get_or_raise(CompositeContest, "contest_id", str(id_olympiad))
         all_stages = [stage.serialize() for stage in contest.stages]
@@ -373,11 +369,11 @@ def stages_all(id_base_olympiad, id_olympiad):
 
 
 # Contest views
-@module.route('/base_olympiad/<int:id_base_olympiad>/olympiad/<int:id_olympiad>/stage/<int:id_stage>/contest'
+@module.route('/olympiad/<int:id_olympiad>/stage/<int:id_stage>/contest'
               '/createsimple',
               methods=['POST'])
 @jwt_required_role(['Admin', 'System', 'Creator'])
-def contest_create_simple(id_base_olympiad, id_olympiad, id_stage):
+def contest_create_simple(id_olympiad, id_stage):
     values = request.openapi.body
 
     visibility = values['visibility']
@@ -388,7 +384,6 @@ def contest_create_simple(id_base_olympiad, id_olympiad, id_stage):
     previous_participation_condition = values.get('previous_participation_condition', None)
 
     try:
-        db_get_or_raise(BaseContest, "base_contest_id", str(id_base_olympiad))
         db_get_or_raise(Contest, "contest_id", str(id_olympiad))
         contest = add_simple_contest(db.session,
                                      visibility=visibility,
@@ -412,17 +407,16 @@ def contest_create_simple(id_base_olympiad, id_olympiad, id_stage):
         }, 200)
 
 
-@module.route('/base_olympiad/<int:id_base_olympiad>/olympiad/<int:id_olympiad>/stage/<int:id_stage>/contest'
+@module.route('/olympiad/<int:id_olympiad>/stage/<int:id_stage>/contest'
               '/createcomposite',
               methods=['POST'])
 @jwt_required_role(['Admin', 'System', 'Creator'])
-def contest_create_composite(id_base_olympiad, id_olympiad, id_stage):
+def contest_create_composite(id_olympiad, id_stage):
     values = request.openapi.body
 
     visibility = values['visibility']
 
     try:
-        db_get_or_raise(BaseContest, "base_contest_id", str(id_base_olympiad))
         db_get_or_raise(Contest, "contest_id", str(id_olympiad))
         contest = add_composite_contest(db.session,
                                         visibility=visibility)
@@ -442,13 +436,12 @@ def contest_create_composite(id_base_olympiad, id_olympiad, id_stage):
 
 
 @module.route(
-    '/base_olympiad/<int:id_base_olympiad>/olympiad/<int:id_olympiad>/stage/<int:id_stage>/contest/<int:id_contest'
+    '/olympiad/<int:id_olympiad>/stage/<int:id_stage>/contest/<int:id_contest'
     '>/remove',
     methods=['POST'])
 @jwt_required_role(['Admin', 'System', 'Creator'])
-def contest_remove(id_base_olympiad, id_olympiad, id_stage, id_contest):
+def contest_remove(id_olympiad, id_stage, id_contest):
     try:
-        db_get_or_raise(BaseContest, "base_contest_id", str(id_base_olympiad))
         db_get_or_raise(Contest, "contest_id", str(id_olympiad))
         db_get_or_raise(Stage, "stage_id", str(id_stage))
         contest = db_get_or_raise(Contest, "contest_id", str(id_contest))
@@ -462,14 +455,13 @@ def contest_remove(id_base_olympiad, id_olympiad, id_stage, id_contest):
 
 
 @module.route(
-    '/base_olympiad/<int:id_base_olympiad>/olympiad/<int:id_olympiad>/stage/<int:id_stage>/contest/<int:id_contest>',
+    '/olympiad/<int:id_olympiad>/stage/<int:id_stage>/contest/<int:id_contest>',
     methods=['GET', 'PATCH'])
 @jwt_required_role(['Admin', 'System', 'Creator'])
-def contest_response(id_base_olympiad, id_olympiad, id_stage, id_contest):
+def contest_response(id_olympiad, id_stage, id_contest):
     contest = db_get_or_raise(Contest, "contest_id", id_contest)
     if request.method == 'GET':
         try:
-            db_get_or_raise(BaseContest, "base_contest_id", str(id_base_olympiad))
             db_get_or_raise(Contest, "contest_id", str(id_olympiad))
             db_get_or_raise(Stage, "stage_id", str(id_stage))
             return make_response(contest.serialize(), 200)
@@ -480,7 +472,6 @@ def contest_response(id_base_olympiad, id_olympiad, id_stage, id_contest):
         values = request.openapi.body
 
         try:
-            db_get_or_raise(BaseContest, "base_contest_id", str(id_base_olympiad))
             db_get_or_raise(Contest, "contest_id", str(id_olympiad))
             db_get_or_raise(Stage, "stage_id", str(id_stage))
             contest.update(**values)
@@ -493,15 +484,14 @@ def contest_response(id_base_olympiad, id_olympiad, id_stage, id_contest):
 
 
 @module.route(
-    '/base_olympiad/<int:id_base_olympiad>/olympiad/<int:id_olympiad>/stage/<int:id_stage>/contest/'
+    '/olympiad/<int:id_olympiad>/stage/<int:id_stage>/contest/'
     '<int:id_contest>/addprevious',
     methods=['PATCH'])
 @jwt_required_role(['Admin', 'System', 'Creator'])
-def contest_add_previous(id_base_olympiad, id_olympiad, id_stage, id_contest):
+def contest_add_previous(id_olympiad, id_stage, id_contest):
     contest = db_get_or_raise(Contest, "contest_id", id_contest)
     values = request.openapi.body
     try:
-        db_get_or_raise(BaseContest, "base_contest_id", str(id_base_olympiad))
         db_get_or_raise(Contest, "contest_id", str(id_olympiad))
         db_get_or_raise(Stage, "stage_id", str(id_stage))
         contest.change_previous(**values)
@@ -513,12 +503,11 @@ def contest_add_previous(id_base_olympiad, id_olympiad, id_stage, id_contest):
     return make_response({}, 200)
 
 
-@module.route('/base_olympiad/<int:id_base_olympiad>/olympiad/<int:id_olympiad>/stage/<int:id_stage>/contest/all',
+@module.route('/olympiad/<int:id_olympiad>/stage/<int:id_stage>/contest/all',
               methods=['GET'])
 @jwt_required_role(['Admin', 'System', 'Creator'])
-def contests_all(id_base_olympiad, id_olympiad, id_stage):
+def contests_all(id_olympiad, id_stage):
     try:
-        db_get_or_raise(BaseContest, "base_contest_id", str(id_base_olympiad))
         db_get_or_raise(Contest, "contest_id", str(id_olympiad))
         db_get_or_raise(Stage, "stage_id", str(id_stage))
         stage = db_get_or_raise(Stage, "stage_id", str(id_stage))
@@ -533,11 +522,11 @@ def contests_all(id_base_olympiad, id_olympiad, id_stage):
 
 
 @module.route(
-    '/base_olympiad/<int:id_base_olympiad>/olympiad/<int:id_olympiad>/stage/<int:id_stage>/contest/<int:id_contest'
+    '/olympiad/<int:id_olympiad>/stage/<int:id_stage>/contest/<int:id_contest'
     '>/variant/create',
     methods=['POST'])
 @jwt_required_role(['Admin', 'System', 'Creator'])
-def variant_create(id_base_olympiad, id_olympiad, id_stage, id_contest):
+def variant_create(id_olympiad, id_stage, id_contest):
     values = request.openapi.body
 
     contest = db_get_or_raise(Contest, "contest_id", str(id_contest))
@@ -550,7 +539,6 @@ def variant_create(id_base_olympiad, id_olympiad, id_stage, id_contest):
     variant_description = values['variant_description']
 
     try:
-        db_get_or_raise(BaseContest, "base_contest_id", str(id_base_olympiad))
         db_get_or_raise(Contest, "contest_id", str(id_olympiad))
         db_get_or_raise(Stage, "stage_id", str(id_stage))
         contest = db_get_or_raise(Contest, "contest_id", str(id_contest))
@@ -574,14 +562,12 @@ def variant_create(id_base_olympiad, id_olympiad, id_stage, id_contest):
 
 
 @module.route(
-    '/base_olympiad/<int:id_base_olympiad>/olympiad/<int:id_olympiad>/stage/<int:id_stage>/contest/<int:id_contest'
+    '/olympiad/<int:id_olympiad>/stage/<int:id_stage>/contest/<int:id_contest'
     '>/variant/<int:id_variant>/remove',
     methods=['POST'])
 @jwt_required_role(['Admin', 'System', 'Creator'])
-def variant_remove(id_base_olympiad, id_olympiad, id_stage, id_contest, id_variant):
+def variant_remove(id_olympiad, id_stage, id_contest, id_variant):
     try:
-
-        db_get_or_raise(BaseContest, "base_contest_id", str(id_base_olympiad))
         db_get_or_raise(Contest, "contest_id", str(id_olympiad))
         db_get_or_raise(Stage, "stage_id", str(id_stage))
         contest = db_get_or_raise(Contest, "contest_id", str(id_contest))
@@ -596,13 +582,12 @@ def variant_remove(id_base_olympiad, id_olympiad, id_stage, id_contest, id_varia
 
 
 @module.route(
-    '/base_olympiad/<int:id_base_olympiad>/olympiad/<int:id_olympiad>/stage/<int:id_stage>/contest/<int:id_contest'
+    '/olympiad/<int:id_olympiad>/stage/<int:id_stage>/contest/<int:id_contest'
     '>/variant/<int:variant_num>',
     methods=['GET'])
 @jwt_required_role(['Admin', 'System', 'Creator', 'Participant'])
-def variant_get(id_base_olympiad, id_olympiad, id_stage, id_contest, variant_num):
+def variant_get(id_olympiad, id_stage, id_contest, variant_num):
     try:
-        db_get_or_raise(BaseContest, "base_contest_id", str(id_base_olympiad))
         db_get_or_raise(Contest, "contest_id", str(id_olympiad))
         db_get_or_raise(Stage, "stage_id", str(id_stage))
         contest = db_get_or_raise(Contest, "contest_id", str(id_contest))
@@ -618,13 +603,12 @@ def variant_get(id_base_olympiad, id_olympiad, id_stage, id_contest, variant_num
 
 
 @module.route(
-    '/base_olympiad/<int:id_base_olympiad>/olympiad/<int:id_olympiad>/stage/<int:id_stage>/contest/<int:id_contest'
+    '/olympiad/<int:id_olympiad>/stage/<int:id_stage>/contest/<int:id_contest'
     '>/variant/<int:variant_num>',
     methods=['PATCH'])
 @jwt_required_role(['Admin', 'System', 'Creator'])
-def variant_patch(id_base_olympiad, id_olympiad, id_stage, id_contest, variant_num):
+def variant_patch(id_olympiad, id_stage, id_contest, variant_num):
     try:
-        db_get_or_raise(BaseContest, "base_contest_id", str(id_base_olympiad))
         db_get_or_raise(Contest, "contest_id", str(id_olympiad))
         db_get_or_raise(Stage, "stage_id", str(id_stage))
         contest = db_get_or_raise(Contest, "contest_id", str(id_contest))
@@ -642,13 +626,12 @@ def variant_patch(id_base_olympiad, id_olympiad, id_stage, id_contest, variant_n
 
 
 @module.route(
-    '/base_olympiad/<int:id_base_olympiad>/olympiad/<int:id_olympiad>/stage/<int:id_stage>/contest/<int:id_contest'
+    '/olympiad/<int:id_olympiad>/stage/<int:id_stage>/contest/<int:id_contest'
     '>/variant/all',
     methods=['GET'])
 @jwt_required_role(['Admin', 'System', 'Creator'])
-def variant_all(id_base_olympiad, id_olympiad, id_stage, id_contest):
+def variant_all(id_olympiad, id_stage, id_contest):
     try:
-        db_get_or_raise(BaseContest, "base_contest_id", str(id_base_olympiad))
         db_get_or_raise(Contest, "contest_id", str(id_olympiad))
         db_get_or_raise(Stage, "stage_id", str(id_stage))
         contest = db_get_or_raise(Contest, "contest_id", id_contest)
@@ -665,13 +648,13 @@ def variant_all(id_base_olympiad, id_olympiad, id_stage, id_contest):
 
 
 @module.route(
-    '/base_olympiad/<int:id_base_olympiad>/olympiad/<int:id_olympiad>/stage/<int:id_stage>/contest/<int:id_contest'
+    '/olympiad/<int:id_olympiad>/stage/<int:id_stage>/contest/<int:id_contest'
     '>/variant/<int:id_variant>/task/createplain',
     methods=['POST'])
 @jwt_required_role(['Admin', 'System', 'Creator'])
-def task_create_plain(id_base_olympiad, id_olympiad, id_stage, id_contest, id_variant):
+def task_create_plain(id_olympiad, id_stage, id_contest, id_variant):
     try:
-        check_existence(id_base_olympiad, id_olympiad, id_stage, id_contest, id_variant)
+        check_existence(id_olympiad, id_stage, id_contest, id_variant)
         variant = db_get_or_raise(Variant, "variant_id", str(id_variant))
         values = request.openapi.body
 
@@ -700,13 +683,13 @@ def task_create_plain(id_base_olympiad, id_olympiad, id_stage, id_contest, id_va
 
 
 @module.route(
-    '/base_olympiad/<int:id_base_olympiad>/olympiad/<int:id_olympiad>/stage/<int:id_stage>/contest/<int:id_contest'
+    '/olympiad/<int:id_olympiad>/stage/<int:id_stage>/contest/<int:id_contest'
     '>/variant/<int:id_variant>/task/createrange',
     methods=['POST'])
 @jwt_required_role(['Admin', 'System', 'Creator'])
-def task_create_range(id_base_olympiad, id_olympiad, id_stage, id_contest, id_variant):
+def task_create_range(id_olympiad, id_stage, id_contest, id_variant):
     try:
-        check_existence(id_base_olympiad, id_olympiad, id_stage, id_contest, id_variant)
+        check_existence(id_olympiad, id_stage, id_contest, id_variant)
         variant = db_get_or_raise(Variant, "variant_id", str(id_variant))
 
         values = request.openapi.body
@@ -736,13 +719,13 @@ def task_create_range(id_base_olympiad, id_olympiad, id_stage, id_contest, id_va
 
 
 @module.route(
-    '/base_olympiad/<int:id_base_olympiad>/olympiad/<int:id_olympiad>/stage/<int:id_stage>/contest/<int:id_contest'
+    '/olympiad/<int:id_olympiad>/stage/<int:id_stage>/contest/<int:id_contest'
     '>/variant/<int:id_variant>/task/createmultiple',
     methods=['POST'])
 @jwt_required_role(['Admin', 'System', 'Creator'])
-def task_create_multiple(id_base_olympiad, id_olympiad, id_stage, id_contest, id_variant):
+def task_create_multiple(id_olympiad, id_stage, id_contest, id_variant):
     try:
-        check_existence(id_base_olympiad, id_olympiad, id_stage, id_contest, id_variant)
+        check_existence(id_olympiad, id_stage, id_contest, id_variant)
         variant = db_get_or_raise(Variant, "variant_id", str(id_variant))
 
         values = request.openapi.body
@@ -775,13 +758,13 @@ def task_create_multiple(id_base_olympiad, id_olympiad, id_stage, id_contest, id
 
 
 @module.route(
-    '/base_olympiad/<int:id_base_olympiad>/olympiad/<int:id_olympiad>/stage/<int:id_stage>/contest/<int:id_contest'
+    '/olympiad/<int:id_olympiad>/stage/<int:id_stage>/contest/<int:id_contest'
     '>/variant/<int:id_variant>/task/<int:id_task>/remove',
     methods=['POST'])
 @jwt_required_role(['Admin', 'System', 'Creator'])
-def task_remove(id_base_olympiad, id_olympiad, id_stage, id_contest, id_variant, id_task):
+def task_remove(id_olympiad, id_stage, id_contest, id_variant, id_task):
     try:
-        check_existence(id_base_olympiad, id_olympiad, id_stage, id_contest, id_variant)
+        check_existence(id_olympiad, id_stage, id_contest, id_variant)
         task = db_get_or_raise(Task, "task_id", str(id_task))
         db.session.delete(task)
         db.session.commit()
@@ -793,13 +776,13 @@ def task_remove(id_base_olympiad, id_olympiad, id_stage, id_contest, id_variant,
 
 
 @module.route(
-    '/base_olympiad/<int:id_base_olympiad>/olympiad/<int:id_olympiad>/stage/<int:id_stage>/contest/<int:id_contest'
+    '/olympiad/<int:id_olympiad>/stage/<int:id_stage>/contest/<int:id_contest'
     '>/variant/<int:id_variant>/task/<int:id_task>',
     methods=['GET'])
 @jwt_required_role(['Admin', 'System', 'Creator', 'Participant'])
-def task_get(id_base_olympiad, id_olympiad, id_stage, id_contest, id_variant, id_task):
+def task_get(id_olympiad, id_stage, id_contest, id_variant, id_task):
     try:
-        check_existence(id_base_olympiad, id_olympiad, id_stage, id_contest, id_variant)
+        check_existence(id_olympiad, id_stage, id_contest, id_variant)
         task = db_get_or_raise(Task, "task_id", str(id_task))
 
         return make_response(
@@ -808,8 +791,7 @@ def task_get(id_base_olympiad, id_olympiad, id_stage, id_contest, id_variant, id
         raise
 
 
-def check_existence(id_base_olympiad, id_olympiad, id_stage, id_contest, id_variant):
-    db_get_or_raise(BaseContest, "base_contest_id", str(id_base_olympiad))
+def check_existence(id_olympiad, id_stage, id_contest, id_variant):
     db_get_or_raise(Contest, "contest_id", str(id_olympiad))
     db_get_or_raise(Stage, "stage_id", str(id_stage))
     db_get_or_raise(Contest, "contest_id", str(id_contest))
@@ -817,13 +799,13 @@ def check_existence(id_base_olympiad, id_olympiad, id_stage, id_contest, id_vari
 
 
 @module.route(
-    '/base_olympiad/<int:id_base_olympiad>/olympiad/<int:id_olympiad>/stage/<int:id_stage>/contest/<int:id_contest'
+    '/olympiad/<int:id_olympiad>/stage/<int:id_stage>/contest/<int:id_contest'
     '>/variant/<int:id_variant>/task/<int:id_task>/plain',
     methods=['PATCH'])
 @jwt_required_role(['Admin', 'System', 'Creator'])
-def task_patch_plain(id_base_olympiad, id_olympiad, id_stage, id_contest, id_variant, id_task):
+def task_patch_plain(id_olympiad, id_stage, id_contest, id_variant, id_task):
     try:
-        check_existence(id_base_olympiad, id_olympiad, id_stage, id_contest, id_variant)
+        check_existence(id_olympiad, id_stage, id_contest, id_variant)
 
         task = db_get_or_raise(PlainTask, "task_id", str(id_task))
         values = request.openapi.body
@@ -837,14 +819,14 @@ def task_patch_plain(id_base_olympiad, id_olympiad, id_stage, id_contest, id_var
 
 
 @module.route(
-    '/base_olympiad/<int:id_base_olympiad>/olympiad/<int:id_olympiad>/stage/<int:id_stage>/contest/<int:id_contest'
+    '/olympiad/<int:id_olympiad>/stage/<int:id_stage>/contest/<int:id_contest'
     '>/variant/<int:id_variant>/task/<int:id_task>/range',
     methods=['PATCH'])
 @jwt_required_role(['Admin', 'System', 'Creator'])
-def task_patch_range(id_base_olympiad, id_olympiad, id_stage, id_contest, id_variant, id_task):
+def task_patch_range(id_olympiad, id_stage, id_contest, id_variant, id_task):
     try:
         task = db_get_or_raise(RangeTask, "task_id", str(id_task))
-        check_existence(id_base_olympiad, id_olympiad, id_stage, id_contest, id_variant)
+        check_existence(id_olympiad, id_stage, id_contest, id_variant)
         values = request.openapi.body
         task.update(**values)
 
@@ -857,13 +839,13 @@ def task_patch_range(id_base_olympiad, id_olympiad, id_stage, id_contest, id_var
 
 
 @module.route(
-    '/base_olympiad/<int:id_base_olympiad>/olympiad/<int:id_olympiad>/stage/<int:id_stage>/contest/<int:id_contest'
+    '/olympiad/<int:id_olympiad>/stage/<int:id_stage>/contest/<int:id_contest'
     '>/variant/<int:id_variant>/task/<int:id_task>/multiple',
     methods=['PATCH'])
 @jwt_required_role(['Admin', 'System', 'Creator'])
-def task_patch_multiple(id_base_olympiad, id_olympiad, id_stage, id_contest, id_variant, id_task):
+def task_patch_multiple(id_olympiad, id_stage, id_contest, id_variant, id_task):
     try:
-        check_existence(id_base_olympiad, id_olympiad, id_stage, id_contest, id_variant)
+        check_existence(id_olympiad, id_stage, id_contest, id_variant)
         task = db_get_or_raise(MultipleChoiceTask, "task_id", str(id_task))
         values = request.openapi.body
         answers = values['answers']
@@ -884,13 +866,13 @@ def task_patch_multiple(id_base_olympiad, id_olympiad, id_stage, id_contest, id_
 
 
 @module.route(
-    '/base_olympiad/<int:id_base_olympiad>/olympiad/<int:id_olympiad>/stage/<int:id_stage>/contest/<int:id_contest'
+    '/olympiad/<int:id_olympiad>/stage/<int:id_stage>/contest/<int:id_contest'
     '>/variant/<int:id_variant>/task/all',
     methods=['GET'])
 @jwt_required_role(['Admin', 'System', 'Creator'])
-def task_all(id_base_olympiad, id_olympiad, id_stage, id_contest, id_variant):
+def task_all(id_olympiad, id_stage, id_contest, id_variant):
     try:
-        check_existence(id_base_olympiad, id_olympiad, id_stage, id_contest, id_variant)
+        check_existence(id_olympiad, id_stage, id_contest, id_variant)
         variant = db_get_or_raise(Variant, "variant_id", str(id_variant))
         all_tasks = [task.serialize() for task in variant.tasks]
         return make_response(
@@ -902,13 +884,13 @@ def task_all(id_base_olympiad, id_olympiad, id_stage, id_contest, id_variant):
 
 
 @module.route(
-    '/base_olympiad/<int:id_base_olympiad>/olympiad/<int:id_olympiad>/stage/<int:id_stage>/contest/<int:id_contest'
+    '/olympiad/<int:id_olympiad>/stage/<int:id_stage>/contest/<int:id_contest'
     '>/variant/<int:id_variant>/tasks/<int:id_task>/taskimage',
     methods=['GET'])
 @jwt_required_role(['Admin', 'System', 'Creator'])
-def task_image(id_base_olympiad, id_olympiad, id_stage, id_contest, id_variant, id_task):
+def task_image(id_olympiad, id_stage, id_contest, id_variant, id_task):
     try:
-        check_existence(id_base_olympiad, id_olympiad, id_stage, id_contest, id_variant)
+        check_existence(id_olympiad, id_stage, id_contest, id_variant)
         task = db_get_or_raise(Task, "task_id", str(id_task))
 
         return make_response(
@@ -933,15 +915,14 @@ def generate_variant(id_contest, user_id):
 
 
 @module.route(
-    '/base_olympiad/<int:id_base_olympiad>/olympiad/<int:id_olympiad>/stage/<int:id_stage>/contest/<int:id_contest'
+    '/olympiad/<int:id_olympiad>/stage/<int:id_stage>/contest/<int:id_contest'
     '>/adduser',
     methods=['POST'])
 @jwt_required_role(['Admin', 'System', 'Creator'])
-def add_user_to_contest(id_base_olympiad, id_olympiad, id_stage, id_contest):
+def add_user_to_contest(id_olympiad, id_stage, id_contest):
     values = request.openapi.body
     user_ids = values['users_id']
     try:
-        db_get_or_raise(BaseContest, "base_contest_id", str(id_base_olympiad))
         db_get_or_raise(Contest, "contest_id", str(id_olympiad))
         db_get_or_raise(Stage, "stage_id", str(id_stage))
         contest = db_get_or_raise(Contest, "contest_id", str(id_contest))
@@ -964,16 +945,15 @@ def add_user_to_contest(id_base_olympiad, id_olympiad, id_stage, id_contest):
 
 
 @module.route(
-    '/base_olympiad/<int:id_base_olympiad>/olympiad/<int:id_olympiad>/stage/<int:id_stage>/contest/<int:id_contest'
+    '/olympiad/<int:id_olympiad>/stage/<int:id_stage>/contest/<int:id_contest'
     '>/removeuser',
     methods=['POST'])
 @jwt_required_role(['Admin', 'System', 'Creator'])
-def remove_user_from_contest(id_base_olympiad, id_olympiad, id_stage, id_contest):
+def remove_user_from_contest(id_olympiad, id_stage, id_contest):
     values = request.openapi.body
     user_ids = values['users_id']
 
     try:
-        db_get_or_raise(BaseContest, "base_contest_id", str(id_base_olympiad))
         db_get_or_raise(Contest, "contest_id", str(id_olympiad))
         db_get_or_raise(Stage, "stage_id", str(id_stage))
         contest = db_get_or_raise(Contest, "contest_id", str(id_contest))
@@ -991,13 +971,12 @@ def remove_user_from_contest(id_base_olympiad, id_olympiad, id_stage, id_contest
 
 
 @module.route(
-    '/base_olympiad/<int:id_base_olympiad>/olympiad/<int:id_olympiad>/stage/<int:id_stage>/contest/<int:id_contest'
+    '/olympiad/<int:id_olympiad>/stage/<int:id_stage>/contest/<int:id_contest'
     '>/user/all',
     methods=['GET'])
 @jwt_required_role(['Admin', 'System', 'Creator'])
-def users_all(id_base_olympiad, id_olympiad, id_stage, id_contest):
+def users_all(id_olympiad, id_stage, id_contest):
     try:
-        db_get_or_raise(BaseContest, "base_contest_id", str(id_base_olympiad))
         db_get_or_raise(Contest, "contest_id", str(id_olympiad))
         db_get_or_raise(Stage, "stage_id", str(id_stage))
         db_get_or_raise(Contest, "contest_id", str(id_contest))
@@ -1012,13 +991,12 @@ def users_all(id_base_olympiad, id_olympiad, id_stage, id_contest):
 
 
 @module.route(
-    '/base_olympiad/<int:id_base_olympiad>/olympiad/<int:id_olympiad>/stage/<int:id_stage>/contest/<int:id_contest>'
+    '/olympiad/<int:id_olympiad>/stage/<int:id_stage>/contest/<int:id_contest>'
     '/user/<int:id_user>/certificate',
     methods=['GET'])
 @jwt_required_role(['Admin', 'System', 'Creator'])
-def users_certificate(id_base_olympiad, id_olympiad, id_stage, id_contest, id_user):
+def users_certificate(id_olympiad, id_stage, id_contest, id_user):
     try:
-        db_get_or_raise(BaseContest, "base_contest_id", str(id_base_olympiad))
         db_get_or_raise(Contest, "contest_id", str(id_olympiad))
         db_get_or_raise(Stage, "stage_id", str(id_stage))
         contest = db_get_or_raise(Contest, "contest_id", str(id_contest))
