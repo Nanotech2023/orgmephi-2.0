@@ -5,7 +5,7 @@ import enum
 from common import get_current_db
 
 # Constants
-from common.util import db_get_list, db_get_filter_all, db_get_or_raise
+from common.util import db_get_filter_all, db_get_or_raise
 
 db = get_current_db()
 
@@ -19,23 +19,6 @@ class UserStatusEnum(enum.Enum):
 
 
 user_status_dict = {status.value: status for status in UserStatusEnum}
-
-
-class CompositeTypeEnum(enum.Enum):
-    composite = "composite"
-    simple = "simple"
-
-
-composite_type_dict = {composite.value: composite for composite in CompositeTypeEnum}
-
-
-class OlympiadTypeEnum(enum.Enum):
-    Rosatom = "Rosatom"
-    Kurchatov = "Kurchatov"
-    Other = "Other"
-
-
-olympiad_type_dict = {_type.value: _type for _type in OlympiadTypeEnum}
 
 
 class OlympiadSubjectEnum(enum.Enum):
@@ -61,7 +44,39 @@ class TargetClassEnum(enum.Enum):
 olympiad_target_class_dict = {target.value: target for target in TargetClassEnum}
 
 
-def add_base_contest(db_session, name, laureate_condition, winning_condition, description, rules, olympiad_type,
+def add_olympiad_type(db_session, olympiad_type):
+    olympiad = OlympiadType(
+        olympiad_type=olympiad_type,
+    )
+    db_session.add(olympiad)
+    return olympiad
+
+
+class OlympiadType(db.Model):
+    """
+    This class describing olympiad type (ex:Росатом).
+
+    olympiad_type_id: id of olympiad type
+    olympiad_type: olympiad type
+    """
+
+    __tablename__ = 'olympiad_type'
+
+    olympiad_type_id = db.Column(db.Integer, autoincrement=True, primary_key=True)
+    olympiad_type = db.Column(db.Text, nullable=False)
+
+    contests = db.relationship('BaseContest', lazy='select',
+                               backref=db.backref('olympiad_type', lazy='joined'))
+
+    def serialize(self):
+        return \
+            {
+                'olympiad_type_id': self.olympiad_type_id,
+                'olympiad_type': self.olympiad_type,
+            }
+
+
+def add_base_contest(db_session, name, laureate_condition, winning_condition, description, rules, olympiad_type_id,
                      subject, certificate_template):
     baseContest = BaseContest(
         description=description,
@@ -70,7 +85,7 @@ def add_base_contest(db_session, name, laureate_condition, winning_condition, de
         rules=rules,
         winning_condition=winning_condition,
         laureate_condition=laureate_condition,
-        olympiad_type=olympiad_type,
+        olympiad_type_id=olympiad_type_id,
         subject=subject
     )
     db_session.add(baseContest)
@@ -105,7 +120,7 @@ class BaseContest(db.Model):
     name = db.Column(db.Text, nullable=False)
     rules = db.Column(db.Text, nullable=False)
     description = db.Column(db.Text, nullable=False)
-    olympiad_type = db.Column(db.Enum(OlympiadTypeEnum), nullable=False)
+    olympiad_type_id = db.Column(db.Text, db.ForeignKey('olympiad_type.olympiad_type_id'), nullable=False)
     subject = db.Column(db.Enum(OlympiadSubjectEnum), nullable=False)
     certificate_template = db.Column(db.Text, nullable=True)
 
@@ -124,7 +139,7 @@ class BaseContest(db.Model):
                 'name': self.name,
                 'description': self.description,
                 'rules': self.rules,
-                'olympiad_type': self.olympiad_type.value,
+                'olympiad_type': self.olympiad_type,
                 'subject': self.subject.value,
                 'certificate_template': self.certificate_template,
                 'winning_condition': self.winning_condition,

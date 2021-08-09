@@ -14,7 +14,64 @@ db = get_current_db()
 module = get_current_module()
 
 
+# Olympiad types
+
+
+@module.route('/olympiad_type/create', methods=['POST'])
+@jwt_required_role(['Admin', 'System', 'Creator'])
+def olympiad_type_create():
+    values = request.openapi.body
+
+    olympiad_type = values['olympiad_type']
+
+    try:
+        olympiad = add_olympiad_type(db.session,
+                                     olympiad_type=olympiad_type)
+        db.session.commit()
+    except Exception:
+        db.session.rollback()
+        raise
+    return make_response(
+        {
+            'olympiad_type_id': olympiad.olympiad_type_id
+        }
+        , 200)
+
+
+@module.route('/olympiad_type/<int:id_olympiad_type>/remove', methods=['POST'])
+@jwt_required_role(['Admin', 'System', 'Creator'])
+def olympiad_type_remove(id_olympiad_type):
+    try:
+        olympiad = db_get_or_raise(OlympiadType, "olympiad_type_id", str(id_olympiad_type))
+        db.session.delete(olympiad)
+        db.session.commit()
+    except Exception:
+        db.session.rollback()
+        raise
+    return make_response({}, 200)
+
+
+@module.route('/olympiad_type/<int:id_olympiad_type>', methods=['GET'])
+@jwt_required_role(['Admin', 'System', 'Creator'])
+def olympiad_type_get(id_olympiad_type):
+    olympiad = db_get_or_raise(OlympiadType, "olympiad_type_id", str(id_olympiad_type))
+    return make_response(olympiad.serialize(), 200)
+
+
+@module.route('/olympiad_type/all', methods=['GET'])
+@jwt_required_role(['Admin', 'System', 'Creator'])
+def olympiad_type_all():
+    try:
+        olympiad_types = db_get_all(OlympiadType)
+        all_olympiad_types = [olympiad_type.serialize() for olympiad_type in olympiad_types]
+    except Exception:
+        raise
+    return make_response(
+        {"olympiad_types": all_olympiad_types}, 200)
+
+
 # Olympiad views
+
 
 @module.route('/base_olympiad/create', methods=['POST'])
 @jwt_required_role(['Admin', 'System', 'Creator'])
@@ -24,7 +81,7 @@ def base_olympiad_create():
     name = values['name']
     description = values['description']
     rules = values['rules']
-    olympiad_type = values['olympiad_type']
+    olympiad_type_id = values['olympiad_type_id']
 
     # TODO CORRECT BINARY EXAMPLE
 
@@ -45,7 +102,7 @@ def base_olympiad_create():
                                        winning_condition=winning_condition,
                                        laureate_condition=laureate_condition,
                                        rules=rules,
-                                       olympiad_type=olympiad_type,
+                                       olympiad_type_id=olympiad_type_id,
                                        subject=subject)
 
         for target_class in target_classes:

@@ -12,6 +12,105 @@ paths:
   ##                                             Path definition                                                      ##
   ######################################################################################################################
 
+  # Olympiad type
+
+  /olympiad_type/create:
+    post:
+      summary: add olympiad type
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/olympiadType'
+      security:
+        - cookieJWTAuth: [ ]
+        - CSRFToken: [ ]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/olympiadTypeId'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+
+  /olympiad_type/{id_olympiad_type}/remove:
+    post:
+      summary: remove olympiad type
+      parameters:
+        - in: path
+          description: Id of the olympiad type
+          name: id_olympiad_type
+          required: true
+          schema:
+            type: integer
+      security:
+        - cookieJWTAuth: [ ]
+        - CSRFToken: [ ]
+      responses:
+        '200':
+          description: OK
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+
+  /olympiad_type/all:
+    get:
+      summary: list of all olympiad types
+      security:
+        - cookieJWTAuth: [ ]
+        - CSRFToken: [ ]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/olympiadTypes'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+
+  /olympiad_type/{id_olympiad_type}:
+    get:
+      summary: get olympiad type
+      security:
+        - cookieJWTAuth: [ ]
+        - CSRFToken: [ ]
+      parameters:
+        - in: path
+          description: Id of the olympiad type
+          name: id_olympiad_type
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/olympiadTypeInfo'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+
+
   # Base olympiad
 
   /base_olympiad/create:
@@ -1825,9 +1924,8 @@ components:
                 type: string
                 format: binary
                 nullable: true
-              olympiad_type:
-                type: string
-                enum: ["Rosatom", "Kurchatov", "Other"]
+              olympiad_type_id:
+                type: integer
               subject:
                 type: string
                 enum: ["Math", "Physics", "Informatics"]
@@ -1845,7 +1943,7 @@ components:
         - rules
         - winning_condition
         - laureate_condition
-        - olympiad_type
+        - olympiad_type_id
         - subject
         - target_classes
       properties:
@@ -1870,9 +1968,8 @@ components:
           format: binary
           example:
             000
-        olympiad_type:
-          type: string
-          enum: ["Rosatom", "Kurchatov", "Other"]
+        olympiad_type_id:
+          type: integer
         subject:
           type: string
           enum: ["Math", "Physics", "Informatics"]
@@ -1892,7 +1989,7 @@ components:
         - winning_condition
         - laureate_condition
         - certificate_template
-        - olympiad_type
+        - olympiad_type_id
         - subject
       properties:
         base_contest_id:
@@ -1913,9 +2010,8 @@ components:
           type: string
           format: binary
           nullable: true
-        olympiad_type:
-          type: string
-          enum: ["Rosatom", "Kurchatov", "Other"]
+        olympiad_type_id:
+          type: integer
         subject:
           type: string
           enum: ["Math", "Physics", "Informatics"]
@@ -1952,9 +2048,8 @@ components:
           type: string
           format: binary
           nullable: true
-        olympiad_type:
-          type: string
-          enum: ["Rosatom", "Kurchatov", "Other"]
+        olympiad_type_id:
+          type: integer
         subject:
           type: string
           enum: ['Math', "Physics", "Informatics"]
@@ -2475,3 +2570,45 @@ components:
             type: integer
         next_contest_id:
           type: integer
+    olympiadTypes:
+      title: All olympiad types
+      description: Request to get all olympiad types
+      required:
+        - olympiad_types
+      properties:
+        olympiad_types:
+          type: array
+          items:
+            type: object
+            properties:
+              olympiad_type_id:
+                type: integer
+              olympiad_type:
+                type: string
+    olympiadType:
+      title: Add or remove olympiad type
+      description: Request to add or remove olympiad type
+      required:
+        - olympiad_type
+      properties:
+        olympiad_type:
+          type: string
+    olympiadTypeId:
+      title: Get olympiad type id
+      description: Request to get olympiad type id
+      required:
+        - olympiad_type_id
+      properties:
+        olympiad_type_id:
+          type: integer
+    olympiadTypeInfo:
+      title: Add or remove olympiad type
+      description: Request to add or remove olympiad type
+      required:
+        - olympiad_type_id
+        - olympiad_type
+      properties:
+        olympiad_type_id:
+          type: integer
+        olympiad_type:
+          type: string
