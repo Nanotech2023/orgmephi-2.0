@@ -5,7 +5,8 @@ import {
     RequestLogin,
     RequestPasswordAdmin,
     RequestPasswordSelf,
-    RequestRegistration,
+    RequestRegistrationSchool,
+    RequestRegistrationUniversity,
     RequestUserGroupsAdd,
     RequestUserGroupsRemove,
     RequestUserRole,
@@ -29,17 +30,17 @@ import {
 import { HttpEvent, HttpParams, HttpResponse } from '@angular/common/http'
 import { Observable, of } from 'rxjs'
 import { pushPersonalInfo } from '@/auth/store/auth.actions'
-import { AuthState } from '@/auth/store'
+import { AuthSelectors, AuthState } from '@/auth/store'
 import { Store } from '@ngrx/store'
+import { Configuration } from '@/auth/configuration'
 
 
-@Injectable( {
-    providedIn: 'root'
-} )
-export class AuthServiceMock implements AuthService
+@Injectable()
+export class AuthServiceMock extends AuthService
 {
     constructor( private readonly store: Store<AuthState.State> )
     {
+        super( new Configuration() )
     }
 
     addToHttpParams( httpParams: HttpParams, value: any, key?: string ): HttpParams
@@ -155,20 +156,27 @@ export class AuthServiceMock implements AuthService
         throw new Error( 'not implemented' )
     }
 
-    registerPost( requestRegistration: RequestRegistration, observe?: "body", reportProgress?: boolean, options?: { httpHeaderAccept?: "application/json" } ): Observable<TypeUserInfo>
-    registerPost( requestRegistration: RequestRegistration, observe?: "response", reportProgress?: boolean, options?: { httpHeaderAccept?: "application/json" } ): Observable<HttpResponse<TypeUserInfo>>
-    registerPost( requestRegistration: RequestRegistration, observe?: "events", reportProgress?: boolean, options?: { httpHeaderAccept?: "application/json" } ): Observable<HttpEvent<TypeUserInfo>>
-    registerPost( requestRegistration: RequestRegistration, observe: any, reportProgress: boolean, options?: { httpHeaderAccept?: "application/json" } ): Observable<any>
-    registerPost( requestRegistration: RequestRegistration, observe?: any, reportProgress?: boolean, options?: { httpHeaderAccept?: "application/json" } ): Observable<TypeUserInfo> | Observable<HttpResponse<TypeUserInfo>> | Observable<HttpEvent<TypeUserInfo>> | Observable<any>
+    registerSchoolPost( requestRegistrationSchool: RequestRegistrationSchool, observe?: 'body', reportProgress?: boolean, options?: { httpHeaderAccept?: 'application/json' | undefined } ): Observable<TypeUserInfo>
+    registerSchoolPost( requestRegistrationSchool: RequestRegistrationSchool, observe?: 'response', reportProgress?: boolean, options?: { httpHeaderAccept?: 'application/json' | undefined } ): Observable<HttpResponse<TypeUserInfo>>
+    registerSchoolPost( requestRegistrationSchool: RequestRegistrationSchool, observe?: 'events', reportProgress?: boolean, options?: { httpHeaderAccept?: 'application/json' | undefined } ): Observable<HttpEvent<TypeUserInfo>>
+    registerSchoolPost( requestRegistrationSchool: RequestRegistrationSchool, observe: any, reportProgress: boolean, options?: { httpHeaderAccept?: 'application/json' | undefined } ): Observable<any>
     {
         const result: TypeUserInfo = {
-            username: requestRegistration.auth_info.email,
+            username: requestRegistrationSchool.auth_info.email,
             role: TypeUserRole.Participant,
-            type: requestRegistration.register_type,
+            type: requestRegistrationSchool.register_type,
             id: 12345
         }
-        this.store.dispatch( pushPersonalInfo( { personalInfo: requestRegistration.personal_info } ) )
+        this.store.dispatch( pushPersonalInfo( { personalInfo: requestRegistrationSchool.personal_info } ) )
         return of( result )
+    }
+
+    registerUniversityPost( requestRegistrationUniversity: RequestRegistrationUniversity, observe?: 'body', reportProgress?: boolean, options?: { httpHeaderAccept?: 'application/json' | undefined } ): Observable<TypeUserInfo>
+    registerUniversityPost( requestRegistrationUniversity: RequestRegistrationUniversity, observe?: 'response', reportProgress?: boolean, options?: { httpHeaderAccept?: 'application/json' | undefined } ): Observable<HttpResponse<TypeUserInfo>>
+    registerUniversityPost( requestRegistrationUniversity: RequestRegistrationUniversity, observe?: 'events', reportProgress?: boolean, options?: { httpHeaderAccept?: 'application/json' | undefined } ): Observable<HttpEvent<TypeUserInfo>>
+    registerUniversityPost( requestRegistrationUniversity: RequestRegistrationUniversity, observe: any, reportProgress: boolean, options?: { httpHeaderAccept?: 'application/json' | undefined } ): Observable<any>
+    {
+        throw new Error( 'Method not implemented.' )
     }
 
     userAllGet( observe?: "body", reportProgress?: boolean, options?: { httpHeaderAccept?: "application/json" } ): Observable<ResponseUserAll>
@@ -195,7 +203,7 @@ export class AuthServiceMock implements AuthService
     userSelfGet( observe: any, reportProgress: boolean, options?: { httpHeaderAccept?: "application/json" } ): Observable<any>
     userSelfGet( observe?: any, reportProgress?: boolean, options?: { httpHeaderAccept?: "application/json" } ): Observable<TypeUserInfo> | Observable<HttpResponse<TypeUserInfo>> | Observable<HttpEvent<TypeUserInfo>> | Observable<any>
     {
-        throw new Error( 'not implemented' )
+        return this.store.select( AuthSelectors.selectUserInfo )
     }
 
     userSelfGroupsGet( observe?: "body", reportProgress?: boolean, options?: { httpHeaderAccept?: "application/json" } ): Observable<ResponseUserSelfGroup>

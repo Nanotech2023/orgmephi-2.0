@@ -21,7 +21,8 @@ import {
     RequestLogin,
     RequestPasswordAdmin,
     RequestPasswordSelf,
-    RequestRegistration,
+    RequestRegistrationSchool,
+    RequestRegistrationUniversity,
     RequestUserGroupsAdd,
     RequestUserGroupsRemove,
     RequestUserRole,
@@ -46,23 +47,16 @@ import { BASE_PATH } from '../variables'
 import { Configuration } from '../configuration'
 import { AuthService } from '@/auth/api/auth.service'
 
-
-@Injectable( {
-    providedIn: 'root'
-} )
-export class AuthServiceReal implements AuthService
+@Injectable()
+export class AuthServiceReal extends AuthService
 {
     protected basePath = 'http://127.0.0.1:5000'
     public defaultHeaders = new HttpHeaders()
-    public configuration = new Configuration()
     public encoder: HttpParameterCodec
 
     constructor( protected httpClient: HttpClient, @Optional() @Inject( BASE_PATH ) basePath: string, @Optional() configuration: Configuration )
     {
-        if ( configuration )
-        {
-            this.configuration = configuration
-        }
+        super( configuration )
         if ( typeof this.configuration.basePath !== 'string' )
         {
             if ( typeof basePath !== 'string' )
@@ -71,6 +65,7 @@ export class AuthServiceReal implements AuthService
             }
             this.configuration.basePath = basePath
         }
+        this.configuration.withCredentials = true
         this.encoder = this.configuration.encoder || new CustomHttpParameterCodec()
     }
 
@@ -790,19 +785,19 @@ export class AuthServiceReal implements AuthService
     }
 
     /**
-     * Register a new user
-     * @param requestRegistration
+     * Register a new school student
+     * @param requestRegistrationSchool
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
      * @param reportProgress flag to report request and response progress.
      */
-    registerPost( requestRegistration: RequestRegistration, observe?: 'body', reportProgress?: boolean, options?: { httpHeaderAccept?: 'application/json' } ): Observable<TypeUserInfo>;
-    registerPost( requestRegistration: RequestRegistration, observe?: 'response', reportProgress?: boolean, options?: { httpHeaderAccept?: 'application/json' } ): Observable<HttpResponse<TypeUserInfo>>;
-    registerPost( requestRegistration: RequestRegistration, observe?: 'events', reportProgress?: boolean, options?: { httpHeaderAccept?: 'application/json' } ): Observable<HttpEvent<TypeUserInfo>>;
-    registerPost( requestRegistration: RequestRegistration, observe: any = 'body', reportProgress: boolean = false, options?: { httpHeaderAccept?: 'application/json' } ): Observable<any>
+    registerSchoolPost( requestRegistrationSchool: RequestRegistrationSchool, observe?: 'body', reportProgress?: boolean, options?: { httpHeaderAccept?: 'application/json' } ): Observable<TypeUserInfo>;
+    registerSchoolPost( requestRegistrationSchool: RequestRegistrationSchool, observe?: 'response', reportProgress?: boolean, options?: { httpHeaderAccept?: 'application/json' } ): Observable<HttpResponse<TypeUserInfo>>;
+    registerSchoolPost( requestRegistrationSchool: RequestRegistrationSchool, observe?: 'events', reportProgress?: boolean, options?: { httpHeaderAccept?: 'application/json' } ): Observable<HttpEvent<TypeUserInfo>>;
+    registerSchoolPost( requestRegistrationSchool: RequestRegistrationSchool, observe: any = 'body', reportProgress: boolean = false, options?: { httpHeaderAccept?: 'application/json' } ): Observable<any>
     {
-        if ( requestRegistration === null || requestRegistration === undefined )
+        if ( requestRegistrationSchool === null || requestRegistrationSchool === undefined )
         {
-            throw new Error( 'Required parameter requestRegistration was null or undefined when calling registerPost.' )
+            throw new Error( 'Required parameter requestRegistrationSchool was null or undefined when calling registerSchoolPost.' )
         }
 
         let headers = this.defaultHeaders
@@ -838,8 +833,69 @@ export class AuthServiceReal implements AuthService
             responseType_ = 'text'
         }
 
-        return this.httpClient.post<TypeUserInfo>( `${ this.configuration.basePath }/register`,
-            requestRegistration,
+        return this.httpClient.post<TypeUserInfo>( `${ this.configuration.basePath }/register/school`,
+            requestRegistrationSchool,
+            {
+                responseType: <any> responseType_,
+                withCredentials: this.configuration.withCredentials,
+                headers: headers,
+                observe: observe,
+                reportProgress: reportProgress
+            }
+        )
+    }
+
+    /**
+     * Register a new university student
+     * @param requestRegistrationUniversity
+     * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
+     * @param reportProgress flag to report request and response progress.
+     */
+    registerUniversityPost( requestRegistrationUniversity: RequestRegistrationUniversity, observe?: 'body', reportProgress?: boolean, options?: { httpHeaderAccept?: 'application/json' } ): Observable<TypeUserInfo>;
+    registerUniversityPost( requestRegistrationUniversity: RequestRegistrationUniversity, observe?: 'response', reportProgress?: boolean, options?: { httpHeaderAccept?: 'application/json' } ): Observable<HttpResponse<TypeUserInfo>>;
+    registerUniversityPost( requestRegistrationUniversity: RequestRegistrationUniversity, observe?: 'events', reportProgress?: boolean, options?: { httpHeaderAccept?: 'application/json' } ): Observable<HttpEvent<TypeUserInfo>>;
+    registerUniversityPost( requestRegistrationUniversity: RequestRegistrationUniversity, observe: any = 'body', reportProgress: boolean = false, options?: { httpHeaderAccept?: 'application/json' } ): Observable<any>
+    {
+        if ( requestRegistrationUniversity === null || requestRegistrationUniversity === undefined )
+        {
+            throw new Error( 'Required parameter requestRegistrationUniversity was null or undefined when calling registerUniversityPost.' )
+        }
+
+        let headers = this.defaultHeaders
+
+        let httpHeaderAcceptSelected: string | undefined = options && options.httpHeaderAccept
+        if ( httpHeaderAcceptSelected === undefined )
+        {
+            // to determine the Accept header
+            const httpHeaderAccepts: string[] = [
+                'application/json'
+            ]
+            httpHeaderAcceptSelected = this.configuration.selectHeaderAccept( httpHeaderAccepts )
+        }
+        if ( httpHeaderAcceptSelected !== undefined )
+        {
+            headers = headers.set( 'Accept', httpHeaderAcceptSelected )
+        }
+
+
+        // to determine the Content-Type header
+        const consumes: string[] = [
+            'application/json'
+        ]
+        const httpContentTypeSelected: string | undefined = this.configuration.selectHeaderContentType( consumes )
+        if ( httpContentTypeSelected !== undefined )
+        {
+            headers = headers.set( 'Content-Type', httpContentTypeSelected )
+        }
+
+        let responseType_: 'text' | 'json' = 'json'
+        if ( httpHeaderAcceptSelected && httpHeaderAcceptSelected.startsWith( 'text' ) )
+        {
+            responseType_ = 'text'
+        }
+
+        return this.httpClient.post<TypeUserInfo>( `${ this.configuration.basePath }/register/university`,
+            requestRegistrationUniversity,
             {
                 responseType: <any> responseType_,
                 withCredentials: this.configuration.withCredentials,
@@ -975,14 +1031,6 @@ export class AuthServiceReal implements AuthService
         let headers = this.defaultHeaders
 
         let credential: string | undefined
-
-        // authentication (CSRFAcessToken) required
-        credential = this.configuration.lookupCredential( 'CSRFAcessToken' )
-        if ( credential )
-        {
-            headers = headers.set( 'X-CSRF-TOKEN', credential )
-        }
-
         // authentication (JWTAcessToken) required
         credential = this.configuration.lookupCredential( 'JWTAcessToken' )
         if ( credential )
@@ -2050,4 +2098,5 @@ export class AuthServiceReal implements AuthService
             }
         )
     }
+
 }

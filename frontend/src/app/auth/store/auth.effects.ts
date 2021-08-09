@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core'
 import { Actions, createEffect, ofType } from '@ngrx/effects'
-import { AuthServiceReal } from '@/auth/api/auth.service.real'
+import { AuthService } from '@/auth/api/auth.service'
 import { loginAttempt, loginError, loginSuccess, registerAttempt, registerSuccess } from '@/auth/store/auth.actions'
 import { catchError, concatMap, mergeMap } from 'rxjs/operators'
 import { of } from 'rxjs'
@@ -12,7 +12,7 @@ import { Router } from '@angular/router'
 @Injectable()
 export class AuthEffects
 {
-    constructor( private actions$: Actions, private authService: AuthServiceReal, private router: Router )
+    constructor( private actions$: Actions, private authService: AuthService, private router: Router )
     {
     }
 
@@ -48,7 +48,7 @@ export class AuthEffects
         (
             ofType( registerAttempt ),
             concatMap( ( { requestRegistration } ) =>
-                this.authService.registerPost( requestRegistration ).pipe(
+                this.authService.registerSchoolPost( requestRegistration ).pipe(
                     mergeMap( ( userInfo: TypeUserInfo ) =>
                         of( registerSuccess( { userInfo: userInfo } ) ) ),
                     catchError(

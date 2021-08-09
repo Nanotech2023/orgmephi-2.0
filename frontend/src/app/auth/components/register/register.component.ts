@@ -1,7 +1,7 @@
 import { Component } from '@angular/core'
 import { AuthActions, AuthState } from '@/auth/store'
 import { Store } from '@ngrx/store'
-import { RequestRegistration, TypeUserType, TypeUserTypeSchool } from '@/auth/api/models'
+import { RequestRegistrationSchool, TypeUserType, TypeUserTypeSchool } from '@/auth/api/models'
 import { Agreements } from '@/auth/agreements'
 
 
@@ -15,7 +15,7 @@ export class RegisterComponent
     agreements: string[] = Agreements
     registerTypes: TypeUserTypeSchool[] = [ TypeUserTypeSchool.PreUniversity, TypeUserTypeSchool.School, TypeUserTypeSchool.Enrollee ]
 
-    registerAttempt: RequestRegistration // TODO switch to RequestRegistration
+    registerAttempt: RequestRegistrationSchool // TODO support RequestRegistrationUniversity
     isRegistered: boolean
 
     selectedUserType: TypeUserType | null
@@ -46,12 +46,12 @@ export class RegisterComponent
         return this.selectedUserType !== null && this.selectedUserType == TypeUserTypeSchool.School
     }
 
-    isValid( registration: RequestRegistration ): boolean
+    isValid( registration: RequestRegistrationSchool ): boolean
     {
         return this.agreementAccepted
     }
 
-    register( registerUser: RequestRegistration ): void
+    register( registerUser: RequestRegistrationSchool ): void
     {
         this.isRegistered = true
         this.store.dispatch( AuthActions.registerAttempt( { requestRegistration: registerUser } ) )

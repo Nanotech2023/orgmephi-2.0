@@ -4,7 +4,6 @@ export * from './requestGroupAdd';
 export * from './requestLogin';
 export * from './requestPasswordAdmin';
 export * from './requestPasswordSelf';
-export * from './requestRegistration';
 export * from './requestRegistrationSchool';
 export * from './requestRegistrationUniversity';
 export * from './requestUserGroupsAdd';

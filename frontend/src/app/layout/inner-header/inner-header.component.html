@@ -11,7 +11,7 @@
                 <span class="reg-number_title">Ваш регистрационный номер</span>
             </li>
             <li class="nav-item">
-                <span class="reg-number">123456</span>
+                <span class="reg-number">{{ ( userInfo | async )?.id ?? "Отсутствует" }}</span>
             </li>
         </ul>
         <div class="actions">

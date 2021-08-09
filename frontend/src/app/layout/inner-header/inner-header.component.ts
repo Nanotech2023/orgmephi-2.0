@@ -3,7 +3,7 @@ import { select, Store } from '@ngrx/store'
 import { AuthSelectors, AuthState } from '@/auth/store'
 import { Observable } from 'rxjs'
 import { TypeUserInfo } from '@/auth/api/models'
-import { AuthServiceReal } from '@/auth/api/auth.service.real'
+import { AuthService } from '@/auth/api/auth.service'
 
 
 @Component( {
@@ -16,7 +16,7 @@ export class InnerHeaderComponent implements OnInit
     userInfo!: Observable<TypeUserInfo | null>
     isAuthorized$!: Observable<boolean>
 
-    constructor( private store: Store<AuthState.State>, private service: AuthServiceReal ) { }
+    constructor( private store: Store<AuthState.State>, private service: AuthService ) { }
 
     ngOnInit(): void
     {
