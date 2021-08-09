@@ -269,6 +269,9 @@ class SimpleContest(Contest):
     variants = db.relationship('Variant', lazy='dynamic',
                                backref=db.backref('simple_contest', lazy='joined'))
 
+    next_contests = db.relationship('SimpleContest',
+                                    foreign_keys=[previous_contest_id])
+
     __mapper_args__ = {
         'polymorphic_identity': ContestTypeEnum.SimpleContest,
     }

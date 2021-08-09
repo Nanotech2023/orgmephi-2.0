@@ -192,10 +192,12 @@ def olympiad_create_simple(id_base_olympiad):
                                      visibility=visibility,
                                      start_date=start_time,
                                      end_date=end_time,
-                                     previous_contest_id=previous_contest_id,
                                      previous_participation_condition=previous_participation_condition,
                                      location=location,
                                      )
+        if previous_contest_id is not None:
+            prev_contest = db_get_or_raise(Contest, "contest_id", str(previous_contest_id))
+            prev_contest.next_contests.append(contest)
         base_contest.child_contests.append(contest)
 
         db.session.commit()
