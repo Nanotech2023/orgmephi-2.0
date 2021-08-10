@@ -66,20 +66,15 @@ def olympiad_type_all():
 
 # Olympiad views
 
-import json
-
 @module.route('/base_olympiad/create', methods=['POST'])
 @jwt_required_role(['Admin', 'System', 'Creator'])
 def base_olympiad_create():
-    values = json.loads(request.form['params'])
-    files = request.files
+    values = request.openapi.body
 
     name = values['name']
     description = values['description']
     rules = values['rules']
     olympiad_type_id = values['olympiad_type_id']
-
-    certificate_template = files['certificate_template'].stream.read()
     winning_condition = values['winning_condition']
     laureate_condition = values['laureate_condition']
     subject = values['subject']
@@ -90,7 +85,7 @@ def base_olympiad_create():
         base_contest = add_base_contest(db.session,
                                         description=description,
                                         name=name,
-                                        certificate_template=certificate_template,
+                                        certificate_template=None,
                                         winning_condition=winning_condition,
                                         laureate_condition=laureate_condition,
                                         rules=rules,
@@ -107,6 +102,22 @@ def base_olympiad_create():
         {
             'base_contest_id': base_contest.base_contest_id
         }, 200)
+
+
+@module.route('/base_olympiad/<int:id_base_olympiad>/upload_certificate', methods=['POST'])
+@jwt_required_role(['Admin', 'System', 'Creator'])
+def base_olympiad_upload(id_base_olympiad):
+    certificate_template = request.files['certificate_template'].stream.read()
+
+    try:
+        base_contest = db_get_or_raise(BaseContest, "base_contest_id", id_base_olympiad)
+        base_contest.certificate_template = certificate_template
+        db.session.commit()
+    except Exception:
+        db.session.rollback()
+        raise
+    return make_response(
+        {}, 200)
 
 
 @module.route('/base_olympiad/<int:id_base_olympiad>/remove', methods=['POST'])
@@ -134,7 +145,7 @@ def base_olympiad_get(id_base_olympiad):
 @jwt_required_role(['Admin', 'System', 'Creator'])
 def base_olympiad_patch(id_base_olympiad):
     base_contest = db_get_or_raise(BaseContest, "base_contest_id", id_base_olympiad)
-    values = {**json.loads(request.form['params']), 'certificate_template': request.files['certificate_template'].stream.read()}
+    values = request.openapi.body
 
     try:
         db_get_or_raise(OlympiadType, "olympiad_type_id", values["olympiad_type_id"])
@@ -329,7 +340,7 @@ def stage_get(id_olympiad, id_stage):
     stage = db_get_or_raise(Stage, "stage_id", str(id_stage))
 
     return make_response(
-            stage.serialize(), 200)
+        stage.serialize(), 200)
 
 
 @module.route('/olympiad/<int:id_olympiad>/stage/<int:id_stage>',
@@ -356,9 +367,9 @@ def stages_all(id_olympiad):
     contest = db_get_or_raise(CompositeContest, "contest_id", str(id_olympiad))
     all_stages = [stage.serialize() for stage in contest.stages]
     return make_response(
-            {
-                "stages_list": all_stages
-            }, 200)
+        {
+            "stages_list": all_stages
+        }, 200)
 
 
 # Contest views
@@ -508,7 +519,7 @@ def contests_all(id_olympiad, id_stage):
     stage = db_get_or_raise(Stage, "stage_id", str(id_stage))
     all_contests = [contest.serialize() for contest in stage.contests]
     return make_response(
-            {"olympiad_list": all_contests}, 200)
+        {"olympiad_list": all_contests}, 200)
 
 
 # Variant views
@@ -586,10 +597,10 @@ def variant_get(id_olympiad, id_stage, id_contest, variant_num):
     variant = contest.variants.filter_by(**{"variant_number": str(variant_num)}).one_or_none()
 
     if variant is None:
-            raise NotFound("variant_number", str(variant_num))
+        raise NotFound("variant_number", str(variant_num))
 
     return make_response(
-            variant.serialize(), 200)
+        variant.serialize(), 200)
 
 
 @module.route(
@@ -626,9 +637,9 @@ def variant_all(id_olympiad, id_stage, id_contest):
     contest = db_get_or_raise(Contest, "contest_id", id_contest)
     all_variants = [variant.serialize() for variant in contest.variants.all()]
     return make_response(
-            {
-                "variants_list": all_variants
-            }, 200)
+        {
+            "variants_list": all_variants
+        }, 200)
 
 
 # Task views
@@ -772,7 +783,7 @@ def task_get(id_olympiad, id_stage, id_contest, id_variant, id_task):
     task = db_get_or_raise(Task, "task_id", str(id_task))
 
     return make_response(
-            task.serialize(), 200)
+        task.serialize(), 200)
 
 
 def check_existence(id_olympiad, id_stage, id_contest, id_variant):
@@ -858,9 +869,9 @@ def task_all(id_olympiad, id_stage, id_contest, id_variant):
     variant = db_get_or_raise(Variant, "variant_id", str(id_variant))
     all_tasks = [task.serialize() for task in variant.tasks]
     return make_response(
-            {
-                "tasks_list": all_tasks
-            }, 200)
+        {
+            "tasks_list": all_tasks
+        }, 200)
 
 
 @module.route(
@@ -873,10 +884,10 @@ def task_image(id_olympiad, id_stage, id_contest, id_variant, id_task):
     task = db_get_or_raise(Task, "task_id", str(id_task))
 
     return make_response(
-            {
-                "task_id": task.task_id,
-                "image_of_task": task.image_of_task
-            }, 200)
+        {
+            "task_id": task.task_id,
+            "image_of_task": task.image_of_task
+        }, 200)
 
 
 # User views
@@ -959,9 +970,9 @@ def users_all(id_olympiad, id_stage, id_contest):
     contest = db_get_or_raise(Contest, "contest_id", id_contest)
     all_users = [u.serialize() for u in contest.users.all()]
     return make_response(
-            {
-                "user_list": all_users
-            }, 200)
+        {
+            "user_list": all_users
+        }, 200)
 
 
 @module.route(
@@ -974,10 +985,10 @@ def users_certificate(id_olympiad, id_stage, id_contest, id_user):
     db_get_or_raise(Stage, "stage_id", str(id_stage))
     contest = db_get_or_raise(Contest, "contest_id", str(id_contest))
     contest.users.filter_by(**{"user_id": str(id_user)}).one_or_none()
-        # contest = db_get_or_raise(Contest, Contest.contest_id, id_contest)
-        # user = db_get_or_raise(UserInContest, UserInContest.user_id, id_user)
+    # contest = db_get_or_raise(Contest, Contest.contest_id, id_contest)
+    # user = db_get_or_raise(UserInContest, UserInContest.user_id, id_user)
 
-        # certificate = None
+    # certificate = None
 
     abort(502)
 
@@ -985,4 +996,3 @@ def users_certificate(id_olympiad, id_stage, id_contest, id_user):
             {
                 "certificate": certificate
             }, 200)"""
-

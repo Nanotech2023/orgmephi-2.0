@@ -127,18 +127,9 @@ paths:
       summary: Create a new base olympiad (main contest)
       requestBody:
         content:
-          multipart/form-data:
+          application/json:
             schema:
-              type: object
-              properties:
-                certificate_template:
-                  type: string
-                  format: binary
-                params:
-                  $ref: '#/components/schemas/createBaseContest'
-            encoding:
-              params:
-                contentType: application/json
+              $ref: '#/components/schemas/createBaseContest'
       security:
         - cookieJWTAuth: [ ]
         - CSRFToken: [ ]
@@ -149,6 +140,44 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/commonBaseContestId'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+        '404':
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+
+  /base_olympiad/{id_base_olympiad}/upload_certificate:
+    post:
+      summary: Upload certificate for contest
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                certificate_template:
+                  type: string
+                  format: binary
+      security:
+        - cookieJWTAuth: [ ]
+        - CSRFToken: [ ]
+      parameters:
+        - in: path
+          description: Id of the olympiad
+          name: id_base_olympiad
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: OK
         '400':
           description: Bad request
           content:
@@ -254,18 +283,9 @@ paths:
             type: integer
       requestBody:
         content:
-          multipart/form-data:
+          application/json:
             schema:
-              type: object
-              properties:
-                certificate_template:
-                  type: string
-                  format: binary
-                params:
-                  $ref: '#/components/schemas/baseContestInfoUpdate'
-            encoding:
-              params:
-                contentType: application/json
+              $ref: '#/components/schemas/baseContestInfoUpdate'
       responses:
         '200':
           description: OK
@@ -2014,7 +2034,6 @@ components:
                   enum: [ "5", "6", "7", "8", "9", "10", "11", "student" ]
     createBaseContest:
       title: Create base contest
-      type: object
       description: Request to base contest creation
       required:
         - name
@@ -2101,7 +2120,6 @@ components:
     baseContestInfoUpdate:
       title: Edit contest base common info
       description: Request to creation base contest
-      type: object
       properties:
         name:
           type: string
