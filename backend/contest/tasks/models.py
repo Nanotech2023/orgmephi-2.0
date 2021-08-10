@@ -125,8 +125,8 @@ class BaseContest(db.Model):
     winning_condition = db.Column(db.Float, nullable=False)
     laureate_condition = db.Column(db.Float, nullable=False)
 
-    target_classes = db.relationship('TargetClass', lazy='select',
-                                     backref=db.backref('base_contest', lazy='joined'), cascade="all, delete-orphan")
+    target_classes = db.Column(db.PickleType)
+
     child_contests = db.relationship('Contest', lazy='select',
                                      backref=db.backref('base_contest', lazy='joined'), cascade="all, delete-orphan")
 
@@ -141,7 +141,7 @@ class BaseContest(db.Model):
                 'subject': self.subject.value,
                 'winning_condition': self.winning_condition,
                 'laureate_condition': self.laureate_condition,
-                'target_classes': [target.target_class.value for target in self.target_classes],
+                'target_classes': [target for target in self.target_classes],
             }
 
     def update(self, name=None, certificate_template=None,
@@ -167,30 +167,6 @@ class BaseContest(db.Model):
             self.olympiad_type_id = olympiad_type_id
         if subject is not None:
             self.subject = subject
-
-
-class TargetClass(db.Model):
-    """
-    Table describing a Target class of olympiad.
-    """
-
-    __tablename__ = 'target_class'
-
-    contest_id = db.Column(db.Integer, db.ForeignKey('base_contest.base_contest_id'), primary_key=True)
-    target_class = db.Column(db.Enum(TargetClassEnum), primary_key=True)
-
-    def serialize(self):
-        return {'contest_id': self.contest_id,
-                'target_class': self.target_class.value}
-
-
-def add_target_class(db_session, contest_id, target_class_):
-    target_class = TargetClass(
-        contest_id=contest_id,
-        target_class=target_class_
-    )
-    db_session.add(target_class)
-    return target_class
 
 
 class ContestTypeEnum(enum.Enum):
@@ -388,7 +364,7 @@ class Stage(db.Model):
     stage_id: id of the stage
     olympiad_id: id of olympiad
     stage_name: name of the stage
-    next_stage_condition: condition to pass to the next stage
+    this_stage_condition: condition to pass to the next stage
     """
 
     __tablename__ = 'stage'
@@ -398,7 +374,7 @@ class Stage(db.Model):
     stage_name = db.Column(db.Text, index=True, nullable=False)
     stage_num = db.Column(db.Integer, nullable=False)
     condition = db.Column(db.Enum(StageConditionEnum), nullable=True)
-    next_stage_condition = db.Column(db.Text, nullable=False)
+    this_stage_condition = db.Column(db.Text, nullable=False)
 
     contests = db.relationship('Contest', secondary=contestsInStage, lazy='subquery',
                                backref=db.backref('stage', lazy=True))
@@ -411,26 +387,26 @@ class Stage(db.Model):
                 'stage_name': self.stage_name,
                 'condition': self.condition.value,
                 'stage_num': self.stage_num,
-                'next_stage_condition': self.next_stage_condition,
+                'this_stage_condition': self.this_stage_condition,
             }
 
-    def update(self, stage_name=None, stage_num=None, condition=None, next_stage_condition=None):
+    def update(self, stage_name=None, stage_num=None, condition=None, this_stage_condition=None):
         if stage_name is not None:
             self.stage_name = stage_name
-        if next_stage_condition is not None:
-            self.next_stage_condition = next_stage_condition
+        if this_stage_condition is not None:
+            self.this_stage_condition = this_stage_condition
         if stage_num is not None:
             self.stage_num = stage_num
         if condition is not None:
             self.condition = condition
 
 
-def add_stage(db_session, stage_name, condition, stage_num, next_stage_condition, olympiad_id=None):
+def add_stage(db_session, stage_name, condition, stage_num, this_stage_condition, olympiad_id=None):
     stage = Stage(
         stage_name=stage_name,
         stage_num=stage_num,
         condition=condition,
-        next_stage_condition=next_stage_condition,
+        this_stage_condition=this_stage_condition,
         olympiad_id=olympiad_id,
     )
     db_session.add(stage)
@@ -686,9 +662,8 @@ class MultipleChoiceTask(Task):
     __tablename__ = 'multiple_task'
 
     task_id = db.Column(db.Integer, db.ForeignKey('base_task.task_id'), primary_key=True)
-    all_answers_in_multiple_task = db.relationship('AnswersInMultipleChoiceTask', lazy='select',
-                                                   backref=db.backref('multiple_task', lazy='joined'),
-                                                   cascade="all, delete-orphan")
+
+    answers = db.Column(db.PickleType)
 
     __mapper_args__ = {
         'polymorphic_identity': TaskTypeEnum.MultipleChoiceTask,
@@ -699,7 +674,10 @@ class MultipleChoiceTask(Task):
             {
                 'task_id': self.task_id,
                 'num_of_task': self.num_of_task,
-                'all_answers_in_multiple_task': [answer.serialize() for answer in self.all_answers_in_multiple_task],
+                'answers': [{
+                    'answer': answer[0],
+                    'correct': answer[1]}
+                    for answer in self.answers],
             }
 
     def update(self, num_of_task=None, image_of_task=None):
@@ -707,44 +685,3 @@ class MultipleChoiceTask(Task):
             self.num_of_task = num_of_task
         if image_of_task is not None:
             self.image_of_task = image_of_task
-
-
-def add_answer_to_multiple_task(db_session, task_id, answer, correct):
-    answers_in_multiple_choice_task = AnswersInMultipleChoiceTask(
-        task_id=task_id,
-        answer=answer,
-        correct=correct
-    )
-    db_session.add(answers_in_multiple_choice_task)
-
-
-class AnswersInMultipleChoiceTask(db.Model):
-    """
-    Class describing a Multiple answers for the task model.
-
-    answer_id: id of answer
-    task_id: id of the task
-    answer: possible answer
-    correct: is answer correct
-    """
-
-    __tablename__ = 'answers_in_multiple_task'
-
-    answer_id = db.Column(db.Integer, autoincrement=True, primary_key=True)
-    task_id = db.Column(db.Integer, db.ForeignKey('multiple_task.task_id'), nullable=False)
-    answer = db.Column(db.Text, nullable=False)
-    correct = db.Column(db.Boolean, nullable=False)
-
-    def serialize(self):
-        return \
-            {
-                'answer_id': self.answer_id,
-                'answer': self.answer,
-                'correct': self.correct
-            }
-
-    def update(self, answer=None, correct=None):
-        if answer is not None:
-            self.answer = answer
-        if correct is not None:
-            self.correct = correct

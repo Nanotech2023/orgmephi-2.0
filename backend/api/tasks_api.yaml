@@ -2110,7 +2110,7 @@ components:
       required:
         - stage_name
         - stage_num
-        - next_stage_condition
+        - this_stage_condition
         - condition
       properties:
         condition:
@@ -2121,7 +2121,7 @@ components:
           type: string
         stage_num:
           type: integer
-        next_stage_condition:
+        this_stage_condition:
           type: string
     stageInfo:
       title: Stage common info
@@ -2130,7 +2130,7 @@ components:
         - stage_id
         - stage_name
         - stage_num
-        - next_stage_condition
+        - this_stage_condition
         - condition
       properties:
         condition:
@@ -2143,7 +2143,7 @@ components:
           type: string
         stage_num:
           type: integer
-        next_stage_condition:
+        this_stage_condition:
           type: string
     stageInfoId:
       title: Stage id
@@ -2165,7 +2165,7 @@ components:
           type: string
         stage_num:
           type: integer
-        next_stage_condition:
+        this_stage_condition:
           type: string
 
     addPreviousForSimpleContest:
@@ -2351,7 +2351,7 @@ components:
                 type: string
               stage_num:
                 type: integer
-              next_stage_condition:
+              this_stage_condition:
                 type: string
     tasksInVariant:
       title: Get contests in stage
@@ -2378,7 +2378,7 @@ components:
                 format: float
                 example:
                   2.0
-              all_answers_in_multiple_task:
+              answers:
                 type: array
                 items:
                   type: object
@@ -2549,13 +2549,13 @@ components:
       required:
         - task_id
         - num_of_task
-        - all_answers_in_multiple_task
+        - answers
       properties:
         task_id:
           type: integer
         num_of_task:
           type: integer
-        all_answers_in_multiple_task:
+        answers:
           type: array
           items:
             type: object
