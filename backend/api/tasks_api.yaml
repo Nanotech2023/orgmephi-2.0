@@ -129,8 +129,16 @@ paths:
         content:
           multipart/form-data:
             schema:
-              $ref: '#/components/schemas/createBaseContest'
-
+              type: object
+              properties:
+                certificate_template:
+                  type: string
+                  format: binary
+                params:
+                  $ref: '#/components/schemas/createBaseContest'
+            encoding:
+              params:
+                contentType: application/json
       security:
         - cookieJWTAuth: [ ]
         - CSRFToken: [ ]
@@ -248,7 +256,16 @@ paths:
         content:
           multipart/form-data:
             schema:
-              $ref: '#/components/schemas/baseContestInfoUpdate'
+              type: object
+              properties:
+                certificate_template:
+                  type: string
+                  format: binary
+                params:
+                  $ref: '#/components/schemas/baseContestInfoUpdate'
+            encoding:
+              params:
+                contentType: application/json
       responses:
         '200':
           description: OK
@@ -267,50 +284,52 @@ paths:
 
   # Olympiad
 
-  /base_olympiad/{id_base_olympiad}/olympiad/createsimple:
-    post:
-      summary: Create a new simple olympiad (main contest)
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/createSimpleContest'
-      parameters:
-        - in: path
-          description: Id of the base olympiad
-          name: id_base_olympiad
-          required: true
-          schema:
-            type: integer
-      security:
-        - cookieJWTAuth: [ ]
-        - CSRFToken: [ ]
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/commonContestId'
-        '400':
-          description: Bad request
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errorResponse'
-        '404':
-          description: Not found
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errorResponse'
-        '409':
-          description: Wrong data
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errorResponse'
+  #/base_olympiad/{id_base_olympiad}/olympiad/createsimple:
+  #  post:
+  #    summary: Create a new simple olympiad (main contest)
+  #    requestBody:
+  #      required: true
+  #      content:
+  #        application/json:
+  #          schema:
+  #            $ref: '#/components/schemas/createSimpleContest'
+  #    parameters:
+  #      - in: path
+  #        description: Id of the base olympiad
+  #        name: id_base_olympiad
+  #        required: true
+  #        schema:
+  #          type: integer
+  #    security:
+  #      - cookieJWTAuth: [ ]
+  #      - CSRFToken: [ ]
+  #    responses:
+  #      '200':
+  #        description: OK
+  #        content:
+  #          application/json:
+  #            schema:
+  #              $ref: '#/components/schemas/commonContestId'
+  #      '400':
+  #        description: Bad request
+  #        content:
+  #          application/json:
+  #            schema:
+  #              $ref: '#/components/schemas/errorResponse'
+  #      '404':
+  #        description: Not found
+  #        content:
+  #          application/json:
+  #            schema:
+  #              $ref: '#/components/schemas/errorResponse'
+  #      '409':
+  #        description: Wrong data
+  #        content:
+  #          application/json:
+  #            schema:
+  #              $ref: '#/components/schemas/errorResponse'
+
+
   /base_olympiad/{id_base_olympiad}/olympiad/createcomposite:
     post:
       summary: Create a new composite olympiad (main contest)
@@ -1995,8 +2014,8 @@ components:
                   enum: [ "5", "6", "7", "8", "9", "10", "11", "student" ]
     createBaseContest:
       title: Create base contest
-      description: Request to base contest creation
       type: object
+      description: Request to base contest creation
       required:
         - name
         - description
@@ -2023,11 +2042,6 @@ components:
           format: float
           example:
             0.5
-        certificate_template:
-          type: string
-          format: binary
-          example:
-            000
         olympiad_type_id:
           type: integer
         subject:
@@ -2101,10 +2115,6 @@ components:
         laureate_condition:
           type: number
           format: float
-        certificate_template:
-          type: string
-          format: binary
-          nullable: true
         olympiad_type_id:
           type: integer
         subject:

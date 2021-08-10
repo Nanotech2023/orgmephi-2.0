@@ -66,11 +66,12 @@ def olympiad_type_all():
 
 # Olympiad views
 
+import json
 
 @module.route('/base_olympiad/create', methods=['POST'])
 @jwt_required_role(['Admin', 'System', 'Creator'])
 def base_olympiad_create():
-    values = request.form
+    values = json.loads(request.form['params'])
     files = request.files
 
     name = values['name']
@@ -82,7 +83,7 @@ def base_olympiad_create():
     winning_condition = values['winning_condition']
     laureate_condition = values['laureate_condition']
     subject = values['subject']
-    target_classes = set(values['target_classes'].split(','))
+    target_classes = set(values['target_classes'])
 
     try:
         db_get_or_raise(OlympiadType, "olympiad_type_id", values["olympiad_type_id"])
@@ -133,19 +134,15 @@ def base_olympiad_get(id_base_olympiad):
 @jwt_required_role(['Admin', 'System', 'Creator'])
 def base_olympiad_patch(id_base_olympiad):
     base_contest = db_get_or_raise(BaseContest, "base_contest_id", id_base_olympiad)
-    values = {**request.form, 'certificate_template': request.files['certificate_template'].stream.read()}
+    values = {**json.loads(request.form['params']), 'certificate_template': request.files['certificate_template'].stream.read()}
 
     try:
         db_get_or_raise(OlympiadType, "olympiad_type_id", values["olympiad_type_id"])
-        target_classes = set(str(values['target_classes']).split(','))
+        target_classes = set(values['target_classes'])
         del values["target_classes"]
         base_contest.update(**values)
         if target_classes is not None:
-            classes = [TargetClass(
-                contest_id=id_base_olympiad,
-                target_class=olympiad_target_class_dict[target_class]
-            ) for target_class in target_classes]
-            base_contest.target_classes = classes
+            base_contest.target_classes = target_classes
 
         db.session.commit()
     except Exception:
