@@ -1,8 +1,8 @@
 import { Component, ElementRef, OnInit, ViewChild } from '@angular/core'
-import { AuthServiceMock } from '@/auth/api/auth.service.mock'
 import { ResponseUserAll } from '@/auth/api/models'
 import { Observable } from 'rxjs'
 import { fixedHeight } from '@/shared/consts'
+import { AuthService } from '@/auth/api/auth.service'
 
 
 @Component( {
@@ -25,11 +25,11 @@ export class ManageUsersComponent implements OnInit
         { field: 'username', sortable: true, filter: true, headerName: 'Имя пользовтаеля' },
         { field: 'role', sortable: true, filter: true, headerName: 'Роль' },
         { field: 'type', sortable: true, filter: true, headerName: 'Тип регистрации' },
-        { headerName: 'Действия', cellRenderer: 'btnCellRenderer' }
+        { headerName: 'Действия' }
     ]
     modalVisible: boolean = false
 
-    constructor( private service: AuthServiceMock ) { }
+    constructor( private service: AuthService ) { }
 
     ngOnInit(): void
     {

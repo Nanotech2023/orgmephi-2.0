@@ -16,13 +16,17 @@
         </ul>
         <div class="actions">
             <div class="button_container">
+                <div class="button_logout">
+                    <a routerLink="/admin">Admin</a>
+                </div>
+            </div>
+            <div class="button_container">
                 <div class="user-info" *ngIf="userInfo | async as userInfo">
                     {{ userInfo.username }}
                 </div>
             </div>
             <div class="button_container">
-                <a class="button_logout" routerLink="/logout"
-                   routerLinkActive="active">Выход</a>
+                <a class="button_logout" routerLink="/logout" routerLinkActive="active">Выход</a>
             </div>
         </div>
     </nav>

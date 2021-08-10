@@ -12,6 +12,8 @@ import { AppComponent } from '@/app.component'
 import { UsersModule } from '@/users/users.module';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations'
 import { AdminModule } from '@/admin/admin.module'
+import { AuthService } from '@/auth/api/auth.service'
+import { AuthServiceReal } from '@/auth/api/auth.service.real'
 
 
 @NgModule( {
@@ -31,7 +33,9 @@ import { AdminModule } from '@/admin/admin.module'
         environment.production ? [] : StoreDevtoolsModule.instrument(),
         BrowserAnimationsModule
     ],
-    providers: [],
+    providers: [
+        { provide: AuthService, useClass: AuthServiceReal }
+    ],
     bootstrap: [ AppComponent ]
 } )
 export class AppModule {}

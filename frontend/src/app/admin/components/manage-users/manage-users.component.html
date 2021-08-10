@@ -56,7 +56,7 @@
          *ngIf="users$ | async as users" [style]="{'min-height': minContainerHeight - 86 + 'px'}">
         <ag-grid-angular
             pagination="true"
-            [style]="{'height': minContainerHeight - 120 + 'px'}"
+            [style]="{'height': minContainerHeight + 'px'}"
             id="table-users"
             [rowData]="users.users"
             [columnDefs]="columnDefs">
