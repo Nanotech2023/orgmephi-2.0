@@ -83,10 +83,10 @@ def base_olympiad_create():
     winning_condition = values['winning_condition']
     laureate_condition = values['laureate_condition']
     subject = values['subject']
-    target_classes = set(values['target_classes'])
-    target_classes.remove(',')
+    target_classes = set(values['target_classes'].split(','))
 
     try:
+        db_get_or_raise(OlympiadType, "olympiad_type_id", values["olympiad_type_id"])
         base_contest = add_base_contest(db.session,
                                         description=description,
                                         name=name,
@@ -139,8 +139,8 @@ def base_olympiad_patch(id_base_olympiad):
     values = {**request.form, 'certificate_template': request.files['certificate_template'].stream.read()}
 
     try:
-        target_classes = set(values["target_classes"])
-        target_classes.remove(',')
+        db_get_or_raise(OlympiadType, "olympiad_type_id", values["olympiad_type_id"])
+        target_classes = set(str(values['target_classes']).split(','))
         del values["target_classes"]
         base_contest.update(**values)
         if target_classes is not None:

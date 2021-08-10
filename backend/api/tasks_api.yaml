@@ -147,6 +147,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/errorResponse'
+        '404':
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
   /base_olympiad/all:
     get:
       summary: list of base olympiads (main contests)
