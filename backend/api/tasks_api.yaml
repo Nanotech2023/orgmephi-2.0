@@ -299,6 +299,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/errorResponse'
+        '404':
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
   /base_olympiad/{id_base_olympiad}/olympiad/createcomposite:
     post:
       summary: Create a new composite olympiad (main contest)
@@ -327,6 +333,12 @@ paths:
                 $ref: '#/components/schemas/commonContestId'
         '400':
           description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+        '404':
+          description: Not found
           content:
             application/json:
               schema:
@@ -2228,6 +2240,11 @@ components:
           type: integer
         visibility:
           type: boolean
+        previous_contest_id:
+          type: integer
+        previous_participation_condition:
+          type: string
+          enum: [ "Participant", "Laureate", "Winner" ]
     commonContestId:
       title: Contest id
       description: Request to get contest id as response for creation
@@ -2395,6 +2412,11 @@ components:
                 type: string
                 nullable: true
                 enum: [ "SimpleContest", "CompositeContest"]
+              previous_contest_id:
+                type: integer
+              previous_participation_condition:
+                type: string
+                enum: [ "Participant", "Laureate", "Winner" ]
     variantsInContest:
       title: Get variants in contest
       description: Request to get variants in contest

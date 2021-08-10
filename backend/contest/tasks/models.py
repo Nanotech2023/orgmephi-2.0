@@ -283,15 +283,28 @@ class SimpleContest(Contest):
             self.previous_participation_condition = previous_participation_condition
 
     def serialize(self):
-        return \
-            {
-                'contest_id': self.contest_id,
-                'visibility': self.visibility,
-                'composite_type': self.composite_type.value,
-                'start_date': self.start_date.isoformat(),
-                'end_date': self.end_date.isoformat(),
-                'location': self.location,
-            }
+        if (self.previous_contest_id is not None) and (self.previous_participation_condition is not None):
+            return \
+                {
+                    'contest_id': self.contest_id,
+                    'visibility': self.visibility,
+                    'composite_type': self.composite_type.value,
+                    'start_date': self.start_date.isoformat(),
+                    'end_date': self.end_date.isoformat(),
+                    'location': self.location,
+                    'previous_contest_id': self.previous_contest_id,
+                    'previous_participation_condition': self.previous_participation_condition.value,
+                }
+        else:
+            return \
+                {
+                    'contest_id': self.contest_id,
+                    'visibility': self.visibility,
+                    'composite_type': self.composite_type.value,
+                    'start_date': self.start_date.isoformat(),
+                    'end_date': self.end_date.isoformat(),
+                    'location': self.location,
+                }
 
     def update(self, start_date=None, end_date=None, previous_contest_id=None,
                previous_participation_condition=None, visibility=None, composite_type=None, location=None):
