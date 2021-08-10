@@ -17,7 +17,7 @@ module = get_current_module()
 
 
 @module.route('/olympiad_type/create', methods=['POST'])
-@jwt_required_role(['Admin', 'System', 'Creator'])
+@jwt_required_role(['Admin'])
 def olympiad_type_create():
     values = request.openapi.body
 
@@ -37,7 +37,7 @@ def olympiad_type_create():
 
 
 @module.route('/olympiad_type/<int:id_olympiad_type>/remove', methods=['POST'])
-@jwt_required_role(['Admin', 'System', 'Creator'])
+@jwt_required_role(['Admin'])
 def olympiad_type_remove(id_olympiad_type):
     try:
         olympiad = db_get_or_raise(OlympiadType, "olympiad_type_id", str(id_olympiad_type))
@@ -50,14 +50,13 @@ def olympiad_type_remove(id_olympiad_type):
 
 
 @module.route('/olympiad_type/<int:id_olympiad_type>', methods=['GET'])
-@jwt_required_role(['Admin', 'System', 'Creator'])
 def olympiad_type_get(id_olympiad_type):
     olympiad = db_get_or_raise(OlympiadType, "olympiad_type_id", str(id_olympiad_type))
     return make_response(olympiad.serialize(), 200)
 
 
 @module.route('/olympiad_type/all', methods=['GET'])
-@jwt_required_role(['Admin', 'System', 'Creator'])
+@jwt_required_role(['Admin', 'System', 'Creator', 'Participant'])
 def olympiad_type_all():
     olympiad_types = db_get_all(OlympiadType)
     all_olympiad_types = [olympiad_type.serialize() for olympiad_type in olympiad_types]
@@ -289,6 +288,8 @@ def stage_create(id_olympiad):
 
     try:
         contest = db_get_or_raise(Contest, "contest_id", str(id_olympiad))
+        if contest.composite_type == ContestTypeEnum.SimpleContest:
+            raise InsufficientData('contest.composite_type', 'not composite')
         stage = add_stage(db.session,
                           stage_name=stage_name,
                           stage_num=stage_num,
@@ -324,26 +325,31 @@ def stage_remove(id_olympiad, id_stage):
 
 
 @module.route('/olympiad/<int:id_olympiad>/stage/<int:id_stage>',
-              methods=['GET', 'PATCH'])
-@jwt_required_role(['Admin', 'System', 'Creator'])
-def stage_response(id_olympiad, id_stage):
+              methods=['GET'])
+@jwt_required_role(['Admin', 'System', 'Creator', 'Participant'])
+def stage_get(id_olympiad, id_stage):
+    db_get_or_raise(Contest, "contest_id", str(id_olympiad))
     stage = db_get_or_raise(Stage, "stage_id", str(id_stage))
 
-    if request.method == 'GET':
-        return make_response(
+    return make_response(
             stage.serialize(), 200)
 
-    elif request.method == 'PATCH':
-        try:
-            db_get_or_raise(Contest, "contest_id", str(id_olympiad))
-            values = request.openapi.body
-            stage.update(**values)
-            db.session.commit()
-        except Exception:
-            db.session.rollback()
-            raise
 
-        return make_response(stage.serialize(), 200)
+@module.route('/olympiad/<int:id_olympiad>/stage/<int:id_stage>',
+              methods=['PATCH'])
+@jwt_required_role(['Admin', 'System', 'Creator'])
+def stage_patch(id_olympiad, id_stage):
+    stage = db_get_or_raise(Stage, "stage_id", str(id_stage))
+    try:
+        db_get_or_raise(Contest, "contest_id", str(id_olympiad))
+        values = request.openapi.body
+        stage.update(**values)
+        db.session.commit()
+    except Exception:
+        db.session.rollback()
+        raise
+
+    return make_response(stage.serialize(), 200)
 
 
 @module.route('/olympiad/<int:id_olympiad>/stage/all', methods=['GET'])
@@ -374,6 +380,9 @@ def contest_create_simple(id_olympiad, id_stage):
     previous_participation_condition = values.get('previous_participation_condition', None)
 
     try:
+        if (previous_participation_condition is None and previous_contest_id is not None) or \
+                (previous_participation_condition is not None and previous_contest_id is None):
+            raise InsufficientData("previous contest", "id or condition")
         db_get_or_raise(Contest, "contest_id", str(id_olympiad))
         contest = add_simple_contest(db.session,
                                      visibility=visibility,

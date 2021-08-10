@@ -305,6 +305,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/errorResponse'
+        '409':
+          description: Wrong data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
   /base_olympiad/{id_base_olympiad}/olympiad/createcomposite:
     post:
       summary: Create a new composite olympiad (main contest)
@@ -511,6 +517,12 @@ paths:
                 $ref: '#/components/schemas/stageInfoId'
         '400':
           description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+        '409':
+          description: Wrong value
           content:
             application/json:
               schema:

@@ -61,7 +61,7 @@ class OlympiadType(db.Model):
     __tablename__ = 'olympiad_type'
 
     olympiad_type_id = db.Column(db.Integer, autoincrement=True, primary_key=True)
-    olympiad_type = db.Column(db.Text, nullable=False)
+    olympiad_type = db.Column(db.Text, nullable=False, unique=True)
 
     contests = db.relationship('BaseContest', lazy='select',
                                backref=db.backref('olympiad_type', lazy='joined'))
