@@ -5,7 +5,7 @@ from common.errors import AlreadyExists
 from common import get_current_app, get_current_module, get_current_db
 from common.util import db_get_all
 
-from user.models import user_types, add_user, UserRoleEnum, UserTypeEnum, add_personal_info, create_university_info, \
+from user.models import user_types, add_user, UserRoleEnum, UserTypeEnum, create_personal_info, create_university_info,\
     University, Country
 
 db = get_current_db()
@@ -33,13 +33,13 @@ def register():
 
     try:
         user = add_user(db.session, username, password_hash, UserRoleEnum.participant, reg_type)
-        add_personal_info(db.session, user, username, user_data['first_name'], user_data['second_name'],
-                          user_data['middle_name'], user_data['date_of_birth'])
+        user.user_info = create_personal_info(username, user_data['first_name'], user_data['second_name'],
+                                              user_data['middle_name'], user_data['date_of_birth'])
 
         if reg_type == UserTypeEnum.university:
             student_data = values['student_info']
-            user.student_info = create_university_info(db.session, student_data['phone_number'],
-                                                       student_data['university'], grade_to_year(student_data['grade']),
+            user.student_info = create_university_info(student_data['phone_number'], student_data['university'],
+                                                       grade_to_year(student_data['grade']),
                                                        student_data['university_country'], student_data['citizenship'],
                                                        student_data['region'], student_data['city'])
 
