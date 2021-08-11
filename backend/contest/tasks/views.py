@@ -110,7 +110,7 @@ def base_olympiad_create():
 @module.route('/base_olympiad/<int:id_base_olympiad>/upload_certificate', methods=['POST'])
 @jwt_required_role(['Admin', 'System', 'Creator'])
 def base_olympiad_upload(id_base_olympiad):
-    certificate_template = request.files['certificate_template'].stream.read()
+    certificate_template = request.data
 
     try:
         base_contest = db_get_or_raise(BaseContest, "base_contest_id", id_base_olympiad)
@@ -596,7 +596,7 @@ def variant_remove(id_olympiad, id_stage, id_contest, id_variant):
     '/olympiad/<int:id_olympiad>/stage/<int:id_stage>/contest/<int:id_contest'
     '>/variant/<int:variant_num>',
     methods=['GET'])
-@jwt_required_role(['Admin', 'System', 'Creator', 'Participant'])
+@jwt_required_role(['Admin', 'System', 'Creator'])
 def variant_get(id_olympiad, id_stage, id_contest, variant_num):
     db_get_or_raise(Contest, "contest_id", str(id_olympiad))
     db_get_or_raise(Stage, "stage_id", str(id_stage))
@@ -784,7 +784,7 @@ def task_remove(id_olympiad, id_stage, id_contest, id_variant, id_task):
     '/olympiad/<int:id_olympiad>/stage/<int:id_stage>/contest/<int:id_contest'
     '>/variant/<int:id_variant>/task/<int:id_task>',
     methods=['GET'])
-@jwt_required_role(['Admin', 'System', 'Creator', 'Participant'])
+@jwt_required_role(['Admin', 'System', 'Creator'])
 def task_get(id_olympiad, id_stage, id_contest, id_variant, id_task):
     check_existence(id_olympiad, id_stage, id_contest, id_variant)
     task = db_get_or_raise(Task, "task_id", str(id_task))
@@ -870,7 +870,7 @@ def task_patch_multiple(id_olympiad, id_stage, id_contest, id_variant, id_task):
     '/olympiad/<int:id_olympiad>/stage/<int:id_stage>/contest/<int:id_contest'
     '>/variant/<int:id_variant>/task/all',
     methods=['GET'])
-@jwt_required_role(['Admin', 'System', 'Creator', 'Participant'])
+@jwt_required_role(['Admin', 'System', 'Creator'])
 def task_all(id_olympiad, id_stage, id_contest, id_variant):
     check_existence(id_olympiad, id_stage, id_contest, id_variant)
     variant = db_get_or_raise(Variant, "variant_id", str(id_variant))
@@ -885,7 +885,7 @@ def task_all(id_olympiad, id_stage, id_contest, id_variant):
     '/olympiad/<int:id_olympiad>/stage/<int:id_stage>/contest/<int:id_contest'
     '>/variant/<int:id_variant>/tasks/<int:id_task>/taskimage',
     methods=['GET'])
-@jwt_required_role(['Admin', 'System', 'Creator', 'Participant'])
+@jwt_required_role(['Admin', 'System', 'Creator'])
 def task_image(id_olympiad, id_stage, id_contest, id_variant, id_task):
     check_existence(id_olympiad, id_stage, id_contest, id_variant)
     task = db_get_or_raise(Task, "task_id", str(id_task))

@@ -170,9 +170,8 @@ paths:
       summary: Upload certificate for contest
       requestBody:
         content:
-          multipart/form-data:
+          application/octet-stream:
             schema:
-              type: object
               properties:
                 certificate_template:
                   type: string
