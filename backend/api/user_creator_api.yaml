@@ -5,14 +5,12 @@ info:
   version: 1.0.0
 servers:
   - url: http://127.0.0.1:5000
-  - url: http://127.0.0.1:5000/user
+  - url: http://127.0.0.1:5000/user/creator
 
 paths:
   ######################################################################################################################
   ##                                             Path definition                                                      ##
   ######################################################################################################################
-
-  # User info
 
   /user/{user_id}:
     get:
@@ -97,10 +95,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/errorResponse'
-
-  # Personal info
-
-  /user/{user_id}/personal:
+  /personal/{user_id}:
     get:
       summary: Get personal info for a different user
       description: Get personal info about any user by its id, only for admins and creators
@@ -132,10 +127,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/errorResponse'
-
-  # University info
-
-  /user/{user_id}/university:
+  /university/{user_id}:
     get:
       summary: Get university student info for a different user
       description: Get university student info about any user by its id, only for admins and creators
@@ -167,9 +159,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/errorResponse'
-
-  # Groups
-
   /group/{group_id}:
     get:
       summary: Get any group
@@ -221,10 +210,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/errorResponse'
-
-  # User group management
-
-  /user/{user_id}/groups:
+  /membership/{user_id}:
     get:
       summary: Get groups for a different user
       description: Get group list for any user by its id, only for admins and creators
