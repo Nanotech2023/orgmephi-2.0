@@ -3,7 +3,6 @@
 from datetime import datetime
 import enum
 from common import get_current_db
-from common.util import db_get_or_raise
 
 db = get_current_db()
 
@@ -90,6 +89,12 @@ def add_base_contest(db_session, name, laureate_condition, winning_condition, de
     return base_contest
 
 
+def update_class_object_arguments(class_object, **object_parameters):
+    for parameter_name, value in object_parameters.items():
+        if value is not None:
+            setattr(class_object, parameter_name, value)
+
+
 # Contest models
 class BaseContest(db.Model):
     """
@@ -144,29 +149,8 @@ class BaseContest(db.Model):
                 'target_classes': [target for target in self.target_classes],
             }
 
-    def update(self, name=None, certificate_template=None,
-               description=None,
-               rules=None,
-               olympiad_type_id=None,
-               subject=None,
-               winning_condition=None,
-               laureate_condition=None):
-        if name is not None:
-            self.name = name
-        if description is not None:
-            self.description = description
-        if winning_condition is not None:
-            self.winning_condition = winning_condition
-        if laureate_condition is not None:
-            self.laureate_condition = laureate_condition
-        if rules is not None:
-            self.rules = rules
-        if certificate_template is not None:
-            self.certificate_template = certificate_template
-        if olympiad_type_id is not None:
-            self.olympiad_type_id = olympiad_type_id
-        if subject is not None:
-            self.subject = subject
+    def update(self, params):
+        update_class_object_arguments(self, **params)
 
 
 class ContestTypeEnum(enum.Enum):
@@ -282,22 +266,8 @@ class SimpleContest(Contest):
                     'location': self.location,
                 }
 
-    def update(self, start_date=None, end_date=None, previous_contest_id=None,
-               previous_participation_condition=None, visibility=None, composite_type=None, location=None):
-        if start_date is not None:
-            self.start_date = start_date
-        if end_date is not None:
-            self.end_date = end_date
-        if previous_contest_id is not None:
-            self.previous_contest_id = previous_contest_id
-        if previous_participation_condition is not None:
-            self.previous_participation_condition = previous_participation_condition
-        if visibility is not None:
-            self.visibility = visibility
-        if composite_type is not None:
-            self.composite_type = composite_type
-        if location is not None:
-            self.location = location
+    def update(self, params):
+        update_class_object_arguments(self, **params)
 
 
 def add_composite_contest(db_session, visibility, base_contest_id=None):
@@ -325,11 +295,8 @@ class CompositeContest(Contest):
                 'visibility': self.visibility,
             }
 
-    def update(self, visibility=None, composite_type=None):
-        if visibility is not None:
-            self.visibility = visibility
-        if composite_type is not None:
-            self.composite_type = composite_type
+    def update(self, params):
+        update_class_object_arguments(self, **params)
 
     __mapper_args__ = {
         'polymorphic_identity': ContestTypeEnum.CompositeContest,
@@ -390,15 +357,8 @@ class Stage(db.Model):
                 'this_stage_condition': self.this_stage_condition,
             }
 
-    def update(self, stage_name=None, stage_num=None, condition=None, this_stage_condition=None):
-        if stage_name is not None:
-            self.stage_name = stage_name
-        if this_stage_condition is not None:
-            self.this_stage_condition = this_stage_condition
-        if stage_num is not None:
-            self.stage_num = stage_num
-        if condition is not None:
-            self.condition = condition
+    def update(self, params):
+        update_class_object_arguments(self, **params)
 
 
 def add_stage(db_session, stage_name, condition, stage_num, this_stage_condition, olympiad_id=None):
@@ -468,13 +428,8 @@ class Variant(db.Model):
                 'variant_description': self.variant_description,
             }
 
-    def update(self, contest_id=None, variant_number=None, variant_description=None):
-        if contest_id is not None:
-            self.contest_id = contest_id
-        if variant_number is not None:
-            self.variant_number = variant_number
-        if variant_description is not None:
-            self.variant_description = variant_description
+    def update(self, params):
+        update_class_object_arguments(self, **params)
 
 
 class UserInContest(db.Model):
@@ -501,13 +456,8 @@ class UserInContest(db.Model):
                 'variant_id': self.variant_id
             }
 
-    def update(self, contest_id=None, variant_id=None, user_status=None):
-        if contest_id is not None:
-            self.contest_id = contest_id
-        if variant_id is not None:
-            self.variant_id = variant_id
-        if user_status is not None:
-            self.user_status = user_status
+    def update(self, params):
+        update_class_object_arguments(self, **params)
 
 
 class TaskTypeEnum(enum.Enum):
@@ -573,13 +523,8 @@ class PlainTask(Task):
                 'recommended_answer': self.recommended_answer,
             }
 
-    def update(self, num_of_task=None, image_of_task=None, recommended_answer=None):
-        if num_of_task is not None:
-            self.num_of_task = num_of_task
-        if image_of_task is not None:
-            self.image_of_task = image_of_task
-        if recommended_answer is not None:
-            self.recommended_answer = recommended_answer
+    def update(self, params):
+        update_class_object_arguments(self, **params)
 
 
 def add_range_task(db_session, num_of_task, image_of_task, start_value, end_value):
@@ -621,15 +566,8 @@ class RangeTask(Task):
                 'end_value': self.end_value,
             }
 
-    def update(self, num_of_task=None, image_of_task=None, start_value=None, end_value=None):
-        if num_of_task is not None:
-            self.num_of_task = num_of_task
-        if image_of_task is not None:
-            self.image_of_task = image_of_task
-        if start_value is not None:
-            self.start_value = start_value
-        if end_value is not None:
-            self.end_value = end_value
+    def update(self, params):
+        update_class_object_arguments(self, **params)
 
 
 def add_multiple_task(db_session, num_of_task, image_of_task):
@@ -669,8 +607,5 @@ class MultipleChoiceTask(Task):
                     for answer in self.answers],
             }
 
-    def update(self, num_of_task=None, image_of_task=None):
-        if num_of_task is not None:
-            self.num_of_task = num_of_task
-        if image_of_task is not None:
-            self.image_of_task = image_of_task
+    def update(self, params):
+        update_class_object_arguments(self, **params)

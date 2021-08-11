@@ -6,7 +6,7 @@ from flask import request, make_response
 from common import get_current_module
 from common.jwt_verify import jwt_required_role
 from common.errors import NotFound, AlreadyExists, InsufficientData
-from common.util import db_get_all, db_get_one_or_none
+from common.util import db_get_or_raise, db_get_all, db_get_one_or_none
 from .models import *
 
 db = get_current_db()
@@ -154,7 +154,7 @@ def base_olympiad_patch(id_base_olympiad):
         db_get_or_raise(OlympiadType, "olympiad_type_id", values["olympiad_type_id"])
         target_classes = set(values['target_classes'])
         del values["target_classes"]
-        base_contest.update(**values)
+        base_contest.update(values)
         if target_classes is not None:
             base_contest.target_classes = target_classes
 
@@ -276,7 +276,7 @@ def olympiad_patch(id_base_olympiad, id_olympiad):
 
     try:
         db_get_or_raise(BaseContest, "base_contest_id", str(id_base_olympiad))
-        contest.update(**values)
+        contest.update(values)
         db.session.commit()
 
     except Exception:
@@ -354,7 +354,7 @@ def stage_patch(id_olympiad, id_stage):
     try:
         db_get_or_raise(Contest, "contest_id", str(id_olympiad))
         values = request.openapi.body
-        stage.update(**values)
+        stage.update(values)
         db.session.commit()
     except Exception:
         db.session.rollback()
@@ -488,7 +488,7 @@ def contest_response(id_olympiad, id_stage, id_contest):
             stage = db_get_or_raise(Stage, "stage_id", str(id_stage))
             if contest not in stage.contests:
                 raise InsufficientData('contest_id', 'not in current stage')
-            contest.update(**values)
+            contest.update(values)
             db.session.commit()
         except Exception:
             db.session.rollback()
@@ -623,7 +623,7 @@ def variant_patch(id_olympiad, id_stage, id_contest, variant_num):
         variant = contest.variants.filter_by(**{"variant_number": str(variant_num)}).one_or_none()
 
         values = request.openapi.body
-        variant.update(**values)
+        variant.update(values)
         db.session.commit()
 
     except Exception:
@@ -811,7 +811,7 @@ def task_patch_plain(id_olympiad, id_stage, id_contest, id_variant, id_task):
 
         task = db_get_or_raise(PlainTask, "task_id", str(id_task))
         values = request.openapi.body
-        task.update(**values)
+        task.update(values)
         db.session.commit()
 
     except Exception:
@@ -830,7 +830,7 @@ def task_patch_range(id_olympiad, id_stage, id_contest, id_variant, id_task):
         task = db_get_or_raise(RangeTask, "task_id", str(id_task))
         check_existence(id_olympiad, id_stage, id_contest, id_variant)
         values = request.openapi.body
-        task.update(**values)
+        task.update(values)
 
         db.session.commit()
 
@@ -852,7 +852,7 @@ def task_patch_multiple(id_olympiad, id_stage, id_contest, id_variant, id_task):
         values = request.openapi.body
         answers = values['answers']
         del values['answers']
-        task.update(**values)
+        task.update(values)
 
         task.answers = [
             (answer['task_answer'], answer['is_right_answer'])
@@ -870,7 +870,7 @@ def task_patch_multiple(id_olympiad, id_stage, id_contest, id_variant, id_task):
     '/olympiad/<int:id_olympiad>/stage/<int:id_stage>/contest/<int:id_contest'
     '>/variant/<int:id_variant>/task/all',
     methods=['GET'])
-@jwt_required_role(['Admin', 'System', 'Creator'])
+@jwt_required_role(['Admin', 'System', 'Creator', 'Participant'])
 def task_all(id_olympiad, id_stage, id_contest, id_variant):
     check_existence(id_olympiad, id_stage, id_contest, id_variant)
     variant = db_get_or_raise(Variant, "variant_id", str(id_variant))
@@ -885,7 +885,7 @@ def task_all(id_olympiad, id_stage, id_contest, id_variant):
     '/olympiad/<int:id_olympiad>/stage/<int:id_stage>/contest/<int:id_contest'
     '>/variant/<int:id_variant>/tasks/<int:id_task>/taskimage',
     methods=['GET'])
-@jwt_required_role(['Admin', 'System', 'Creator'])
+@jwt_required_role(['Admin', 'System', 'Creator', 'Participant'])
 def task_image(id_olympiad, id_stage, id_contest, id_variant, id_task):
     check_existence(id_olympiad, id_stage, id_contest, id_variant)
     task = db_get_or_raise(Task, "task_id", str(id_task))
@@ -989,9 +989,6 @@ def users_certificate(id_olympiad, id_stage, id_contest, id_user):
     db_get_or_raise(Stage, "stage_id", str(id_stage))
     contest = db_get_or_raise(Contest, "contest_id", str(id_contest))
     contest.users.filter_by(**{"user_id": str(id_user)}).one_or_none()
-    # contest = db_get_or_raise(Contest, Contest.contest_id, id_contest)
-    # user = db_get_or_raise(UserInContest, UserInContest.user_id, id_user)
-
     # certificate = None
 
     abort(502)
