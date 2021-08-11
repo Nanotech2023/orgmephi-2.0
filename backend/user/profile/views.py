@@ -3,7 +3,7 @@ from flask import request, make_response
 from common.errors import NotFound
 from common import get_current_app, get_current_module, get_current_db
 from common.util import db_get_or_raise
-from common.jwt_verify import jwt_required, jwt_get_id
+from common.jwt_verify import jwt_get_id
 
 from user.models import User
 

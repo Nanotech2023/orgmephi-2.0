@@ -4,8 +4,8 @@ from common.errors import NotFound, AlreadyExists, InsufficientData
 from common import get_current_app, get_current_module, get_current_db
 from common.util import db_get_or_raise, db_get_one_or_none
 
-from user.models import User, UserRoleEnum, UserTypeEnum, add_user, user_roles, user_types, add_personal_info, UserInfo,\
-    create_university_info, add_group, Group
+from user.models import User, UserRoleEnum, UserTypeEnum, add_user, user_roles, user_types, add_personal_info, \
+    UserInfo, create_university_info, add_group, Group
 
 db = get_current_db()
 module = get_current_module()
