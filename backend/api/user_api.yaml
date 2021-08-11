@@ -65,78 +65,6 @@ paths:
               schema:
                 $ref: '#/components/schemas/errorResponse'
 
-  # Authentication
-
-  /login:
-    post:
-      summary: Authenticate a user
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/requestLogin'
-      security: []
-      responses:
-        '200':
-          description: OK
-          headers:
-            Set-Cookie:
-              schema:
-                description: Set both access_token_cookie and refresh_token_cookie
-                type: string
-                example: access_token_cookie=eyJ0eXAi...; Path=/; HttpOnly
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/responseLogin'
-        '400':
-          description: Bad request
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errorResponse'
-        '401':
-          description: Wrong credentials
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errorResponse'
-  /refresh:
-    post:
-      summary: Refresh JWT token for current user
-      security:
-        - JWTRefreshToken: [ ]
-        - CSRFRefreshToken: [ ]
-      responses:
-        '200':
-          description: OK
-          headers:
-            Set-Cookie:
-              schema:
-                description: Set both access_token_cookie and refresh_token_cookie
-                type: string
-                example: access_token_cookie=eyJ0eXAi...; Path=/; HttpOnly
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/responseRefresh'
-  /logout:
-    post:
-      summary: Logout current user
-      security:
-        - JWTAcessToken: []
-        - CSRFAcessToken: [] #framework limitations
-      responses:
-        '200':
-          description: OK
-          headers:
-            Set-Cookie:
-              schema:
-                description: Set both access_token_cookie and refresh_token_cookie
-                type: string
-                example: access_token_cookie=deleted; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT
-
   # User info
 
   /user/self:
@@ -912,10 +840,6 @@ components:
     typeDate:
       type: string
       format: date
-    typeRememberMe:
-      type: boolean
-    typeCSRFToken:
-      type: string
     typeIdentifier:
       type: integer
     typeGroupName:
@@ -959,15 +883,6 @@ components:
           $ref: '#/components/schemas/typeUsername'
         password:
           $ref: '#/components/schemas/typePassword'
-    typeCSRFPair:
-      required:
-        - csrf_access_token
-        - csrf_refresh_token
-      properties:
-        csrf_access_token:
-          $ref: '#/components/schemas/typeCSRFToken'
-        csrf_refresh_token:
-          $ref: '#/components/schemas/typeCSRFToken'
 
     # User data
 
@@ -1041,28 +956,6 @@ components:
 
     responsePreregister:
       $ref: '#/components/schemas/typePreregisterInfo'
-
-    # /login
-
-    requestLogin:
-      title: 'Authentication request info'
-      required:
-        - auth_credentials
-        - remember_me
-      properties:
-        auth_credentials:
-          $ref: '#/components/schemas/typeAuthCredentials'
-        remember_me:
-          $ref: '#/components/schemas/typeRememberMe'
-    responseLogin:
-      $ref: '#/components/schemas/typeCSRFPair'
-
-    # /refresh
-
-    responseRefresh:
-      $ref: '#/components/schemas/typeCSRFPair'
-
-    # /logout
 
     # /user/self
 
