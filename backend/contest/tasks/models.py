@@ -10,6 +10,9 @@ DEFAULT_VISIBILITY = True
 
 
 class UserStatusEnum(enum.Enum):
+    """
+    Enum for user statuses
+    """
     Participant = "Participant"
     Laureate = "Laureate"
     Winner = "Winner"
@@ -19,6 +22,9 @@ user_status_dict = {status.value: status for status in UserStatusEnum}
 
 
 class OlympiadSubjectEnum(enum.Enum):
+    """
+    Enum for olympiad subject
+    """
     Math = "Math"
     Physics = "Physics"
     Informatics = "Informatics"
@@ -28,6 +34,9 @@ olympiad_subject_dict = {subject.value: subject for subject in OlympiadSubjectEn
 
 
 class TargetClassEnum(enum.Enum):
+    """
+    Enum for olympiad target classes
+    """
     class_5 = "5"
     class_6 = "6"
     class_7 = "7"
@@ -42,6 +51,9 @@ olympiad_target_class_dict = {target.value: target for target in TargetClassEnum
 
 
 def add_olympiad_type(db_session, olympiad_type):
+    """
+    Create new olympiad type object
+    """
     olympiad = OlympiadType(
         olympiad_type=olympiad_type,
     )
@@ -55,6 +67,8 @@ class OlympiadType(db.Model):
 
     olympiad_type_id: id of olympiad type
     olympiad_type: olympiad type
+
+    contests: contest in olympiad
     """
 
     __tablename__ = 'olympiad_type'
@@ -75,6 +89,9 @@ class OlympiadType(db.Model):
 
 def add_base_contest(db_session, name, laureate_condition, winning_condition, description, rules, olympiad_type_id,
                      subject, certificate_template):
+    """
+    Create new base content object
+    """
     base_contest = BaseContest(
         description=description,
         name=name,
@@ -101,19 +118,19 @@ class BaseContest(db.Model):
     Base Class describing a Contest model with meta information.
 
     base_contest_id: id of base contest
+
     name: name of base contest
-    description: description of the contest
     rules: rules of the contest
+    description: description of the contest
+    olympiad_type_id: olympiad type id
+    subject: subject
     certificate_template: contest certificate template
 
     winning_condition: minimum passing scores
     laureate_condition: minimum passing scores
 
-    composite_type: composite type
-    olympiad_type: olympiad type
-    subject: subject
     target_class: target class
-
+    child_contests: child contests
     """
 
     __tablename__ = 'base_contest'
@@ -166,15 +183,16 @@ class Contest(db.Model):
     base_contest_id: id of base contest
 
     contest_id: id of contest
-    visibility: visibility of the contest
     composite_type: composite type
+    visibility: visibility of the contest
 
-    subject: subject
+    users: users
     """
 
     __tablename__ = 'contest'
 
     base_contest_id = db.Column(db.Integer, db.ForeignKey('base_contest.base_contest_id'))
+
     contest_id = db.Column(db.Integer, autoincrement=True, primary_key=True)
     composite_type = db.Column(db.Enum(ContestTypeEnum))
     visibility = db.Column(db.Boolean, default=DEFAULT_VISIBILITY, nullable=False)
@@ -191,6 +209,9 @@ class Contest(db.Model):
 def add_simple_contest(db_session,
                        visibility, start_date, end_date, previous_contest_id=None,
                        previous_participation_condition=None, location=None, base_contest_id=None):
+    """
+    Create new simple contest object
+    """
     simple_contest = SimpleContest(
         base_contest_id=base_contest_id,
         visibility=visibility,
@@ -208,13 +229,17 @@ class SimpleContest(Contest):
     """
     Simple contest model.
 
-    base_contest_id: id of base contest
-
     contest_id: id of contest
-    visibility: visibility of the contest
     start_date: start date of contest
     end_date: end date of contest
     location: location of the olympiad
+
+    previous_contest_id: previous contest id
+    previous_participation_condition: previous participation condition
+
+    variants: variants
+    next_contest: next contests
+
     """
     __tablename__ = 'simple_contest'
 
@@ -271,6 +296,9 @@ class SimpleContest(Contest):
 
 
 def add_composite_contest(db_session, visibility, base_contest_id=None):
+    """
+    Create new composite contest object
+    """
     composite_contest = CompositeContest(
         base_contest_id=base_contest_id,
         visibility=visibility,
@@ -280,6 +308,13 @@ def add_composite_contest(db_session, visibility, base_contest_id=None):
 
 
 class CompositeContest(Contest):
+    """
+    Simple contest model
+
+    contest_id: id of contest
+
+    stages: stages
+    """
     __tablename__ = 'composite_contest'
 
     contest_id = db.Column(db.Integer, db.ForeignKey('contest.contest_id'), primary_key=True)
@@ -308,7 +343,6 @@ Table describing a Contests In Stage model.
 
 stage_id: id of the stage
 contest_id: id of contest
-location: address + room or link to online
 """
 
 contestsInStage = db.Table('contests_in_stage',
@@ -331,7 +365,11 @@ class Stage(db.Model):
     stage_id: id of the stage
     olympiad_id: id of olympiad
     stage_name: name of the stage
+    stage_num: name of the stage
+
     this_stage_condition: condition to pass to the next stage
+
+    contests: contests
     """
 
     __tablename__ = 'stage'
@@ -362,6 +400,9 @@ class Stage(db.Model):
 
 
 def add_stage(db_session, stage_name, condition, stage_num, this_stage_condition, olympiad_id=None):
+    """
+    Create new stage object
+    """
     stage = Stage(
         stage_name=stage_name,
         stage_num=stage_num,
@@ -387,6 +428,9 @@ taskInVariant = db.Table('task_in_variant',
 
 
 def add_variant(db_session, variant_number, variant_description, contest_id=None):
+    """
+    Create new variant object
+    """
     variant = Variant(
         contest_id=contest_id,
         variant_number=variant_number,
@@ -404,6 +448,9 @@ class Variant(db.Model):
     contest_id: id of contest
     variant_number: id of the variant number
     variant_description: description of the variant
+
+    users: users
+    tasks: tasks
     """
 
     __tablename__ = 'variant'
@@ -436,10 +483,10 @@ class UserInContest(db.Model):
     """
     Class describing a User in contest model.
 
-    contest_id: id of the contest
     user_id: if of user
-    user_status: user status: laureate, winner or custom value
+    contest_id: id of the contest
     variant_id: variant connected with current contest
+    user_status: user status: laureate, winner or custom value
     """
 
     __tablename__ = 'user_in_contest'
@@ -474,6 +521,7 @@ class Task(db.Model):
     task_id: id of the task
     num_of_task: number of the task
     image_of_task: image file
+    task_type: task type for inheritance
     """
 
     __tablename__ = 'base_task'
@@ -489,6 +537,9 @@ class Task(db.Model):
 
 
 def add_plain_task(db_session, num_of_task, image_of_task, recommended_answer):
+    """
+    Create new plain task object
+    """
     task = PlainTask(
         num_of_task=num_of_task,
         image_of_task=image_of_task,
@@ -528,6 +579,9 @@ class PlainTask(Task):
 
 
 def add_range_task(db_session, num_of_task, image_of_task, start_value, end_value):
+    """
+    Create new range task object
+    """
     task = RangeTask(
         num_of_task=num_of_task,
         image_of_task=image_of_task,
@@ -571,6 +625,9 @@ class RangeTask(Task):
 
 
 def add_multiple_task(db_session, num_of_task, image_of_task):
+    """
+    Create new multiple task object
+    """
     task = MultipleChoiceTask(
         num_of_task=num_of_task,
         image_of_task=image_of_task,
@@ -584,6 +641,7 @@ class MultipleChoiceTask(Task):
     Class describing a Task with multiple choice model.
 
     task_id: id of the task
+    answers: answers on multiple tasks
     """
 
     __tablename__ = 'multiple_task'

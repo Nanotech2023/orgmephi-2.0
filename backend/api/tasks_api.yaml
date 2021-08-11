@@ -327,7 +327,7 @@ paths:
   #            $ref: '#/components/schemas/createSimpleContest'
   #    parameters:
   #      - in: path
-  #        description: Id of the base olympiad
+  #        description: id of the base olympiad
   #        name: id_base_olympiad
   #        required: true
   #        schema:
