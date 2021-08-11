@@ -23,6 +23,9 @@ class UserRoleEnum(enum.Enum):
     system = 'System'
 
 
+user_roles = {role.value: role for role in UserRoleEnum}
+
+
 class UserTypeEnum(enum.Enum):
     """
         User types enumeration class.
@@ -40,6 +43,9 @@ class UserTypeEnum(enum.Enum):
     university = 'University'
     internal = 'Internal'
     pre_register = 'PreRegister'
+
+
+user_types = {user_type.value: user_type for user_type in UserTypeEnum}
 
 
 def _populate_table(table, values):
