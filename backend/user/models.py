@@ -328,8 +328,8 @@ def add_personal_info(db_session, user, email, first_name, second_name, middle_n
     user.user_info = user_info
 
 
-def add_university_info(db_session, user, phone, university_name, admission_year, university_country, citizenship,
-                        region, city):
+def create_university_info(db_session, phone, university_name, admission_year, university_country, citizenship,
+                           region, city):
     university = University.query.filter(University.name == university_name).one_or_none()
     student_info = StudentInfo(
         phone=phone,
@@ -341,7 +341,7 @@ def add_university_info(db_session, user, phone, university_name, admission_year
         region=region,
         city=city
     )
-    user.university_info = university
+    return student_info
 
 
 def add_group(db_session, name):
