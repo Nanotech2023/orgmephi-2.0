@@ -1,25 +1,21 @@
 import { Component, ElementRef, OnInit, ViewChild } from '@angular/core'
-import { ResponseUserAll } from '@/auth/api/models'
+import { ResponseUserAll, TypeRegistrationPersonalInfo } from '@/auth/api/models'
 import { Observable } from 'rxjs'
 import { fixedHeight } from '@/shared/consts'
 import { AuthService } from '@/auth/api/auth.service'
+import { AgGridAngular } from 'ag-grid-angular'
 
 
 @Component( {
     selector: 'app-manage-users',
     templateUrl: './manage-users.component.html',
-    styleUrls: [ './manage-users.component.scss' ],
-    host: {
-        '(document:click)': 'onClick($event)'
-    }
+    styleUrls: [ './manage-users.component.scss' ]
 } )
 
 
 export class ManageUsersComponent implements OnInit
 {
-    users$!: Observable<ResponseUserAll>
     minContainerHeight = fixedHeight
-    @ViewChild( 'modal' ) modal!: ElementRef
     columnDefs = [
         { field: 'id', sortable: true, filter: true, headerName: 'ID' },
         { field: 'username', sortable: true, filter: true, headerName: 'Имя пользовтаеля' },
@@ -28,6 +24,8 @@ export class ManageUsersComponent implements OnInit
         { headerName: 'Действия' }
     ]
     modalVisible: boolean = false
+    @ViewChild( 'table_users' ) agGrid!: AgGridAngular
+    users$!: Observable<ResponseUserAll>
 
     constructor( private service: AuthService ) { }
 
@@ -36,9 +34,14 @@ export class ManageUsersComponent implements OnInit
         this.users$ = this.service.userAllGet()
     }
 
-    onClick( $event: any )
+    onNewUserAdded( userInfo: TypeRegistrationPersonalInfo )
     {
-        if ( $event.target == this.modal?.nativeElement )
-            this.modalVisible = false
+        this.agGrid.api.addItems( [
+            {
+                type: 'School',
+                username: userInfo.first_name,
+                role: 'Participant'
+            }
+        ] )
     }
 }
