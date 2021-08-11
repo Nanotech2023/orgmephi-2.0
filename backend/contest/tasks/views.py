@@ -6,7 +6,7 @@ from flask import request, make_response
 from common import get_current_module
 from common.jwt_verify import jwt_required_role
 from common.errors import NotFound, AlreadyExists, InsufficientData
-from common.util import db_get_all
+from common.util import db_get_all, db_get_one_or_none
 from .models import *
 
 db = get_current_db()
@@ -24,6 +24,9 @@ def olympiad_type_create():
     olympiad_type = values['olympiad_type']
 
     try:
+        type_of_olympiad = db_get_one_or_none(OlympiadType, "olympiad_type", str(olympiad_type))
+        if type_of_olympiad is not None:
+            raise AlreadyExists('olympiad_type', olympiad_type)
         olympiad = add_olympiad_type(db.session,
                                      olympiad_type=olympiad_type)
         db.session.commit()
@@ -470,7 +473,9 @@ def contest_response(id_olympiad, id_stage, id_contest):
     if request.method == 'GET':
         try:
             db_get_or_raise(Contest, "contest_id", str(id_olympiad))
-            db_get_or_raise(Stage, "stage_id", str(id_stage))
+            stage = db_get_or_raise(Stage, "stage_id", str(id_stage))
+            if contest not in stage.contests:
+                raise InsufficientData('contest_id', 'not in current stage')
             return make_response(contest.serialize(), 200)
         except Exception:
             raise
@@ -480,7 +485,9 @@ def contest_response(id_olympiad, id_stage, id_contest):
 
         try:
             db_get_or_raise(Contest, "contest_id", str(id_olympiad))
-            db_get_or_raise(Stage, "stage_id", str(id_stage))
+            stage = db_get_or_raise(Stage, "stage_id", str(id_stage))
+            if contest not in stage.contests:
+                raise InsufficientData('contest_id', 'not in current stage')
             contest.update(**values)
             db.session.commit()
         except Exception:
@@ -896,7 +903,7 @@ def generate_variant(id_contest, user_id):
     contest = db_get_or_raise(Contest, "contest_id", id_contest)
     variants_number = len(contest.variants.all())
     if variants_number == 0:
-        raise InsufficientData('variant', 'variants_number')
+        raise InsufficientData('variant', 'variants in contest')
     random_number = random.randint(0, variants_number * 2)
     variant = (user_id + random_number) % variants_number
     return variant

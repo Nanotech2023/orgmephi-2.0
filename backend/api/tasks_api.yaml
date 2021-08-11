@@ -39,6 +39,18 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/errorResponse'
+        '409':
+          description: Already exists
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+        '404':
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
   /olympiad_type/{id_olympiad_type}/remove:
     post:
       summary: remove olympiad type
@@ -790,6 +802,13 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/errorResponse'
+        '404':
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+
   /olympiad/{id_olympiad}/stage/{id_stage}/contest/createcomposite:
     post:
       summary: Create a new composite contest
@@ -822,7 +841,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/commonContestId'
-
+        '404':
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
         '400':
           description: Bad request
           content:
@@ -915,6 +939,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/errorResponse'
+        '409':
+          description: Wrong data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
     patch:
       summary: Edit contest info
       security:
@@ -960,6 +990,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/errorResponse'
+        '409':
+          description: Wrong data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
 
   /olympiad/{id_olympiad}/stage/{id_stage}/contest/all:
     get:
@@ -989,6 +1025,12 @@ paths:
                 $ref: '#/components/schemas/contestsInStage'
         '400':
           description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+        '404':
+          description: Not found
           content:
             application/json:
               schema:
@@ -1222,6 +1264,12 @@ paths:
                 $ref: '#/components/schemas/variantInfoId'
         '400':
           description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+        '404':
+          description: Contest not found
           content:
             application/json:
               schema:
@@ -1467,6 +1515,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/errorResponse'
+        '404':
+          description: Contest not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
 
   /olympiad/{id_olympiad}/stage/{id_stage}/contest/{id_contest}/variant/{id_variant}/task/createrange:
     post:
@@ -1518,6 +1572,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/errorResponse'
+        '404':
+          description: Contest not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
 
   /olympiad/{id_olympiad}/stage/{id_stage}/contest/{id_contest}/variant/{id_variant}/task/createmultiple:
     post:
@@ -1565,6 +1625,12 @@ paths:
                 $ref: '#/components/schemas/taskId'
         '400':
           description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+        '404':
+          description: Contest not found
           content:
             application/json:
               schema:
@@ -1904,6 +1970,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/errorResponse'
+        '404':
+          description: Contest not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
 
   /olympiad/{id_olympiad}/stage/{id_stage}/contest/{id_contest}/variant/{id_variant}/tasks/{id_task}/taskimage:
     get:
@@ -2047,6 +2119,7 @@ components:
       properties:
         name:
           type: string
+          example: Test contest
         description:
           type: string
         rules:
@@ -2063,6 +2136,7 @@ components:
             0.5
         olympiad_type_id:
           type: integer
+          example: 1
         subject:
           type: string
           enum: [ "Math", "Physics", "Informatics" ]
@@ -2130,11 +2204,14 @@ components:
         winning_condition:
           type: number
           format: float
+          example: 0.7
         laureate_condition:
           type: number
           format: float
+          example: 0.7
         olympiad_type_id:
           type: integer
+          example: 1
         subject:
           type: string
           enum: [ 'Math', "Physics", "Informatics" ]
@@ -2519,12 +2596,12 @@ components:
           type: number
           format: float
           example:
-            1.0
+            1.4
         end_value:
           type: number
           format: float
           example:
-            2.0
+            2.4
     createMultipleTask:
       title: Create task with multiple choice
       description: Request to creation task with multiple choice
@@ -2621,9 +2698,13 @@ components:
         start_value:
           type: number
           format: float
+          example:
+            1.4
         end_value:
           type: number
           format: float
+          example:
+            2.4
     multipleTaskInfoUpdate:
       title: Update task with multiple choice
       description: Request to update task with multiple choice
@@ -2704,6 +2785,7 @@ components:
       properties:
         olympiad_type:
           type: string
+          example: Rosatom
     olympiadTypeId:
       title: Get olympiad type id
       description: Request to get olympiad type id
@@ -2723,3 +2805,4 @@ components:
           type: integer
         olympiad_type:
           type: string
+          example: Rosatom
