@@ -1,5 +1,6 @@
 from common import get_current_db, get_current_app
-from .reference import University
+from .reference import University, Country
+from .auth import User
 
 db = get_current_db()
 app = get_current_app()
@@ -24,15 +25,17 @@ class StudentInfo(db.Model):
 
     __table_name__ = 'student_info'
 
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey(User.id), primary_key=True)
     phone = db.Column(db.String)
-    university = db.Column(db.Integer, db.ForeignKey('university.id'))
+    university = db.Column(db.Integer, db.ForeignKey(University.id))
     custom_university = db.Column(db.String)
     admission_year = db.Column(db.Date)
-    university_country = db.Column(db.Integer, db.ForeignKey('country.id'))
-    citizenship = db.Column(db.Integer, db.ForeignKey('country.id'))
+    university_country = db.Column(db.Integer, db.ForeignKey(Country.id))
+    citizenship = db.Column(db.Integer, db.ForeignKey(Country.id))
     region = db.Column(db.String)
     city = db.Column(db.String)
+
+    user = db.relationship('User', back_populates='student_info', lazy='select')
 
     def serialize(self):
         if self.custom_university is None:
@@ -74,7 +77,7 @@ class StudentInfo(db.Model):
             self.city = city
 
 
-def create_university_info(db_session, phone, university_name, admission_year, university_country, citizenship,
+def create_university_info(phone, university_name, admission_year, university_country, citizenship,
                            region, city):
     university = University.query.filter(University.name == university_name).one_or_none()
     student_info = StudentInfo(

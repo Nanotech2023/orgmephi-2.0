@@ -1,4 +1,5 @@
 from common import get_current_db, get_current_app
+from .auth import User
 
 db = get_current_db()
 app = get_current_app()
@@ -20,12 +21,14 @@ class UserInfo(db.Model):
 
     __table_name__ = 'user_info'
 
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey(User.id), primary_key=True)
     email = db.Column(db.String, unique=True)
     first_name = db.Column(db.String)
     middle_name = db.Column(db.String)
     second_name = db.Column(db.String)
     date_of_birth = db.Column(db.Date)
+
+    user = db.relationship('User', back_populates='user_info', lazy='select')
 
     def serialize(self):
         return \
@@ -50,7 +53,7 @@ class UserInfo(db.Model):
             self.date_of_birth = date_of_birth
 
 
-def add_personal_info(db_session, user, email, first_name, second_name, middle_name, date_of_birth):
+def create_personal_info(email, first_name, second_name, middle_name, date_of_birth):
     user_info = UserInfo(
         email=email,
         first_name=first_name,
@@ -58,4 +61,4 @@ def add_personal_info(db_session, user, email, first_name, second_name, middle_n
         middle_name=middle_name,
         date_of_birth=date_of_birth
     )
-    user.user_info = user_info
+    return user_info

@@ -4,7 +4,7 @@ from common.errors import NotFound, AlreadyExists, InsufficientData
 from common import get_current_app, get_current_module, get_current_db
 from common.util import db_get_or_raise, db_get_one_or_none
 
-from user.models import User, UserRoleEnum, UserTypeEnum, add_user, user_roles, user_types, add_personal_info, \
+from user.models import User, UserRoleEnum, UserTypeEnum, add_user, user_roles, user_types, create_personal_info, \
     UserInfo, create_university_info, add_group, Group
 
 db = get_current_db()
@@ -81,8 +81,8 @@ def set_user_info_admin(user_id):
         if len(missing) > 0:
             raise InsufficientData(str(missing), 'for user %d' % user.id)
         try:
-            add_personal_info(db.session, user, values['email'], values['first_name'], values['second_name'],
-                              values['middle_name'], values['date_of_birth'])
+            user.user_info = create_personal_info(values['email'], values['first_name'], values['second_name'],
+                                                  values['middle_name'], values['date_of_birth'])
         except Exception:
             db.session.rollback()
             raise
@@ -106,7 +106,7 @@ def set_university_info_admin(user_id):
         if len(missing) > 0:
             raise InsufficientData(str(missing), 'for user %d' % user.id)
         try:
-            user.student_info = create_university_info(db.session, values['phone_number'], values['university'],
+            user.student_info = create_university_info(values['phone_number'], values['university'],
                                                        values['admission_year'], values['university_country'],
                                                        values['citizenship'], values['region'], values['city'])
         except Exception:

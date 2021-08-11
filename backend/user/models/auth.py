@@ -78,10 +78,11 @@ class User(db.Model):
     type = db.Column(db.Enum(UserTypeEnum), nullable=False)
     registration_date = db.Column(db.DateTime, default=datetime.utcnow)
 
-    user_info = db.relationship('UserInfo', backref='user', lazy=True, uselist=False)
-    student_info = db.relationship('StudentInfo', backref='user', lazy=True, uselist=False)
-    groups = db.relationship('Group', secondary=users_in_group, lazy='select', backref=db.backref('user', lazy=True),
-                             viewonly=True)
+    user_info = db.relationship('UserInfo', back_populates='user', lazy=True, uselist=False,
+                                cascade='save-update, merge, delete, delete-orphan')
+    student_info = db.relationship('StudentInfo', back_populates='user', lazy=True, uselist=False,
+                                   cascade='save-update, merge, delete, delete-orphan')
+    groups = db.relationship('Group', secondary=users_in_group, lazy='select', back_populates='users', viewonly=True)
 
     def serialize(self):
         return {
@@ -118,8 +119,7 @@ class Group(db.Model):
     id = db.Column(db.Integer, autoincrement=True, primary_key=True)
     name = db.Column(db.String, nullable=False, unique=True)
 
-    users = db.relationship('User', secondary=users_in_group, lazy='subquery',
-                            backref=db.backref('group', lazy=True))
+    users = db.relationship('User', secondary=users_in_group, lazy='subquery', back_populates='groups', viewonly=True)
 
     def serialize(self):
         return {'id': self.id, 'name': self.name}
