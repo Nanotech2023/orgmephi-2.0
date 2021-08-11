@@ -67,24 +67,6 @@ paths:
 
   # User info
 
-  /user/self:
-    get:
-      summary: Get common info for current user
-      security:
-        - JWTAcessToken: [ ]
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/responseUserSelf'
-        '404':
-          description: User not found
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errorResponse'
   /user/{user_id}:
     get:
       summary: Get common info for a different user
@@ -164,37 +146,6 @@ paths:
                 $ref: '#/components/schemas/errorResponse'
         '404':
           description: Group not found
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errorResponse'
-
-
-  # Password
-
-  /user/self/password:
-    post:
-      summary: Change password for current user
-      security:
-        - JWTAcessToken: []
-        - CSRFAcessToken: []
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/requestPasswordSelf'
-      responses:
-        '200':
-          description: OK
-        '400':
-          description: Bad request or weak password
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errorResponse'
-        '404':
-          description: User not found
           content:
             application/json:
               schema:
@@ -322,24 +273,6 @@ paths:
 
   # Personal info
 
-  /user/self/personal:
-    get:
-      summary: Get personal info for current user
-      security:
-        - JWTAcessToken: [ ]
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/responsePersonalSelf'
-        '404':
-          description: Personal info is not set or user not found
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errorResponse'
   /user/{user_id}/personal:
     get:
       summary: Get personal info for a different user
@@ -415,24 +348,6 @@ paths:
 
   # University info
 
-  /user/self/university:
-    get:
-      summary: Get university student info for current user
-      security:
-        - JWTAcessToken: [ ]
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/responseUniversitySelf'
-        '404':
-          description: User not found or is not a university student
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errorResponse'
   /user/{user_id}/university:
     get:
       summary: Get university student info for a different user
@@ -629,24 +544,6 @@ paths:
 
   # User group management
 
-  /user/self/groups:
-    get:
-      summary: Get groups for current user
-      security:
-        - JWTAcessToken: [ ]
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/responseUserSelfGroup'
-        '404':
-          description: User not found
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errorResponse'
   /user/{user_id}/groups:
     get:
       summary: Get groups for a different user
@@ -957,11 +854,6 @@ components:
     responsePreregister:
       $ref: '#/components/schemas/typePreregisterInfo'
 
-    # /user/self
-
-    responseUserSelf:
-      $ref: '#/components/schemas/typeUserInfo'
-
     # /user/{user_id}
 
     responseUserAdmin:
@@ -990,19 +882,6 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/typeUserInfo'
-
-    # /user/self/password
-
-    requestPasswordSelf:
-      title: 'Reset current users password'
-      required:
-        - new_password
-        - old_password
-      properties:
-        new_password:
-          $ref: '#/components/schemas/typePassword'
-        old_password:
-          $ref: '#/components/schemas/typePassword'
 
     # /user/{user_id}/password
 
@@ -1034,21 +913,11 @@ components:
         type:
           $ref: '#/components/schemas/typeUserType'
 
-    # /user/self/personal
-
-    responsePersonalSelf:
-      $ref: '#/components/schemas/typePersonalInfo'
-
     # /user/{user_id}/personal
 
     responsePersonalAdminGet:
       $ref: '#/components/schemas/typePersonalInfo'
     requestPersonalAdminPatch:
-      $ref: '#/components/schemas/typePersonalInfo'
-
-    # /user/self/university
-
-    responseUniversitySelf:
       $ref: '#/components/schemas/typePersonalInfo'
 
     # /user/{user_id}/university
@@ -1087,17 +956,6 @@ components:
       $ref: '#/components/schemas/typeGroup'
 
     # /group/{group_id}/remove
-
-    # /user/self/groups
-
-    responseUserSelfGroup:
-      required:
-        - groups
-      properties:
-        groups:
-          type: array
-          items:
-            $ref: '#/components/schemas/typeGroup'
 
     # /user/{user_id}/groups
 
