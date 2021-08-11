@@ -477,17 +477,6 @@ class Variant(db.Model):
             self.variant_description = variant_description
 
 
-def add_user_in_contest(db_session, user_id, contest_id, variant_id=None, user_status=None):
-    user = UserInContest(
-        user_id=user_id,
-        contest_id=contest_id,
-        variant_id=variant_id,
-        user_status=user_status,
-    )
-    db_session.add(user)
-    return user
-
-
 class UserInContest(db.Model):
     """
     Class describing a User in contest model.

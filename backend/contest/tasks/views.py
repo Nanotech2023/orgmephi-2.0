@@ -924,12 +924,9 @@ def add_user_to_contest(id_olympiad, id_stage, id_contest):
         for user_id in user_ids:
             if contest.users.filter_by(**{"user_id": str(user_id)}).one_or_none() is not None:
                 raise AlreadyExists('user_id', user_id)
-            add_user_in_contest(db.session,
-                                user_id=user_id,
-                                contest_id=id_contest,
-                                variant_id=generate_variant(id_contest, user_id),
-                                user_status=UserStatusEnum.Participant
-                                )
+            contest.users.append(UserInContest(user_id=user_id,
+                                               variant_id=generate_variant(id_contest, user_id),
+                                               user_status=UserStatusEnum.Participant))
 
         db.session.commit()
     except Exception:
