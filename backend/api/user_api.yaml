@@ -12,67 +12,6 @@ paths:
   ##                                             Path definition                                                      ##
   ######################################################################################################################
 
-  # Registration
-
-  /register/school:
-    post:
-      summary: Register a new school student
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/requestRegistrationSchool'
-      security: []
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/responseRegistrationSchool'
-        '400':
-          description: Bad request or weak password
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errorResponse'
-        '409':
-          description: Username already in use
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errorResponse'
-  /register/university:
-    post:
-      summary: Register a new university student
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/requestRegistrationUniversity'
-      security: [ ]
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/responseRegistrationUniversity'
-        '400':
-          description: Bad request or weak password
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errorResponse'
-        '409':
-          description: Username already in use
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errorResponse'
-
   /register/internal:
     post:
       summary: Register an internal user
@@ -889,29 +828,6 @@ paths:
               schema:
                 $ref: '#/components/schemas/errorResponse'
 
-  # Reference Information
-
-  /info/universities:
-    get:
-      summary: Get known university list
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/responseInfoUniversities'
-  /info/countries:
-    get:
-      summary: Get known country list
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/responseInfoCountries'
-
 
 components:
   securitySchemes:
@@ -996,11 +912,6 @@ components:
     typeDate:
       type: string
       format: date
-    typeGrade:
-      type: integer
-      minimum: 1
-      maximum: 5
-      example: 1
     typeRememberMe:
       type: boolean
     typeCSRFToken:
@@ -1018,14 +929,6 @@ components:
       title: 'All user type'
       type: string
       enum: [ 'PreUniversity', 'Enrollee', 'School', 'University', 'Internal', 'PreRegister' ]
-    typeUserTypeSchool:
-      title: 'Types for school students'
-      type: string
-      enum: [ 'PreUniversity', 'Enrollee', 'School' ]
-    typeUserTypeUniversity:
-      title: 'Types for university students'
-      type: string
-      enum: [ 'University' ]
 
   ######################################################################################################################
   ##                                             Composite data types                                                 ##
@@ -1033,57 +936,6 @@ components:
 
     # Registration data
 
-    typeRegistrationCredentials:
-      title: 'Authentication info'
-      required:
-        - email
-        - password
-      properties:
-        email:
-          $ref: '#/components/schemas/typeEmail'
-        password:
-          $ref: '#/components/schemas/typePassword'
-    typeRegistrationPersonalInfo:
-      title: 'Personal info that is required for registration'
-      required:
-        - first_name
-        - second_name
-        - middle_name
-        - date_of_birth
-      properties:
-        first_name:
-          $ref: '#/components/schemas/typeCommonName'
-        second_name:
-          $ref: '#/components/schemas/typeCommonName'
-        middle_name:
-          $ref: '#/components/schemas/typeCommonName'
-        date_of_birth:
-          $ref: '#/components/schemas/typeDate'
-    typeRegistrationStudentInfo:
-      title: 'Student info that is required for registration'
-      required:
-        - phone_number
-        - university
-        - grade
-        - university_country
-        - citizenship
-        - region
-        - city
-      properties:
-        phone_number:
-          $ref: '#/components/schemas/typePhone'
-        university:
-          $ref: '#/components/schemas/typeCommonName'
-        grade:
-          $ref: '#/components/schemas/typeGrade'
-        university_country:
-          $ref: '#/components/schemas/typeCommonName'
-        citizenship:
-          $ref: '#/components/schemas/typeCommonName'
-        region:
-          $ref: '#/components/schemas/typeCommonName'
-        city:
-          $ref: '#/components/schemas/typeCommonName'
     typePreregisterInfo:
       title: 'Credentials for preregistered users'
       required:
@@ -1177,47 +1029,6 @@ components:
   ######################################################################################################################
   ##                                             Path schemas                                                         ##
   ######################################################################################################################
-
-    # /register/school
-
-    requestRegistrationSchool:
-      title: 'Registration data for school students'
-      required:
-        - auth_info
-        - personal_info
-        - register_type
-      properties:
-        auth_info:
-          $ref: '#/components/schemas/typeRegistrationCredentials'
-        personal_info:
-          $ref: '#/components/schemas/typeRegistrationPersonalInfo'
-        register_type:
-          $ref: '#/components/schemas/typeUserTypeSchool'
-        register_confirm:
-          $ref: '#/components/schemas/typePreregisterInfo'
-    responseRegistrationSchool:
-      $ref: '#/components/schemas/typeUserInfo'
-
-    # /register/university
-
-    requestRegistrationUniversity:
-      title: 'Registration data for university students'
-      required:
-        - auth_info
-        - personal_info
-        - register_type
-        - student_info
-      properties:
-        auth_info:
-          $ref: '#/components/schemas/typeRegistrationCredentials'
-        personal_info:
-          $ref: '#/components/schemas/typeRegistrationPersonalInfo'
-        register_type:
-          $ref: '#/components/schemas/typeUserTypeUniversity'
-        student_info:
-          $ref: '#/components/schemas/typeRegistrationStudentInfo'
-    responseRegistrationUniversity:
-      $ref: '#/components/schemas/typeUserInfo'
 
     # /register/internal
 
@@ -1423,27 +1234,3 @@ components:
       properties:
         group_id:
           $ref: '#/components/schemas/typeIdentifier'
-
-    # /info/universities
-
-    responseInfoUniversities:
-      title: 'Get university list response'
-      required:
-        - university_list
-      properties:
-        university_list:
-          type: array
-          items:
-            $ref: '#/components/schemas/typeCommonName'
-
-    # /info/countries
-
-    responseInfoCountries:
-      title: 'Get country list response'
-      required:
-        - country_list
-      properties:
-        country_list:
-          type: array
-          items:
-            $ref: '#/components/schemas/typeCommonName'
