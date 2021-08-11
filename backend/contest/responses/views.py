@@ -5,6 +5,7 @@ from common.errors import NotFound, InsufficientData
 from common import get_current_app, get_current_module
 from common.jwt_verify import jwt_required, jwt_required_role, jwt_get_id
 from common.util import db_get_or_raise, db_get_list, db_get_one_or_none
+import base64
 
 db = get_current_db()
 module = get_current_module()
@@ -40,18 +41,13 @@ def user_answer_get(user_id, contest_id, task_id):
     if user_answer is None:
         raise NotFound('response_answer', 'for task_id %d' % task_id)
     return {
-        "user_answer": str(user_answer.answer),  # TODO BLOB not for json
-        "filetype": user_answer.filetype.value
+        "user_answer":str(user_answer.answer)   # TODO return a FILE
     }
 
 
-def user_answer_post(values, user_id, contest_id, task_id):
-    search = ['user_answer', 'filetype']
-    missing = [value for value in search if value not in values]
-    if len(missing) > 0:
-        raise InsufficientData(str(missing), 'for user %d' % user_id)
-    answer = values['user_answer']
-    filetype = values['filetype']
+def user_answer_post(answer_file, filetype, user_id, contest_id, task_id):
+    if answer_file is None:
+        raise InsufficientData('answer', 'for user %d' % user_id)
     try:
         user_work = get_user_in_contest_work(user_id, contest_id)
     except NotFound:
@@ -60,10 +56,10 @@ def user_answer_post(values, user_id, contest_id, task_id):
         user_work.statuses.append(response_status)
     user_answer = user_work.answers.filter(ResponseAnswer.task_num == task_id).one_or_none()
     if user_answer is None:
-        response_answer = add_response_answer(user_work.work_id, task_id, answer, filetype)
+        response_answer = add_response_answer(user_work.work_id, task_id, answer_file, filetype)
         user_work.answers.append(response_answer)
     else:
-        user_answer.update(answer_new=answer, filetype_new=filetype)
+        user_answer.update(answer_new=answer_file, filetype_new=filetype)
     db.session.commit()
 
 
@@ -129,39 +125,49 @@ def get_user_answer_by_id(olympiad_id, stage_id, contest_id, answer_id):
     user_answer = db_get_or_raise(ResponseAnswer, 'answer_id', answer_id)
     return make_response(
         {
-            "user_answer": str(user_answer.answer),  # TODO BLOB not for json
+            "user_answer": user_answer.answer,  # TODO BLOB not for json
             "filetype": user_answer.filetype.value
         }, 200)
 
 
 @module.route('/olympiad/<int:olympiad_id>/stage/<int:stage_id>/contest/<int:contest_id>/task/<int:task_id>/user/self',
-              methods=['GET', 'POST'])
+              methods=['GET'])
 @jwt_required_role(['Admin', 'System', 'Creator', 'Participant'])
 def user_answer_for_task(olympiad_id, stage_id, contest_id, task_id):
     check_olympiad_and_stage(olympiad_id, stage_id, contest_id)
     self_user_id = jwt_get_id()
-    if request.method == 'GET':
-        user_answer = user_answer_get(self_user_id, contest_id, task_id)
-        return make_response(user_answer, 200)
-    elif request.method == 'POST':
-        values = request.openapi.body
-        user_answer_post(values, self_user_id, contest_id, task_id)
-        return make_response({}, 200)
+    user_answer = user_answer_get(self_user_id, contest_id, task_id)
+    return make_response(user_answer, 200)
+
+
+@module.route('/olympiad/<int:olympiad_id>/stage/<int:stage_id>/contest/<int:contest_id>/'
+              'task/<int:task_id>/user/self/<string:filetype>', methods=['POST'])
+@jwt_required_role(['Admin', 'System', 'Creator', 'Participant'])
+def user_answer_for_task_post(olympiad_id, stage_id, contest_id, task_id, filetype):
+    check_olympiad_and_stage(olympiad_id, stage_id, contest_id)
+    self_user_id = jwt_get_id()
+    answer = request.data
+    user_answer_post(answer, filetype, self_user_id, contest_id, task_id)
+    return make_response({}, 200)
 
 
 @module.route('/olympiad/<int:olympiad_id>/stage/<int:stage_id>/contest/<int:contest_id>/task/<int:task_id>/'
-              'user/<int:user_id>',
-              methods=['GET', 'POST'])
+              'user/<int:user_id>', methods=['GET'])
 @jwt_required_role(['Admin', 'System', 'Creator', 'Participant'])
 def user_answer_for_task_by_id(olympiad_id, stage_id, contest_id, task_id, user_id):
     check_olympiad_and_stage(olympiad_id, stage_id, contest_id)
-    if request.method == 'GET':
-        user_answer = user_answer_get(user_id, contest_id, task_id)
-        return make_response(user_answer, 200)
-    elif request.method == 'POST':
-        values = request.openapi.body
-        user_answer_post(values, user_id, contest_id, task_id)
-        return make_response({}, 200)
+    user_answer = user_answer_get(user_id, contest_id, task_id)
+    return make_response(user_answer, 200)
+
+
+@module.route('/olympiad/<int:olympiad_id>/stage/<int:stage_id>/contest/<int:contest_id>/task/<int:task_id>/'
+              'user/<int:user_id>/<string:filetype>', methods=['POST'])
+@jwt_required_role(['Admin', 'System', 'Creator', 'Participant'])
+def user_answer_for_task_by_id_post(olympiad_id, stage_id, contest_id, task_id, user_id, filetype):
+    check_olympiad_and_stage(olympiad_id, stage_id, contest_id)
+    answer = request.data
+    user_answer_post(answer, filetype, user_id, contest_id, task_id)
+    return make_response({}, 200)
 
 
 @module.route('/olympiad/<int:olympiad_id>/stage/<int:stage_id>/contest/<int:contest_id>/user/self/status',

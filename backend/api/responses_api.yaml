@@ -21,8 +21,14 @@ paths:
         - cookieJWTAuth: [ ]
       parameters:
         - in: path
-          description: Id of the user
-          name: user_id
+          description: Id of the olympiad
+          name: olympiad_id
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the stage
+          name: stage_id
           required: true
           schema:
             type: integer
@@ -33,14 +39,8 @@ paths:
           schema:
             type: integer
         - in: path
-          description: Id of the olympiad
-          name: olympiad_id
-          required: true
-          schema:
-            type: integer
-        - in: path
-          description: Id of the stage
-          name: stage_id
+          description: Id of the user
+          name: user_id
           required: true
           schema:
             type: integer
@@ -70,12 +70,6 @@ paths:
         - cookieJWTAuth: [ ]
       parameters:
         - in: path
-          description: Id of the contest
-          name: contest_id
-          required: true
-          schema:
-            type: integer
-        - in: path
           description: Id of the olympiad
           name: olympiad_id
           required: true
@@ -84,6 +78,12 @@ paths:
         - in: path
           description: Id of the stage
           name: stage_id
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the contest
+          name: contest_id
           required: true
           schema:
             type: integer
@@ -119,18 +119,6 @@ paths:
         - cookieJWTAuth: [ ]
       parameters:
         - in: path
-          description: Id of the contest
-          name: contest_id
-          required: true
-          schema:
-            type: integer
-        - in: path
-          description: Id of the task
-          name: task_id
-          required: true
-          schema:
-            type: integer
-        - in: path
           description: Id of the olympiad
           name: olympiad_id
           required: true
@@ -139,6 +127,18 @@ paths:
         - in: path
           description: Id of the stage
           name: stage_id
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the contest
+          name: contest_id
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the task
+          name: task_id
           required: true
           schema:
             type: integer
@@ -148,19 +148,34 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/userContestAnswer'
+                properties:
+                  user_answer:
+                    type: string    #TODO return FILE
         '404':
           description: User, contest, olympiad, stage or task not found
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/errorResponse'
+  /olympiad/{olympiad_id}/stage/{stage_id}/contest/{contest_id}/task/{task_id}/user/self/{filetype}:
     post:
       summary: Add current user answer for the task
       security:
         - cookieJWTAuth: [ ]
         - CSRFToken: [ ]
       parameters:
+        - in: path
+          description: Id of the olympiad
+          name: olympiad_id
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the stage
+          name: stage_id
+          required: true
+          schema:
+            type: integer
         - in: path
           description: Id of the contest
           name: contest_id
@@ -174,23 +189,18 @@ paths:
           schema:
             type: integer
         - in: path
-          description: Id of the olympiad
-          name: olympiad_id
+          description: Type of file
+          name: filetype
           required: true
           schema:
-            type: integer
-        - in: path
-          description: Id of the stage
-          name: stage_id
-          required: true
-          schema:
-            type: integer
+            $ref: '#/components/schemas/typeFiletype'
       requestBody:
-        required: true
         content:
-          multipart/form-data:
+          application/octet-stream:
             schema:
-              $ref: '#/components/schemas/userContestAnswer'
+              properties:
+                user_answer:
+                  $ref: '#/components/schemas/typeUserAnswer'
       responses:
         '200':
           description: OK
@@ -207,8 +217,14 @@ paths:
         - cookieJWTAuth: [ ]
       parameters:
         - in: path
-          description: Id of the user
-          name: user_id
+          description: Id of the olympiad
+          name: olympiad_id
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the stage
+          name: stage_id
           required: true
           schema:
             type: integer
@@ -225,14 +241,8 @@ paths:
           schema:
             type: integer
         - in: path
-          description: Id of the olympiad
-          name: olympiad_id
-          required: true
-          schema:
-            type: integer
-        - in: path
-          description: Id of the stage
-          name: stage_id
+          description: Id of the user
+          name: user_id
           required: true
           schema:
             type: integer
@@ -242,7 +252,9 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/userContestAnswer'
+                properties:
+                  user_answer:
+                    type: string    #TODO return FILE
         '403':
           description: Not enough rights for current user
           content:
@@ -255,6 +267,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/errorResponse'
+  /olympiad/{olympiad_id}/stage/{stage_id}/contest/{contest_id}/task/{task_id}/user/{user_id}/{filetype}:
     post:
       summary: Add user answer for a task
       security:
@@ -262,8 +275,14 @@ paths:
         - CSRFToken: [ ]
       parameters:
         - in: path
-          description: Id of the user
-          name: user_id
+          description: Id of the olympiad
+          name: olympiad_id
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the stage
+          name: stage_id
           required: true
           schema:
             type: integer
@@ -280,23 +299,24 @@ paths:
           schema:
             type: integer
         - in: path
-          description: Id of the olympiad
-          name: olympiad_id
+          description: Id of the user
+          name: user_id
           required: true
           schema:
             type: integer
         - in: path
-          description: Id of the stage
-          name: stage_id
+          description: Filetype
+          name: filetype
           required: true
           schema:
-            type: integer
+            $ref: '#/components/schemas/typeFiletype'
       requestBody:
-        required: true
         content:
-          multipart/form-data:
+          application/octet-stream:
             schema:
-              $ref: '#/components/schemas/userContestAnswer'
+              properties:
+                user_answer:
+                  $ref: '#/components/schemas/typeUserAnswer'
       responses:
         '200':
           description: OK
@@ -322,12 +342,6 @@ paths:
         - cookieJWTAuth: [ ]
       parameters:
         - in: path
-          description: Id of the contest
-          name: contest_id
-          required: true
-          schema:
-            type: integer
-        - in: path
           description: Id of the olympiad
           name: olympiad_id
           required: true
@@ -336,6 +350,12 @@ paths:
         - in: path
           description: Id of the stage
           name: stage_id
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the contest
+          name: contest_id
           required: true
           schema:
             type: integer
@@ -417,18 +437,6 @@ paths:
         - cookieJWTAuth: [ ]
       parameters:
         - in: path
-          description: Id of the contest
-          name: contest_id
-          required: true
-          schema:
-            type: integer
-        - in: path
-          description: Id of the user
-          name: user_id
-          required: true
-          schema:
-            type: integer
-        - in: path
           description: Id of the olympiad
           name: olympiad_id
           required: true
@@ -437,6 +445,18 @@ paths:
         - in: path
           description: Id of the stage
           name: stage_id
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the contest
+          name: contest_id
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the user
+          name: user_id
           required: true
           schema:
             type: integer
@@ -467,8 +487,14 @@ paths:
         - CSRFToken: [ ]
       parameters:
         - in: path
-          description: Id of the user
-          name: user_id
+          description: Id of the olympiad
+          name: olympiad_id
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the stage
+          name: stage_id
           required: true
           schema:
             type: integer
@@ -479,14 +505,8 @@ paths:
           schema:
             type: integer
         - in: path
-          description: Id of the olympiad
-          name: olympiad_id
-          required: true
-          schema:
-            type: integer
-        - in: path
-          description: Id of the stage
-          name: stage_id
+          description: Id of the user
+          name: user_id
           required: true
           schema:
             type: integer
@@ -524,12 +544,6 @@ paths:
         - cookieJWTAuth: [ ]
       parameters:
         - in: path
-          description: Id of the contest
-          name: contest_id
-          required: true
-          schema:
-            type: integer
-        - in: path
           description: Id of the olympiad
           name: olympiad_id
           required: true
@@ -538,6 +552,12 @@ paths:
         - in: path
           description: Id of the stage
           name: stage_id
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the contest
+          name: contest_id
           required: true
           schema:
             type: integer
@@ -567,18 +587,6 @@ paths:
         - cookieJWTAuth: [ ]
       parameters:
         - in: path
-          description: Id of the contest
-          name: contest_id
-          required: true
-          schema:
-            type: integer
-        - in: path
-          description: Id of the user
-          name: user_id
-          required: true
-          schema:
-            type: integer
-        - in: path
           description: Id of the olympiad
           name: olympiad_id
           required: true
@@ -587,6 +595,18 @@ paths:
         - in: path
           description: Id of the stage
           name: stage_id
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the contest
+          name: contest_id
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the user
+          name: user_id
           required: true
           schema:
             type: integer
@@ -619,12 +639,6 @@ paths:
         - cookieJWTAuth: [ ]
       parameters:
         - in: path
-          description: Id of the contest
-          name: contest_id
-          required: true
-          schema:
-            type: integer
-        - in: path
           description: Id of the olympiad
           name: olympiad_id
           required: true
@@ -633,6 +647,12 @@ paths:
         - in: path
           description: Id of the stage
           name: stage_id
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the contest
+          name: contest_id
           required: true
           schema:
             type: integer
@@ -660,12 +680,6 @@ paths:
         - CSRFToken: [ ]
       parameters:
         - in: path
-          description: Id of the contest
-          name: contest_id
-          required: true
-          schema:
-            type: integer
-        - in: path
           description: Id of the olympiad
           name: olympiad_id
           required: true
@@ -674,6 +688,12 @@ paths:
         - in: path
           description: Id of the stage
           name: stage_id
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the contest
+          name: contest_id
           required: true
           schema:
             type: integer
@@ -704,18 +724,6 @@ paths:
         - CSRFToken: [ ]
       parameters:
         - in: path
-          description: Id of the contest
-          name: contest_id
-          required: true
-          schema:
-            type: integer
-        - in: path
-          description: Id of the user
-          name: user_id
-          required: true
-          schema:
-            type: integer
-        - in: path
           description: Id of the olympiad
           name: olympiad_id
           required: true
@@ -724,6 +732,18 @@ paths:
         - in: path
           description: Id of the stage
           name: stage_id
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the contest
+          name: contest_id
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the user
+          name: user_id
           required: true
           schema:
             type: integer
@@ -754,18 +774,6 @@ paths:
         - CSRFToken: [ ]
       parameters:
         - in: path
-          description: Id of the contest
-          name: contest_id
-          required: true
-          schema:
-            type: integer
-        - in: path
-          description: Id of the appeal
-          name: appeal_id
-          required: true
-          schema:
-            type: integer
-        - in: path
           description: Id of the olympiad
           name: olympiad_id
           required: true
@@ -774,6 +782,18 @@ paths:
         - in: path
           description: Id of the stage
           name: stage_id
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the contest
+          name: contest_id
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the appeal
+          name: appeal_id
           required: true
           schema:
             type: integer
@@ -803,18 +823,6 @@ paths:
         - cookieJWTAuth: [ ]
       parameters:
         - in: path
-          description: Id of the contest
-          name: contest_id
-          required: true
-          schema:
-            type: integer
-        - in: path
-          description: Id of the appeal
-          name: appeal_id
-          required: true
-          schema:
-            type: integer
-        - in: path
           description: Id of the olympiad
           name: olympiad_id
           required: true
@@ -823,6 +831,18 @@ paths:
         - in: path
           description: Id of the stage
           name: stage_id
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the contest
+          name: contest_id
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the appeal
+          name: appeal_id
           required: true
           schema:
             type: integer
@@ -898,7 +918,8 @@ components:
     typeIdentifier:
       type: integer
     typeMark:
-      type: float
+      type: number
+      format: float
       minimum: 0
       maximum: 100
       nullable: true

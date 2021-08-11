@@ -2,9 +2,8 @@
 
 from datetime import datetime
 import enum
-from contest.tasks.models import UserInContest
 from common import get_current_db
-from contest.tasks.models import UserInContest
+from contest.tasks.models import UserInContest, Task
 
 db = get_current_db()
 
@@ -16,6 +15,9 @@ class Response(db.Model):
     work_id: id of the user's work
     user_id: id of the user
     contest_id: id of the contest
+
+    statuses: responses statuses
+    answers: answers in user response
     """
 
     __tablename__ = 'response'
@@ -64,6 +66,8 @@ class ResponseStatus(db.Model):
     timestamp: timestamp to determine the timeline
     status: status of the work
     mark: mark of the work
+
+    appeal: an appeal which is linked to this status
     """
 
     __tablename__ = 'responsestatus'
@@ -189,7 +193,7 @@ class ResponseAnswer(db.Model):
 
     answer_id = db.Column(db.Integer, autoincrement=True, primary_key=True)
     work_id = db.Column(db.Integer, db.ForeignKey('response.work_id'))
-    task_num = db.Column(db.Integer, db.ForeignKey('base_task.task_id'))
+    task_num = db.Column(db.Integer, db.ForeignKey(f'{Task.__tablename__}.task_id'))
     answer = db.Column(db.LargeBinary, nullable=False)
     filetype = db.Column(db.Enum(ResponseFiletypeEnum), nullable=False)
 
