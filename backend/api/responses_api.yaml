@@ -4,10 +4,16 @@ info:
   description: API description in Markdown.
   version: 1.0.0
 servers:
-  - url: http://127.0.0.1:5000
   - url: http://127.0.0.1:5000/contest/responses
+  - url: http://127.0.0.1:5000
 
 paths:
+  ######################################################################################################################
+  ##                                             Path definition                                                      ##
+  ######################################################################################################################
+
+  # User answers
+
   /olympiad/{olympiad_id}/stage/{stage_id}/contest/{contest_id}/user/{user_id}/response:
     get:
       summary: Get all user answers for the contest
@@ -182,7 +188,7 @@ paths:
       requestBody:
         required: true
         content:
-          application/json:
+          multipart/form-data:
             schema:
               $ref: '#/components/schemas/userContestAnswer'
       responses:
@@ -288,7 +294,7 @@ paths:
       requestBody:
         required: true
         content:
-          application/json:
+          multipart/form-data:
             schema:
               $ref: '#/components/schemas/userContestAnswer'
       responses:
@@ -306,6 +312,9 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/errorResponse'
+
+  # User status
+
   /olympiad/{olympiad_id}/stage/{stage_id}/contest/{contest_id}/user/self/status:
     get:
       summary: Get user's status and mark for reponse
@@ -600,6 +609,9 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/errorResponse'
+
+  # List of users
+
   /olympiad/{olympiad_id}/stage/{stage_id}/contest/{contest_id}/list/:
     get:
       summary: Get the consolidated sheets within a single competition or stage
@@ -637,6 +649,9 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/errorResponse'
+
+  # Appeal
+
   /olympiad/{olympiad_id}/stage/{stage_id}/contest/{contest_id}/user/self/appeal:
     post:
       summary: Create appeal for current user's response
@@ -828,6 +843,11 @@ paths:
 
 components:
   securitySchemes:
+
+  ######################################################################################################################
+  ##                                             Security components                                                  ##
+  ######################################################################################################################
+
     cookieJWTAuth:
       description: Authentication with JWT stored in cookies
       type: apiKey
@@ -839,44 +859,124 @@ components:
       in: header
       name: X-CSRF-TOKEN
   schemas:
+
+  ######################################################################################################################
+  ##                                             Error handling                                                       ##
+  ######################################################################################################################
+
     errorResponse:
-      title: "Error response"
-      description: "Common response with error message"
+      title: 'Error response'
       required:
-        - error_msg
+        - errors
       properties:
-        error_msg:
-          type: string
+        errors:
+          type: array
+          items:
+            type: object
+            title: 'Error value'
+            required:
+              - status
+              - title
+            properties:
+              class:
+                type: string
+              status:
+                type: integer
+              title:
+                type: string
+
+  ######################################################################################################################
+  ##                                             Common data types                                                    ##
+  ######################################################################################################################
+
+    typeCommonName:
+      type: string
+      maxLength: 32
+    typeDateTime:
+      type: string
+      format: date-time   #TODO example
+    typeIdentifier:
+      type: integer
+    typeMark:
+      type: float
+      minimum: 0
+      maximum: 100
+      nullable: true
+    typeUserAnswer:
+      type: string
+      format: binary
+    typeFiletype:
+      type: string
+      maxLength: 6
+    typeNullableIdentifier:
+      type: integer
+      nullable: true
+    typeMessage:
+      type: string
+      maxLength: 4096
+    typeNullableMessage:
+      type: string
+      maxLength: 4096
+      nullable: true
+    typeBoolean:
+      type: boolean
+
+  ######################################################################################################################
+  ##                                             Composite data types                                                 ##
+  ######################################################################################################################
+
+    typeUserAnswerForList:
+      title: "User answer"
+      required:
+        - task_id
+        - answer_id
+      properties:
+        task_id:
+          $ref: '#/components/schemas/typeIdentifier'
+        answer_id:
+          $ref: '#/components/schemas/typeIdentifier'
+
+    contestResultLine:
+      title: "Line in sheet"
+      required:
+        - user_id
+        - mark
+      properties:
+        user_id:
+          $ref: '#/components/schemas/typeIdentifier'
+        mark:
+          $ref: '#/components/schemas/typeMark'
+
+  ######################################################################################################################
+  ##                                             Path schemas                                                         ##
+  ######################################################################################################################
+
     userContestAnswer:
-      title: "User's contest answer"
+      title: "User's contest answer"    #TODO type object?
       required:
         - user_answer
         - filetype
       properties:
         user_answer:
-          type: string
-          # format: binary
+          $ref: '#/components/schemas/typeUserAnswer'
         filetype:
-          type: string
-    StatusHistoryItem:
+          $ref: '#/components/schemas/typeFiletype'
+
+    statusHistoryItem:
       title: "Item of status history"
       required:
         - status
         - datetime
       properties:
         status:
-          type: string
+          $ref: '#/components/schemas/typeCommonName'
         datetime:
-          type: string
-          format: date-time
-          description: "Change date and time"
+          $ref: '#/components/schemas/typeDateTime'
         appeal_id:
-          type: integer
-          nullable: true
+          $ref: '#/components/schemas/typeNullableIdentifier'
         mark:
-          type: number
-          format: float
-          nullable: true
+          $ref: '#/components/schemas/typeMark'
+
     userResponseStatusHistory:
       title: "Status history of user response"
       required:
@@ -885,25 +985,14 @@ components:
         - history
       properties:
         user_id:
-          type: integer
+          $ref: '#/components/schemas/typeIdentifier'
         contest_id:
-          type: integer
+          $ref: '#/components/schemas/typeIdentifier'
         history:
           type: array
           items:
-            $ref: '#/components/schemas/StatusHistoryItem'
-    contestResultLine:
-      title: "Line in sheet"
-      required:
-        - user_id
-        - mark
-      properties:
-        user_id:
-          type: integer
-        mark:
-          type: number
-          format: float
-          nullable: true
+            $ref: '#/components/schemas/statusHistoryItem'
+
     contestResultSheet:
       title: "Result sheet for one contest"
       required:
@@ -911,32 +1000,20 @@ components:
         - user_row
       properties:
         contest_id:
-          type: integer
+          $ref: '#/components/schemas/typeIdentifier'
         user_row:
           type: array
           items:
             $ref: '#/components/schemas/contestResultLine'
+
     appealMessage:
       title: Appeal message
       required:
         - message
       properties:
         message:
-          type: string
-    appealListInfo:
-      title: "All appeal for the user's response"
-      required:
-        - user_id
-        - work_id
-      properties:
-        user_id:
-          type: integer
-        work_id:
-          type: integer
-        appeal_elem:
-          type: array
-          items:
-            $ref: '#/components/schemas/commonAppealInfo'
+          $ref: '#/components/schemas/typeMessage'
+
     commonAppealInfo:
       title: "Common appeal info"
       required:
@@ -947,16 +1024,16 @@ components:
         - appeal_response
       properties:
         appeal_id:
-          type: integer
+          $ref: '#/components/schemas/typeIdentifier'
         status_id:
-          type: integer
+          $ref: '#/components/schemas/typeIdentifier'
         appeal_status:
-          type: string
+          $ref: '#/components/schemas/typeCommonName'
         appeal_message:
-          type: string
+          $ref: '#/components/schemas/typeMessage'
         appeal_response:
-          type: string
-          nullable: true
+          $ref: '#/components/schemas/typeNullableMessage'
+
     userContestAllAnswer:
       title: "ALl user's answer for the contest"
       required:
@@ -965,37 +1042,34 @@ components:
         - contest_id
       properties:
         user_id:
-          type: integer
+          $ref: '#/components/schemas/typeIdentifier'
         work_id:
-          type: integer
+          $ref: '#/components/schemas/typeIdentifier'
         contest_id:
-          type: integer
-        user_answer:
+          $ref: '#/components/schemas/typeIdentifier'
+        user_answers:
           type: array
           items:
-            type: object
-            properties:
-              task_id:
-                type: integer
-              answer_id:
-                type: integer
+            $ref: '#/components/schemas/typeUserAnswerForList'
+
     responseStatus:
       title: "User's response status and mark"
       required:
         - status
       properties:
         status:
-          type: string
+          $ref: '#/components/schemas/typeCommonName'
         mark:
-          type: number
-          format: float
+          $ref: '#/components/schemas/typeMark'
+
     createAppealInfo:
       title: "Id of created appeal"
       required:
         - appeal_id
       properties:
         appeal_id:
-          type: integer
+          $ref: '#/components/schemas/typeIdentifier'
+
     appealMessageReply:
       title: "Reply to user's appeal"
       required:
@@ -1003,9 +1077,8 @@ components:
         - accepted
       properties:
         message:
-          type: string
+          $ref: '#/components/schemas/typeMessage'
         accepted:
-          type: boolean
+          $ref: '#/components/schemas/typeBoolean'
         new_mark:
-          type: number
-          format: float
+          $ref: '#/components/schemas/typeMark'

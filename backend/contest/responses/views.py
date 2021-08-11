@@ -117,7 +117,7 @@ def get_user_all_answers(olympiad_id, stage_id, contest_id, user_id):
             "user_id": user_work.user_id,
             "work_id": user_work.work_id,
             "contest_id": user_work.contest_id,
-            "user_answer": user_answer
+            "user_answers": user_answer
         }, 200)
 
 
