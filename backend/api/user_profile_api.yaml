@@ -1,0 +1,294 @@
+openapi: 3.0.0
+info:
+  title: User service API
+  description: API description in Markdown.
+  version: 1.0.0
+servers:
+  - url: http://127.0.0.1:5000
+  - url: http://127.0.0.1:5000/user/profile
+
+paths:
+  ######################################################################################################################
+  ##                                             Path definition                                                      ##
+  ######################################################################################################################
+
+  /user:
+    get:
+      summary: Get common info for current user
+      security:
+        - JWTAcessToken: [ ]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/responseUserSelf'
+        '404':
+          description: User not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+  /password:
+    post:
+      summary: Change password for current user
+      security:
+        - JWTAcessToken: []
+        - CSRFAcessToken: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/requestPasswordSelf'
+      responses:
+        '200':
+          description: OK
+        '400':
+          description: Bad request or weak password
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+        '401':
+          description: Wrong credentials
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+        '404':
+          description: User not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+  /personal:
+    get:
+      summary: Get personal info for current user
+      security:
+        - JWTAcessToken: [ ]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/responsePersonalSelf'
+        '404':
+          description: Personal info is not set or user not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+  /university:
+    get:
+      summary: Get university student info for current user
+      security:
+        - JWTAcessToken: [ ]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/responseUniversitySelf'
+        '404':
+          description: User not found or is not a university student
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+  /groups:
+    get:
+      summary: Get groups for current user
+      security:
+        - JWTAcessToken: [ ]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/responseUserSelfGroup'
+        '404':
+          description: User not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+
+components:
+  securitySchemes:
+
+  ######################################################################################################################
+  ##                                             Security components                                                  ##
+  ######################################################################################################################
+    
+    JWTAcessToken:
+      description: Authentication with JWT stored in cookies
+      type: apiKey
+      in: cookie
+      name: access_token_cookie
+    JWTRefreshToken:
+      description: JWT stored in cookies to refresh an acess token
+      type: apiKey
+      in: cookie
+      name: refresh_token_cookie
+    CSRFAcessToken:
+      description: CSRF acess token
+      type: apiKey
+      in: header
+      name: X-CSRF-TOKEN
+    CSRFRefreshToken:
+      description: CSRF refresh token for "remember me" functionality
+      type: apiKey
+      in: header
+      name: X-CSRF-TOKEN
+  schemas:
+
+  ######################################################################################################################
+  ##                                             Error handling                                                       ##
+  ######################################################################################################################
+
+    errorResponse:
+      title: 'Error response'
+      required:
+        - errors
+      properties:
+        errors:
+          type: array
+          items:
+            type: object
+            title: 'Error value'
+            required:
+              - status
+              - title
+            properties:
+              class:
+                type: string
+              status:
+                type: integer
+              title:
+                type: string
+
+  ######################################################################################################################
+  ##                                             Common data types                                                    ##
+  ######################################################################################################################
+
+    typeEmail:
+      type: string
+      pattern: '^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$'
+      maxLength: 64
+      example: 'example@example.org'
+    typePassword:
+      type: string
+      format: password
+      maxLength: 128
+      example: qwertyA*1
+    typeCommonName:
+      type: string
+      maxLength: 32
+    typeDate:
+      type: string
+      format: date
+    typeIdentifier:
+      type: integer
+    typeGroupName:
+      type: string
+      maxLength: 32
+    typeUserRole:
+      title: 'User role'
+      type: string
+      enum: [ 'Admin', 'Creator', 'Participant', 'System' ]
+    typeUserType:
+      title: 'All user type'
+      type: string
+      enum: [ 'PreUniversity', 'Enrollee', 'School', 'University', 'Internal', 'PreRegister' ]
+
+  ######################################################################################################################
+  ##                                             Composite data types                                                 ##
+  ######################################################################################################################
+
+    # User data
+
+    typeUserInfo:
+      title: 'Common user info'
+      properties:
+        id:
+          $ref: '#/components/schemas/typeIdentifier'
+        username:
+          $ref: '#/components/schemas/typeCommonName'
+        role:
+          $ref: '#/components/schemas/typeUserRole'
+        type:
+          $ref: '#/components/schemas/typeUserType'
+    typePersonalInfo:
+      title: 'Full personal information'
+      properties:
+        email:
+          $ref: '#/components/schemas/typeEmail'
+        first_name:
+          $ref: '#/components/schemas/typeCommonName'
+        second_name:
+          $ref: '#/components/schemas/typeCommonName'
+        middle_name:
+          $ref: '#/components/schemas/typeCommonName'
+        date_of_birth:
+          $ref: '#/components/schemas/typeDate'
+
+    # Group data
+
+    typeGroup:
+      title: 'User group'
+      required:
+        - id
+        - name
+      properties:
+        id:
+          $ref: '#/components/schemas/typeIdentifier'
+        name:
+          $ref: '#/components/schemas/typeGroupName'
+
+  ######################################################################################################################
+  ##                                             Path schemas                                                         ##
+  ######################################################################################################################
+
+    # /user/self
+
+    responseUserSelf:
+      $ref: '#/components/schemas/typeUserInfo'
+
+    # /user/self/password
+
+    requestPasswordSelf:
+      title: 'Reset current users password'
+      required:
+        - new_password
+        - old_password
+      properties:
+        new_password:
+          $ref: '#/components/schemas/typePassword'
+        old_password:
+          $ref: '#/components/schemas/typePassword'
+
+    # /user/self/personal
+
+    responsePersonalSelf:
+      $ref: '#/components/schemas/typePersonalInfo'
+
+    # /user/self/university
+
+    responseUniversitySelf:
+      $ref: '#/components/schemas/typePersonalInfo'
+
+    # /user/self/groups
+
+    responseUserSelfGroup:
+      required:
+        - groups
+      properties:
+        groups:
+          type: array
+          items:
+            $ref: '#/components/schemas/typeGroup'

@@ -18,16 +18,6 @@ def get_missing(values, search):
     return [value for value in search if value not in values]
 
 
-def update_password(user_id, new_password, old_password, admin=False):
-    user = db_get_or_raise(User, "id", user_id)
-    if not admin:
-        app.password_policy.validate_password(old_password, user.password_hash)
-    password_hash = app.password_policy.hash_password(new_password, check=not admin)
-    user.password_hash = password_hash
-    db.session.commit()
-    return make_response({}, 200)
-
-
 @module.route('/register/internal', methods=['POST'])
 @jwt_required_role(['Admin', 'System'])
 def register_internal():
@@ -50,15 +40,8 @@ def register_internal():
 def preregister():
     abort(501)
 
+
 # User info
-
-
-@module.route('/user/self', methods=['GET'])
-@jwt_required()
-def get_user_self():
-    user = db_get_or_raise(User, "id", jwt_get_id())
-    return make_response(user.serialize(), 200)
-
 
 @module.route('/user/<int:user_id>', methods=['GET'])
 @jwt_required_role(['Admin', 'System', 'Creator'])
@@ -85,17 +68,10 @@ def get_user_by_group(group_id):
 
 # Password
 
-@module.route('/user/self/password', methods=['POST'])
-@jwt_required()
-def change_password_self():
-    values = request.openapi.body
-    user_id = jwt_get_id()
-    return update_password(user_id, values['new_password'], values['old_password'], False)
-
-
 @module.route('/user/<int:user_id>/password', methods=['POST'])
 @jwt_required_role(['Admin'])
 def change_password_admin(user_id):
+    from .util import update_password
     values = request.openapi.body
     return update_password(user_id, values['new_password'], None, True)
 
@@ -127,15 +103,6 @@ def set_user_type(user_id):
 
 
 # Personal info
-
-@module.route('/user/self/personal', methods=['GET'])
-@jwt_required()
-def get_user_info_self():
-    user = db_get_or_raise(User, "id", jwt_get_id())
-    if user.user_info is None:
-        raise NotFound('user.personal_info', 'for user %d' % user.id)
-    return make_response(user.user_info.serialize(), 200)
-
 
 @module.route('/user/<int:user_id>/personal', methods=['GET'])
 @jwt_required_role(['Admin', 'System', 'Creator'])
@@ -176,15 +143,6 @@ def set_user_info_admin(user_id):
 
 
 # University info
-
-@module.route('/user/self/university', methods=['GET'])
-@jwt_required()
-def get_university_info_self():
-    user = db_get_or_raise(User, "id", jwt_get_id())
-    if user.student_info is None:
-        raise NotFound('user.university_info', 'for user %d' % user.id)
-    return make_response(user.student_info.serialize(), 200)
-
 
 @module.route('/user/<int:user_id>/university', methods=['GET'])
 @jwt_required_role(['Admin', 'System', 'Creator'])
@@ -265,14 +223,6 @@ def remove_group_admin(group_id):
 
 
 # User group management
-
-@module.route('/user/self/groups', methods=['GET'])
-@jwt_required()
-def get_user_groups_self():
-    user = db_get_or_raise(User, "id", jwt_get_id())
-    groups = [grp.serialize() for grp in user.groups]
-    return make_response({'groups': groups}, 200)
-
 
 @module.route('/user/<int:user_id>/groups', methods=['GET'])
 @jwt_required_role(['Admin', 'System', 'Creator'])
