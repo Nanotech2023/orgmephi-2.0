@@ -5,7 +5,7 @@ from common.errors import AlreadyExists
 from common import get_current_app, get_current_module, get_current_db
 from common.util import db_get_all
 
-from user.models import user_types, add_user, UserRoleEnum, UserTypeEnum, add_personal_info, add_university_info, \
+from user.models import user_types, add_user, UserRoleEnum, UserTypeEnum, add_personal_info, create_university_info, \
     University, Country
 
 db = get_current_db()
@@ -38,9 +38,10 @@ def register():
 
         if reg_type == UserTypeEnum.university:
             student_data = values['student_info']
-            add_university_info(db.session, user, student_data['phone_number'], student_data['university'],
-                                grade_to_year(student_data['grade']), student_data['university_country'],
-                                student_data['citizenship'], student_data['region'], student_data['city'])
+            user.student_info = create_university_info(db.session, student_data['phone_number'],
+                                                       student_data['university'], grade_to_year(student_data['grade']),
+                                                       student_data['university_country'], student_data['citizenship'],
+                                                       student_data['region'], student_data['city'])
 
         db.session.commit()
     except sqlalchemy.exc.IntegrityError:
