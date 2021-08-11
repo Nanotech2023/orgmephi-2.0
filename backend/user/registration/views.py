@@ -1,5 +1,3 @@
-
-
 from flask import request, make_response
 import sqlalchemy.exc
 
