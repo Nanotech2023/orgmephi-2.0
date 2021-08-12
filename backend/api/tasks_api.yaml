@@ -249,37 +249,6 @@ paths:
               schema:
                 $ref: '#/components/schemas/errorResponse'
   /base_olympiad/{id_base_olympiad}:
-    get:
-      summary: Get info for the base olympiad (main contest)
-      security:
-        - cookieJWTAuth: [ ]
-        - CSRFToken: [ ]
-      parameters:
-        - in: path
-          description: Id of the olympiad
-          name: id_base_olympiad
-          required: true
-          schema:
-            type: integer
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/commonBaseContestInfo'
-        '400':
-          description: Bad request
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errorResponse'
-        '404':
-          description: Base olympiad not found
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errorResponse'
     patch:
       summary: Edit base olympiad info
       security:
