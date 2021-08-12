@@ -10,12 +10,29 @@ from typing import Callable, Any, Optional
 from .access_levels import OrgMephiAccessLevel
 
 
+def _enum_allowed_values(enum_type, validator):
+    from marshmallow import validate
+    if isinstance(validator, validate.OneOf):
+        return {v for v in validator.choices}
+    if isinstance(validator, validate.And):
+        return _enum_allowed_values_list(enum_type, validator.validators)
+    return set(enum_type)
+
+
+def _enum_allowed_values_list(enum_type, validators):
+    allowed = set(enum_type)
+    for val in validators:
+        dd = _enum_allowed_values(enum_type, val)
+        allowed = allowed & _enum_allowed_values(enum_type, val)
+    return allowed
+
+
 def _enum2properties(self, field, **kwargs):
     import marshmallow_enum
-    """Add an OpenAPI extension for marshmallow_enum.EnumField instances
-    """
+    import itertools
     if isinstance(field, marshmallow_enum.EnumField):
-        return {'type': 'string', 'enum': [m.value for m in field.enum]}
+        allowed = _enum_allowed_values_list(field.enum, field.validators)
+        return {'type': 'string', 'enum': [m.value for m in field.enum if m in allowed]}
     return {}
 
 
