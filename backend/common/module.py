@@ -126,6 +126,8 @@ class OrgMephiModule:
 
             func_wrapped = f
 
+            func_wrapped = self._wrap_db_commit(f)
+
             output_schema = options.pop('output_schema', None)
             if output_schema is not None:
                 func_wrapped = self._wrap_marshmallow_output(func_wrapped, output_schema)
@@ -204,8 +206,10 @@ class OrgMephiModule:
                     self._api_from_marshmallow(top)
                 else:
                     self._api_from_file(api_doc_path)
-        finally:
+        except Exception:
             _orgmephi_current_module.set(last_module)
+            raise
+        _orgmephi_current_module.set(last_module)
 
     def get_swagger_blueprints(self) -> list[Blueprint]:
         """
@@ -335,5 +339,22 @@ class OrgMephiModule:
                 return make_response()
             serialized = schema().dump(obj=result[0])
             return make_response(serialized, *result[1:])
+
+        return wrapper
+
+    @staticmethod
+    def _wrap_db_commit(f: Callable):
+        from . import get_current_db
+
+        @wraps(f)
+        def wrapper(*args, **kwargs):
+            db = get_current_db()
+            try:
+                result = f(*args, **kwargs)
+            except Exception:
+                db.session.rollback()
+                raise
+            db.session.rollback()
+            return result
 
         return wrapper

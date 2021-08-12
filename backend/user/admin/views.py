@@ -54,9 +54,7 @@ def register_internal():
         db.session.commit()
     except sqlalchemy.exc.IntegrityError:
         raise AlreadyExists('username', username)
-    except Exception:
-        db.session.rollback()
-        raise
+
     return user, 200
 
 
@@ -319,9 +317,6 @@ def add_group_admin():
         db.session.commit()
     except sqlalchemy.exc.IntegrityError:
         raise AlreadyExists('name', name)
-    except Exception:
-        db.session.rollback()
-        raise
     return group, 200
 
 

@@ -47,13 +47,9 @@ def register():
             user.student_info = StudentInfo()
             StudentInfoSchema().load(request.json['student_info'], session=db.session,
                                      instance=user.student_info, partial=True, unknown=EXCLUDE)
-
         db.session.commit()
     except sqlalchemy.exc.IntegrityError:
         raise AlreadyExists('username', username)
-    except Exception:
-        db.session.rollback()
-        raise
     return user
 
 
