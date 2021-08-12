@@ -10,7 +10,7 @@ from user.model_schemas.auth import UserSchema
 from user.model_schemas.personal import UserInfoSchema
 from user.model_schemas.university import StudentInfoSchema
 
-from .schemas import PassportRequestSchema, GroupsResponseSchema
+from .schemas import PasswordRequestSchema, GroupsResponseSchema
 
 db = get_current_db()
 module = get_current_module()
@@ -37,7 +37,7 @@ def get_user_self():
     return db_get_or_raise(User, "id", jwt_get_id()), 200
 
 
-@module.route('/password', methods=['POST'], input_schema=PassportRequestSchema)
+@module.route('/password', methods=['POST'], input_schema=PasswordRequestSchema)
 def change_password_self():
     """
     Change password for current user
@@ -50,7 +50,7 @@ def change_password_self():
         required: true
         content:
           application/json:
-            schema: PassportRequestSchema
+            schema: PasswordRequestSchema
       responses:
         '200':
           description: OK
@@ -62,7 +62,7 @@ def change_password_self():
           description: User not found
     """
     from user.util import update_password
-    values = request.marshmallow.body
+    values = request.marshmallow
     user_id = jwt_get_id()
     return update_password(user_id, values['new_password'], values['old_password'], False)
 

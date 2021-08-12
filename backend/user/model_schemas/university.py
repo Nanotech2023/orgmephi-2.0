@@ -10,7 +10,7 @@ class StudentInfoSchema(SQLAlchemySchema):
         load_instance = True
 
     user_id = auto_field(column_name='user_id', dump_only=True, required=False)
-    phone = auto_field(column_name='phone', validate=phone_validator, nullable=True)
+    phone = auto_field(column_name='phone', validate=phone_validator, nullable=True, example='8 (800) 555 35 35')
     university = auto_field(column_name='custom_university', validate=common_name_validator, nullable=True)
     admission_year = auto_field(column_name='admission_year', nullable=True)
     university_country = fields.Str(validate=common_name_validator, nullable=True)

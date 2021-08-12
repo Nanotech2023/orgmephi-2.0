@@ -1,21 +1,52 @@
-from flask import request, make_response
+from flask import request
+from marshmallow import EXCLUDE
 
 from common.errors import NotFound, AlreadyExists, InsufficientData
 from common import get_current_app, get_current_module, get_current_db
 from common.util import db_get_or_raise, db_get_one_or_none
 
-from user.models import User, UserRoleEnum, UserTypeEnum, add_user, user_roles, user_types, create_personal_info, \
-    UserInfo, create_university_info, add_group, Group
+from user.models import User, UserRoleEnum, UserTypeEnum, add_user, UserInfo, Group
+
+from user.model_schemas.auth import UserSchema, GroupSchema
+from user.model_schemas.personal import UserInfoSchema
+from user.model_schemas.university import StudentInfoSchema
+
+from .schemas import RegisterInternalRequestSchema, PasswordAdminRequestSchema, RoleRequestSchema, \
+    TypeRequestSchema, GroupAddRequestSchema, MembershipRequestSchema, PreregisterResponseSchema
 
 db = get_current_db()
 module = get_current_module()
 app = get_current_app()
 
 
-@module.route('/internal_register', methods=['POST'])
+@module.route('/internal_register', methods=['POST'],
+              input_schema=RegisterInternalRequestSchema, output_schema=UserSchema)
 def register_internal():
+    """
+    Register an internal user
+    ---
+    post:
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: RegisterInternalRequestSchema
+      security:
+        - JWTAccessToken: [ ]
+        - CSRFAccessToken: [ ]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: UserSchema
+        '400':
+          description: Bad request
+        '409':
+          description: Username already in use
+    """
     import sqlalchemy.exc
-    values = request.openapi.body
+    values = request.marshmallow
     username = values['username']
     password_hash = app.password_policy.hash_password(values['password'], check=False)
     try:
@@ -26,34 +57,136 @@ def register_internal():
     except Exception:
         db.session.rollback()
         raise
-    return make_response(user.serialize(), 200)
+    return user, 200
 
 
-@module.route('/preregister', methods=['POST'])
+@module.route('/preregister', methods=['POST'], output_schema=PreregisterResponseSchema)
 def preregister():
+    """
+    !NOT IMPLEMENTED!
+    Register an unconfirmed user with a one-time password
+    ---
+    post:
+      security:
+        - JWTAccessToken: [ ]
+        - CSRFAccessToken: [ ]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: PreregisterResponseSchema
+        '403':
+          description: Invalid role of current user
+    """
     from flask import abort
     abort(501)
 
 
-@module.route('/password/<int:user_id>', methods=['POST'])
+@module.route('/password/<int:user_id>', methods=['POST'], input_schema=PasswordAdminRequestSchema)
 def change_password_admin(user_id):
+    """
+    Change password for another user
+    ---
+    post:
+      security:
+        - JWTAccessToken: [ ]
+        - CSRFAccessToken: [ ]
+      parameters:
+        - in: path
+          description: Id of the user
+          name: user_id
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: PasswordAdminRequestSchema
+      responses:
+        '200':
+          description: OK
+        '400':
+          description: Bad request or weak password
+        '403':
+          description: Invalid role of current user
+        '404':
+          description: User not found
+    """
     from user.util import update_password
-    values = request.openapi.body
+    values = request.marshmallow
     return update_password(user_id, values['new_password'], None, True)
 
 
-@module.route('/role/<int:user_id>', methods=['PUT'])
+@module.route('/role/<int:user_id>', methods=['PUT'], input_schema=RoleRequestSchema)
 def set_user_role(user_id):
-    role = user_roles[request.openapi.body['role']]
+    """
+    Set the role of any user
+    ---
+    put:
+      security:
+        - JWTAccessToken: [ ]
+        - CSRFAccessToken: [ ]
+      parameters:
+        - in: path
+          description: Id of the user
+          name: user_id
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: RoleRequestSchema
+      responses:
+        '200':
+          description: OK
+        '403':
+          description: Invalid role of current user
+        '404':
+          description: User not found
+    """
+    role = request.marshmallow['role']
     user = db_get_or_raise(User, 'id', user_id)
     user.role = role
     db.session.commit()
-    return make_response({}, 200)
+    return {}, 200
 
 
-@module.route('/type/<int:user_id>', methods=['PUT'])
+@module.route('/type/<int:user_id>', methods=['PUT'], input_schema=TypeRequestSchema)
 def set_user_type(user_id):
-    user_type = user_types[request.openapi.body['type']]
+    """
+    Set the type of any user
+    ---
+    put:
+      security:
+        - JWTAccessToken: [ ]
+        - CSRFAccessToken: [ ]
+      parameters:
+        - in: path
+          description: Id of the user
+          name: user_id
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: TypeRequestSchema
+      responses:
+        '200':
+          description: OK
+        '403':
+          description: Invalid role of current user
+        '404':
+          description: User not found
+        '409':
+          description: User is missing required info (e.g. university info for a university student)
+    """
+    user_type = request.marshmallow['type']
     user = db_get_or_raise(User, 'id', user_id)
     if user_type != UserTypeEnum.internal and user_type != UserTypeEnum.pre_register and user.user_info is None:
         raise InsufficientData('user', 'personal info')
@@ -61,110 +194,242 @@ def set_user_type(user_id):
         raise InsufficientData('user', 'university info')
     user.type = user_type
     db.session.commit()
-    return make_response({}, 200)
+    return {}, 200
 
 
-def get_missing(values, search):
-    return [value for value in search if value not in values]
-
-
-@module.route('/personal/<int:user_id>', methods=['PATCH'])
+@module.route('/personal/<int:user_id>', methods=['PATCH'], input_schema=UserInfoSchema)
 def set_user_info_admin(user_id):
-    values = request.openapi.body
+    """
+    Set personal info for a user
+    ---
+    patch:
+      security:
+        - JWTAccessToken: [ ]
+        - CSRFAccessToken: [ ]
+      parameters:
+        - in: path
+          description: Id of the user
+          name: user_id
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: UserInfoSchema
+      responses:
+        '200':
+          description: OK
+        '403':
+          description: Invalid role of current user
+        '404':
+          description: User not found
+        '409':
+          description: Personal info is not set and request is not full
+    """
+    values = request.marshmallow
     user = db_get_or_raise(User, "id", user_id)
     if 'email' in values:
         info = db_get_one_or_none(UserInfo, 'email', values['email'])
         if info is not None and info.user_id != user_id:
             raise AlreadyExists('user.email', values['email'])
     if user.user_info is None:
-        missing = get_missing(values, ['email', 'first_name', 'second_name', 'middle_name', 'date_of_birth'])
-        if len(missing) > 0:
-            raise InsufficientData(str(missing), 'for user %d' % user.id)
-        try:
-            user.user_info = create_personal_info(values['email'], values['first_name'], values['second_name'],
-                                                  values['middle_name'], values['date_of_birth'])
-        except Exception:
-            db.session.rollback()
-            raise
-    else:
-        try:
-            user.user_info.update(**values)
-        except Exception:
-            db.session.rollback()
-            raise
+        user.user_info = UserInfo()
+    UserInfoSchema().load(request.json, session=db.session, instance=user.user_info, partial=True, unknown=EXCLUDE)
     db.session.commit()
-    return make_response(user.user_info.serialize(), 200)
+    return {}, 200
 
 
-@module.route('/university/<int:user_id>', methods=['PATCH'])
+@module.route('/university/<int:user_id>', methods=['PATCH'], input_schema=StudentInfoSchema)
 def set_university_info_admin(user_id):
-    values = request.openapi.body
+    """
+    Set university student info for a user
+    ---
+    patch:
+      security:
+        - JWTAccessToken: [ ]
+        - CSRFAccessToken: [ ]
+      parameters:
+        - in: path
+          description: Id of the user
+          name: user_id
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: StudentInfoSchema
+      responses:
+        '200':
+          description: OK
+        '403':
+          description: Invalid role of current user
+        '404':
+          description: User not found or is not a university student
+        '409':
+          description: University info is not set and request is not full
+    """
+    from user.models.university import StudentInfo
+    values = request.marshmallow
     user = db_get_or_raise(User, "id", user_id)
     if user.student_info is None:
-        missing = get_missing(values, ['phone_number', 'university', 'admission_year', 'university_country',
-                                       'citizenship', 'region', 'city'])
-        if len(missing) > 0:
-            raise InsufficientData(str(missing), 'for user %d' % user.id)
-        try:
-            user.student_info = create_university_info(values['phone_number'], values['university'],
-                                                       values['admission_year'], values['university_country'],
-                                                       values['citizenship'], values['region'], values['city'])
-        except Exception:
-            db.session.rollback()
-            raise
-    else:
-        try:
-            user.student_info.update(**values)
-        except Exception:
-            db.session.rollback()
-            raise
+        user.student_info = StudentInfo()
+    StudentInfoSchema().load(request.json, session=db.session, instance=user.student_info, partial=True,
+                             unknown=EXCLUDE)
     db.session.commit()
-    return make_response(user.student_info.serialize(), 200)
+    return {}, 200
 
 
-@module.route('/add_group', methods=['POST'])
+@module.route('/add_group', methods=['POST'], input_schema=GroupAddRequestSchema, output_schema=GroupSchema)
 def add_group_admin():
+    """
+    Add a group
+    ---
+    post:
+      security:
+        - JWTAccessToken: [ ]
+        - CSRFAccessToken: [ ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: GroupAddRequestSchema
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: GroupSchema
+        '403':
+          description: Invalid role of current user
+        '404':
+          description: Group not found
+        '409':
+          description: Group already exists
+    """
     import sqlalchemy.exc
-    values = request.openapi.body
+    values = request.marshmallow
     name = values['name']
     try:
-        group = add_group(db.session, name)
+        group = Group(name=name)
+        db.session.add(group)
         db.session.commit()
     except sqlalchemy.exc.IntegrityError:
         raise AlreadyExists('name', name)
     except Exception:
         db.session.rollback()
         raise
-    return make_response(group.serialize(), 200)
+    return group, 200
 
 
 @module.route('/remove_group/<int:group_id>', methods=['POST'])
 def remove_group_admin(group_id):
+    """
+    Delete a group
+    ---
+    post:
+      security:
+        - JWTAccessToken: [ ]
+        - CSRFAccessToken: [ ]
+      parameters:
+        - in: path
+          description: ID of the group
+          name: group_id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: OK
+        '403':
+          description: Invalid role of current user
+        '404':
+          description: Group not found
+    """
     group = db_get_or_raise(Group, 'id', group_id)
     db.session.delete(group)
     db.session.commit()
-    return make_response({}, 200)
+    return {}, 200
 
 
-@module.route('/add_member/<int:user_id>', methods=['POST'])
+@module.route('/add_member/<int:user_id>', methods=['POST'], input_schema=MembershipRequestSchema)
 def add_user_groups(user_id):
-    values = request.openapi.body
+    """
+    Assign a user to a group
+    ---
+    post:
+      security:
+        - JWTAccessToken: [ ]
+        - CSRFAccessToken: [ ]
+      parameters:
+        - in: path
+          description: Id of the user
+          name: user_id
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: MembershipRequestSchema
+      responses:
+        '200':
+          description: OK
+        '403':
+          description: Invalid role of current user
+        '404':
+          description: User or group not found
+        '409':
+          description: User already in the group
+    """
+    values = request.marshmallow
     user = db_get_or_raise(User, "id", user_id)
     group = db_get_or_raise(Group, 'id', values['group_id'])
     if user in group.users:
         raise AlreadyExists('group.users', str(user_id))
     group.users.append(user)
     db.session.commit()
-    return make_response({}, 200)
+    return {}, 200
 
 
-@module.route('/remove_member/<int:user_id>', methods=['POST'])
+@module.route('/remove_member/<int:user_id>', methods=['POST'], input_schema=MembershipRequestSchema)
 def remove_user_groups(user_id):
-    values = request.openapi.body
+    """
+    Remove a user from a group
+    ---
+    post:
+      security:
+        - JWTAccessToken: [ ]
+        - CSRFAccessToken: [ ]
+      parameters:
+        - in: path
+          description: Id of the user
+          name: user_id
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: MembershipRequestSchema
+      responses:
+        '200':
+          description: OK
+        '403':
+          description: Invalid role of current user
+        '404':
+          description: User or group not found
+    """
+    values = request.marshmallow
     user = db_get_or_raise(User, "id", user_id)
     group = db_get_or_raise(Group, 'id', values['group_id'])
     if user not in group.users:
         raise NotFound('group.users', str(user_id))
     group.users.remove(user)
     db.session.commit()
-    return make_response({}, 200)
+    return {}, 200

@@ -1,5 +1,6 @@
 from flask import request
 import sqlalchemy.exc
+from marshmallow import EXCLUDE
 
 from common.errors import AlreadyExists
 from common import get_current_app, get_current_module, get_current_db
@@ -39,13 +40,13 @@ def register():
         user = add_user(db.session, username, password_hash, UserRoleEnum.participant, reg_type)
         user.user_info = UserInfo()
         UserInfoSchema().load(request.json['personal_info'], session=db.session,
-                              instance=user.user_info, partial=True)
+                              instance=user.user_info, partial=True, unknown=EXCLUDE)
         user.user_info.email = username
 
         if reg_type == UserTypeEnum.university:
             user.student_info = StudentInfo()
             StudentInfoSchema().load(request.json['student_info'], session=db.session,
-                                     instance=user.student_info, partial=True)
+                                     instance=user.student_info, partial=True, unknown=EXCLUDE)
 
         db.session.commit()
     except sqlalchemy.exc.IntegrityError:

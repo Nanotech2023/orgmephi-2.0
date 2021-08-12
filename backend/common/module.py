@@ -29,7 +29,6 @@ def _enum_allowed_values_list(enum_type, validators):
 
 def _enum2properties(self, field, **kwargs):
     import marshmallow_enum
-    import itertools
     if isinstance(field, marshmallow_enum.EnumField):
         allowed = _enum_allowed_values_list(field.enum, field.validators)
         return {'type': 'string', 'enum': [m.value for m in field.enum if m in allowed]}
@@ -307,8 +306,14 @@ class OrgMephiModule:
         def wrapper(*args, **kwargs):
             from flask import request, make_response
             from marshmallow import ValidationError, EXCLUDE
+            from marshmallow_sqlalchemy import SQLAlchemySchema
             try:
-                request.marshmallow = schema().load(data=request.json, unknown=EXCLUDE)
+                if issubclass(schema, SQLAlchemySchema):
+                    sch = schema()
+                    sch.__class__ = Schema
+                    request.marshmallow = sch.load(data=request.json, unknown=EXCLUDE)
+                else:
+                    request.marshmallow = schema().load(data=request.json, unknown=EXCLUDE)
             except ValidationError as err:
                 return make_response({
                     "class": err.__class__.__name__,
