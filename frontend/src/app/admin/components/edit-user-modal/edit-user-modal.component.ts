@@ -52,6 +52,12 @@ export class EditUserModalComponent implements OnInit
     onClick( $event: any )
     {
         if ( $event.target == this.modal?.nativeElement )
-            this.modalVisible = false
+            this.hideModal()
+    }
+
+    hideModal()
+    {
+        this.modalVisible = false
+        this.modalVisibleChange.emit( this.modalVisible )
     }
 }
