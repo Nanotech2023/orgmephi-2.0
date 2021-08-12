@@ -10,6 +10,15 @@ from typing import Callable, Any, Optional
 from .access_levels import OrgMephiAccessLevel
 
 
+def _enum2properties(self, field, **kwargs):
+    import marshmallow_enum
+    """Add an OpenAPI extension for marshmallow_enum.EnumField instances
+    """
+    if isinstance(field, marshmallow_enum.EnumField):
+        return {'type': 'string', 'enum': [m.value for m in field.enum]}
+    return {}
+
+
 class OrgMephiModule:
     """
     Application module
@@ -236,12 +245,16 @@ class OrgMephiModule:
         from apispec_webframeworks.flask import FlaskPlugin
         from apispec_oneofschema import MarshmallowPlugin
 
+        plugin = MarshmallowPlugin()
+
         spec = APISpec(
             title=self.get_full_name(top),
             version='1.0.0',
             openapi_version='3.0.2',
-            plugins=[FlaskPlugin(), MarshmallowPlugin()]
+            plugins=[FlaskPlugin(), plugin]
         )
+
+        plugin.converter.add_attribute_function(_enum2properties)
 
         spec.components.security_scheme('JWTAccessToken', self._jwt_access_token_schema)
         spec.components.security_scheme('JWTRefreshToken', self._jwt_refresh_token_schema)
@@ -295,14 +308,10 @@ class OrgMephiModule:
         @wraps(f)
         def wrapper(*args, **kwargs):
             from flask import make_response
-            from marshmallow import ValidationError
             result = f(*args, **kwargs)
             if len(result) == 0:
                 return make_response()
             serialized = schema().dump(obj=result[0])
-            errors = schema().validate(serialized)
-            if len(errors) > 0:
-                raise ValidationError(errors)
             return make_response(serialized, *result[1:])
 
         return wrapper
