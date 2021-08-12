@@ -276,7 +276,7 @@ class OrgMephiModule:
         @self._swagger.route('/api.yaml', methods=['GET'])
         def serve_api():
             nonlocal api
-            return api, 200
+            return api, 200, {'Content-Type': 'text/plain'}
 
     def _get_parents(self, top=None):
         if self._parent is None or self == top:
