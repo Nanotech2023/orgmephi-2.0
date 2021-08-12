@@ -34,6 +34,39 @@ paths:
               schema:
                 $ref: '#/components/schemas/errorResponse'
 
+  /olympiad_type/{id_olympiad_type}:
+    get:
+      summary: get olympiad type
+      security:
+        - cookieJWTAuth: [ ]
+        - CSRFToken: [ ]
+      parameters:
+        - in: path
+          description: Id of the olympiad type
+          name: id_olympiad_type
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/olympiadTypeInfo'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+        '404':
+          description: Olympiad type not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+
   # Base olympiad
 
   /base_olympiad/all:
@@ -313,7 +346,7 @@ paths:
 
   # Users
 
-  /olympiad/{id_olympiad}/stage/{id_stage}/contest/{id_contest}/certificate:
+  /olympiad/{id_olympiad}/stage/{id_stage}/contest/{id_contest}/certificate/self:
     get:
       summary: certificate of user in contest
       parameters:
@@ -366,7 +399,7 @@ paths:
 
   # Variant
 
-  /olympiad/{id_olympiad}/stage/{id_stage}/contest/{id_contest}/variant/self:
+  /contest/{id_contest}/variant/self:
     get:
       summary: Get info for a different variant
       security:
@@ -419,7 +452,7 @@ paths:
 
   # Tasks
 
-  /olympiad/{id_olympiad}/stage/{id_stage}/contest/{id_contest}/variant/{id_variant}/tasks/self:
+  /contest/{id_contest}/variant/{id_variant}/tasks/self:
     get:
       summary: Get info for a different tasks
       security:
@@ -479,7 +512,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/errorResponse'
 
-  /olympiad/{id_olympiad}/stage/{id_stage}/contest/{id_contest}/variant/{id_variant}/tasks/{id_task}:
+  /contest/{id_contest}/variant/{id_variant}/tasks/{id_task}/self:
     get:
       summary: list of tasks in variant
       parameters:
@@ -530,7 +563,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/errorResponse'
 
-  /olympiad/{id_olympiad}/stage/{id_stage}/contest/{id_contest}/variant/{id_variant}/tasks/{id_task}/image:
+  /contest/{id_contest}/variant/{id_variant}/tasks/{id_task}/image/self:
     get:
       summary: Task image
       parameters:
@@ -743,6 +776,9 @@ components:
                 type: array
                 items:
                   $ref: '#/components/schemas/typeTargetClass'
+
+    # /base_olympiad/{id_base_olympiad}
+
     commonBaseContestInfo:
       title: Base contest common info
       description: Request to get base contest info
@@ -777,6 +813,9 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/typeTargetClass'
+
+    # /olympiad/{id_olympiad}/stage/{id_stage}
+
     stageInfo:
       title: Stage common info
       description: Request to get stage info
@@ -797,6 +836,9 @@ components:
           $ref: '#/components/schemas/typePartNum'
         this_stage_condition:
           $ref: '#/components/schemas/typeOlympiadText'
+
+    # /olympiad/{id_olympiad}/stage/{id_stage}/contest/{id_contest}
+
     commonContestInfo:
       title: Contest common info
       description: Request to get contest info
@@ -820,6 +862,9 @@ components:
           $ref: '#/components/schemas/typeIdentifier'
         previous_participation_condition:
           $ref: '#/components/schemas/typeParticipant'
+
+    # /contest/{id_contest}/variant/self:
+
     variantInfo:
       title: Common variant info
       description: Request to get variant info
@@ -834,6 +879,9 @@ components:
           $ref: '#/components/schemas/typePartNum'
         variant_description:
           $ref: '#/components/schemas/typeOlympiadText'
+
+    # /olympiad/{id_olympiad}/stage/all
+
     stagesInOlympiad:
       title: Get stages in olympiad
       description: Request to get stages in olympiad
@@ -853,6 +901,9 @@ components:
                 $ref: '#/components/schemas/typePartNum'
               this_stage_condition:
                 $ref: '#/components/schemas/typeOlympiadText'
+
+    # /contest/{id_contest}/variant/{id_variant}/tasks/self
+
     tasksInVariant:
       title: Get contests in stage
       description: Request to get contests in stage
@@ -881,6 +932,9 @@ components:
                       $ref: '#/components/schemas/typeMultipleAnswer'
                     is_right_answer:
                       $ref: '#/components/schemas/typeCorrectness'
+
+    # /olympiad/{id_olympiad}/stage/{id_stage}/contest/all
+
     contestsInStage:
       title: Get contests in stage
       description: Request to get contests in stage
@@ -906,6 +960,9 @@ components:
                 $ref: '#/components/schemas/typeIdentifier'
               previous_participation_condition:
                 $ref: '#/components/schemas/typeParticipant'
+
+    # /contest/{id_contest}/variant/{id_variant}/tasks/{id_task}/self
+
     plainTaskInfo:
       title: Get info of task with plain text
       description: Request to get info of task with plain text
@@ -960,14 +1017,9 @@ components:
                 $ref: '#/components/schemas/multipleTaskInfo'
               correct:
                 $ref: '#/components/schemas/typeCorrectness'
-    userCertificate:
-      title: Get certificate of the user
-      description: Request to get certificate of the user
-      required:
-        - certificate
-      properties:
-        certificate:
-          $ref: '#/components/schemas/typeFile'
+
+    # /contest/{id_contest}/variant/{id_variant}/tasks/{id_task}/image/self
+
     taskInVariantImage:
       title: Get image of the task
       description: Request to get task image
@@ -979,6 +1031,24 @@ components:
           $ref: '#/components/schemas/typeIdentifier'
         image_of_task:
           $ref: '#/components/schemas/typeFile'
+
+
+    # /olympiad/{id_olympiad}/stage/{id_stage}/contest/{id_contest}/certificate
+
+
+    userCertificate:
+      title: Get certificate of the user
+      description: Request to get certificate of the user
+      required:
+        - certificate
+      properties:
+        certificate:
+          $ref: '#/components/schemas/typeFile'
+
+
+
+    # /olympiad_type/all
+
     olympiadTypes:
       title: All olympiad types
       description: Request to get all olympiad types
@@ -994,4 +1064,18 @@ components:
                 $ref: '#/components/schemas/typeIdentifier'
               olympiad_type:
                 $ref: '#/components/schemas/typeOlympiadType'
+
+    # /olympiad_type/{id_olympiad_type}
+
+    olympiadTypeInfo:
+      title: Add or remove olympiad type
+      description: Request to add or remove olympiad type
+      required:
+        - olympiad_type_id
+        - olympiad_type
+      properties:
+        olympiad_type_id:
+          $ref: '#/components/schemas/typeIdentifier'
+        olympiad_type:
+          $ref: '#/components/schemas/typeOlympiadType'
 
