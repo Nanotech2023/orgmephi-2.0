@@ -125,7 +125,7 @@ def get_user_answer_by_id(olympiad_id, stage_id, contest_id, answer_id):
     user_answer = db_get_or_raise(ResponseAnswer, 'answer_id', answer_id)
     return make_response(
         {
-            "user_answer": user_answer.answer,  # TODO BLOB not for json
+            "user_answer": str(user_answer.answer),  # TODO BLOB not for json
             "filetype": user_answer.filetype.value
         }, 200)
 

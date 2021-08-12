@@ -925,7 +925,7 @@ components:
       nullable: true
     typeUserAnswer:
       type: string
-      format: binary
+     # format: binary     # TODO FILE
     typeFiletype:
       type: string
       maxLength: 6
@@ -941,6 +941,9 @@ components:
       nullable: true
     typeBoolean:
       type: boolean
+    typeStatus:
+      type: string
+      enum: [ "NotChecked", "Accepted", "Rejected", "Appeal", "Revision" ]
 
   ######################################################################################################################
   ##                                             Composite data types                                                 ##
@@ -1079,7 +1082,7 @@ components:
         - status
       properties:
         status:
-          $ref: '#/components/schemas/typeCommonName'
+          $ref: '#/components/schemas/typeStatus'
         mark:
           $ref: '#/components/schemas/typeMark'
 

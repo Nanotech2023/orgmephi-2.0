@@ -223,7 +223,7 @@ def add_response_status(work_id, status=None, mark=None):
     if status is None:
         new_status = work_status['NotChecked']
     else:
-        new_status = work_status[status]
+        new_status = work_status.get(status)
     if mark is None:
         response_status = ResponseStatus(
             work_id=work_id,
