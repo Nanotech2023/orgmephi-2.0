@@ -1,0 +1,277 @@
+openapi: 3.0.0
+info:
+  title: Student responses service API
+  description: API description in Markdown.
+  version: 1.0.0
+servers:
+  - url: http://127.0.0.1:5000/contest/responses/appeal
+  - url: http://127.0.0.1:5000
+
+paths:
+  ######################################################################################################################
+  ##                                             Path definition                                                      ##
+  ######################################################################################################################
+  # Appeal
+
+  /contest/{contest_id}/user/self/appeal:
+    post:
+      summary: Create appeal for current user's response
+      security:
+        - cookieJWTAuth: [ ]
+        - CSRFToken: [ ]
+      parameters:
+        - in: path
+          description: Id of the contest
+          name: contest_id
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/appealMessage'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/createAppealInfo'
+        '404':
+          description: User or contest not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+  /contest/{contest_id}/user/{user_id}/appeal:
+    post:
+      summary: Create appeal for user's response
+      security:
+        - cookieJWTAuth: [ ]
+        - CSRFToken: [ ]
+      parameters:
+        - in: path
+          description: Id of the contest
+          name: contest_id
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the user
+          name: user_id
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/appealMessage'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/createAppealInfo'
+        '404':
+          description: User or contest not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+  /contest/{contest_id}/appeal/{appeal_id}/reply:
+    post:
+      summary: Reply appeal for the user's response
+      security:
+        - cookieJWTAuth: [ ]
+        - CSRFToken: [ ]
+      parameters:
+        - in: path
+          description: Id of the contest
+          name: contest_id
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the appeal
+          name: appeal_id
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/appealMessageReply'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/commonAppealInfo'
+        '404':
+          description: User or contest not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+  /contest/{contest_id}/appeal/{appeal_id}:
+    get:
+      summary: Get appeal info
+      security:
+        - cookieJWTAuth: [ ]
+      parameters:
+        - in: path
+          description: Id of the contest
+          name: contest_id
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the appeal
+          name: appeal_id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/commonAppealInfo'
+        '404':
+          description: Appeal or contest not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+
+
+components:
+  securitySchemes:
+
+  ######################################################################################################################
+  ##                                             Security components                                                  ##
+  ######################################################################################################################
+
+    cookieJWTAuth:
+      description: Authentication with JWT stored in cookies
+      type: apiKey
+      in: cookie
+      name: access_token_cookie
+    CSRFToken:
+      description: CSRF token
+      type: apiKey
+      in: header
+      name: X-CSRF-TOKEN
+  schemas:
+
+  ######################################################################################################################
+  ##                                             Error handling                                                       ##
+  ######################################################################################################################
+
+    errorResponse:
+      title: 'Error response'
+      required:
+        - errors
+      properties:
+        errors:
+          type: array
+          items:
+            type: object
+            title: 'Error value'
+            required:
+              - status
+              - title
+            properties:
+              class:
+                type: string
+              status:
+                type: integer
+              title:
+                type: string
+
+  ######################################################################################################################
+  ##                                             Common data types                                                    ##
+  ######################################################################################################################
+
+    typeCommonName:
+      type: string
+      maxLength: 32
+    typeIdentifier:
+      type: integer
+    typeMark:
+      type: number
+      format: float
+      minimum: 0
+      maximum: 100
+      nullable: true
+    typeMessage:
+      type: string
+      maxLength: 4096
+    typeNullableMessage:
+      type: string
+      maxLength: 4096
+      nullable: true
+    typeBoolean:
+      type: boolean
+
+  ######################################################################################################################
+  ##                                             Path schemas                                                         ##
+  ######################################################################################################################
+
+    appealMessage:
+      title: Appeal message
+      required:
+        - message
+      properties:
+        message:
+          $ref: '#/components/schemas/typeMessage'
+
+    commonAppealInfo:
+      title: "Common appeal info"
+      required:
+        - appeal_id
+        - status_id
+        - appeal_status
+        - appeal_message
+        - appeal_response
+      properties:
+        appeal_id:
+          $ref: '#/components/schemas/typeIdentifier'
+        status_id:
+          $ref: '#/components/schemas/typeIdentifier'
+        appeal_status:
+          $ref: '#/components/schemas/typeCommonName'
+        appeal_message:
+          $ref: '#/components/schemas/typeMessage'
+        appeal_response:
+          $ref: '#/components/schemas/typeNullableMessage'
+
+    createAppealInfo:
+      title: "Id of created appeal"
+      required:
+        - appeal_id
+      properties:
+        appeal_id:
+          $ref: '#/components/schemas/typeIdentifier'
+
+    appealMessageReply:
+      title: "Reply to user's appeal"
+      required:
+        - message
+        - accepted
+      properties:
+        message:
+          $ref: '#/components/schemas/typeMessage'
+        accepted:
+          $ref: '#/components/schemas/typeBoolean'
+        new_mark:
+          $ref: '#/components/schemas/typeMark'

@@ -1,0 +1,368 @@
+openapi: 3.0.0
+info:
+  title: Student responses service API
+  description: API description in Markdown.
+  version: 1.0.0
+servers:
+  - url: http://127.0.0.1:5000/contest/responses/answers
+  - url: http://127.0.0.1:5000
+
+paths:
+  ######################################################################################################################
+  ##                                             Path definition                                                      ##
+  ######################################################################################################################
+
+  # User answers
+
+  /contest/{contest_id}/user/{user_id}/response:
+    get:
+      summary: Get all user answers for the contest
+      security:
+        - cookieJWTAuth: [ ]
+      parameters:
+        - in: path
+          description: Id of the contest
+          name: contest_id
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the user
+          name: user_id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/userContestAllAnswer'
+        '403':
+          description: Not enough rights for current user
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+        '404':
+          description: User or contest not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+  /contest/{contest_id}/answer/{answer_id}:
+    get:
+      summary: Get user's answer by id
+      security:
+        - cookieJWTAuth: [ ]
+      parameters:
+        - in: path
+          description: Id of the contest
+          name: contest_id
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the answer
+          name: answer_id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/userContestAnswer'
+        '403':
+          description: Not enough rights for current user
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+        '404':
+          description: User or contest not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+  /contest/{contest_id}/task/{task_id}/user/self:
+    get:
+      summary: Get current user answer for the task
+      security:
+        - cookieJWTAuth: [ ]
+      parameters:
+        - in: path
+          description: Id of the contest
+          name: contest_id
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the task
+          name: task_id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                properties:
+                  user_answer:
+                    type: string    #TODO return FILE
+        '404':
+          description: User, contest or task not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+  /contest/{contest_id}/task/{task_id}/user/self/{filetype}:
+    post:
+      summary: Add current user answer for the task
+      security:
+        - cookieJWTAuth: [ ]
+        - CSRFToken: [ ]
+      parameters:
+        - in: path
+          description: Id of the contest
+          name: contest_id
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the task
+          name: task_id
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Type of file
+          name: filetype
+          required: true
+          schema:
+            $ref: '#/components/schemas/typeFiletype'
+      requestBody:
+        content:
+          application/octet-stream:
+            schema:
+              properties:
+                user_answer:
+                  $ref: '#/components/schemas/typeUserAnswer'
+      responses:
+        '200':
+          description: OK
+        '404':
+          description: User, contest or task not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+  /contest/{contest_id}/task/{task_id}/user/{user_id}:
+    get:
+      summary: Get user answer for the task
+      security:
+        - cookieJWTAuth: [ ]
+      parameters:
+        - in: path
+          description: Id of the contest
+          name: contest_id
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the task
+          name: task_id
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the user
+          name: user_id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                properties:
+                  user_answer:
+                    type: string    #TODO return FILE
+        '403':
+          description: Not enough rights for current user
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+        '404':
+          description: User, contest or task not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+  /contest/{contest_id}/task/{task_id}/user/{user_id}/{filetype}:
+    post:
+      summary: Add user answer for a task
+      security:
+        - cookieJWTAuth: [ ]
+        - CSRFToken: [ ]
+      parameters:
+        - in: path
+          description: Id of the contest
+          name: contest_id
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the task
+          name: task_id
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the user
+          name: user_id
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Filetype
+          name: filetype
+          required: true
+          schema:
+            $ref: '#/components/schemas/typeFiletype'
+      requestBody:
+        content:
+          application/octet-stream:
+            schema:
+              properties:
+                user_answer:
+                  $ref: '#/components/schemas/typeUserAnswer'
+      responses:
+        '200':
+          description: OK
+        '403':
+          description: Not enough rights for current user
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+        '404':
+          description: User, contest or task not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+
+
+components:
+  securitySchemes:
+
+  ######################################################################################################################
+  ##                                             Security components                                                  ##
+  ######################################################################################################################
+
+    cookieJWTAuth:
+      description: Authentication with JWT stored in cookies
+      type: apiKey
+      in: cookie
+      name: access_token_cookie
+    CSRFToken:
+      description: CSRF token
+      type: apiKey
+      in: header
+      name: X-CSRF-TOKEN
+  schemas:
+
+  ######################################################################################################################
+  ##                                             Error handling                                                       ##
+  ######################################################################################################################
+
+    errorResponse:
+      title: 'Error response'
+      required:
+        - errors
+      properties:
+        errors:
+          type: array
+          items:
+            type: object
+            title: 'Error value'
+            required:
+              - status
+              - title
+            properties:
+              class:
+                type: string
+              status:
+                type: integer
+              title:
+                type: string
+
+  ######################################################################################################################
+  ##                                             Common data types                                                    ##
+  ######################################################################################################################
+
+    typeIdentifier:
+      type: integer
+    typeUserAnswer:
+      type: string
+     # format: binary     # TODO FILE
+    typeFiletype:
+      type: string
+      enum:  ["txt", "pdf", "jpg", "doc", "docx", "png", "gif", "odt" ]
+
+  ######################################################################################################################
+  ##                                             Composite data types                                                 ##
+  ######################################################################################################################
+
+    typeUserAnswerForList:
+      title: "User answer"
+      required:
+        - task_id
+        - answer_id
+      properties:
+        task_id:
+          $ref: '#/components/schemas/typeIdentifier'
+        answer_id:
+          $ref: '#/components/schemas/typeIdentifier'
+
+  ######################################################################################################################
+  ##                                             Path schemas                                                         ##
+  ######################################################################################################################
+
+    userContestAnswer:
+      title: "User's contest answer"
+      required:
+        - user_answer
+        - filetype
+      properties:
+        user_answer:
+          $ref: '#/components/schemas/typeUserAnswer'
+        filetype:
+          $ref: '#/components/schemas/typeFiletype'
+
+    userContestAllAnswer:
+      title: "ALl user's answer for the contest"
+      required:
+        - user_id
+        - work_id
+        - contest_id
+      properties:
+        user_id:
+          $ref: '#/components/schemas/typeIdentifier'
+        work_id:
+          $ref: '#/components/schemas/typeIdentifier'
+        contest_id:
+          $ref: '#/components/schemas/typeIdentifier'
+        user_answers:
+          type: array
+          items:
+            $ref: '#/components/schemas/typeUserAnswerForList'
