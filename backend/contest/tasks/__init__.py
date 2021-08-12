@@ -1,5 +1,5 @@
 from common import OrgMephiModule
-from .contest_create import module as creator_module
+from .creator import module as creator_module
 from .admin import module as admin_module
 from .participant import module as participant_module
 
