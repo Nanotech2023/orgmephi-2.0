@@ -11,7 +11,7 @@ class UserSchema(SQLAlchemySchema):
         load_instance = True
 
     id = auto_field(column_name='id', dump_only=True)
-    username = auto_field(column_name='username', validate=username_validator)
+    username = auto_field(column_name='username', validate=username_validator, required=False)
     role = EnumField(UserRoleEnum, data_key='role', by_value=True)
     type = EnumField(UserTypeEnum, data_key='type', by_value=True)
 
@@ -22,4 +22,4 @@ class GroupSchema(SQLAlchemySchema):
         load_instance = True
 
     id = auto_field(column_name='id', dump_only=True)
-    name = auto_field(column_name='name', validate=group_name_validator)
+    name = auto_field(column_name='name', validate=group_name_validator, required=False)
