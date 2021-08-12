@@ -24,8 +24,8 @@ paths:
             schema:
               $ref: '#/components/schemas/olympiadType'
       security:
-        - cookieJWTAuth: [ ]
-        - CSRFToken: [ ]
+        - JWTAcessToken: [ ]
+        - CSRFAcessToken: [ ]
       responses:
         '200':
           description: OK
@@ -62,8 +62,8 @@ paths:
           schema:
             type: integer
       security:
-        - cookieJWTAuth: [ ]
-        - CSRFToken: [ ]
+        - JWTAcessToken: [ ]
+        - CSRFAcessToken: [ ]
       responses:
         '200':
           description: OK
@@ -100,8 +100,8 @@ paths:
           schema:
             type: integer
       security:
-        - cookieJWTAuth: [ ]
-        - CSRFToken: [ ]
+        - JWTAcessToken: [ ]
+        - CSRFAcessToken: [ ]
       responses:
         '200':
           description: OK
@@ -141,8 +141,8 @@ paths:
           schema:
             type: integer
       security:
-        - cookieJWTAuth: [ ]
-        - CSRFToken: [ ]
+        - JWTAcessToken: [ ]
+        - CSRFAcessToken: [ ]
       responses:
         '200':
           description: OK
@@ -158,26 +158,14 @@ paths:
       summary: list of user in contest
       parameters:
         - in: path
-          description: Id of the olympiad
-          name: id_olympiad
-          required: true
-          schema:
-            type: integer
-        - in: path
-          description: Id of the stage
-          name: id_stage
-          required: true
-          schema:
-            type: integer
-        - in: path
           description: Id of the contest
           name: id_contest
           required: true
           schema:
             type: integer
       security:
-        - cookieJWTAuth: [ ]
-        - CSRFToken: [ ]
+        - JWTAcessToken: [ ]
+        - CSRFAcessToken: [ ]
       responses:
         '200':
           description: OK
@@ -209,8 +197,8 @@ paths:
           schema:
             type: integer
       security:
-        - cookieJWTAuth: [ ]
-        - CSRFToken: [ ]
+        - JWTAcessToken: [ ]
+        - CSRFAcessToken: [ ]
       responses:
         '200':
           description: OK
@@ -332,10 +320,14 @@ components:
       format: float
       minimum: 0.0
       maximum: 100.0
+      example:
+        5.5
     typeRangeAnswer:
       type: number
       format: float
       maxLength: 128
+      example:
+        5.5
     typeTargetClass:
       title: 'All target classes types'
       type: string
@@ -408,13 +400,13 @@ components:
     # /olympiad_type/create
 
     olympiadType:
-      title: Add or remove olympiad type
-      description: Request to add or remove olympiad type
+      title: 'Add or remove olympiad type'
+      description: 'Request to add or remove olympiad type'
       required:
         - olympiad_type
       properties:
         olympiad_type:
-          $ref: '#/components/schemas/olympiadType'
+          $ref: '#/components/schemas/typeOlympiadType'
 
     # /olympiad_type/{id_olympiad_type}/remove
 

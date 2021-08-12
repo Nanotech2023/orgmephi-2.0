@@ -201,7 +201,7 @@ def task_image(id_olympiad, id_stage, id_contest, id_task):
 
 
 @module.route(
-    '/olympiad/<int:id_olympiad>/stage/<int:id_stage>/contest/<int:id_contest>/certificate/self',
+    '/contest/<int:id_contest>/certificate/self',
     methods=['GET'])
 def users_certificate(id_olympiad, id_stage, id_contest):
     # contest = get_user_contest_if_possible(id_olympiad, id_stage, id_contest)

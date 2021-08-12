@@ -18,8 +18,8 @@ paths:
     get:
       summary: list of all olympiad types
       security:
-        - cookieJWTAuth: [ ]
-        - CSRFToken: [ ]
+        - JWTAcessToken: [ ]
+        - CSRFAcessToken: [ ]
       responses:
         '200':
           description: OK
@@ -38,8 +38,8 @@ paths:
     get:
       summary: get olympiad type
       security:
-        - cookieJWTAuth: [ ]
-        - CSRFToken: [ ]
+        - JWTAcessToken: [ ]
+        - CSRFAcessToken: [ ]
       parameters:
         - in: path
           description: Id of the olympiad type
@@ -73,8 +73,8 @@ paths:
     get:
       summary: list of base olympiads (main contests)
       security:
-        - cookieJWTAuth: [ ]
-        - CSRFToken: [ ]
+        - JWTAcessToken: [ ]
+        - CSRFAcessToken: [ ]
       responses:
         '200':
           description: OK
@@ -92,8 +92,8 @@ paths:
     get:
       summary: Get info for the base olympiad (main contest)
       security:
-        - cookieJWTAuth: [ ]
-        - CSRFToken: [ ]
+        - JWTAcessToken: [ ]
+        - CSRFAcessToken: [ ]
       parameters:
         - in: path
           description: Id of the olympiad
@@ -127,8 +127,8 @@ paths:
     get:
       summary: list of olympiads (main contests)
       security:
-        - cookieJWTAuth: [ ]
-        - CSRFToken: [ ]
+        - JWTAcessToken: [ ]
+        - CSRFAcessToken: [ ]
       parameters:
         - in: path
           description: Id of the base olympiad
@@ -153,8 +153,8 @@ paths:
     get:
       summary: Get info for the olympiad (main contest)
       security:
-        - cookieJWTAuth: [ ]
-        - CSRFToken: [ ]
+        - JWTAcessToken: [ ]
+        - CSRFAcessToken: [ ]
       parameters:
         - in: path
           description: Id of the base olympiad
@@ -201,8 +201,8 @@ paths:
           schema:
             type: integer
       security:
-        - cookieJWTAuth: [ ]
-        - CSRFToken: [ ]
+        - JWTAcessToken: [ ]
+        - CSRFAcessToken: [ ]
       responses:
         '200':
           description: OK
@@ -259,8 +259,8 @@ paths:
     get:
       summary: Get common info for a contest
       security:
-        - cookieJWTAuth: [ ]
-        - CSRFToken: [ ]
+        - JWTAcessToken: [ ]
+        - CSRFAcessToken: [ ]
       parameters:
         - in: path
           description: Id of the olympiad
@@ -322,8 +322,8 @@ paths:
           schema:
             type: integer
       security:
-        - cookieJWTAuth: [ ]
-        - CSRFToken: [ ]
+        - JWTAcessToken: [ ]
+        - CSRFAcessToken: [ ]
       responses:
         '200':
           description: OK
@@ -346,37 +346,19 @@ paths:
 
   # Users
 
-  /olympiad/{id_olympiad}/stage/{id_stage}/contest/{id_contest}/certificate/self:
+  /contest/{id_contest}/certificate/self:
     get:
       summary: certificate of user in contest
       parameters:
-        - in: path
-          description: Id of the olympiad
-          name: id_olympiad
-          required: true
-          schema:
-            type: integer
-        - in: path
-          description: Id of the stage
-          name: id_stage
-          required: true
-          schema:
-            type: integer
         - in: path
           description: Id of the contest
           name: id_contest
           required: true
           schema:
             type: integer
-        - in: path
-          description: Id of the user
-          name: id_user
-          required: true
-          schema:
-            type: integer
       security:
-        - cookieJWTAuth: [ ]
-        - CSRFToken: [ ]
+        - JWTAcessToken: [ ]
+        - CSRFAcessToken: [ ]
       responses:
         '200':
           description: OK
@@ -403,30 +385,12 @@ paths:
     get:
       summary: Get info for a different variant
       security:
-        - cookieJWTAuth: [ ]
-        - CSRFToken: [ ]
+        - JWTAcessToken: [ ]
+        - CSRFAcessToken: [ ]
       parameters:
-        - in: path
-          description: Id of the olympiad
-          name: id_olympiad
-          required: true
-          schema:
-            type: integer
-        - in: path
-          description: Id of the stage
-          name: id_stage
-          required: true
-          schema:
-            type: integer
         - in: path
           description: Id of the contest
           name: id_contest
-          required: true
-          schema:
-            type: integer
-        - in: path
-          description: Number of the variant in contest
-          name: variant_num
           required: true
           schema:
             type: integer
@@ -456,21 +420,9 @@ paths:
     get:
       summary: Get info for a different tasks
       security:
-        - cookieJWTAuth: [ ]
-        - CSRFToken: [ ]
+        - JWTAcessToken: [ ]
+        - CSRFAcessToken: [ ]
       parameters:
-        - in: path
-          description: Id of the olympiad
-          name: id_olympiad
-          required: true
-          schema:
-            type: integer
-        - in: path
-          description: Id of the stage
-          name: id_stage
-          required: true
-          schema:
-            type: integer
         - in: path
           description: Id of the contest
           name: id_contest
@@ -483,22 +435,13 @@ paths:
           required: true
           schema:
             type: integer
-        - in: path
-          description: Id of the task
-          name: id_task
-          required: true
-          schema:
-            type: integer
       responses:
         '200':
           description: OK
           content:
             application/json:
               schema:
-                oneOf:
-                  - $ref: '#/components/schemas/plainTaskInfo'
-                  - $ref: '#/components/schemas/rangeTaskInfo'
-                  - $ref: '#/components/schemas/multipleTaskInfo'
+                $ref: '#/components/schemas/tasksInVariant'
         '404':
           description: Task not found
           content:
@@ -517,18 +460,6 @@ paths:
       summary: list of tasks in variant
       parameters:
         - in: path
-          description: Id of the olympiad
-          name: id_olympiad
-          required: true
-          schema:
-            type: integer
-        - in: path
-          description: Id of the stage
-          name: id_stage
-          required: true
-          schema:
-            type: integer
-        - in: path
           description: Id of the contest
           name: id_contest
           required: true
@@ -540,16 +471,25 @@ paths:
           required: true
           schema:
             type: integer
+        - in: path
+          description: Id of the variant
+          name: id_task
+          required: true
+          schema:
+            type: integer
       security:
-        - cookieJWTAuth: [ ]
-        - CSRFToken: [ ]
+        - JWTAcessToken: [ ]
+        - CSRFAcessToken: [ ]
       responses:
         '200':
           description: OK
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/tasksInVariant'
+                oneOf:
+                  - $ref: '#/components/schemas/plainTaskInfo'
+                  - $ref: '#/components/schemas/rangeTaskInfo'
+                  - $ref: '#/components/schemas/multipleTaskInfo'
         '400':
           description: Bad request
           content:
@@ -567,18 +507,6 @@ paths:
     get:
       summary: Task image
       parameters:
-        - in: path
-          description: Id of the olympiad
-          name: id_olympiad
-          required: true
-          schema:
-            type: integer
-        - in: path
-          description: Id of the stage
-          name: id_stage
-          required: true
-          schema:
-            type: integer
         - in: path
           description: Id of the contest
           name: id_contest
@@ -598,8 +526,8 @@ paths:
           schema:
             type: integer
       security:
-        - cookieJWTAuth: [ ]
-        - CSRFToken: [ ]
+        - JWTAcessToken: [ ]
+        - CSRFAcessToken: [ ]
       responses:
         '200':
           description: OK
@@ -715,10 +643,14 @@ components:
       format: float
       minimum: 0.0
       maximum: 100.0
+      example:
+        5.5
     typeRangeAnswer:
       type: number
       format: float
       maxLength: 128
+      example:
+        5.5
     typeTargetClass:
       title: 'All target classes types'
       type: string

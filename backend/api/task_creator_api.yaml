@@ -23,8 +23,8 @@ paths:
             schema:
               $ref: '#/components/schemas/createBaseContest'
       security:
-        - cookieJWTAuth: [ ]
-        - CSRFToken: [ ]
+        - JWTAcessToken: [ ]
+        - CSRFAcessToken: [ ]
       responses:
         '200':
           description: OK
@@ -57,8 +57,8 @@ paths:
                   type: string
                   format: binary
       security:
-        - cookieJWTAuth: [ ]
-        - CSRFToken: [ ]
+        - JWTAcessToken: [ ]
+        - CSRFAcessToken: [ ]
       parameters:
         - in: path
           description: Id of the olympiad
@@ -93,8 +93,8 @@ paths:
           schema:
             type: integer
       security:
-        - cookieJWTAuth: [ ]
-        - CSRFToken: [ ]
+        - JWTAcessToken: [ ]
+        - CSRFAcessToken: [ ]
       responses:
         '200':
           description: OK
@@ -116,8 +116,8 @@ paths:
     patch:
       summary: Edit base olympiad info
       security:
-        - cookieJWTAuth: [ ]
-        - CSRFToken: [ ]
+        - JWTAcessToken: [ ]
+        - CSRFAcessToken: [ ]
       parameters:
         - in: path
           description: Id of the base olympiad
@@ -166,8 +166,8 @@ paths:
           schema:
             type: integer
       security:
-        - cookieJWTAuth: [ ]
-        - CSRFToken: [ ]
+        - JWTAcessToken: [ ]
+        - CSRFAcessToken: [ ]
       responses:
         '200':
           description: OK
@@ -211,8 +211,8 @@ paths:
           schema:
             type: integer
       security:
-        - cookieJWTAuth: [ ]
-        - CSRFToken: [ ]
+        - JWTAcessToken: [ ]
+        - CSRFAcessToken: [ ]
       responses:
         '200':
           description: OK
@@ -250,8 +250,8 @@ paths:
           schema:
             type: integer
       security:
-        - cookieJWTAuth: [ ]
-        - CSRFToken: [ ]
+        - JWTAcessToken: [ ]
+        - CSRFAcessToken: [ ]
       responses:
         '200':
           description: OK
@@ -272,8 +272,8 @@ paths:
     patch:
       summary: Edit olympiad info
       security:
-        - cookieJWTAuth: [ ]
-        - CSRFToken: [ ]
+        - JWTAcessToken: [ ]
+        - CSRFAcessToken: [ ]
       parameters:
         - in: path
           description: Id of the base olympiad
@@ -328,8 +328,8 @@ paths:
             schema:
               $ref: '#/components/schemas/createStage'
       security:
-        - cookieJWTAuth: [ ]
-        - CSRFToken: [ ]
+        - JWTAcessToken: [ ]
+        - CSRFAcessToken: [ ]
       responses:
         '200':
           description: OK
@@ -367,8 +367,8 @@ paths:
           schema:
             type: integer
       security:
-        - cookieJWTAuth: [ ]
-        - CSRFToken: [ ]
+        - JWTAcessToken: [ ]
+        - CSRFAcessToken: [ ]
       responses:
         '200':
           description: OK
@@ -389,8 +389,8 @@ paths:
     patch:
       summary: Set stage info for a olympiad
       security:
-        - cookieJWTAuth: [ ]
-        - CSRFToken: [ ]
+        - JWTAcessToken: [ ]
+        - CSRFAcessToken: [ ]
       parameters:
         - in: path
           description: Id of the olympiad
@@ -457,8 +457,8 @@ paths:
             schema:
               $ref: '#/components/schemas/addPreviousForSimpleContest'
       security:
-        - cookieJWTAuth: [ ]
-        - CSRFToken: [ ]
+        - JWTAcessToken: [ ]
+        - CSRFAcessToken: [ ]
       responses:
         '200':
           description: OK
@@ -498,8 +498,8 @@ paths:
             schema:
               $ref: '#/components/schemas/createSimpleContest'
       security:
-        - cookieJWTAuth: [ ]
-        - CSRFToken: [ ]
+        - JWTAcessToken: [ ]
+        - CSRFAcessToken: [ ]
       responses:
         '200':
           description: OK
@@ -544,8 +544,8 @@ paths:
             schema:
               $ref: '#/components/schemas/createCompositeContest'
       security:
-        - cookieJWTAuth: [ ]
-        - CSRFToken: [ ]
+        - JWTAcessToken: [ ]
+        - CSRFAcessToken: [ ]
       responses:
         '200':
           description: OK
@@ -589,8 +589,8 @@ paths:
           schema:
             type: integer
       security:
-        - cookieJWTAuth: [ ]
-        - CSRFToken: [ ]
+        - JWTAcessToken: [ ]
+        - CSRFAcessToken: [ ]
       responses:
         '200':
           description: OK
@@ -611,8 +611,8 @@ paths:
     patch:
       summary: Edit contest info
       security:
-        - cookieJWTAuth: [ ]
-        - CSRFToken: [ ]
+        - JWTAcessToken: [ ]
+        - CSRFAcessToken: [ ]
       parameters:
         - in: path
           description: Id of the olympiad
@@ -677,8 +677,8 @@ paths:
           schema:
             type: integer
       security:
-        - cookieJWTAuth: [ ]
-        - CSRFToken: [ ]
+        - JWTAcessToken: [ ]
+        - CSRFAcessToken: [ ]
       responses:
         '200':
           description: OK
@@ -706,18 +706,6 @@ paths:
       summary: Create a new variant
       parameters:
         - in: path
-          description: Id of the olympiad
-          name: id_olympiad
-          required: true
-          schema:
-            type: integer
-        - in: path
-          description: Id of the stage
-          name: id_stage
-          required: true
-          schema:
-            type: integer
-        - in: path
           description: Id of the contest
           name: id_contest
           required: true
@@ -730,8 +718,8 @@ paths:
             schema:
               $ref: '#/components/schemas/createVariant'
       security:
-        - cookieJWTAuth: [ ]
-        - CSRFToken: [ ]
+        - JWTAcessToken: [ ]
+        - CSRFAcessToken: [ ]
       responses:
         '200':
           description: OK
@@ -757,26 +745,14 @@ paths:
       summary: list of variants in contest
       parameters:
         - in: path
-          description: Id of the olympiad
-          name: id_olympiad
-          required: true
-          schema:
-            type: integer
-        - in: path
-          description: Id of the stage
-          name: id_stage
-          required: true
-          schema:
-            type: integer
-        - in: path
           description: Id of the contest
           name: id_contest
           required: true
           schema:
             type: integer
       security:
-        - cookieJWTAuth: [ ]
-        - CSRFToken: [ ]
+        - JWTAcessToken: [ ]
+        - CSRFAcessToken: [ ]
       responses:
         '200':
           description: OK
@@ -796,18 +772,6 @@ paths:
       summary: Remove variant
       parameters:
         - in: path
-          description: Id of the olympiad
-          name: id_olympiad
-          required: true
-          schema:
-            type: integer
-        - in: path
-          description: Id of the stage
-          name: id_stage
-          required: true
-          schema:
-            type: integer
-        - in: path
           description: Id of the contest
           name: id_contest
           required: true
@@ -820,8 +784,8 @@ paths:
           schema:
             type: integer
       security:
-        - cookieJWTAuth: [ ]
-        - CSRFToken: [ ]
+        - JWTAcessToken: [ ]
+        - CSRFAcessToken: [ ]
       responses:
         '200':
           description: OK
@@ -842,21 +806,9 @@ paths:
     get:
       summary: Get info for a different variant
       security:
-        - cookieJWTAuth: [ ]
-        - CSRFToken: [ ]
+        - JWTAcessToken: [ ]
+        - CSRFAcessToken: [ ]
       parameters:
-        - in: path
-          description: Id of the olympiad
-          name: id_olympiad
-          required: true
-          schema:
-            type: integer
-        - in: path
-          description: Id of the stage
-          name: id_stage
-          required: true
-          schema:
-            type: integer
         - in: path
           description: Id of the contest
           name: id_contest
@@ -891,21 +843,9 @@ paths:
     patch:
       summary: Edit variant
       security:
-        - cookieJWTAuth: [ ]
-        - CSRFToken: [ ]
+        - JWTAcessToken: [ ]
+        - CSRFAcessToken: [ ]
       parameters:
-        - in: path
-          description: Id of the olympiad
-          name: id_olympiad
-          required: true
-          schema:
-            type: integer
-        - in: path
-          description: Id of the stage
-          name: id_stage
-          required: true
-          schema:
-            type: integer
         - in: path
           description: Id of the contest
           name: id_contest
@@ -947,18 +887,6 @@ paths:
       summary: Create a new plain task
       parameters:
         - in: path
-          description: Id of the olympiad
-          name: id_olympiad
-          required: true
-          schema:
-            type: integer
-        - in: path
-          description: Id of the stage
-          name: id_stage
-          required: true
-          schema:
-            type: integer
-        - in: path
           description: Id of the contest
           name: id_contest
           required: true
@@ -977,8 +905,8 @@ paths:
             schema:
               $ref: '#/components/schemas/createPlainTask'
       security:
-        - cookieJWTAuth: [ ]
-        - CSRFToken: [ ]
+        - JWTAcessToken: [ ]
+        - CSRFAcessToken: [ ]
       responses:
         '200':
           description: OK
@@ -1004,18 +932,6 @@ paths:
       summary: Create a new range task
       parameters:
         - in: path
-          description: Id of the olympiad
-          name: id_olympiad
-          required: true
-          schema:
-            type: integer
-        - in: path
-          description: Id of the stage
-          name: id_stage
-          required: true
-          schema:
-            type: integer
-        - in: path
           description: Id of the contest
           name: id_contest
           required: true
@@ -1034,8 +950,8 @@ paths:
             schema:
               $ref: '#/components/schemas/createRangeTask'
       security:
-        - cookieJWTAuth: [ ]
-        - CSRFToken: [ ]
+        - JWTAcessToken: [ ]
+        - CSRFAcessToken: [ ]
       responses:
         '200':
           description: OK
@@ -1061,18 +977,6 @@ paths:
       summary: Create a new multiple task
       parameters:
         - in: path
-          description: Id of the olympiad
-          name: id_olympiad
-          required: true
-          schema:
-            type: integer
-        - in: path
-          description: Id of the stage
-          name: id_stage
-          required: true
-          schema:
-            type: integer
-        - in: path
           description: Id of the contest
           name: id_contest
           required: true
@@ -1091,8 +995,8 @@ paths:
             schema:
               $ref: '#/components/schemas/createMultipleTask'
       security:
-        - cookieJWTAuth: [ ]
-        - CSRFToken: [ ]
+        - JWTAcessToken: [ ]
+        - CSRFAcessToken: [ ]
       responses:
         '200':
           description: OK
@@ -1118,18 +1022,6 @@ paths:
       summary: Remove task
       parameters:
         - in: path
-          description: Id of the olympiad
-          name: id_olympiad
-          required: true
-          schema:
-            type: integer
-        - in: path
-          description: Id of the stage
-          name: id_stage
-          required: true
-          schema:
-            type: integer
-        - in: path
           description: Id of the contest
           name: id_contest
           required: true
@@ -1148,8 +1040,8 @@ paths:
           schema:
             type: integer
       security:
-        - cookieJWTAuth: [ ]
-        - CSRFToken: [ ]
+        - JWTAcessToken: [ ]
+        - CSRFAcessToken: [ ]
       responses:
         '200':
           description: OK
@@ -1170,21 +1062,9 @@ paths:
     get:
       summary: Get info for a different tasks
       security:
-        - cookieJWTAuth: [ ]
-        - CSRFToken: [ ]
+        - JWTAcessToken: [ ]
+        - CSRFAcessToken: [ ]
       parameters:
-        - in: path
-          description: Id of the olympiad
-          name: id_olympiad
-          required: true
-          schema:
-            type: integer
-        - in: path
-          description: Id of the stage
-          name: id_stage
-          required: true
-          schema:
-            type: integer
         - in: path
           description: Id of the contest
           name: id_contest
@@ -1230,21 +1110,9 @@ paths:
     patch:
       summary: Update plain task info
       security:
-        - cookieJWTAuth: [ ]
-        - CSRFToken: [ ]
+        - JWTAcessToken: [ ]
+        - CSRFAcessToken: [ ]
       parameters:
-        - in: path
-          description: Id of the olympiad
-          name: id_olympiad
-          required: true
-          schema:
-            type: integer
-        - in: path
-          description: Id of the stage
-          name: id_stage
-          required: true
-          schema:
-            type: integer
         - in: path
           description: Id of the contest
           name: id_contest
@@ -1289,21 +1157,9 @@ paths:
     patch:
       summary: Update range task info
       security:
-        - cookieJWTAuth: [ ]
-        - CSRFToken: [ ]
+        - JWTAcessToken: [ ]
+        - CSRFAcessToken: [ ]
       parameters:
-        - in: path
-          description: Id of the olympiad
-          name: id_olympiad
-          required: true
-          schema:
-            type: integer
-        - in: path
-          description: Id of the stage
-          name: id_stage
-          required: true
-          schema:
-            type: integer
         - in: path
           description: Id of the contest
           name: id_contest
@@ -1348,21 +1204,9 @@ paths:
     patch:
       summary: Update multiple task info
       security:
-        - cookieJWTAuth: [ ]
-        - CSRFToken: [ ]
+        - JWTAcessToken: [ ]
+        - CSRFAcessToken: [ ]
       parameters:
-        - in: path
-          description: Id of the olympiad
-          name: id_olympiad
-          required: true
-          schema:
-            type: integer
-        - in: path
-          description: Id of the stage
-          name: id_stage
-          required: true
-          schema:
-            type: integer
         - in: path
           description: Id of the contest
           name: id_contest
@@ -1408,18 +1252,6 @@ paths:
       summary: list of tasks in variant
       parameters:
         - in: path
-          description: Id of the olympiad
-          name: id_olympiad
-          required: true
-          schema:
-            type: integer
-        - in: path
-          description: Id of the stage
-          name: id_stage
-          required: true
-          schema:
-            type: integer
-        - in: path
           description: Id of the contest
           name: id_contest
           required: true
@@ -1432,8 +1264,8 @@ paths:
           schema:
             type: integer
       security:
-        - cookieJWTAuth: [ ]
-        - CSRFToken: [ ]
+        - JWTAcessToken: [ ]
+        - CSRFAcessToken: [ ]
       responses:
         '200':
           description: OK
@@ -1459,18 +1291,6 @@ paths:
       summary: Task image
       parameters:
         - in: path
-          description: Id of the olympiad
-          name: id_olympiad
-          required: true
-          schema:
-            type: integer
-        - in: path
-          description: Id of the stage
-          name: id_stage
-          required: true
-          schema:
-            type: integer
-        - in: path
           description: Id of the contest
           name: id_contest
           required: true
@@ -1489,8 +1309,8 @@ paths:
           schema:
             type: integer
       security:
-        - cookieJWTAuth: [ ]
-        - CSRFToken: [ ]
+        - JWTAcessToken: [ ]
+        - CSRFAcessToken: [ ]
       responses:
         '200':
           description: OK
@@ -1612,10 +1432,14 @@ components:
       format: float
       minimum: 0.0
       maximum: 100.0
+      example:
+        5.5
     typeRangeAnswer:
       type: number
       format: float
       maxLength: 128
+      example:
+        5.5
     typeTargetClass:
       title: 'All target classes types'
       type: string
