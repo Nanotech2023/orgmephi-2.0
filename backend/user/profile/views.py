@@ -1,4 +1,4 @@
-from flask import request, make_response
+from flask import request
 
 from common.errors import NotFound
 from common import get_current_app, get_current_module, get_current_db

@@ -9,27 +9,23 @@ class StudentInfoSchema(SQLAlchemySchema):
         model = StudentInfo
         load_instance = True
 
-    user_id = auto_field(column_name='user_id', dump_only=True)
+    user_id = auto_field(column_name='user_id', dump_only=True, required=False)
     phone = auto_field(column_name='phone', validate=phone_validator, nullable=True)
-
     university = auto_field(column_name='custom_university', validate=common_name_validator, nullable=True)
+    admission_year = auto_field(column_name='admission_year', nullable=True)
+    university_country = fields.Str(validate=common_name_validator, nullable=True)
+    citizenship = fields.Str(validate=common_name_validator, nullable=True)
+    region = auto_field(column_name='region', validate=common_name_validator, nullable=True)
+    city = auto_field(column_name='city', validate=common_name_validator, nullable=True)
+
     university_id = auto_field(column_name='university', nullable=True,
                                description="Framework-specific, ignored on request and never set on on response")
-
-    admission_year = auto_field(column_name='admission_year', nullable=True)
-
-    university_country = fields.Str(validate=common_name_validator, nullable=True)
     university_country_id = auto_field(column_name='university_country_id', nullable=True,
                                        description="Framework-specific, "
                                                    "ignored on request and never set on on response")
-
-    citizenship = fields.Str(validate=common_name_validator, nullable=True)
     citizenship_country_id = auto_field(column_name='citizenship_country_id', nullable=True,
                                         description="Framework-specific, "
                                                     "ignored on request and never set on on response")
-
-    region = auto_field(column_name='region', validate=common_name_validator, nullable=True)
-    city = auto_field(column_name='city', validate=common_name_validator, nullable=True)
 
     @pre_load()
     def get_university(self, data, many, **kwargs):
@@ -53,7 +49,7 @@ class StudentInfoSchema(SQLAlchemySchema):
         from common.util import db_get_one_or_none
         uni_known = data.pop('university_id', None)
         if uni_known is not None:
-            uni = db_get_one_or_none(University, 'id', uni_known.id)
+            uni = db_get_one_or_none(University, 'id', uni_known)
             data['university'] = uni.name
         else:
             data['university'] = None
@@ -93,12 +89,11 @@ class StudentInfoSchema(SQLAlchemySchema):
 
     @post_dump()
     def put_citizenship(self, data, many, **kwargs):
-        from common.util import db_get_or_raise
-        if 'citizenship' in data:
-            country_name = data.pop('citizenship')
-            if country_name is not None:
-                country = db_get_or_raise(Country, 'name', country_name)
-                data['citizenship_country_id'] = country.id
-            else:
-                data['citizenship_country_id'] = None
+        from common.util import db_get_one_or_none
+        country_id = data.pop('citizenship_country_id', None)
+        if country_id is not None:
+            country = db_get_one_or_none(Country, 'id', country_id)
+            data['citizenship'] = country.name
+        else:
+            data['citizenship'] = None
         return data

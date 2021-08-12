@@ -1,67 +1,240 @@
-from flask import make_response
-
 from common.errors import NotFound
 from common import get_current_app, get_current_module, get_current_db
 from common.util import db_get_or_raise, db_get_all
 
 from user.models import User, Group
+from user.model_schemas.auth import UserSchema, GroupSchema
+from user.model_schemas.personal import UserInfoSchema
+from user.model_schemas.university import StudentInfoSchema
+
+from .schemas import ResponseGroupListSchema, ResponseUserListSchema
 
 db = get_current_db()
 module = get_current_module()
 app = get_current_app()
 
 
-@module.route('/user/<int:user_id>', methods=['GET'])
+@module.route('/user/<int:user_id>', methods=['GET'], output_schema=UserSchema)
 def get_user_admin(user_id):
+    """
+    Get common info for a different user
+    ---
+    get:
+      security:
+        - JWTAccessToken: [ ]
+      parameters:
+        - in: path
+          description: Id of the user
+          name: user_id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: UserSchema
+        '403':
+          description: Invalid role of current user
+        '404':
+          description: User not found
+    """
     user = db_get_or_raise(User, "id", user_id)
-    return make_response(user.serialize(), 200)
+    return user, 200
 
 
-@module.route('/user/all', methods=['GET'])
+@module.route('/user/all', methods=['GET'], output_schema=ResponseUserListSchema)
 def get_user_all():
+    """
+    Get common info for all users
+    ---
+    get:
+      security:
+        - JWTAccessToken: [ ]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: ResponseUserListSchema
+        '403':
+          description: Invalid role of current user
+    """
     users = db_get_all(User)
-    user_list = [user.serialize() for user in users]
-    return make_response({'users': user_list}, 200)
+    return {'users': users}, 200
 
 
-@module.route('/user/by-group/<int:group_id>', methods=['GET'])
+@module.route('/user/by-group/<int:group_id>', methods=['GET'], output_schema=ResponseUserListSchema)
 def get_user_by_group(group_id):
+    """
+    Get common info for different users
+    ---
+    get:
+      security:
+        - JWTAccessToken: [ ]
+      parameters:
+        - in: path
+          description: ID of the group
+          name: group_id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: ResponseUserListSchema
+        '403':
+          description: Invalid role of current user
+        '404':
+          description: Group not found
+    """
     group = db_get_or_raise(Group, "id", group_id)
-    users = [value.serialize() for value in group.users]
-    return make_response({'users': users}, 200)
+    return {'users': group.users}, 200
 
 
-@module.route('/personal/<int:user_id>', methods=['GET'])
+@module.route('/personal/<int:user_id>', methods=['GET'], output_schema=UserInfoSchema)
 def get_user_info_admin(user_id):
+    """
+    Get personal info for a different user
+    ---
+    get:
+      security:
+        - JWTAccessToken: [ ]
+      parameters:
+        - in: path
+          description: Id of the user
+          name: user_id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: UserInfoSchema
+        '403':
+          description: Invalid role of current user
+        '404':
+          description: Personal info is not set or user not found
+    """
     user = db_get_or_raise(User, "id", user_id)
     if user.user_info is None:
         raise NotFound('user.personal_info', 'for user %d' % user.id)
-    return make_response(user.user_info.serialize(), 200)
+    return user.user_info, 200
 
 
-@module.route('/university/<int:user_id>', methods=['GET'])
+@module.route('/university/<int:user_id>', methods=['GET'], output_schema=StudentInfoSchema)
 def get_university_info_admin(user_id):
+    """
+    Get university student info for a different user
+    ---
+    get:
+      security:
+        - JWTAccessToken: [ ]
+      parameters:
+        - in: path
+          description: Id of the user
+          name: user_id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: StudentInfoSchema
+        '403':
+          description: Invalid role of current user
+        '404':
+          description: User not found or is not a university student
+    """
     user = db_get_or_raise(User, "id", user_id)
     if user.student_info is None:
         raise NotFound('user.university_info', 'for user %d' % user.id)
-    return make_response(user.student_info.serialize(), 200)
+    return user.student_info, 200
 
 
-@module.route('/group/<int:group_id>', methods=['GET'])
+@module.route('/group/<int:group_id>', methods=['GET'], output_schema=GroupSchema)
 def get_group(group_id):
+    """
+    Get any group
+    ---
+    get:
+      security:
+        - JWTAccessToken: [ ]
+      parameters:
+        - in: path
+          description: Id of the group
+          name: group_id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: GroupSchema
+        '403':
+          description: Invalid role of current user
+        '404':
+          description: Group not found
+    """
     group = db_get_or_raise(Group, 'id', group_id)
-    return make_response(group.serialize(), 200)
+    return group, 200
 
 
-@module.route('/group/all', methods=['GET'])
+@module.route('/group/all', methods=['GET'], output_schema=ResponseGroupListSchema)
 def get_groups_all():
+    """
+    Get all groups
+    ---
+    get:
+      security:
+        - JWTAccessToken: [ ]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: ResponseGroupListSchema
+        '403':
+          description: Invalid role of current user
+    """
     groups = db_get_all(Group)
-    groups_dict = [grp.serialize() for grp in groups]
-    return make_response({'groups': groups_dict}, 200)
+    return {'groups': groups}, 200
 
 
-@module.route('/membership/<int:user_id>', methods=['GET'])
+@module.route('/membership/<int:user_id>', methods=['GET'], output_schema=ResponseGroupListSchema)
 def get_user_groups_admin(user_id):
+    """
+    Get groups for a different user
+    ---
+    get:
+      security:
+        - JWTAccessToken: [ ]
+      parameters:
+        - in: path
+          description: Id of the user
+          name: user_id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: ResponseGroupListSchema
+        '403':
+          description: Invalid role of current user
+        '404':
+          description: User not found
+    """
     user = db_get_or_raise(User, "id", user_id)
-    groups = [grp.serialize() for grp in user.groups]
-    return make_response({'groups': groups}, 200)
+    return {'groups': user.groups}, 200
