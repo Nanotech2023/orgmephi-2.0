@@ -8,7 +8,17 @@ servers:
   - url: 'http://127.0.0.1:5000'
 paths:
   /hello:
-    get:
+    post:
+      requestBody:
+        content:
+          application/json:
+            schema:
+              required:
+                - now
+              properties:
+                now:
+                  type: string
+                  format: 'date-time'
       responses:
         '200':
           description: OK

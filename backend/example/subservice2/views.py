@@ -1,14 +1,27 @@
-from flask import make_response
+from flask import request
+from marshmallow import Schema, fields
 
 from common import get_current_module
 
 module = get_current_module()
 
 
-@module.route('/hello', methods=['GET'])
+class InputSchema(Schema):
+    now = fields.DateTime(required=True)
+
+
+class OutputSchema(Schema):
+    msg = fields.Str(required=True)
+
+
+class Output:
+    def __init__(self, msg):
+        self.msg = msg
+
+
+@module.route('/hello', methods=['POST'], input_schema=InputSchema, output_schema=OutputSchema)
 def hello():
-    from datetime import datetime
-    time = datetime.now()
+    time = request.marshmallow['now']
     if 6 <= time.hour < 12:
         msg = 'Good morning'
     elif 12 <= time.hour < 18:
@@ -17,4 +30,4 @@ def hello():
         msg = 'Good evening'
     else:
         msg = 'ZzZzZ...'
-    return make_response({'msg': msg}, 200)
+    return Output(msg), 200
