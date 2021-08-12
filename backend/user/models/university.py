@@ -17,8 +17,8 @@ class StudentInfo(db.Model):
         university: id of student's university from known university list
         custom_university: name of student's university if the university is not in the known university list
         admission_year: year of admission to the university
-        university_country: country of the university
-        citizenship: student's citizenship
+        university_country_id: country of the university
+        citizenship_country_id: student's citizenship
         region: student's country region
         city: student's city
     """
@@ -30,8 +30,8 @@ class StudentInfo(db.Model):
     university = db.Column(db.Integer, db.ForeignKey(University.id))
     custom_university = db.Column(db.String)
     admission_year = db.Column(db.Date)
-    university_country = db.Column(db.Integer, db.ForeignKey(Country.id))
-    citizenship = db.Column(db.Integer, db.ForeignKey(Country.id))
+    university_country_id = db.Column(db.Integer, db.ForeignKey(Country.id))
+    citizenship_country_id = db.Column(db.Integer, db.ForeignKey(Country.id))
     region = db.Column(db.String)
     city = db.Column(db.String)
 
