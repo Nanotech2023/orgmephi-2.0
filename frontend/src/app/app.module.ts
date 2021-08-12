@@ -14,6 +14,7 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations'
 import { AdminModule } from '@/admin/admin.module'
 import { AuthService } from '@/auth/api/auth.service'
 import { AuthServiceReal } from '@/auth/api/auth.service.real'
+import { AuthServiceMock } from '@/auth/api/auth.service.mock'
 
 
 @NgModule( {
@@ -34,7 +35,7 @@ import { AuthServiceReal } from '@/auth/api/auth.service.real'
         BrowserAnimationsModule
     ],
     providers: [
-        { provide: AuthService, useClass: AuthServiceReal }
+        { provide: AuthService, useClass: AuthServiceMock }
     ],
     bootstrap: [ AppComponent ]
 } )

@@ -8,12 +8,13 @@
                   stroke-linejoin="round"/>
         </svg>
         <div class="add-user-form-container">
-            <h2>пользователя</h2>
+            <h2></h2>
             <h4>Просьба заполнить все поля</h4>
 
 
             <div class="form-group row">
                 <div class="col-sm-12">
+                    <h4>Выберите тип регистрации</h4>
                     <select [(ngModel)]="selectedUserType" class="form-control">
                         <option *ngFor="let registerType of registerTypes" [value]="registerType">
                             {{ registerType }}

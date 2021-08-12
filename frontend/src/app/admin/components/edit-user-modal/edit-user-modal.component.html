@@ -1,0 +1,61 @@
+<div #modal class="add-user-modal" *ngIf="modalVisible">
+    <div class="add-user-modal-content">
+        <svg (click)="modalVisible = false" width="22" height="23" viewBox="0 0 22 23" fill="none"
+             xmlns="http://www.w3.org/2000/svg">
+            <path d="M5.5 5.92773L17.2097 17.6374" stroke="#14142B" stroke-width="2" stroke-linecap="round"
+                  stroke-linejoin="round"/>
+            <path d="M4.5 17.6367L16.2097 5.92702" stroke="#14142B" stroke-width="2" stroke-linecap="round"
+                  stroke-linejoin="round"/>
+        </svg>
+        <div class="add-user-form-container">
+            <h2></h2>
+            <div class="form-group row">
+                <div class="col-sm-12">
+                    <select [(ngModel)]="user.type" class="form-control">
+                        <option *ngFor="let registerType of registerTypes" [value]="registerType">
+                            {{ registerType }}
+                        </option>
+                    </select>
+                </div>
+            </div>
+            <br/>
+            <div class="form-group row">
+                <div class="col-sm-12">
+                    <select [(ngModel)]="user.role" class="form-control">
+                        <option *ngFor="let role of roles" [value]="role">
+                            {{ role }}
+                        </option>
+                    </select>
+                </div>
+            </div>
+            <br/>
+            <div class="form-group row">
+                <div class="col-sm-12">
+                    <input class="form-control" type="text" required
+                           [(ngModel)]="user.username"
+                           #name="ngModel"
+                           placeholder="Имя">
+                    <div *ngIf="name.invalid && (name.dirty || name.touched)"
+                         class="error-message">
+                        <div *ngIf="name.errors?.required">
+                            Поле обязательно для заполнения
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <br/>
+            <div class="form-group row">
+                <div class="col-sm-6">
+                    <button type="submit" class="btn btn-primary" (click)="confirm()">
+                        Сохранить
+                    </button>
+                </div>
+                <div class="col-sm-6">
+                    <button type="submit" class="btn btn-primary"  style="float: right" (click)="resetPassword()">
+                        Сбросить пароль
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

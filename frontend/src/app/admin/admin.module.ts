@@ -5,14 +5,16 @@ import { ManageOlympiadsComponent } from './components/manage-olympiads/manage-o
 import { SharedModule } from '@/shared/shared.module'
 import { AdminRoutingModule } from '@/admin/admin-routing.module'
 import { AgGridModule } from 'ag-grid-angular'
-import { AddUserModalComponent } from './components/add-user-modal/add-user-modal.component'
+import { AddUserModalComponent } from './components/add-user-modal/add-user-modal.component';
+import { EditUserModalComponent } from './components/edit-user-modal/edit-user-modal.component'
 
 
 const COMPONENTS = [
     ManageUsersComponent,
     ManageOlympiadsComponent,
     AdminComponent,
-    AddUserModalComponent
+    AddUserModalComponent,
+    EditUserModalComponent
 ]
 
 
