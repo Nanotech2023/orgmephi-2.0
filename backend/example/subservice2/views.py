@@ -21,6 +21,21 @@ class Output:
 
 @module.route('/hello', methods=['POST'], input_schema=InputSchema, output_schema=OutputSchema)
 def hello():
+    """
+    Hello
+    ---
+    post:
+        requestBody:
+            content:
+              application/json:
+                schema: InputSchema
+        responses:
+            '200':
+              description: OK
+              content:
+                application/json:
+                  schema: OutputSchema
+    """
     time = request.marshmallow['now']
     if 6 <= time.hour < 12:
         msg = 'Good morning'
