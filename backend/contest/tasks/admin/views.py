@@ -15,9 +15,6 @@ app = get_current_app()
 
 @module.route('/olympiad_type/create', methods=['POST'])
 def olympiad_type_create():
-    """
-    Create olympiad type
-    """
     values = request.openapi.body
 
     olympiad_type = values['olympiad_type']
@@ -59,14 +56,14 @@ def olympiad_type_remove(id_olympiad_type):
 @module.route(
     '/contest/<int:id_contest>/add_user',
     methods=['POST'])
-def add_user_to_contest(id_olympiad, id_stage, id_contest):
+def add_user_to_contest(id_contest):
     """
     Add user to contest
     """
     values = request.openapi.body
     user_ids = values['users_id']
     try:
-        contest = get_contest_if_possible_from_stage(id_olympiad, id_stage, id_contest)
+        contest = get_contest_if_possible(id_contest)
 
         for user_id in user_ids:
             if is_user_in_contest(user_id, contest):

@@ -83,9 +83,9 @@ def stage_get(id_olympiad, id_stage):
     Get stage
     """
     try:
-        olympiad = db_get_or_raise(Contest, "id_olympiad", str(id_olympiad))
+        olympiad = db_get_or_raise(Contest, "contest_id", str(id_olympiad))
         stage = db_get_or_raise(Stage, "stage_id", str(id_stage))
-        if stage not in olympiad.stages:
+        if olympiad.composite_type != ContestTypeEnum.CompositeContest or stage not in olympiad.stages:
             raise InsufficientData('stage_id', 'not in current olympiad')
         return make_response(
             stage.serialize(), 200)
@@ -117,9 +117,9 @@ def contest_all_self(id_olympiad, id_stage):
     """
     Get all contests for user in current stage
     """
-    olympiad = db_get_or_raise(Contest, "id_olympiad", str(id_olympiad))
+    olympiad = db_get_or_raise(Contest, "contest_id", str(id_olympiad))
     stage = db_get_or_raise(Stage, "stage_id", str(id_stage))
-    if stage not in olympiad.stages:
+    if olympiad.composite_type != ContestTypeEnum.CompositeContest or stage not in olympiad.stages:
         raise InsufficientData('stage_id', 'not in current olympiad')
     all_contest = [contest_.serialize()
                    for contest_ in stage.contests
@@ -147,11 +147,11 @@ def contest_self(id_olympiad, id_stage, id_contest):
 @module.route(
     '/contest/<int:id_contest>/variant/self',
     methods=['GET'])
-def variant_self(id_olympiad, id_stage, id_contest):
+def variant_self(id_contest):
     """
     Get variant for user in current contest
     """
-    variant = get_user_variant_if_possible(id_olympiad, id_stage, id_contest)
+    variant = get_user_variant_if_possible(id_contest)
     return make_response(
         variant.serialize(), 200)
 
@@ -162,11 +162,11 @@ def variant_self(id_olympiad, id_stage, id_contest):
 @module.route(
     '/contest/<int:id_contest>/tasks/self',
     methods=['GET'])
-def task_all(id_olympiad, id_stage, id_contest):
+def task_all(id_contest):
     """
     Get tasks for user in current variant
     """
-    tasks = get_user_tasks_if_possible(id_olympiad, id_stage, id_contest)
+    tasks = get_user_tasks_if_possible(id_contest)
     return make_response(
         {
             "tasks_list": tasks
@@ -176,11 +176,11 @@ def task_all(id_olympiad, id_stage, id_contest):
 @module.route(
     '/contest/<int:id_contest>/tasks/<int:id_task>/self',
     methods=['GET'])
-def task_get(id_olympiad, id_stage, id_contest, id_task):
+def task_get(id_contest, id_task):
     """
     Get task for user in current variant
     """
-    task = get_user_task_if_possible(id_olympiad, id_stage, id_contest, id_task)
+    task = get_user_task_if_possible(id_contest, id_task)
     return make_response(
         task.serialize(), 200)
 
@@ -188,11 +188,11 @@ def task_get(id_olympiad, id_stage, id_contest, id_task):
 @module.route(
     '/contest/<int:id_contest>/tasks/<int:id_task>/image/self',
     methods=['GET'])
-def task_image(id_olympiad, id_stage, id_contest, id_task):
+def task_image(id_contest, id_task):
     """
     Get task image for user in current task
     """
-    task = get_user_task_if_possible(id_olympiad, id_stage, id_contest, id_task)
+    task = get_user_task_if_possible(id_contest, id_task)
     return make_response(
         task.serialize_image(), 200)
 
@@ -203,7 +203,7 @@ def task_image(id_olympiad, id_stage, id_contest, id_task):
 @module.route(
     '/contest/<int:id_contest>/certificate/self',
     methods=['GET'])
-def users_certificate(id_olympiad, id_stage, id_contest):
-    # contest = get_user_contest_if_possible(id_olympiad, id_stage, id_contest)
+def users_certificate(id_contest):
+    # contest = get_user_contest_if_possible(id_contest)
     # certificate = None
     abort(502)

@@ -1286,7 +1286,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/errorResponse'
 
-  /contest/{id_contest}/variant/{id_variant}/tasks/{id_task}/taskimage:
+  /contest/{id_contest}/variant/{id_variant}/tasks/{id_task}/image:
     get:
       summary: Task image
       parameters:
@@ -1546,7 +1546,7 @@ components:
         - condition
       properties:
         condition:
-          $ref: '#/components/schemas/typeCondition'
+          $ref: '#/components/schemas/typeStageCondition'
         stage_name:
           $ref: '#/components/schemas/typeOlympiadName'
         stage_num:
@@ -1563,7 +1563,7 @@ components:
         - stage_id
       properties:
         stage_id:
-          $ref: '#/components/schemas/typeOlympiadText'
+          $ref: '#/components/schemas/typeIdentifier'
 
 
 
@@ -1575,7 +1575,7 @@ components:
       description: Request to edit stage
       properties:
         condition:
-          $ref: '#/components/schemas/typeCondition'
+          $ref: '#/components/schemas/typeStageCondition'
         stage_name:
           $ref: '#/components/schemas/typeOlympiadName'
         stage_num:
@@ -1970,7 +1970,7 @@ components:
         recommended_answer:
           $ref: '#/components/schemas/typeOlympiadText'
 
-    # /contest/{id_contest}/variant/{id_variant}/tasks/{id_task}/taskimage
+    # /contest/{id_contest}/variant/{id_variant}/tasks/{id_task}/image
 
     taskInVariantImage:
       title: Get image of the task
