@@ -535,6 +535,13 @@ class Task(db.Model):
         'polymorphic_on': task_type
     }
 
+    def serialize_image(self):
+        return \
+            {
+                'task_id': self.task_id,
+                'image_of_task': self.image_of_task
+            }
+
 
 def add_plain_task(db_session, num_of_task, image_of_task, recommended_answer):
     """
