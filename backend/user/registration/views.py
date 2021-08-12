@@ -6,10 +6,11 @@ from common import get_current_app, get_current_module, get_current_db
 from common.util import db_get_all
 
 from user.models import add_user, UserRoleEnum, UserTypeEnum, University, Country, UserInfo, StudentInfo
+from user.model_schemas.auth import UserSchema
 from user.model_schemas.personal import UserInfoSchema
 from user.model_schemas.university import StudentInfoSchema
 
-from .schemas import SchoolRequestSchema, SchoolResponseSchema, UniversityRequestSchema, UniversityResponseSchema, \
+from .schemas import SchoolRequestSchema, UniversityRequestSchema, \
     InfoUniversitiesResponseSchema, InfoCountriesResponseSchema
 
 
@@ -56,7 +57,7 @@ def register():
 
 
 @module.route('/school', methods=['POST'],
-              input_schema=SchoolRequestSchema, output_schema=SchoolResponseSchema)
+              input_schema=SchoolRequestSchema, output_schema=UserSchema)
 def register_school():
     """
     Register a school student
@@ -73,7 +74,7 @@ def register_school():
           description: OK
           content:
             application/json:
-              schema: SchoolResponseSchema
+              schema: UserSchema
         '400':
           description: Bad request or weak password
         '409':
@@ -83,7 +84,7 @@ def register_school():
 
 
 @module.route('/university', methods=['POST'],
-              input_schema=UniversityRequestSchema, output_schema=UniversityResponseSchema)
+              input_schema=UniversityRequestSchema, output_schema=UserSchema)
 def register_university():
     """
     Register a university student
@@ -99,7 +100,7 @@ def register_university():
           description: OK
           content:
             application/json:
-              schema: UniversityResponseSchema
+              schema: UserSchema
         '400':
           description: Bad request or weak password
         '409':

@@ -1,8 +1,7 @@
-from marshmallow import Schema, fields, post_load, validate
+from marshmallow import Schema, fields, validate
 from marshmallow_enum import EnumField
 from common import fields as common_fields
-from user.models.auth import UserTypeEnum, user_types
-from user.model_schemas.auth import UserSchema
+from user.models.auth import UserTypeEnum
 from user.model_schemas.reference import UniversitySchema, CountrySchema
 
 
@@ -42,16 +41,6 @@ class SchoolRequestSchema(Schema):
                                                        UserTypeEnum.enrollee]))
     register_confirm = fields.Nested(nested=RegisterConfirmSchema)
 
-    @post_load()
-    def convert_enum(self, item, many, **kwargs):
-        val = item.get('register_type', None)
-        if val is not None:
-            item['register_type'] = user_types[val.value]
-        return item
-
-
-SchoolResponseSchema = UserSchema
-
 
 class UniversityRequestSchema(Schema):
     auth_info = fields.Nested(nested=AuthInfoSchema, required=True)
@@ -59,9 +48,6 @@ class UniversityRequestSchema(Schema):
     register_type = EnumField(UserTypeEnum, by_value=True, required=True,
                               validate=validate.OneOf([UserTypeEnum.university]))
     student_info = fields.Nested(nested=StudentInfoRegistrationSchema, required=True)
-
-
-UniversityResponseSchema = UserSchema
 
 
 class InfoUniversitiesResponseSchema(Schema):

@@ -41,7 +41,7 @@ group_name_validator = validate.Length(max=32)
 
 Email = _apply_validator(fields.Email, email_validator)
 Phone = _add_example(_apply_validator(fields.String, phone_validator), '8 (800) 555 35 35')
-Password = _add_example(_apply_validator(fields.String, password_validator), 'stringA*1')
+Password = _add_example(_apply_validator(fields.String, password_validator), 'qwertyA*1')
 Username = _apply_validator(fields.String, username_validator)
 CommonName = _apply_validator(fields.String, common_name_validator)
 GroupName = _apply_validator(fields.String, group_name_validator)
