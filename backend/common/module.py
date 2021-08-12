@@ -1,6 +1,9 @@
 import importlib
+from functools import wraps
 
 from openapi_core.contrib.flask.decorators import FlaskOpenAPIViewDecorator
+from marshmallow import Schema
+from typing import Type
 from flask import Blueprint, send_file
 from typing import Callable, Any, Optional
 
@@ -78,6 +81,8 @@ class OrgMephiModule:
         Decorator factory to initialize a new route for self (see flask.Flask.route)
         :param rule: path for this rule
         :param refresh: If True, refresh JWT will be checked for current path instead of access JWT
+        :param input_schema: Marshmallow schema to input data
+        :param output_schema: Marshmallow schema to output data
         :param options: flask.Flask.route options
         :return: decorator
         """
@@ -93,19 +98,31 @@ class OrgMephiModule:
                 refresh = False
             from .jwt_verify import jwt_required, jwt_required_role
             from .errors import _catch_request_error
+
+            func_wrapped = f
+
+            output_schema = options.pop('output_schema', None)
+            if output_schema is not None:
+                func_wrapped = self._wrap_marshmallow_output(func_wrapped, output_schema)
+
+            input_schema = options.pop('input_schema', None)
+            if input_schema is not None:
+                func_wrapped = self._wrap_marshmallow_input(func_wrapped, input_schema)
+
             if self._access_level == OrgMephiAccessLevel.visitor:
-                jwt_wrap = f
+                pass
             elif self._access_level == OrgMephiAccessLevel.participant:
-                jwt_wrap = jwt_required(refresh=refresh)(f)
+                func_wrapped = jwt_required(refresh=refresh)(func_wrapped)
             else:
                 roles = [v.value[1] for v in OrgMephiAccessLevel if v.value[0] >= self._access_level.value[0]]
-                jwt_wrap = jwt_required_role(roles=roles, refresh=refresh)(f)
-            catch_error_wrap = _catch_request_error(jwt_wrap)
+                func_wrapped = jwt_required_role(roles=roles, refresh=refresh)(func_wrapped)
+
+            func_wrapped = _catch_request_error(func_wrapped)
+
             if self._openapi is not None:
-                openapi_wrap = self._openapi(catch_error_wrap)
-            else:
-                openapi_wrap = catch_error_wrap
-            self._blueprint.route(rule, **options)(openapi_wrap)
+                func_wrapped = self._openapi(func_wrapped)
+
+            self._blueprint.route(rule, **options)(func_wrapped)
             return f
         return decorator
 
@@ -134,7 +151,7 @@ class OrgMephiModule:
         """
         from . import _orgmephi_current_module
 
-        if self._parent is None:
+        if self._parent is None or self == top:
             self._blueprint = Blueprint(self._name, __name__)
         else:
             self._blueprint = Blueprint(self._name, __name__, url_prefix='/%s' % self._name)
@@ -211,3 +228,40 @@ class OrgMephiModule:
         if self._parent is None or self == top:
             return [self._name]
         return self._parent._get_parents() + [self._name]
+
+    @staticmethod
+    def _wrap_marshmallow_input(f: Callable, schema: Type[Schema]):
+
+        @wraps(f)
+        def wrapper(*args, **kwargs):
+            from flask import request, make_response
+            from marshmallow import ValidationError, EXCLUDE
+            try:
+                request.marshmallow = schema().load(data=request.json, unknown=EXCLUDE)
+            except ValidationError as err:
+                return make_response({
+                    "class": err.__class__.__name__,
+                    "status": 400,
+                    "title": str(err)
+                }, 400)
+            return f(*args, **kwargs)
+
+        return wrapper
+
+    @staticmethod
+    def _wrap_marshmallow_output(f: Callable, schema: Type[Schema]):
+
+        @wraps(f)
+        def wrapper(*args, **kwargs):
+            from flask import make_response
+            from marshmallow import ValidationError
+            result = f(*args, **kwargs)
+            if len(result) == 0:
+                return make_response()
+            serialized = schema().dump(obj=result[0])
+            errors = schema().validate(serialized)
+            if len(errors) > 0:
+                raise ValidationError(errors)
+            return make_response(serialized, *result[1:])
+
+        return wrapper
