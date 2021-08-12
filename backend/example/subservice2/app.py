@@ -3,7 +3,7 @@ from common import OrgMephiApp
 
 from . import module
 
-app = OrgMephiApp('example_subservice1', module, default_config=DefaultConfig())
+app = OrgMephiApp('example_subservice2', module, default_config=DefaultConfig(), marshmallow_api=True)
 app.set_current()
 app.prepare()
 flask_app = app.app

@@ -1,10 +1,22 @@
 import importlib
+from functools import wraps
 
 from openapi_core.contrib.flask.decorators import FlaskOpenAPIViewDecorator
+from marshmallow import Schema
+from typing import Type
 from flask import Blueprint, send_file
 from typing import Callable, Any, Optional
 
 from .access_levels import OrgMephiAccessLevel
+
+
+def _enum2properties(self, field, **kwargs):
+    import marshmallow_enum
+    """Add an OpenAPI extension for marshmallow_enum.EnumField instances
+    """
+    if isinstance(field, marshmallow_enum.EnumField):
+        return {'type': 'string', 'enum': [m.value for m in field.enum]}
+    return {}
 
 
 class OrgMephiModule:
@@ -78,6 +90,8 @@ class OrgMephiModule:
         Decorator factory to initialize a new route for self (see flask.Flask.route)
         :param rule: path for this rule
         :param refresh: If True, refresh JWT will be checked for current path instead of access JWT
+        :param input_schema: Marshmallow schema to input data
+        :param output_schema: Marshmallow schema to output data
         :param options: flask.Flask.route options
         :return: decorator
         """
@@ -93,19 +107,31 @@ class OrgMephiModule:
                 refresh = False
             from .jwt_verify import jwt_required, jwt_required_role
             from .errors import _catch_request_error
+
+            func_wrapped = f
+
+            output_schema = options.pop('output_schema', None)
+            if output_schema is not None:
+                func_wrapped = self._wrap_marshmallow_output(func_wrapped, output_schema)
+
+            input_schema = options.pop('input_schema', None)
+            if input_schema is not None:
+                func_wrapped = self._wrap_marshmallow_input(func_wrapped, input_schema)
+
             if self._access_level == OrgMephiAccessLevel.visitor:
-                jwt_wrap = f
+                pass
             elif self._access_level == OrgMephiAccessLevel.participant:
-                jwt_wrap = jwt_required(refresh=refresh)(f)
+                func_wrapped = jwt_required(refresh=refresh)(func_wrapped)
             else:
                 roles = [v.value[1] for v in OrgMephiAccessLevel if v.value[0] >= self._access_level.value[0]]
-                jwt_wrap = jwt_required_role(roles=roles, refresh=refresh)(f)
-            catch_error_wrap = _catch_request_error(jwt_wrap)
+                func_wrapped = jwt_required_role(roles=roles, refresh=refresh)(func_wrapped)
+
+            func_wrapped = _catch_request_error(func_wrapped)
+
             if self._openapi is not None:
-                openapi_wrap = self._openapi(catch_error_wrap)
-            else:
-                openapi_wrap = catch_error_wrap
-            self._blueprint.route(rule, **options)(openapi_wrap)
+                func_wrapped = self._openapi(func_wrapped)
+
+            self._blueprint.route(rule, **options)(func_wrapped)
             return f
         return decorator
 
@@ -120,7 +146,7 @@ class OrgMephiModule:
         self._modules.append(module)
         module._parent = self
 
-    def prepare(self, api_path: str, development: bool, top):
+    def prepare(self, api_path: str, development: bool, top, marshmellow_api: bool):
         """
         Prepare this module for execution
 
@@ -131,10 +157,14 @@ class OrgMephiModule:
         :param api_path: directory with ap files
         :param development: If True development-only options will be enabled (e.g. swagger ui wil be generated)
         :param top: Top-level module
+        :param marshmellow_api: If True then openapi will be generated from apispec
         """
         from . import _orgmephi_current_module
+        api_doc_path = None
+        if (not marshmellow_api) and (self._api_file is not None and api_path is not None):
+            api_doc_path = f'{api_path}/{self._api_file}'
 
-        if self._parent is None:
+        if self._parent is None or self == top:
             self._blueprint = Blueprint(self._name, __name__)
         else:
             self._blueprint = Blueprint(self._name, __name__, url_prefix='/%s' % self._name)
@@ -143,14 +173,21 @@ class OrgMephiModule:
         _orgmephi_current_module.set(self)
 
         try:
-            self._init_api(api_path, development, top)
+            if api_doc_path is not None:
+                self._init_openapi(api_doc_path)
             try:
                 importlib.import_module('.views', self._package)
             except ModuleNotFoundError:
                 pass
             for module in self._modules:
-                module.prepare(api_path, development, top)
+                module.prepare(api_path, development, top, marshmellow_api)
                 self._blueprint.register_blueprint(module.blueprint)
+            if development and (api_doc_path is not None or marshmellow_api):
+                self._init_swagger(top)
+                if marshmellow_api:
+                    self._api_from_marshmallow(top)
+                else:
+                    self._api_from_file(api_doc_path)
         finally:
             _orgmephi_current_module.set(last_module)
 
@@ -169,16 +206,6 @@ class OrgMephiModule:
         else:
             return list(itertools.chain([self._swagger], *[mod.get_swagger_blueprints() for mod in self._modules]))
 
-    def _init_api(self, api_path: Optional[str], development: bool, top):
-        if api_path is None or self._api_file is None:
-            return
-        api_doc_path = '%s/%s' % (api_path, self._api_file)
-        self._init_openapi(api_doc_path)
-        if development:
-            self._init_swagger(api_doc_path, top)
-        else:
-            self._swagger = None
-
     def _init_openapi(self, api_path: str):
         import yaml
         from openapi_core import create_spec
@@ -187,7 +214,7 @@ class OrgMephiModule:
         spec = create_spec(spec_dict)
         self._openapi = FlaskOpenAPIViewDecorator.from_spec(spec)
 
-    def _init_swagger(self, api_doc_path: str, top):
+    def _init_swagger(self, top):
         from flask_swagger_ui import get_swaggerui_blueprint
         full_name = self.get_full_name(top)
         full_path = self.get_prefix(top)
@@ -199,15 +226,92 @@ class OrgMephiModule:
                 'app_name': "orgmephi_%s" % full_name
             }
         )
+        self._swagger = swagger_ui_blueprint
 
-        @swagger_ui_blueprint.route('/api.yaml', methods=['GET'])
+    def _api_from_file(self, api_doc_path: str):
+        @self._swagger.route('/api.yaml', methods=['GET'])
         def serve_api():
             nonlocal api_doc_path
             return send_file(api_doc_path)
 
-        self._swagger = swagger_ui_blueprint
+    _jwt_access_token_schema = {'type': 'apiKey', 'in': 'cookie', 'name': 'access_token_cookie'}
+    _jwt_refresh_token_schema = {'type': 'apiKey', 'in': 'cookie', 'name': 'refresh_token_cookie'}
+    _csrf_access_token_schema = {'type': 'apiKey', 'in': 'header', 'name': 'X-CSRF-TOKEN'}
+    _csrf_refresh_token_schema = {'type': 'apiKey', 'in': 'header', 'name': 'X-CSRF-TOKEN'}
+
+    def _api_from_marshmallow(self, top):
+        from flask import Flask
+        from apispec import APISpec
+        from apispec_webframeworks.flask import FlaskPlugin
+        from apispec_oneofschema import MarshmallowPlugin
+
+        plugin = MarshmallowPlugin()
+
+        spec = APISpec(
+            title=self.get_full_name(top),
+            version='1.0.0',
+            openapi_version='3.0.2',
+            plugins=[FlaskPlugin(), plugin]
+        )
+
+        plugin.converter.add_attribute_function(_enum2properties)
+
+        spec.components.security_scheme('JWTAccessToken', self._jwt_access_token_schema)
+        spec.components.security_scheme('JWTRefreshToken', self._jwt_refresh_token_schema)
+        spec.components.security_scheme('CSRFAccessToken', self._csrf_access_token_schema)
+        spec.components.security_scheme('CSRFRefreshToken', self._csrf_refresh_token_schema)
+
+        tmp_app = Flask('tmp_app')
+        tmp_app.register_blueprint(self._blueprint)
+
+        static_endpoint = tmp_app.view_functions.get('static', None)
+
+        with tmp_app.test_request_context():
+            for endpoint in tmp_app.view_functions.values():
+                if endpoint.__doc__ is not None and endpoint != static_endpoint:
+                    spec.path(view=endpoint)
+
+        api = spec.to_yaml()
+
+        @self._swagger.route('/api.yaml', methods=['GET'])
+        def serve_api():
+            nonlocal api
+            return api, 200, {'Content-Type': 'text/plain'}
 
     def _get_parents(self, top=None):
         if self._parent is None or self == top:
             return [self._name]
         return self._parent._get_parents() + [self._name]
+
+    @staticmethod
+    def _wrap_marshmallow_input(f: Callable, schema: Type[Schema]):
+
+        @wraps(f)
+        def wrapper(*args, **kwargs):
+            from flask import request, make_response
+            from marshmallow import ValidationError, EXCLUDE
+            try:
+                request.marshmallow = schema().load(data=request.json, unknown=EXCLUDE)
+            except ValidationError as err:
+                return make_response({
+                    "class": err.__class__.__name__,
+                    "status": 400,
+                    "title": str(err)
+                }, 400)
+            return f(*args, **kwargs)
+
+        return wrapper
+
+    @staticmethod
+    def _wrap_marshmallow_output(f: Callable, schema: Type[Schema]):
+
+        @wraps(f)
+        def wrapper(*args, **kwargs):
+            from flask import make_response
+            result = f(*args, **kwargs)
+            if len(result) == 0:
+                return make_response()
+            serialized = schema().dump(obj=result[0])
+            return make_response(serialized, *result[1:])
+
+        return wrapper
