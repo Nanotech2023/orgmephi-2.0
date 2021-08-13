@@ -43,7 +43,7 @@ def add_user_to_contest(id_contest):
 @module.route(
     '/contest/<int:id_contest>/remove_user',
     methods=['POST'])
-def remove_user_from_contest(id_olympiad, id_stage, id_contest):
+def remove_user_from_contest(id_contest):
     """
     Remove user from contest
     """
@@ -51,7 +51,7 @@ def remove_user_from_contest(id_olympiad, id_stage, id_contest):
     user_ids = values['users_id']
 
     try:
-        contest = get_contest_if_possible_from_stage(id_olympiad, id_stage, id_contest)
+        contest = get_contest_if_possible(id_contest)
 
         for user_id in user_ids:
             user = contest.users.filter_by(**{"user_id": str(user_id)}).one_or_none()
@@ -68,11 +68,11 @@ def remove_user_from_contest(id_olympiad, id_stage, id_contest):
 @module.route(
     '/contest/<int:id_contest>/user/all',
     methods=['GET'])
-def users_all(id_olympiad, id_stage, id_contest):
+def users_all(id_contest):
     """
     Get all user in contest
     """
-    contest = get_contest_if_possible_from_stage(id_olympiad, id_stage, id_contest)
+    contest = get_contest_if_possible(id_contest)
     all_users = [u.serialize() for u in contest.users.all()]
     return make_response(
         {
@@ -83,7 +83,7 @@ def users_all(id_olympiad, id_stage, id_contest):
 @module.route(
     'contest/<int:id_contest>/user/<int:id_user>/certificate',
     methods=['GET'])
-def users_certificate(id_olympiad, id_stage, id_contest, id_user):
+def users_certificate( id_contest, id_user):
     """
     Get user certificate
     """
