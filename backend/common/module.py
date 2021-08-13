@@ -40,7 +40,7 @@ class OrgMephiModule:
     Application module
     """
     def __init__(self, name: str, package: str, access_level: Optional[OrgMephiAccessLevel],
-                 api_file: Optional[str] = None):
+                 api_file: Optional[str] = None, marshmallow_api: bool = False):
         """
         Create a new module
         :param name: name of the module (equals to its path prefix)
@@ -50,6 +50,7 @@ class OrgMephiModule:
                              jwt_required_role.
         :param api_file: name of the file with this module's api. If omitted (or set to None), requests will not be
                          automatically verified in this module and swagger ui will not be generated
+        :param marshmallow_api: if True then marshmellow will be used instead of openapi_core
         """
         self._name = name
         self._package = package
@@ -60,6 +61,7 @@ class OrgMephiModule:
         self._openapi = None
         self._swagger = None
         self._api_file = api_file
+        self._marshmallow_api: bool = marshmallow_api
 
     @property
     def name(self) -> str:
@@ -164,7 +166,7 @@ class OrgMephiModule:
         self._modules.append(module)
         module._parent = self
 
-    def prepare(self, api_path: str, development: bool, top, marshmellow_api: bool):
+    def prepare(self, api_path: str, development: bool, top):
         """
         Prepare this module for execution
 
@@ -175,11 +177,10 @@ class OrgMephiModule:
         :param api_path: directory with ap files
         :param development: If True development-only options will be enabled (e.g. swagger ui wil be generated)
         :param top: Top-level module
-        :param marshmellow_api: If True then openapi will be generated from apispec
         """
         from . import _orgmephi_current_module
         api_doc_path = None
-        if (not marshmellow_api) and (self._api_file is not None and api_path is not None):
+        if (not self._marshmallow_api) and (self._api_file is not None and api_path is not None):
             api_doc_path = f'{api_path}/{self._api_file}'
 
         if self._parent is None or self == top:
@@ -198,11 +199,11 @@ class OrgMephiModule:
             except ModuleNotFoundError:
                 pass
             for module in self._modules:
-                module.prepare(api_path, development, top, marshmellow_api)
+                module.prepare(api_path, development, top)
                 self._blueprint.register_blueprint(module.blueprint)
-            if development and (api_doc_path is not None or marshmellow_api):
+            if development and (api_doc_path is not None or self._marshmallow_api):
                 self._init_swagger(top)
-                if marshmellow_api:
+                if self._marshmallow_api:
                     self._api_from_marshmallow(top)
                 else:
                     self._api_from_file(api_doc_path)

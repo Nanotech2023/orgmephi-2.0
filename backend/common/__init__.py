@@ -24,7 +24,7 @@ class OrgMephiApp:
     """
 
     def __init__(self, service_name: str, top_module: OrgMephiModule, security: bool = False,
-                 default_config: object = None, test_config: object = None, marshmallow_api: bool = False):
+                 default_config: object = None, test_config: object = None):
         """
         Create an application object
 
@@ -40,7 +40,6 @@ class OrgMephiApp:
                             (on top of) default configuration
         """
         self._service_name: str = service_name
-        self._marshmallow_api: bool = marshmallow_api
         self._db_prepare_actions: list[Callable] = []
         self._init_app(default_config, test_config)
         self._module: OrgMephiModule = top_module
@@ -140,12 +139,11 @@ class OrgMephiApp:
         """
         with self.app.app_context():
             api_path = None
-            if not self._marshmallow_api:
-                api_var = 'ORGMEPHI_API_PATH'
-                if api_var in self._app.config:
-                    api_path = _path_to_absolute(self._app.config[api_var])
+            api_var = 'ORGMEPHI_API_PATH'
+            if api_var in self._app.config:
+                api_path = _path_to_absolute(self._app.config[api_var])
             development = self._app.config['ENV'] == 'development'
-            self._module.prepare(api_path, development, self._module, self._marshmallow_api)
+            self._module.prepare(api_path, development, self._module)
             self._app.register_blueprint(self._module.blueprint)
             # swagger-ui does not work with nested blueprints
             for bp in self._module.get_swagger_blueprints():
