@@ -20,13 +20,12 @@ class Response(db.Model):
     answers: answers in user response
     """
 
-    __tablename__ = 'response'
 
     work_id = db.Column(db.Integer, autoincrement=True, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey(f'{UserInContest.__tablename__}.user_id'))
-    contest_id = db.Column(db.Integer, db.ForeignKey(f'{UserInContest.__tablename__}.contest_id'))
-    statuses = db.relationship('ResponseStatus', backref='response', lazy=True)
-    answers = db.relationship('ResponseAnswer', backref='response', lazy='dynamic')
+    user_id = db.Column(db.Integer, db.ForeignKey(UserInContest.user_id))
+    contest_id = db.Column(db.Integer, db.ForeignKey(UserInContest.contest_id))
+    statuses = db.relationship('ResponseStatus', backref='response', lazy=True, cascade="all, delete")
+    answers = db.relationship('ResponseAnswer', backref='response', lazy='dynamic', cascade="all, delete")
 
     def prepare_for_list(self):
         mark = self.statuses[-1].mark
@@ -70,10 +69,9 @@ class ResponseStatus(db.Model):
     appeal: an appeal which is linked to this status
     """
 
-    __tablename__ = 'responsestatus'
 
     status_id = db.Column(db.Integer, autoincrement=True, primary_key=True)
-    work_id = db.Column(db.Integer, db.ForeignKey('response.work_id'))
+    work_id = db.Column(db.Integer, db.ForeignKey(Response.work_id))
     timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
     status = db.Column(db.Enum(ResponseStatusEnum), nullable=False)
     mark = db.Column(db.Float)
@@ -129,10 +127,9 @@ class Appeal(db.Model):
     appeal_response: expert's response for user's appeal
     """
 
-    __tablename__ = 'appeal'
 
     appeal_id = db.Column(db.Integer, autoincrement=True, primary_key=True)
-    work_status = db.Column(db.Integer, db.ForeignKey('responsestatus.status_id'))
+    work_status = db.Column(db.Integer, db.ForeignKey(ResponseStatus.status_id))
     appeal_status = db.Column(db.Enum(AppealStatusEnum), nullable=False)
     appeal_message = db.Column(db.Text)
     appeal_response = db.Column(db.Text)
@@ -189,7 +186,6 @@ class ResponseAnswer(db.Model):
     filetype: user's answer filetype
     """
 
-    __tablename__ = 'responseanswer'
 
     answer_id = db.Column(db.Integer, autoincrement=True, primary_key=True)
     work_id = db.Column(db.Integer, db.ForeignKey('response.work_id'))
