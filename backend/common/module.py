@@ -338,15 +338,13 @@ class OrgMephiModule:
         @wraps(f)
         def wrapper(*args, **kwargs):
             from flask import request, make_response
-            from marshmallow import ValidationError, EXCLUDE
+            from marshmallow import ValidationError, RAISE
             from marshmallow_sqlalchemy import SQLAlchemySchema
             try:
                 if issubclass(schema, SQLAlchemySchema):
-                    sch = schema()
-                    sch.__class__ = Schema
-                    request.marshmallow = sch.load(data=request.json, unknown=EXCLUDE)
+                    request.marshmallow = schema(load_instance=False).load(data=request.json, unknown=RAISE)
                 else:
-                    request.marshmallow = schema().load(data=request.json, unknown=EXCLUDE)
+                    request.marshmallow = schema().load(data=request.json, unknown=RAISE)
             except ValidationError as err:
                 return make_response({
                     "class": err.__class__.__name__,
