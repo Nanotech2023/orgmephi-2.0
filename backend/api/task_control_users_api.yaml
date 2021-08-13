@@ -12,52 +12,21 @@ paths:
   ##                                             Path definition                                                      ##
   ######################################################################################################################
 
-  # Olympiad type
+  # Users
 
-  /olympiad_type/create:
+  /contest/{id_contest}/add_user:
     post:
-      summary: add olympiad type
+      summary: Add user to contest
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/olympiadType'
-      security:
-        - JWTAcessToken: [ ]
-        - CSRFAcessToken: [ ]
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/olympiadTypeId'
-        '400':
-          description: Bad request
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errorResponse'
-        '409':
-          description: Already exists
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errorResponse'
-        '404':
-          description: Not found
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errorResponse'
-  /olympiad_type/{id_olympiad_type}/remove:
-    post:
-      summary: remove olympiad type
+              $ref: '#/components/schemas/updateUserInContest'
       parameters:
         - in: path
-          description: Id of the olympiad type
-          name: id_olympiad_type
+          description: Id of the contest
+          name: id_contest
           required: true
           schema:
             type: integer
@@ -67,18 +36,120 @@ paths:
       responses:
         '200':
           description: OK
+        '404':
+          description: User or group not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+        '409':
+          description: User is already exists or no variants for this contest
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+        '400':
+          description: Request error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+
+  /contest/{id_contest}/remove_user:
+    post:
+      summary: Remove user from contest
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/updateUserInContest'
+      parameters:
+        - in: path
+          description: Id of the contest
+          name: id_contest
+          required: true
+          schema:
+            type: integer
+      security:
+        - JWTAcessToken: [ ]
+        - CSRFAcessToken: [ ]
+      responses:
+        '200':
+          description: OK
+        '404':
+          description: User or group not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+
+  /contest/{id_contest}/user/all:
+    get:
+      summary: list of user in contest
+      parameters:
+        - in: path
+          description: Id of the contest
+          name: id_contest
+          required: true
+          schema:
+            type: integer
+      security:
+        - JWTAcessToken: [ ]
+        - CSRFAcessToken: [ ]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/usersInContest'
         '400':
           description: Bad request
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/errorResponse'
+
+  /contest/{id_contest}/user/{id_user}/certificate:
+    get:
+      summary: certificate of user in contest
+      parameters:
+        - in: path
+          description: Id of the contest
+          name: id_contest
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the user
+          name: id_user
+          required: true
+          schema:
+            type: integer
+      security:
+        - JWTAcessToken: [ ]
+        - CSRFAcessToken: [ ]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/userCertificate'
         '404':
-          description: Olympiad type not found
+          description: User not found
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/errorResponse'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+
 
 
   ######################################################################################################################
@@ -143,34 +214,60 @@ components:
   ##                                             Common data types                                                    ##
   ######################################################################################################################
 
-    typeOlympiadType:
+    typeFile:
       type: string
-      maxLength: 256
+      format: binary
+      nullable: true
     typeIdentifier:
       type: integer
+    typeParticipant:
+      title: 'All subject types'
+      type: string
+      enum: [ "Participant", "Laureate", "Winner" ]
 
   ######################################################################################################################
   ##                                             Path schemas                                                         ##
   ######################################################################################################################
 
-    # /olympiad_type/create
+    # /contest/{id_contest}/user/all
 
-    olympiadType:
-      title: 'Add or remove olympiad type'
-      description: 'Request to add or remove olympiad type'
-      required:
-        - olympiad_type
+    usersInContest:
+      title: Get users in contest
+      description: Request to get users in contest
       properties:
-        olympiad_type:
-          $ref: '#/components/schemas/typeOlympiadType'
+        user_list:
+          type: array
+          items:
+            type: object
+            properties:
+              user_id:
+                $ref: '#/components/schemas/typeIdentifier'
+              variant_id:
+                $ref: '#/components/schemas/typeIdentifier'
+              user_status:
+                $ref: '#/components/schemas/typeParticipant'
 
-    # /olympiad_type/{id_olympiad_type}/remove
+    # /contest/{id_contest}/add_user
+    # /contest/{id_contest}/remove_user
 
-    olympiadTypeId:
-      title: Get olympiad type id
-      description: Request to get olympiad type id
+    updateUserInContest:
+      title: Add or remove user to contest or stage
+      description: Request to add or remove user user to contest or stage
       required:
-        - olympiad_type_id
+        - users_id
       properties:
-        olympiad_type_id:
-          $ref: '#/components/schemas/typeIdentifier'
+        users_id:
+          type: array
+          items:
+            $ref: '#/components/schemas/typeIdentifier'
+
+    # /contest/{id_contest}/user/{id_user}/certificate
+
+    userCertificate:
+      title: Get certificate of the user
+      description: Request to get certificate of the user
+      required:
+        - certificate
+      properties:
+        certificate:
+          $ref: '#/components/schemas/typeFile'
