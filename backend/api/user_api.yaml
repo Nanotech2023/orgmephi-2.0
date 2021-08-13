@@ -1,1449 +1,1040 @@
-openapi: 3.0.0
-info:
-  title: User service API
-  description: API description in Markdown.
-  version: 1.0.0
-servers:
-  - url: http://127.0.0.1:5000
-  - url: http://127.0.0.1:5000/user
-
-paths:
-  ######################################################################################################################
-  ##                                             Path definition                                                      ##
-  ######################################################################################################################
-
-  # Registration
-
-  /register/school:
-    post:
-      summary: Register a new school student
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/requestRegistrationSchool'
-      security: []
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/responseRegistrationSchool'
-        '400':
-          description: Bad request or weak password
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errorResponse'
-        '409':
-          description: Username already in use
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errorResponse'
-  /register/university:
-    post:
-      summary: Register a new university student
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/requestRegistrationUniversity'
-      security: [ ]
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/responseRegistrationUniversity'
-        '400':
-          description: Bad request or weak password
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errorResponse'
-        '409':
-          description: Username already in use
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errorResponse'
-
-  /register/internal:
-    post:
-      summary: Register an internal user
-      description: Register an internal user, admin only
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/requestRegistrationInternal'
-      security:
-        - JWTAcessToken: [ ]
-        - CSRFAcessToken: [ ]
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/responseRegistrationInternal'
-        '400':
-          description: Bad request
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errorResponse'
-        '409':
-          description: Username already in use
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errorResponse'
-  /preregister:
-    post:
-      summary: Register an unconfirmed user with a one-time password
-      description: Register an unconfirmed user with a one-time password, creators and admins only
-      security:
-        - JWTAcessToken: [ ]
-        - CSRFAcessToken: [ ]
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/responsePreregister'
-        '403':
-          description: Invalid role of current user
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errorResponse'
-
-  # Authentication
-
-  /login:
-    post:
-      summary: Authenticate a user
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/requestLogin'
-      security: []
-      responses:
-        '200':
-          description: OK
-          headers:
-            Set-Cookie:
-              schema:
-                description: Set both access_token_cookie and refresh_token_cookie
-                type: string
-                example: access_token_cookie=eyJ0eXAi...; Path=/; HttpOnly
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/responseLogin'
-        '400':
-          description: Bad request
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errorResponse'
-        '401':
-          description: Wrong credentials
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errorResponse'
-  /refresh:
-    post:
-      summary: Refresh JWT token for current user
-      security:
-        - JWTRefreshToken: [ ]
-        - CSRFRefreshToken: [ ]
-      responses:
-        '200':
-          description: OK
-          headers:
-            Set-Cookie:
-              schema:
-                description: Set both access_token_cookie and refresh_token_cookie
-                type: string
-                example: access_token_cookie=eyJ0eXAi...; Path=/; HttpOnly
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/responseRefresh'
-  /logout:
-    post:
-      summary: Logout current user
-      security:
-        - JWTAcessToken: []
-        - CSRFAcessToken: [] #framework limitations
-      responses:
-        '200':
-          description: OK
-          headers:
-            Set-Cookie:
-              schema:
-                description: Set both access_token_cookie and refresh_token_cookie
-                type: string
-                example: access_token_cookie=deleted; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT
-
-  # User info
-
-  /user/self:
-    get:
-      summary: Get common info for current user
-      security:
-        - JWTAcessToken: [ ]
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/responseUserSelf'
-        '404':
-          description: User not found
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errorResponse'
-  /user/{user_id}:
-    get:
-      summary: Get common info for a different user
-      description: Get info about any user by its id, only for admins and creators
-      security:
-        - JWTAcessToken: [ ]
-      parameters:
-        - in: path
-          description: Id of the user
-          name: user_id
-          required: true
-          schema:
-            type: integer
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/responseUserAdmin'
-        '403':
-          description: Invalid role of current user
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errorResponse'
-        '404':
-          description: User not found
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errorResponse'
-  /user/all:
-    get:
-      summary: Get common info for all users
-      description: Get info about all users, only for admins and creators
-      security:
-        - JWTAcessToken: [ ]
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/responseUserAll'
-        '403':
-          description: Invalid role of current user
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errorResponse'
-  /user/by-group/{group_id}:
-    get:
-      summary: Get common info for different users
-      description: Get info about any user by their group, only for admins and creators
-      security:
-        - JWTAcessToken: [ ]
-      parameters:
-        - in: path
-          description: ID of the group
-          name: group_id
-          required: true
-          schema:
-            type: integer
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/responseUserByGroup'
-        '403':
-          description: Invalid role of current user
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errorResponse'
-        '404':
-          description: Group not found
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errorResponse'
-
-
-  # Password
-
-  /user/self/password:
-    post:
-      summary: Change password for current user
-      security:
-        - JWTAcessToken: []
-        - CSRFAcessToken: []
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/requestPasswordSelf'
-      responses:
-        '200':
-          description: OK
-        '400':
-          description: Bad request or weak password
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errorResponse'
-        '404':
-          description: User not found
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errorResponse'
-  /user/{user_id}/password:
-    post:
-      summary: Change password for another user
-      description: Change password for another user, admins only
-      security:
-        - JWTAcessToken: [ ]
-        - CSRFAcessToken: [ ]
-      parameters:
-        - in: path
-          description: Id of the user
-          name: user_id
-          required: true
-          schema:
-            type: integer
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/requestPasswordAdmin'
-      responses:
-        '200':
-          description: OK
-        '400':
-          description: Bad request or weak password
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errorResponse'
-        '403':
-          description: Invalid role of current user
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errorResponse'
-        '404':
-          description: User not found
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errorResponse'
-
-  # Permissions
-
-  /user/{user_id}/role:
-    put:
-      summary: Set the role of any user
-      description: Set the role of another user, only for admins
-      security:
-        - JWTAcessToken: [ ]
-        - CSRFAcessToken: [ ]
-      parameters:
-        - in: path
-          description: Id of the user
-          name: user_id
-          required: true
-          schema:
-            type: integer
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/requestUserRole'
-      responses:
-        '200':
-          description: OK
-        '403':
-          description: Invalid role of current user
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errorResponse'
-        '404':
-          description: User not found
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errorResponse'
-  /user/{user_id}/type:
-    put:
-      summary: Set the type of any user
-      description: Set the type of another user, only for admins
-      security:
-        - JWTAcessToken: [ ]
-        - CSRFAcessToken: [ ]
-      parameters:
-        - in: path
-          description: Id of the user
-          name: user_id
-          required: true
-          schema:
-            type: integer
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/requestUserType'
-      responses:
-        '200':
-          description: OK
-        '403':
-          description: Invalid role of current user
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errorResponse'
-        '404':
-          description: User not found
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errorResponse'
-        '409':
-          description: User is missing required info (e.g. university info for a university student)
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errorResponse'
-
-  # Personal info
-
-  /user/self/personal:
-    get:
-      summary: Get personal info for current user
-      security:
-        - JWTAcessToken: [ ]
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/responsePersonalSelf'
-        '404':
-          description: Personal info is not set or user not found
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errorResponse'
-  /user/{user_id}/personal:
-    get:
-      summary: Get personal info for a different user
-      description: Get personal info about any user by its id, only for admins and creators
-      security:
-        - JWTAcessToken: [ ]
-      parameters:
-        - in: path
-          description: Id of the user
-          name: user_id
-          required: true
-          schema:
-            type: integer
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/responsePersonalAdminGet'
-        '403':
-          description: Invalid role of current user
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errorResponse'
-        '404':
-          description: Personal info is not set or user not found
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errorResponse'
-    patch:
-      summary: Set personal info for a user
-      description: Set personal info about any user by its id, only for admins
-      security:
-        - JWTAcessToken: [ ]
-        - CSRFAcessToken: [ ]
-      parameters:
-        - in: path
-          description: Id of the user
-          name: user_id
-          required: true
-          schema:
-            type: integer
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/requestPersonalAdminPatch'
-      responses:
-        '200':
-          description: OK
-        '403':
-          description: Invalid role of current user
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errorResponse'
-        '404':
-          description: User not found
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errorResponse'
-        '409':
-          description: Personal info is not set and request is not full
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errorResponse'
-
-  # University info
-
-  /user/self/university:
-    get:
-      summary: Get university student info for current user
-      security:
-        - JWTAcessToken: [ ]
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/responseUniversitySelf'
-        '404':
-          description: User not found or is not a university student
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errorResponse'
-  /user/{user_id}/university:
-    get:
-      summary: Get university student info for a different user
-      description: Get university student info about any user by its id, only for admins and creators
-      security:
-        - JWTAcessToken: [ ]
-      parameters:
-        - in: path
-          description: Id of the user
-          name: user_id
-          required: true
-          schema:
-            type: integer
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/responseUniversityAdminGet'
-        '403':
-          description: Invalid role of current user
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errorResponse'
-        '404':
-          description: User not found or is not a university student
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errorResponse'
-    patch:
-      summary: Set university student info for a user
-      description: Set university student info about any user by its id, only for admins
-      security:
-        - JWTAcessToken: [ ]
-        - CSRFAcessToken: [ ]
-      parameters:
-        - in: path
-          description: Id of the user
-          name: user_id
-          required: true
-          schema:
-            type: integer
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/requestUniversityAdminPatch'
-      responses:
-        '200':
-          description: OK
-        '403':
-          description: Invalid role of current user
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errorResponse'
-        '404':
-          description: User not found or is not a university student
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errorResponse'
-        '409':
-          description: University info is not set and request is not full
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errorResponse'
-
-  # Groups
-
-  /group/{group_id}:
-    get:
-      summary: Get any group
-      description: Get any group, only for admins and creators
-      security:
-        - JWTAcessToken: [ ]
-      parameters:
-        - in: path
-          description: Id of the group
-          name: group_id
-          required: true
-          schema:
-            type: integer
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/responseGroup'
-        '403':
-          description: Invalid role of current user
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errorResponse'
-        '404':
-          description: Group not found
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errorResponse'
-  /group/all:
-    get:
-      summary: Get all groups
-      description: Get all group list, only for admins and creators
-      security:
-        - JWTAcessToken: [ ]
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/responseGroupAll'
-        '403':
-          description: Invalid role of current user
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errorResponse'
-  /group/add:
-    post:
-      summary: Add a group
-      description: Add a group, only for admins
-      security:
-        - JWTAcessToken: [ ]
-        - CSRFAcessToken: [ ]
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/requestGroupAdd'
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/responseGroupAdd'
-        '403':
-          description: Invalid role of current user
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errorResponse'
-        '404':
-          description: Group not found
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errorResponse'
-        '409':
-          description: Group already exists
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errorResponse'
-  /group/{group_id}/remove:
-    post:
-      summary: Delete a group
-      description: Add a group, only for admins
-      security:
-        - JWTAcessToken: [ ]
-        - CSRFAcessToken: [ ]
-      parameters:
-        - in: path
-          description: ID of the group
-          name: group_id
-          required: true
-          schema:
-            type: integer
-      responses:
-        '200':
-          description: OK
-        '403':
-          description: Invalid role of current user
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errorResponse'
-        '404':
-          description: Group not found
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errorResponse'
-
-  # User group management
-
-  /user/self/groups:
-    get:
-      summary: Get groups for current user
-      security:
-        - JWTAcessToken: [ ]
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/responseUserSelfGroup'
-        '404':
-          description: User not found
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errorResponse'
-  /user/{user_id}/groups:
-    get:
-      summary: Get groups for a different user
-      description: Get group list for any user by its id, only for admins and creators
-      security:
-        - JWTAcessToken: [ ]
-      parameters:
-        - in: path
-          description: Id of the user
-          name: user_id
-          required: true
-          schema:
-            type: integer
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/responseUserAdminGroup'
-        '403':
-          description: Invalid role of current user
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errorResponse'
-        '404':
-          description: User not found
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errorResponse'
-  /user/{user_id}/groups/add:
-    post:
-      summary: Assign a user to a group
-      description: Assign a user to a group, only for admins and creators
-      security:
-        - JWTAcessToken: [ ]
-        - CSRFAcessToken: [ ]
-      parameters:
-        - in: path
-          description: Id of the user
-          name: user_id
-          required: true
-          schema:
-            type: integer
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/requestUserGroupsAdd'
-      responses:
-        '200':
-          description: OK
-        '403':
-          description: Invalid role of current user
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errorResponse'
-        '404':
-          description: User or group not found
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errorResponse'
-        '409':
-          description: User already in the group
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errorResponse'
-  /user/{user_id}/groups/remove:
-    post:
-      summary: Remove a user from a group
-      description: Remove a user from a group, only for admins and creators
-      security:
-        - JWTAcessToken: [ ]
-        - CSRFAcessToken: [ ]
-      parameters:
-        - in: path
-          description: Id of the user
-          name: user_id
-          required: true
-          schema:
-            type: integer
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/requestUserGroupsRemove'
-      responses:
-        '200':
-          description: OK
-        '403':
-          description: Invalid role of current user
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errorResponse'
-        '404':
-          description: User or group not found
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errorResponse'
-
-  # Reference Information
-
-  /info/universities:
-    get:
-      summary: Get known university list
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/responseInfoUniversities'
-  /info/countries:
-    get:
-      summary: Get known country list
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/responseInfoCountries'
-
-
+# This file is generated automatically !!!
 components:
-  securitySchemes:
-
-  ######################################################################################################################
-  ##                                             Security components                                                  ##
-  ######################################################################################################################
-
-    JWTAcessToken:
-      description: Authentication with JWT stored in cookies
-      type: apiKey
-      in: cookie
-      name: access_token_cookie
-    JWTRefreshToken:
-      description: JWT stored in cookies to refresh an acess token
-      type: apiKey
-      in: cookie
-      name: refresh_token_cookie
-    CSRFAcessToken:
-      description: CSRF acess token
-      type: apiKey
-      in: header
-      name: X-CSRF-TOKEN
-    CSRFRefreshToken:
-      description: CSRF refresh token for "remember me" functionality
-      type: apiKey
-      in: header
-      name: X-CSRF-TOKEN
   schemas:
-
-  ######################################################################################################################
-  ##                                             Error handling                                                       ##
-  ######################################################################################################################
-
-    errorResponse:
-      title: 'Error response'
-      required:
-        - errors
-      properties:
-        errors:
-          type: array
-          items:
-            type: object
-            title: 'Error value'
-            required:
-              - status
-              - title
-            properties:
-              class:
-                type: string
-              status:
-                type: integer
-              title:
-                type: string
-
-  ######################################################################################################################
-  ##                                             Common data types                                                    ##
-  ######################################################################################################################
-
-    typeEmail:
-      type: string
-      pattern: '^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$'
-      maxLength: 64
-      example: 'example@example.org'
-    typePhone:
-      type: string
-      pattern: '(?:(?:\+?1\s*(?:[.-]\s*)?)?(?:(\s*([2-9]1[02-9]|[2-9][02-8]1|[2-9][02-8][02-9]‌​)\s*)|([2-9]1[02-9]|[2-9][02-8]1|[2-9][02-8][02-9]))\s*(?:[.-]\s*)?)([2-9]1[02-9]‌​|[2-9][02-9]1|[2-9][02-9]{2})\s*(?:[.-]\s*)?([0-9]{2})\s*(?:[.-]\s*)?([0-9]{2})(?:\s*(?:#|x\.?|ext\.?|extension)\s*(\d+))?$'
-      maxLength: 32
-      example: 8-800-555-35-35
-    typePassword:
-      type: string
-      format: password
-      maxLength: 128
-      example: qwertyA*1
-    typeUsername:
-      type: string
-      # Must be equal to or larger than email max length
-      maxLength: 64
-    typeCommonName:
-      type: string
-      maxLength: 32
-    typeDate:
-      type: string
-      format: date
-    typeGrade:
-      type: integer
-      minimum: 1
-      maximum: 5
-      example: 1
-    typeRememberMe:
-      type: boolean
-    typeCSRFToken:
-      type: string
-    typeIdentifier:
-      type: integer
-    typeGroupName:
-      type: string
-      maxLength: 32
-    typeUserRole:
-      title: 'User role'
-      type: string
-      enum: [ 'Admin', 'Creator', 'Participant', 'System' ]
-    typeUserType:
-      title: 'All user type'
-      type: string
-      enum: [ 'PreUniversity', 'Enrollee', 'School', 'University', 'Internal', 'PreRegister' ]
-    typeUserTypeSchool:
-      title: 'Types for school students'
-      type: string
-      enum: [ 'PreUniversity', 'Enrollee', 'School' ]
-    typeUserTypeUniversity:
-      title: 'Types for university students'
-      type: string
-      enum: [ 'University' ]
-
-  ######################################################################################################################
-  ##                                             Composite data types                                                 ##
-  ######################################################################################################################
-
-    # Registration data
-
-    typeRegistrationCredentials:
-      title: 'Authentication info'
-      required:
-        - email
-        - password
+    AuthInfo:
       properties:
         email:
-          $ref: '#/components/schemas/typeEmail'
+          format: email
+          maxLength: 64
+          type: string
         password:
-          $ref: '#/components/schemas/typePassword'
-    typeRegistrationPersonalInfo:
-      title: 'Personal info that is required for registration'
+          example: qwertyA*1
+          maxLength: 128
+          type: string
       required:
-        - first_name
-        - second_name
-        - middle_name
-        - date_of_birth
-      properties:
-        first_name:
-          $ref: '#/components/schemas/typeCommonName'
-        second_name:
-          $ref: '#/components/schemas/typeCommonName'
-        middle_name:
-          $ref: '#/components/schemas/typeCommonName'
-        date_of_birth:
-          $ref: '#/components/schemas/typeDate'
-    typeRegistrationStudentInfo:
-      title: 'Student info that is required for registration'
-      required:
-        - phone_number
-        - university
-        - grade
-        - university_country
-        - citizenship
-        - region
-        - city
-      properties:
-        phone_number:
-          $ref: '#/components/schemas/typePhone'
-        university:
-          $ref: '#/components/schemas/typeCommonName'
-        grade:
-          $ref: '#/components/schemas/typeGrade'
-        university_country:
-          $ref: '#/components/schemas/typeCommonName'
-        citizenship:
-          $ref: '#/components/schemas/typeCommonName'
-        region:
-          $ref: '#/components/schemas/typeCommonName'
-        city:
-          $ref: '#/components/schemas/typeCommonName'
-    typePreregisterInfo:
-      title: 'Credentials for preregistered users'
-      required:
-        - registration_number
-        - password
-      properties:
-        registration_number:
-          $ref: '#/components/schemas/typeUsername'
-        password:
-          $ref: '#/components/schemas/typePassword'
-
-    # Authorization data
-
-    typeAuthCredentials:
-      title: 'Authentication info'
-      required:
-        - username
-        - password
-      properties:
-        username:
-          $ref: '#/components/schemas/typeUsername'
-        password:
-          $ref: '#/components/schemas/typePassword'
-    typeCSRFPair:
-      required:
-        - csrf_access_token
-        - csrf_refresh_token
+      - email
+      - password
+      type: object
+    CSRFPair:
       properties:
         csrf_access_token:
-          $ref: '#/components/schemas/typeCSRFToken'
+          type: string
         csrf_refresh_token:
-          $ref: '#/components/schemas/typeCSRFToken'
-
-    # User data
-
-    typeUserInfo:
-      title: 'Common user info'
-      properties:
-        id:
-          $ref: '#/components/schemas/typeIdentifier'
-        username:
-          $ref: '#/components/schemas/typeCommonName'
-        role:
-          $ref: '#/components/schemas/typeUserRole'
-        type:
-          $ref: '#/components/schemas/typeUserType'
-    typePersonalInfo:
-      title: 'Full personal information'
-      properties:
-        email:
-          $ref: '#/components/schemas/typeEmail'
-        first_name:
-          $ref: '#/components/schemas/typeCommonName'
-        second_name:
-          $ref: '#/components/schemas/typeCommonName'
-        middle_name:
-          $ref: '#/components/schemas/typeCommonName'
-        date_of_birth:
-          $ref: '#/components/schemas/typeDate'
-    typeStudentInfo:
-      title: 'Full student info'
-      properties:
-        phone_number:
-          $ref: '#/components/schemas/typePhone'
-        university:
-          $ref: '#/components/schemas/typeCommonName'
-        admission_year:
-          $ref: '#/components/schemas/typeDate'
-        university_country:
-          $ref: '#/components/schemas/typeCommonName'
-        citizenship:
-          $ref: '#/components/schemas/typeCommonName'
-        region:
-          $ref: '#/components/schemas/typeCommonName'
-        city:
-          $ref: '#/components/schemas/typeCommonName'
-
-    # Group data
-
-    typeGroup:
-      title: 'User group'
+          type: string
       required:
-        - id
-        - name
-      properties:
-        id:
-          $ref: '#/components/schemas/typeIdentifier'
-        name:
-          $ref: '#/components/schemas/typeGroupName'
-
-  ######################################################################################################################
-  ##                                             Path schemas                                                         ##
-  ######################################################################################################################
-
-    # /register/school
-
-    requestRegistrationSchool:
-      title: 'Registration data for school students'
-      required:
-        - auth_info
-        - personal_info
-        - register_type
-      properties:
-        auth_info:
-          $ref: '#/components/schemas/typeRegistrationCredentials'
-        personal_info:
-          $ref: '#/components/schemas/typeRegistrationPersonalInfo'
-        register_type:
-          $ref: '#/components/schemas/typeUserTypeSchool'
-        register_confirm:
-          $ref: '#/components/schemas/typePreregisterInfo'
-    responseRegistrationSchool:
-      $ref: '#/components/schemas/typeUserInfo'
-
-    # /register/university
-
-    requestRegistrationUniversity:
-      title: 'Registration data for university students'
-      required:
-        - auth_info
-        - personal_info
-        - register_type
-        - student_info
-      properties:
-        auth_info:
-          $ref: '#/components/schemas/typeRegistrationCredentials'
-        personal_info:
-          $ref: '#/components/schemas/typeRegistrationPersonalInfo'
-        register_type:
-          $ref: '#/components/schemas/typeUserTypeUniversity'
-        student_info:
-          $ref: '#/components/schemas/typeRegistrationStudentInfo'
-    responseRegistrationUniversity:
-      $ref: '#/components/schemas/typeUserInfo'
-
-    # /register/internal
-
-    requestRegistrationInternal:
-      $ref: '#/components/schemas/typeAuthCredentials'
-    responseRegistrationInternal:
-      $ref: '#/components/schemas/typeUserInfo'
-
-    # /preregister
-
-    responsePreregister:
-      $ref: '#/components/schemas/typePreregisterInfo'
-
-    # /login
-
-    requestLogin:
-      title: 'Authentication request info'
-      required:
-        - auth_credentials
-        - remember_me
-      properties:
-        auth_credentials:
-          $ref: '#/components/schemas/typeAuthCredentials'
-        remember_me:
-          $ref: '#/components/schemas/typeRememberMe'
-    responseLogin:
-      $ref: '#/components/schemas/typeCSRFPair'
-
-    # /refresh
-
-    responseRefresh:
-      $ref: '#/components/schemas/typeCSRFPair'
-
-    # /logout
-
-    # /user/self
-
-    responseUserSelf:
-      $ref: '#/components/schemas/typeUserInfo'
-
-    # /user/{user_id}
-
-    responseUserAdmin:
-      $ref: '#/components/schemas/typeUserInfo'
-
-    # /user/all
-
-    responseUserAll:
+      - csrf_access_token
+      - csrf_refresh_token
       type: object
-      required:
-        - users
-      properties:
-        users:
-          type: array
-          items:
-            $ref: '#/components/schemas/typeUserInfo'
-
-    # /user/by-group/{group_id}
-
-    responseUserByGroup:
-      type: object
-      required:
-        - users
-      properties:
-        users:
-          type: array
-          items:
-            $ref: '#/components/schemas/typeUserInfo'
-
-    # /user/self/password
-
-    requestPasswordSelf:
-      title: 'Reset current users password'
-      required:
-        - new_password
-        - old_password
-      properties:
-        new_password:
-          $ref: '#/components/schemas/typePassword'
-        old_password:
-          $ref: '#/components/schemas/typePassword'
-
-    # /user/{user_id}/password
-
-    requestPasswordAdmin:
-      title: 'Reset password request for admins'
-      required:
-        - new_password
-      properties:
-        new_password:
-          $ref: '#/components/schemas/typePassword'
-
-    # /user/{user_id}/role
-
-    requestUserRole:
-      type: object
-      required:
-        - role
-      properties:
-        role:
-          $ref: '#/components/schemas/typeUserRole'
-
-    # /user/{user_id}/type
-
-    requestUserType:
-      type: object
-      required:
-        - type
-      properties:
-        type:
-          $ref: '#/components/schemas/typeUserType'
-
-    # /user/self/personal
-
-    responsePersonalSelf:
-      $ref: '#/components/schemas/typePersonalInfo'
-
-    # /user/{user_id}/personal
-
-    responsePersonalAdminGet:
-      $ref: '#/components/schemas/typePersonalInfo'
-    requestPersonalAdminPatch:
-      $ref: '#/components/schemas/typePersonalInfo'
-
-    # /user/self/university
-
-    responseUniversitySelf:
-      $ref: '#/components/schemas/typePersonalInfo'
-
-    # /user/{user_id}/university
-
-    responseUniversityAdminGet:
-      $ref: '#/components/schemas/typeStudentInfo'
-    requestUniversityAdminPatch:
-      $ref: '#/components/schemas/typeStudentInfo'
-
-    # /group/{group_id}
-
-    responseGroup:
-      $ref: '#/components/schemas/typeGroup'
-
-    # /group/all
-
-    responseGroupAll:
-      type: object
-      required:
-        - groups
-      properties:
-        groups:
-          type: array
-          items:
-            $ref: '#/components/schemas/typeGroup'
-
-    # /group/add
-
-    requestGroupAdd:
-      required:
-        - name
+    Country:
       properties:
         name:
-          $ref: '#/components/schemas/typeGroupName'
-    responseGroupAdd:
-      $ref: '#/components/schemas/typeGroup'
-
-    # /group/{group_id}/remove
-
-    # /user/self/groups
-
-    responseUserSelfGroup:
+          maxLength: 32
+          type: string
       required:
-        - groups
+      - name
+      type: object
+    Group:
+      properties:
+        id:
+          readOnly: true
+          type: integer
+        name:
+          maxLength: 32
+          type: string
+      type: object
+    GroupAddRequest:
+      properties:
+        name:
+          maxLength: 32
+          type: string
+      required:
+      - name
+      type: object
+    GroupsResponse:
       properties:
         groups:
-          type: array
           items:
-            $ref: '#/components/schemas/typeGroup'
-
-    # /user/{user_id}/groups
-
-    responseUserAdminGroup:
-      required:
-        - groups
-      properties:
-        groups:
+            $ref: '#/components/schemas/Group'
           type: array
-          items:
-            $ref: '#/components/schemas/typeGroup'
-
-    # /user/{user_id}/groups/add
-
-    requestUserGroupsAdd:
       required:
-        - group_id
-      properties:
-        group_id:
-          $ref: '#/components/schemas/typeIdentifier'
-
-    # /user/{user_id}/groups/remove
-
-    requestUserGroupsRemove:
-      required:
-        - group_id
-      properties:
-        group_id:
-          $ref: '#/components/schemas/typeIdentifier'
-
-    # /info/universities
-
-    responseInfoUniversities:
-      title: 'Get university list response'
-      required:
-        - university_list
-      properties:
-        university_list:
-          type: array
-          items:
-            $ref: '#/components/schemas/typeCommonName'
-
-    # /info/countries
-
-    responseInfoCountries:
-      title: 'Get country list response'
-      required:
-        - country_list
+      - groups
+      type: object
+    InfoCountriesResponse:
       properties:
         country_list:
-          type: array
           items:
-            $ref: '#/components/schemas/typeCommonName'
+            $ref: '#/components/schemas/Country'
+          type: array
+      required:
+      - country_list
+      type: object
+    InfoUniversitiesResponse:
+      properties:
+        university_list:
+          items:
+            $ref: '#/components/schemas/University'
+          type: array
+      required:
+      - university_list
+      type: object
+    LoginRequest:
+      properties:
+        password:
+          example: qwertyA*1
+          maxLength: 128
+          type: string
+        remember_me:
+          type: boolean
+        username:
+          maxLength: 64
+          type: string
+      required:
+      - password
+      - remember_me
+      - username
+      type: object
+    MembershipRequest:
+      properties:
+        group_id:
+          type: integer
+      required:
+      - group_id
+      type: object
+    PasswordAdminRequest:
+      properties:
+        new_password:
+          example: qwertyA*1
+          maxLength: 128
+          type: string
+      required:
+      - new_password
+      type: object
+    PasswordRequest:
+      properties:
+        new_password:
+          example: qwertyA*1
+          maxLength: 128
+          type: string
+        old_password:
+          example: qwertyA*1
+          maxLength: 128
+          type: string
+      required:
+      - new_password
+      - old_password
+      type: object
+    PersonalInfo:
+      properties:
+        date_of_birth:
+          format: date
+          type: string
+        first_name:
+          maxLength: 32
+          type: string
+        middle_name:
+          maxLength: 32
+          type: string
+        second_name:
+          maxLength: 32
+          type: string
+      required:
+      - date_of_birth
+      - first_name
+      - middle_name
+      - second_name
+      type: object
+    PreregisterResponse:
+      properties:
+        password:
+          example: qwertyA*1
+          maxLength: 128
+          type: string
+        registration_number:
+          maxLength: 64
+          type: string
+      required:
+      - password
+      - registration_number
+      type: object
+    RegisterConfirm:
+      properties:
+        password:
+          example: qwertyA*1
+          maxLength: 128
+          type: string
+        registration_number:
+          maxLength: 64
+          type: string
+      required:
+      - password
+      - registration_number
+      type: object
+    RegisterInternalRequest:
+      properties:
+        password:
+          example: qwertyA*1
+          maxLength: 128
+          type: string
+        username:
+          maxLength: 64
+          type: string
+      required:
+      - password
+      - username
+      type: object
+    ResponseGroupList:
+      properties:
+        groups:
+          items:
+            $ref: '#/components/schemas/Group'
+          type: array
+      required:
+      - groups
+      type: object
+    ResponseUserList:
+      properties:
+        users:
+          items:
+            $ref: '#/components/schemas/User'
+          type: array
+      required:
+      - users
+      type: object
+    RoleRequest:
+      properties:
+        role:
+          enum:
+          - Participant
+          - Creator
+          - Admin
+          - System
+          type: string
+      required:
+      - role
+      type: object
+    SchoolRequest:
+      properties:
+        auth_info:
+          $ref: '#/components/schemas/AuthInfo'
+        personal_info:
+          $ref: '#/components/schemas/PersonalInfo'
+        register_confirm:
+          $ref: '#/components/schemas/RegisterConfirm'
+        register_type:
+          enum:
+          - PreUniversity
+          - Enrollee
+          - School
+          type: string
+      required:
+      - auth_info
+      - personal_info
+      - register_type
+      type: object
+    StudentInfo:
+      properties:
+        admission_year:
+          format: date
+          nullable: true
+          type: string
+        citizenship:
+          maxLength: 32
+          nullable: true
+          type: string
+        citizenship_country_id:
+          description: Framework-specific, ignored on request and never set on on
+            response
+          nullable: true
+          type: integer
+        city:
+          maxLength: 32
+          nullable: true
+          type: string
+        phone:
+          example: 8 (800) 555 35 35
+          nullable: true
+          type: string
+        region:
+          maxLength: 32
+          nullable: true
+          type: string
+        university:
+          maxLength: 32
+          nullable: true
+          type: string
+        university_country:
+          maxLength: 32
+          nullable: true
+          type: string
+        university_country_id:
+          description: Framework-specific, ignored on request and never set on on
+            response
+          nullable: true
+          type: integer
+        university_id:
+          description: Framework-specific, ignored on request and never set on on
+            response
+          nullable: true
+          type: integer
+        user_id:
+          readOnly: true
+          type: integer
+      type: object
+    StudentInfoRegistration:
+      properties:
+        admission_year:
+          format: date
+          type: string
+        citizenship:
+          maxLength: 32
+          type: string
+        city:
+          maxLength: 32
+          type: string
+        phone:
+          example: 8 (800) 555 35 35
+          type: string
+        region:
+          maxLength: 32
+          type: string
+        university:
+          maxLength: 32
+          type: string
+        university_country:
+          maxLength: 32
+          type: string
+      required:
+      - admission_year
+      - citizenship
+      - city
+      - phone
+      - region
+      - university
+      - university_country
+      type: object
+    TypeRequest:
+      properties:
+        type:
+          enum:
+          - PreUniversity
+          - Enrollee
+          - School
+          - University
+          - Internal
+          - PreRegister
+          type: string
+      required:
+      - type
+      type: object
+    University:
+      properties:
+        name:
+          maxLength: 32
+          type: string
+      required:
+      - name
+      type: object
+    UniversityRequest:
+      properties:
+        auth_info:
+          $ref: '#/components/schemas/AuthInfo'
+        personal_info:
+          $ref: '#/components/schemas/PersonalInfo'
+        register_type:
+          enum:
+          - University
+          type: string
+        student_info:
+          $ref: '#/components/schemas/StudentInfoRegistration'
+      required:
+      - auth_info
+      - personal_info
+      - register_type
+      - student_info
+      type: object
+    User:
+      properties:
+        id:
+          readOnly: true
+          type: integer
+        role:
+          enum:
+          - Participant
+          - Creator
+          - Admin
+          - System
+          type: string
+        type:
+          enum:
+          - PreUniversity
+          - Enrollee
+          - School
+          - University
+          - Internal
+          - PreRegister
+          type: string
+        username:
+          maxLength: 64
+          type: string
+      type: object
+    UserInfo:
+      properties:
+        date_of_birth:
+          format: date
+          nullable: true
+          type: string
+        email:
+          maxLength: 64
+          nullable: true
+          type: string
+        first_name:
+          maxLength: 32
+          nullable: true
+          type: string
+        middle_name:
+          maxLength: 32
+          nullable: true
+          type: string
+        second_name:
+          maxLength: 32
+          nullable: true
+          type: string
+        user_id:
+          readOnly: true
+          type: integer
+      required:
+      - user_id
+      type: object
+  securitySchemes:
+    CSRFAccessToken:
+      in: header
+      name: X-CSRF-TOKEN
+      type: apiKey
+    CSRFRefreshToken:
+      in: header
+      name: X-CSRF-TOKEN
+      type: apiKey
+    JWTAccessToken:
+      in: cookie
+      name: access_token_cookie
+      type: apiKey
+    JWTRefreshToken:
+      in: cookie
+      name: refresh_token_cookie
+      type: apiKey
+info:
+  title: aggregate_user
+  version: 1.0.0
+openapi: 3.0.2
+paths:
+  /user/registration/school:
+    post:
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SchoolRequest'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+          description: OK
+        '400':
+          description: Bad request or weak password
+        '409':
+          description: Username already in use
+      summary: Register a new school student
+  /user/registration/university:
+    post:
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UniversityRequest'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+          description: OK
+        '400':
+          description: Bad request or weak password
+        '409':
+          description: Username already in use
+  /user/registration/info/universities:
+    get:
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InfoUniversitiesResponse'
+          description: OK
+  /user/registration/info/countries:
+    get:
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InfoCountriesResponse'
+          description: OK
+  /user/auth/login:
+    post:
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CSRFPair'
+          description: OK
+          headers:
+            Set-Cookie:
+              schema:
+                description: Set both access_token_cookie and refresh_token_cookie
+                example: access_token_cookie=eyJ0eXAi...; Path=/; HttpOnly
+                type: string
+        '400':
+          description: Bad request
+        '401':
+          description: Wrong credentials
+      security: []
+  /user/auth/refresh:
+    post:
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CSRFPair'
+          description: OK
+          headers:
+            Set-Cookie:
+              schema:
+                description: Set both access_token_cookie and refresh_token_cookie
+                example: access_token_cookie=eyJ0eXAi...; Path=/; HttpOnly
+                type: string
+      security:
+      - JWTRefreshToken: []
+      - CSRFRefreshToken: []
+  /user/auth/logout:
+    post:
+      responses:
+        '200':
+          description: OK
+          headers:
+            Set-Cookie:
+              schema:
+                description: Set both access_token_cookie and refresh_token_cookie
+                example: access_token_cookie=deleted; path=/; expires=Thu, 01 Jan
+                  1970 00:00:00 GMT
+                type: string
+      security:
+      - JWTAccessToken: []
+      - CSRFAccessToken: []
+  /user/profile/user:
+    get:
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+          description: OK
+        '404':
+          description: User not found
+      security:
+      - JWTAccessToken: []
+  /user/profile/password:
+    post:
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PasswordRequest'
+        required: true
+      responses:
+        '200':
+          description: OK
+        '400':
+          description: Bad request or weak password
+        '401':
+          description: Wrong credentials
+        '404':
+          description: User not found
+      security:
+      - JWTAccessToken: []
+      - CSRFAccessToken: []
+  /user/profile/personal:
+    get:
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserInfo'
+          description: OK
+        '404':
+          description: Personal info is not set or user not found
+      security:
+      - JWTAccessToken: []
+  /user/profile/university:
+    get:
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StudentInfo'
+          description: OK
+        '404':
+          description: User not found or is not a university student
+      security:
+      - JWTAccessToken: []
+  /user/profile/groups:
+    get:
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GroupsResponse'
+          description: OK
+        '404':
+          description: User not found
+      security:
+      - JWTAccessToken: []
+  /user/admin/internal_register:
+    post:
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterInternalRequest'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+          description: OK
+        '400':
+          description: Bad request
+        '409':
+          description: Username already in use
+      security:
+      - JWTAccessToken: []
+      - CSRFAccessToken: []
+  /user/admin/preregister:
+    post:
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PreregisterResponse'
+          description: OK
+        '403':
+          description: Invalid role of current user
+      security:
+      - JWTAccessToken: []
+      - CSRFAccessToken: []
+  /user/admin/password/{user_id}:
+    post:
+      parameters:
+      - description: Id of the user
+        in: path
+        name: user_id
+        required: true
+        schema:
+          type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PasswordAdminRequest'
+        required: true
+      responses:
+        '200':
+          description: OK
+        '400':
+          description: Bad request or weak password
+        '403':
+          description: Invalid role of current user
+        '404':
+          description: User not found
+      security:
+      - JWTAccessToken: []
+      - CSRFAccessToken: []
+  /user/admin/role/{user_id}:
+    put:
+      parameters:
+      - description: Id of the user
+        in: path
+        name: user_id
+        required: true
+        schema:
+          type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RoleRequest'
+        required: true
+      responses:
+        '200':
+          description: OK
+        '403':
+          description: Invalid role of current user
+        '404':
+          description: User not found
+      security:
+      - JWTAccessToken: []
+      - CSRFAccessToken: []
+  /user/admin/type/{user_id}:
+    put:
+      parameters:
+      - description: Id of the user
+        in: path
+        name: user_id
+        required: true
+        schema:
+          type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TypeRequest'
+        required: true
+      responses:
+        '200':
+          description: OK
+        '403':
+          description: Invalid role of current user
+        '404':
+          description: User not found
+        '409':
+          description: User is missing required info (e.g. university info for a university
+            student)
+      security:
+      - JWTAccessToken: []
+      - CSRFAccessToken: []
+  /user/admin/personal/{user_id}:
+    patch:
+      parameters:
+      - description: Id of the user
+        in: path
+        name: user_id
+        required: true
+        schema:
+          type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserInfo'
+        required: true
+      responses:
+        '200':
+          description: OK
+        '403':
+          description: Invalid role of current user
+        '404':
+          description: User not found
+        '409':
+          description: Personal info is not set and request is not full
+      security:
+      - JWTAccessToken: []
+      - CSRFAccessToken: []
+  /user/admin/university/{user_id}:
+    patch:
+      parameters:
+      - description: Id of the user
+        in: path
+        name: user_id
+        required: true
+        schema:
+          type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StudentInfo'
+        required: true
+      responses:
+        '200':
+          description: OK
+        '403':
+          description: Invalid role of current user
+        '404':
+          description: User not found or is not a university student
+        '409':
+          description: University info is not set and request is not full
+      security:
+      - JWTAccessToken: []
+      - CSRFAccessToken: []
+  /user/admin/add_group:
+    post:
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GroupAddRequest'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Group'
+          description: OK
+        '403':
+          description: Invalid role of current user
+        '404':
+          description: Group not found
+        '409':
+          description: Group already exists
+      security:
+      - JWTAccessToken: []
+      - CSRFAccessToken: []
+  /user/admin/remove_group/{group_id}:
+    post:
+      parameters:
+      - description: ID of the group
+        in: path
+        name: group_id
+        required: true
+        schema:
+          type: integer
+      responses:
+        '200':
+          description: OK
+        '403':
+          description: Invalid role of current user
+        '404':
+          description: Group not found
+      security:
+      - JWTAccessToken: []
+      - CSRFAccessToken: []
+  /user/admin/add_member/{user_id}:
+    post:
+      parameters:
+      - description: Id of the user
+        in: path
+        name: user_id
+        required: true
+        schema:
+          type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MembershipRequest'
+        required: true
+      responses:
+        '200':
+          description: OK
+        '403':
+          description: Invalid role of current user
+        '404':
+          description: User or group not found
+        '409':
+          description: User already in the group
+      security:
+      - JWTAccessToken: []
+      - CSRFAccessToken: []
+  /user/admin/remove_member/{user_id}:
+    post:
+      parameters:
+      - description: Id of the user
+        in: path
+        name: user_id
+        required: true
+        schema:
+          type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MembershipRequest'
+        required: true
+      responses:
+        '200':
+          description: OK
+        '403':
+          description: Invalid role of current user
+        '404':
+          description: User or group not found
+      security:
+      - JWTAccessToken: []
+      - CSRFAccessToken: []
+  /user/creator/user/{user_id}:
+    get:
+      parameters:
+      - description: Id of the user
+        in: path
+        name: user_id
+        required: true
+        schema:
+          type: integer
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+          description: OK
+        '403':
+          description: Invalid role of current user
+        '404':
+          description: User not found
+      security:
+      - JWTAccessToken: []
+  /user/creator/user/all:
+    get:
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponseUserList'
+          description: OK
+        '403':
+          description: Invalid role of current user
+      security:
+      - JWTAccessToken: []
+  /user/creator/user/by-group/{group_id}:
+    get:
+      parameters:
+      - description: ID of the group
+        in: path
+        name: group_id
+        required: true
+        schema:
+          type: integer
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponseUserList'
+          description: OK
+        '403':
+          description: Invalid role of current user
+        '404':
+          description: Group not found
+      security:
+      - JWTAccessToken: []
+  /user/creator/personal/{user_id}:
+    get:
+      parameters:
+      - description: Id of the user
+        in: path
+        name: user_id
+        required: true
+        schema:
+          type: integer
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserInfo'
+          description: OK
+        '403':
+          description: Invalid role of current user
+        '404':
+          description: Personal info is not set or user not found
+      security:
+      - JWTAccessToken: []
+  /user/creator/university/{user_id}:
+    get:
+      parameters:
+      - description: Id of the user
+        in: path
+        name: user_id
+        required: true
+        schema:
+          type: integer
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StudentInfo'
+          description: OK
+        '403':
+          description: Invalid role of current user
+        '404':
+          description: User not found or is not a university student
+      security:
+      - JWTAccessToken: []
+  /user/creator/group/{group_id}:
+    get:
+      parameters:
+      - description: Id of the group
+        in: path
+        name: group_id
+        required: true
+        schema:
+          type: integer
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Group'
+          description: OK
+        '403':
+          description: Invalid role of current user
+        '404':
+          description: Group not found
+      security:
+      - JWTAccessToken: []
+  /user/creator/group/all:
+    get:
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponseGroupList'
+          description: OK
+        '403':
+          description: Invalid role of current user
+      security:
+      - JWTAccessToken: []
+  /user/creator/membership/{user_id}:
+    get:
+      parameters:
+      - description: Id of the user
+        in: path
+        name: user_id
+        required: true
+        schema:
+          type: integer
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponseGroupList'
+          description: OK
+        '403':
+          description: Invalid role of current user
+        '404':
+          description: User not found
+      security:
+      - JWTAccessToken: []

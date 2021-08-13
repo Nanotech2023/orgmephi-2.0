@@ -1,6 +1,7 @@
 import importlib
 from functools import wraps
 
+from apispec import APISpec
 from openapi_core.contrib.flask.decorators import FlaskOpenAPIViewDecorator
 from marshmallow import Schema
 from typing import Type
@@ -62,6 +63,8 @@ class OrgMephiModule:
         self._swagger = None
         self._api_file = api_file
         self._marshmallow_api: bool = marshmallow_api
+        self._apispec: Optional[APISpec] = None
+        self._api_full_path: Optional[str] = None
 
     @property
     def name(self) -> str:
@@ -86,6 +89,14 @@ class OrgMephiModule:
         :return: Swagger blueprint of self
         """
         return self._swagger
+
+    @property
+    def modules(self):
+        """
+        Child modules
+        :return: List of child modules
+        """
+        return self._modules
 
     def get_full_name(self, top=None) -> str:
         """
@@ -227,6 +238,17 @@ class OrgMephiModule:
         else:
             return list(itertools.chain([self._swagger], *[mod.get_swagger_blueprints() for mod in self._modules]))
 
+    def get_api(self) -> str:
+        """
+        Generate api for this module
+        :return: Api string in yaml format
+        """
+        if self._apispec is not None:
+            return self._apispec.to_yaml()
+        if self._api_full_path is not None:
+            with open(self._api_full_path) as api_file:
+                return api_file.read()
+
     def _init_openapi(self, api_path: str):
         import yaml
         from openapi_core import create_spec
@@ -234,6 +256,7 @@ class OrgMephiModule:
             spec_dict = yaml.safe_load(spec_file)
         spec = create_spec(spec_dict)
         self._openapi = FlaskOpenAPIViewDecorator.from_spec(spec)
+        self._api_full_path = api_path
 
     def _init_swagger(self, top):
         from flask_swagger_ui import get_swaggerui_blueprint
@@ -260,16 +283,15 @@ class OrgMephiModule:
     _csrf_access_token_schema = {'type': 'apiKey', 'in': 'header', 'name': 'X-CSRF-TOKEN'}
     _csrf_refresh_token_schema = {'type': 'apiKey', 'in': 'header', 'name': 'X-CSRF-TOKEN'}
 
-    def _api_from_marshmallow(self, top):
+    def _init_apispec(self, title):
         from flask import Flask
-        from apispec import APISpec
         from apispec_webframeworks.flask import FlaskPlugin
         from apispec_oneofschema import MarshmallowPlugin
 
         plugin = MarshmallowPlugin()
 
         spec = APISpec(
-            title=self.get_full_name(top),
+            title=title,
             version='1.0.0',
             openapi_version='3.0.2',
             plugins=[FlaskPlugin(), plugin]
@@ -292,7 +314,13 @@ class OrgMephiModule:
                 if endpoint.__doc__ is not None and endpoint != static_endpoint:
                     spec.path(view=endpoint)
 
-        api = spec.to_yaml()
+        self._apispec = spec
+
+    def _api_from_marshmallow(self, top):
+
+        self._init_apispec(self.get_full_name(top))
+
+        api = self._apispec.to_yaml()
 
         @self._swagger.route('/api.yaml', methods=['GET'])
         def serve_api():
