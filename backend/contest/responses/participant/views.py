@@ -10,6 +10,21 @@ module = get_current_module()
 app = get_current_app()
 
 
+@module.route('/contest/<int:contest_id>/task/<int:task_id>/user/self', methods=['GET'])
+def user_answer_for_task(contest_id, task_id):
+    self_user_id = jwt_get_id()
+    user_answer = user_answer_get(self_user_id, contest_id, task_id)
+    return make_response(user_answer, 200)
+
+
+@module.route('/contest/<int:contest_id>/task/<int:task_id>/user/self/<string:filetype>', methods=['POST'])
+def user_answer_for_task_post(contest_id, task_id, filetype):
+    self_user_id = jwt_get_id()
+    answer = request.data
+    user_answer_post(answer, filetype, self_user_id, contest_id, task_id)
+    return make_response({}, 200)
+
+
 @module.route('/contest/<int:contest_id>/user/self/status', methods=['GET', 'POST'])
 def user_status_and_mark_for_response(contest_id):
     self_user_id = jwt_get_id()
@@ -18,16 +33,6 @@ def user_status_and_mark_for_response(contest_id):
     elif request.method == 'POST':
         values = request.openapi.body
         user_answer_status_post(values, self_user_id, contest_id)
-        return make_response({}, 200)
-
-
-@module.route('/contest/<int:contest_id>/user/<int:user_id>/status', methods=['GET', 'POST'])
-def user_status_and_mark_for_response_by_id(contest_id, user_id):
-    if request.method == 'GET':
-        return make_response(user_answer_status_get(user_id, contest_id), 200)
-    elif request.method == 'POST':
-        values = request.openapi.body
-        user_answer_status_post(values, user_id, contest_id)
         return make_response({}, 200)
 
 
@@ -44,26 +49,11 @@ def user_status_history_for_response(contest_id):
             'history': history
         }, 200)
 
-
-@module.route('/contest/<int:contest_id>/user/<int:user_id>/status/history', methods=['GET'])
-def user_status_history_for_response_by_id(contest_id, user_id):
-    user_work = get_user_in_contest_work(user_id, contest_id)
-    status = user_work.statuses
-    history = [elem.status_for_history() for elem in status]
+@module.route('/contest/<int:contest_id>/user/self/appeal', methods=['POST'])
+def user_response_appeal(contest_id):
+    self_user_id = jwt_get_id()
+    values = request.openapi.body
     return make_response(
         {
-            'user_id': user_id,
-            'contest_id': contest_id,
-            'history': history
-        }, 200)
-
-
-@module.route('/contest/<int:contest_id>/list/', methods=['GET'])
-def get_list_for_stage(contest_id):
-    users_in_contest = db_get_list(Response, 'contest_id', contest_id)
-    user_rows = [elem.prepare_for_list() for elem in users_in_contest]
-    return make_response(
-        {
-            'contest_id': contest_id,
-            'user_row': user_rows
+            'appeal_id': user_response_appeal_create(values, self_user_id, contest_id)
         }, 200)
