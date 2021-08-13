@@ -4,7 +4,7 @@ info:
   description: API description in Markdown.
   version: 1.0.0
 servers:
-  - url: http://127.0.0.1:5000/contest/responses/answer
+  - url: http://127.0.0.1:5000/contest/responses/participant
   - url: http://127.0.0.1:5000
 
 paths:
@@ -12,11 +12,82 @@ paths:
   ##                                             Path definition                                                      ##
   ######################################################################################################################
 
-  # User answers
+  # User status
 
-  /contest/{contest_id}/user/{user_id}/response:
+  /contest/{contest_id}/user/self/status:
     get:
-      summary: Get all user answers for the contest
+      summary: Get user's status and mark for reponse
+      security:
+        - cookieJWTAuth: [ ]
+      parameters:
+        - in: path
+          description: Id of the contest
+          name: contest_id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/responseStatus'
+        '403':
+          description: Invalid role of current user
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+        '404':
+          description: User or contest not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+    post:
+      summary: Set user's status and mark for reponse
+      description: Set user's status and mark for reponse, only for inspector
+      security:
+        - cookieJWTAuth: [ ]
+        - CSRFToken: [ ]
+      parameters:
+        - in: path
+          description: Id of the contest
+          name: contest_id
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/responseStatus'
+      responses:
+        '200':
+          description: OK
+        '400':
+          description: Incorrect mark or status
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+        '403':
+          description: Invalid role of current user
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+        '404':
+          description: User or contest not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+  /contest/{contest_id}/user/{user_id}/status:
+    get:
+      summary: Get user's status and mark for reponse
       security:
         - cookieJWTAuth: [ ]
       parameters:
@@ -38,7 +109,84 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/userContestAllAnswer'
+                $ref: '#/components/schemas/responseStatus'
+        '403':
+          description: Invalid role of current user
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+        '404':
+          description: User or contest not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+    post:
+      summary: Set user's status and mark for reponse
+      description: Set user's status and mark for reponse, only for inspector
+      security:
+        - cookieJWTAuth: [ ]
+        - CSRFToken: [ ]
+      parameters:
+        - in: path
+          description: Id of the contest
+          name: contest_id
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the user
+          name: user_id
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/responseStatus'
+      responses:
+        '200':
+          description: OK
+        '400':
+          description: Incorrect mark or status
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+        '403':
+          description: Invalid role of current user
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+        '404':
+          description: User or contest not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+  /contest/{contest_id}/user/self/status/history:
+    get:
+      summary: Get status history of current user's work
+      security:
+        - cookieJWTAuth: [ ]
+      parameters:
+        - in: path
+          description: Id of the contest
+          name: contest_id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/userResponseStatusHistory'
         '403':
           description: Not enough rights for current user
           content:
@@ -51,9 +199,9 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/errorResponse'
-  /contest/{contest_id}/answer/{answer_id}:
+  /contest/{contest_id}/user/{user_id}/status/history:
     get:
-      summary: Get user's answer by id
+      summary: Get status history of user's work
       security:
         - cookieJWTAuth: [ ]
       parameters:
@@ -64,8 +212,8 @@ paths:
           schema:
             type: integer
         - in: path
-          description: Id of the answer
-          name: answer_id
+          description: Id of the user
+          name: user_id
           required: true
           schema:
             type: integer
@@ -75,7 +223,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/userContestAnswer'
+                $ref: '#/components/schemas/userResponseStatusHistory'
         '403':
           description: Not enough rights for current user
           content:
@@ -88,9 +236,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/errorResponse'
-  /contest/{contest_id}/task/{task_id}/user/self:
+
+  # List of users
+
+  /contest/{contest_id}/list/:
     get:
-      summary: Get current user answer for the task
+      summary: Get the consolidated sheets within a single competition or stage
       security:
         - cookieJWTAuth: [ ]
       parameters:
@@ -100,162 +251,15 @@ paths:
           required: true
           schema:
             type: integer
-        - in: path
-          description: Id of the task
-          name: task_id
-          required: true
-          schema:
-            type: integer
       responses:
         '200':
           description: OK
           content:
             application/json:
               schema:
-                properties:
-                  user_answer:
-                    type: string    #TODO return FILE
+                $ref: '#/components/schemas/contestResultSheet'
         '404':
-          description: User, contest or task not found
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errorResponse'
-  /contest/{contest_id}/task/{task_id}/user/self/{filetype}:
-    post:
-      summary: Add current user answer for the task
-      security:
-        - cookieJWTAuth: [ ]
-        - CSRFToken: [ ]
-      parameters:
-        - in: path
-          description: Id of the contest
-          name: contest_id
-          required: true
-          schema:
-            type: integer
-        - in: path
-          description: Id of the task
-          name: task_id
-          required: true
-          schema:
-            type: integer
-        - in: path
-          description: Type of file
-          name: filetype
-          required: true
-          schema:
-            $ref: '#/components/schemas/typeFiletype'
-      requestBody:
-        content:
-          application/octet-stream:
-            schema:
-              properties:
-                user_answer:
-                  $ref: '#/components/schemas/typeUserAnswer'
-      responses:
-        '200':
-          description: OK
-        '404':
-          description: User, contest or task not found
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errorResponse'
-  /contest/{contest_id}/task/{task_id}/user/{user_id}:
-    get:
-      summary: Get user answer for the task
-      security:
-        - cookieJWTAuth: [ ]
-      parameters:
-        - in: path
-          description: Id of the contest
-          name: contest_id
-          required: true
-          schema:
-            type: integer
-        - in: path
-          description: Id of the task
-          name: task_id
-          required: true
-          schema:
-            type: integer
-        - in: path
-          description: Id of the user
-          name: user_id
-          required: true
-          schema:
-            type: integer
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                properties:
-                  user_answer:
-                    type: string    #TODO return FILE
-        '403':
-          description: Not enough rights for current user
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errorResponse'
-        '404':
-          description: User, contest or task not found
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errorResponse'
-  /contest/{contest_id}/task/{task_id}/user/{user_id}/{filetype}:
-    post:
-      summary: Add user answer for a task
-      security:
-        - cookieJWTAuth: [ ]
-        - CSRFToken: [ ]
-      parameters:
-        - in: path
-          description: Id of the contest
-          name: contest_id
-          required: true
-          schema:
-            type: integer
-        - in: path
-          description: Id of the task
-          name: task_id
-          required: true
-          schema:
-            type: integer
-        - in: path
-          description: Id of the user
-          name: user_id
-          required: true
-          schema:
-            type: integer
-        - in: path
-          description: Filetype
-          name: filetype
-          required: true
-          schema:
-            $ref: '#/components/schemas/typeFiletype'
-      requestBody:
-        content:
-          application/octet-stream:
-            schema:
-              properties:
-                user_answer:
-                  $ref: '#/components/schemas/typeUserAnswer'
-      responses:
-        '200':
-          description: OK
-        '403':
-          description: Not enough rights for current user
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errorResponse'
-        '404':
-          description: User, contest or task not found
+          description: Contest not found
           content:
             application/json:
               schema:
@@ -310,59 +314,96 @@ components:
   ##                                             Common data types                                                    ##
   ######################################################################################################################
 
+    typeCommonName:
+      type: string
+      maxLength: 32
+    typeDateTime:
+      type: string
+      format: date-time   #TODO example
     typeIdentifier:
       type: integer
-    typeUserAnswer:
+    typeMark:
+      type: number
+      format: float
+      minimum: 0
+      maximum: 100
+      nullable: true
+    typeNullableIdentifier:
+      type: integer
+      nullable: true
+    typeStatus:
       type: string
-     # format: binary     # TODO FILE
-    typeFiletype:
-      type: string
-      enum:  ["txt", "pdf", "jpg", "doc", "docx", "png", "gif", "odt" ]
+      enum: [ "NotChecked", "Accepted", "Rejected", "Appeal", "Revision" ]
 
   ######################################################################################################################
   ##                                             Composite data types                                                 ##
   ######################################################################################################################
 
-    typeUserAnswerForList:
-      title: "User answer"
+    contestResultLine:
+      title: "Line in sheet"
       required:
-        - task_id
-        - answer_id
+        - user_id
+        - mark
       properties:
-        task_id:
+        user_id:
           $ref: '#/components/schemas/typeIdentifier'
-        answer_id:
-          $ref: '#/components/schemas/typeIdentifier'
+        mark:
+          $ref: '#/components/schemas/typeMark'
 
   ######################################################################################################################
   ##                                             Path schemas                                                         ##
   ######################################################################################################################
 
-    userContestAnswer:
-      title: "User's contest answer"
+    statusHistoryItem:
+      title: "Item of status history"
       required:
-        - user_answer
-        - filetype
+        - status
+        - datetime
       properties:
-        user_answer:
-          $ref: '#/components/schemas/typeUserAnswer'
-        filetype:
-          $ref: '#/components/schemas/typeFiletype'
+        status:
+          $ref: '#/components/schemas/typeCommonName'
+        datetime:
+          $ref: '#/components/schemas/typeDateTime'
+        appeal_id:
+          $ref: '#/components/schemas/typeNullableIdentifier'
+        mark:
+          $ref: '#/components/schemas/typeMark'
 
-    userContestAllAnswer:
-      title: "ALl user's answer for the contest"
+    userResponseStatusHistory:
+      title: "Status history of user response"
       required:
         - user_id
-        - work_id
         - contest_id
+        - history
       properties:
         user_id:
           $ref: '#/components/schemas/typeIdentifier'
-        work_id:
-          $ref: '#/components/schemas/typeIdentifier'
         contest_id:
           $ref: '#/components/schemas/typeIdentifier'
-        user_answers:
+        history:
           type: array
           items:
-            $ref: '#/components/schemas/typeUserAnswerForList'
+            $ref: '#/components/schemas/statusHistoryItem'
+
+    contestResultSheet:
+      title: "Result sheet for one contest"
+      required:
+        - contest_id
+        - user_row
+      properties:
+        contest_id:
+          $ref: '#/components/schemas/typeIdentifier'
+        user_row:
+          type: array
+          items:
+            $ref: '#/components/schemas/contestResultLine'
+
+    responseStatus:
+      title: "User's response status and mark"
+      required:
+        - status
+      properties:
+        status:
+          $ref: '#/components/schemas/typeStatus'
+        mark:
+          $ref: '#/components/schemas/typeMark'
