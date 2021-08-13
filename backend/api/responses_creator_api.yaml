@@ -112,6 +112,43 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/errorResponse'
+  /contest/{contest_id}/user/{user_id}/response:
+    get:
+      summary: Get all user answers for the contest
+      security:
+        - cookieJWTAuth: [ ]
+      parameters:
+        - in: path
+          description: Id of the contest
+          name: contest_id
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the user
+          name: user_id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/userContestAllAnswer'
+        '403':
+          description: Not enough rights for current user
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+        '404':
+          description: User or contest not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
 
     # User status
 
@@ -549,3 +586,32 @@ components:
           $ref: '#/components/schemas/typeMessage'
         appeal_response:
           $ref: '#/components/schemas/typeNullableMessage'
+
+    userContestAllAnswer:
+      title: "ALl user's answer for the contest"
+      required:
+        - user_id
+        - work_id
+        - contest_id
+      properties:
+        user_id:
+          $ref: '#/components/schemas/typeIdentifier'
+        work_id:
+          $ref: '#/components/schemas/typeIdentifier'
+        contest_id:
+          $ref: '#/components/schemas/typeIdentifier'
+        user_answers:
+          type: array
+          items:
+            $ref: '#/components/schemas/typeUserAnswerForList'
+
+    typeUserAnswerForList:
+      title: "User answer"
+      required:
+        - task_id
+        - answer_id
+      properties:
+        task_id:
+          $ref: '#/components/schemas/typeIdentifier'
+        answer_id:
+          $ref: '#/components/schemas/typeIdentifier'

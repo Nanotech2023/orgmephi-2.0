@@ -1,6 +1,6 @@
 from flask import request, make_response
 from contest.responses.models import *
-from common.errors import NotFound
+from common.errors import NotFound, InsufficientData
 from common import get_current_app, get_current_module
 from common.jwt_verify import jwt_required, jwt_required_role, jwt_get_id
 from common.util import db_get_or_raise
@@ -22,6 +22,22 @@ def user_answer_for_task_by_id_post(contest_id, task_id, user_id, filetype):
     answer = request.data
     user_answer_post(answer, filetype, user_id, contest_id, task_id)
     return make_response({}, 200)
+
+
+@module.route('/contest/<int:contest_id>/user/<int:user_id>/response', methods=['GET'])
+def get_user_all_answers(contest_id, user_id):
+    user_work = get_user_in_contest_work(user_id, contest_id)
+    if user_work.answers is None:
+        raise NotFound('user_response.answers', 'for user %d' % user_id)
+    answers = user_work.answers
+    user_answer = [elem.serialize() for elem in answers]
+    return make_response(
+        {
+            "user_id": user_work.user_id,
+            "work_id": user_work.work_id,
+            "contest_id": user_work.contest_id,
+            "user_answers": user_answer
+        }, 200)
 
 
 @module.route('/contest/<int:contest_id>/user/<int:user_id>/status', methods=['GET', 'POST'])

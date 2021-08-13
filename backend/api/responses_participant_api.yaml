@@ -88,6 +88,43 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/errorResponse'
+  /contest/{contest_id}/answer/{answer_id}:
+    get:
+      summary: Get user's answer by id
+      security:
+        - cookieJWTAuth: [ ]
+      parameters:
+        - in: path
+          description: Id of the contest
+          name: contest_id
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the answer
+          name: answer_id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/userContestAnswer'
+        '403':
+          description: Not enough rights for current user
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+        '404':
+          description: User or contest not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
 
     # User status
 
@@ -229,6 +266,38 @@ paths:
               schema:
                 $ref: '#/components/schemas/errorResponse'
 
+  /contest/{contest_id}/appeal/{appeal_id}:
+    get:
+      summary: Get appeal info
+      security:
+        - cookieJWTAuth: [ ]
+      parameters:
+        - in: path
+          description: Id of the contest
+          name: contest_id
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the appeal
+          name: appeal_id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/commonAppealInfo'
+        '404':
+          description: Appeal or contest not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+
 
 components:
   securitySchemes:
@@ -307,6 +376,10 @@ components:
     typeMessage:
       type: string
       maxLength: 4096
+    typeNullableMessage:
+      type: string
+      maxLength: 4096
+      nullable: true
 
   ######################################################################################################################
   ##                                             Composite data types                                                 ##
@@ -374,3 +447,34 @@ components:
       properties:
         message:
           $ref: '#/components/schemas/typeMessage'
+
+    commonAppealInfo:
+      title: "Common appeal info"
+      required:
+        - appeal_id
+        - status_id
+        - appeal_status
+        - appeal_message
+        - appeal_response
+      properties:
+        appeal_id:
+          $ref: '#/components/schemas/typeIdentifier'
+        status_id:
+          $ref: '#/components/schemas/typeIdentifier'
+        appeal_status:
+          $ref: '#/components/schemas/typeCommonName'
+        appeal_message:
+          $ref: '#/components/schemas/typeMessage'
+        appeal_response:
+          $ref: '#/components/schemas/typeNullableMessage'
+
+    userContestAnswer:
+      title: "User's contest answer"
+      required:
+        - user_answer
+        - filetype
+      properties:
+        user_answer:
+          $ref: '#/components/schemas/typeUserAnswer'
+        filetype:
+          $ref: '#/components/schemas/typeFiletype'

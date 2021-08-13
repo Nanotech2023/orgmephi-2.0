@@ -25,6 +25,16 @@ def user_answer_for_task_post(contest_id, task_id, filetype):
     return make_response({}, 200)
 
 
+@module.route('/contest/<int:contest_id>/answer/<int:answer_id>', methods=['GET'])
+def get_user_answer_by_id(contest_id, answer_id):
+    user_answer = db_get_or_raise(ResponseAnswer, 'answer_id', answer_id)
+    return make_response(
+        {
+            "user_answer": str(user_answer.answer),  # TODO BLOB not for json
+            "filetype": user_answer.filetype.value
+        }, 200)
+
+
 @module.route('/contest/<int:contest_id>/user/self/status', methods=['GET', 'POST'])
 def user_status_and_mark_for_response(contest_id):
     self_user_id = jwt_get_id()
@@ -57,3 +67,9 @@ def user_response_appeal(contest_id):
         {
             'appeal_id': user_response_appeal_create(values, self_user_id, contest_id)
         }, 200)
+
+
+@module.route('/contest/<int:contest_id>/appeal/<int:appeal_id>', methods=['GET'])
+def get_appeal_info_by_id(contest_id, appeal_id):
+    appeal = db_get_or_raise(Appeal, 'appeal_id', appeal_id)
+    return make_response(appeal.serialize(), 200)
