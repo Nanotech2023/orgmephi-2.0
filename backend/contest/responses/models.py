@@ -2,8 +2,8 @@
 
 from datetime import datetime
 import enum
-from contest.tasks.models import UserInContest
 from common import get_current_db
+from contest.tasks.models import UserInContest, Task
 
 db = get_current_db()
 
@@ -15,6 +15,9 @@ class Response(db.Model):
     work_id: id of the user's work
     user_id: id of the user
     contest_id: id of the contest
+
+    statuses: responses statuses
+    answers: answers in user response
     """
 
     __tablename__ = 'response'
@@ -23,7 +26,14 @@ class Response(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey(f'{UserInContest.__tablename__}.user_id'))
     contest_id = db.Column(db.Integer, db.ForeignKey(f'{UserInContest.__tablename__}.contest_id'))
     statuses = db.relationship('ResponseStatus', backref='response', lazy=True)
-    answers = db.relationship('ResponseAnswer', backref='response', lazy=True)
+    answers = db.relationship('ResponseAnswer', backref='response', lazy='dynamic')
+
+    def prepare_for_list(self):
+        mark = self.statuses[-1].mark
+        return {
+            'user_id': self.user_id,
+            'mark': mark
+        }
 
 
 class ResponseStatusEnum(enum.Enum):
@@ -37,11 +47,14 @@ class ResponseStatusEnum(enum.Enum):
     revision: work sent for revision
     """
 
-    not_checked = 0
-    accepted = 1
-    rejected = 2
-    appeal = 3
-    revision = 4
+    not_checked = 'NotChecked'
+    accepted = 'Accepted'
+    rejected = 'Rejected'
+    appeal = 'Appeal'
+    revision = 'Revision'
+
+
+work_status = {status.value: status for status in ResponseStatusEnum}
 
 
 class ResponseStatus(db.Model):
@@ -53,6 +66,8 @@ class ResponseStatus(db.Model):
     timestamp: timestamp to determine the timeline
     status: status of the work
     mark: mark of the work
+
+    appeal: an appeal which is linked to this status
     """
 
     __tablename__ = 'responsestatus'
@@ -62,6 +77,28 @@ class ResponseStatus(db.Model):
     timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
     status = db.Column(db.Enum(ResponseStatusEnum), nullable=False)
     mark = db.Column(db.Float)
+    appeal = db.relationship('Appeal', backref='status', lazy=True, uselist=False)
+
+    def serialize(self):
+        if self.mark is None:
+            return {
+                'status': self.status.value
+            }
+        else:
+            return {
+                'status': self.status.value,
+                'mark': self.mark
+            }
+
+    def status_for_history(self):
+        appeal_id = self.appeal.appeal_id if self.appeal is not None else None
+
+        return {
+            'status': self.status.value,
+            'datetime': self.timestamp.isoformat(),
+            'appeal_id': appeal_id,
+            'mark': self.mark
+        }
 
 
 class AppealStatusEnum(enum.Enum):
@@ -73,9 +110,12 @@ class AppealStatusEnum(enum.Enum):
     appeal_rejected: appeal rejected
     """
 
-    under_review = 0
-    appeal_accepted = 1
-    appeal_rejected = 2
+    under_review = "UnderReview"
+    appeal_accepted = "AppealAccepted"
+    appeal_rejected = "AppealRejected"
+
+
+appeal_status = {status.value: status for status in AppealStatusEnum}
 
 
 class Appeal(db.Model):
@@ -97,6 +137,19 @@ class Appeal(db.Model):
     appeal_message = db.Column(db.Text)
     appeal_response = db.Column(db.Text)
 
+    def serialize(self):
+        return {
+                'appeal_id': self.appeal_id,
+                'status_id': self.work_status,
+                'appeal_status': self.appeal_status.value,
+                'appeal_message': self.appeal_message,
+                'appeal_response': self.appeal_response
+            }
+
+    def reply_to_appeal(self, message, status):
+        self.appeal_response = message
+        self.appeal_status = status
+
 
 class ResponseFiletypeEnum(enum.Enum):
     """
@@ -112,14 +165,17 @@ class ResponseFiletypeEnum(enum.Enum):
     odt: OpenOffice format
     """
 
-    txt = 0
-    pdf = 1
-    jpg = 2
-    doc = 3
-    docx = 4
-    png = 5
-    gif = 6
-    odt = 7
+    txt = 'txt'
+    pdf = 'pdf'
+    jpg = 'jpg'
+    doc = 'doc'
+    docx = 'docx'
+    png = 'png'
+    gif = 'gif'
+    odt = 'odt'
+
+
+filetype_dict = {filetype.value: filetype for filetype in ResponseFiletypeEnum}
 
 
 class ResponseAnswer(db.Model):
@@ -137,21 +193,69 @@ class ResponseAnswer(db.Model):
 
     answer_id = db.Column(db.Integer, autoincrement=True, primary_key=True)
     work_id = db.Column(db.Integer, db.ForeignKey('response.work_id'))
-    task_num = db.Column(db.Integer, db.ForeignKey('base_task.task_id'))
+    task_num = db.Column(db.Integer, db.ForeignKey(f'{Task.__tablename__}.task_id'))
     answer = db.Column(db.LargeBinary, nullable=False)
     filetype = db.Column(db.Enum(ResponseFiletypeEnum), nullable=False)
 
+    def serialize(self):
+        return {
+            'task_id': self.task_num,
+            'answer_id': self.answer_id
+        }
 
-"""
-Возможные запросы:
-    - Получение ведомости пользователей для определенного конкурса - пользователь/ оценка
-    - Отображение переписки между проряющим и пользователем во время аппеляции
-    - Отобразить историю статусов для работы с оценками
-    - Внести / Изменить ответ пользователя
-    - Загрузить файл от пользователя
-    - Выдать все ответы пользователя + файлы
-    - Изменить статус работы
-"""
+    def update(self, answer_new=None, filetype_new=None):
+        if answer_new is not None:
+            self.answer = answer_new
+        if filetype_new is not None:
+            self.filetype = filetype_dict[filetype_new]
+
+
+def add_user_response(db_session, user_id, contest_id):
+    user_work = Response(
+        user_id=user_id,
+        contest_id=contest_id
+    )
+    db_session.add(user_work)
+    return user_work
+
+
+def add_response_status(work_id, status=None, mark=None):
+    if status is None:
+        new_status = work_status['NotChecked']
+    else:
+        new_status = work_status.get(status)
+    if mark is None:
+        response_status = ResponseStatus(
+            work_id=work_id,
+            status=new_status
+        )
+    else:
+        response_status = ResponseStatus(
+            work_id=work_id,
+            status=new_status,
+            mark=mark
+        )
+    return response_status
+
+
+def add_response_answer(work_id, task_id, answer, filetype):
+    response_answer = ResponseAnswer(
+        work_id=work_id,
+        task_num=task_id,
+        answer=answer,
+        filetype=filetype_dict[filetype]
+    )
+    return response_answer
+
+
+def add_response_appeal(status_id, message):
+    appeal = Appeal(
+        work_status=status_id,
+        appeal_status=appeal_status['UnderReview'],
+        appeal_message=message
+    )
+    return appeal
+
 
 if __name__ == '__main__':
     db.create_all()

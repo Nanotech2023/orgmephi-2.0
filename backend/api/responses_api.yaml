@@ -4,10 +4,16 @@ info:
   description: API description in Markdown.
   version: 1.0.0
 servers:
+  - url: http://127.0.0.1:5000/contest/responses
   - url: http://127.0.0.1:5000
-  - url: http://127.0.0.1:5000/contest
 
 paths:
+  ######################################################################################################################
+  ##                                             Path definition                                                      ##
+  ######################################################################################################################
+
+  # User answers
+
   /olympiad/{olympiad_id}/stage/{stage_id}/contest/{contest_id}/user/{user_id}/response:
     get:
       summary: Get all user answers for the contest
@@ -15,8 +21,14 @@ paths:
         - cookieJWTAuth: [ ]
       parameters:
         - in: path
-          description: Id of the user
-          name: user_id
+          description: Id of the olympiad
+          name: olympiad_id
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the stage
+          name: stage_id
           required: true
           schema:
             type: integer
@@ -27,14 +39,8 @@ paths:
           schema:
             type: integer
         - in: path
-          description: Id of the olympiad
-          name: olympiad_id
-          required: true
-          schema:
-            type: integer
-        - in: path
-          description: Id of the stage
-          name: stage_id
+          description: Id of the user
+          name: user_id
           required: true
           schema:
             type: integer
@@ -64,12 +70,6 @@ paths:
         - cookieJWTAuth: [ ]
       parameters:
         - in: path
-          description: Id of the contest
-          name: contest_id
-          required: true
-          schema:
-            type: integer
-        - in: path
           description: Id of the olympiad
           name: olympiad_id
           required: true
@@ -78,6 +78,12 @@ paths:
         - in: path
           description: Id of the stage
           name: stage_id
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the contest
+          name: contest_id
           required: true
           schema:
             type: integer
@@ -113,18 +119,6 @@ paths:
         - cookieJWTAuth: [ ]
       parameters:
         - in: path
-          description: Id of the contest
-          name: contest_id
-          required: true
-          schema:
-            type: integer
-        - in: path
-          description: Id of the task
-          name: task_id
-          required: true
-          schema:
-            type: integer
-        - in: path
           description: Id of the olympiad
           name: olympiad_id
           required: true
@@ -133,6 +127,18 @@ paths:
         - in: path
           description: Id of the stage
           name: stage_id
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the contest
+          name: contest_id
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the task
+          name: task_id
           required: true
           schema:
             type: integer
@@ -142,19 +148,34 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/userContestAnswer'
+                properties:
+                  user_answer:
+                    type: string    #TODO return FILE
         '404':
           description: User, contest, olympiad, stage or task not found
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/errorResponse'
+  /olympiad/{olympiad_id}/stage/{stage_id}/contest/{contest_id}/task/{task_id}/user/self/{filetype}:
     post:
       summary: Add current user answer for the task
       security:
         - cookieJWTAuth: [ ]
         - CSRFToken: [ ]
       parameters:
+        - in: path
+          description: Id of the olympiad
+          name: olympiad_id
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the stage
+          name: stage_id
+          required: true
+          schema:
+            type: integer
         - in: path
           description: Id of the contest
           name: contest_id
@@ -168,23 +189,18 @@ paths:
           schema:
             type: integer
         - in: path
-          description: Id of the olympiad
-          name: olympiad_id
+          description: Type of file
+          name: filetype
           required: true
           schema:
-            type: integer
-        - in: path
-          description: Id of the stage
-          name: stage_id
-          required: true
-          schema:
-            type: integer
+            $ref: '#/components/schemas/typeFiletype'
       requestBody:
-        required: true
         content:
-          application/json:
+          application/octet-stream:
             schema:
-              $ref: '#/components/schemas/userContestAnswer'
+              properties:
+                user_answer:
+                  $ref: '#/components/schemas/typeUserAnswer'
       responses:
         '200':
           description: OK
@@ -201,8 +217,14 @@ paths:
         - cookieJWTAuth: [ ]
       parameters:
         - in: path
-          description: Id of the user
-          name: user_id
+          description: Id of the olympiad
+          name: olympiad_id
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the stage
+          name: stage_id
           required: true
           schema:
             type: integer
@@ -219,14 +241,8 @@ paths:
           schema:
             type: integer
         - in: path
-          description: Id of the olympiad
-          name: olympiad_id
-          required: true
-          schema:
-            type: integer
-        - in: path
-          description: Id of the stage
-          name: stage_id
+          description: Id of the user
+          name: user_id
           required: true
           schema:
             type: integer
@@ -236,7 +252,9 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/userContestAnswer'
+                properties:
+                  user_answer:
+                    type: string    #TODO return FILE
         '403':
           description: Not enough rights for current user
           content:
@@ -249,6 +267,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/errorResponse'
+  /olympiad/{olympiad_id}/stage/{stage_id}/contest/{contest_id}/task/{task_id}/user/{user_id}/{filetype}:
     post:
       summary: Add user answer for a task
       security:
@@ -256,8 +275,14 @@ paths:
         - CSRFToken: [ ]
       parameters:
         - in: path
-          description: Id of the user
-          name: user_id
+          description: Id of the olympiad
+          name: olympiad_id
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the stage
+          name: stage_id
           required: true
           schema:
             type: integer
@@ -274,23 +299,24 @@ paths:
           schema:
             type: integer
         - in: path
-          description: Id of the olympiad
-          name: olympiad_id
+          description: Id of the user
+          name: user_id
           required: true
           schema:
             type: integer
         - in: path
-          description: Id of the stage
-          name: stage_id
+          description: Filetype
+          name: filetype
           required: true
           schema:
-            type: integer
+            $ref: '#/components/schemas/typeFiletype'
       requestBody:
-        required: true
         content:
-          application/json:
+          application/octet-stream:
             schema:
-              $ref: '#/components/schemas/userContestAnswer'
+              properties:
+                user_answer:
+                  $ref: '#/components/schemas/typeUserAnswer'
       responses:
         '200':
           description: OK
@@ -306,18 +332,15 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/errorResponse'
+
+  # User status
+
   /olympiad/{olympiad_id}/stage/{stage_id}/contest/{contest_id}/user/self/status:
     get:
       summary: Get user's status and mark for reponse
       security:
         - cookieJWTAuth: [ ]
       parameters:
-        - in: path
-          description: Id of the contest
-          name: contest_id
-          required: true
-          schema:
-            type: integer
         - in: path
           description: Id of the olympiad
           name: olympiad_id
@@ -327,6 +350,12 @@ paths:
         - in: path
           description: Id of the stage
           name: stage_id
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the contest
+          name: contest_id
           required: true
           schema:
             type: integer
@@ -408,18 +437,6 @@ paths:
         - cookieJWTAuth: [ ]
       parameters:
         - in: path
-          description: Id of the contest
-          name: contest_id
-          required: true
-          schema:
-            type: integer
-        - in: path
-          description: Id of the user
-          name: user_id
-          required: true
-          schema:
-            type: integer
-        - in: path
           description: Id of the olympiad
           name: olympiad_id
           required: true
@@ -428,6 +445,18 @@ paths:
         - in: path
           description: Id of the stage
           name: stage_id
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the contest
+          name: contest_id
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the user
+          name: user_id
           required: true
           schema:
             type: integer
@@ -458,8 +487,14 @@ paths:
         - CSRFToken: [ ]
       parameters:
         - in: path
-          description: Id of the user
-          name: user_id
+          description: Id of the olympiad
+          name: olympiad_id
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the stage
+          name: stage_id
           required: true
           schema:
             type: integer
@@ -470,14 +505,8 @@ paths:
           schema:
             type: integer
         - in: path
-          description: Id of the olympiad
-          name: olympiad_id
-          required: true
-          schema:
-            type: integer
-        - in: path
-          description: Id of the stage
-          name: stage_id
+          description: Id of the user
+          name: user_id
           required: true
           schema:
             type: integer
@@ -515,12 +544,6 @@ paths:
         - cookieJWTAuth: [ ]
       parameters:
         - in: path
-          description: Id of the contest
-          name: contest_id
-          required: true
-          schema:
-            type: integer
-        - in: path
           description: Id of the olympiad
           name: olympiad_id
           required: true
@@ -529,6 +552,12 @@ paths:
         - in: path
           description: Id of the stage
           name: stage_id
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the contest
+          name: contest_id
           required: true
           schema:
             type: integer
@@ -558,18 +587,6 @@ paths:
         - cookieJWTAuth: [ ]
       parameters:
         - in: path
-          description: Id of the contest
-          name: contest_id
-          required: true
-          schema:
-            type: integer
-        - in: path
-          description: Id of the user
-          name: user_id
-          required: true
-          schema:
-            type: integer
-        - in: path
           description: Id of the olympiad
           name: olympiad_id
           required: true
@@ -578,6 +595,18 @@ paths:
         - in: path
           description: Id of the stage
           name: stage_id
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the contest
+          name: contest_id
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the user
+          name: user_id
           required: true
           schema:
             type: integer
@@ -600,18 +629,15 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/errorResponse'
+
+  # List of users
+
   /olympiad/{olympiad_id}/stage/{stage_id}/contest/{contest_id}/list/:
     get:
       summary: Get the consolidated sheets within a single competition or stage
       security:
         - cookieJWTAuth: [ ]
       parameters:
-        - in: path
-          description: Id of the contest
-          name: contest_id
-          required: true
-          schema:
-            type: integer
         - in: path
           description: Id of the olympiad
           name: olympiad_id
@@ -621,6 +647,12 @@ paths:
         - in: path
           description: Id of the stage
           name: stage_id
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the contest
+          name: contest_id
           required: true
           schema:
             type: integer
@@ -637,43 +669,10 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/errorResponse'
-  /olympiad/{olympiad_id}/stage/{stage_id}/contest/{contest_id}/user/self/appeal/last:
-    get:
-      summary: Get appeal info for current user's response
-      security:
-        - cookieJWTAuth: [ ]
-      parameters:
-        - in: path
-          description: Id of the contest
-          name: contest_id
-          required: true
-          schema:
-            type: integer
-        - in: path
-          description: Id of the olympiad
-          name: olympiad_id
-          required: true
-          schema:
-            type: integer
-        - in: path
-          description: Id of the stage
-          name: stage_id
-          required: true
-          schema:
-            type: integer
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/commonAppealInfo'
-        '404':
-          description: User, olympiad, stage or contest not found
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errorResponse'
+
+  # Appeal
+
+  /olympiad/{olympiad_id}/stage/{stage_id}/contest/{contest_id}/user/self/appeal:
     post:
       summary: Create appeal for current user's response
       security:
@@ -681,12 +680,6 @@ paths:
         - CSRFToken: [ ]
       parameters:
         - in: path
-          description: Id of the contest
-          name: contest_id
-          required: true
-          schema:
-            type: integer
-        - in: path
           description: Id of the olympiad
           name: olympiad_id
           required: true
@@ -695,6 +688,12 @@ paths:
         - in: path
           description: Id of the stage
           name: stage_id
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the contest
+          name: contest_id
           required: true
           schema:
             type: integer
@@ -717,68 +716,14 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/errorResponse'
-  /olympiad/{olympiad_id}/stage/{stage_id}/contest/{contest_id}/user/{user_id}/appeal/last:
-    get:
-      summary: Get appeal info for user's response
-      security:
-        - cookieJWTAuth: [ ]
-      parameters:
-        - in: path
-          description: Id of the contest
-          name: contest_id
-          required: true
-          schema:
-            type: integer
-        - in: path
-          description: Id of the user
-          name: user_id
-          required: true
-          schema:
-            type: integer
-        - in: path
-          description: Id of the olympiad
-          name: olympiad_id
-          required: true
-          schema:
-            type: integer
-        - in: path
-          description: Id of the stage
-          name: stage_id
-          required: true
-          schema:
-            type: integer
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/commonAppealInfo'
-        '404':
-          description: User, olympiad, stage or contest not found
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errorResponse'
+  /olympiad/{olympiad_id}/stage/{stage_id}/contest/{contest_id}/user/{user_id}/appeal:
     post:
-      summary: Create appeal for current user's response
+      summary: Create appeal for user's response
       security:
         - cookieJWTAuth: [ ]
         - CSRFToken: [ ]
       parameters:
         - in: path
-          description: Id of the contest
-          name: contest_id
-          required: true
-          schema:
-            type: integer
-        - in: path
-          description: Id of the user
-          name: user_id
-          required: true
-          schema:
-            type: integer
-        - in: path
           description: Id of the olympiad
           name: olympiad_id
           required: true
@@ -787,6 +732,18 @@ paths:
         - in: path
           description: Id of the stage
           name: stage_id
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the contest
+          name: contest_id
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the user
+          name: user_id
           required: true
           schema:
             type: integer
@@ -817,18 +774,6 @@ paths:
         - CSRFToken: [ ]
       parameters:
         - in: path
-          description: Id of the contest
-          name: contest_id
-          required: true
-          schema:
-            type: integer
-        - in: path
-          description: Id of the appeal
-          name: appeal_id
-          required: true
-          schema:
-            type: integer
-        - in: path
           description: Id of the olympiad
           name: olympiad_id
           required: true
@@ -837,6 +782,18 @@ paths:
         - in: path
           description: Id of the stage
           name: stage_id
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the contest
+          name: contest_id
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the appeal
+          name: appeal_id
           required: true
           schema:
             type: integer
@@ -866,18 +823,6 @@ paths:
         - cookieJWTAuth: [ ]
       parameters:
         - in: path
-          description: Id of the contest
-          name: contest_id
-          required: true
-          schema:
-            type: integer
-        - in: path
-          description: Id of the appeal
-          name: appeal_id
-          required: true
-          schema:
-            type: integer
-        - in: path
           description: Id of the olympiad
           name: olympiad_id
           required: true
@@ -886,6 +831,18 @@ paths:
         - in: path
           description: Id of the stage
           name: stage_id
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the contest
+          name: contest_id
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the appeal
+          name: appeal_id
           required: true
           schema:
             type: integer
@@ -906,6 +863,11 @@ paths:
 
 components:
   securitySchemes:
+
+  ######################################################################################################################
+  ##                                             Security components                                                  ##
+  ######################################################################################################################
+
     cookieJWTAuth:
       description: Authentication with JWT stored in cookies
       type: apiKey
@@ -917,42 +879,128 @@ components:
       in: header
       name: X-CSRF-TOKEN
   schemas:
+
+  ######################################################################################################################
+  ##                                             Error handling                                                       ##
+  ######################################################################################################################
+
     errorResponse:
-      title: "Error response"
-      description: "Common response with error message"
+      title: 'Error response'
       required:
-        - error_msg
+        - errors
       properties:
-        error_msg:
-          type: string
+        errors:
+          type: array
+          items:
+            type: object
+            title: 'Error value'
+            required:
+              - status
+              - title
+            properties:
+              class:
+                type: string
+              status:
+                type: integer
+              title:
+                type: string
+
+  ######################################################################################################################
+  ##                                             Common data types                                                    ##
+  ######################################################################################################################
+
+    typeCommonName:
+      type: string
+      maxLength: 32
+    typeDateTime:
+      type: string
+      format: date-time   #TODO example
+    typeIdentifier:
+      type: integer
+    typeMark:
+      type: number
+      format: float
+      minimum: 0
+      maximum: 100
+      nullable: true
+    typeUserAnswer:
+      type: string
+     # format: binary     # TODO FILE
+    typeFiletype:
+      type: string
+      maxLength: 6
+    typeNullableIdentifier:
+      type: integer
+      nullable: true
+    typeMessage:
+      type: string
+      maxLength: 4096
+    typeNullableMessage:
+      type: string
+      maxLength: 4096
+      nullable: true
+    typeBoolean:
+      type: boolean
+    typeStatus:
+      type: string
+      enum: [ "NotChecked", "Accepted", "Rejected", "Appeal", "Revision" ]
+
+  ######################################################################################################################
+  ##                                             Composite data types                                                 ##
+  ######################################################################################################################
+
+    typeUserAnswerForList:
+      title: "User answer"
+      required:
+        - task_id
+        - answer_id
+      properties:
+        task_id:
+          $ref: '#/components/schemas/typeIdentifier'
+        answer_id:
+          $ref: '#/components/schemas/typeIdentifier'
+
+    contestResultLine:
+      title: "Line in sheet"
+      required:
+        - user_id
+        - mark
+      properties:
+        user_id:
+          $ref: '#/components/schemas/typeIdentifier'
+        mark:
+          $ref: '#/components/schemas/typeMark'
+
+  ######################################################################################################################
+  ##                                             Path schemas                                                         ##
+  ######################################################################################################################
+
     userContestAnswer:
-      title: "User's contest answer"
+      title: "User's contest answer"    #TODO type object?
       required:
         - user_answer
         - filetype
       properties:
         user_answer:
-          type: string
-          format: binary
+          $ref: '#/components/schemas/typeUserAnswer'
         filetype:
-          type: string
-    StatusHistoryItem:
+          $ref: '#/components/schemas/typeFiletype'
+
+    statusHistoryItem:
       title: "Item of status history"
       required:
         - status
         - datetime
       properties:
         status:
-          type: string
+          $ref: '#/components/schemas/typeCommonName'
         datetime:
-          type: string
-          format: data-time
-          description: "Change date and time"
+          $ref: '#/components/schemas/typeDateTime'
         appeal_id:
-          type: integer
+          $ref: '#/components/schemas/typeNullableIdentifier'
         mark:
-          type: number
-          format: float
+          $ref: '#/components/schemas/typeMark'
+
     userResponseStatusHistory:
       title: "Status history of user response"
       required:
@@ -961,84 +1009,55 @@ components:
         - history
       properties:
         user_id:
-          type: integer
+          $ref: '#/components/schemas/typeIdentifier'
         contest_id:
-          type: integer
+          $ref: '#/components/schemas/typeIdentifier'
         history:
           type: array
           items:
-            $ref: '#/components/schemas/StatusHistoryItem'
-    contestResultLine:
-      title: "Line in sheet"
-      required:
-        - user_id
-        - first_name
-        - second_name
-        - middle_name
-        - mark
-      properties:
-        user_id:
-          type: integer
-        first_name:
-          type: string
-        second_name:
-          type: string
-        middle_name:
-          type: string
-        mark:
-          type: integer
+            $ref: '#/components/schemas/statusHistoryItem'
+
     contestResultSheet:
       title: "Result sheet for one contest"
       required:
         - contest_id
-        - contest_name
-        - userrow
+        - user_row
       properties:
         contest_id:
-          type: integer
-        contest_name:
-          type: string
-        userrow:
+          $ref: '#/components/schemas/typeIdentifier'
+        user_row:
           type: array
           items:
             $ref: '#/components/schemas/contestResultLine'
+
     appealMessage:
       title: Appeal message
       required:
         - message
       properties:
         message:
-          type: string
-    appealListInfo:
-      title: "All appeal for the user's response"
-      required:
-        - user_id
-        - work_id
-      properties:
-        user_id:
-          type: integer
-        work_id:
-          type: integer
-        appeal_elem:
-          type: array
-          items:
-            $ref: '#/components/schemas/commonAppealInfo'
+          $ref: '#/components/schemas/typeMessage'
+
     commonAppealInfo:
       title: "Common appeal info"
       required:
         - appeal_id
-        - status
+        - status_id
+        - appeal_status
         - appeal_message
         - appeal_response
       properties:
         appeal_id:
-          type: integer
-        status:
-          type: string
+          $ref: '#/components/schemas/typeIdentifier'
+        status_id:
+          $ref: '#/components/schemas/typeIdentifier'
+        appeal_status:
+          $ref: '#/components/schemas/typeCommonName'
         appeal_message:
-          type: string
+          $ref: '#/components/schemas/typeMessage'
         appeal_response:
-          type: string
+          $ref: '#/components/schemas/typeNullableMessage'
+
     userContestAllAnswer:
       title: "ALl user's answer for the contest"
       required:
@@ -1047,37 +1066,34 @@ components:
         - contest_id
       properties:
         user_id:
-          type: integer
+          $ref: '#/components/schemas/typeIdentifier'
         work_id:
-          type: integer
+          $ref: '#/components/schemas/typeIdentifier'
         contest_id:
-          type: integer
-        user_answer:
+          $ref: '#/components/schemas/typeIdentifier'
+        user_answers:
           type: array
           items:
-            type: object
-            properties:
-              task_id:
-                type: integer
-              answer_id:
-                type: integer
+            $ref: '#/components/schemas/typeUserAnswerForList'
+
     responseStatus:
       title: "User's response status and mark"
       required:
         - status
       properties:
         status:
-          type: string
+          $ref: '#/components/schemas/typeStatus'
         mark:
-          type: number
-          format: float
+          $ref: '#/components/schemas/typeMark'
+
     createAppealInfo:
       title: "Id of created appeal"
       required:
         - appeal_id
       properties:
         appeal_id:
-          type: integer
+          $ref: '#/components/schemas/typeIdentifier'
+
     appealMessageReply:
       title: "Reply to user's appeal"
       required:
@@ -1085,9 +1101,8 @@ components:
         - accepted
       properties:
         message:
-          type: string
+          $ref: '#/components/schemas/typeMessage'
         accepted:
-          type: boolean
+          $ref: '#/components/schemas/typeBoolean'
         new_mark:
-          type: number
-          format: float
+          $ref: '#/components/schemas/typeMark'
