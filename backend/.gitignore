@@ -154,3 +154,4 @@ id_rsa
 id_rsa.pub
 *.sqlite
 !scripts
+generated_api

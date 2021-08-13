@@ -2,45 +2,46 @@ from marshmallow import fields, validate
 import re
 
 
-def _limit_length(field, max_len):
+def _apply_validator(field, validator):
 
-    class LimitLength(field):
+    class ApplyValidator(field):
 
         def __init__(self, *args, **kwargs):
             super().__init__(*args, **kwargs)
-            validator = validate.Length(max=max_len)
             self.validators.insert(0, validator)
 
-    return LimitLength
+    return ApplyValidator
 
 
-class _Phone(fields.String):
-    PHONE_REGEX = re.compile(
+def _add_example(field, example):
+
+    class AddExample(field):
+
+        def __init__(self, *args, **kwargs):
+            kwargs['example'] = example
+            super().__init__(*args, **kwargs)
+
+    return AddExample
+
+
+PHONE_REGEX = re.compile(
         r'^([+]?\d[-.\s]??)?'
         r'(\d{2,3}[-.\s]??\d{2,3}[-.\s]??\d{2}[-.\s]??\d{2}|'
         r'\(\d{3}\)[-.\s]??\d{3}[-.\s]??\d{2}[-.\s]??\d{2}|'
         r'\d{3}[-.\s]??\d{2}[-.\s]??\d{2})$'
     )
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        validator = validate.Regexp(self.PHONE_REGEX)
-        self.validators.insert(0, validator)
 
+email_validator = validate.Length(max=64)
+phone_validator = validate.And(validate.Length(max=32), validate.Regexp(PHONE_REGEX))
+password_validator = validate.Length(max=128)
+username_validator = validate.Length(max=64)
+common_name_validator = validate.Length(max=32)
+group_name_validator = validate.Length(max=32)
 
-Email = _limit_length(fields.Email, 64)
-
-
-Phone = _limit_length(_Phone, 32)
-
-
-Password = _limit_length(fields.String, 128)
-
-
-Username = _limit_length(fields.String, 64)
-
-
-CommonName = _limit_length(fields.String, 32)
-
-
-GroupName = _limit_length(fields.String, 32)
+Email = _apply_validator(fields.Email, email_validator)
+Phone = _add_example(_apply_validator(fields.String, phone_validator), '8 (800) 555 35 35')
+Password = _add_example(_apply_validator(fields.String, password_validator), 'qwertyA*1')
+Username = _apply_validator(fields.String, username_validator)
+CommonName = _apply_validator(fields.String, common_name_validator)
+GroupName = _apply_validator(fields.String, group_name_validator)

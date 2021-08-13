@@ -1,6 +1,7 @@
 import importlib
 from functools import wraps
 
+from apispec import APISpec
 from openapi_core.contrib.flask.decorators import FlaskOpenAPIViewDecorator
 from marshmallow import Schema
 from typing import Type
@@ -10,12 +11,28 @@ from typing import Callable, Any, Optional
 from .access_levels import OrgMephiAccessLevel
 
 
+def _enum_allowed_values(enum_type, validator):
+    from marshmallow import validate
+    if isinstance(validator, validate.OneOf):
+        return {v for v in validator.choices}
+    if isinstance(validator, validate.And):
+        return _enum_allowed_values_list(enum_type, validator.validators)
+    return set(enum_type)
+
+
+def _enum_allowed_values_list(enum_type, validators):
+    allowed = set(enum_type)
+    for val in validators:
+        dd = _enum_allowed_values(enum_type, val)
+        allowed = allowed & _enum_allowed_values(enum_type, val)
+    return allowed
+
+
 def _enum2properties(self, field, **kwargs):
     import marshmallow_enum
-    """Add an OpenAPI extension for marshmallow_enum.EnumField instances
-    """
     if isinstance(field, marshmallow_enum.EnumField):
-        return {'type': 'string', 'enum': [m.value for m in field.enum]}
+        allowed = _enum_allowed_values_list(field.enum, field.validators)
+        return {'type': 'string', 'enum': [m.value for m in field.enum if m in allowed]}
     return {}
 
 
@@ -24,7 +41,7 @@ class OrgMephiModule:
     Application module
     """
     def __init__(self, name: str, package: str, access_level: Optional[OrgMephiAccessLevel],
-                 api_file: Optional[str] = None):
+                 api_file: Optional[str] = None, marshmallow_api: bool = False):
         """
         Create a new module
         :param name: name of the module (equals to its path prefix)
@@ -34,6 +51,7 @@ class OrgMephiModule:
                              jwt_required_role.
         :param api_file: name of the file with this module's api. If omitted (or set to None), requests will not be
                          automatically verified in this module and swagger ui will not be generated
+        :param marshmallow_api: if True then marshmellow will be used instead of openapi_core
         """
         self._name = name
         self._package = package
@@ -44,6 +62,9 @@ class OrgMephiModule:
         self._openapi = None
         self._swagger = None
         self._api_file = api_file
+        self._marshmallow_api: bool = marshmallow_api
+        self._apispec: Optional[APISpec] = None
+        self._api_full_path: Optional[str] = None
 
     @property
     def name(self) -> str:
@@ -68,6 +89,14 @@ class OrgMephiModule:
         :return: Swagger blueprint of self
         """
         return self._swagger
+
+    @property
+    def modules(self):
+        """
+        Child modules
+        :return: List of child modules
+        """
+        return self._modules
 
     def get_full_name(self, top=None) -> str:
         """
@@ -110,6 +139,8 @@ class OrgMephiModule:
 
             func_wrapped = f
 
+            func_wrapped = self._wrap_db_commit(f)
+
             output_schema = options.pop('output_schema', None)
             if output_schema is not None:
                 func_wrapped = self._wrap_marshmallow_output(func_wrapped, output_schema)
@@ -146,7 +177,7 @@ class OrgMephiModule:
         self._modules.append(module)
         module._parent = self
 
-    def prepare(self, api_path: str, development: bool, top, marshmellow_api: bool):
+    def prepare(self, api_path: str, development: bool, top):
         """
         Prepare this module for execution
 
@@ -157,11 +188,10 @@ class OrgMephiModule:
         :param api_path: directory with ap files
         :param development: If True development-only options will be enabled (e.g. swagger ui wil be generated)
         :param top: Top-level module
-        :param marshmellow_api: If True then openapi will be generated from apispec
         """
         from . import _orgmephi_current_module
         api_doc_path = None
-        if (not marshmellow_api) and (self._api_file is not None and api_path is not None):
+        if (not self._marshmallow_api) and (self._api_file is not None and api_path is not None):
             api_doc_path = f'{api_path}/{self._api_file}'
 
         if self._parent is None or self == top:
@@ -180,16 +210,18 @@ class OrgMephiModule:
             except ModuleNotFoundError:
                 pass
             for module in self._modules:
-                module.prepare(api_path, development, top, marshmellow_api)
+                module.prepare(api_path, development, top)
                 self._blueprint.register_blueprint(module.blueprint)
-            if development and (api_doc_path is not None or marshmellow_api):
+            if development and (api_doc_path is not None or self._marshmallow_api):
                 self._init_swagger(top)
-                if marshmellow_api:
+                if self._marshmallow_api:
                     self._api_from_marshmallow(top)
                 else:
                     self._api_from_file(api_doc_path)
-        finally:
+        except Exception:
             _orgmephi_current_module.set(last_module)
+            raise
+        _orgmephi_current_module.set(last_module)
 
     def get_swagger_blueprints(self) -> list[Blueprint]:
         """
@@ -206,6 +238,17 @@ class OrgMephiModule:
         else:
             return list(itertools.chain([self._swagger], *[mod.get_swagger_blueprints() for mod in self._modules]))
 
+    def get_api(self) -> str:
+        """
+        Generate api for this module
+        :return: Api string in yaml format
+        """
+        if self._apispec is not None:
+            return self._apispec.to_yaml()
+        if self._api_full_path is not None:
+            with open(self._api_full_path) as api_file:
+                return api_file.read()
+
     def _init_openapi(self, api_path: str):
         import yaml
         from openapi_core import create_spec
@@ -213,6 +256,7 @@ class OrgMephiModule:
             spec_dict = yaml.safe_load(spec_file)
         spec = create_spec(spec_dict)
         self._openapi = FlaskOpenAPIViewDecorator.from_spec(spec)
+        self._api_full_path = api_path
 
     def _init_swagger(self, top):
         from flask_swagger_ui import get_swaggerui_blueprint
@@ -239,16 +283,15 @@ class OrgMephiModule:
     _csrf_access_token_schema = {'type': 'apiKey', 'in': 'header', 'name': 'X-CSRF-TOKEN'}
     _csrf_refresh_token_schema = {'type': 'apiKey', 'in': 'header', 'name': 'X-CSRF-TOKEN'}
 
-    def _api_from_marshmallow(self, top):
+    def _init_apispec(self, title):
         from flask import Flask
-        from apispec import APISpec
         from apispec_webframeworks.flask import FlaskPlugin
         from apispec_oneofschema import MarshmallowPlugin
 
         plugin = MarshmallowPlugin()
 
         spec = APISpec(
-            title=self.get_full_name(top),
+            title=title,
             version='1.0.0',
             openapi_version='3.0.2',
             plugins=[FlaskPlugin(), plugin]
@@ -271,7 +314,13 @@ class OrgMephiModule:
                 if endpoint.__doc__ is not None and endpoint != static_endpoint:
                     spec.path(view=endpoint)
 
-        api = spec.to_yaml()
+        self._apispec = spec
+
+    def _api_from_marshmallow(self, top):
+
+        self._init_apispec(self.get_full_name(top))
+
+        api = self._apispec.to_yaml()
 
         @self._swagger.route('/api.yaml', methods=['GET'])
         def serve_api():
@@ -290,8 +339,14 @@ class OrgMephiModule:
         def wrapper(*args, **kwargs):
             from flask import request, make_response
             from marshmallow import ValidationError, EXCLUDE
+            from marshmallow_sqlalchemy import SQLAlchemySchema
             try:
-                request.marshmallow = schema().load(data=request.json, unknown=EXCLUDE)
+                if issubclass(schema, SQLAlchemySchema):
+                    sch = schema()
+                    sch.__class__ = Schema
+                    request.marshmallow = sch.load(data=request.json, unknown=EXCLUDE)
+                else:
+                    request.marshmallow = schema().load(data=request.json, unknown=EXCLUDE)
             except ValidationError as err:
                 return make_response({
                     "class": err.__class__.__name__,
@@ -313,5 +368,22 @@ class OrgMephiModule:
                 return make_response()
             serialized = schema().dump(obj=result[0])
             return make_response(serialized, *result[1:])
+
+        return wrapper
+
+    @staticmethod
+    def _wrap_db_commit(f: Callable):
+        from . import get_current_db
+
+        @wraps(f)
+        def wrapper(*args, **kwargs):
+            db = get_current_db()
+            try:
+                result = f(*args, **kwargs)
+            except Exception:
+                db.session.rollback()
+                raise
+            db.session.rollback()
+            return result
 
         return wrapper

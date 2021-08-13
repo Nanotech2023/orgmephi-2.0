@@ -21,9 +21,6 @@ class UserRoleEnum(enum.Enum):
     system = 'System'
 
 
-user_roles = {role.value: role for role in UserRoleEnum}
-
-
 class UserTypeEnum(enum.Enum):
     """
         User types enumeration class.
@@ -41,9 +38,6 @@ class UserTypeEnum(enum.Enum):
     university = 'University'
     internal = 'Internal'
     pre_register = 'PreRegister'
-
-
-user_types = {user_type.value: user_type for user_type in UserTypeEnum}
 
 
 # Many-To-Many relationship for User <-> Group
@@ -82,24 +76,20 @@ class User(db.Model):
                                 cascade='save-update, merge, delete, delete-orphan')
     student_info = db.relationship('StudentInfo', back_populates='user', lazy=True, uselist=False,
                                    cascade='save-update, merge, delete, delete-orphan')
-    groups = db.relationship('Group', secondary=users_in_group, lazy='select', back_populates='users', viewonly=True)
-
-    def serialize(self):
-        return {
-                "id": self.id,
-                "username": self.username,
-                "role": self.role.value,
-                "type": self.type.value
-            }
+    groups = db.relationship('Group', secondary=users_in_group, lazy='select', back_populates='users')
 
 
 def add_user(db_session, username, password_hash, role, reg_type):
+    from .personal import UserInfo
+    from .university import StudentInfo
     user = User(
         username=username,
         password_hash=password_hash,
         role=role,
         type=reg_type
     )
+    user.user_info = UserInfo()
+    user.student_info = StudentInfo()
     db_session.add(user)
     return user
 
@@ -119,13 +109,4 @@ class Group(db.Model):
     id = db.Column(db.Integer, autoincrement=True, primary_key=True)
     name = db.Column(db.String, nullable=False, unique=True)
 
-    users = db.relationship('User', secondary=users_in_group, lazy='subquery', back_populates='groups', viewonly=True)
-
-    def serialize(self):
-        return {'id': self.id, 'name': self.name}
-
-
-def add_group(db_session, name):
-    group = Group(name=name)
-    db_session.add(group)
-    return group
+    users = db.relationship('User', secondary=users_in_group, lazy='subquery', back_populates='groups')

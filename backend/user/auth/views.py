@@ -9,6 +9,8 @@ from flask_jwt_extended import create_access_token, set_access_cookies, create_r
 
 from user.models import User
 
+from user.auth.schemas import LoginRequestSchema
+
 db = get_current_db()
 module = get_current_module()
 app = get_current_app()
@@ -32,16 +34,43 @@ def generate_refresh_token(user_id, remember_me):
     return refresh_token, csrf_refresh_token
 
 
-@module.route('/login', methods=['POST'])
+@module.route('/login', methods=['POST'], input_schema=LoginRequestSchema)
 def login():
-    values = request.openapi.body
-    user = db_get_one_or_none(User, 'username', values['auth_credentials']['username'])
+    """
+    Authenticate a user
+    ---
+    post:
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: LoginRequestSchema
+      security: []
+      responses:
+        '200':
+          description: OK
+          headers:
+            Set-Cookie:
+              schema:
+                description: Set both access_token_cookie and refresh_token_cookie
+                type: string
+                example: access_token_cookie=eyJ0eXAi...; Path=/; HttpOnly
+          content:
+            application/json:
+              schema: CSRFPairSchema
+        '400':
+          description: Bad request
+        '401':
+          description: Wrong credentials
+    """
+    values = request.marshmallow
+    user = db_get_one_or_none(User, 'username', values['username'])
 
     if user is not None:
-        app.password_policy.validate_password(values['auth_credentials']['password'], user.password_hash)
+        app.password_policy.validate_password(values['password'], user.password_hash)
     else:
         # align response times
-        app.password_policy.validate_password(values['auth_credentials']['password'],
+        app.password_policy.validate_password(values['password'],
                                               '$pbkdf2-sha256$29000$h8DWeu8dg3CudQ4BAACg1A'
                                               '$JMTWWR9uLxzruMTaZObU8CJxMJoDTjJPwfL.aboeCIM')
         raise WrongCredentials
@@ -64,6 +93,26 @@ def login():
 @module.route('/refresh', methods=['POST'])
 @jwt_required(refresh=True)
 def refresh():
+    """
+    Refresh JWT token for current user
+    ---
+    post:
+      security:
+        - JWTRefreshToken: [ ]
+        - CSRFRefreshToken: [ ]
+      responses:
+        '200':
+          description: OK
+          headers:
+            Set-Cookie:
+              schema:
+                description: Set both access_token_cookie and refresh_token_cookie
+                type: string
+                example: access_token_cookie=eyJ0eXAi...; Path=/; HttpOnly
+          content:
+            application/json:
+              schema: CSRFPairSchema
+    """
     user_id = jwt_get_id()
     user = db_get_or_raise(User, "id", user_id)
     access_token, access_csrf = generate_access_token(user_id, user.username, user.role.value)
@@ -84,6 +133,23 @@ def refresh():
 @module.route('/logout', methods=['POST'])
 @jwt_required()
 def logout():
+    """
+    Logout current user
+    ---
+    post:
+      security:
+        - JWTAccessToken: []
+        - CSRFAccessToken: []
+      responses:
+        '200':
+          description: OK
+          headers:
+            Set-Cookie:
+              schema:
+                description: Set both access_token_cookie and refresh_token_cookie
+                type: string
+                example: access_token_cookie=deleted; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT
+    """
     response = make_response({}, 200)
     unset_jwt_cookies(response)
     return response
