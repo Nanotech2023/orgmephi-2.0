@@ -11,31 +11,6 @@ from typing import Callable, Any, Optional
 from .access_levels import OrgMephiAccessLevel
 
 
-def _enum_allowed_values(enum_type, validator):
-    from marshmallow import validate
-    if isinstance(validator, validate.OneOf):
-        return {v for v in validator.choices}
-    if isinstance(validator, validate.And):
-        return _enum_allowed_values_list(enum_type, validator.validators)
-    return set(enum_type)
-
-
-def _enum_allowed_values_list(enum_type, validators):
-    allowed = set(enum_type)
-    for val in validators:
-        dd = _enum_allowed_values(enum_type, val)
-        allowed = allowed & _enum_allowed_values(enum_type, val)
-    return allowed
-
-
-def _enum2properties(self, field, **kwargs):
-    import marshmallow_enum
-    if isinstance(field, marshmallow_enum.EnumField):
-        allowed = _enum_allowed_values_list(field.enum, field.validators)
-        return {'type': 'string', 'enum': [m.value for m in field.enum if m in allowed]}
-    return {}
-
-
 class OrgMephiModule:
     """
     Application module
@@ -51,7 +26,7 @@ class OrgMephiModule:
                              jwt_required_role.
         :param api_file: name of the file with this module's api. If omitted (or set to None), requests will not be
                          automatically verified in this module and swagger ui will not be generated
-        :param marshmallow_api: if True then marshmellow will be used instead of openapi_core
+        :param marshmallow_api: if True then marshmallow will be used instead of openapi_core
         """
         self._name = name
         self._package = package
@@ -114,7 +89,8 @@ class OrgMephiModule:
         prefix = '/'.join(self._get_parents(top)[1:])
         return '' if prefix == '' else '/' + prefix
 
-    def route(self, rule: str, **options: Any) -> Callable:
+    def route(self, rule: str, refresh: bool = False, input_schema: Optional[Type[Schema]] = None,
+              output_schema: Optional[Type[Schema]] = None, **options: Any) -> Callable:
         """
         Decorator factory to initialize a new route for self (see flask.Flask.route)
         :param rule: path for this rule
@@ -130,10 +106,6 @@ class OrgMephiModule:
             :param f: function to wrap
             :return: Provided function
             """
-            if 'refresh' in options:
-                refresh = options.pop('refresh')
-            else:
-                refresh = False
             from .jwt_verify import jwt_required, jwt_required_role
             from .errors import _catch_request_error
 
@@ -141,11 +113,9 @@ class OrgMephiModule:
 
             func_wrapped = self._wrap_db_commit(f)
 
-            output_schema = options.pop('output_schema', None)
             if output_schema is not None:
                 func_wrapped = self._wrap_marshmallow_output(func_wrapped, output_schema)
 
-            input_schema = options.pop('input_schema', None)
             if input_schema is not None:
                 func_wrapped = self._wrap_marshmallow_input(func_wrapped, input_schema)
 
@@ -287,6 +257,7 @@ class OrgMephiModule:
         from flask import Flask
         from apispec_webframeworks.flask import FlaskPlugin
         from apispec_oneofschema import MarshmallowPlugin
+        from .marshmallow import _enum2properties, _related2properties
 
         plugin = MarshmallowPlugin()
 
@@ -298,6 +269,7 @@ class OrgMephiModule:
         )
 
         plugin.converter.add_attribute_function(_enum2properties)
+        plugin.converter.add_attribute_function(_related2properties)
 
         spec.components.security_scheme('JWTAccessToken', self._jwt_access_token_schema)
         spec.components.security_scheme('JWTRefreshToken', self._jwt_refresh_token_schema)
@@ -337,20 +309,13 @@ class OrgMephiModule:
 
         @wraps(f)
         def wrapper(*args, **kwargs):
-            from flask import request, make_response
-            from marshmallow import ValidationError, RAISE
+            from flask import request
+            from marshmallow import RAISE
             from marshmallow_sqlalchemy import SQLAlchemySchema
-            try:
-                if issubclass(schema, SQLAlchemySchema):
-                    request.marshmallow = schema(load_instance=False).load(data=request.json, unknown=RAISE)
-                else:
-                    request.marshmallow = schema().load(data=request.json, unknown=RAISE)
-            except ValidationError as err:
-                return make_response({
-                    "class": err.__class__.__name__,
-                    "status": 400,
-                    "title": str(err)
-                }, 400)
+            if issubclass(schema, SQLAlchemySchema) and getattr(schema.Meta, 'load_instance', False):
+                raise TypeError('Trying to load instance with SQLAlchemySchema on request')
+            else:
+                request.marshmallow = schema().load(data=request.json, unknown=RAISE)
             return f(*args, **kwargs)
 
         return wrapper
