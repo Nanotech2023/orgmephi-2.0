@@ -9,7 +9,7 @@ from flask_jwt_extended import create_access_token, set_access_cookies, create_r
 
 from user.models import User
 
-from user.auth.schemas import LoginRequestSchema
+from .schemas import LoginRequestAuthSchema
 
 db = get_current_db()
 module = get_current_module()
@@ -34,7 +34,7 @@ def generate_refresh_token(user_id, remember_me):
     return refresh_token, csrf_refresh_token
 
 
-@module.route('/login', methods=['POST'], input_schema=LoginRequestSchema)
+@module.route('/login', methods=['POST'], input_schema=LoginRequestAuthSchema)
 def login():
     """
     Authenticate a user
@@ -44,7 +44,7 @@ def login():
         required: true
         content:
           application/json:
-            schema: LoginRequestSchema
+            schema: LoginRequestAuthSchema
       security: []
       responses:
         '200':
@@ -57,7 +57,7 @@ def login():
                 example: access_token_cookie=eyJ0eXAi...; Path=/; HttpOnly
           content:
             application/json:
-              schema: CSRFPairSchema
+              schema: CSRFPairAuthSchema
         '400':
           description: Bad request
         '401':
@@ -111,7 +111,7 @@ def refresh():
                 example: access_token_cookie=eyJ0eXAi...; Path=/; HttpOnly
           content:
             application/json:
-              schema: CSRFPairSchema
+              schema: CSRFPairAuthSchema
     """
     user_id = jwt_get_id()
     user = db_get_or_raise(User, "id", user_id)

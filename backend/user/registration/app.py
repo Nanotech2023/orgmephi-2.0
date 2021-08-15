@@ -1,7 +1,7 @@
 from user.default_config import DefaultConfiguration
 from common import OrgMephiApp
 
-from . import module
+from user.registration import module
 
 app = OrgMephiApp('registration', module, default_config=DefaultConfiguration(), security=True)
 app.set_current()

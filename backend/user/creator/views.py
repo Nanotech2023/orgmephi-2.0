@@ -7,7 +7,7 @@ from user.model_schemas.auth import UserSchema, GroupSchema
 from user.model_schemas.personal import UserInfoSchema
 from user.model_schemas.university import StudentInfoSchema
 
-from .schemas import ResponseGroupListSchema, ResponseUserListSchema
+from .schemas import GroupListResponseCreatorSchema, UserListResponseCreatorSchema
 
 db = get_current_db()
 module = get_current_module()
@@ -44,7 +44,7 @@ def get_user_admin(user_id):
     return user, 200
 
 
-@module.route('/user/all', methods=['GET'], output_schema=ResponseUserListSchema)
+@module.route('/user/all', methods=['GET'], output_schema=UserListResponseCreatorSchema)
 def get_user_all():
     """
     Get common info for all users
@@ -57,7 +57,7 @@ def get_user_all():
           description: OK
           content:
             application/json:
-              schema: ResponseUserListSchema
+              schema: UserListResponseCreatorSchema
         '403':
           description: Invalid role of current user
     """
@@ -65,7 +65,7 @@ def get_user_all():
     return {'users': users}, 200
 
 
-@module.route('/user/by-group/<int:group_id>', methods=['GET'], output_schema=ResponseUserListSchema)
+@module.route('/user/by-group/<int:group_id>', methods=['GET'], output_schema=UserListResponseCreatorSchema)
 def get_user_by_group(group_id):
     """
     Get common info for different users
@@ -85,7 +85,7 @@ def get_user_by_group(group_id):
           description: OK
           content:
             application/json:
-              schema: ResponseUserListSchema
+              schema: UserListResponseCreatorSchema
         '403':
           description: Invalid role of current user
         '404':
@@ -189,7 +189,7 @@ def get_group(group_id):
     return group, 200
 
 
-@module.route('/group/all', methods=['GET'], output_schema=ResponseGroupListSchema)
+@module.route('/group/all', methods=['GET'], output_schema=GroupListResponseCreatorSchema)
 def get_groups_all():
     """
     Get all groups
@@ -202,7 +202,7 @@ def get_groups_all():
           description: OK
           content:
             application/json:
-              schema: ResponseGroupListSchema
+              schema: GroupListResponseCreatorSchema
         '403':
           description: Invalid role of current user
     """
@@ -210,7 +210,7 @@ def get_groups_all():
     return {'groups': groups}, 200
 
 
-@module.route('/membership/<int:user_id>', methods=['GET'], output_schema=ResponseGroupListSchema)
+@module.route('/membership/<int:user_id>', methods=['GET'], output_schema=GroupListResponseCreatorSchema)
 def get_user_groups_admin(user_id):
     """
     Get groups for a different user
@@ -230,7 +230,7 @@ def get_user_groups_admin(user_id):
           description: OK
           content:
             application/json:
-              schema: ResponseGroupListSchema
+              schema: GroupListResponseCreatorSchema
         '403':
           description: Invalid role of current user
         '404':
