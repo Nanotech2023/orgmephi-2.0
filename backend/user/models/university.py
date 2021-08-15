@@ -1,3 +1,4 @@
+import enum
 from common import get_current_db, get_current_app
 from .reference import University, Country
 from .auth import User
@@ -27,12 +28,64 @@ class StudentInfo(db.Model):
 
     user_id = db.Column(db.Integer, db.ForeignKey(User.id), primary_key=True)
     phone = db.Column(db.String)
-    university = db.Column(db.Integer, db.ForeignKey(University.id))
-    custom_university = db.Column(db.String)
     admission_year = db.Column(db.Date)
-    university_country_id = db.Column(db.Integer, db.ForeignKey(Country.id))
     citizenship_country_id = db.Column(db.Integer, db.ForeignKey(Country.id))
     region = db.Column(db.String)
     city = db.Column(db.String)
 
-    user = db.relationship('User', back_populates='student_info', lazy='select')
+    university = db.relationship('StudentUniversity', lazy='select', uselist=False,
+                                 cascade='save-update, merge, delete, delete-orphan')
+    citizenship = db.relationship('Country', lazy='select')
+
+    user = db.relationship('User', lazy='select')
+
+
+class StudentUniversity(db.Model):
+    """
+        Base ORM class for student -> university relationship
+    """
+
+    user_id = db.Column(db.Integer, db.ForeignKey(StudentInfo.user_id), primary_key=True)
+    known = db.Column(db.Boolean)
+
+    __mapper_args__ = {
+        'with_polymorphic': '*',
+        "polymorphic_on": known
+    }
+
+
+class StudentUniversityKnown(StudentUniversity):
+    """
+        ORM class for student -> known university relationship
+
+        Attributes:
+
+        university_id: id of student's university
+    """
+
+    university_id = db.Column(db.Integer, db.ForeignKey(University.id))
+    university = db.relationship('University')
+
+    __mapper_args__ = {
+        'polymorphic_identity': True,
+        'with_polymorphic': '*'
+    }
+
+
+class StudentUniversityCustom(StudentUniversity):
+    """
+        ORM class for student -> custom (unknown) university relationship
+
+        Attributes:
+
+        university: name of student's university
+    """
+
+    university_name = db.Column(db.String)
+    university_country = db.Column(db.Integer, db.ForeignKey(Country.id))
+    country = db.relationship('Country')
+
+    __mapper_args__ = {
+        'polymorphic_identity': False,
+        'with_polymorphic': '*'
+    }

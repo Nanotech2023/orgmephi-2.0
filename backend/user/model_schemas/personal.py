@@ -1,5 +1,4 @@
 from marshmallow_sqlalchemy import SQLAlchemySchema, auto_field
-
 from user.models.personal import *
 from common.fields import email_validator, common_name_validator
 
@@ -7,7 +6,8 @@ from common.fields import email_validator, common_name_validator
 class UserInfoSchema(SQLAlchemySchema):
     class Meta:
         model = UserInfo
-        load_instance = True
+        load_instance = False
+        sqla_session = db.session
 
     user_id = auto_field(column_name='user_id', dump_only=True)
     email = auto_field(column_name='email', allow_none=True, validate=email_validator)

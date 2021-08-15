@@ -4,15 +4,15 @@ from marshmallow import EXCLUDE
 
 from common.errors import AlreadyExists
 from common import get_current_app, get_current_module, get_current_db
-from common.util import db_get_all
+from common.util import db_get_all, db_update_from_dict
 
 from user.models import add_user, UserRoleEnum, UserTypeEnum, University, Country, UserInfo, StudentInfo
 from user.model_schemas.auth import UserSchema
 from user.model_schemas.personal import UserInfoSchema
 from user.model_schemas.university import StudentInfoSchema
 
-from .schemas import SchoolRequestSchema, UniversityRequestSchema, \
-    InfoUniversitiesResponseSchema, InfoCountriesResponseSchema
+from .schemas import SchoolRequestRegistrationSchema, UniversityRequestRegistrationSchema, \
+    InfoUniversitiesResponseRegistrationSchema, InfoCountriesResponseRegistrationSchema
 
 
 db = get_current_db()
@@ -39,22 +39,21 @@ def register():
     try:
         user = add_user(db.session, username, password_hash, UserRoleEnum.participant, reg_type)
         user.user_info = UserInfo()
-        UserInfoSchema().load(request.json['personal_info'], session=db.session,
-                              instance=user.user_info, partial=True, unknown=EXCLUDE)
+        db_update_from_dict(db.session, values['personal_info'], user.user_info, schema=UserInfoSchema)
         user.user_info.email = username
 
         if reg_type == UserTypeEnum.university:
             user.student_info = StudentInfo()
-            StudentInfoSchema().load(request.json['student_info'], session=db.session,
-                                     instance=user.student_info, partial=True, unknown=EXCLUDE)
+            db_update_from_dict(db.session, values['student_info'], user.student_info, schema=StudentInfoSchema)
+
         db.session.commit()
-    except sqlalchemy.exc.IntegrityError:
+    except sqlalchemy.exc.IntegrityError as err:
         raise AlreadyExists('username', username)
     return user
 
 
 @module.route('/school', methods=['POST'],
-              input_schema=SchoolRequestSchema, output_schema=UserSchema)
+              input_schema=SchoolRequestRegistrationSchema, output_schema=UserSchema)
 def register_school():
     """
     Register a school student
@@ -65,7 +64,7 @@ def register_school():
         required: true
         content:
           application/json:
-            schema: SchoolRequestSchema
+            schema: SchoolRequestRegistrationSchema
       responses:
         '200':
           description: OK
@@ -81,7 +80,7 @@ def register_school():
 
 
 @module.route('/university', methods=['POST'],
-              input_schema=UniversityRequestSchema, output_schema=UserSchema)
+              input_schema=UniversityRequestRegistrationSchema, output_schema=UserSchema)
 def register_university():
     """
     Register a university student
@@ -91,7 +90,7 @@ def register_university():
         required: true
         content:
           application/json:
-            schema: UniversityRequestSchema
+            schema: UniversityRequestRegistrationSchema
       responses:
         '200':
           description: OK
@@ -106,7 +105,7 @@ def register_university():
     return register(), 200
 
 
-@module.route('/info/universities', methods=['GET'], output_schema=InfoUniversitiesResponseSchema)
+@module.route('/info/universities', methods=['GET'], output_schema=InfoUniversitiesResponseRegistrationSchema)
 def get_universities():
     """
     Get known university list
@@ -117,12 +116,12 @@ def get_universities():
           description: OK
           content:
             application/json:
-              schema: InfoUniversitiesResponseSchema
+              schema: InfoUniversitiesResponseRegistrationSchema
     """
     return {"university_list": db_get_all(University)}, 200
 
 
-@module.route('/info/countries', methods=['GET'], output_schema=InfoCountriesResponseSchema)
+@module.route('/info/countries', methods=['GET'], output_schema=InfoCountriesResponseRegistrationSchema)
 def get_countries():
     """
     Get known country list
@@ -133,6 +132,6 @@ def get_countries():
           description: OK
           content:
             application/json:
-              schema: InfoCountriesResponseSchema
+              schema: InfoCountriesResponseRegistrationSchema
     """
     return {"country_list": db_get_all(Country)}, 200

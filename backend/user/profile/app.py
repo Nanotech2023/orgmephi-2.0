@@ -1,7 +1,7 @@
 from user.default_config import DefaultConfiguration
 from common import OrgMephiApp
 
-from . import module
+from user.profile import module
 
 app = OrgMephiApp('profile', module, default_config=DefaultConfiguration())
 app.set_current()

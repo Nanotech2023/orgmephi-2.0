@@ -4,12 +4,21 @@ from typing import Callable
 
 
 def _catch_request_error(function: Callable) -> Callable:
+    from marshmallow import ValidationError
+
     @wraps(function)
     def wrapper(*args, **kwargs):
         try:
             return function(*args, **kwargs)
         except RequestError as err:
             return err.to_response()
+        except ValidationError as err:
+            return make_response({
+                "class": err.__class__.__name__,
+                "status": 400,
+                "title": str(err)
+            }, 400)
+
     return wrapper
 
 
