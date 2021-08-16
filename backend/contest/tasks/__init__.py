@@ -5,7 +5,7 @@ from .participant import module as participant_module
 from .unauthorized import module as unauthorized_module
 from .control_users import module as control_users_module
 
-module = OrgMephiModule('tasks', __package__, access_level=None)
+module = OrgMephiModule('tasks', __package__, access_level=None, marshmallow_api=True)
 
 module.add_module(creator_module)
 module.add_module(admin_module)

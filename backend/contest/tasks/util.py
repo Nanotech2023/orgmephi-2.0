@@ -77,7 +77,7 @@ def get_user_variant_if_possible(id_contest):
 
 def get_user_tasks_if_possible(id_contest):
     variant = get_user_variant_if_possible(id_contest)
-    tasks = [task.serialize() for task in variant.tasks]
+    tasks = [task for task in variant.tasks]
     return tasks
 
 
