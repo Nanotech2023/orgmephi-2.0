@@ -35,15 +35,10 @@ def get_user_answer_by_id(contest_id, answer_id):
         }, 200)
 
 
-@module.route('/contest/<int:contest_id>/user/self/status', methods=['GET', 'POST'])
+@module.route('/contest/<int:contest_id>/user/self/status', methods=['GET'])
 def user_status_and_mark_for_response(contest_id):
     self_user_id = jwt_get_id()
-    if request.method == 'GET':
-        return make_response(user_answer_status_get(self_user_id, contest_id), 200)
-    elif request.method == 'POST':
-        values = request.openapi.body
-        user_answer_status_post(values, self_user_id, contest_id)
-        return make_response({}, 200)
+    return make_response(user_answer_status_get(self_user_id, contest_id), 200)
 
 
 @module.route('/contest/<int:contest_id>/user/self/status/history', methods=['GET'])

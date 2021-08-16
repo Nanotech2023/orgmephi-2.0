@@ -159,46 +159,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/errorResponse'
-    post:
-      summary: Set user's status and mark for reponse
-      description: Set user's status and mark for reponse, only for inspector
-      security:
-        - cookieJWTAuth: [ ]
-        - CSRFToken: [ ]
-      parameters:
-        - in: path
-          description: Id of the contest
-          name: contest_id
-          required: true
-          schema:
-            type: integer
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/responseStatus'
-      responses:
-        '200':
-          description: OK
-        '400':
-          description: Incorrect mark or status
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errorResponse'
-        '403':
-          description: Invalid role of current user
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errorResponse'
-        '404':
-          description: User or contest not found
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errorResponse'
   /contest/{contest_id}/user/self/status/history:
     get:
       summary: Get status history of current user's work

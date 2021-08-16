@@ -186,7 +186,6 @@ class ResponseAnswer(db.Model):
     filetype: user's answer filetype
     """
 
-
     answer_id = db.Column(db.Integer, autoincrement=True, primary_key=True)
     work_id = db.Column(db.Integer, db.ForeignKey('response.work_id'))
     task_num = db.Column(db.Integer, db.ForeignKey(f'{Task.__tablename__}.task_id'))
