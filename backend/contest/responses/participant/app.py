@@ -3,7 +3,7 @@ from common import OrgMephiApp
 
 from . import module
 
-app = OrgMephiApp('responses', module, default_config=DefaultConfiguration(), security=True)
+app = OrgMephiApp('participant', module, default_config=DefaultConfiguration())
 app.set_current()
 app.prepare()
 flask_app = app.app
