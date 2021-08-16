@@ -26,13 +26,6 @@ class Response(db.Model):
     statuses = db.relationship('ResponseStatus', backref='response', lazy=True, cascade="all, delete")
     answers = db.relationship('ResponseAnswer', backref='response', lazy='dynamic', cascade="all, delete")
 
-    def prepare_for_list(self):
-        mark = self.statuses[-1].mark
-        return {
-            'user_id': self.user_id,
-            'mark': mark
-        }
-
 
 class ResponseStatusEnum(enum.Enum):
     """
@@ -75,27 +68,6 @@ class ResponseStatus(db.Model):
     mark = db.Column(db.Float)
     appeal = db.relationship('Appeal', backref='status', lazy=True, uselist=False)
 
-    def serialize(self):
-        if self.mark is None:
-            return {
-                'status': self.status.value
-            }
-        else:
-            return {
-                'status': self.status.value,
-                'mark': self.mark
-            }
-
-    def status_for_history(self):
-        appeal_id = self.appeal.appeal_id if self.appeal is not None else None
-
-        return {
-            'status': self.status.value,
-            'datetime': self.timestamp.isoformat(),
-            'appeal_id': appeal_id,
-            'mark': self.mark
-        }
-
 
 class AppealStatusEnum(enum.Enum):
     """
@@ -130,15 +102,6 @@ class Appeal(db.Model):
     appeal_status = db.Column(db.Enum(AppealStatusEnum), nullable=False)
     appeal_message = db.Column(db.Text)
     appeal_response = db.Column(db.Text)
-
-    def serialize(self):
-        return {
-            'appeal_id': self.appeal_id,
-            'status_id': self.work_status,
-            'appeal_status': self.appeal_status.value,
-            'appeal_message': self.appeal_message,
-            'appeal_response': self.appeal_response
-        }
 
     def reply_to_appeal(self, message, status):
         self.appeal_response = message
@@ -188,12 +151,6 @@ class ResponseAnswer(db.Model):
     task_num = db.Column(db.Integer, db.ForeignKey(f'{Task.__tablename__}.task_id'))
     answer = db.Column(db.LargeBinary, nullable=False)
     filetype = db.Column(db.Enum(ResponseFiletypeEnum), nullable=False)
-
-    def serialize(self):
-        return {
-            'task_id': self.task_num,
-            'answer_id': self.answer_id
-        }
 
     def update(self, answer_new=None, filetype_new=None):
         if answer_new is not None:

@@ -2,7 +2,7 @@ from marshmallow_sqlalchemy import SQLAlchemySchema, auto_field
 from marshmallow_enum import EnumField
 
 from contest.responses.models import *
-from common.fields import username_validator, group_name_validator
+from common.fields import message_validator
 
 
 class ResponseSchema(SQLAlchemySchema):
@@ -47,8 +47,18 @@ class AppealSchema(SQLAlchemySchema):
     appeal_id = auto_field(column_name='appeal_id', dump_only=True)
     status_id = auto_field(column_name='status_id', dump_only=True)
     appeal_status = EnumField(AppealStatusEnum, data_key='appeal_status', by_value=True)
-    appeal_message = auto_field(column_name='appeal_message', dump_only=True)
-    appeal_response = auto_field(column_name='appeal_response', required=False)
+    appeal_message = auto_field(column_name='appeal_message', dump_only=True, validate=message_validator)
+    appeal_response = auto_field(column_name='appeal_response', required=False, validate=message_validator)
+
+
+class ResponseAnswerListSchema(SQLAlchemySchema):
+    class Meta:
+        model = ResponseAnswer
+        load_instance = False
+        sqla_session = db.session
+
+    task_id = auto_field(column_name='task_num', dump_only=True)
+    answer_id = auto_field(column_name='answer_id', dump_only=True)
 
 
 class ResponseAnswerSchema(SQLAlchemySchema):
@@ -57,5 +67,5 @@ class ResponseAnswerSchema(SQLAlchemySchema):
         load_instance = False
         sqla_session = db.session
 
-    task_id = auto_field(column_name='task_num', dump_only=True)
-    answer_id = auto_field(column_name='answer_id', dump_only=True)
+    filetype = EnumField(ResponseFiletypeEnum,data_key='filetype', by_value=True)
+    answer = auto_field(column_name='answer', dump_only=True)
