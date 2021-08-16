@@ -2,7 +2,6 @@ import { Component, OnInit } from '@angular/core'
 import { select, Store } from '@ngrx/store'
 import { AuthSelectors, AuthState } from '@/auth/store'
 import { Observable } from 'rxjs'
-import { TypeUserInfo } from '@/auth/api/models'
 
 
 @Component( {
@@ -12,17 +11,12 @@ import { TypeUserInfo } from '@/auth/api/models'
 } )
 export class HomeComponent implements OnInit
 {
-    user$!: Observable<TypeUserInfo | null>
+    isParticipant$!: Observable<boolean>
 
     constructor( private store: Store<AuthState.State> ) {}
 
     ngOnInit(): void
     {
-        this.user$ = this.store.pipe( select( AuthSelectors.selectUserInfo ) )
-    }
-
-    isStudent( userInfo: TypeUserInfo | null )
-    {
-        return userInfo?.role == 'Participant'
+        this.isParticipant$ = this.store.pipe( select( AuthSelectors.selectIsParticipant ) )
     }
 }

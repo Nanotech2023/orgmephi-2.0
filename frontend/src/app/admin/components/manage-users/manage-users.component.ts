@@ -37,6 +37,7 @@ export class ManageUsersComponent implements OnInit
 
     onNewUserAdded( userInfo: TypeRegistrationPersonalInfo )
     {
+        // TODO dispatch add action
         this.agGrid.api.addItems( [
             {
                 type: 'School',
@@ -67,6 +68,7 @@ export class ManageUsersComponent implements OnInit
 
     userChanged( $event: TypeUserInfo )
     {
+        // TODO dispatch edit action
         // @ts-ignore
         const rowNode = this.agGrid.api.getRowNode( $event.id )
         rowNode?.updateData( $event )

@@ -1,4 +1,10 @@
-<header *ngIf="(userInfo | async)?.role != 'Admin'; else adminHeader">
+<header>
+    <ng-container *ngIf="hasAccessToManagePages$ | async; then adminHeader; else defaultHeader">
+    </ng-container>
+</header>
+
+
+<ng-template #defaultHeader>
     <nav class="navbar navbar-expand-md navbar-dark fixed-top bg-light">
         <a class="navbar-brand" routerLink="/">
             <img src="/assets/mephi-logo.png" width="121" height="80" class="d-inline-block align-top" alt="">
@@ -25,7 +31,7 @@
             </div>
         </div>
     </nav>
-</header>
+</ng-template>
 <ng-template #adminHeader>
     <header>
         <nav class="navbar navbar-expand-md navbar-dark fixed-top bg-light">

@@ -3,7 +3,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing'
 import { ManageOlympiadsComponent } from './manage-olympiads.component'
 
 
-describe( 'ManageOlynpiadsComponent', () =>
+describe( 'ManageOlympiadsComponent', () =>
 {
     let component: ManageOlympiadsComponent
     let fixture: ComponentFixture<ManageOlympiadsComponent>
