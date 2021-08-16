@@ -20,7 +20,6 @@ class Response(db.Model):
     answers: answers in user response
     """
 
-
     work_id = db.Column(db.Integer, autoincrement=True, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey(UserInContest.user_id))
     contest_id = db.Column(db.Integer, db.ForeignKey(UserInContest.contest_id))
@@ -68,7 +67,6 @@ class ResponseStatus(db.Model):
 
     appeal: an appeal which is linked to this status
     """
-
 
     status_id = db.Column(db.Integer, autoincrement=True, primary_key=True)
     work_id = db.Column(db.Integer, db.ForeignKey(Response.work_id))
@@ -127,7 +125,6 @@ class Appeal(db.Model):
     appeal_response: expert's response for user's appeal
     """
 
-
     appeal_id = db.Column(db.Integer, autoincrement=True, primary_key=True)
     work_status = db.Column(db.Integer, db.ForeignKey(ResponseStatus.status_id))
     appeal_status = db.Column(db.Enum(AppealStatusEnum), nullable=False)
@@ -136,12 +133,12 @@ class Appeal(db.Model):
 
     def serialize(self):
         return {
-                'appeal_id': self.appeal_id,
-                'status_id': self.work_status,
-                'appeal_status': self.appeal_status.value,
-                'appeal_message': self.appeal_message,
-                'appeal_response': self.appeal_response
-            }
+            'appeal_id': self.appeal_id,
+            'status_id': self.work_status,
+            'appeal_status': self.appeal_status.value,
+            'appeal_message': self.appeal_message,
+            'appeal_response': self.appeal_response
+        }
 
     def reply_to_appeal(self, message, status):
         self.appeal_response = message
