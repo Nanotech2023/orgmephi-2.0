@@ -7,7 +7,7 @@ from common.fields import common_name_validator
 class UniversitySchema(SQLAlchemySchema):
     class Meta:
         model = University
-        load_instance = False
+        load_instance = True
         sqla_session = db.session
 
     name = auto_field(column_name='name', validate=common_name_validator)
@@ -16,7 +16,7 @@ class UniversitySchema(SQLAlchemySchema):
 class CountrySchema(SQLAlchemySchema):
     class Meta:
         model = University
-        load_instance = False
+        load_instance = True
         sqla_session = db.session
 
     name = auto_field(column_name='name', validate=common_name_validator)

@@ -4,7 +4,7 @@ from functools import wraps
 from apispec import APISpec
 from openapi_core.contrib.flask.decorators import FlaskOpenAPIViewDecorator
 from marshmallow import Schema
-from typing import Type
+from typing import Type, Union
 from flask import Blueprint, send_file
 from typing import Callable, Any, Optional
 
@@ -89,8 +89,10 @@ class OrgMephiModule:
         prefix = '/'.join(self._get_parents(top)[1:])
         return '' if prefix == '' else '/' + prefix
 
-    def route(self, rule: str, refresh: bool = False, input_schema: Optional[Type[Schema]] = None,
-              output_schema: Optional[Type[Schema]] = None, **options: Any) -> Callable:
+    def route(self, rule: str, refresh: bool = False,
+              input_schema: Union[Type[Schema], Schema] = None,
+              output_schema: Union[Type[Schema], Schema] = None,
+              **options: Any) -> Callable:
         """
         Decorator factory to initialize a new route for self (see flask.Flask.route)
         :param rule: path for this rule
@@ -305,23 +307,31 @@ class OrgMephiModule:
         return self._parent._get_parents() + [self._name]
 
     @staticmethod
-    def _wrap_marshmallow_input(f: Callable, schema: Type[Schema]):
+    def _wrap_marshmallow_input(f: Callable, schema: Union[Type[Schema], Schema]):
+
+        if issubclass(schema, Schema):
+            # noinspection PyCallingNonCallable
+            schema = schema()
 
         @wraps(f)
         def wrapper(*args, **kwargs):
             from flask import request
             from marshmallow import RAISE
             from marshmallow_sqlalchemy import SQLAlchemySchema
-            if issubclass(schema, SQLAlchemySchema) and getattr(schema.Meta, 'load_instance', False):
+            if isinstance(schema, SQLAlchemySchema) and getattr(schema.Meta, 'load_instance', False):
                 raise TypeError('Trying to load instance with SQLAlchemySchema on request')
             else:
-                request.marshmallow = schema().load(data=request.json, unknown=RAISE)
+                request.marshmallow = schema.load(data=request.json, unknown=RAISE)
             return f(*args, **kwargs)
 
         return wrapper
 
     @staticmethod
-    def _wrap_marshmallow_output(f: Callable, schema: Type[Schema]):
+    def _wrap_marshmallow_output(f: Callable, schema: Union[Type[Schema], Schema]):
+
+        if issubclass(schema, Schema):
+            # noinspection PyCallingNonCallable
+            schema = schema()
 
         @wraps(f)
         def wrapper(*args, **kwargs):
@@ -329,7 +339,7 @@ class OrgMephiModule:
             result = f(*args, **kwargs)
             if len(result) == 0:
                 return make_response()
-            serialized = schema().dump(obj=result[0])
+            serialized = schema.dump(obj=result[0])
             return make_response(serialized, *result[1:])
 
         return wrapper

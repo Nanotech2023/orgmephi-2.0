@@ -4,7 +4,7 @@ from marshmallow import EXCLUDE
 
 from common.errors import AlreadyExists
 from common import get_current_app, get_current_module, get_current_db
-from common.util import db_get_all, db_update_from_dict
+from common.util import db_get_all
 
 from user.models import add_user, UserRoleEnum, UserTypeEnum, University, Country, UserInfo, StudentInfo
 from user.model_schemas.auth import UserSchema
@@ -39,13 +39,14 @@ def register():
     try:
         user = add_user(db.session, username, password_hash, UserRoleEnum.participant, reg_type)
         user.user_info = UserInfo()
-        db_update_from_dict(db.session, values['personal_info'], user.user_info, schema=UserInfoSchema)
+        UserInfoSchema(load_instance=True).load(request.json['personal_info'], instance=user.user_info,
+                                                session=db.session, partial=False, unknown=EXCLUDE)
         user.user_info.email = username
 
         if reg_type == UserTypeEnum.university:
             user.student_info = StudentInfo()
-            db_update_from_dict(db.session, values['student_info'], user.student_info, schema=StudentInfoSchema)
-
+            StudentInfoSchema(load_instance=True).load(request.json['student_info'], instance=user.student_info,
+                                                       session=db.session, partial=False, unknown=EXCLUDE)
         db.session.commit()
     except sqlalchemy.exc.IntegrityError as err:
         raise AlreadyExists('username', username)
