@@ -8,7 +8,7 @@ from common.fields import username_validator, group_name_validator
 class UserSchema(SQLAlchemySchema):
     class Meta:
         model = User
-        load_instance = False
+        load_instance = True
         sqla_session = db.session
 
     id = auto_field(column_name='id', dump_only=True)
@@ -20,7 +20,7 @@ class UserSchema(SQLAlchemySchema):
 class GroupSchema(SQLAlchemySchema):
     class Meta:
         model = Group
-        load_instance = False
+        load_instance = True
         sqla_session = db.session
 
     id = auto_field(column_name='id', dump_only=True)

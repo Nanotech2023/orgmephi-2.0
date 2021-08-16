@@ -1,8 +1,9 @@
 from typing import Type
+from flask_sqlalchemy import Model
+from marshmallow import ValidationError
 from marshmallow_sqlalchemy.fields import Nested
 from marshmallow_sqlalchemy import auto_field
 from marshmallow_sqlalchemy.schema import SQLAlchemySchema
-from .errors import NotFound
 
 
 def _enum_allowed_values(enum_type, validator):
@@ -71,70 +72,38 @@ def related_to_nested(field):
         raise TypeError(f'Related field has not columns: {repr(field)}')
 
 
-def db_update_from_dict(db_session, data: dict, obj, schema: Type[SQLAlchemySchema]):
+def check_related_existence(data: dict, attribute: str, field: str, sqla_model: Type[Model], table_field: str = None) \
+        -> dict:
     """
-    Update a database object from a dictionary based on a marshmallow schema
-    :param db_session: Database session
-    :param data: Dictionary of model attributes
-    :param obj: Database object to update
-    :param schema: marshmallow schema for the database model
+    Ensures that a database object for a Related-type marshmallow-sqlalchemy field during pre_load
+    :param data: Data for deserialization
+    :param attribute: Name of the related attribute within marshmallow schema
+    :param field: Name of the field by which the object is related within marshmallow schema
+    :param sqla_model: SQLAlchemy model
+    :param table_field: Name of the field by which the object is related within sqlalchemy model
+    :return: Data for deserialization
     """
-    from marshmallow_sqlalchemy.fields import Related, RelatedList
-    from marshmallow.fields import Nested
-    from marshmallow_oneofschema import OneOfSchema
-    from sqlalchemy.orm import RelationshipProperty, ColumnProperty
-    from sqlalchemy.inspection import inspect
-    sch = schema()
-    model = type(obj)
-    model_info = inspect(model)
-    for key, value in data.items():
-        fld = sch.fields.get(key, None)
-        if fld is None:
-            raise ValueError(f'Field {key} not found in schema {schema.__class__}')
-        if fld.attribute is not None:
-            attr_name = fld.attribute
-        else:
-            attr_name = key
-        column = getattr(model_info.attrs, attr_name, None)
-        if column is None:
-            raise ValueError(f'Attribute {attr_name} not found in model {model.__class__}')
-        if value is None:
-            setattr(obj, attr_name, None)
-            continue
-        if isinstance(fld, Related) and isinstance(column, RelationshipProperty):
-            relation = getattr(model_info.relationships, attr_name, None)
-            other_model = relation.mapper.class_
-            if isinstance(value, other_model):
-                value_info = inspect(value)
-                if value_info.transient:
-                    raise NotFound(f'{key} {str(fld.columns)}', str([getattr(value, k) for k in fld.columns]))
-                setattr(obj, key, value)
-            else:
-                if value is dict:
-                    filters = value
-                else:
-                    filters = {fld.columns[0]: value}
-                rel = db_session.query(other_model).filter_by(**filters).one_or_none()
-                if rel is None:
-                    raise NotFound(key, str(value))
-                setattr(obj, attr_name, rel)
-        elif isinstance(fld, RelatedList) and isinstance(column, RelationshipProperty):
-            pass
-        elif isinstance(fld, Nested) and isinstance(column, RelationshipProperty):
-            relation = getattr(model_info.relationships, attr_name, None)
-            other_model = relation.mapper.class_
-            nested = fld.nested
-            if issubclass(nested, OneOfSchema):
-                nested = nested.type_schemas[nested().get_data_type(value)]
-                nested_model = nested.Meta.model
-                nested_value = getattr(obj, attr_name)
-                if not isinstance(nested_value, nested_model):
-                    setattr(obj, attr_name, nested_model())
-                other_model = nested_model
-            elif getattr(obj, attr_name) is None:
-                setattr(obj, attr_name, other_model())
-            db_update_from_dict(db_session, value, getattr(obj, attr_name), nested)
-        elif isinstance(column, ColumnProperty):
-            setattr(obj, attr_name, value)
-        else:
-            raise TypeError(f'Unknown type for attribute {attr_name}')
+    from common.util import db_get_one_or_none
+    from common.errors import NotFound
+    if table_field is None:
+        table_field = field
+    obj = data.get(attribute, None)
+    if isinstance(obj, dict):
+        obj = obj.get(field, None)
+    if obj is not None:
+        if db_get_one_or_none(sqla_model, table_field, obj) is None:
+            raise NotFound(f'{attribute}.{field}', str(obj))
+    else:
+        data.pop(attribute, None)
+    return data
+
+
+def require_fields(data: dict, fields: list[str]):
+    """
+    Checks if fields are present in the data
+    :param data: Data dictionary to check
+    :param fields: Fields to look for
+    """
+    for field in fields:
+        if field not in data:
+            raise ValidationError('Missing data for required field.', field, data)

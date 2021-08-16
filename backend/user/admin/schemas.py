@@ -2,7 +2,7 @@ from marshmallow import Schema, fields
 from marshmallow_enum import EnumField
 from common import fields as common_fields
 from user.models.auth import UserTypeEnum, UserRoleEnum
-from user.model_schemas.university import StudentInfoSchema
+from user.model_schemas.university import StudentInfoSchema, StudentUniversityCompatibleSchema
 from user.model_schemas.personal import UserInfoSchema
 
 
@@ -41,4 +41,4 @@ class UserInfoAdminSchema(UserInfoSchema):
 
 
 class StudentInfoAdminSchema(StudentInfoSchema):
-    pass
+    university = fields.Nested(nested=StudentUniversityCompatibleSchema, allow_none=True, many=False)

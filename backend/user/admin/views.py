@@ -1,8 +1,9 @@
 from flask import request
+from marshmallow import EXCLUDE
 
 from common.errors import NotFound, AlreadyExists, InsufficientData
 from common import get_current_app, get_current_module, get_current_db
-from common.util import db_get_or_raise, db_get_one_or_none, db_update_from_dict
+from common.util import db_get_or_raise
 
 from user.models import User, UserRoleEnum, UserTypeEnum, add_user, UserInfo, Group
 
@@ -195,7 +196,7 @@ def set_user_type(user_id):
     return {}, 200
 
 
-@module.route('/personal/<int:user_id>', methods=['PATCH'], input_schema=UserInfoAdminSchema)
+@module.route('/personal/<int:user_id>', methods=['PATCH'])
 def set_user_info_admin(user_id):
     """
     Set personal info for a user
@@ -226,20 +227,16 @@ def set_user_info_admin(user_id):
         '409':
           description: Personal info is not set and request is not full
     """
-    values = request.marshmallow
     user = db_get_or_raise(User, "id", user_id)
-    if 'email' in values:
-        info = db_get_one_or_none(UserInfo, 'email', values['email'])
-        if info is not None and info.user_id != user_id:
-            raise AlreadyExists('user.email', values['email'])
     if user.user_info is None:
         user.user_info = UserInfo()
-    db_update_from_dict(db.session, values, user.user_info, UserInfoSchema)
+    UserInfoSchema(load_instance=True).load(request.json, instance=user.user_info, session=db.session, partial=False,
+                                            unknown=EXCLUDE)
     db.session.commit()
     return {}, 200
 
 
-@module.route('/university/<int:user_id>', methods=['PATCH'], input_schema=StudentInfoAdminSchema)
+@module.route('/university/<int:user_id>', methods=['PATCH'])
 def set_university_info_admin(user_id):
     """
     Set university student info for a user
@@ -271,11 +268,11 @@ def set_university_info_admin(user_id):
           description: University info is not set and request is not full
     """
     from user.models.university import StudentInfo
-    values = request.marshmallow
     user = db_get_or_raise(User, "id", user_id)
     if user.student_info is None:
         user.student_info = StudentInfo()
-    db_update_from_dict(db.session, values, user.student_info, StudentInfoSchema)
+    StudentInfoSchema(load_instance=True).load(request.json, instance=user.student_info, session=db.session,
+                                               partial=False, unknown=EXCLUDE)
     db.session.commit()
     return {}, 200
 
