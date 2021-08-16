@@ -4,6 +4,7 @@ from common import fields as common_fields
 from user.models.auth import UserTypeEnum
 from user.model_schemas.reference import UniversitySchema, CountrySchema, RegionSchema, CitySchema
 from user.model_schemas.university import StudentUniversityCompatibleSchema
+from user.model_schemas.personal import DwellingCompatibleSchema
 
 
 class RegistrationInfoUserSchema(Schema):
@@ -26,9 +27,7 @@ class RegisterConfirmUserSchema(Schema):
 class RegistrationStudentInfoUserSchema(Schema):
     phone = common_fields.Phone(required=True)
     admission_year = fields.Date(required=True)
-    citizenship = common_fields.CommonName(required=True)
-    region = common_fields.CommonName(required=True)
-    city = common_fields.CommonName(required=True)
+    dwelling = fields.Nested(nested=DwellingCompatibleSchema, required=True)
     university = fields.Nested(nested=StudentUniversityCompatibleSchema, required=True)
 
 

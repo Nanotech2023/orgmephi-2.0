@@ -1,3 +1,4 @@
+import enum
 from marshmallow_sqlalchemy import SQLAlchemySchema, auto_field
 from marshmallow_sqlalchemy.fields import Related, Nested
 from marshmallow_oneofschema import OneOfSchema
@@ -91,10 +92,3 @@ class StudentInfoSchema(SQLAlchemySchema):
     phone = auto_field(column_name='phone', allow_none=True)
     university = Nested(nested=StudentUniversitySchema, allow_none=True, many=False)
     admission_year = auto_field(column_name='admission_year', allow_none=True)
-    citizenship = Related(column=['name'], data_key='citizenship')
-    region = auto_field(column_name='region', allow_none=True)
-    city = auto_field(column_name='city', allow_none=True)
-
-    @pre_load()
-    def check_citizenship(self, data, many, **kwargs):
-        return check_related_existence(data, 'citizenship', 'name', Country)

@@ -1,4 +1,3 @@
-import enum
 from common import get_current_db, get_current_app
 from .reference import University, Country
 from .auth import User
@@ -29,13 +28,9 @@ class StudentInfo(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey(User.id), primary_key=True)
     phone = db.Column(db.String)
     admission_year = db.Column(db.Date)
-    citizenship_country_id = db.Column(db.Integer, db.ForeignKey(Country.id))
-    region = db.Column(db.String)
-    city = db.Column(db.String)
 
     university = db.relationship('StudentUniversity', lazy='select', uselist=False,
                                  cascade='save-update, merge, delete, delete-orphan')
-    citizenship = db.relationship('Country', lazy='select')
 
     user = db.relationship('User', lazy='select')
 
@@ -86,7 +81,7 @@ class StudentUniversityCustom(StudentUniversity):
     """
 
     university_name = db.Column(db.String)
-    university_country = db.Column(db.Integer, db.ForeignKey(Country.id))
+    university_country_name = db.Column(db.String, db.ForeignKey(Country.name))
     country = db.relationship('Country')
 
     __mapper_args__ = {

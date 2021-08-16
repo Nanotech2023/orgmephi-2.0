@@ -15,8 +15,7 @@ class Country(db.Model):
     """
     __table_name__ = 'country'
 
-    id = db.Column(db.Integer, autoincrement=True, primary_key=True)
-    name = db.Column(db.String, nullable=False, unique=True)
+    name = db.Column(db.String, nullable=False, unique=True, primary_key=True)
 
 
 @app.db_prepare_action()
@@ -40,8 +39,7 @@ class Region(db.Model):
         name: name of the region
     """
 
-    id = db.Column(db.Integer, autoincrement=True, primary_key=True)
-    name = db.Column(db.String, nullable=False, unique=True)
+    name = db.Column(db.String, nullable=False, unique=True, primary_key=True)
     cities = db.relationship('City', back_populates='region', lazy='dynamic')
 
 
@@ -64,16 +62,11 @@ class City(db.Model):
 
         id: id of the city
         name: name of the city
-        region_id: id of city's region
+        region_name: name of city's region
     """
 
-    __table_args__ = (
-        db.UniqueConstraint('region_id', 'name', name='unique_name_constraint'),
-    )
-
-    id = db.Column(db.Integer, autoincrement=True, primary_key=True)
-    region_id = db.Column(db.Integer, db.ForeignKey(Region.id), nullable=False)
-    name = db.Column(db.String, nullable=False)
+    region_name = db.Column(db.String, db.ForeignKey(Region.name), primary_key=True)
+    name = db.Column(db.String, nullable=False, primary_key=True)
     region = db.relationship('Region', back_populates='cities')
 
 
@@ -82,7 +75,7 @@ def _read_city(name, region_name):
     city = City(name=name)
     region = db_get_one_or_none(Region, 'name', region_name)
     if region is not None:
-        city.region_id = region.id
+        city.region_name = region.name
         return city
     else:
         app.app.logger.warning('City "%s" depends on region "%s" which is not known', name, region_name)
@@ -99,7 +92,7 @@ def populate_cities():
     cities = [_read_city(value[0].strip(), value[1].strip()) for value in values if len(value) >= 2]
     cities = [city for city in cities if city is not None]
 
-    db_populate(db.session, City, cities, keys=['name', 'region_id'])
+    db_populate(db.session, City, cities, keys=['name', 'region_name'])
     db.session.commit()
 
 
@@ -111,13 +104,13 @@ class University(db.Model):
 
         id: id of the university
         name: name of the university
-        country_id" id of university's country
+        country_name" name of university's country
     """
     __table_name__ = 'university'
 
     id = db.Column(db.Integer, autoincrement=True, primary_key=True)
     name = db.Column(db.String, nullable=False, unique=True)
-    country_id = db.Column(db.Integer, db.ForeignKey(Country.id))
+    country_name = db.Column(db.String, db.ForeignKey(Country.name))
     country = db.relationship('Country')
 
 
@@ -127,7 +120,7 @@ def _read_university(name, country_name):
     if country_name is not None:
         country = db_get_one_or_none(Country, 'name', country_name)
         if country is not None:
-            uni.country_id = country.id
+            uni.country_name = country.name
         else:
             app.app.logger.warning('University "%s" depends on country "%s" which is not known', name, country_name)
     return uni
