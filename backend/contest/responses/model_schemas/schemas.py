@@ -3,7 +3,10 @@ from marshmallow_enum import EnumField
 
 from contest.responses.models import *
 from common.fields import message_validator
+<<<<<<< HEAD
 from common.fields import username_validator, group_name_validator
+=======
+>>>>>>> add: marshmallow for creator module
 
 
 class ResponseSchema(SQLAlchemySchema):
@@ -52,7 +55,7 @@ class AppealSchema(SQLAlchemySchema):
     appeal_response = auto_field(column_name='appeal_response', required=False, validate=message_validator)
 
 
-class ResponseAnswerSchema(SQLAlchemySchema):
+class ResponseAnswerListSchema(SQLAlchemySchema):
     class Meta:
         model = ResponseAnswer
         load_instance = True
