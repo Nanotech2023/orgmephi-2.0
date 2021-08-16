@@ -2,7 +2,7 @@ from marshmallow import Schema, fields, validate
 from marshmallow_enum import EnumField
 from common import fields as common_fields
 from user.models.auth import UserTypeEnum
-from user.model_schemas.reference import UniversitySchema, CountrySchema
+from user.model_schemas.reference import UniversitySchema, CountrySchema, RegionSchema, CitySchema
 from user.model_schemas.university import StudentUniversityCompatibleSchema
 
 
@@ -56,3 +56,11 @@ class InfoUniversitiesResponseUserSchema(Schema):
 
 class InfoCountriesResponseUserSchema(Schema):
     country_list = fields.Nested(CountrySchema, many=True, required=True)
+
+
+class InfoRegionsResponseUserSchema(Schema):
+    region_list = fields.Nested(RegionSchema, many=True, required=True)
+
+
+class InfoCitiesResponseUserSchema(Schema):
+    city_list = fields.Nested(CitySchema, many=True, required=True)

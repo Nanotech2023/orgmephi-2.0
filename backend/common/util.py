@@ -1,6 +1,7 @@
 from .errors import NotFound
-from typing import Type
+from typing import Type, Optional
 from flask_sqlalchemy import Model
+from sqlalchemy.orm import Session
 
 
 def db_get_one_or_none(table: Type[Model], field: str, value: object):
@@ -59,3 +60,40 @@ def db_get_all(table: Type[Model]):
     :return: List of table instances
     """
     return table.query.all()
+
+
+def db_exists(db_session: Session, table: Type[Model], field: Optional[str] = None, value: Optional[object] = None,
+              filters: dict[str, object] = None) -> bool:
+    """
+    Check if object with specified value exists
+    :param db_session: database session
+    :param table: table class
+    :param field: attribute to filter by
+    :param value: value to filter by
+    :param filters: attribute_name-value dictionary
+    :return: True if at least one object found, false otherwise
+    """
+    if filters is None:
+        filters = {field: value}
+    q = db_session.query(table).filter_by(**filters)
+    return db_session.query(q.exists()).scalar()
+
+
+def db_populate(db_session: Session, table: Type[Model], values: list, key: Optional[str] = None,
+                keys: Optional[list[str]] = None) -> None:
+    """
+    Populate table
+    :param db_session: database session
+    :param table: table class
+    :param values: list of values to insert
+    :param key: name of the PK field
+    :param keys: list of PK field names
+    """
+
+    def _get_filter(obj, key_list: list[str]) -> dict[str, object]:
+        return {k: getattr(obj, k) for k in key_list if getattr(obj, k) is not None}
+
+    if keys is None:
+        keys = [key]
+    new_values = [v for v in values if not db_exists(db_session, table, filters=_get_filter(v, keys))]
+    db_session.add_all(new_values)

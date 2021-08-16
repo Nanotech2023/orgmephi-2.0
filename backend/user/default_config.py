@@ -7,6 +7,8 @@ class DefaultConfiguration:
     ORGMEPHI_API_PATH = 'api'
     ORGMEPHI_UNIVERSITY_FILE = 'user/universities.txt'
     ORGMEPHI_COUNTRY_FILE = 'user/countries.txt'
+    ORGMEPHI_REGION_FILE = 'user/regions.txt'
+    ORGMEPHI_CITY_FILE = 'user/cities.txt'
     ORGMEPHI_PASSWORD_HASH = 'pbkdf2_sha256'
     ORGMEPHI_PASSWORD_LENGTH = 8
     ORGMEPHI_PASSWORD_UPPERCASE = 1
@@ -23,3 +25,4 @@ class DefaultConfiguration:
     # Warning: in most browsers 'None' only works over https
     ORGMEPHI_JWT_SAMESITE = 'Strict'
     ORGMEPHI_CORS_ENABLED = True
+    ORGMEPHI_NATIVE_COUNTRY = 'Россия'

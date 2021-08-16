@@ -4,15 +4,14 @@ from marshmallow import EXCLUDE
 
 from common.errors import AlreadyExists
 from common import get_current_app, get_current_module, get_current_db
-from common.util import db_get_all
+from common.util import db_get_all, db_get_or_raise
 
-from user.models import add_user, UserRoleEnum, UserTypeEnum, University, Country, UserInfo, StudentInfo
+from user.models import add_user, UserRoleEnum, University, Country, UserInfo, StudentInfo, Region
 from user.model_schemas.auth import UserSchema
 from user.model_schemas.personal import UserInfoSchema
 from user.model_schemas.university import StudentInfoSchema
 
-from .schemas import SchoolRegistrationRequestUserSchema, UniversityRegistrationRequestUserSchema, \
-    InfoUniversitiesResponseUserSchema, InfoCountriesResponseUserSchema
+from .schemas import *
 
 
 db = get_current_db()
@@ -48,7 +47,7 @@ def register():
             StudentInfoSchema(load_instance=True).load(request.json['student_info'], instance=user.student_info,
                                                        session=db.session, partial=False, unknown=EXCLUDE)
         db.session.commit()
-    except sqlalchemy.exc.IntegrityError as err:
+    except sqlalchemy.exc.IntegrityError:
         raise AlreadyExists('username', username)
     return user
 
@@ -136,3 +135,45 @@ def get_countries():
               schema: InfoCountriesResponseUserSchema
     """
     return {"country_list": db_get_all(Country)}, 200
+
+
+@module.route('/info/regions', methods=['GET'], output_schema=InfoRegionsResponseUserSchema)
+def get_regions():
+    """
+    Get known RF region list
+    ---
+    get:
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: InfoRegionsResponseUserSchema
+    """
+    return {"region_list": db_get_all(Region)}, 200
+
+
+@module.route('/info/cities/<string:region>', methods=['GET'], output_schema=InfoCitiesResponseUserSchema)
+def get_cities(region):
+    """
+    Get cities within the region
+    ---
+    get:
+      parameters:
+        - in: path
+          description: Region name
+          name: region
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: InfoCitiesResponseUserSchema
+        '404':
+          description: Region not found
+    """
+    region_obj = db_get_or_raise(Region, 'name', region)
+    return {"city_list": region_obj.cities}, 200
