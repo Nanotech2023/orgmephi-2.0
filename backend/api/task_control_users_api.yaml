@@ -1,0 +1,273 @@
+openapi: 3.0.0
+info:
+  title: Tasks service API
+  description: API description in Markdown.
+  version: 1.0.0
+servers:
+  - url: http://127.0.0.1:5000/contest/tasks/control_users
+  - url: http://127.0.0.1:5000
+
+paths:
+  ######################################################################################################################
+  ##                                             Path definition                                                      ##
+  ######################################################################################################################
+
+  # Users
+
+  /contest/{id_contest}/add_user:
+    post:
+      summary: Add user to contest
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/updateUserInContest'
+      parameters:
+        - in: path
+          description: Id of the contest
+          name: id_contest
+          required: true
+          schema:
+            type: integer
+      security:
+        - JWTAcessToken: [ ]
+        - CSRFAcessToken: [ ]
+      responses:
+        '200':
+          description: OK
+        '404':
+          description: User or group not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+        '409':
+          description: User is already exists or no variants for this contest
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+        '400':
+          description: Request error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+
+  /contest/{id_contest}/remove_user:
+    post:
+      summary: Remove user from contest
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/updateUserInContest'
+      parameters:
+        - in: path
+          description: Id of the contest
+          name: id_contest
+          required: true
+          schema:
+            type: integer
+      security:
+        - JWTAcessToken: [ ]
+        - CSRFAcessToken: [ ]
+      responses:
+        '200':
+          description: OK
+        '404':
+          description: User or group not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+
+  /contest/{id_contest}/user/all:
+    get:
+      summary: list of user in contest
+      parameters:
+        - in: path
+          description: Id of the contest
+          name: id_contest
+          required: true
+          schema:
+            type: integer
+      security:
+        - JWTAcessToken: [ ]
+        - CSRFAcessToken: [ ]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/usersInContest'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+
+  /contest/{id_contest}/user/{id_user}/certificate:
+    get:
+      summary: certificate of user in contest
+      parameters:
+        - in: path
+          description: Id of the contest
+          name: id_contest
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the user
+          name: id_user
+          required: true
+          schema:
+            type: integer
+      security:
+        - JWTAcessToken: [ ]
+        - CSRFAcessToken: [ ]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/userCertificate'
+        '404':
+          description: User not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+
+
+
+  ######################################################################################################################
+  ##                                             Path schemas                                                         ##
+  ######################################################################################################################
+
+components:
+  securitySchemes:
+
+  ######################################################################################################################
+  ##                                             Security components                                                  ##
+  ######################################################################################################################
+
+    JWTAcessToken:
+      description: Authentication with JWT stored in cookies
+      type: apiKey
+      in: cookie
+      name: access_token_cookie
+    JWTRefreshToken:
+      description: JWT stored in cookies to refresh an acess token
+      type: apiKey
+      in: cookie
+      name: refresh_token_cookie
+    CSRFAcessToken:
+      description: CSRF acess token
+      type: apiKey
+      in: header
+      name: X-CSRF-TOKEN
+    CSRFRefreshToken:
+      description: CSRF refresh token for "remember me" functionality
+      type: apiKey
+      in: header
+      name: X-CSRF-TOKEN
+  schemas:
+
+  ######################################################################################################################
+  ##                                             Error handling                                                       ##
+  ######################################################################################################################
+
+    errorResponse:
+      title: 'Error response'
+      required:
+        - errors
+      properties:
+        errors:
+          type: array
+          items:
+            type: object
+            title: 'Error value'
+            required:
+              - status
+              - title
+            properties:
+              class:
+                type: string
+              status:
+                type: integer
+              title:
+                type: string
+
+  ######################################################################################################################
+  ##                                             Common data types                                                    ##
+  ######################################################################################################################
+
+    typeFile:
+      type: string
+      format: binary
+      nullable: true
+    typeIdentifier:
+      type: integer
+    typeParticipant:
+      title: 'All subject types'
+      type: string
+      enum: [ "Participant", "Laureate", "Winner" ]
+
+  ######################################################################################################################
+  ##                                             Path schemas                                                         ##
+  ######################################################################################################################
+
+    # /contest/{id_contest}/user/all
+
+    usersInContest:
+      title: Get users in contest
+      description: Request to get users in contest
+      properties:
+        user_list:
+          type: array
+          items:
+            type: object
+            properties:
+              user_id:
+                $ref: '#/components/schemas/typeIdentifier'
+              variant_id:
+                $ref: '#/components/schemas/typeIdentifier'
+              user_status:
+                $ref: '#/components/schemas/typeParticipant'
+
+    # /contest/{id_contest}/add_user
+    # /contest/{id_contest}/remove_user
+
+    updateUserInContest:
+      title: Add or remove user to contest or stage
+      description: Request to add or remove user user to contest or stage
+      required:
+        - users_id
+      properties:
+        users_id:
+          type: array
+          items:
+            $ref: '#/components/schemas/typeIdentifier'
+
+    # /contest/{id_contest}/user/{id_user}/certificate
+
+    userCertificate:
+      title: Get certificate of the user
+      description: Request to get certificate of the user
+      required:
+        - certificate
+      properties:
+        certificate:
+          $ref: '#/components/schemas/typeFile'

@@ -1,0 +1,176 @@
+openapi: 3.0.0
+info:
+  title: Tasks service API
+  description: API description in Markdown.
+  version: 1.0.0
+servers:
+  - url: http://127.0.0.1:5000/contest/tasks/admin
+  - url: http://127.0.0.1:5000
+
+paths:
+  ######################################################################################################################
+  ##                                             Path definition                                                      ##
+  ######################################################################################################################
+
+  # Olympiad type
+
+  /olympiad_type/create:
+    post:
+      summary: add olympiad type
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/olympiadType'
+      security:
+        - JWTAcessToken: [ ]
+        - CSRFAcessToken: [ ]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/olympiadTypeId'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+        '409':
+          description: Already exists
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+        '404':
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+  /olympiad_type/{id_olympiad_type}/remove:
+    post:
+      summary: remove olympiad type
+      parameters:
+        - in: path
+          description: Id of the olympiad type
+          name: id_olympiad_type
+          required: true
+          schema:
+            type: integer
+      security:
+        - JWTAcessToken: [ ]
+        - CSRFAcessToken: [ ]
+      responses:
+        '200':
+          description: OK
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+        '404':
+          description: Olympiad type not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+
+
+  ######################################################################################################################
+  ##                                             Path schemas                                                         ##
+  ######################################################################################################################
+
+components:
+  securitySchemes:
+
+  ######################################################################################################################
+  ##                                             Security components                                                  ##
+  ######################################################################################################################
+
+    JWTAcessToken:
+      description: Authentication with JWT stored in cookies
+      type: apiKey
+      in: cookie
+      name: access_token_cookie
+    JWTRefreshToken:
+      description: JWT stored in cookies to refresh an acess token
+      type: apiKey
+      in: cookie
+      name: refresh_token_cookie
+    CSRFAcessToken:
+      description: CSRF acess token
+      type: apiKey
+      in: header
+      name: X-CSRF-TOKEN
+    CSRFRefreshToken:
+      description: CSRF refresh token for "remember me" functionality
+      type: apiKey
+      in: header
+      name: X-CSRF-TOKEN
+  schemas:
+
+  ######################################################################################################################
+  ##                                             Error handling                                                       ##
+  ######################################################################################################################
+
+    errorResponse:
+      title: 'Error response'
+      required:
+        - errors
+      properties:
+        errors:
+          type: array
+          items:
+            type: object
+            title: 'Error value'
+            required:
+              - status
+              - title
+            properties:
+              class:
+                type: string
+              status:
+                type: integer
+              title:
+                type: string
+
+  ######################################################################################################################
+  ##                                             Common data types                                                    ##
+  ######################################################################################################################
+
+    typeOlympiadType:
+      type: string
+      maxLength: 256
+    typeIdentifier:
+      type: integer
+
+  ######################################################################################################################
+  ##                                             Path schemas                                                         ##
+  ######################################################################################################################
+
+    # /olympiad_type/create
+
+    olympiadType:
+      title: 'Add or remove olympiad type'
+      description: 'Request to add or remove olympiad type'
+      required:
+        - olympiad_type
+      properties:
+        olympiad_type:
+          $ref: '#/components/schemas/typeOlympiadType'
+
+    # /olympiad_type/{id_olympiad_type}/remove
+
+    olympiadTypeId:
+      title: Get olympiad type id
+      description: Request to get olympiad type id
+      required:
+        - olympiad_type_id
+      properties:
+        olympiad_type_id:
+          $ref: '#/components/schemas/typeIdentifier'

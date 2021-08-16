@@ -1,0 +1,462 @@
+openapi: 3.0.0
+info:
+  title: Tasks service API
+  description: API description in Markdown.
+  version: 1.0.0
+servers:
+  - url: http://127.0.0.1:5000/contest/tasks/participant
+  - url: http://127.0.0.1:5000
+
+paths:
+  ######################################################################################################################
+  ##                                             Path definition                                                      ##
+  ######################################################################################################################
+
+  # Certificate
+
+  /contest/{id_contest}/certificate/self:
+    get:
+      summary: certificate of user in contest
+      parameters:
+        - in: path
+          description: Id of the contest
+          name: id_contest
+          required: true
+          schema:
+            type: integer
+      security:
+        - JWTAcessToken: [ ]
+        - CSRFAcessToken: [ ]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/userCertificate'
+        '404':
+          description: User not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+
+  # Variant
+
+  /contest/{id_contest}/variant/self:
+    get:
+      summary: Get info for a different variant
+      security:
+        - JWTAcessToken: [ ]
+        - CSRFAcessToken: [ ]
+      parameters:
+        - in: path
+          description: Id of the contest
+          name: id_contest
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/variantInfo'
+        '404':
+          description: Variant not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+
+  # Tasks
+
+  /contest/{id_contest}/tasks/self:
+    get:
+      summary: Get info for a different tasks
+      security:
+        - JWTAcessToken: [ ]
+        - CSRFAcessToken: [ ]
+      parameters:
+        - in: path
+          description: Id of the contest
+          name: id_contest
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/tasksInVariant'
+        '404':
+          description: Task not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+
+  /contest/{id_contest}/tasks/{id_task}/self:
+    get:
+      summary: list of tasks in variant
+      parameters:
+        - in: path
+          description: Id of the contest
+          name: id_contest
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the variant
+          name: id_task
+          required: true
+          schema:
+            type: integer
+      security:
+        - JWTAcessToken: [ ]
+        - CSRFAcessToken: [ ]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/plainTaskInfo'
+                  - $ref: '#/components/schemas/rangeTaskInfo'
+                  - $ref: '#/components/schemas/multipleTaskInfo'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+        '404':
+          description: Contest not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+
+  /contest/{id_contest}/tasks/{id_task}/image/self:
+    get:
+      summary: Task image
+      parameters:
+        - in: path
+          description: Id of the contest
+          name: id_contest
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the task
+          name: id_task
+          required: true
+          schema:
+            type: integer
+      security:
+        - JWTAcessToken: [ ]
+        - CSRFAcessToken: [ ]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/taskInVariantImage'
+        '404':
+          description: Task not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+
+components:
+  securitySchemes:
+
+  ######################################################################################################################
+  ##                                             Security components                                                  ##
+  ######################################################################################################################
+
+    JWTAcessToken:
+      description: Authentication with JWT stored in cookies
+      type: apiKey
+      in: cookie
+      name: access_token_cookie
+    JWTRefreshToken:
+      description: JWT stored in cookies to refresh an acess token
+      type: apiKey
+      in: cookie
+      name: refresh_token_cookie
+    CSRFAcessToken:
+      description: CSRF acess token
+      type: apiKey
+      in: header
+      name: X-CSRF-TOKEN
+    CSRFRefreshToken:
+      description: CSRF refresh token for "remember me" functionality
+      type: apiKey
+      in: header
+      name: X-CSRF-TOKEN
+  schemas:
+
+  ######################################################################################################################
+  ##                                             Error handling                                                       ##
+  ######################################################################################################################
+
+    errorResponse:
+      title: 'Error response'
+      required:
+        - errors
+      properties:
+        errors:
+          type: array
+          items:
+            type: object
+            title: 'Error value'
+            required:
+              - status
+              - title
+            properties:
+              class:
+                type: string
+              status:
+                type: integer
+              title:
+                type: string
+
+  ######################################################################################################################
+  ##                                             Common data types                                                    ##
+  ######################################################################################################################
+
+    typeOlympiadName:
+      type: string
+      maxLength: 256
+    typeOlympiadType:
+      type: string
+      maxLength: 256
+    typeOlympiadLocation:
+      type: string
+      maxLength: 256
+    typeOlympiadText:
+      type: string
+      maxLength: 1024
+    typeDate:
+      type: string
+      format: date
+    typeFile:
+      type: string
+      format: binary
+      nullable: true
+    typeVisibility:
+      type: boolean
+    typeCorrectness:
+      type: boolean
+    typeMultipleAnswer:
+      type: string
+      maxLength: 256
+    typeIdentifier:
+      type: integer
+    typePartNum:
+      type: integer
+      minimum: 0
+      maximum: 1000
+    typeCondition:
+      type: number
+      format: float
+      minimum: 0.0
+      maximum: 100.0
+      example:
+        5.5
+    typeRangeAnswer:
+      type: number
+      format: float
+      maxLength: 128
+      example:
+        5.5
+    typeTargetClass:
+      title: 'All target classes types'
+      type: string
+      enum: [ "5", "6", "7", "8", "9", "10", "11", "student" ]
+    typeSubject:
+      title: 'All subject types'
+      type: string
+      enum: [ "Math", "Physics", "Informatics" ]
+    typeParticipant:
+      title: 'All subject types'
+      type: string
+      enum: [ "Participant", "Laureate", "Winner" ]
+    typeStageCondition:
+      title: 'All stage condition types'
+      type: string
+      enum: [ "No", "And", "Or" ]
+      nullable: true
+    typeComposite:
+      title: 'All contest types'
+      type: string
+      enum: [ "SimpleContest", "CompositeContest" ]
+
+  ######################################################################################################################
+  ##                                             Path schemas                                                         ##
+  ######################################################################################################################
+
+    # /contest/{id_contest}/variant/self:
+
+    variantInfo:
+      title: Common variant info
+      description: Request to get variant info
+      required:
+        - variant_id
+        - variant_number
+        - variant_description
+      properties:
+        variant_id:
+          $ref: '#/components/schemas/typeIdentifier'
+        variant_number:
+          $ref: '#/components/schemas/typePartNum'
+        variant_description:
+          $ref: '#/components/schemas/typeOlympiadText'
+
+    # /contest/{id_contest}/variant/{id_variant}/tasks/self
+
+    tasksInVariant:
+      title: Get contests in stage
+      description: Request to get contests in stage
+      properties:
+        tasks_list:
+          type: array
+          items:
+            type: object
+            properties:
+              task_id:
+                $ref: '#/components/schemas/typeIdentifier'
+              num_of_task:
+                $ref: '#/components/schemas/typePartNum'
+              recommended_answer:
+                $ref: '#/components/schemas/typeOlympiadText'
+              start_value:
+                $ref: '#/components/schemas/typeRangeAnswer'
+              end_value:
+                $ref: '#/components/schemas/typeRangeAnswer'
+              answers:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    answer:
+                      $ref: '#/components/schemas/typeMultipleAnswer'
+                    is_right_answer:
+                      $ref: '#/components/schemas/typeCorrectness'
+
+    # /contest/{id_contest}/variant/{id_variant}/tasks/{id_task}/self
+
+    plainTaskInfo:
+      title: Get info of task with plain text
+      description: Request to get info of task with plain text
+      required:
+        - task_id
+        - num_of_task
+        - recommended_answer
+      properties:
+        task_id:
+          $ref: '#/components/schemas/typeIdentifier'
+        num_of_task:
+          $ref: '#/components/schemas/typePartNum'
+        recommended_answer:
+          $ref: '#/components/schemas/typeOlympiadText'
+
+    rangeTaskInfo:
+      title: Get info of task with range
+      description: Request to get info of task with range
+      required:
+        - task_id
+        - num_of_task
+        - start_value
+        - end_value
+      properties:
+        task_id:
+          $ref: '#/components/schemas/typeIdentifier'
+        num_of_task:
+          $ref: '#/components/schemas/typePartNum'
+        start_value:
+          $ref: '#/components/schemas/typeRangeAnswer'
+        end_value:
+          $ref: '#/components/schemas/typeRangeAnswer'
+
+    multipleTaskInfo:
+      title: Get info of task with multiple choice
+      description: Request to get info of task with multiple choice
+      required:
+        - task_id
+        - num_of_task
+        - answers
+      properties:
+        task_id:
+          $ref: '#/components/schemas/typeIdentifier'
+        num_of_task:
+          $ref: '#/components/schemas/typePartNum'
+        answers:
+          type: array
+          items:
+            type: object
+            properties:
+              answer_id:
+                $ref: '#/components/schemas/typeIdentifier'
+              answer:
+                $ref: '#/components/schemas/typeMultipleAnswer'
+              correct:
+                $ref: '#/components/schemas/typeCorrectness'
+
+    # /contest/{id_contest}/variant/{id_variant}/tasks/{id_task}/image/self
+
+    taskInVariantImage:
+      title: Get image of the task
+      description: Request to get task image
+      required:
+        - task_id
+        - image_of_task
+      properties:
+        task_id:
+          $ref: '#/components/schemas/typeIdentifier'
+        image_of_task:
+          $ref: '#/components/schemas/typeFile'
+
+
+    # /olympiad/{id_olympiad}/stage/{id_stage}/contest/{id_contest}/certificate
+
+
+    userCertificate:
+      title: Get certificate of the user
+      description: Request to get certificate of the user
+      required:
+        - certificate
+      properties:
+        certificate:
+          $ref: '#/components/schemas/typeFile'
