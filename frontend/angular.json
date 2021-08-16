@@ -32,6 +32,8 @@
             ],
             "styles": [
               "node_modules/bootstrap/dist/css/bootstrap.min.css",
+              "node_modules/ag-grid-community/dist/styles/ag-grid.css",
+              "node_modules/ag-grid-community/dist/styles/ag-theme-alpine.css",
               "src/styles/main.scss"
             ],
             "scripts": [
@@ -57,8 +59,8 @@
               "budgets": [
                 {
                   "type": "initial",
-                  "maximumWarning": "500kb",
-                  "maximumError": "1mb"
+                  "maximumWarning": "1mb",
+                  "maximumError": "2mb"
                 },
                 {
                   "type": "anyComponentStyle",

@@ -11,6 +11,10 @@ import { environment } from '@environments/environment'
 import { AppComponent } from '@/app.component'
 import { UsersModule } from '@/users/users.module';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations'
+import { AdminModule } from '@/admin/admin.module'
+import { AuthService } from '@/auth/api/auth.service'
+import { AuthServiceReal } from '@/auth/api/auth.service.real'
+import { AuthServiceMock } from '@/auth/api/auth.service.mock'
 
 
 @NgModule( {
@@ -23,13 +27,16 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations'
         AuthModule,
         OlympiadsModule,
         UsersModule,
+        AdminModule,
         AppRoutingModule,
         StoreModule.forRoot( {} ),
         EffectsModule.forRoot( [] ),
         environment.production ? [] : StoreDevtoolsModule.instrument(),
         BrowserAnimationsModule
     ],
-    providers: [],
+    providers: [
+        { provide: AuthService, useClass: AuthServiceMock }
+    ],
     bootstrap: [ AppComponent ]
 } )
 export class AppModule {}

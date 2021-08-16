@@ -15,12 +15,14 @@ export class InnerHeaderComponent implements OnInit
 {
     userInfo!: Observable<TypeUserInfo | null>
     isAuthorized$!: Observable<boolean>
+    hasAccessToManagePages$!: Observable<boolean>
 
     constructor( private store: Store<AuthState.State>, private service: AuthService ) { }
 
     ngOnInit(): void
     {
         this.isAuthorized$ = this.store.pipe( select( AuthSelectors.selectIsAuthenticated ) )
+        this.hasAccessToManagePages$ = this.store.pipe( select( AuthSelectors.selectAccessToManagePages ) )
         this.userInfo = this.service.userSelfGet()
     }
 }

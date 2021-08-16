@@ -4,4 +4,4 @@
 SQLALCHEMY_DATABASE_URI = "sqlite:///database.sqlite"
 ORGMEPHI_JWT_SAMESITE = 'Strict'
 # Set to limit origins for cors
-# CORS_ORIGINS = ['origin1', ...]
+CORS_ORIGINS = ['127.0.0.1:4200']

@@ -1,6 +1,6 @@
 import { createFeatureSelector, createSelector, MemoizedSelector } from '@ngrx/store'
 import { featureKey, State } from '@/auth/store/auth.reducer'
-import { ErrorValue, TypeCSRFPair, TypePersonalInfo, TypeUserInfo } from '@/auth/api/models'
+import { ErrorValue, TypeCSRFPair, TypePersonalInfo, TypeUserInfo, TypeUserRole } from '@/auth/api/models'
 
 
 export const selectFeature: MemoizedSelector<object, State> = createFeatureSelector<State>( featureKey )
@@ -27,6 +27,18 @@ export const selectPersonalInfo: MemoizedSelector<State, TypePersonalInfo | null
     selectFeature,
     ( state: State ) =>
         state.personalInfo
+)
+
+export const selectIsParticipant: MemoizedSelector<State, boolean>= createSelector(
+    selectFeature,
+    (state: State) =>
+        state.userInfo?.role === TypeUserRole.Participant
+)
+
+export const selectAccessToManagePages: MemoizedSelector<State, boolean> = createSelector(
+    selectFeature,
+    ( state: State ) =>
+        state.userInfo?.role === TypeUserRole.Creator || state.userInfo?.role === TypeUserRole.Admin || state.userInfo?.role === TypeUserRole.System
 )
 
 export const selectError: MemoizedSelector<State, ErrorValue[] | null> = createSelector(

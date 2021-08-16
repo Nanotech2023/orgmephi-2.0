@@ -24,6 +24,8 @@
     "@ngrx/router-store": "^12.2.0",
     "@ngrx/store": "^12.2.0",
     "@popperjs/core": "2.9.2",
+    "ag-grid-angular": "^25.3.0",
+    "ag-grid-community": "^25.3.0",
     "bootstrap": "^5.0.2",
     "rxjs": "~6.6.0",
     "tslib": "^2.2.0",
