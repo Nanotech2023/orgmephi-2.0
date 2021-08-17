@@ -1,4 +1,4 @@
-from flask import abort, request, make_response
+from flask import abort, request
 
 from common import get_current_app, get_current_module
 from common.errors import AlreadyExists

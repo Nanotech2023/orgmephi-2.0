@@ -33,7 +33,7 @@ def olympiad_type_create():
           description: OK
           content:
             application/json:
-              schema: OlympiadTypeSchema
+              schema: CreateOlympiadTypeSchema
         '400':
           description: Bad request
         '409':
@@ -75,6 +75,8 @@ def olympiad_type_remove(id_olympiad_type):
           description: Bad request
         '409':
           description: Olympiad type already in use
+        '404':
+          description: Olympiad type not found
     """
     olympiad = db_get_or_raise(OlympiadType, "olympiad_type_id", str(id_olympiad_type))
     db.session.delete(olympiad)

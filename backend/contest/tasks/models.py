@@ -79,13 +79,6 @@ class OlympiadType(db.Model):
     contests = db.relationship('BaseContest', lazy='select',
                                backref=db.backref('olympiad_type', lazy='joined'))
 
-    def serialize(self):
-        return \
-            {
-                'olympiad_type_id': self.olympiad_type_id,
-                'olympiad_type': self.olympiad_type,
-            }
-
 
 def add_base_contest(db_session, name, laureate_condition, winning_condition, description, rules, olympiad_type_id,
                      subject, certificate_template):
@@ -104,12 +97,6 @@ def add_base_contest(db_session, name, laureate_condition, winning_condition, de
     )
     db_session.add(base_contest)
     return base_contest
-
-
-def update_class_object_arguments(class_object, **object_parameters):
-    for parameter_name, value in object_parameters.items():
-        if value is not None:
-            setattr(class_object, parameter_name, value)
 
 
 # Contest models
@@ -151,23 +138,6 @@ class BaseContest(db.Model):
 
     child_contests = db.relationship('Contest', lazy='select',
                                      backref=db.backref('base_contest', lazy='joined'), cascade="all, delete-orphan")
-
-    def serialize(self):
-        return \
-            {
-                'base_contest_id': self.base_contest_id,
-                'name': self.name,
-                'description': self.description,
-                'rules': self.rules,
-                'olympiad_type_id': self.olympiad_type_id,
-                'subject': self.subject.value,
-                'winning_condition': self.winning_condition,
-                'laureate_condition': self.laureate_condition,
-                'target_classes': [target for target in self.target_classes],
-            }
-
-    def update(self, params):
-        update_class_object_arguments(self, **params)
 
 
 class ContestTypeEnum(enum.Enum):
@@ -267,33 +237,6 @@ class SimpleContest(Contest):
         if previous_participation_condition is not None:
             self.previous_participation_condition = previous_participation_condition
 
-    def serialize(self):
-        if (self.previous_contest_id is not None) and (self.previous_participation_condition is not None):
-            return \
-                {
-                    'contest_id': self.contest_id,
-                    'visibility': self.visibility,
-                    'composite_type': self.composite_type.value,
-                    'start_date': self.start_date.isoformat(),
-                    'end_date': self.end_date.isoformat(),
-                    'location': self.location,
-                    'previous_contest_id': self.previous_contest_id,
-                    'previous_participation_condition': self.previous_participation_condition.value,
-                }
-        else:
-            return \
-                {
-                    'contest_id': self.contest_id,
-                    'visibility': self.visibility,
-                    'composite_type': self.composite_type.value,
-                    'start_date': self.start_date.isoformat(),
-                    'end_date': self.end_date.isoformat(),
-                    'location': self.location,
-                }
-
-    def update(self, params):
-        update_class_object_arguments(self, **params)
-
 
 def add_composite_contest(db_session, visibility, base_contest_id=None):
     """
@@ -321,17 +264,6 @@ class CompositeContest(Contest):
 
     stages = db.relationship('Stage', lazy='select',
                              backref=db.backref('composite_contest', lazy='joined'))
-
-    def serialize(self):
-        return \
-            {
-                'contest_id': self.contest_id,
-                'composite_type': self.composite_type.value,
-                'visibility': self.visibility,
-            }
-
-    def update(self, params):
-        update_class_object_arguments(self, **params)
 
     __mapper_args__ = {
         'polymorphic_identity': ContestTypeEnum.CompositeContest,
@@ -383,20 +315,6 @@ class Stage(db.Model):
 
     contests = db.relationship('Contest', secondary=contestsInStage, lazy='subquery',
                                backref=db.backref('stage', lazy=True))
-
-    def serialize(self):
-        return \
-            {
-                'stage_id': self.stage_id,
-                'olympiad_id': self.olympiad_id,
-                'stage_name': self.stage_name,
-                'condition': self.condition.value,
-                'stage_num': self.stage_num,
-                'this_stage_condition': self.this_stage_condition,
-            }
-
-    def update(self, params):
-        update_class_object_arguments(self, **params)
 
 
 def add_stage(db_session, stage_name, condition, stage_num, this_stage_condition, olympiad_id=None):
@@ -466,18 +384,6 @@ class Variant(db.Model):
     tasks = db.relationship('Task', secondary=taskInVariant, lazy='subquery',
                             backref=db.backref('variant', lazy=True))
 
-    def serialize(self):
-        return \
-            {
-                'variant_id': self.variant_id,
-                'contest_id': self.contest_id,
-                'variant_number': self.variant_number,
-                'variant_description': self.variant_description,
-            }
-
-    def update(self, params):
-        update_class_object_arguments(self, **params)
-
 
 class UserInContest(db.Model):
     """
@@ -494,17 +400,6 @@ class UserInContest(db.Model):
     contest_id = db.Column(db.Integer, db.ForeignKey('contest.contest_id'), primary_key=True)
     variant_id = db.Column(db.Integer, db.ForeignKey('variant.variant_id'))
     user_status = db.Column(db.Enum(UserStatusEnum))
-
-    def serialize(self):
-        return \
-            {
-                'user_id': self.user_id,
-                'user_status': self.user_status.value,
-                'variant_id': self.variant_id
-            }
-
-    def update(self, params):
-        update_class_object_arguments(self, **params)
 
 
 class TaskTypeEnum(enum.Enum):
@@ -573,17 +468,6 @@ class PlainTask(Task):
         'polymorphic_identity': TaskTypeEnum.PlainTask,
     }
 
-    def serialize(self):
-        return \
-            {
-                'task_id': self.task_id,
-                'num_of_task': self.num_of_task,
-                'recommended_answer': self.recommended_answer,
-            }
-
-    def update(self, params):
-        update_class_object_arguments(self, **params)
-
 
 def add_range_task(db_session, num_of_task, image_of_task, start_value, end_value):
     """
@@ -618,18 +502,6 @@ class RangeTask(Task):
         'polymorphic_identity': TaskTypeEnum.RangeTask,
     }
 
-    def serialize(self):
-        return \
-            {
-                'task_id': self.task_id,
-                'num_of_task': self.num_of_task,
-                'start_value': self.start_value,
-                'end_value': self.end_value,
-            }
-
-    def update(self, params):
-        update_class_object_arguments(self, **params)
-
 
 def add_multiple_task(db_session, num_of_task, image_of_task):
     """
@@ -660,17 +532,3 @@ class MultipleChoiceTask(Task):
     __mapper_args__ = {
         'polymorphic_identity': TaskTypeEnum.MultipleChoiceTask,
     }
-
-    def serialize(self):
-        return \
-            {
-                'task_id': self.task_id,
-                'num_of_task': self.num_of_task,
-                'answers': [{
-                    'answer': answer[0],
-                    'correct': answer[1]}
-                    for answer in self.answers],
-            }
-
-    def update(self, params):
-        update_class_object_arguments(self, **params)

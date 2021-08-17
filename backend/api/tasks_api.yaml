@@ -184,6 +184,13 @@ components:
       required:
       - visibility
       type: object
+    CreateOlympiadType:
+      properties:
+        olympiad_type_id:
+          type: integer
+      required:
+      - olympiad_type_id
+      type: object
     CreateOlympiadTypeRequestAdmin:
       properties:
         olympiad_type:
@@ -783,11 +790,11 @@ components:
       name: refresh_token_cookie
       type: apiKey
 info:
-  title: aggregate_contest
+  title: aggregate_contest_tasks
   version: 1.0.0
 openapi: 3.0.2
 paths:
-  /contest/tasks/creator/base_olympiad/create:
+  /tasks/creator/base_olympiad/create:
     post:
       requestBody:
         content:
@@ -809,7 +816,7 @@ paths:
       security:
       - JWTAccessToken: []
       - CSRFAccessToken: []
-  /contest/tasks/creator/base_olympiad/{id_base_olympiad}/upload_certificate:
+  /tasks/creator/base_olympiad/{id_base_olympiad}/upload_certificate:
     post:
       parameters:
       - description: Id of the olympiad
@@ -834,7 +841,7 @@ paths:
       security:
       - JWTAccessToken: []
       - CSRFAccessToken: []
-  /contest/tasks/creator/base_olympiad/{id_base_olympiad}/remove:
+  /tasks/creator/base_olympiad/{id_base_olympiad}/remove:
     post:
       parameters:
       - description: ID of the base olympiad
@@ -853,7 +860,7 @@ paths:
       security:
       - JWTAccessToken: []
       - CSRFAccessToken: []
-  /contest/tasks/creator/base_olympiad/{id_base_olympiad}:
+  /tasks/creator/base_olympiad/{id_base_olympiad}:
     post:
       parameters:
       - description: ID of the base olympiad
@@ -882,7 +889,7 @@ paths:
       security:
       - JWTAccessToken: []
       - CSRFAccessToken: []
-  /contest/tasks/creator/base_olympiad/{id_base_olympiad}/olympiad/createsimple:
+  /tasks/creator/base_olympiad/{id_base_olympiad}/olympiad/createsimple:
     post:
       parameters:
       - description: ID of the base olympiad
@@ -911,7 +918,7 @@ paths:
       security:
       - JWTAccessToken: []
       - CSRFAccessToken: []
-  /contest/tasks/creator/base_olympiad/{id_base_olympiad}/olympiad/createcomposite:
+  /tasks/creator/base_olympiad/{id_base_olympiad}/olympiad/createcomposite:
     post:
       parameters:
       - description: ID of the base olympiad
@@ -940,7 +947,7 @@ paths:
       security:
       - JWTAccessToken: []
       - CSRFAccessToken: []
-  /contest/tasks/creator/base_olympiad/{id_base_olympiad}/olympiad/{id_olympiad}/remove:
+  /tasks/creator/base_olympiad/{id_base_olympiad}/olympiad/{id_olympiad}/remove:
     post:
       parameters:
       - description: ID of the base olympiad
@@ -965,7 +972,7 @@ paths:
       security:
       - JWTAccessToken: []
       - CSRFAccessToken: []
-  /contest/tasks/creator/base_olympiad/{id_base_olympiad}/olympiad/{id_olympiad}:
+  /tasks/creator/base_olympiad/{id_base_olympiad}/olympiad/{id_olympiad}:
     post:
       parameters:
       - description: ID of the base olympiad
@@ -1000,7 +1007,7 @@ paths:
       security:
       - JWTAccessToken: []
       - CSRFAccessToken: []
-  /contest/tasks/creator/olympiad/{id_olympiad}/stage/create:
+  /tasks/creator/olympiad/{id_olympiad}/stage/create:
     post:
       parameters:
       - description: ID of the olympiad
@@ -1029,7 +1036,7 @@ paths:
       security:
       - JWTAccessToken: []
       - CSRFAccessToken: []
-  /contest/tasks/creator/olympiad/{id_olympiad}/stage/{id_stage}/remove:
+  /tasks/creator/olympiad/{id_olympiad}/stage/{id_stage}/remove:
     post:
       parameters:
       - description: ID of the olympiad
@@ -1054,7 +1061,7 @@ paths:
       security:
       - JWTAccessToken: []
       - CSRFAccessToken: []
-  /contest/tasks/creator/olympiad/{id_olympiad}/stage/{id_stage}:
+  /tasks/creator/olympiad/{id_olympiad}/stage/{id_stage}:
     post:
       parameters:
       - description: ID of the olympiad
@@ -1089,7 +1096,7 @@ paths:
       security:
       - JWTAccessToken: []
       - CSRFAccessToken: []
-  /contest/tasks/creator/olympiad/{id_olympiad}/stage/{id_stage}/contest/createsimple:
+  /tasks/creator/olympiad/{id_olympiad}/stage/{id_stage}/contest/createsimple:
     post:
       parameters:
       - description: ID of the olympiad
@@ -1124,7 +1131,7 @@ paths:
       security:
       - JWTAccessToken: []
       - CSRFAccessToken: []
-  /contest/tasks/creator/olympiad/{id_olympiad}/stage/{id_stage}/contest/{id_contest}/remove:
+  /tasks/creator/olympiad/{id_olympiad}/stage/{id_stage}/contest/{id_contest}/remove:
     post:
       parameters:
       - description: ID of the olympiad
@@ -1155,7 +1162,7 @@ paths:
       security:
       - JWTAccessToken: []
       - CSRFAccessToken: []
-  /contest/tasks/creator/olympiad/{id_olympiad}/stage/{id_stage}/contest/{id_contest}:
+  /tasks/creator/olympiad/{id_olympiad}/stage/{id_stage}/contest/{id_contest}:
     post:
       parameters:
       - description: ID of the base olympiad
@@ -1196,7 +1203,7 @@ paths:
       security:
       - JWTAccessToken: []
       - CSRFAccessToken: []
-  /contest/tasks/creator/olympiad/{id_olympiad}/stage/{id_stage}/contest/{id_contest}/add_previous:
+  /tasks/creator/olympiad/{id_olympiad}/stage/{id_stage}/contest/{id_contest}/add_previous:
     post:
       parameters:
       - description: ID of the base olympiad
@@ -1233,7 +1240,7 @@ paths:
       security:
       - JWTAccessToken: []
       - CSRFAccessToken: []
-  /contest/tasks/creator/olympiad/{id_olympiad}/stage/{id_stage}/contest/all:
+  /tasks/creator/olympiad/{id_olympiad}/stage/{id_stage}/contest/all:
     post:
       parameters:
       - description: ID of the base olympiad
@@ -1262,7 +1269,7 @@ paths:
       security:
       - JWTAccessToken: []
       - CSRFAccessToken: []
-  /contest/tasks/creator/contest/{id_contest}/variant/create:
+  /tasks/creator/contest/{id_contest}/variant/create:
     post:
       parameters:
       - description: ID of the contest
@@ -1291,7 +1298,7 @@ paths:
       security:
       - JWTAccessToken: []
       - CSRFAccessToken: []
-  /contest/tasks/creator/contest/{id_contest}/variant/{id_variant}/remove:
+  /tasks/creator/contest/{id_contest}/variant/{id_variant}/remove:
     post:
       parameters:
       - description: ID of the contest
@@ -1316,7 +1323,7 @@ paths:
       security:
       - JWTAccessToken: []
       - CSRFAccessToken: []
-  /contest/tasks/creator/contest/{id_contest}/variant/{variant_num}:
+  /tasks/creator/contest/{id_contest}/variant/{variant_num}:
     post:
       parameters:
       - description: ID of the contest
@@ -1351,7 +1358,7 @@ paths:
       security:
       - JWTAccessToken: []
       - CSRFAccessToken: []
-  /contest/tasks/creator/contest/{id_contest}/variant/all:
+  /tasks/creator/contest/{id_contest}/variant/all:
     post:
       parameters:
       - description: ID of the contest
@@ -1374,7 +1381,7 @@ paths:
       security:
       - JWTAccessToken: []
       - CSRFAccessToken: []
-  /contest/tasks/creator/contest/{id_contest}/variant/{id_variant}/task/createplain:
+  /tasks/creator/contest/{id_contest}/variant/{id_variant}/task/createplain:
     post:
       parameters:
       - description: ID of the contest
@@ -1409,7 +1416,7 @@ paths:
       security:
       - JWTAccessToken: []
       - CSRFAccessToken: []
-  /contest/tasks/creator/contest/{id_contest}/variant/{id_variant}/task/createrange:
+  /tasks/creator/contest/{id_contest}/variant/{id_variant}/task/createrange:
     post:
       parameters:
       - description: ID of the contest
@@ -1444,7 +1451,7 @@ paths:
       security:
       - JWTAccessToken: []
       - CSRFAccessToken: []
-  /contest/tasks/creator/contest/{id_contest}/variant/{id_variant}/task/createmultiple:
+  /tasks/creator/contest/{id_contest}/variant/{id_variant}/task/createmultiple:
     post:
       parameters:
       - description: ID of the contest
@@ -1479,7 +1486,7 @@ paths:
       security:
       - JWTAccessToken: []
       - CSRFAccessToken: []
-  /contest/tasks/creator/contest/{id_contest}/variant/{id_variant}/task/{id_task}/remove:
+  /tasks/creator/contest/{id_contest}/variant/{id_variant}/task/{id_task}/remove:
     post:
       parameters:
       - description: ID of the contest
@@ -1510,7 +1517,7 @@ paths:
       security:
       - JWTAccessToken: []
       - CSRFAccessToken: []
-  /contest/tasks/creator/contest/{id_contest}/variant/{id_variant}/task/{id_task}:
+  /tasks/creator/contest/{id_contest}/variant/{id_variant}/task/{id_task}:
     post:
       parameters:
       - description: ID of the contest
@@ -1545,7 +1552,7 @@ paths:
       security:
       - JWTAccessToken: []
       - CSRFAccessToken: []
-  /contest/tasks/creator/contest/{id_contest}/variant/{id_variant}/task/{id_task}/plain:
+  /tasks/creator/contest/{id_contest}/variant/{id_variant}/task/{id_task}/plain:
     post:
       parameters:
       - description: ID of the contest
@@ -1586,7 +1593,7 @@ paths:
       security:
       - JWTAccessToken: []
       - CSRFAccessToken: []
-  /contest/tasks/creator/contest/{id_contest}/variant/{id_variant}/task/{id_task}/range:
+  /tasks/creator/contest/{id_contest}/variant/{id_variant}/task/{id_task}/range:
     post:
       parameters:
       - description: ID of the contest
@@ -1627,7 +1634,7 @@ paths:
       security:
       - JWTAccessToken: []
       - CSRFAccessToken: []
-  /contest/tasks/creator/contest/{id_contest}/variant/{id_variant}/task/{id_task}/multiple:
+  /tasks/creator/contest/{id_contest}/variant/{id_variant}/task/{id_task}/multiple:
     post:
       parameters:
       - description: ID of the contest
@@ -1668,7 +1675,7 @@ paths:
       security:
       - JWTAccessToken: []
       - CSRFAccessToken: []
-  /contest/tasks/creator/contest/{id_contest}/variant/{id_variant}/task/all:
+  /tasks/creator/contest/{id_contest}/variant/{id_variant}/task/all:
     post:
       parameters:
       - description: ID of the contest
@@ -1697,7 +1704,7 @@ paths:
       security:
       - JWTAccessToken: []
       - CSRFAccessToken: []
-  /contest/tasks/creator/contest/{id_contest}/variant/{id_variant}/tasks/{id_task}/image:
+  /tasks/creator/contest/{id_contest}/variant/{id_variant}/tasks/{id_task}/image:
     post:
       parameters:
       - description: ID of the contest
@@ -1732,7 +1739,7 @@ paths:
       security:
       - JWTAccessToken: []
       - CSRFAccessToken: []
-  /contest/tasks/admin/olympiad_type/create:
+  /tasks/admin/olympiad_type/create:
     post:
       requestBody:
         content:
@@ -1745,7 +1752,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/OlympiadType'
+                $ref: '#/components/schemas/CreateOlympiadType'
           description: OK
         '400':
           description: Bad request
@@ -1754,7 +1761,7 @@ paths:
       security:
       - JWTAccessToken: []
       - CSRFAccessToken: []
-  /contest/tasks/admin/olympiad_type/{id_olympiad_type}/remove:
+  /tasks/admin/olympiad_type/{id_olympiad_type}/remove:
     post:
       parameters:
       - description: Id of the olympiad type
@@ -1770,10 +1777,12 @@ paths:
           description: Bad request
         '409':
           description: Olympiad type already in use
+        '404':
+          description: Olympiad type not found
       security:
       - JWTAccessToken: []
       - CSRFAccessToken: []
-  /contest/tasks/participant/contest/{id_contest}/variant/self:
+  /tasks/participant/contest/{id_contest}/variant/self:
     post:
       parameters:
       - description: Id of the contest
@@ -1798,7 +1807,7 @@ paths:
       security:
       - JWTAccessToken: []
       - CSRFAccessToken: []
-  /contest/tasks/participant/contest/{id_contest}/tasks/self:
+  /tasks/participant/contest/{id_contest}/tasks/self:
     post:
       parameters:
       - description: Id of the contest
@@ -1823,7 +1832,7 @@ paths:
       security:
       - JWTAccessToken: []
       - CSRFAccessToken: []
-  /contest/tasks/participant/contest/{id_contest}/tasks/{id_task}/self:
+  /tasks/participant/contest/{id_contest}/tasks/{id_task}/self:
     post:
       parameters:
       - description: Id of the contest
@@ -1854,7 +1863,7 @@ paths:
       security:
       - JWTAccessToken: []
       - CSRFAccessToken: []
-  /contest/tasks/participant/contest/{id_contest}/tasks/{id_task}/image/self:
+  /tasks/participant/contest/{id_contest}/tasks/{id_task}/image/self:
     post:
       parameters:
       - description: Id of the contest
@@ -1885,7 +1894,7 @@ paths:
       security:
       - JWTAccessToken: []
       - CSRFAccessToken: []
-  /contest/tasks/participant/contest/{id_contest}/certificate/self:
+  /tasks/participant/contest/{id_contest}/certificate/self:
     post:
       parameters:
       - description: Id of the contest
@@ -1912,7 +1921,7 @@ paths:
       security:
       - JWTAccessToken: []
       - CSRFAccessToken: []
-  /contest/tasks/participant/olympiad/{id_olympiad}/stage/{id_stage}/contest/all:
+  /tasks/participant/olympiad/{id_olympiad}/stage/{id_stage}/contest/all:
     post:
       parameters:
       - description: Id of the olympiad
@@ -1943,7 +1952,7 @@ paths:
       security:
       - JWTAccessToken: []
       - CSRFAccessToken: []
-  /contest/tasks/participant/olympiad/{id_olympiad}/stage/{id_stage}/contest/{id_contest}:
+  /tasks/participant/olympiad/{id_olympiad}/stage/{id_stage}/contest/{id_contest}:
     post:
       parameters:
       - description: Id of the olympiad
@@ -1980,7 +1989,7 @@ paths:
       security:
       - JWTAccessToken: []
       - CSRFAccessToken: []
-  /contest/tasks/unauthorized/olympiad_type/all:
+  /tasks/unauthorized/olympiad_type/all:
     post:
       responses:
         '200':
@@ -1998,7 +2007,7 @@ paths:
       security:
       - JWTAccessToken: []
       - CSRFAccessToken: []
-  /contest/tasks/unauthorized/olympiad_type/{id_olympiad_type}:
+  /tasks/unauthorized/olympiad_type/{id_olympiad_type}:
     post:
       parameters:
       - description: Id of the olympiad type
@@ -2023,7 +2032,7 @@ paths:
       security:
       - JWTAccessToken: []
       - CSRFAccessToken: []
-  /contest/tasks/unauthorized/base_olympiad/all:
+  /tasks/unauthorized/base_olympiad/all:
     post:
       responses:
         '200':
@@ -2041,7 +2050,7 @@ paths:
       security:
       - JWTAccessToken: []
       - CSRFAccessToken: []
-  /contest/tasks/unauthorized/base_olympiad/{id_base_olympiad}:
+  /tasks/unauthorized/base_olympiad/{id_base_olympiad}:
     post:
       parameters:
       - description: Id of the base contest
@@ -2066,7 +2075,7 @@ paths:
       security:
       - JWTAccessToken: []
       - CSRFAccessToken: []
-  /contest/tasks/unauthorized/base_olympiad/{id_base_olympiad}/olympiad/all:
+  /tasks/unauthorized/base_olympiad/{id_base_olympiad}/olympiad/all:
     post:
       parameters:
       - description: Id of the base contest
@@ -2091,7 +2100,7 @@ paths:
       security:
       - JWTAccessToken: []
       - CSRFAccessToken: []
-  /contest/tasks/unauthorized/base_olympiad/{id_base_olympiad}/olympiad/{id_olympiad}:
+  /tasks/unauthorized/base_olympiad/{id_base_olympiad}/olympiad/{id_olympiad}:
     post:
       parameters:
       - description: Id of the base contest
@@ -2122,7 +2131,7 @@ paths:
       security:
       - JWTAccessToken: []
       - CSRFAccessToken: []
-  /contest/tasks/unauthorized/olympiad/{id_olympiad}/stage/{id_stage}:
+  /tasks/unauthorized/olympiad/{id_olympiad}/stage/{id_stage}:
     post:
       parameters:
       - description: Id of the olympiad
@@ -2153,7 +2162,7 @@ paths:
       security:
       - JWTAccessToken: []
       - CSRFAccessToken: []
-  /contest/tasks/unauthorized/olympiad/{id_olympiad}/stage/all:
+  /tasks/unauthorized/olympiad/{id_olympiad}/stage/all:
     post:
       parameters:
       - description: Id of the olympiad
@@ -2178,7 +2187,7 @@ paths:
       security:
       - JWTAccessToken: []
       - CSRFAccessToken: []
-  /contest/tasks/control_users/contest/{id_contest}/add_user:
+  /tasks/control_users/contest/{id_contest}/add_user:
     post:
       parameters:
       - description: ID of the contest
@@ -2203,7 +2212,7 @@ paths:
       security:
       - JWTAccessToken: []
       - CSRFAccessToken: []
-  /contest/tasks/control_users/contest/{id_contest}/remove_user:
+  /tasks/control_users/contest/{id_contest}/remove_user:
     post:
       parameters:
       - description: ID of the contest
@@ -2228,7 +2237,7 @@ paths:
       security:
       - JWTAccessToken: []
       - CSRFAccessToken: []
-  /contest/tasks/control_users/contest/{id_contest}/user/all:
+  /tasks/control_users/contest/{id_contest}/user/all:
     post:
       parameters:
       - description: ID of the contest
@@ -2251,7 +2260,7 @@ paths:
       security:
       - JWTAccessToken: []
       - CSRFAccessToken: []
-  /contest/tasks/control_users/contest/{id_contest}/user/{id_user}/certificate:
+  /tasks/control_users/contest/{id_contest}/user/{id_user}/certificate:
     post:
       parameters:
       - description: ID of the contest

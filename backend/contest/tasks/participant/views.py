@@ -1,4 +1,4 @@
-from flask import abort, make_response
+from flask import abort
 
 from common import get_current_app, get_current_module
 from contest.tasks.control_users.schemas import UserCertificateSchema
