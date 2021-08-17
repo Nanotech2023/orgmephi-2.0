@@ -255,19 +255,22 @@ class OrgMephiModule:
     _csrf_access_token_schema = {'type': 'apiKey', 'in': 'header', 'name': 'X-CSRF-TOKEN'}
     _csrf_refresh_token_schema = {'type': 'apiKey', 'in': 'header', 'name': 'X-CSRF-TOKEN'}
 
-    def _init_apispec(self, title):
+    def _init_apispec(self, title, top):
         from flask import Flask
         from apispec_webframeworks.flask import FlaskPlugin
         from apispec_oneofschema import MarshmallowPlugin
         from .marshmallow import _enum2properties, _related2properties
 
         plugin = MarshmallowPlugin()
-
+        opts = {}
+        if self != top:
+            opts['servers'] = [{"url": self.get_prefix(top).removesuffix(self._blueprint.url_prefix)}]
         spec = APISpec(
             title=title,
             version='1.0.0',
             openapi_version='3.0.2',
-            plugins=[FlaskPlugin(), plugin]
+            plugins=[FlaskPlugin(), plugin],
+            **opts
         )
 
         plugin.converter.add_attribute_function(_enum2properties)
@@ -292,7 +295,7 @@ class OrgMephiModule:
 
     def _api_from_marshmallow(self, top):
 
-        self._init_apispec(self.get_full_name(top))
+        self._init_apispec(self.get_full_name(top), top)
 
         api = self._apispec.to_yaml()
 
