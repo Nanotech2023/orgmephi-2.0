@@ -1,5 +1,6 @@
 from marshmallow import Schema, fields
 from common import fields as common_fields
+from common.fields import BytesField
 from contest.responses.model_schemas.schemas import ResponseAnswerListSchema, ResponseStatusHistorySchema
 from contest.responses.models import ResponseStatusEnum
 from marshmallow_enum import EnumField
@@ -37,5 +38,15 @@ class AppealMessageSchema(Schema):
     message = common_fields.Message(required=True)
 
 
+class AppealReplySchema(Schema):
+    message = common_fields.Message(required=True)
+    accepted = fields.Bool(required=True)
+    mark = fields.Float(required=False)
+
+
 class AppealCreateInfoSchema(Schema):
     appeal_id = fields.Int(required=True)
+
+
+class PostUserAnswerSchema(Schema):
+    user_answer = fields.Raw(required=True)

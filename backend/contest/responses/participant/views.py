@@ -5,7 +5,7 @@ from common.jwt_verify import jwt_required, jwt_required_role, jwt_get_id
 from common.util import db_get_list, db_get_or_raise
 from contest.responses.util import *
 from contest.responses.model_schemas.schemas import ResponseAnswerSchema, ResponseStatusSchema, AppealSchema
-from contest.responses.creator.schemas import UserResponseHistorySchema, AppealMessageSchema
+from contest.responses.creator.schemas import UserResponseHistorySchema, AppealMessageSchema, AppealCreateInfoSchema
 
 db = get_current_db()
 module = get_current_module()
@@ -20,7 +20,7 @@ def user_answer_for_task(contest_id, task_id):
     ---
     get:
       security:
-        - cookieJWTAuth: [ ]
+        - JWTAccessToken: []
       parameters:
         - in: path
           description: Id of the contest
@@ -55,8 +55,8 @@ def user_answer_for_task_post(contest_id, task_id, filetype):
     ---
     post:
       security:
-        - cookieJWTAuth: [ ]
-        - CSRFToken: [ ]
+        - JWTAccessToken: []
+        - CSRFAccessToken: []
       parameters:
         - in: path
           description: Id of the contest
@@ -80,9 +80,8 @@ def user_answer_for_task_post(contest_id, task_id, filetype):
         content:
           application/octet-stream:
             schema:
-              properties:
-                user_answer:         # TODO FILE
-                  $ref: '#/components/schemas/typeUserAnswer'
+              type: string
+              format: binary
       responses:
         '200':
           description: OK
@@ -90,8 +89,7 @@ def user_answer_for_task_post(contest_id, task_id, filetype):
           description: User, contest or task not found
     """
     self_user_id = jwt_get_id()
-    answer = request.marshmallow
-    user_answer_post(answer, filetype, self_user_id, contest_id, task_id)
+    user_answer_post(request.data, filetype, self_user_id, contest_id, task_id)
     return {}, 200
 
 
@@ -103,7 +101,7 @@ def get_user_answer_by_id(contest_id, answer_id):
     ---
     get:
       security:
-        - cookieJWTAuth: [ ]
+        - JWTAccessToken: []
       parameters:
         - in: path
           description: Id of the contest
@@ -140,7 +138,7 @@ def user_status_and_mark_for_response(contest_id):
     ---
     get:
       security:
-        - cookieJWTAuth: [ ]
+        - JWTAccessToken: []
       parameters:
         - in: path
           description: Id of the contest
@@ -156,16 +154,8 @@ def user_status_and_mark_for_response(contest_id):
               schema: ResponseStatusSchema
         '403':
           description: Invalid role of current user
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errorResponse'
         '404':
           description: User or contest not found
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/errorResponse'
     """
     self_user_id = jwt_get_id()
     return user_answer_status_get(self_user_id, contest_id), 200
@@ -179,7 +169,7 @@ def user_status_history_for_response(contest_id):
     ---
     get:
       security:
-        - cookieJWTAuth: [ ]
+        - JWTAccessToken: []
       parameters:
         - in: path
           description: Id of the contest
@@ -209,14 +199,15 @@ def user_status_history_for_response(contest_id):
 
 
 @module.route('/contest/<int:contest_id>/user/self/appeal', methods=['POST'],
-              output_schema=AppealMessageSchema)
+              input_schema=AppealMessageSchema, output_schema=AppealCreateInfoSchema)
 def user_response_appeal(contest_id):
     """
+    Create appeal for current user's response
+    ---
     post:
-      summary: Create appeal for current user's response
       security:
-        - cookieJWTAuth: [ ]
-        - CSRFToken: [ ]
+        - JWTAccessToken: []
+        - CSRFAccessToken: []
       parameters:
         - in: path
           description: Id of the contest
@@ -234,8 +225,7 @@ def user_response_appeal(contest_id):
           description: OK
           content:
             application/json:
-              schema:
-                $ref: '#/components/schemas/createAppealInfo'
+              schema: AppealCreateInfoSchema
         '404':
           description: User or contest not found
     """
@@ -248,10 +238,11 @@ def user_response_appeal(contest_id):
               output_schema=AppealSchema)
 def get_appeal_info_by_id(contest_id, appeal_id):
     """
+    Get appeal info
+    ---
     get:
-      summary: Get appeal info
       security:
-        - cookieJWTAuth: [ ]
+        - JWTAccessToken: []
       parameters:
         - in: path
           description: Id of the contest
@@ -275,4 +266,4 @@ def get_appeal_info_by_id(contest_id, appeal_id):
           description: Appeal or contest not found
     """
     appeal = db_get_or_raise(Appeal, 'appeal_id', appeal_id)
-    return appeal.serialize(), 200
+    return appeal, 200

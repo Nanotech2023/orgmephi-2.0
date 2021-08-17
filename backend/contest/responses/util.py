@@ -18,9 +18,8 @@ def user_answer_get(user_id, contest_id, task_id):
     user_answer = user_work.answers.filter(ResponseAnswer.task_num == task_id).one_or_none()
     if user_answer is None:
         raise NotFound('response_answer', 'for task_id %d' % task_id)
-    return {
-        "user_answer":str(user_answer.answer)   # TODO return a FILE
-    }
+    print(user_answer.answer, "YAY")
+    return user_answer      #TODO File
 
 
 def user_answer_post(answer_file, filetype, user_id, contest_id, task_id):
@@ -52,7 +51,7 @@ def user_answer_status_post(values, user_id, contest_id):
         mark = values['mark']
     else:
         mark = None
-    status = values['status']
+    status = values['status'].value
     user_work = get_user_in_contest_work(user_id, contest_id)
     response_status = add_response_status(user_work.work_id, status, mark)
     user_work.statuses.append(response_status)
@@ -67,5 +66,5 @@ def user_response_appeal_create(values, user_id, contest_id):
     appeal = add_response_appeal(new_status.status_id, message)
     new_status.appeal = appeal
     db.session.commit()
-    return appeal.appeal_id
+    return appeal
 

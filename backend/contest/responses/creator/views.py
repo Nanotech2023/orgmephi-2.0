@@ -20,7 +20,7 @@ def user_answer_for_task_by_id(contest_id, task_id, user_id):
     ---
     get:
       security:
-        - cookieJWTAuth: [ ]
+        - JWTAccessToken: []
       parameters:
         - in: path
           description: Id of the contest
@@ -62,8 +62,8 @@ def user_answer_for_task_by_id_post(contest_id, task_id, user_id, filetype):
     ---
     post:
       security:
-        - cookieJWTAuth: [ ]
-        - CSRFToken: [ ]
+        - JWTAccessToken: []
+        - CSRFAccessToken: []
       parameters:
         - in: path
           description: Id of the contest
@@ -93,9 +93,8 @@ def user_answer_for_task_by_id_post(contest_id, task_id, user_id, filetype):
         content:
           application/octet-stream:
             schema:
-              properties:
-                user_answer:                # TODO FILE
-                  $ref: '#/components/schemas/typeUserAnswer'
+              type: string
+              format: binary
       responses:
         '200':
           description: OK
@@ -104,8 +103,7 @@ def user_answer_for_task_by_id_post(contest_id, task_id, user_id, filetype):
         '404':
           description: User, contest or task not found
     """
-    answer = request.marshmallow
-    user_answer_post(answer['user_answer'], filetype, user_id, contest_id, task_id)
+    user_answer_post(request.data, filetype, user_id, contest_id, task_id)
     return {}, 200
 
 
@@ -117,7 +115,7 @@ def get_user_all_answers(contest_id, user_id):
     ---
     get:
       security:
-        - cookieJWTAuth: [ ]
+        - JWTAccessToken: []
       parameters:
         - in: path
           description: Id of the contest
@@ -163,7 +161,7 @@ def user_status_and_mark_for_response_by_id(contest_id, user_id):
     get:
       summary:
       security:
-        - cookieJWTAuth: [ ]
+        - JWTAccessToken: []
       parameters:
         - in: path
           description: Id of the contest
@@ -199,8 +197,8 @@ def user_status_and_mark_for_response_by_id_post(contest_id, user_id):
     ---
     post:
       security:
-        - cookieJWTAuth: [ ]
-        - CSRFToken: [ ]
+        - JWTAccessToken: []
+        - CSRFAccessToken: []
       parameters:
         - in: path
           description: Id of the contest
@@ -243,7 +241,7 @@ def user_status_history_for_response_by_id(contest_id, user_id):
     get:
       summary:
       security:
-        - cookieJWTAuth: [ ]
+        - JWTAccessToken: []
       parameters:
         - in: path
           description: Id of the contest
@@ -282,9 +280,10 @@ def user_status_history_for_response_by_id(contest_id, user_id):
 def get_list_for_stage(contest_id):
     """
     Get the consolidated sheets within a single competition or stage
+    ---
     get:
       security:
-        - cookieJWTAuth: [ ]
+        - JWTAccessToken: []
       parameters:
         - in: path
           description: Id of the contest
@@ -302,7 +301,10 @@ def get_list_for_stage(contest_id):
           description: Contest not found
     """
     users_in_contest = db_get_list(Response, 'contest_id', contest_id)
-    return users_in_contest, 200
+    return {
+            'contest_id': contest_id,
+            'user_row': users_in_contest
+          }, 200
 
 
 @module.route('/contest/<int:contest_id>/user/<int:user_id>/appeal', methods=['POST'],
@@ -310,10 +312,11 @@ def get_list_for_stage(contest_id):
 def user_response_appeal_by_id(contest_id, user_id):
     """
     Create appeal for user's response
+    ---
     post:
       security:
-        - cookieJWTAuth: [ ]
-        - CSRFToken: [ ]
+        - JWTAccessToken: []
+        - CSRFAccessToken: []
       parameters:
         - in: path
           description: Id of the contest
@@ -346,14 +349,15 @@ def user_response_appeal_by_id(contest_id, user_id):
 
 
 @module.route('/contest/<int:contest_id>/appeal/<int:appeal_id>/reply', methods=['POST'],
-              input_schema=AppealMessageSchema, output_schema=AppealSchema)
+              input_schema=AppealReplySchema, output_schema=AppealSchema)
 def reply_to_user_appeal(contest_id, appeal_id):
     """
     Reply appeal for the user's response
+    ---
     post:
       security:
-        - cookieJWTAuth: [ ]
-        - CSRFToken: [ ]
+        - JWTAccessToken: []
+        - CSRFAccessToken: []
       parameters:
         - in: path
           description: Id of the contest
@@ -371,7 +375,7 @@ def reply_to_user_appeal(contest_id, appeal_id):
         required: true
         content:
           application/json:
-            schema: AppealMessageSchema
+            schema: AppealReplySchema
       responses:
         '200':
           description: OK
@@ -394,8 +398,8 @@ def reply_to_user_appeal(contest_id, appeal_id):
     appeal.reply_to_appeal(message, appeal_new_status)
     db.session.commit()
     last_status = db_get_one_or_none(ResponseStatus, 'status_id', appeal.work_status)
-    if 'new_mark' in values and accepted:
-        new_mark = values['new_mark']
+    if 'mark' in values and accepted:
+        new_mark = values['mark']
     else:
         new_mark = last_status.mark
     new_response_status = add_response_status(last_status.work_id, status=response_new_status,

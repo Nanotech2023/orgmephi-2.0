@@ -1,12 +1,9 @@
-from marshmallow_sqlalchemy import SQLAlchemySchema, auto_field
+from marshmallow_sqlalchemy import SQLAlchemySchema, auto_field, fields
 from marshmallow_enum import EnumField
+from marshmallow_sqlalchemy.fields import Related
 
 from contest.responses.models import *
 from common.fields import message_validator
-<<<<<<< HEAD
-from common.fields import username_validator, group_name_validator
-=======
->>>>>>> add: marshmallow for creator module
 
 
 class ResponseSchema(SQLAlchemySchema):
@@ -38,8 +35,8 @@ class ResponseStatusHistorySchema(SQLAlchemySchema):
 
     status = EnumField(ResponseStatusEnum, data_key='status', by_value=True)
     mark = auto_field(column_name='mark', required=False)
-    appeal_id = auto_field(column_name='appeal_id', required=False)
-    datetime = auto_field(column_name='datetime', dump_only=True)
+    appeal = Related(column=['appeal_id'], data_key='appeal', required=False)
+    datetime = fields.fields.DateTime(format='%Y-%m-%dT%H:%M:%S%z')
 
 
 class AppealSchema(SQLAlchemySchema):
@@ -49,7 +46,7 @@ class AppealSchema(SQLAlchemySchema):
         sqla_session = db.session
 
     appeal_id = auto_field(column_name='appeal_id', dump_only=True)
-    status_id = auto_field(column_name='status_id', dump_only=True)
+    status_id = auto_field(column_name='work_status', dump_only=True)
     appeal_status = EnumField(AppealStatusEnum, data_key='appeal_status', by_value=True)
     appeal_message = auto_field(column_name='appeal_message', dump_only=True, validate=message_validator)
     appeal_response = auto_field(column_name='appeal_response', required=False, validate=message_validator)
