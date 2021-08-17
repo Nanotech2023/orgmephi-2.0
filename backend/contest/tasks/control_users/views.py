@@ -21,18 +21,18 @@ def add_user_to_contest(id_contest):
     Add user to contest
     ---
     post:
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema: CreateOlympiadTypeRequestAdminSchema
       parameters:
         - in: path
-          description: Id of the contest
+          description: ID of the contest
           name: id_contest
           required: true
           schema:
             type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: UpdateUserInRequestCreatorSchema
       security:
         - JWTAccessToken: [ ]
         - CSRFAccessToken: [ ]
@@ -42,7 +42,7 @@ def add_user_to_contest(id_contest):
         '400':
           description: Bad request
         '409':
-          description: User already in use
+          description: Olympiad type already in use
     """
 
     values = request.marshmallow
@@ -69,18 +69,18 @@ def remove_user_from_contest(id_contest):
     Remove user from contest
     ---
     post:
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema: CreateOlympiadTypeRequestAdminSchema
       parameters:
         - in: path
-          description: Id of the contest
+          description: ID of the contest
           name: id_contest
           required: true
           schema:
             type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: UpdateUserInRequestCreatorSchema
       security:
         - JWTAccessToken: [ ]
         - CSRFAccessToken: [ ]
@@ -90,10 +90,9 @@ def remove_user_from_contest(id_contest):
         '400':
           description: Bad request
         '409':
-          description: User already in use
-        '404':
-          description: User not found
+          description: Olympiad type already in use
     """
+
 
     values = request.marshmallow
     user_ids = values['users_id']
@@ -119,14 +118,9 @@ def users_all(id_contest):
     Get all users
     ---
     post:
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema: UsersResponseSchema
       parameters:
         - in: path
-          description: Id of the contest
+          description: ID of the contest
           name: id_contest
           required: true
           schema:
@@ -137,12 +131,13 @@ def users_all(id_contest):
       responses:
         '200':
           description: OK
+          content:
+            application/json:
+              schema: UsersResponseSchema
         '400':
           description: Bad request
         '409':
           description: Olympiad type already in use
-        '404':
-          description: User not found
     """
 
     contest = get_contest_if_possible(id_contest)
@@ -156,23 +151,18 @@ def users_all(id_contest):
     methods=['GET'], input_schema=UserCertificateSchema)
 def users_certificate(id_contest, id_user):
     """
-    Get user certificate
+    Get certificate
     ---
     post:
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema: UserCertificateSchema
       parameters:
         - in: path
-          description: Id of the contest
+          description: ID of the contest
           name: id_contest
           required: true
           schema:
             type: integer
         - in: path
-          description: Id of the user
+          description: ID of the user
           name: id_user
           required: true
           schema:
@@ -187,8 +177,6 @@ def users_certificate(id_contest, id_user):
           description: Bad request
         '409':
           description: Olympiad type already in use
-        '404':
-          description: User not found
     """
     # contest = get_contest_if_possible_from_stage(id_olympiad, id_stage, id_contest)
     # certificate = None

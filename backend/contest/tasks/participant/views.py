@@ -2,8 +2,8 @@ from flask import abort, make_response
 
 from common import get_current_app, get_current_module
 from contest.tasks.control_users.schemas import UserCertificateSchema
-from contest.tasks.model_schemas.schemas import VariantSchema, TaskSchema, TaskImageSchema, ContestSchema
-from contest.tasks.participant.schemas import AllTaskSchema
+from contest.tasks.model_schemas.schemas import VariantSchema, TaskImageSchema, ContestSchema
+from contest.tasks.participant.schemas import *
 from contest.tasks.unauthorized.schemas import AllOlympiadsSchema
 from contest.tasks.util import *
 

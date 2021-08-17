@@ -1,9 +1,8 @@
-from flask import request, make_response
+from flask import request
 
 from common import get_current_app, get_current_module
 from common.errors import AlreadyExists
-from common.util import db_get_one_or_none
-from contest.tasks.admin.schemas import CreateOlympiadTypeRequestAdminSchema, OlympiadTypeSchema
+from contest.tasks.admin.schemas import *
 from contest.tasks.util import *
 
 db = get_current_db()
@@ -15,7 +14,7 @@ app = get_current_app()
 
 
 @module.route('/olympiad_type/create', methods=['POST'],
-              input_schema=CreateOlympiadTypeRequestAdminSchema, output_schema=OlympiadTypeSchema)
+              input_schema=CreateOlympiadTypeRequestAdminSchema, output_schema=CreateOlympiadTypeSchema)
 def olympiad_type_create():
     """
     Add olympiad type

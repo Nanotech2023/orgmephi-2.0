@@ -1,5 +1,5 @@
-from .default_config import DefaultConfiguration
 from common import OrgMephiApp
+from contest.default_config import DefaultConfiguration
 
 from . import module
 

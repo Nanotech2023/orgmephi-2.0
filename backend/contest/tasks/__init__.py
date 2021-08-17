@@ -10,5 +10,5 @@ module = OrgMephiModule('tasks', __package__, access_level=None, marshmallow_api
 module.add_module(creator_module)
 module.add_module(admin_module)
 module.add_module(participant_module)
-# module.add_module(unauthorized_module)
-# module.add_module(control_users_module)
+module.add_module(unauthorized_module)
+module.add_module(control_users_module)

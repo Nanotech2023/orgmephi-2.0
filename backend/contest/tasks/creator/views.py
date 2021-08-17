@@ -778,7 +778,7 @@ def contest_add_previous(id_olympiad, id_stage, id_contest):
 
 
 @module.route('/olympiad/<int:id_olympiad>/stage/<int:id_stage>/contest/all',
-              methods=['GET'], output_schema=AllStagesSchema)
+              methods=['GET'], output_schema=GetAllStagesSchema)
 def contests_all(id_olympiad, id_stage):
     """
     Update composite contest in stage
@@ -805,7 +805,7 @@ def contests_all(id_olympiad, id_stage):
           description: OK
           content:
             application/json:
-              schema: AllStagesSchema
+              schema: GetAllStagesSchema
         '400':
           description: Bad request
         '409':
@@ -1008,7 +1008,7 @@ def variant_patch(id_contest, variant_num):
 @module.route(
     '/contest/<int:id_contest>/variant/all',
     methods=['GET'],
-    input_schema=AllVariantsSchema)
+    input_schema=GetAllVariantsSchema)
 def variant_all(id_contest):
     """
     All variants
@@ -1029,7 +1029,7 @@ def variant_all(id_contest):
           description: OK
           content:
             application/json:
-              schema: AllVariantsSchema
+              schema: GetAllVariantsSchema
         '400':
           description: Bad request
         '409':
@@ -1531,7 +1531,7 @@ def task_patch_multiple(id_contest, id_variant, id_task):
 @module.route(
     '/contest/<int:id_contest>/variant/<int:id_variant>/task/all',
     methods=['GET'],
-    output_schema=AllTasksSchema)
+    output_schema=GetAllTasksSchema)
 def task_all(id_contest, id_variant):
     """
     Update multiple task
@@ -1558,7 +1558,7 @@ def task_all(id_contest, id_variant):
           description: OK
           content:
             application/json:
-              schema: AllTasksSchema
+              schema: GetAllTasksSchema
         '400':
           description: Bad request
         '409':

@@ -150,9 +150,9 @@ def base_olympiad_get(id_base_olympiad):
               output_schema=AllOlympiadsSchema)
 def olympiads_all(id_base_olympiad):
     """
-     Get olympiads list
-     ---
-     post:
+    Get olympiads list
+    ---
+    post:
       parameters:
         - in: path
           description: Id of the base contest
@@ -160,22 +160,22 @@ def olympiads_all(id_base_olympiad):
           required: true
           schema:
             type: integer
-       security:
-         - JWTAccessToken: [ ]
-         - CSRFAccessToken: [ ]
-       responses:
-         '200':
-           description: OK
-           content:
-             application/json:
-               schema: AllOlympiadsSchema
-         '400':
-           description: Bad request
-         '409':
-           description: Olympiad type already in use
-         '404':
-           description: Olympiad type not found
-     """
+      security:
+        - JWTAccessToken: [ ]
+        - CSRFAccessToken: [ ]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: AllOlympiadsSchema
+        '400':
+          description: Bad request
+        '409':
+          description: Olympiad type already in use
+        '404':
+          description: Olympiad type not found
+    """
     base_contest = db_get_or_raise(BaseContest, "base_contest_id", str(id_base_olympiad))
     all_olympiads = [olympiad for olympiad in base_contest.child_contests]
     return {
@@ -187,9 +187,9 @@ def olympiads_all(id_base_olympiad):
               output_schema=ContestSchema)
 def olympiad_get(id_base_olympiad, id_olympiad):
     """
-     Get olympiad
-     ---
-     post:
+    Get olympiad
+    ---
+    post:
       parameters:
         - in: path
           description: Id of the base contest
@@ -203,22 +203,22 @@ def olympiad_get(id_base_olympiad, id_olympiad):
           required: true
           schema:
             type: integer
-       security:
-         - JWTAccessToken: [ ]
-         - CSRFAccessToken: [ ]
-       responses:
-         '200':
-           description: OK
-           content:
-             application/json:
-               schema: ContestSchema
-         '400':
-           description: Bad request
-         '409':
-           description: Olympiad type already in use
-         '404':
-           description: Olympiad type not found
-     """
+      security:
+        - JWTAccessToken: [ ]
+        - CSRFAccessToken: [ ]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: ContestSchema
+        '400':
+          description: Bad request
+        '409':
+          description: Olympiad type already in use
+        '404':
+          description: Olympiad type not found
+    """
     db_get_or_raise(BaseContest, "base_contest_id", str(id_base_olympiad))
     contest = db_get_or_raise(Contest, "contest_id", id_olympiad)
     return contest, 200
@@ -231,9 +231,9 @@ def olympiad_get(id_base_olympiad, id_olympiad):
               output_schema=StageSchema)
 def stage_get(id_olympiad, id_stage):
     """
-     Get stage
-     ---
-     post:
+    Get stage
+    ---
+    post:
       parameters:
         - in: path
           description: Id of the olympiad
@@ -247,22 +247,22 @@ def stage_get(id_olympiad, id_stage):
           required: true
           schema:
             type: integer
-       security:
-         - JWTAccessToken: [ ]
-         - CSRFAccessToken: [ ]
-       responses:
-         '200':
-           description: OK
-           content:
-             application/json:
-               schema: StageSchema
-         '400':
-           description: Bad request
-         '409':
-           description: Olympiad type already in use
-         '404':
-           description: Olympiad type not found
-     """
+      security:
+        - JWTAccessToken: [ ]
+        - CSRFAccessToken: [ ]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: StageSchema
+        '400':
+          description: Bad request
+        '409':
+          description: Olympiad type already in use
+        '404':
+          description: Olympiad type not found
+    """
     olympiad = db_get_or_raise(Contest, "contest_id", str(id_olympiad))
     stage = db_get_or_raise(Stage, "stage_id", str(id_stage))
     if olympiad.composite_type != ContestTypeEnum.CompositeContest or stage not in olympiad.stages:
@@ -274,9 +274,9 @@ def stage_get(id_olympiad, id_stage):
               output_schema=AllStagesSchema)
 def stages_all(id_olympiad):
     """
-     Get stage
-     ---
-     post:
+    Get stage
+    ---
+    post:
       parameters:
         - in: path
           description: Id of the olympiad
@@ -284,22 +284,22 @@ def stages_all(id_olympiad):
           required: true
           schema:
             type: integer
-       security:
-         - JWTAccessToken: [ ]
-         - CSRFAccessToken: [ ]
-       responses:
-         '200':
-           description: OK
-           content:
-             application/json:
-               schema: AllStagesSchema
-         '400':
-           description: Bad request
-         '409':
-           description: Olympiad type already in use
-         '404':
-           description: Olympiad type not found
-     """
+      security:
+        - JWTAccessToken: [ ]
+        - CSRFAccessToken: [ ]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: AllStagesSchema
+        '400':
+          description: Bad request
+        '409':
+          description: Olympiad type already in use
+        '404':
+          description: Olympiad type not found
+    """
     db_get_or_raise(Contest, "contest_id", str(id_olympiad))
     contest = db_get_or_raise(CompositeContest, "contest_id", str(id_olympiad))
     all_stages = [stage for stage in contest.stages]

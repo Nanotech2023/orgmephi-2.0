@@ -127,23 +127,23 @@ class UpdateStageSchema(Schema):
 
 # All
 
-class AllOlympiadsSchema(Schema):
+class GetAllOlympiadsSchema(Schema):
     olympiad_list = fields.Nested(ContestSchema, many=True, required=True)
 
 
-class AllBaseContestSchema(Schema):
+class GetAllBaseContestSchema(Schema):
     olympiad_list = fields.Nested(BaseContestSchema, many=True, required=True)
 
 
-class AllStagesSchema(Schema):
+class GetAllStagesSchema(Schema):
     stages_list = fields.Nested(StageSchema, many=True, required=True)
 
 
-class AllStagesSchema(Schema):
+class GetAllStagesSchema(Schema):
     stages_list = fields.Nested(StageSchema, many=True, required=True)
 
 
-class AllVariantsSchema(Schema):
+class GetAllVariantsSchema(Schema):
     stages_list = fields.Nested(VariantSchema, many=True, required=True)
 
 
@@ -170,7 +170,7 @@ class UpdateVariantSchema(Schema):
     variant_description = common_fields.Text(required=False)
 
 
-class AllTasksSchema(Schema):
+class GetAllTasksSchema(Schema):
     stages_list = fields.Nested(TaskSchema, many=True, required=True)
 
 # Tasks
