@@ -21,7 +21,7 @@ def variant_self(id_contest):
     """
     Get variant for user in current contest
     ---
-    post:
+    get:
       parameters:
         - in: path
           description: Id of the contest
@@ -60,7 +60,7 @@ def task_all(id_contest):
     """
     Get tasks for user in current variant
     ---
-    post:
+    get:
       parameters:
         - in: path
           description: Id of the contest
@@ -98,7 +98,7 @@ def task_get(id_contest, id_task):
     """
     Get task for user in current variant
     ---
-    post:
+    get:
       parameters:
         - in: path
           description: Id of the contest
@@ -140,7 +140,7 @@ def task_image(id_contest, id_task):
     """
     Get task image for user in current task
     ---
-    post:
+    get:
       parameters:
         - in: path
           description: Id of the contest
@@ -184,7 +184,7 @@ def users_certificate(id_contest):
     """
     Get user certificate
     ---
-    post:
+    get:
       requestBody:
         required: true
         content:
@@ -225,7 +225,7 @@ def contest_all_self(id_olympiad, id_stage):
     """
     Get all contests in stage
     ---
-    post:
+    get:
       parameters:
         - in: path
           description: Id of the olympiad
@@ -274,7 +274,7 @@ def contest_self(id_olympiad, id_stage, id_contest):
     """
     Get current contest in stage
     ---
-    post:
+    get:
       parameters:
         - in: path
           description: Id of the olympiad

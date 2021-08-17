@@ -12,7 +12,7 @@ User
 """
 
 
-class UserSchema(SQLAlchemySchema):
+class UserInContestSchema(SQLAlchemySchema):
     class Meta:
         model = UserInContest
         load_instance = False

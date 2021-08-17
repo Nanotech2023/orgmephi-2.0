@@ -117,7 +117,7 @@ def users_all(id_contest):
     """
     Get all users
     ---
-    post:
+    get:
       parameters:
         - in: path
           description: ID of the contest
@@ -153,7 +153,7 @@ def users_certificate(id_contest, id_user):
     """
     Get certificate
     ---
-    post:
+    get:
       parameters:
         - in: path
           description: ID of the contest

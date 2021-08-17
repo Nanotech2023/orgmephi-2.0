@@ -21,11 +21,7 @@ def olympiad_type_all():
     """
     Get all olympiad types
     ---
-    post:
-
-      security:
-        - JWTAccessToken: [ ]
-        - CSRFAccessToken: [ ]
+    get:
       responses:
         '200':
           description: OK
@@ -51,7 +47,7 @@ def olympiad_type_get(id_olympiad_type):
     """
     Get olympiad type by id
     ---
-    post:
+    get:
       parameters:
         - in: path
           description: Id of the olympiad type
@@ -59,9 +55,6 @@ def olympiad_type_get(id_olympiad_type):
           required: true
           schema:
             type: integer
-      security:
-        - JWTAccessToken: [ ]
-        - CSRFAccessToken: [ ]
       responses:
         '200':
           description: OK
@@ -89,10 +82,7 @@ def base_olympiads_all():
     """
     Get base olympiads list
     ---
-    post:
-      security:
-        - JWTAccessToken: [ ]
-        - CSRFAccessToken: [ ]
+    get:
       responses:
         '200':
           description: OK
@@ -118,7 +108,7 @@ def base_olympiad_get(id_base_olympiad):
     """
     Get base olympiad
     ---
-    post:
+    get:
       parameters:
         - in: path
           description: Id of the base contest
@@ -126,9 +116,6 @@ def base_olympiad_get(id_base_olympiad):
           required: true
           schema:
             type: integer
-      security:
-        - JWTAccessToken: [ ]
-        - CSRFAccessToken: [ ]
       responses:
         '200':
           description: OK
@@ -152,7 +139,7 @@ def olympiads_all(id_base_olympiad):
     """
     Get olympiads list
     ---
-    post:
+    get:
       parameters:
         - in: path
           description: Id of the base contest
@@ -160,9 +147,6 @@ def olympiads_all(id_base_olympiad):
           required: true
           schema:
             type: integer
-      security:
-        - JWTAccessToken: [ ]
-        - CSRFAccessToken: [ ]
       responses:
         '200':
           description: OK
@@ -189,7 +173,7 @@ def olympiad_get(id_base_olympiad, id_olympiad):
     """
     Get olympiad
     ---
-    post:
+    get:
       parameters:
         - in: path
           description: Id of the base contest
@@ -203,9 +187,6 @@ def olympiad_get(id_base_olympiad, id_olympiad):
           required: true
           schema:
             type: integer
-      security:
-        - JWTAccessToken: [ ]
-        - CSRFAccessToken: [ ]
       responses:
         '200':
           description: OK
@@ -233,7 +214,7 @@ def stage_get(id_olympiad, id_stage):
     """
     Get stage
     ---
-    post:
+    get:
       parameters:
         - in: path
           description: Id of the olympiad
@@ -247,9 +228,6 @@ def stage_get(id_olympiad, id_stage):
           required: true
           schema:
             type: integer
-      security:
-        - JWTAccessToken: [ ]
-        - CSRFAccessToken: [ ]
       responses:
         '200':
           description: OK
@@ -276,7 +254,7 @@ def stages_all(id_olympiad):
     """
     Get stage
     ---
-    post:
+    get:
       parameters:
         - in: path
           description: Id of the olympiad
@@ -284,9 +262,6 @@ def stages_all(id_olympiad):
           required: true
           schema:
             type: integer
-      security:
-        - JWTAccessToken: [ ]
-        - CSRFAccessToken: [ ]
       responses:
         '200':
           description: OK

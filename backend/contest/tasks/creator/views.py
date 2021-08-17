@@ -144,7 +144,7 @@ def base_olympiad_patch(id_base_olympiad):
     """
     Patch base olympiad
     ---
-    post:
+    patch:
       parameters:
         - in: path
           description: ID of the base olympiad
@@ -348,7 +348,7 @@ def olympiad_patch(id_base_olympiad, id_olympiad):
     """
     Create composite contest
     ---
-    post:
+    patch:
       parameters:
         - in: path
           description: ID of the base olympiad
@@ -501,7 +501,7 @@ def stage_patch(id_olympiad, id_stage):
     """
     Update stage
     ---
-    post:
+    patch:
       parameters:
         - in: path
           description: ID of the olympiad
@@ -677,7 +677,7 @@ def contest_patch(id_olympiad, id_stage, id_contest):
     """
     Update composite contest in stage
     ---
-    post:
+    patch:
       parameters:
         - in: path
           description: ID of the base olympiad
@@ -733,7 +733,7 @@ def contest_add_previous(id_olympiad, id_stage, id_contest):
     """
     Update composite contest in stage
     ---
-    post:
+    patch:
       parameters:
         - in: path
           description: ID of the base olympiad
@@ -783,7 +783,7 @@ def contests_all(id_olympiad, id_stage):
     """
     Update composite contest in stage
     ---
-    post:
+    get:
       parameters:
         - in: path
           description: ID of the base olympiad
@@ -921,7 +921,7 @@ def variant_get(id_contest, variant_num):
     """
     Get variant
     ---
-    post:
+    get:
       parameters:
         - in: path
           description: ID of the contest
@@ -961,7 +961,7 @@ def variant_patch(id_contest, variant_num):
     """
     Variant patch
     ---
-    post:
+    patch:
       parameters:
         - in: path
           description: ID of the contest
@@ -1013,7 +1013,7 @@ def variant_all(id_contest):
     """
     All variants
     ---
-    post:
+    get:
       parameters:
         - in: path
           description: ID of the contest
@@ -1303,7 +1303,7 @@ def task_get(id_contest, id_variant, id_task):
     """
     Get task
     ---
-    post:
+    get:
       parameters:
         - in: path
           description: ID of the contest
@@ -1356,7 +1356,7 @@ def task_patch_plain(id_contest, id_variant, id_task):
     """
     Update plain task
     ---
-    post:
+    patch:
       parameters:
         - in: path
           description: ID of the contest
@@ -1415,7 +1415,7 @@ def task_patch_range(id_contest, id_variant, id_task):
     """
     Update range task
     ---
-    post:
+    patch:
       parameters:
         - in: path
           description: ID of the contest
@@ -1472,7 +1472,7 @@ def task_patch_multiple(id_contest, id_variant, id_task):
     """
     Update multiple task
     ---
-    post:
+    patch:
       parameters:
         - in: path
           description: ID of the contest
@@ -1536,7 +1536,7 @@ def task_all(id_contest, id_variant):
     """
     Update multiple task
     ---
-    post:
+    get:
       parameters:
         - in: path
           description: ID of the contest
@@ -1578,7 +1578,7 @@ def task_image(id_contest, id_variant, id_task):
     """
     Get task image
     ---
-    post:
+    get:
       parameters:
         - in: path
           description: ID of the contest

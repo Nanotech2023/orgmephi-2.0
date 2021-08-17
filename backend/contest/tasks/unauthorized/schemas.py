@@ -16,5 +16,3 @@ class AllBaseContestSchema(Schema):
 
 class AllStagesSchema(Schema):
     stages_list = fields.Nested(StageSchema, many=True, required=True)
-
-
