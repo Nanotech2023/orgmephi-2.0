@@ -45,6 +45,7 @@ def variant_self(id_contest):
         '404':
           description: User not found
     """
+
     variant = get_user_variant_if_possible(id_contest)
     return variant.serialize, 200
 
@@ -222,19 +223,19 @@ def users_certificate(id_contest):
     methods=['GET'], output_schema=AllOlympiadsSchema)
 def contest_all_self(id_olympiad, id_stage):
     """
-    Get all contests for user in current stage
+    Get all contests in stage
     ---
     post:
       parameters:
         - in: path
-          description: Id of the contest
-          name: id_contest
+          description: Id of the olympiad
+          name: id_olympiad
           required: true
           schema:
             type: integer
         - in: path
-          description: Id of the user
-          name: id_user
+          description: Id of the stage
+          name: id_stage
           required: true
           schema:
             type: integer
@@ -242,11 +243,11 @@ def contest_all_self(id_olympiad, id_stage):
         - JWTAccessToken: [ ]
         - CSRFAccessToken: [ ]
       responses:
-         '200':
-           description: OK
-           content:
-             application/json:
-               schema: AllOlympiadsSchema
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: AllOlympiadsSchema
         '400':
           description: Bad request
         '409':
@@ -271,7 +272,7 @@ def contest_all_self(id_olympiad, id_stage):
     methods=['GET'], output_schema=ContestSchema)
 def contest_self(id_olympiad, id_stage, id_contest):
     """
-    Get contest for user in current stage
+    Get current contest in stage
     ---
     post:
       parameters:
@@ -297,11 +298,11 @@ def contest_self(id_olympiad, id_stage, id_contest):
         - JWTAccessToken: [ ]
         - CSRFAccessToken: [ ]
       responses:
-         '200':
-           description: OK
-           content:
-             application/json:
-               schema: ContestSchema
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: ContestSchema
         '400':
           description: Bad request
         '409':

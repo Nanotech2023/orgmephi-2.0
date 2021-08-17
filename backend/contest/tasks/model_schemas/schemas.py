@@ -35,8 +35,9 @@ class VariantSchema(SQLAlchemySchema):
         sqla_session = db.session
 
     variant_id = auto_field(column_name='variant_id', dump_only=True)
+    contest_id = auto_field(column_name='contest_id', required=True)
     variant_number = auto_field(column_name='variant_number', required=True)
-    variant_description = auto_field(column_name='name', validate=text_validator, required=True)
+    variant_description = auto_field(column_name='variant_description', validate=text_validator, required=True)
 
 
 """
@@ -59,7 +60,7 @@ class TaskImageSchema(SQLAlchemySchema):
         load_instance = False
         sqla_session = db.session
 
-    task_id = auto_field(column_name='variant_id', dump_only=True)
+    task_id = auto_field(column_name='task_id', dump_only=True)
     image_of_task = auto_field(column_name='image_of_task', required=True)
 
 
@@ -69,9 +70,9 @@ class TaskPlainSchema(SQLAlchemySchema):
         load_instance = False
         sqla_session = db.session
 
-    task_id = auto_field(column_name='variant_id', dump_only=True)
-    num_of_task = auto_field(column_name='variant_number', required=True)
-    recommended_answer = auto_field(column_name='name', validate=text_validator, required=True)
+    task_id = auto_field(column_name='task_id', dump_only=True)
+    num_of_task = auto_field(column_name='num_of_task', required=True)
+    recommended_answer = auto_field(column_name='recommended_answer', validate=text_validator, required=True)
 
 
 class TaskRangeSchema(SQLAlchemySchema):
@@ -80,15 +81,15 @@ class TaskRangeSchema(SQLAlchemySchema):
         load_instance = False
         sqla_session = db.session
 
-    task_id = auto_field(column_name='variant_id', dump_only=True)
-    num_of_task = auto_field(column_name='variant_number', required=True)
-    start_value = auto_field(column_name='name', validate=text_validator, required=True)
-    end_value = auto_field(column_name='name', validate=text_validator, required=True)
+    task_id = auto_field(column_name='task_id', dump_only=True)
+    num_of_task = auto_field(column_name='num_of_task', required=True)
+    start_value = auto_field(column_name='start_value',  required=True)
+    end_value = auto_field(column_name='end_value', required=True)
 
 
 class Answers(Schema):
-    answer = auto_field(column_name='name', validate=text_validator, required=True)
-    is_right_answer = auto_field(column_name='name', validate=text_validator, required=True)
+    answer = auto_field(column_name='answer', validate=text_validator, required=True)
+    is_right_answer = auto_field(column_name='is_right_answer', validate=text_validator, required=True)
 
 
 class TaskMultipleSchema(SQLAlchemySchema):
@@ -97,9 +98,9 @@ class TaskMultipleSchema(SQLAlchemySchema):
         load_instance = False
         sqla_session = db.session
 
-    task_id = auto_field(column_name='variant_id', dump_only=True)
-    num_of_task = auto_field(column_name='variant_number', required=True)
-    answers = fields.Nested(Answers, many=True, required=True)
+    task_id = auto_field(column_name='task_id', dump_only=True)
+    num_of_task = auto_field(column_name='num_of_task', required=True)
+    answers = auto_field(column_name='answers', many=True, required=True)
 
 
 class TaskSchema(OneOfSchema):
@@ -141,10 +142,9 @@ class CompositeContestSchema(SQLAlchemySchema):
     contest_id = auto_field(column_name='contest_id', dump_only=True)
     visibility = auto_field(column_name='visibility', required=True)
     composite_type = EnumField(ContestTypeEnum, data_key='composite_type', by_value=True, required=True)
-    recommended_answer = auto_field(column_name='name', validate=text_validator, required=True)
 
 
-class SimpleSchema(SQLAlchemySchema):
+class SimpleContestSchema(SQLAlchemySchema):
     class Meta:
         model = SimpleContest
         load_instance = False
@@ -153,22 +153,21 @@ class SimpleSchema(SQLAlchemySchema):
     contest_id = auto_field(column_name='contest_id', dump_only=True)
     visibility = auto_field(column_name='visibility', required=True)
     composite_type = EnumField(ContestTypeEnum, data_key='composite_type', by_value=True, required=True)
-    recommended_answer = auto_field(column_name='name', validate=text_validator, required=True)
     location = auto_field(column_name='location', validate=text_validator, required=True)
-    start_time = auto_field(column_name='start_time', required=True)
-    end_time = auto_field(column_name='end_time', required=True)
+    start_date = auto_field(column_name='start_date', required=True)
+    end_date = auto_field(column_name='end_date', required=True)
     previous_contest_id = auto_field(column_name='previous_contest_id', allow_none=True)
     previous_participation_condition = auto_field(column_name='previous_participation_condition',
                                                   validate=text_validator, allow_none=True)
 
 
 class ContestSchema(OneOfSchema):
-    type_schemas = {ContestType.simpleContest.value: SimpleContest,
-                    ContestType.compositeContest.value: CompositeContestSchema }
+    type_schemas = {ContestType.simpleContest.value: SimpleContestSchema,
+                    ContestType.compositeContest.value: CompositeContestSchema}
     type_field = "composite_type"
     type_field_remove = False
 
-    class_types = {SimpleContest: ContestType.simpleContest.value,
+    class_types = {SimpleContestSchema: ContestType.simpleContest.value,
                    CompositeContestSchema: ContestType.compositeContest.value}
 
     def get_obj_type(self, obj):
@@ -214,7 +213,7 @@ class BaseContestSchema(SQLAlchemySchema):
     rules = auto_field(column_name='rules', validate=text_validator, required=True)
 
     winning_condition = auto_field(column_name='winning_condition', required=True)
-    laureate_condition = auto_field(column_name='winning_condition', required=True)
+    laureate_condition = auto_field(column_name='laureate_condition', required=True)
 
     olympiad_type_id = auto_field(column_name='olympiad_type_id', required=True)
 
@@ -233,6 +232,5 @@ class StageSchema(SQLAlchemySchema):
     olympiad_id = auto_field(column_name='olympiad_id', required=True)
     stage_name = auto_field(column_name='stage_name', validate=common_name_validator, required=True)
     condition = auto_field(column_name='condition', validate=text_validator, required=True)
-    this_stage_condition = auto_field(column_name='condition', validate=text_validator, required=True)
+    this_stage_condition = auto_field(column_name='this_stage_condition', validate=text_validator, required=True)
     stage_num = EnumField(StageConditionEnum, data_key='subject', by_value=True, required=True)
-

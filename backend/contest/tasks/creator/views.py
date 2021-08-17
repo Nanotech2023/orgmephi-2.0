@@ -1,6 +1,7 @@
-from flask import request, make_response
+from flask import request
 
 from common import get_current_app, get_current_module
+from contest.tasks.creator.schemas import *
 from contest.tasks.util import *
 
 db = get_current_db()
@@ -8,9 +9,34 @@ module = get_current_module()
 app = get_current_app()
 
 
-@module.route('/base_olympiad/create', methods=['POST'])
+@module.route('/base_olympiad/create', methods=['POST'],
+              input_schema=CreateBaseOlympiadSchema, output_schema=BaseOlympiadIdSchema)
 def base_olympiad_create():
-    values = request.openapi.body
+    """
+    Create base olympiad
+    ---
+    post:
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: CreateBaseOlympiadSchema
+      security:
+        - JWTAccessToken: [ ]
+        - CSRFAccessToken: [ ]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: BaseOlympiadIdSchema
+        '400':
+          description: Bad request
+        '409':
+          description: Olympiad type already in use
+    """
+
+    values = request.marshmallow
 
     name = values['name']
     description = values['description']
@@ -21,83 +47,186 @@ def base_olympiad_create():
     subject = values['subject']
     target_classes = set(values['target_classes'])
 
-    try:
-        db_get_or_raise(OlympiadType, "olympiad_type_id", values["olympiad_type_id"])
-        base_contest = add_base_contest(db.session,
-                                        description=description,
-                                        name=name,
-                                        certificate_template=None,
-                                        winning_condition=winning_condition,
-                                        laureate_condition=laureate_condition,
-                                        rules=rules,
-                                        olympiad_type_id=olympiad_type_id,
-                                        subject=subject)
+    db_get_or_raise(OlympiadType, "olympiad_type_id", values["olympiad_type_id"])
+    base_contest = add_base_contest(db.session,
+                                    description=description,
+                                    name=name,
+                                    certificate_template=None,
+                                    winning_condition=winning_condition,
+                                    laureate_condition=laureate_condition,
+                                    rules=rules,
+                                    olympiad_type_id=olympiad_type_id,
+                                    subject=subject)
 
-        base_contest.target_classes = target_classes
+    base_contest.target_classes = target_classes
 
-        db.session.commit()
-    except Exception:
-        db.session.rollback()
-        raise
-    return make_response(
-        {
-            'base_contest_id': base_contest.base_contest_id
-        }, 200)
+    db.session.commit()
+
+    return {
+               'base_contest_id': base_contest.base_contest_id
+           }, 200
 
 
-@module.route('/base_olympiad/<int:id_base_olympiad>/upload_certificate', methods=['POST'])
+@module.route('/base_olympiad/<int:id_base_olympiad>/upload_certificate', methods=['POST'],
+              input_schema=BaseCertificateSchema)
 def base_olympiad_upload(id_base_olympiad):
+    """
+    Upload base olympiad certificate
+    ---
+    post:
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: BaseCertificateSchema
+      parameters:
+        - in: path
+          description: Id of the olympiad
+          name: id_base_olympiad
+          required: true
+          schema:
+            type: integer
+      security:
+        - JWTAccessToken: [ ]
+        - CSRFAccessToken: [ ]
+      responses:
+        '200':
+          description: OK
+        '400':
+          description: Bad request
+        '404':
+          description: Base contest not found
+    """
+
     certificate_template = request.data
 
-    try:
-        base_contest = db_get_or_raise(BaseContest, "base_contest_id", id_base_olympiad)
-        base_contest.certificate_template = certificate_template
-        db.session.commit()
-    except Exception:
-        db.session.rollback()
-        raise
-    return make_response(
-        {}, 200)
+    base_contest = db_get_or_raise(BaseContest, "base_contest_id", id_base_olympiad)
+    base_contest.certificate_template = certificate_template
+    db.session.commit()
+
+    return {}, 200
 
 
 @module.route('/base_olympiad/<int:id_base_olympiad>/remove', methods=['POST'])
 def base_olympiad_remove(id_base_olympiad):
-    try:
-        base_contest = db_get_or_raise(BaseContest, "base_contest_id", str(id_base_olympiad))
-        db.session.delete(base_contest)
-        db.session.commit()
-    except Exception:
-        db.session.rollback()
-        raise
-    return make_response({}, 200)
+    """
+    Delete a base olympiad
+    ---
+    post:
+      security:
+        - JWTAccessToken: [ ]
+        - CSRFAccessToken: [ ]
+      parameters:
+        - in: path
+          description: ID of the base olympiad
+          name: id_base_olympiad
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: OK
+        '403':
+          description: Invalid role of current user
+        '404':
+          description: Group not found
+    """
+
+    base_contest = db_get_or_raise(BaseContest, "base_contest_id", str(id_base_olympiad))
+    db.session.delete(base_contest)
+    db.session.commit()
+    return {}, 200
 
 
-@module.route('/base_olympiad/<int:id_base_olympiad>', methods=['PATCH'])
+@module.route('/base_olympiad/<int:id_base_olympiad>', methods=['PATCH'],
+              input_schema=UpdateBaseOlympiadSchema, output_schema=GetBaseOlympiadSchema)
 def base_olympiad_patch(id_base_olympiad):
+    """
+    Patch base olympiad
+    ---
+    post:
+      parameters:
+        - in: path
+          description: ID of the base olympiad
+          name: id_base_olympiad
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: UpdateBaseOlympiadSchema
+      security:
+        - JWTAccessToken: [ ]
+        - CSRFAccessToken: [ ]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: GetBaseOlympiadSchema
+        '400':
+          description: Bad request
+        '409':
+          description: Olympiad type already in use
+    """
+    values = request.marshmallow
+
     base_contest = db_get_or_raise(BaseContest, "base_contest_id", id_base_olympiad)
-    values = request.openapi.body
+    db_get_or_raise(OlympiadType, "olympiad_type_id", values["olympiad_type_id"])
 
-    try:
-        db_get_or_raise(OlympiadType, "olympiad_type_id", values["olympiad_type_id"])
-        target_classes = set(values['target_classes'])
-        del values["target_classes"]
-        base_contest.update(values)
-        if target_classes is not None:
-            base_contest.target_classes = target_classes
+    target_classes = set(values['target_classes'])
+    del values["target_classes"]
 
-        db.session.commit()
-    except Exception:
-        db.session.rollback()
-        raise
-    return make_response(base_contest.serialize(), 200)
+    serializer = CreateBaseOlympiadSchema()
+    serializer.load(values, instance=base_contest, session=db.session, partial=True)
+
+    if target_classes is not None:
+        base_contest.target_classes = target_classes
+
+    db.session.commit()
+
+    return base_contest.serialize, 200
 
 
 # Olympiads
 
 
-@module.route('/base_olympiad/<int:id_base_olympiad>/olympiad/createsimple', methods=['POST'])
+@module.route('/base_olympiad/<int:id_base_olympiad>/olympiad/createsimple', methods=['POST'],
+              input_schema=CreateSimpleContestSchema, output_schema=ContestIdSchema)
 def olympiad_create_simple(id_base_olympiad):
-    values = request.openapi.body
+    """
+    Create simple contest
+    ---
+    post:
+      parameters:
+        - in: path
+          description: ID of the base olympiad
+          name: id_base_olympiad
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: CreateSimpleContestSchema
+      security:
+        - JWTAccessToken: [ ]
+        - CSRFAccessToken: [ ]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: ContestIdSchema
+        '400':
+          description: Bad request
+        '409':
+          description: Olympiad type already in use
+    """
+    values = request.marshmallow
 
     visibility = values['visibility']
     start_time = values['start_time']
@@ -106,153 +235,360 @@ def olympiad_create_simple(id_base_olympiad):
     location = values.get('location', None)
     previous_participation_condition = values.get('previous_participation_condition', None)
 
-    try:
-        base_contest = db_get_or_raise(BaseContest, "base_contest_id", str(id_base_olympiad))
-        contest = add_simple_contest(db.session,
-                                     visibility=visibility,
-                                     start_date=start_time,
-                                     end_date=end_time,
-                                     previous_participation_condition=previous_participation_condition,
-                                     location=location,
-                                     )
-        if previous_contest_id is not None:
-            prev_contest = db_get_or_raise(Contest, "contest_id", str(previous_contest_id))
-            prev_contest.next_contests.append(contest)
-        base_contest.child_contests.append(contest)
+    base_contest = db_get_or_raise(BaseContest, "base_contest_id", str(id_base_olympiad))
+    contest = add_simple_contest(db.session,
+                                 visibility=visibility,
+                                 start_date=start_time,
+                                 end_date=end_time,
+                                 previous_participation_condition=previous_participation_condition,
+                                 location=location,
+                                 )
+    if previous_contest_id is not None:
+        prev_contest = db_get_or_raise(Contest, "contest_id", str(previous_contest_id))
+        prev_contest.next_contests.append(contest)
+    base_contest.child_contests.append(contest)
 
-        db.session.commit()
+    db.session.commit()
 
-    except Exception:
-        db.session.rollback()
-        raise
-    return make_response(
-        {
-            'contest_id': contest.contest_id
-        }, 200)
+    return {
+               'contest_id': contest.contest_id
+           }, 200
 
 
-@module.route('/base_olympiad/<int:id_base_olympiad>/olympiad/createcomposite', methods=['POST'])
+@module.route('/base_olympiad/<int:id_base_olympiad>/olympiad/createcomposite', methods=['POST'],
+              input_schema=CreateCompositeContestSchema, output_schema=ContestIdSchema)
 def olympiad_create_composite(id_base_olympiad):
-    values = request.openapi.body
+    """
+    Create composite contest
+    ---
+    post:
+      parameters:
+        - in: path
+          description: ID of the base olympiad
+          name: id_base_olympiad
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: CreateCompositeContestSchema
+      security:
+        - JWTAccessToken: [ ]
+        - CSRFAccessToken: [ ]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: ContestIdSchema
+        '400':
+          description: Bad request
+        '409':
+          description: Olympiad type already in use
+    """
+    values = request.marshmallow
 
     visibility = values['visibility']
 
-    try:
-        base_contest = db_get_or_raise(BaseContest, "base_contest_id", str(id_base_olympiad))
-        contest = add_composite_contest(db.session,
-                                        visibility=visibility)
-        base_contest.child_contests.append(contest)
+    base_contest = db_get_or_raise(BaseContest, "base_contest_id", str(id_base_olympiad))
+    contest = add_composite_contest(db.session,
+                                    visibility=visibility)
+    base_contest.child_contests.append(contest)
 
-        db.session.commit()
+    db.session.commit()
 
-    except Exception:
-        db.session.rollback()
-        raise
-    return make_response(
-        {
-            'contest_id': contest.contest_id
-        }, 200)
+    return {
+               'contest_id': contest.contest_id
+           }, 200
 
 
 @module.route('/base_olympiad/<int:id_base_olympiad>/olympiad/<int:id_olympiad>/remove', methods=['POST'])
 def olympiad_remove(id_base_olympiad, id_olympiad):
-    try:
-        db_get_or_raise(BaseContest, "base_contest_id", str(id_base_olympiad))
-        contest = db_get_or_raise(Contest, "contest_id", str(id_olympiad))
-        db.session.delete(contest)
-        db.session.commit()
-    except Exception:
-        db.session.rollback()
-        raise
-    return make_response({}, 200)
+    """
+    Delete a olympiad
+    ---
+    post:
+      security:
+        - JWTAccessToken: [ ]
+        - CSRFAccessToken: [ ]
+      parameters:
+        - in: path
+          description: ID of the base olympiad
+          name: id_base_olympiad
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: ID of the olympiad
+          name: id_olympiad
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: OK
+        '403':
+          description: Invalid role of current user
+        '404':
+          description: Olympiad not found
+    """
+
+    db_get_or_raise(BaseContest, "base_contest_id", str(id_base_olympiad))
+    contest = db_get_or_raise(Contest, "contest_id", str(id_olympiad))
+    db.session.delete(contest)
+    db.session.commit()
+    return {}, 200
 
 
-@module.route('/base_olympiad/<int:id_base_olympiad>/olympiad/<int:id_olympiad>', methods=['PATCH'])
+@module.route('/base_olympiad/<int:id_base_olympiad>/olympiad/<int:id_olympiad>', methods=['PATCH'],
+              input_schema=UpdateContestSchema, output_schema=GetCompositeContestSchema)
 def olympiad_patch(id_base_olympiad, id_olympiad):
+    """
+    Create composite contest
+    ---
+    post:
+      parameters:
+        - in: path
+          description: ID of the base olympiad
+          name: id_base_olympiad
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: ID of the olympiad
+          name: id_olympiad
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: UpdateContestSchema
+      security:
+        - JWTAccessToken: [ ]
+        - CSRFAccessToken: [ ]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: GetCompositeContestSchema
+        '400':
+          description: Bad request
+        '409':
+          description: Olympiad type already in use
+    """
+
+    values = request.marshmallow
+
     contest = db_get_or_raise(Contest, "contest_id", id_olympiad)
-    values = request.openapi.body
+    db_get_or_raise(BaseContest, "base_contest_id", str(id_base_olympiad))
 
-    try:
-        db_get_or_raise(BaseContest, "base_contest_id", str(id_base_olympiad))
-        contest.update(values)
-        db.session.commit()
+    serializer = CreateBaseOlympiadSchema()
+    serializer.load(values, instance=contest, session=db.session, partial=True)
 
-    except Exception:
-        db.session.rollback()
-        raise
+    db.session.commit()
 
-    return make_response(contest.serialize(), 200)
+    return contest, 200
 
 
 # Stage views
 
 
-@module.route('/olympiad/<int:id_olympiad>/stage/create', methods=['POST'])
+@module.route('/olympiad/<int:id_olympiad>/stage/create', methods=['POST'],
+              input_schema=CreateStageSchema, output_schema=StageIdSchema)
 def stage_create(id_olympiad):
-    values = request.openapi.body
+    """
+    Create stage
+    ---
+    post:
+      parameters:
+        - in: path
+          description: ID of the olympiad
+          name: id_olympiad
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: CreateStageSchema
+      security:
+        - JWTAccessToken: [ ]
+        - CSRFAccessToken: [ ]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: StageIdSchema
+        '400':
+          description: Bad request
+        '409':
+          description: Olympiad type already in use
+    """
+
+    values = request.marshmallow
     stage_name = values['stage_name']
     stage_num = values['stage_num']
     condition = values['condition']
     this_stage_condition = values['this_stage_condition']
 
-    try:
-        contest = db_get_or_raise(Contest, "contest_id", str(id_olympiad))
-        if contest.composite_type == ContestTypeEnum.SimpleContest:
-            raise InsufficientData('contest.composite_type', 'not composite')
-        stage = add_stage(db.session,
-                          stage_name=stage_name,
-                          stage_num=stage_num,
-                          condition=condition,
-                          this_stage_condition=this_stage_condition,
-                          )
-        contest.stages.append(stage)
-        db.session.commit()
+    contest = db_get_or_raise(Contest, "contest_id", str(id_olympiad))
+    if contest.composite_type == ContestTypeEnum.SimpleContest:
+        raise InsufficientData('contest.composite_type', 'not composite')
+    stage = add_stage(db.session,
+                      stage_name=stage_name,
+                      stage_num=stage_num,
+                      condition=condition,
+                      this_stage_condition=this_stage_condition,
+                      )
+    contest.stages.append(stage)
+    db.session.commit()
 
-    except Exception:
-        db.session.rollback()
-        raise
-
-    return make_response(
-        {
-            'stage_id': stage.stage_id
-        }, 200)
+    return {
+               'stage_id': stage.stage_id
+           }, 200
 
 
 @module.route('/olympiad/<int:id_olympiad>/stage/<int:id_stage>/remove',
               methods=['POST'])
 def stage_remove(id_olympiad, id_stage):
-    try:
-        db_get_or_raise(Contest, "contest_id", str(id_olympiad))
-        stage = db_get_or_raise(Stage, "stage_id", str(id_stage))
-        db.session.delete(stage)
-        db.session.commit()
-    except Exception:
-        db.session.rollback()
-        raise
-    return make_response({}, 200)
+    """
+    Delete a stage
+    ---
+    post:
+      security:
+        - JWTAccessToken: [ ]
+        - CSRFAccessToken: [ ]
+      parameters:
+        - in: path
+          description: ID of the olympiad
+          name: id_olympiad
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: ID of the stage
+          name: id_stage
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: OK
+        '403':
+          description: Invalid role of current user
+        '404':
+          description: Olympiad not found
+    """
+
+    db_get_or_raise(Contest, "contest_id", str(id_olympiad))
+    stage = db_get_or_raise(Stage, "stage_id", str(id_stage))
+    db.session.delete(stage)
+    db.session.commit()
+    return {}, 200
 
 
 @module.route('/olympiad/<int:id_olympiad>/stage/<int:id_stage>',
-              methods=['PATCH'])
+              methods=['PATCH'],
+              input_schema=UpdateStageSchema, output_schema=GetStageSchema)
 def stage_patch(id_olympiad, id_stage):
-    stage = db_get_or_raise(Stage, "stage_id", str(id_stage))
-    try:
-        db_get_or_raise(Contest, "contest_id", str(id_olympiad))
-        values = request.openapi.body
-        stage.update(values)
-        db.session.commit()
-    except Exception:
-        db.session.rollback()
-        raise
+    """
+    Update stage
+    ---
+    post:
+      parameters:
+        - in: path
+          description: ID of the olympiad
+          name: id_olympiad
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: ID of the stage
+          name: id_stage
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: CreateStageSchema
+      security:
+        - JWTAccessToken: [ ]
+        - CSRFAccessToken: [ ]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: StageIdSchema
+        '403':
+          description: Invalid role of current user
+        '404':
+          description: Stage not found
+    """
 
-    return make_response(stage.serialize(), 200)
+    stage = db_get_or_raise(Stage, "stage_id", str(id_stage))
+    db_get_or_raise(Contest, "contest_id", str(id_olympiad))
+    values = request.marshmallow
+
+    serializer = CreateBaseOlympiadSchema()
+    serializer.load(values, instance=stage, session=db.session, partial=True)
+    db.session.commit()
+
+    return stage.serialize(), 200
 
 
 # Contest views
 @module.route('/olympiad/<int:id_olympiad>/stage/<int:id_stage>/contest/createsimple',
-              methods=['POST'])
+              methods=['POST'],
+              input_schema=CreateSimpleContestSchema, output_schema=ContestIdSchema)
 def contest_create_simple(id_olympiad, id_stage):
-    values = request.openapi.body
+    """
+    Create simple contest in stage
+    ---
+    post:
+      parameters:
+        - in: path
+          description: ID of the olympiad
+          name: id_olympiad
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: ID of the stage
+          name: id_stage
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: CreateSimpleContestSchema
+      security:
+        - JWTAccessToken: [ ]
+        - CSRFAccessToken: [ ]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: ContestIdSchema
+        '400':
+          description: Bad request
+        '409':
+          description: Olympiad type already in use
+    """
+
+    values = request.marshmallow
 
     visibility = values['visibility']
     start_time = values['start_time']
@@ -282,38 +618,9 @@ def contest_create_simple(id_olympiad, id_stage):
     except Exception:
         db.session.rollback()
         raise
-    return make_response(
-        {
-            'contest_id': contest.contest_id
-        }, 200)
-
-
-# TODO: WILL IT BE DELETED ?
-@module.route('/olympiad/<int:id_olympiad>/stage/<int:id_stage>/contest/createcomposite',
-              methods=['POST'])
-def contest_create_composite(id_olympiad, id_stage):
-    values = request.openapi.body
-
-    visibility = values['visibility']
-
-    try:
-        db_get_or_raise(Contest, "contest_id", str(id_olympiad))
-        stage = db_get_or_raise(Stage, "stage_id", str(id_stage))
-
-        contest = add_composite_contest(db.session,
-                                        visibility=visibility)
-
-        stage.contests.append(contest)
-
-        db.session.commit()
-
-    except Exception:
-        db.session.rollback()
-        raise
-    return make_response(
-        {
-            'contest_id': contest.contest_id
-        }, 200)
+    return {
+               'contest_id': contest.contest_id
+           }, 200
 
 
 @module.route(
@@ -321,57 +628,194 @@ def contest_create_composite(id_olympiad, id_stage):
     '>/remove',
     methods=['POST'])
 def contest_remove(id_olympiad, id_stage, id_contest):
-    try:
-        contest = get_contest_if_possible_from_stage(id_olympiad, id_stage, id_contest)
-        db.session.delete(contest)
-        db.session.commit()
+    """
+    Delete a contest in stage
+    ---
+    post:
+      security:
+        - JWTAccessToken: [ ]
+        - CSRFAccessToken: [ ]
+      parameters:
+        - in: path
+          description: ID of the olympiad
+          name: id_olympiad
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: ID of the stage
+          name: id_stage
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: ID of the contest
+          name: id_contest
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: OK
+        '403':
+          description: Invalid role of current user
+        '404':
+          description: Olympiad not found
+    """
 
-    except Exception:
-        db.session.rollback()
-        raise
-    return make_response({}, 200)
+    contest = get_contest_if_possible_from_stage(id_olympiad, id_stage, id_contest)
+    db.session.delete(contest)
+    db.session.commit()
+    return {}, 200
 
 
 @module.route(
     '/olympiad/<int:id_olympiad>/stage/<int:id_stage>/contest/<int:id_contest>',
-    methods=['GET', 'PATCH'])
+    methods=['PATCH'],
+    input_schema=UpdateContestSchema, output_schema=GetCompositeContestSchema)
 def contest_patch(id_olympiad, id_stage, id_contest):
-    values = request.openapi.body
-    try:
-        contest = get_contest_if_possible_from_stage(id_olympiad, id_stage, id_contest)
-        contest.update(values)
-        db.session.commit()
-    except Exception:
-        db.session.rollback()
-        raise
-    return make_response(contest.serialize(), 200)
+    """
+    Update composite contest in stage
+    ---
+    post:
+      parameters:
+        - in: path
+          description: ID of the base olympiad
+          name: id_base_olympiad
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: ID of the olympiad
+          name: id_olympiad
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: ID of the contest
+          name: id_contest
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: UpdateContestSchema
+      security:
+        - JWTAccessToken: [ ]
+        - CSRFAccessToken: [ ]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: GetCompositeContestSchema
+        '400':
+          description: Bad request
+        '409':
+          description: Olympiad type already in use
+    """
+
+    values = request.marshmallow
+    contest = get_contest_if_possible_from_stage(id_olympiad, id_stage, id_contest)
+
+    serializer = CreateBaseOlympiadSchema()
+    serializer.load(values, instance=contest, session=db.session, partial=True)
+    db.session.commit()
+    return contest, 200
 
 
 @module.route(
     '/olympiad/<int:id_olympiad>/stage/<int:id_stage>/contest/<int:id_contest>/add_previous',
-    methods=['PATCH'])
+    methods=['PATCH'], input_schema=UpdatePreviousContestSchema)
 def contest_add_previous(id_olympiad, id_stage, id_contest):
+    """
+    Update composite contest in stage
+    ---
+    post:
+      parameters:
+        - in: path
+          description: ID of the base olympiad
+          name: id_base_olympiad
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: ID of the olympiad
+          name: id_olympiad
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: ID of the contest
+          name: id_contest
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: UpdatePreviousContestSchema
+      security:
+        - JWTAccessToken: [ ]
+        - CSRFAccessToken: [ ]
+      responses:
+        '200':
+          description: OK
+        '400':
+          description: Bad request
+        '409':
+          description: Olympiad type already in use
+    """
     contest = get_contest_if_possible_from_stage(id_olympiad, id_stage, id_contest)
-    values = request.openapi.body
-    try:
-        contest.change_previous(**values)
-        db.session.commit()
-    except Exception:
-        db.session.rollback()
-        raise
+    values = request.marshmallow
+    contest.change_previous(**values)
+    db.session.commit()
 
-    return make_response({}, 200)
+    return {}, 200
 
 
 @module.route('/olympiad/<int:id_olympiad>/stage/<int:id_stage>/contest/all',
-              methods=['GET'])
+              methods=['GET'], output_schema=AllStagesSchema)
 def contests_all(id_olympiad, id_stage):
+    """
+    Update composite contest in stage
+    ---
+    post:
+      parameters:
+        - in: path
+          description: ID of the base olympiad
+          name: id_base_olympiad
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: ID of the olympiad
+          name: id_olympiad
+          required: true
+          schema:
+            type: integer
+      security:
+        - JWTAccessToken: [ ]
+        - CSRFAccessToken: [ ]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: AllStagesSchema
+        '400':
+          description: Bad request
+        '409':
+          description: Olympiad type already in use
+    """
     db_get_or_raise(Contest, "contest_id", str(id_olympiad))
     db_get_or_raise(Stage, "stage_id", str(id_stage))
     stage = db_get_or_raise(Stage, "stage_id", str(id_stage))
     all_contests = [contest.serialize() for contest in stage.contests]
-    return make_response(
-        {"olympiad_list": all_contests}, 200)
+    return {"olympiad_list": all_contests}, 200
 
 
 # Variant views
@@ -379,84 +823,223 @@ def contests_all(id_olympiad, id_stage):
 
 @module.route(
     '/contest/<int:id_contest>/variant/create',
-    methods=['POST'])
+    methods=['POST'],
+    input_schema=CreateVariantSchema, output_schema=VariantIdSchema)
 def variant_create(id_contest):
-    values = request.openapi.body
+    """
+    Variant creation
+    ---
+    post:
+      parameters:
+        - in: path
+          description: ID of the contest
+          name: id_contest
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: UpdatePreviousContestSchema
+      security:
+        - JWTAccessToken: [ ]
+        - CSRFAccessToken: [ ]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: StageIdSchema
+        '400':
+          description: Bad request
+        '409':
+          description: Olympiad type already in use
+    """
+    values = request.marshmallow
     contest = get_contest_if_possible(id_contest)
     last_variant_number = get_last_variant_in_contest(contest)
     variant_description = values['variant_description']
 
-    try:
-        variant = add_variant(db.session,
-                              variant_number=last_variant_number + 1,
-                              variant_description=variant_description,
-                              )
-        contest.variants.append(variant)
+    variant = add_variant(db.session,
+                          variant_number=last_variant_number + 1,
+                          variant_description=variant_description,
+                          )
+    contest.variants.append(variant)
 
-        db.session.add(variant)
-        db.session.commit()
+    db.session.add(variant)
+    db.session.commit()
 
-    except Exception:
-        db.session.rollback()
-        raise
-
-    return make_response(
-        {
-            "variant_id": variant.variant_id,
-        }, 200)
+    return {
+               "variant_id": variant.variant_id,
+           }, 200
 
 
 @module.route(
     '/contest/<int:id_contest>/variant/<int:id_variant>/remove',
     methods=['POST'])
 def variant_remove(id_contest, id_variant):
-    try:
-        variant = get_variant_if_possible(id_contest, id_variant)
+    """
+    Delete a contest
+    ---
+    post:
+      security:
+        - JWTAccessToken: [ ]
+        - CSRFAccessToken: [ ]
+      parameters:
+        - in: path
+          description: ID of the contest
+          name: id_contest
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: ID of the variant
+          name: id_variant
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: OK
+        '403':
+          description: Invalid role of current user
+        '404':
+          description: Olympiad not found
+    """
 
-        db.session.delete(variant)
-        db.session.commit()
-    except Exception:
-        db.session.rollback()
-        raise
-    return make_response({}, 200)
+    variant = get_variant_if_possible(id_contest, id_variant)
+    db.session.delete(variant)
+    db.session.commit()
+    return {}, 200
 
 
 @module.route(
     '/contest/<int:id_contest>/variant/<int:variant_num>',
-    methods=['GET'])
+    methods=['GET'], output_schema=GetVariantSchema)
 def variant_get(id_contest, variant_num):
+    """
+    Get variant
+    ---
+    post:
+      parameters:
+        - in: path
+          description: ID of the contest
+          name: id_contest
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Num of the variant
+          name: variant_num
+          required: true
+          schema:
+            type: integer
+      security:
+        - JWTAccessToken: [ ]
+        - CSRFAccessToken: [ ]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: GetVariantSchema
+        '400':
+          description: Bad request
+        '409':
+          description: Olympiad type already in use
+    """
     variant = get_variant_if_possible_by_number(id_contest, variant_num)
-    return make_response(
-        variant.serialize(), 200)
+    return variant, 200
 
 
 @module.route(
     '/contest/<int:id_contest>/variant/<int:variant_num>',
-    methods=['PATCH'])
+    methods=['PATCH'],
+    input_schema=UpdateVariantSchema, output_schema=GetVariantSchema)
 def variant_patch(id_contest, variant_num):
-    values = request.openapi.body
-    try:
-        variant = get_variant_if_possible_by_number(id_contest, variant_num)
-        variant.update(values)
-        db.session.commit()
+    """
+    Variant patch
+    ---
+    post:
+      parameters:
+        - in: path
+          description: ID of the contest
+          name: id_contest
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Num of the variant
+          name: variant_num
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: UpdateVariantSchema
+      security:
+        - JWTAccessToken: [ ]
+        - CSRFAccessToken: [ ]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: GetVariantSchema
+        '400':
+          description: Bad request
+        '409':
+          description: Olympiad type already in use
+    """
+    values = request.marshmallow
 
-    except Exception:
-        db.session.rollback()
-        raise
+    variant = get_variant_if_possible_by_number(id_contest, variant_num)
 
-    return make_response(variant.serialize(), 200)
+    serializer = CreateBaseOlympiadSchema()
+    serializer.load(values, instance=variant, session=db.session, partial=True)
+    db.session.commit()
+
+    return variant, 200
 
 
 @module.route(
     '/contest/<int:id_contest>/variant/all',
-    methods=['GET'])
+    methods=['GET'],
+    input_schema=AllVariantsSchema)
 def variant_all(id_contest):
+    """
+    All variants
+    ---
+    post:
+      parameters:
+        - in: path
+          description: ID of the contest
+          name: id_contest
+          required: true
+          schema:
+            type: integer
+      security:
+        - JWTAccessToken: [ ]
+        - CSRFAccessToken: [ ]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: AllVariantsSchema
+        '400':
+          description: Bad request
+        '409':
+          description: Olympiad type already in use
+    """
     contest = get_contest_if_possible(id_contest)
-    all_variants = [variant.serialize() for variant in contest.variants.all()]
-    return make_response(
-        {
-            "variants_list": all_variants
-        }, 200)
+    all_variants = [variant for variant in contest.variants.all()]
+    return {
+               "variants_list": all_variants
+           }, 200
 
 
 # Task views
@@ -464,9 +1047,46 @@ def variant_all(id_contest):
 
 @module.route(
     '/contest/<int:id_contest>/variant/<int:id_variant>/task/createplain',
-    methods=['POST'])
+    methods=['POST'],
+    input_schema=CreatePlainSchema, output_schema=TaskIdSchema)
 def task_create_plain(id_contest, id_variant):
-    values = request.openapi.body
+    """
+    Create plain task
+    ---
+    post:
+      parameters:
+        - in: path
+          description: ID of the contest
+          name: id_contest
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: ID of the variant
+          name: id_variant
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: CreatePlainSchema
+      security:
+        - JWTAccessToken: [ ]
+        - CSRFAccessToken: [ ]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: TaskIdSchema
+        '400':
+          description: Bad request
+        '409':
+          description: Olympiad type already in use
+    """
+    values = request.marshmallow
 
     num_of_task = values['num_of_task']
     image_of_task = values['image_of_task']
@@ -488,17 +1108,53 @@ def task_create_plain(id_contest, id_variant):
     except Exception:
         db.session.rollback()
         raise
-    return make_response(
-        {
-            "task_id": task.task_id,
-        }, 200)
+    return {
+               "task_id": task.task_id,
+           }, 200
 
 
 @module.route(
     '/contest/<int:id_contest>/variant/<int:id_variant>/task/createrange',
-    methods=['POST'])
+    methods=['POST'],
+    input_schema=CreateRangeSchema, output_schema=TaskIdSchema)
 def task_create_range(id_contest, id_variant):
-    values = request.openapi.body
+    """
+    Create range task
+    ---
+    post:
+      parameters:
+        - in: path
+          description: ID of the contest
+          name: id_contest
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: ID of the variant
+          name: id_variant
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: CreateRangeSchema
+      security:
+        - JWTAccessToken: [ ]
+        - CSRFAccessToken: [ ]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: TaskIdSchema
+        '400':
+          description: Bad request
+        '409':
+          description: Olympiad type already in use
+    """
+    values = request.marshmallow
     num_of_task = values['num_of_task']
     image_of_task = values['image_of_task']
     start_value = values['start_value']
@@ -518,17 +1174,53 @@ def task_create_range(id_contest, id_variant):
     except Exception:
         db.session.rollback()
         raise
-    return make_response(
-        {
-            "task_id": task.task_id,
-        }, 200)
+    return {
+               "task_id": task.task_id,
+           }, 200
 
 
 @module.route(
     '/contest/<int:id_contest>/variant/<int:id_variant>/task/createmultiple',
-    methods=['POST'])
+    methods=['POST'],
+    input_schema=CreateMultipleSchema, output_schema=TaskIdSchema)
 def task_create_multiple(id_contest, id_variant):
-    values = request.openapi.body
+    """
+    Create multiple task
+    ---
+    post:
+      parameters:
+        - in: path
+          description: ID of the contest
+          name: id_contest
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: ID of the variant
+          name: id_variant
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: CreateRangeSchema
+      security:
+        - JWTAccessToken: [ ]
+        - CSRFAccessToken: [ ]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: TaskIdSchema
+        '400':
+          description: Bad request
+        '409':
+          description: Olympiad type already in use
+    """
+    values = request.marshmallow
 
     num_of_task = values['num_of_task']
     image_of_task = values['image_of_task']
@@ -552,34 +1244,101 @@ def task_create_multiple(id_contest, id_variant):
         db.session.rollback()
         raise
 
-    return make_response(
-        {
-            "task_id": task.task_id,
-        }, 200)
+    return {
+               "task_id": task.task_id,
+           }, 200
 
 
 @module.route(
     '/contest/<int:id_contest>/variant/<int:id_variant>/task/<int:id_task>/remove',
     methods=['POST'])
 def task_remove(id_contest, id_variant, id_task):
-    try:
-        task = get_task_if_possible(id_contest, id_variant, id_task)
-        db.session.delete(task)
-        db.session.commit()
+    """
+    Delete a task
+    ---
+    post:
+      security:
+        - JWTAccessToken: [ ]
+        - CSRFAccessToken: [ ]
+      parameters:
+        - in: path
+          description: ID of the contest
+          name: id_contest
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: ID of the variant
+          name: id_variant
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: ID of the task
+          name: id_task
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: OK
+        '403':
+          description: Invalid role of current user
+        '404':
+          description: Olympiad not found
+    """
 
-    except Exception:
-        db.session.rollback()
-        raise
-    return make_response({}, 200)
+    task = get_task_if_possible(id_contest, id_variant, id_task)
+    db.session.delete(task)
+    db.session.commit()
+
+    return {}, 200
 
 
 @module.route(
     '/contest/<int:id_contest>/variant/<int:id_variant>/task/<int:id_task>',
-    methods=['GET'])
+    methods=['GET'],
+    output_schema=GetTaskSchema)
 def task_get(id_contest, id_variant, id_task):
+    """
+    Get task
+    ---
+    post:
+      parameters:
+        - in: path
+          description: ID of the contest
+          name: id_contest
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: ID of the variant
+          name: id_variant
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: ID of the variant
+          name: id_task
+          required: true
+          schema:
+            type: integer
+      security:
+        - JWTAccessToken: [ ]
+        - CSRFAccessToken: [ ]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: TaskIdSchema
+        '400':
+          description: Bad request
+        '409':
+          description: Olympiad type already in use
+    """
     task = get_task_if_possible(id_contest, id_variant, id_task)
-    return make_response(
-        task.serialize(), 200)
+    return task, 200
 
 
 def check_existence(id_olympiad, id_stage, id_contest, id_variant):
@@ -591,77 +1350,271 @@ def check_existence(id_olympiad, id_stage, id_contest, id_variant):
 
 @module.route(
     '/contest/<int:id_contest>/variant/<int:id_variant>/task/<int:id_task>/plain',
-    methods=['PATCH'])
+    methods=['PATCH'],
+    input_schema=UpdatePlainSchema, output_schema=GetTaskSchema)
 def task_patch_plain(id_contest, id_variant, id_task):
-    values = request.openapi.body
-    try:
-        task = get_task_if_possible(id_contest, id_variant, id_task)
-        task.update(values)
-        db.session.commit()
+    """
+    Update plain task
+    ---
+    post:
+      parameters:
+        - in: path
+          description: ID of the contest
+          name: id_contest
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: ID of the variant
+          name: id_variant
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: ID of the ефыл
+          name: id_task
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: UpdatePlainSchema
+      security:
+        - JWTAccessToken: [ ]
+        - CSRFAccessToken: [ ]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: GetTaskSchema
+        '400':
+          description: Bad request
+        '409':
+          description: Olympiad type already in use
+    """
+    values = request.marshmallow
 
-    except Exception:
-        db.session.rollback()
-        raise
-    return make_response({}, 200)
+    task = get_task_if_possible(id_contest, id_variant, id_task)
+
+    serializer = CreateBaseOlympiadSchema()
+    serializer.load(values, instance=task, session=db.session, partial=True)
+
+    db.session.commit()
+
+    return {}, 200
 
 
 @module.route(
     '/contest/<int:id_contest>/variant/<int:id_variant>/task/<int:id_task>/range',
-    methods=['PATCH'])
+    methods=['PATCH'],
+    input_schema=UpdateRangeSchema, output_schema=GetTaskSchema)
 def task_patch_range(id_contest, id_variant, id_task):
-    values = request.openapi.body
-    try:
-        task = get_task_if_possible(id_contest, id_variant, id_task)
-        task.update(values)
+    """
+    Update range task
+    ---
+    post:
+      parameters:
+        - in: path
+          description: ID of the contest
+          name: id_contest
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: ID of the variant
+          name: id_variant
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: ID of the ефыл
+          name: id_task
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: UpdateRangeSchema
+      security:
+        - JWTAccessToken: [ ]
+        - CSRFAccessToken: [ ]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: GetTaskSchema
+        '400':
+          description: Bad request
+        '409':
+          description: Olympiad type already in use
+    """
+    values = request.marshmallow
+    task = get_task_if_possible(id_contest, id_variant, id_task)
+    serializer = CreateBaseOlympiadSchema()
+    serializer.load(values, instance=task, session=db.session, partial=True)
 
-        db.session.commit()
+    db.session.commit()
 
-    except Exception:
-        db.session.rollback()
-        raise
-    return make_response({}, 200)
+    return {}, 200
 
 
 @module.route(
     '/contest/<int:id_contest>/variant/<int:id_variant>/task/<int:id_task>/multiple',
-    methods=['PATCH'])
+    methods=['PATCH'],
+    input_schema=UpdateMultipleSchema, output_schema=GetTaskSchema)
 def task_patch_multiple(id_contest, id_variant, id_task):
-    values = request.openapi.body
-    try:
-        task = get_task_if_possible(id_contest, id_variant, id_task)
-        answers = values['answers']
-        del values['answers']
+    """
+    Update multiple task
+    ---
+    post:
+      parameters:
+        - in: path
+          description: ID of the contest
+          name: id_contest
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: ID of the variant
+          name: id_variant
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: ID of the ефыл
+          name: id_task
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: UpdateMultipleSchema
+      security:
+        - JWTAccessToken: [ ]
+        - CSRFAccessToken: [ ]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: GetTaskSchema
+        '400':
+          description: Bad request
+        '409':
+          description: Olympiad type already in use
+    """
+    values = request.marshmallow
+    task = get_task_if_possible(id_contest, id_variant, id_task)
+    answers = values['answers']
+    del values['answers']
 
-        task.update(values)
+    serializer = CreateBaseOlympiadSchema()
+    serializer.load(values, instance=task, session=db.session, partial=True)
 
-        task.answers = [
-            (answer['task_answer'], answer['is_right_answer'])
-            for answer in answers]
+    task.answers = [
+        (answer['task_answer'], answer['is_right_answer'])
+        for answer in answers]
 
-        db.session.commit()
+    db.session.commit()
 
-    except Exception:
-        db.session.rollback()
-        raise
-    return make_response({}, 200)
+    return {}, 200
 
 
 @module.route(
     '/contest/<int:id_contest>/variant/<int:id_variant>/task/all',
-    methods=['GET'])
+    methods=['GET'],
+    output_schema=AllTasksSchema)
 def task_all(id_contest, id_variant):
+    """
+    Update multiple task
+    ---
+    post:
+      parameters:
+        - in: path
+          description: ID of the contest
+          name: id_contest
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: ID of the variant
+          name: id_variant
+          required: true
+          schema:
+            type: integer
+      security:
+        - JWTAccessToken: [ ]
+        - CSRFAccessToken: [ ]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: AllTasksSchema
+        '400':
+          description: Bad request
+        '409':
+          description: Olympiad type already in use
+    """
     tasks = get_tasks_if_possible(id_contest, id_variant)
-    return make_response(
-        {
-            "tasks_list": tasks
-        }, 200)
+    return {
+               "tasks_list": tasks
+           }, 200
 
 
 @module.route(
     '/contest/<int:id_contest>/variant/<int:id_variant>/tasks/<int:id_task>/image',
-    methods=['GET'])
+    methods=['GET'],
+    output_schema=GetTaskImageSchema)
 def task_image(id_contest, id_variant, id_task):
+    """
+    Get task image
+    ---
+    post:
+      parameters:
+        - in: path
+          description: ID of the contest
+          name: id_contest
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: ID of the variant
+          name: id_variant
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: ID of the ефыл
+          name: id_task
+          required: true
+          schema:
+            type: integer
+      security:
+        - JWTAccessToken: [ ]
+        - CSRFAccessToken: [ ]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: GetTaskImageSchema
+        '400':
+          description: Bad request
+        '409':
+          description: Olympiad type already in use
+    """
     task = get_task_if_possible(id_contest, id_variant, id_task)
 
-    return make_response(
-        task.serialize_image(), 200)
+    return {
+               'task_id': task.task_id,
+               'image_of_task': task.image_of_task
+           }, 200
