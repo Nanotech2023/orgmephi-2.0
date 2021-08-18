@@ -2,8 +2,9 @@ from flask import abort, request
 
 from common import get_current_app, get_current_module
 from common.errors import AlreadyExists
-from contest.tasks.control_users.schemas import UpdateUserInRequestCreatorSchema, UserCertificateSchema, \
-    UsersResponseSchema
+from contest.tasks.control_users.schemas import UpdateUserInContestRequestTaskControlUsersSchema, \
+    UserCertificateResponseTaskControlUsersSchema, \
+    UsersResponseTaskControlUsersSchema
 from contest.tasks.util import *
 
 db = get_current_db()
@@ -15,7 +16,7 @@ app = get_current_app()
 
 
 @module.route('/contest/<int:id_contest>/add_user', methods=['POST'],
-              input_schema=UpdateUserInRequestCreatorSchema)
+              input_schema=UpdateUserInContestRequestTaskControlUsersSchema)
 def add_user_to_contest(id_contest):
     """
     Add user to contest
@@ -32,7 +33,7 @@ def add_user_to_contest(id_contest):
         required: true
         content:
           application/json:
-            schema: UpdateUserInRequestCreatorSchema
+            schema: UpdateUserInContestRequestTaskControlUsersSchema
       security:
         - JWTAccessToken: [ ]
         - CSRFAccessToken: [ ]
@@ -63,7 +64,7 @@ def add_user_to_contest(id_contest):
 
 
 @module.route('/contest/<int:id_contest>/remove_user', methods=['POST'],
-              input_schema=UpdateUserInRequestCreatorSchema)
+              input_schema=UpdateUserInContestRequestTaskControlUsersSchema)
 def remove_user_from_contest(id_contest):
     """
     Remove user from contest
@@ -80,7 +81,7 @@ def remove_user_from_contest(id_contest):
         required: true
         content:
           application/json:
-            schema: UpdateUserInRequestCreatorSchema
+            schema: UpdateUserInContestRequestTaskControlUsersSchema
       security:
         - JWTAccessToken: [ ]
         - CSRFAccessToken: [ ]
@@ -92,7 +93,6 @@ def remove_user_from_contest(id_contest):
         '409':
           description: Olympiad type already in use
     """
-
 
     values = request.marshmallow
     user_ids = values['users_id']
@@ -112,7 +112,7 @@ def remove_user_from_contest(id_contest):
 
 @module.route(
     '/contest/<int:id_contest>/user/all',
-    methods=['GET'], output_schema=UsersResponseSchema)
+    methods=['GET'], output_schema=UsersResponseTaskControlUsersSchema)
 def users_all(id_contest):
     """
     Get all users
@@ -133,7 +133,7 @@ def users_all(id_contest):
           description: OK
           content:
             application/json:
-              schema: UsersResponseSchema
+              schema: UsersResponseTaskControlUsersSchema
         '400':
           description: Bad request
         '409':
@@ -148,7 +148,7 @@ def users_all(id_contest):
 
 @module.route(
     'contest/<int:id_contest>/user/<int:id_user>/certificate',
-    methods=['GET'], output_schema=UserCertificateSchema)
+    methods=['GET'], output_schema=UserCertificateResponseTaskControlUsersSchema)
 def users_certificate(id_contest, id_user):
     """
     Get certificate

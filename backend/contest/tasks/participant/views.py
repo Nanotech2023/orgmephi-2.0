@@ -3,10 +3,10 @@ import io
 from flask import abort, send_file
 
 from common import get_current_app, get_current_module
-from contest.tasks.control_users.schemas import UserCertificateSchema
-from contest.tasks.model_schemas.schemas import VariantSchema, TaskImageSchema, ContestSchema
+from contest.tasks.control_users.schemas import UserCertificateResponseTaskControlUsersSchema
+from contest.tasks.model_schemas.schemas import VariantSchema, ContestSchema
 from contest.tasks.participant.schemas import *
-from contest.tasks.unauthorized.schemas import AllOlympiadsSchema
+from contest.tasks.unauthorized.schemas import AllOlympiadsResponseTaskUnauthorizedSchema
 from contest.tasks.util import *
 
 db = get_current_db()
@@ -57,7 +57,7 @@ def variant_self(id_contest):
 
 @module.route(
     '/contest/<int:id_contest>/tasks/self',
-    methods=['GET'], output_schema=AllTaskSchema)
+    methods=['GET'], output_schema=AllTaskResponseTaskParticipantSchema)
 def task_all(id_contest):
     """
     Get tasks for user in current variant
@@ -78,7 +78,7 @@ def task_all(id_contest):
           description: OK
           content:
             application/json:
-              schema: VariantSchema
+              schema: AllTaskResponseTaskParticipantSchema
         '400':
           description: Bad request
         '409':
@@ -182,13 +182,12 @@ def task_image(id_contest, id_task):
                      mimetype='image/jpeg'), 200
 
 
-
 # Certificate
 
 
 @module.route(
     '/contest/<int:id_contest>/certificate/self',
-    methods=['GET'], output_schema=UserCertificateSchema)
+    methods=['GET'], output_schema=UserCertificateResponseTaskControlUsersSchema)
 def users_certificate(id_contest):
     """
     Get user certificate
@@ -224,7 +223,7 @@ def users_certificate(id_contest):
 
 @module.route(
     '/olympiad/<int:id_olympiad>/stage/<int:id_stage>/contest/all',
-    methods=['GET'], output_schema=AllOlympiadsSchema)
+    methods=['GET'], output_schema=AllOlympiadsResponseTaskUnauthorizedSchema)
 def contest_all_self(id_olympiad, id_stage):
     """
     Get all contests in stage
@@ -251,7 +250,7 @@ def contest_all_self(id_olympiad, id_stage):
           description: OK
           content:
             application/json:
-              schema: AllOlympiadsSchema
+              schema: AllOlympiadsResponseTaskUnauthorizedSchema
         '400':
           description: Bad request
         '409':
@@ -266,9 +265,9 @@ def contest_all_self(id_olympiad, id_stage):
     all_contest = [contest_
                    for contest_ in stage.contests
                    if is_user_in_contest(jwt_get_id(), contest_)]
-    return{
-              "contest_list": all_contest
-          }, 200
+    return {
+               "contest_list": all_contest
+           }, 200
 
 
 @module.route(

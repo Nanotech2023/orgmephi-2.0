@@ -5,8 +5,8 @@ from marshmallow import EXCLUDE
 
 from common import get_current_app, get_current_module
 from contest.tasks.creator.schemas import *
-from contest.tasks.model_schemas.schemas import SimpleContestSchema, CompositeContestSchema, TaskPlainSchema, \
-    TaskRangeSchema, TaskMultipleSchema
+from contest.tasks.model_schemas.schemas import SimpleContestSchema, CompositeContestSchema, PlainTaskSchema, \
+    RangeTaskSchema, MultipleChoiceTaskSchema
 from contest.tasks.util import *
 
 from flask import send_file
@@ -17,7 +17,8 @@ app = get_current_app()
 
 
 @module.route('/base_olympiad/create', methods=['POST'],
-              input_schema=CreateBaseOlympiadSchema, output_schema=BaseOlympiadIdSchema)
+              input_schema=CreateBaseOlympiadRequestTaskCreatorSchema,
+              output_schema=BaseOlympiadIdResponseTaskCreatorSchema)
 def base_olympiad_create():
     """
     Create base olympiad
@@ -27,7 +28,7 @@ def base_olympiad_create():
         required: true
         content:
           application/json:
-            schema: CreateBaseOlympiadSchema
+            schema: CreateBaseOlympiadRequestTaskCreatorSchema
       security:
         - JWTAccessToken: [ ]
         - CSRFAccessToken: [ ]
@@ -36,7 +37,7 @@ def base_olympiad_create():
           description: OK
           content:
             application/json:
-              schema: BaseOlympiadIdSchema
+              schema: BaseOlympiadIdResponseTaskCreatorSchema
         '400':
           description: Bad request
         '409':
@@ -149,7 +150,8 @@ def base_olympiad_remove(id_base_olympiad):
 
 
 @module.route('/base_olympiad/<int:id_base_olympiad>', methods=['PATCH'],
-              input_schema=UpdateBaseOlympiadSchema, output_schema=GetBaseOlympiadSchema)
+              input_schema=UpdateBaseOlympiadRequestTaskCreatorSchema,
+              output_schema=BaseOlympiadResponseTaskCreatorSchema)
 def base_olympiad_patch(id_base_olympiad):
     """
     Patch base olympiad
@@ -166,7 +168,7 @@ def base_olympiad_patch(id_base_olympiad):
         required: true
         content:
           application/json:
-            schema: UpdateBaseOlympiadSchema
+            schema: UpdateBaseOlympiadRequestTaskCreatorSchema
       security:
         - JWTAccessToken: [ ]
         - CSRFAccessToken: [ ]
@@ -175,7 +177,7 @@ def base_olympiad_patch(id_base_olympiad):
           description: OK
           content:
             application/json:
-              schema: GetBaseOlympiadSchema
+              schema: BaseOlympiadResponseTaskCreatorSchema
         '400':
           description: Bad request
         '409':
@@ -204,7 +206,8 @@ def base_olympiad_patch(id_base_olympiad):
 
 
 @module.route('/base_olympiad/<int:id_base_olympiad>/olympiad/createsimple', methods=['POST'],
-              input_schema=CreateSimpleContestSchema, output_schema=ContestIdSchema)
+              input_schema=CreateSimpleContestRequestTaskCreatorSchema,
+              output_schema=ContestIdResponseTaskCreatorSchema)
 def olympiad_create_simple(id_base_olympiad):
     """
     Create simple contest
@@ -221,7 +224,7 @@ def olympiad_create_simple(id_base_olympiad):
         required: true
         content:
           application/json:
-            schema: CreateSimpleContestSchema
+            schema: CreateSimpleContestRequestTaskCreatorSchema
       security:
         - JWTAccessToken: [ ]
         - CSRFAccessToken: [ ]
@@ -230,7 +233,7 @@ def olympiad_create_simple(id_base_olympiad):
           description: OK
           content:
             application/json:
-              schema: ContestIdSchema
+              schema: ContestIdResponseTaskCreatorSchema
         '400':
           description: Bad request
         '409':
@@ -266,7 +269,8 @@ def olympiad_create_simple(id_base_olympiad):
 
 
 @module.route('/base_olympiad/<int:id_base_olympiad>/olympiad/createcomposite', methods=['POST'],
-              input_schema=CreateCompositeContestSchema, output_schema=ContestIdSchema)
+              input_schema=CreateCompositeContestRequestTaskCreatorSchema,
+              output_schema=ContestIdResponseTaskCreatorSchema)
 def olympiad_create_composite(id_base_olympiad):
     """
     Create composite contest
@@ -283,7 +287,7 @@ def olympiad_create_composite(id_base_olympiad):
         required: true
         content:
           application/json:
-            schema: CreateCompositeContestSchema
+            schema: CreateCompositeContestRequestTaskCreatorSchema
       security:
         - JWTAccessToken: [ ]
         - CSRFAccessToken: [ ]
@@ -292,7 +296,7 @@ def olympiad_create_composite(id_base_olympiad):
           description: OK
           content:
             application/json:
-              schema: ContestIdSchema
+              schema: ContestIdResponseTaskCreatorSchema
         '400':
           description: Bad request
         '409':
@@ -353,7 +357,8 @@ def olympiad_remove(id_base_olympiad, id_olympiad):
 
 
 @module.route('/base_olympiad/<int:id_base_olympiad>/olympiad/<int:id_olympiad>', methods=['PATCH'],
-              input_schema=UpdateContestSchema, output_schema=GetCompositeContestSchema)
+              input_schema=UpdateContestRequestTaskCreatorSchema,
+              output_schema=CompositeContestResponseTaskCreatorSchema)
 def olympiad_patch(id_base_olympiad, id_olympiad):
     """
     Update composite contest
@@ -376,7 +381,7 @@ def olympiad_patch(id_base_olympiad, id_olympiad):
         required: true
         content:
           application/json:
-            schema: UpdateContestSchema
+            schema: UpdateContestRequestTaskCreatorSchema
       security:
         - JWTAccessToken: [ ]
         - CSRFAccessToken: [ ]
@@ -385,7 +390,7 @@ def olympiad_patch(id_base_olympiad, id_olympiad):
           description: OK
           content:
             application/json:
-              schema: GetCompositeContestSchema
+              schema: CompositeContestResponseTaskCreatorSchema
         '400':
           description: Bad request
         '409':
@@ -410,7 +415,8 @@ def olympiad_patch(id_base_olympiad, id_olympiad):
 
 
 @module.route('/olympiad/<int:id_olympiad>/stage/create', methods=['POST'],
-              input_schema=CreateStageSchema, output_schema=StageIdSchema)
+              input_schema=CreateStageRequestTaskCreatorSchema,
+              output_schema=StageIdResponseTaskCreatorSchema)
 def stage_create(id_olympiad):
     """
     Create stage
@@ -427,7 +433,7 @@ def stage_create(id_olympiad):
         required: true
         content:
           application/json:
-            schema: CreateStageSchema
+            schema: CreateStageRequestTaskCreatorSchema
       security:
         - JWTAccessToken: [ ]
         - CSRFAccessToken: [ ]
@@ -436,7 +442,7 @@ def stage_create(id_olympiad):
           description: OK
           content:
             application/json:
-              schema: StageIdSchema
+              schema: StageIdResponseTaskCreatorSchema
         '400':
           description: Bad request
         '409':
@@ -507,7 +513,8 @@ def stage_remove(id_olympiad, id_stage):
 
 @module.route('/olympiad/<int:id_olympiad>/stage/<int:id_stage>',
               methods=['PATCH'],
-              input_schema=UpdateStageSchema, output_schema=GetStageSchema)
+              input_schema=UpdateStageRequestTaskCreatorSchema,
+              output_schema=StageResponseTaskCreatorSchema)
 def stage_patch(id_olympiad, id_stage):
     """
     Update stage
@@ -530,7 +537,7 @@ def stage_patch(id_olympiad, id_stage):
         required: true
         content:
           application/json:
-            schema: CreateStageSchema
+            schema: UpdateStageRequestTaskCreatorSchema
       security:
         - JWTAccessToken: [ ]
         - CSRFAccessToken: [ ]
@@ -539,7 +546,7 @@ def stage_patch(id_olympiad, id_stage):
           description: OK
           content:
             application/json:
-              schema: StageIdSchema
+              schema: StageResponseTaskCreatorSchema
         '403':
           description: Invalid role of current user
         '404':
@@ -560,7 +567,8 @@ def stage_patch(id_olympiad, id_stage):
 # Contest views
 @module.route('/olympiad/<int:id_olympiad>/stage/<int:id_stage>/contest/createsimple',
               methods=['POST'],
-              input_schema=CreateSimpleContestSchema, output_schema=ContestIdSchema)
+              input_schema=CreateSimpleContestRequestTaskCreatorSchema,
+              output_schema=ContestIdResponseTaskCreatorSchema)
 def contest_create_simple(id_olympiad, id_stage):
     """
     Create simple contest in stage
@@ -583,7 +591,7 @@ def contest_create_simple(id_olympiad, id_stage):
         required: true
         content:
           application/json:
-            schema: CreateSimpleContestSchema
+            schema: CreateSimpleContestRequestTaskCreatorSchema
       security:
         - JWTAccessToken: [ ]
         - CSRFAccessToken: [ ]
@@ -592,7 +600,7 @@ def contest_create_simple(id_olympiad, id_stage):
           description: OK
           content:
             application/json:
-              schema: ContestIdSchema
+              schema: ContestIdResponseTaskCreatorSchema
         '400':
           description: Bad request
         '409':
@@ -685,7 +693,8 @@ def contest_remove(id_olympiad, id_stage, id_contest):
 @module.route(
     '/olympiad/<int:id_olympiad>/stage/<int:id_stage>/contest/<int:id_contest>',
     methods=['PATCH'],
-    input_schema=UpdateContestSchema, output_schema=GetCompositeContestSchema)
+    input_schema=UpdateContestRequestTaskCreatorSchema,
+    output_schema=CompositeContestResponseTaskCreatorSchema)
 def contest_patch(id_olympiad, id_stage, id_contest):
     """
     Update simple contest in stage
@@ -714,7 +723,7 @@ def contest_patch(id_olympiad, id_stage, id_contest):
         required: true
         content:
           application/json:
-            schema: UpdateContestSchema
+            schema: UpdateContestRequestTaskCreatorSchema
       security:
         - JWTAccessToken: [ ]
         - CSRFAccessToken: [ ]
@@ -723,7 +732,7 @@ def contest_patch(id_olympiad, id_stage, id_contest):
           description: OK
           content:
             application/json:
-              schema: GetCompositeContestSchema
+              schema: CompositeContestResponseTaskCreatorSchema
         '400':
           description: Bad request
         '404':
@@ -743,7 +752,7 @@ def contest_patch(id_olympiad, id_stage, id_contest):
 
 @module.route(
     '/olympiad/<int:id_olympiad>/stage/<int:id_stage>/contest/<int:id_contest>/add_previous',
-    methods=['PATCH'], input_schema=UpdatePreviousContestSchema)
+    methods=['PATCH'], input_schema=UpdatePreviousContestRequestTaskCreatorSchema)
 def contest_add_previous(id_olympiad, id_stage, id_contest):
     """
     Update composite contest in stage
@@ -772,7 +781,7 @@ def contest_add_previous(id_olympiad, id_stage, id_contest):
         required: true
         content:
           application/json:
-            schema: UpdatePreviousContestSchema
+            schema: UpdatePreviousContestRequestTaskCreatorSchema
       security:
         - JWTAccessToken: [ ]
         - CSRFAccessToken: [ ]
@@ -793,7 +802,7 @@ def contest_add_previous(id_olympiad, id_stage, id_contest):
 
 
 @module.route('/olympiad/<int:id_olympiad>/stage/<int:id_stage>/contest/all',
-              methods=['GET'], output_schema=GetAllOlympiadsSchema)
+              methods=['GET'], output_schema=AllOlympiadsResponseTaskCreatorSchema)
 def contests_all(id_olympiad, id_stage):
     """
     Update composite contest in stage
@@ -820,7 +829,7 @@ def contests_all(id_olympiad, id_stage):
           description: OK
           content:
             application/json:
-              schema: GetAllStagesSchema
+              schema: AllOlympiadsResponseTaskCreatorSchema
         '400':
           description: Bad request
         '409':
@@ -840,7 +849,8 @@ def contests_all(id_olympiad, id_stage):
 @module.route(
     '/contest/<int:id_contest>/variant/create',
     methods=['POST'],
-    input_schema=CreateVariantSchema, output_schema=VariantIdSchema)
+    input_schema=CreateVariantRequestTaskCreatorSchema,
+    output_schema=VariantIdResponseTaskCreatorSchema)
 def variant_create(id_contest):
     """
     Variant creation
@@ -857,7 +867,7 @@ def variant_create(id_contest):
         required: true
         content:
           application/json:
-            schema: CreateVariantSchema
+            schema: CreateVariantRequestTaskCreatorSchema
       security:
         - JWTAccessToken: [ ]
         - CSRFAccessToken: [ ]
@@ -866,7 +876,7 @@ def variant_create(id_contest):
           description: OK
           content:
             application/json:
-              schema: VariantIdSchema
+              schema: VariantIdResponseTaskCreatorSchema
         '400':
           description: Bad request
         '409':
@@ -932,7 +942,7 @@ def variant_remove(id_contest, id_variant):
 
 @module.route(
     '/contest/<int:id_contest>/variant/<int:variant_num>',
-    methods=['GET'], output_schema=GetVariantSchema)
+    methods=['GET'], output_schema=VariantResponseTaskCreatorSchema)
 def variant_get(id_contest, variant_num):
     """
     Get variant
@@ -959,7 +969,7 @@ def variant_get(id_contest, variant_num):
           description: OK
           content:
             application/json:
-              schema: GetVariantSchema
+              schema: VariantResponseTaskCreatorSchema
         '400':
           description: Bad request
         '409':
@@ -972,7 +982,8 @@ def variant_get(id_contest, variant_num):
 @module.route(
     '/contest/<int:id_contest>/variant/<int:variant_num>',
     methods=['PATCH'],
-    input_schema=UpdateVariantSchema, output_schema=GetVariantSchema)
+    input_schema=UpdateVariantRequestTaskCreatorSchema,
+    output_schema=VariantResponseTaskCreatorSchema)
 def variant_patch(id_contest, variant_num):
     """
     Variant patch
@@ -995,7 +1006,7 @@ def variant_patch(id_contest, variant_num):
         required: true
         content:
           application/json:
-            schema: UpdateVariantSchema
+            schema: UpdateVariantRequestTaskCreatorSchema
       security:
         - JWTAccessToken: [ ]
         - CSRFAccessToken: [ ]
@@ -1004,7 +1015,7 @@ def variant_patch(id_contest, variant_num):
           description: OK
           content:
             application/json:
-              schema: GetVariantSchema
+              schema: VariantResponseTaskCreatorSchema
         '400':
           description: Bad request
         '409':
@@ -1024,7 +1035,7 @@ def variant_patch(id_contest, variant_num):
 @module.route(
     '/contest/<int:id_contest>/variant/all',
     methods=['GET'],
-    output_schema=GetAllVariantsSchema)
+    output_schema=AllVariantsResponseTaskCreatorSchema)
 def variant_all(id_contest):
     """
     All variants
@@ -1045,7 +1056,7 @@ def variant_all(id_contest):
           description: OK
           content:
             application/json:
-              schema: GetAllVariantsSchema
+              schema: AllVariantsResponseTaskCreatorSchema
         '400':
           description: Bad request
         '409':
@@ -1120,7 +1131,8 @@ def task_image_upload(id_contest, id_variant, id_task):
 @module.route(
     '/contest/<int:id_contest>/variant/<int:id_variant>/task/createplain',
     methods=['POST'],
-    input_schema=CreatePlainSchema, output_schema=TaskIdSchema)
+    input_schema=CreatePlainRequestTaskCreatorSchema,
+    output_schema=TaskIdResponseTaskCreatorSchema)
 def task_create_plain(id_contest, id_variant):
     """
     Create plain task
@@ -1143,7 +1155,7 @@ def task_create_plain(id_contest, id_variant):
         required: true
         content:
           application/json:
-            schema: CreatePlainSchema
+            schema: CreatePlainRequestTaskCreatorSchema
       security:
         - JWTAccessToken: [ ]
         - CSRFAccessToken: [ ]
@@ -1152,7 +1164,7 @@ def task_create_plain(id_contest, id_variant):
           description: OK
           content:
             application/json:
-              schema: TaskIdSchema
+              schema: TaskIdResponseTaskCreatorSchema
         '400':
           description: Bad request
         '409':
@@ -1182,7 +1194,7 @@ def task_create_plain(id_contest, id_variant):
 @module.route(
     '/contest/<int:id_contest>/variant/<int:id_variant>/task/createrange',
     methods=['POST'],
-    input_schema=CreateRangeSchema, output_schema=TaskIdSchema)
+    input_schema=CreateRangeRequestTaskCreatorSchema, output_schema=TaskIdResponseTaskCreatorSchema)
 def task_create_range(id_contest, id_variant):
     """
     Create range task
@@ -1205,7 +1217,7 @@ def task_create_range(id_contest, id_variant):
         required: true
         content:
           application/json:
-            schema: CreateRangeSchema
+            schema: CreateRangeRequestTaskCreatorSchema
       security:
         - JWTAccessToken: [ ]
         - CSRFAccessToken: [ ]
@@ -1214,7 +1226,7 @@ def task_create_range(id_contest, id_variant):
           description: OK
           content:
             application/json:
-              schema: TaskIdSchema
+              schema: TaskIdResponseTaskCreatorSchema
         '400':
           description: Bad request
         '409':
@@ -1242,7 +1254,7 @@ def task_create_range(id_contest, id_variant):
 @module.route(
     '/contest/<int:id_contest>/variant/<int:id_variant>/task/createmultiple',
     methods=['POST'],
-    input_schema=CreateMultipleSchema, output_schema=TaskIdSchema)
+    input_schema=CreateMultipleRequestTaskCreatorSchema, output_schema=TaskIdResponseTaskCreatorSchema)
 def task_create_multiple(id_contest, id_variant):
     """
     Create multiple task
@@ -1265,7 +1277,7 @@ def task_create_multiple(id_contest, id_variant):
         required: true
         content:
           application/json:
-            schema: CreateMultipleSchema
+            schema: CreateMultipleRequestTaskCreatorSchema
       security:
         - JWTAccessToken: [ ]
         - CSRFAccessToken: [ ]
@@ -1274,7 +1286,7 @@ def task_create_multiple(id_contest, id_variant):
           description: OK
           content:
             application/json:
-              schema: TaskIdSchema
+              schema: TaskIdResponseTaskCreatorSchema
         '400':
           description: Bad request
         '409':
@@ -1354,7 +1366,7 @@ def task_remove(id_contest, id_variant, id_task):
 @module.route(
     '/contest/<int:id_contest>/variant/<int:id_variant>/task/<int:id_task>',
     methods=['GET'],
-    output_schema=GetTaskSchema)
+    output_schema=TaskResponseTaskCreatorSchema)
 def task_get(id_contest, id_variant, id_task):
     """
     Get task
@@ -1387,7 +1399,7 @@ def task_get(id_contest, id_variant, id_task):
           description: OK
           content:
             application/json:
-              schema: TaskIdSchema
+              schema: TaskResponseTaskCreatorSchema
         '400':
           description: Bad request
         '409':
@@ -1407,7 +1419,7 @@ def check_existence(id_olympiad, id_stage, id_contest, id_variant):
 @module.route(
     '/contest/<int:id_contest>/variant/<int:id_variant>/task/<int:id_task>/plain',
     methods=['PATCH'],
-    input_schema=UpdatePlainSchema, output_schema=GetTaskSchema)
+    input_schema=UpdatePlainRequestTaskCreatorSchema, output_schema=TaskResponseTaskCreatorSchema)
 def task_patch_plain(id_contest, id_variant, id_task):
     """
     Update plain task
@@ -1436,7 +1448,7 @@ def task_patch_plain(id_contest, id_variant, id_task):
         required: true
         content:
           application/json:
-            schema: UpdatePlainSchema
+            schema: UpdatePlainRequestTaskCreatorSchema
       security:
         - JWTAccessToken: [ ]
         - CSRFAccessToken: [ ]
@@ -1445,7 +1457,7 @@ def task_patch_plain(id_contest, id_variant, id_task):
           description: OK
           content:
             application/json:
-              schema: GetTaskSchema
+              schema: TaskResponseTaskCreatorSchema
         '400':
           description: Bad request
         '409':
@@ -1453,7 +1465,7 @@ def task_patch_plain(id_contest, id_variant, id_task):
     """
     task = get_task_if_possible(id_contest, id_variant, id_task)
 
-    TaskPlainSchema(load_instance=True).load(request.json, instance=task, session=db.session,
+    PlainTaskSchema(load_instance=True).load(request.json, instance=task, session=db.session,
                                              partial=False, unknown=EXCLUDE)
 
     db.session.commit()
@@ -1464,7 +1476,7 @@ def task_patch_plain(id_contest, id_variant, id_task):
 @module.route(
     '/contest/<int:id_contest>/variant/<int:id_variant>/task/<int:id_task>/range',
     methods=['PATCH'],
-    input_schema=UpdateRangeSchema, output_schema=GetTaskSchema)
+    input_schema=UpdateRangeRequestTaskCreatorSchema, output_schema=TaskResponseTaskCreatorSchema)
 def task_patch_range(id_contest, id_variant, id_task):
     """
     Update range task
@@ -1493,7 +1505,7 @@ def task_patch_range(id_contest, id_variant, id_task):
         required: true
         content:
           application/json:
-            schema: UpdateRangeSchema
+            schema: UpdateRangeRequestTaskCreatorSchema
       security:
         - JWTAccessToken: [ ]
         - CSRFAccessToken: [ ]
@@ -1502,7 +1514,7 @@ def task_patch_range(id_contest, id_variant, id_task):
           description: OK
           content:
             application/json:
-              schema: GetTaskSchema
+              schema: TaskResponseTaskCreatorSchema
         '400':
           description: Bad request
         '409':
@@ -1510,7 +1522,7 @@ def task_patch_range(id_contest, id_variant, id_task):
     """
     task = get_task_if_possible(id_contest, id_variant, id_task)
 
-    TaskRangeSchema(load_instance=True).load(request.json, instance=task, session=db.session,
+    RangeTaskSchema(load_instance=True).load(request.json, instance=task, session=db.session,
                                              partial=False, unknown=EXCLUDE)
 
     db.session.commit()
@@ -1521,7 +1533,7 @@ def task_patch_range(id_contest, id_variant, id_task):
 @module.route(
     '/contest/<int:id_contest>/variant/<int:id_variant>/task/<int:id_task>/multiple',
     methods=['PATCH'],
-    input_schema=UpdateMultipleSchema, output_schema=GetTaskSchema)
+    input_schema=UpdateMultipleRequestTaskCreatorSchema, output_schema=TaskResponseTaskCreatorSchema)
 def task_patch_multiple(id_contest, id_variant, id_task):
     """
     Update multiple task
@@ -1550,7 +1562,7 @@ def task_patch_multiple(id_contest, id_variant, id_task):
         required: true
         content:
           application/json:
-            schema: UpdateMultipleSchema
+            schema: UpdateMultipleRequestTaskCreatorSchema
       security:
         - JWTAccessToken: [ ]
         - CSRFAccessToken: [ ]
@@ -1559,7 +1571,7 @@ def task_patch_multiple(id_contest, id_variant, id_task):
           description: OK
           content:
             application/json:
-              schema: GetTaskSchema
+              schema: TaskResponseTaskCreatorSchema
         '400':
           description: Bad request
         '409':
@@ -1570,8 +1582,8 @@ def task_patch_multiple(id_contest, id_variant, id_task):
     answers = values['answers']
     del values['answers']
 
-    TaskMultipleSchema(load_instance=True).load(values, instance=task, session=db.session,
-                                                partial=False, unknown=EXCLUDE)
+    MultipleChoiceTaskSchema(load_instance=True).load(values, instance=task, session=db.session,
+                                                      partial=False, unknown=EXCLUDE)
     task.answers = [
         {
             "answer": answer['answer'],
@@ -1586,7 +1598,7 @@ def task_patch_multiple(id_contest, id_variant, id_task):
 @module.route(
     '/contest/<int:id_contest>/variant/<int:id_variant>/task/all',
     methods=['GET'],
-    output_schema=GetAllTasksSchema)
+    output_schema=AllTasksResponseTaskCreatorSchema)
 def task_all(id_contest, id_variant):
     """
     Update multiple task
@@ -1613,7 +1625,7 @@ def task_all(id_contest, id_variant):
           description: OK
           content:
             application/json:
-              schema: GetAllTasksSchema
+              schema: AllTasksResponseTaskCreatorSchema
         '400':
           description: Bad request
         '409':
@@ -1623,6 +1635,7 @@ def task_all(id_contest, id_variant):
     return {
                "tasks_list": tasks
            }, 200
+
 
 @module.route(
     '/contest/<int:id_contest>/variant/<int:id_variant>/tasks/<int:id_task>/image',
@@ -1675,6 +1688,3 @@ def task_image(id_contest, id_variant, id_task):
     return send_file(io.BytesIO(task.image_of_task),
                      attachment_filename='task_image.png',
                      mimetype='image/jpeg'), 200
-
-
-

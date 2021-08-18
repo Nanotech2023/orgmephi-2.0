@@ -1,6 +1,6 @@
 components:
   schemas:
-    AllBaseContest:
+    AllBaseContestResponseTaskUnauthorized:
       properties:
         olympiad_list:
           items:
@@ -9,7 +9,7 @@ components:
       required:
       - olympiad_list
       type: object
-    AllOlympiadTypes:
+    AllOlympiadTypesResponseTaskUnauthorized:
       properties:
         olympiad_types:
           items:
@@ -18,7 +18,16 @@ components:
       required:
       - olympiad_types
       type: object
-    AllOlympiads:
+    AllOlympiadsResponseTaskCreator:
+      properties:
+        olympiad_list:
+          items:
+            $ref: '#/components/schemas/Contest'
+          type: array
+      required:
+      - olympiad_list
+      type: object
+    AllOlympiadsResponseTaskUnauthorized:
       properties:
         contest_list:
           items:
@@ -27,7 +36,7 @@ components:
       required:
       - contest_list
       type: object
-    AllStages:
+    AllStagesResponseTaskUnauthorized:
       properties:
         stages_list:
           items:
@@ -36,7 +45,34 @@ components:
       required:
       - stages_list
       type: object
-    AnswersInTask:
+    AllTaskResponseTaskParticipant:
+      properties:
+        tasks_list:
+          items:
+            $ref: '#/components/schemas/Task'
+          type: array
+      required:
+      - tasks_list
+      type: object
+    AllTasksResponseTaskCreator:
+      properties:
+        tasks_list:
+          items:
+            $ref: '#/components/schemas/Task'
+          type: array
+      required:
+      - tasks_list
+      type: object
+    AllVariantsResponseTaskCreator:
+      properties:
+        variants_list:
+          items:
+            $ref: '#/components/schemas/Variant'
+          type: array
+      required:
+      - variants_list
+      type: object
+    AnswersInTaskRequestTaskCreator:
       properties:
         answer:
           maxLength: 1024
@@ -95,20 +131,64 @@ components:
       - target_classes
       - winning_condition
       type: object
-    BaseOlympiadId:
+    BaseOlympiadIdResponseTaskCreator:
       properties:
         base_contest_id:
           type: integer
       required:
       - base_contest_id
+      type: object
+    BaseOlympiadResponseTaskCreator:
+      properties:
+        base_contest_id:
+          type: integer
+        description:
+          maxLength: 1024
+          type: string
+        laureate_condition:
+          type: number
+        name:
+          maxLength: 32
+          type: string
+        olympiad_type_id:
+          type: integer
+        rules:
+          maxLength: 1024
+          type: string
+        subject:
+          enum:
+          - Math
+          - Physics
+          - Informatics
+          type: string
+        target_classes:
+          items:
+            enum:
+            - '5'
+            - '6'
+            - '7'
+            - '8'
+            - '9'
+            - '10'
+            - '11'
+            - student
+            type: string
+          type: array
+        winning_condition:
+          type: number
+      required:
+      - base_contest_id
+      - description
+      - laureate_condition
+      - name
+      - olympiad_type_id
+      - rules
+      - subject
+      - target_classes
+      - winning_condition
       type: object
     CompositeContest:
       properties:
-        composite_type:
-          enum:
-          - CompositeContest
-          readOnly: true
-          type: string
         contest_id:
           readOnly: true
           type: integer
@@ -118,257 +198,7 @@ components:
       - contest_id
       - visibility
       type: object
-    Contest:
-      discriminator:
-        mapping:
-          CompositeContest: '#/components/schemas/CompositeContest'
-          SimpleContest: '#/components/schemas/SimpleContest'
-        propertyName: composite_type
-      oneOf:
-      - $ref: '#/components/schemas/SimpleContest'
-      - $ref: '#/components/schemas/CompositeContest'
-    ContestId:
-      properties:
-        contest_id:
-          type: integer
-      required:
-      - contest_id
-      type: object
-    CreateBaseOlympiad:
-      properties:
-        description:
-          maxLength: 1024
-          type: string
-        laureate_condition:
-          type: number
-        name:
-          maxLength: 32
-          type: string
-        olympiad_type_id:
-          type: integer
-        rules:
-          maxLength: 1024
-          type: string
-        subject:
-          enum:
-          - Math
-          - Physics
-          - Informatics
-          type: string
-        target_classes:
-          items:
-            enum:
-            - '5'
-            - '6'
-            - '7'
-            - '8'
-            - '9'
-            - '10'
-            - '11'
-            - student
-            type: string
-          type: array
-        winning_condition:
-          type: number
-      required:
-      - description
-      - laureate_condition
-      - name
-      - olympiad_type_id
-      - rules
-      - subject
-      - target_classes
-      - winning_condition
-      type: object
-    CreateCompositeContest:
-      properties:
-        visibility:
-          type: boolean
-      required:
-      - visibility
-      type: object
-    CreateMultiple:
-      properties:
-        answers:
-          items:
-            $ref: '#/components/schemas/AnswersInTask'
-          type: array
-        num_of_task:
-          type: integer
-      required:
-      - answers
-      - num_of_task
-      type: object
-    CreateOlympiadType:
-      properties:
-        olympiad_type_id:
-          type: integer
-      required:
-      - olympiad_type_id
-      type: object
-    CreateOlympiadTypeRequestAdmin:
-      properties:
-        olympiad_type:
-          maxLength: 32
-          type: string
-      required:
-      - olympiad_type
-      type: object
-    CreatePlain:
-      properties:
-        num_of_task:
-          type: integer
-        recommended_answer:
-          maxLength: 1024
-          type: string
-      required:
-      - num_of_task
-      - recommended_answer
-      type: object
-    CreateRange:
-      properties:
-        end_value:
-          type: number
-        num_of_task:
-          type: integer
-        start_value:
-          type: number
-      required:
-      - end_value
-      - num_of_task
-      - start_value
-      type: object
-    CreateSimpleContest:
-      properties:
-        end_time:
-          format: date-time
-          type: string
-        location:
-          maxLength: 128
-          type: string
-        previous_contest_id:
-          type: integer
-        previous_participation_condition:
-          maxLength: 1024
-          type: string
-        start_time:
-          format: date-time
-          type: string
-        visibility:
-          type: boolean
-      required:
-      - end_time
-      - location
-      - start_time
-      - visibility
-      type: object
-    CreateStage:
-      properties:
-        condition:
-          enum:
-          - 'No'
-          - And
-          - Or
-          type: string
-        stage_name:
-          maxLength: 32
-          type: string
-        stage_num:
-          type: integer
-        this_stage_condition:
-          maxLength: 1024
-          type: string
-      required:
-      - condition
-      - stage_name
-      - stage_num
-      - this_stage_condition
-      type: object
-    CreateVariant:
-      properties:
-        variant_description:
-          maxLength: 1024
-          type: string
-      required:
-      - variant_description
-      type: object
-    GetAllStages:
-      properties:
-        stages_list:
-          items:
-            $ref: '#/components/schemas/Stage'
-          type: array
-      required:
-      - stages_list
-      type: object
-    GetAllTasks:
-      properties:
-        tasks_list:
-          items:
-            $ref: '#/components/schemas/Task'
-          type: array
-      required:
-      - tasks_list
-      type: object
-    GetAllVariants:
-      properties:
-        variants_list:
-          items:
-            $ref: '#/components/schemas/Variant'
-          type: array
-      required:
-      - variants_list
-      type: object
-    GetBaseOlympiad:
-      properties:
-        base_contest_id:
-          type: integer
-        description:
-          maxLength: 1024
-          type: string
-        laureate_condition:
-          type: number
-        name:
-          maxLength: 32
-          type: string
-        olympiad_type_id:
-          type: integer
-        rules:
-          maxLength: 1024
-          type: string
-        subject:
-          enum:
-          - Math
-          - Physics
-          - Informatics
-          type: string
-        target_classes:
-          items:
-            enum:
-            - '5'
-            - '6'
-            - '7'
-            - '8'
-            - '9'
-            - '10'
-            - '11'
-            - student
-            type: string
-          type: array
-        winning_condition:
-          type: number
-      required:
-      - base_contest_id
-      - description
-      - laureate_condition
-      - name
-      - olympiad_type_id
-      - rules
-      - subject
-      - target_classes
-      - winning_condition
-      type: object
-    GetCompositeContest:
+    CompositeContestResponseTaskCreator:
       properties:
         contest_id:
           type: integer
@@ -392,42 +222,185 @@ components:
       - contest_id
       - visibility
       type: object
-    GetTask:
+    Contest:
+      discriminator:
+        mapping:
+          CompositeContest: '#/components/schemas/CompositeContest'
+          SimpleContest: '#/components/schemas/SimpleContest'
+        propertyName: composite_type
+      oneOf:
+      - $ref: '#/components/schemas/SimpleContest'
+      - $ref: '#/components/schemas/CompositeContest'
+    ContestIdResponseTaskCreator:
+      properties:
+        contest_id:
+          type: integer
+      required:
+      - contest_id
+      type: object
+    CreateBaseOlympiadRequestTaskCreator:
+      properties:
+        description:
+          maxLength: 1024
+          type: string
+        laureate_condition:
+          type: number
+        name:
+          maxLength: 32
+          type: string
+        olympiad_type_id:
+          type: integer
+        rules:
+          maxLength: 1024
+          type: string
+        subject:
+          enum:
+          - Math
+          - Physics
+          - Informatics
+          type: string
+        target_classes:
+          items:
+            enum:
+            - '5'
+            - '6'
+            - '7'
+            - '8'
+            - '9'
+            - '10'
+            - '11'
+            - student
+            type: string
+          type: array
+        winning_condition:
+          type: number
+      required:
+      - description
+      - laureate_condition
+      - name
+      - olympiad_type_id
+      - rules
+      - subject
+      - target_classes
+      - winning_condition
+      type: object
+    CreateCompositeContestRequestTaskCreator:
+      properties:
+        visibility:
+          type: boolean
+      required:
+      - visibility
+      type: object
+    CreateMultipleRequestTaskCreator:
       properties:
         answers:
           items:
-            $ref: '#/components/schemas/AnswersInTask'
+            $ref: '#/components/schemas/AnswersInTaskRequestTaskCreator'
           type: array
-        end_value:
-          type: number
-        image_of_task: {}
+        num_of_task:
+          type: integer
+      required:
+      - answers
+      - num_of_task
+      type: object
+    CreateOlympiadTypeRequestTaskAdmin:
+      properties:
+        olympiad_type:
+          maxLength: 32
+          type: string
+      required:
+      - olympiad_type
+      type: object
+    CreatePlainRequestTaskCreator:
+      properties:
         num_of_task:
           type: integer
         recommended_answer:
           maxLength: 1024
           type: string
+      required:
+      - num_of_task
+      - recommended_answer
+      type: object
+    CreateRangeRequestTaskCreator:
+      properties:
+        end_value:
+          type: number
+        num_of_task:
+          type: integer
         start_value:
           type: number
-        task_id:
-          type: integer
       required:
-      - image_of_task
+      - end_value
       - num_of_task
-      - task_id
+      - start_value
       type: object
-    GetVariant:
+    CreateSimpleContestRequestTaskCreator:
+      properties:
+        end_time:
+          format: date-time
+          type: string
+        location:
+          maxLength: 128
+          type: string
+        previous_contest_id:
+          type: integer
+        previous_participation_condition:
+          maxLength: 1024
+          type: string
+        start_time:
+          format: date-time
+          type: string
+        visibility:
+          type: boolean
+      required:
+      - end_time
+      - location
+      - start_time
+      - visibility
+      type: object
+    CreateStageRequestTaskCreator:
+      properties:
+        condition:
+          enum:
+          - 'No'
+          - And
+          - Or
+          type: string
+        stage_name:
+          maxLength: 32
+          type: string
+        stage_num:
+          type: integer
+        this_stage_condition:
+          maxLength: 1024
+          type: string
+      required:
+      - condition
+      - stage_name
+      - stage_num
+      - this_stage_condition
+      type: object
+    CreateVariantRequestTaskCreator:
       properties:
         variant_description:
           maxLength: 1024
           type: string
-        variant_id:
-          type: integer
-        variant_number:
-          type: integer
       required:
       - variant_description
-      - variant_id
-      - variant_number
+      type: object
+    MultipleChoiceTask:
+      properties:
+        answers:
+          nullable: true
+          type: string
+        num_of_task:
+          type: integer
+        task_id:
+          readOnly: true
+          type: integer
+      required:
+      - task_id
       type: object
     OlympiadType:
       properties:
@@ -440,13 +413,47 @@ components:
       required:
       - olympiad_type
       type: object
+    OlympiadTypeResponseTaskAdmin:
+      properties:
+        olympiad_type_id:
+          type: integer
+      required:
+      - olympiad_type_id
+      type: object
+    PlainTask:
+      properties:
+        num_of_task:
+          type: integer
+        recommended_answer:
+          maxLength: 1024
+          type: string
+        task_id:
+          readOnly: true
+          type: integer
+      required:
+      - num_of_task
+      - recommended_answer
+      - task_id
+      type: object
+    RangeTask:
+      properties:
+        end_value:
+          type: number
+        num_of_task:
+          type: integer
+        start_value:
+          type: number
+        task_id:
+          readOnly: true
+          type: integer
+      required:
+      - end_value
+      - num_of_task
+      - start_value
+      - task_id
+      type: object
     SimpleContest:
       properties:
-        composite_type:
-          enum:
-          - SimpleContest
-          readOnly: true
-          type: string
         contest_id:
           readOnly: true
           type: integer
@@ -509,92 +516,80 @@ components:
       - stage_num
       - this_stage_condition
       type: object
-    StageId:
+    StageIdResponseTaskCreator:
       properties:
         stage_id:
           type: integer
       required:
       - stage_id
       type: object
+    StageResponseTaskCreator:
+      properties:
+        condition:
+          enum:
+          - 'No'
+          - And
+          - Or
+          type: string
+        stage_id:
+          type: integer
+        stage_name:
+          maxLength: 32
+          type: string
+        stage_num:
+          type: integer
+        this_stage_condition:
+          maxLength: 1024
+          type: string
+      required:
+      - condition
+      - stage_id
+      - stage_name
+      - stage_num
+      - this_stage_condition
+      type: object
     Task:
       discriminator:
         mapping:
-          MultipleChoiceTask: '#/components/schemas/TaskMultiple'
-          PlainTask: '#/components/schemas/TaskPlain'
-          RangeTask: '#/components/schemas/TaskRange'
+          MultipleChoiceTask: '#/components/schemas/MultipleChoiceTask'
+          PlainTask: '#/components/schemas/PlainTask'
+          RangeTask: '#/components/schemas/RangeTask'
         propertyName: task_type
       oneOf:
-      - $ref: '#/components/schemas/TaskPlain'
-      - $ref: '#/components/schemas/TaskRange'
-      - $ref: '#/components/schemas/TaskMultiple'
-    TaskId:
+      - $ref: '#/components/schemas/PlainTask'
+      - $ref: '#/components/schemas/RangeTask'
+      - $ref: '#/components/schemas/MultipleChoiceTask'
+    TaskIdResponseTaskCreator:
       properties:
         task_id:
           type: integer
       required:
       - task_id
       type: object
-    TaskMultiple:
+    TaskResponseTaskCreator:
       properties:
         answers:
-          nullable: true
-          type: string
-        num_of_task:
-          type: integer
-        task_id:
-          readOnly: true
-          type: integer
-        task_type:
-          enum:
-          - MultipleChoiceTask
-          readOnly: true
-          type: string
-      required:
-      - task_id
-      type: object
-    TaskPlain:
-      properties:
+          items:
+            $ref: '#/components/schemas/AnswersInTaskRequestTaskCreator'
+          type: array
+        end_value:
+          type: number
+        image_of_task: {}
         num_of_task:
           type: integer
         recommended_answer:
           maxLength: 1024
           type: string
-        task_id:
-          readOnly: true
-          type: integer
-        task_type:
-          enum:
-          - PlainTask
-          readOnly: true
-          type: string
-      required:
-      - num_of_task
-      - recommended_answer
-      - task_id
-      type: object
-    TaskRange:
-      properties:
-        end_value:
-          type: number
-        num_of_task:
-          type: integer
         start_value:
           type: number
         task_id:
-          readOnly: true
           type: integer
-        task_type:
-          enum:
-          - RangeTask
-          readOnly: true
-          type: string
       required:
-      - end_value
+      - image_of_task
       - num_of_task
-      - start_value
       - task_id
       type: object
-    UpdateBaseOlympiad:
+    UpdateBaseOlympiadRequestTaskCreator:
       properties:
         description:
           maxLength: 1024
@@ -633,7 +628,7 @@ components:
       required:
       - target_classes
       type: object
-    UpdateContest:
+    UpdateContestRequestTaskCreator:
       properties:
         end_date:
           format: date-time
@@ -652,16 +647,16 @@ components:
         visibility:
           type: boolean
       type: object
-    UpdateMultiple:
+    UpdateMultipleRequestTaskCreator:
       properties:
         answers:
           items:
-            $ref: '#/components/schemas/AnswersInTask'
+            $ref: '#/components/schemas/AnswersInTaskRequestTaskCreator'
           type: array
         num_of_task:
           type: integer
       type: object
-    UpdatePlain:
+    UpdatePlainRequestTaskCreator:
       properties:
         num_of_task:
           type: integer
@@ -669,7 +664,7 @@ components:
           maxLength: 1024
           type: string
       type: object
-    UpdatePreviousContest:
+    UpdatePreviousContestRequestTaskCreator:
       properties:
         previous_contest_id:
           type: integer
@@ -680,7 +675,7 @@ components:
       - previous_contest_id
       - previous_participation_condition
       type: object
-    UpdateRange:
+    UpdateRangeRequestTaskCreator:
       properties:
         end_value:
           type: number
@@ -689,7 +684,24 @@ components:
         start_value:
           type: number
       type: object
-    UpdateUserInRequestCreator:
+    UpdateStageRequestTaskCreator:
+      properties:
+        condition:
+          enum:
+          - 'No'
+          - And
+          - Or
+          type: string
+        stage_name:
+          maxLength: 32
+          type: string
+        stage_num:
+          type: integer
+        this_stage_condition:
+          maxLength: 1024
+          type: string
+      type: object
+    UpdateUserInContestRequestTaskControlUsers:
       properties:
         users_id:
           items:
@@ -698,7 +710,7 @@ components:
       required:
       - users_id
       type: object
-    UpdateVariant:
+    UpdateVariantRequestTaskCreator:
       properties:
         variant_description:
           maxLength: 1024
@@ -725,7 +737,7 @@ components:
       - user_id
       - user_status
       type: object
-    UsersResponse:
+    UsersResponseTaskControlUsers:
       properties:
         user_list:
           items:
@@ -753,12 +765,26 @@ components:
       - variant_description
       - variant_number
       type: object
-    VariantId:
+    VariantIdResponseTaskCreator:
       properties:
         variant_id:
           type: integer
       required:
       - variant_id
+      type: object
+    VariantResponseTaskCreator:
+      properties:
+        variant_description:
+          maxLength: 1024
+          type: string
+        variant_id:
+          type: integer
+        variant_number:
+          type: integer
+      required:
+      - variant_description
+      - variant_id
+      - variant_number
       type: object
   securitySchemes:
     CSRFAccessToken:
@@ -788,14 +814,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/CreateBaseOlympiad'
+              $ref: '#/components/schemas/CreateBaseOlympiadRequestTaskCreator'
         required: true
       responses:
         '200':
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/BaseOlympiadId'
+                $ref: '#/components/schemas/BaseOlympiadIdResponseTaskCreator'
           description: OK
         '400':
           description: Bad request
@@ -864,14 +890,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/UpdateBaseOlympiad'
+              $ref: '#/components/schemas/UpdateBaseOlympiadRequestTaskCreator'
         required: true
       responses:
         '200':
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/GetBaseOlympiad'
+                $ref: '#/components/schemas/BaseOlympiadResponseTaskCreator'
           description: OK
         '400':
           description: Bad request
@@ -893,14 +919,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/CreateSimpleContest'
+              $ref: '#/components/schemas/CreateSimpleContestRequestTaskCreator'
         required: true
       responses:
         '200':
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ContestId'
+                $ref: '#/components/schemas/ContestIdResponseTaskCreator'
           description: OK
         '400':
           description: Bad request
@@ -922,14 +948,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/CreateCompositeContest'
+              $ref: '#/components/schemas/CreateCompositeContestRequestTaskCreator'
         required: true
       responses:
         '200':
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ContestId'
+                $ref: '#/components/schemas/ContestIdResponseTaskCreator'
           description: OK
         '400':
           description: Bad request
@@ -982,14 +1008,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/UpdateContest'
+              $ref: '#/components/schemas/UpdateContestRequestTaskCreator'
         required: true
       responses:
         '200':
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/GetCompositeContest'
+                $ref: '#/components/schemas/CompositeContestResponseTaskCreator'
           description: OK
         '400':
           description: Bad request
@@ -1011,14 +1037,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/CreateStage'
+              $ref: '#/components/schemas/CreateStageRequestTaskCreator'
         required: true
       responses:
         '200':
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/StageId'
+                $ref: '#/components/schemas/StageIdResponseTaskCreator'
           description: OK
         '400':
           description: Bad request
@@ -1071,14 +1097,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/CreateStage'
+              $ref: '#/components/schemas/UpdateStageRequestTaskCreator'
         required: true
       responses:
         '200':
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/StageId'
+                $ref: '#/components/schemas/StageResponseTaskCreator'
           description: OK
         '403':
           description: Invalid role of current user
@@ -1106,14 +1132,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/CreateSimpleContest'
+              $ref: '#/components/schemas/CreateSimpleContestRequestTaskCreator'
         required: true
       responses:
         '200':
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ContestId'
+                $ref: '#/components/schemas/ContestIdResponseTaskCreator'
           description: OK
         '400':
           description: Bad request
@@ -1178,14 +1204,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/UpdateContest'
+              $ref: '#/components/schemas/UpdateContestRequestTaskCreator'
         required: true
       responses:
         '200':
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/GetCompositeContest'
+                $ref: '#/components/schemas/CompositeContestResponseTaskCreator'
           description: OK
         '400':
           description: Bad request
@@ -1221,7 +1247,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/UpdatePreviousContest'
+              $ref: '#/components/schemas/UpdatePreviousContestRequestTaskCreator'
         required: true
       responses:
         '200':
@@ -1253,7 +1279,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/GetAllStages'
+                $ref: '#/components/schemas/AllOlympiadsResponseTaskCreator'
           description: OK
         '400':
           description: Bad request
@@ -1275,14 +1301,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/CreateVariant'
+              $ref: '#/components/schemas/CreateVariantRequestTaskCreator'
         required: true
       responses:
         '200':
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/VariantId'
+                $ref: '#/components/schemas/VariantIdResponseTaskCreator'
           description: OK
         '400':
           description: Bad request
@@ -1336,7 +1362,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/GetVariant'
+                $ref: '#/components/schemas/VariantResponseTaskCreator'
           description: OK
         '400':
           description: Bad request
@@ -1363,14 +1389,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/UpdateVariant'
+              $ref: '#/components/schemas/UpdateVariantRequestTaskCreator'
         required: true
       responses:
         '200':
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/GetVariant'
+                $ref: '#/components/schemas/VariantResponseTaskCreator'
           description: OK
         '400':
           description: Bad request
@@ -1393,7 +1419,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/GetAllVariants'
+                $ref: '#/components/schemas/AllVariantsResponseTaskCreator'
           description: OK
         '400':
           description: Bad request
@@ -1461,14 +1487,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/CreatePlain'
+              $ref: '#/components/schemas/CreatePlainRequestTaskCreator'
         required: true
       responses:
         '200':
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/TaskId'
+                $ref: '#/components/schemas/TaskIdResponseTaskCreator'
           description: OK
         '400':
           description: Bad request
@@ -1496,14 +1522,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/CreateRange'
+              $ref: '#/components/schemas/CreateRangeRequestTaskCreator'
         required: true
       responses:
         '200':
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/TaskId'
+                $ref: '#/components/schemas/TaskIdResponseTaskCreator'
           description: OK
         '400':
           description: Bad request
@@ -1531,14 +1557,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/CreateMultiple'
+              $ref: '#/components/schemas/CreateMultipleRequestTaskCreator'
         required: true
       responses:
         '200':
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/TaskId'
+                $ref: '#/components/schemas/TaskIdResponseTaskCreator'
           description: OK
         '400':
           description: Bad request
@@ -1604,7 +1630,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/TaskId'
+                $ref: '#/components/schemas/TaskResponseTaskCreator'
           description: OK
         '400':
           description: Bad request
@@ -1638,14 +1664,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/UpdatePlain'
+              $ref: '#/components/schemas/UpdatePlainRequestTaskCreator'
         required: true
       responses:
         '200':
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/GetTask'
+                $ref: '#/components/schemas/TaskResponseTaskCreator'
           description: OK
         '400':
           description: Bad request
@@ -1679,14 +1705,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/UpdateRange'
+              $ref: '#/components/schemas/UpdateRangeRequestTaskCreator'
         required: true
       responses:
         '200':
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/GetTask'
+                $ref: '#/components/schemas/TaskResponseTaskCreator'
           description: OK
         '400':
           description: Bad request
@@ -1720,14 +1746,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/UpdateMultiple'
+              $ref: '#/components/schemas/UpdateMultipleRequestTaskCreator'
         required: true
       responses:
         '200':
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/GetTask'
+                $ref: '#/components/schemas/TaskResponseTaskCreator'
           description: OK
         '400':
           description: Bad request
@@ -1756,7 +1782,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/GetAllTasks'
+                $ref: '#/components/schemas/AllTasksResponseTaskCreator'
           description: OK
         '400':
           description: Bad request
@@ -1807,14 +1833,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/CreateOlympiadTypeRequestAdmin'
+              $ref: '#/components/schemas/CreateOlympiadTypeRequestTaskAdmin'
         required: true
       responses:
         '200':
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/CreateOlympiadType'
+                $ref: '#/components/schemas/OlympiadTypeResponseTaskAdmin'
           description: OK
         '400':
           description: Bad request
@@ -1883,7 +1909,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Variant'
+                $ref: '#/components/schemas/AllTaskResponseTaskParticipant'
           description: OK
         '400':
           description: Bad request
@@ -1996,7 +2022,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/AllOlympiads'
+                $ref: '#/components/schemas/AllOlympiadsResponseTaskUnauthorized'
           description: OK
         '400':
           description: Bad request
@@ -2051,7 +2077,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/AllOlympiadTypes'
+                $ref: '#/components/schemas/AllOlympiadTypesResponseTaskUnauthorized'
           description: OK
         '400':
           description: Bad request
@@ -2088,7 +2114,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/AllBaseContest'
+                $ref: '#/components/schemas/AllBaseContestResponseTaskUnauthorized'
           description: OK
         '400':
           description: Bad request
@@ -2132,7 +2158,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/AllOlympiads'
+                $ref: '#/components/schemas/AllOlympiadsResponseTaskUnauthorized'
           description: OK
         '400':
           description: Bad request
@@ -2210,7 +2236,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/AllStages'
+                $ref: '#/components/schemas/AllStagesResponseTaskUnauthorized'
           description: OK
         '400':
           description: Bad request
@@ -2231,7 +2257,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/UpdateUserInRequestCreator'
+              $ref: '#/components/schemas/UpdateUserInContestRequestTaskControlUsers'
         required: true
       responses:
         '200':
@@ -2256,7 +2282,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/UpdateUserInRequestCreator'
+              $ref: '#/components/schemas/UpdateUserInContestRequestTaskControlUsers'
         required: true
       responses:
         '200':
@@ -2282,7 +2308,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/UsersResponse'
+                $ref: '#/components/schemas/UsersResponseTaskControlUsers'
           description: OK
         '400':
           description: Bad request

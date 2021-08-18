@@ -14,7 +14,7 @@ app = get_current_app()
 
 
 @module.route('/olympiad_type/create', methods=['POST'],
-              input_schema=CreateOlympiadTypeRequestAdminSchema, output_schema=CreateOlympiadTypeSchema)
+              input_schema=CreateOlympiadTypeRequestTaskAdminSchema, output_schema=OlympiadTypeResponseTaskAdminSchema)
 def olympiad_type_create():
     """
     Add olympiad type
@@ -24,7 +24,7 @@ def olympiad_type_create():
         required: true
         content:
           application/json:
-            schema: CreateOlympiadTypeRequestAdminSchema
+            schema: CreateOlympiadTypeRequestTaskAdminSchema
       security:
         - JWTAccessToken: [ ]
         - CSRFAccessToken: [ ]
@@ -33,7 +33,7 @@ def olympiad_type_create():
           description: OK
           content:
             application/json:
-              schema: CreateOlympiadTypeSchema
+              schema: OlympiadTypeResponseTaskAdminSchema
         '400':
           description: Bad request
         '409':

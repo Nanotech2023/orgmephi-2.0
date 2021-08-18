@@ -2,9 +2,9 @@ from marshmallow import Schema, fields
 from common import fields as common_fields
 
 
-class CreateOlympiadTypeRequestAdminSchema(Schema):
+class CreateOlympiadTypeRequestTaskAdminSchema(Schema):
     olympiad_type = common_fields.CommonName(required=True)
 
 
-class CreateOlympiadTypeSchema(Schema):
+class OlympiadTypeResponseTaskAdminSchema(Schema):
     olympiad_type_id = fields.Int(required=True)

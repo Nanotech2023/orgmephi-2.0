@@ -8,7 +8,7 @@ from contest.tasks.models import OlympiadSubjectEnum, TargetClassEnum, StageCond
 
 # Base contest
 
-class CreateBaseOlympiadSchema(Schema):
+class CreateBaseOlympiadRequestTaskCreatorSchema(Schema):
     name = common_fields.CommonName(required=True)
     description = common_fields.Text(required=True)
     rules = common_fields.Text(required=True)
@@ -19,7 +19,7 @@ class CreateBaseOlympiadSchema(Schema):
     target_classes = fields.List(EnumField(TargetClassEnum, required=True, by_value=True), required=True)
 
 
-class UpdateBaseOlympiadSchema(Schema):
+class UpdateBaseOlympiadRequestTaskCreatorSchema(Schema):
     name = common_fields.CommonName(required=False)
     description = common_fields.Text(required=False)
     rules = common_fields.Text(required=False)
@@ -30,7 +30,7 @@ class UpdateBaseOlympiadSchema(Schema):
     target_classes = fields.List(EnumField(TargetClassEnum, required=True, by_value=True), required=True)
 
 
-class GetBaseOlympiadSchema(Schema):
+class BaseOlympiadResponseTaskCreatorSchema(Schema):
     base_contest_id = fields.Int(required=True)
     name = common_fields.CommonName(required=True)
     description = common_fields.Text(required=True)
@@ -42,14 +42,14 @@ class GetBaseOlympiadSchema(Schema):
     target_classes = fields.List(EnumField(TargetClassEnum, required=True, by_value=True), required=True)
 
 
-class BaseOlympiadIdSchema(Schema):
+class BaseOlympiadIdResponseTaskCreatorSchema(Schema):
     base_contest_id = fields.Int(required=True)
 
 
 # Contest
 
 
-class CreateSimpleContestSchema(Schema):
+class CreateSimpleContestRequestTaskCreatorSchema(Schema):
     location = common_fields.Location(required=True)
     start_time = fields.DateTime(required=True)
     end_time = fields.DateTime(required=True)
@@ -58,11 +58,11 @@ class CreateSimpleContestSchema(Schema):
     previous_participation_condition = common_fields.Text(required=False)
 
 
-class CreateCompositeContestSchema(Schema):
+class CreateCompositeContestRequestTaskCreatorSchema(Schema):
     visibility = fields.Boolean(required=True)
 
 
-class GetCompositeContestSchema(Schema):
+class CompositeContestResponseTaskCreatorSchema(Schema):
     contest_id = fields.Int(required=True)
     location = common_fields.Location(required=False)
     start_date = fields.DateTime(required=False)
@@ -72,11 +72,11 @@ class GetCompositeContestSchema(Schema):
     previous_participation_condition = common_fields.Text(required=False)
 
 
-class ContestIdSchema(Schema):
+class ContestIdResponseTaskCreatorSchema(Schema):
     contest_id = fields.Int(required=True)
 
 
-class UpdateContestSchema(Schema):
+class UpdateContestRequestTaskCreatorSchema(Schema):
     location = common_fields.Location(required=False)
     start_date = fields.DateTime(required=False)
     end_date = fields.DateTime(required=False)
@@ -85,7 +85,7 @@ class UpdateContestSchema(Schema):
     previous_participation_condition = common_fields.Text(required=False)
 
 
-class UpdatePreviousContestSchema(Schema):
+class UpdatePreviousContestRequestTaskCreatorSchema(Schema):
     previous_contest_id = fields.Int(required=True)
     previous_participation_condition = common_fields.Text(required=True)
 
@@ -93,14 +93,14 @@ class UpdatePreviousContestSchema(Schema):
 # Stage
 
 
-class CreateStageSchema(Schema):
+class CreateStageRequestTaskCreatorSchema(Schema):
     stage_name = common_fields.CommonName(required=True)
     stage_num = fields.Int(required=True)
     this_stage_condition = common_fields.Text(required=True)
     condition = EnumField(StageConditionEnum, required=True, by_value=True)
 
 
-class GetStageSchema(Schema):
+class StageResponseTaskCreatorSchema(Schema):
     stage_id = fields.Int(required=True)
     stage_name = common_fields.CommonName(required=True)
     stage_num = fields.Int(required=True)
@@ -108,11 +108,11 @@ class GetStageSchema(Schema):
     condition = EnumField(StageConditionEnum, required=True, by_value=True)
 
 
-class StageIdSchema(Schema):
+class StageIdResponseTaskCreatorSchema(Schema):
     stage_id = fields.Int(required=True)
 
 
-class UpdateStageSchema(Schema):
+class UpdateStageRequestTaskCreatorSchema(Schema):
     stage_name = common_fields.CommonName(required=False)
     stage_num = fields.Int(required=False)
     this_stage_condition = common_fields.Text(required=False)
@@ -121,101 +121,96 @@ class UpdateStageSchema(Schema):
 
 # All
 
-class GetAllOlympiadsSchema(Schema):
+class AllOlympiadsResponseTaskCreatorSchema(Schema):
     olympiad_list = fields.Nested(ContestSchema, many=True, required=True)
 
 
-class GetAllBaseContestSchema(Schema):
+class AllBaseContestResponseTaskCreatorSchema(Schema):
     olympiad_list = fields.Nested(BaseContestSchema, many=True, required=True)
 
 
-class GetAllStagesSchema(Schema):
+class AllStagesResponseTaskCreatorSchema(Schema):
     stages_list = fields.Nested(StageSchema, many=True, required=True)
 
 
-class GetAllVariantsSchema(Schema):
+class AllVariantsResponseTaskCreatorSchema(Schema):
     variants_list = fields.Nested(VariantSchema, many=True, required=True)
 
 
 # Variant
 
 
-class CreateVariantSchema(Schema):
+class CreateVariantRequestTaskCreatorSchema(Schema):
     variant_description = common_fields.Text(required=True)
 
 
-class GetVariantSchema(Schema):
+class VariantResponseTaskCreatorSchema(Schema):
     variant_id = fields.Int(required=True)
     variant_number = fields.Int(required=True)
     variant_description = common_fields.Text(required=True)
 
 
-class VariantIdSchema(Schema):
+class VariantIdResponseTaskCreatorSchema(Schema):
     variant_id = fields.Int(required=True)
 
 
-class UpdateVariantSchema(Schema):
+class UpdateVariantRequestTaskCreatorSchema(Schema):
     variant_number = fields.Int(required=False)
     variant_description = common_fields.Text(required=False)
 
 
-class GetAllTasksSchema(Schema):
+class AllTasksResponseTaskCreatorSchema(Schema):
     tasks_list = fields.Nested(TaskSchema, many=True, required=True)
 
 # Tasks
 
 
-class CreatePlainSchema(Schema):
+class CreatePlainRequestTaskCreatorSchema(Schema):
     num_of_task = fields.Int(required=True)
     recommended_answer = common_fields.Text(required=True)
 
 
-class CreateRangeSchema(Schema):
+class CreateRangeRequestTaskCreatorSchema(Schema):
     num_of_task = fields.Int(required=True)
     start_value = fields.Float(required=True)
     end_value = fields.Float(required=True)
 
 
-class AnswersInTask(Schema):
+class AnswersInTaskRequestTaskCreatorSchema(Schema):
     answer = common_fields.Text(required=True)
     is_right_answer = fields.Boolean(required=True)
 
 
-class CreateMultipleSchema(Schema):
+class CreateMultipleRequestTaskCreatorSchema(Schema):
     num_of_task = fields.Int(required=True)
-    answers = fields.List(fields.Nested(AnswersInTask), required=True)
+    answers = fields.List(fields.Nested(AnswersInTaskRequestTaskCreatorSchema), required=True)
 
 
-class GetTaskSchema(Schema):
+class TaskResponseTaskCreatorSchema(Schema):
     task_id = fields.Int(required=True)
     num_of_task = fields.Int(required=True)
     image_of_task = common_fields.BytesField(required=True)
     recommended_answer = common_fields.Text(required=False)
     start_value = fields.Float(required=False)
     end_value = fields.Float(required=False)
-    answers = fields.List(fields.Nested(AnswersInTask), required=False)
+    answers = fields.List(fields.Nested(AnswersInTaskRequestTaskCreatorSchema), required=False)
 
 
-class GetTaskImageSchema(Schema):
-    task_id = fields.Int(required=True)
-    image_of_task = common_fields.BytesField(required=True)
-
-
-class TaskIdSchema(Schema):
+class TaskIdResponseTaskCreatorSchema(Schema):
     task_id = fields.Int(required=True)
 
 
-class UpdatePlainSchema(Schema):
+class UpdatePlainRequestTaskCreatorSchema(Schema):
     num_of_task = fields.Int(required=False)
     recommended_answer = common_fields.Text(required=False)
 
 
-class UpdateRangeSchema(Schema):
+class UpdateRangeRequestTaskCreatorSchema(Schema):
     num_of_task = fields.Int(required=False)
     start_value = fields.Float(required=False)
     end_value = fields.Float(required=False)
 
 
-class UpdateMultipleSchema(Schema):
+class UpdateMultipleRequestTaskCreatorSchema(Schema):
     num_of_task = fields.Int(required=False)
-    answers = fields.List(fields.Nested(AnswersInTask), required=False)
+    answers = fields.List(fields.Nested(AnswersInTaskRequestTaskCreatorSchema), required=False)

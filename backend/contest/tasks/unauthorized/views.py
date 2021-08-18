@@ -1,10 +1,9 @@
-from flask import make_response
-
 from common import get_current_app, get_current_module
 from common.util import db_get_all
 from contest.tasks.model_schemas.schemas import OlympiadTypeSchema, BaseContestSchema, ContestSchema, StageSchema
-from contest.tasks.unauthorized.schemas import AllOlympiadTypesSchema, AllBaseContestSchema, AllOlympiadsSchema, \
-    AllStagesSchema
+from contest.tasks.unauthorized.schemas import AllOlympiadTypesResponseTaskUnauthorizedSchema, \
+    AllBaseContestResponseTaskUnauthorizedSchema, AllOlympiadsResponseTaskUnauthorizedSchema, \
+    AllStagesResponseTaskUnauthorizedSchema
 from contest.tasks.util import *
 
 db = get_current_db()
@@ -16,7 +15,7 @@ app = get_current_app()
 
 
 @module.route('/olympiad_type/all', methods=['GET'],
-              output_schema=AllOlympiadTypesSchema)
+              output_schema=AllOlympiadTypesResponseTaskUnauthorizedSchema)
 def olympiad_type_all():
     """
     Get all olympiad types
@@ -27,7 +26,7 @@ def olympiad_type_all():
           description: OK
           content:
             application/json:
-              schema: AllOlympiadTypesSchema
+              schema: AllOlympiadTypesResponseTaskUnauthorizedSchema
         '400':
           description: Bad request
         '409':
@@ -77,7 +76,7 @@ def olympiad_type_get(id_olympiad_type):
 
 
 @module.route('/base_olympiad/all', methods=['GET'],
-              output_schema=AllBaseContestSchema)
+              output_schema=AllBaseContestResponseTaskUnauthorizedSchema)
 def base_olympiads_all():
     """
     Get base olympiads list
@@ -88,7 +87,7 @@ def base_olympiads_all():
           description: OK
           content:
             application/json:
-              schema: AllBaseContestSchema
+              schema: AllBaseContestResponseTaskUnauthorizedSchema
         '400':
           description: Bad request
         '409':
@@ -99,7 +98,7 @@ def base_olympiads_all():
     olympiads = db_get_all(BaseContest)
     return {
                "olympiad_list": olympiads
-            }, 200
+           }, 200
 
 
 @module.route('/base_olympiad/<int:id_base_olympiad>', methods=['GET'],
@@ -134,7 +133,7 @@ def base_olympiad_get(id_base_olympiad):
 
 
 @module.route('/base_olympiad/<int:id_base_olympiad>/olympiad/all', methods=['GET'],
-              output_schema=AllOlympiadsSchema)
+              output_schema=AllOlympiadsResponseTaskUnauthorizedSchema)
 def olympiads_all(id_base_olympiad):
     """
     Get olympiads list
@@ -152,7 +151,7 @@ def olympiads_all(id_base_olympiad):
           description: OK
           content:
             application/json:
-              schema: AllOlympiadsSchema
+              schema: AllOlympiadsResponseTaskUnauthorizedSchema
         '400':
           description: Bad request
         '409':
@@ -249,7 +248,7 @@ def stage_get(id_olympiad, id_stage):
 
 
 @module.route('/olympiad/<int:id_olympiad>/stage/all', methods=['GET'],
-              output_schema=AllStagesSchema)
+              output_schema=AllStagesResponseTaskUnauthorizedSchema)
 def stages_all(id_olympiad):
     """
     Get stage
@@ -267,7 +266,7 @@ def stages_all(id_olympiad):
           description: OK
           content:
             application/json:
-              schema: AllStagesSchema
+              schema: AllStagesResponseTaskUnauthorizedSchema
         '400':
           description: Bad request
         '409':
@@ -281,6 +280,3 @@ def stages_all(id_olympiad):
     return {
                "stages_list": all_stages
            }, 200
-
-
-
