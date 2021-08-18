@@ -1,8 +1,15 @@
+import io
+
 from flask import request
+from marshmallow import EXCLUDE
 
 from common import get_current_app, get_current_module
 from contest.tasks.creator.schemas import *
+from contest.tasks.model_schemas.schemas import SimpleContestSchema, CompositeContestSchema, TaskPlainSchema, \
+    TaskRangeSchema, TaskMultipleSchema
 from contest.tasks.util import *
+
+from flask import send_file
 
 db = get_current_db()
 module = get_current_module()
@@ -67,8 +74,7 @@ def base_olympiad_create():
            }, 200
 
 
-@module.route('/base_olympiad/<int:id_base_olympiad>/upload_certificate', methods=['POST'],
-              input_schema=BaseCertificateSchema)
+@module.route('/base_olympiad/<int:id_base_olympiad>/upload_certificate', methods=['POST'])
 def base_olympiad_upload(id_base_olympiad):
     """
     Upload base olympiad certificate
@@ -77,8 +83,10 @@ def base_olympiad_upload(id_base_olympiad):
       requestBody:
         required: true
         content:
-          application/json:
-            schema: BaseCertificateSchema
+          application/octet-stream:
+            schema:
+              type: string
+              format: binary
       parameters:
         - in: path
           description: Id of the olympiad
@@ -96,6 +104,8 @@ def base_olympiad_upload(id_base_olympiad):
           description: Bad request
         '404':
           description: Base contest not found
+        '409':
+          description: Wrong value
     """
 
     certificate_template = request.data
@@ -179,15 +189,15 @@ def base_olympiad_patch(id_base_olympiad):
     target_classes = set(values['target_classes'])
     del values["target_classes"]
 
-    serializer = CreateBaseOlympiadSchema()
-    serializer.load(values, instance=base_contest, session=db.session, partial=True)
+    BaseContestSchema(load_instance=True).load(request.json, instance=base_contest, session=db.session,
+                                               partial=False, unknown=EXCLUDE)
 
     if target_classes is not None:
         base_contest.target_classes = target_classes
 
     db.session.commit()
 
-    return base_contest.serialize, 200
+    return base_contest, 200
 
 
 # Olympiads
@@ -346,7 +356,7 @@ def olympiad_remove(id_base_olympiad, id_olympiad):
               input_schema=UpdateContestSchema, output_schema=GetCompositeContestSchema)
 def olympiad_patch(id_base_olympiad, id_olympiad):
     """
-    Create composite contest
+    Update composite contest
     ---
     patch:
       parameters:
@@ -382,16 +392,17 @@ def olympiad_patch(id_base_olympiad, id_olympiad):
           description: Olympiad type already in use
     """
 
-    values = request.marshmallow
-
     contest = db_get_or_raise(Contest, "contest_id", id_olympiad)
     db_get_or_raise(BaseContest, "base_contest_id", str(id_base_olympiad))
 
-    serializer = CreateBaseOlympiadSchema()
-    serializer.load(values, instance=contest, session=db.session, partial=True)
+    if contest.composite_type == ContestTypeEnum.SimpleContest:
+        SimpleContestSchema(load_instance=True).load(request.json, instance=contest, session=db.session,
+                                                     partial=False, unknown=EXCLUDE)
+    else:
+        CompositeContestSchema(load_instance=True).load(request.json, instance=contest, session=db.session,
+                                                        partial=False, unknown=EXCLUDE)
 
     db.session.commit()
-
     return contest, 200
 
 
@@ -537,13 +548,13 @@ def stage_patch(id_olympiad, id_stage):
 
     stage = db_get_or_raise(Stage, "stage_id", str(id_stage))
     db_get_or_raise(Contest, "contest_id", str(id_olympiad))
-    values = request.marshmallow
 
-    serializer = CreateBaseOlympiadSchema()
-    serializer.load(values, instance=stage, session=db.session, partial=True)
+    StageSchema(load_instance=True).load(request.json, instance=stage, session=db.session,
+                                         partial=False, unknown=EXCLUDE)
+
     db.session.commit()
 
-    return stage.serialize(), 200
+    return stage, 200
 
 
 # Contest views
@@ -597,27 +608,29 @@ def contest_create_simple(id_olympiad, id_stage):
     previous_contest_id = values.get('previous_contest_id', None)
     previous_participation_condition = values.get('previous_participation_condition', None)
 
-    try:
-        validate_contest_values(previous_contest_id, previous_participation_condition)
+    validate_contest_values(previous_contest_id, previous_participation_condition)
 
-        stage = db_get_or_raise(Stage, "stage_id", str(id_stage))
-        db_get_or_raise(Contest, "contest_id", str(id_olympiad))
+    stage = db_get_or_raise(Stage, "stage_id", str(id_stage))
+    main_contest = db_get_or_raise(Contest, "contest_id", str(id_olympiad))
 
-        contest = add_simple_contest(db.session,
-                                     visibility=visibility,
-                                     start_date=start_time,
-                                     end_date=end_time,
-                                     previous_contest_id=previous_contest_id,
-                                     previous_participation_condition=previous_participation_condition,
-                                     location=location)
+    if main_contest.composite_type != ContestTypeEnum.CompositeContest:
+        raise InsufficientData("composite_type", "not Composite")
 
-        stage.contests.append(contest)
+    if stage not in main_contest.stages:
+        raise InsufficientData("stage_id", "not in current stage")
 
-        db.session.commit()
+    contest = add_simple_contest(db.session,
+                                 visibility=visibility,
+                                 start_date=start_time,
+                                 end_date=end_time,
+                                 previous_contest_id=previous_contest_id,
+                                 previous_participation_condition=previous_participation_condition,
+                                 location=location)
 
-    except Exception:
-        db.session.rollback()
-        raise
+    stage.contests.append(contest)
+
+    db.session.commit()
+
     return {
                'contest_id': contest.contest_id
            }, 200
@@ -675,19 +688,19 @@ def contest_remove(id_olympiad, id_stage, id_contest):
     input_schema=UpdateContestSchema, output_schema=GetCompositeContestSchema)
 def contest_patch(id_olympiad, id_stage, id_contest):
     """
-    Update composite contest in stage
+    Update simple contest in stage
     ---
     patch:
       parameters:
         - in: path
-          description: ID of the base olympiad
-          name: id_base_olympiad
+          description: ID of the olympiad
+          name: id_olympiad
           required: true
           schema:
             type: integer
         - in: path
-          description: ID of the olympiad
-          name: id_olympiad
+          description: ID of the stage
+          name: id_stage
           required: true
           schema:
             type: integer
@@ -713,15 +726,17 @@ def contest_patch(id_olympiad, id_stage, id_contest):
               schema: GetCompositeContestSchema
         '400':
           description: Bad request
+        '404':
+          description: Not found
         '409':
           description: Olympiad type already in use
     """
 
-    values = request.marshmallow
     contest = get_contest_if_possible_from_stage(id_olympiad, id_stage, id_contest)
 
-    serializer = CreateBaseOlympiadSchema()
-    serializer.load(values, instance=contest, session=db.session, partial=True)
+    SimpleContestSchema(load_instance=True).load(request.json, instance=contest, session=db.session,
+                                                 partial=False, unknown=EXCLUDE)
+
     db.session.commit()
     return contest, 200
 
@@ -736,14 +751,14 @@ def contest_add_previous(id_olympiad, id_stage, id_contest):
     patch:
       parameters:
         - in: path
-          description: ID of the base olympiad
-          name: id_base_olympiad
+          description: ID of the olympiad
+          name: id_olympiad
           required: true
           schema:
             type: integer
         - in: path
-          description: ID of the olympiad
-          name: id_olympiad
+          description: ID of the stage
+          name: id_stage
           required: true
           schema:
             type: integer
@@ -778,7 +793,7 @@ def contest_add_previous(id_olympiad, id_stage, id_contest):
 
 
 @module.route('/olympiad/<int:id_olympiad>/stage/<int:id_stage>/contest/all',
-              methods=['GET'], output_schema=GetAllStagesSchema)
+              methods=['GET'], output_schema=GetAllOlympiadsSchema)
 def contests_all(id_olympiad, id_stage):
     """
     Update composite contest in stage
@@ -786,14 +801,14 @@ def contests_all(id_olympiad, id_stage):
     get:
       parameters:
         - in: path
-          description: ID of the base olympiad
-          name: id_base_olympiad
+          description: ID of the olympiad
+          name: id_olympiad
           required: true
           schema:
             type: integer
         - in: path
-          description: ID of the olympiad
-          name: id_olympiad
+          description: ID of the stage
+          name: id_stage
           required: true
           schema:
             type: integer
@@ -814,8 +829,9 @@ def contests_all(id_olympiad, id_stage):
     db_get_or_raise(Contest, "contest_id", str(id_olympiad))
     db_get_or_raise(Stage, "stage_id", str(id_stage))
     stage = db_get_or_raise(Stage, "stage_id", str(id_stage))
-    all_contests = [contest.serialize() for contest in stage.contests]
-    return {"olympiad_list": all_contests}, 200
+    return {
+               "olympiad_list": stage.contests
+           }, 200
 
 
 # Variant views
@@ -841,7 +857,7 @@ def variant_create(id_contest):
         required: true
         content:
           application/json:
-            schema: UpdatePreviousContestSchema
+            schema: CreateVariantSchema
       security:
         - JWTAccessToken: [ ]
         - CSRFAccessToken: [ ]
@@ -850,7 +866,7 @@ def variant_create(id_contest):
           description: OK
           content:
             application/json:
-              schema: StageIdSchema
+              schema: VariantIdSchema
         '400':
           description: Bad request
         '409':
@@ -994,12 +1010,12 @@ def variant_patch(id_contest, variant_num):
         '409':
           description: Olympiad type already in use
     """
-    values = request.marshmallow
 
     variant = get_variant_if_possible_by_number(id_contest, variant_num)
 
-    serializer = CreateBaseOlympiadSchema()
-    serializer.load(values, instance=variant, session=db.session, partial=True)
+    VariantSchema(load_instance=True).load(request.json, instance=variant, session=db.session,
+                                           partial=False, unknown=EXCLUDE)
+
     db.session.commit()
 
     return variant, 200
@@ -1008,7 +1024,7 @@ def variant_patch(id_contest, variant_num):
 @module.route(
     '/contest/<int:id_contest>/variant/all',
     methods=['GET'],
-    input_schema=GetAllVariantsSchema)
+    output_schema=GetAllVariantsSchema)
 def variant_all(id_contest):
     """
     All variants
@@ -1036,13 +1052,69 @@ def variant_all(id_contest):
           description: Olympiad type already in use
     """
     contest = get_contest_if_possible(id_contest)
-    all_variants = [variant for variant in contest.variants.all()]
     return {
-               "variants_list": all_variants
+               "variants_list": contest.variants.all()
            }, 200
 
 
 # Task views
+
+
+@module.route('/contest/<int:id_contest>/variant/<int:id_variant>/task/<int:id_task>/upload_image',
+              methods=['POST'])
+def task_image_upload(id_contest, id_variant, id_task):
+    """
+    Upload task image
+    ---
+    post:
+      requestBody:
+        required: true
+        content:
+          application/octet-stream:
+            schema:
+              type: string
+              format: binary
+      parameters:
+        - in: path
+          description: ID of the contest
+          name: id_contest
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: ID of the variant
+          name: id_variant
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: ID of the task
+          name: id_task
+          required: true
+          schema:
+            type: integer
+      security:
+        - JWTAccessToken: [ ]
+        - CSRFAccessToken: [ ]
+      responses:
+        '200':
+          description: OK
+        '400':
+          description: Bad request
+        '404':
+          description: Base contest not found
+        '409':
+          description: Wrong value
+    """
+
+    image_of_task = request.data
+
+    task = get_task_if_possible(id_contest, id_variant, id_task)
+    task.image_of_task = image_of_task
+
+    db.session.commit()
+
+    return {}, 200
 
 
 @module.route(
@@ -1089,25 +1161,19 @@ def task_create_plain(id_contest, id_variant):
     values = request.marshmallow
 
     num_of_task = values['num_of_task']
-    image_of_task = values['image_of_task']
     recommended_answer = values['recommended_answer']
 
-    try:
-        variant = get_variant_if_possible(id_contest, id_variant)
+    variant = get_variant_if_possible(id_contest, id_variant)
 
-        task = add_plain_task(db.session,
-                              num_of_task=num_of_task,
-                              image_of_task=image_of_task,
-                              recommended_answer=recommended_answer,
-                              )
+    task = add_plain_task(db.session,
+                          num_of_task=num_of_task,
+                          recommended_answer=recommended_answer,
+                          )
 
-        variant.tasks.append(task)
+    variant.tasks.append(task)
 
-        db.session.commit()
+    db.session.commit()
 
-    except Exception:
-        db.session.rollback()
-        raise
     return {
                "task_id": task.task_id,
            }, 200
@@ -1156,24 +1222,18 @@ def task_create_range(id_contest, id_variant):
     """
     values = request.marshmallow
     num_of_task = values['num_of_task']
-    image_of_task = values['image_of_task']
     start_value = values['start_value']
     end_value = values['end_value']
 
-    try:
-        variant = get_variant_if_possible(id_contest, id_variant)
-        task = add_range_task(db.session,
-                              num_of_task=num_of_task,
-                              image_of_task=image_of_task,
-                              start_value=start_value,
-                              end_value=end_value
-                              )
-        variant.tasks.append(task)
-        db.session.commit()
+    variant = get_variant_if_possible(id_contest, id_variant)
+    task = add_range_task(db.session,
+                          num_of_task=num_of_task,
+                          start_value=start_value,
+                          end_value=end_value
+                          )
+    variant.tasks.append(task)
+    db.session.commit()
 
-    except Exception:
-        db.session.rollback()
-        raise
     return {
                "task_id": task.task_id,
            }, 200
@@ -1205,7 +1265,7 @@ def task_create_multiple(id_contest, id_variant):
         required: true
         content:
           application/json:
-            schema: CreateRangeSchema
+            schema: CreateMultipleSchema
       security:
         - JWTAccessToken: [ ]
         - CSRFAccessToken: [ ]
@@ -1223,26 +1283,22 @@ def task_create_multiple(id_contest, id_variant):
     values = request.marshmallow
 
     num_of_task = values['num_of_task']
-    image_of_task = values['image_of_task']
     answers = values['answers']
-    try:
-        variant = get_variant_if_possible(id_contest, id_variant)
 
-        task = add_multiple_task(db.session,
-                                 num_of_task=num_of_task,
-                                 image_of_task=image_of_task
-                                 )
-        variant.tasks.append(task)
+    variant = get_variant_if_possible(id_contest, id_variant)
 
-        task.answers = [
-            (answer['task_answer'], answer['is_right_answer'])
-            for answer in answers]
+    task = add_multiple_task(db.session,
+                             num_of_task=num_of_task
+                             )
+    variant.tasks.append(task)
 
-        db.session.commit()
+    task.answers = [
+        {
+            "answer": answer['answer'],
+            "is_right_answer": answer['is_right_answer']}
+        for answer in answers]
 
-    except Exception:
-        db.session.rollback()
-        raise
+    db.session.commit()
 
     return {
                "task_id": task.task_id,
@@ -1318,7 +1374,7 @@ def task_get(id_contest, id_variant, id_task):
           schema:
             type: integer
         - in: path
-          description: ID of the variant
+          description: ID of the task
           name: id_task
           required: true
           schema:
@@ -1371,7 +1427,7 @@ def task_patch_plain(id_contest, id_variant, id_task):
           schema:
             type: integer
         - in: path
-          description: ID of the ефыл
+          description: ID of the task
           name: id_task
           required: true
           schema:
@@ -1395,16 +1451,14 @@ def task_patch_plain(id_contest, id_variant, id_task):
         '409':
           description: Olympiad type already in use
     """
-    values = request.marshmallow
-
     task = get_task_if_possible(id_contest, id_variant, id_task)
 
-    serializer = CreateBaseOlympiadSchema()
-    serializer.load(values, instance=task, session=db.session, partial=True)
+    TaskPlainSchema(load_instance=True).load(request.json, instance=task, session=db.session,
+                                             partial=False, unknown=EXCLUDE)
 
     db.session.commit()
 
-    return {}, 200
+    return task, 200
 
 
 @module.route(
@@ -1430,7 +1484,7 @@ def task_patch_range(id_contest, id_variant, id_task):
           schema:
             type: integer
         - in: path
-          description: ID of the ефыл
+          description: ID of the task
           name: id_task
           required: true
           schema:
@@ -1454,14 +1508,14 @@ def task_patch_range(id_contest, id_variant, id_task):
         '409':
           description: Olympiad type already in use
     """
-    values = request.marshmallow
     task = get_task_if_possible(id_contest, id_variant, id_task)
-    serializer = CreateBaseOlympiadSchema()
-    serializer.load(values, instance=task, session=db.session, partial=True)
+
+    TaskRangeSchema(load_instance=True).load(request.json, instance=task, session=db.session,
+                                             partial=False, unknown=EXCLUDE)
 
     db.session.commit()
 
-    return {}, 200
+    return task, 200
 
 
 @module.route(
@@ -1487,7 +1541,7 @@ def task_patch_multiple(id_contest, id_variant, id_task):
           schema:
             type: integer
         - in: path
-          description: ID of the ефыл
+          description: ID of the task
           name: id_task
           required: true
           schema:
@@ -1516,16 +1570,17 @@ def task_patch_multiple(id_contest, id_variant, id_task):
     answers = values['answers']
     del values['answers']
 
-    serializer = CreateBaseOlympiadSchema()
-    serializer.load(values, instance=task, session=db.session, partial=True)
-
+    TaskMultipleSchema(load_instance=True).load(values, instance=task, session=db.session,
+                                                partial=False, unknown=EXCLUDE)
     task.answers = [
-        (answer['task_answer'], answer['is_right_answer'])
+        {
+            "answer": answer['answer'],
+            "is_right_answer": answer['is_right_answer']}
         for answer in answers]
 
     db.session.commit()
 
-    return {}, 200
+    return task, 200
 
 
 @module.route(
@@ -1569,11 +1624,9 @@ def task_all(id_contest, id_variant):
                "tasks_list": tasks
            }, 200
 
-
 @module.route(
     '/contest/<int:id_contest>/variant/<int:id_variant>/tasks/<int:id_task>/image',
-    methods=['GET'],
-    output_schema=GetTaskImageSchema)
+    methods=['GET'])
 def task_image(id_contest, id_variant, id_task):
     """
     Get task image
@@ -1593,7 +1646,7 @@ def task_image(id_contest, id_variant, id_task):
           schema:
             type: integer
         - in: path
-          description: ID of the ефыл
+          description: ID of the task
           name: id_task
           required: true
           schema:
@@ -1605,8 +1658,10 @@ def task_image(id_contest, id_variant, id_task):
         '200':
           description: OK
           content:
-            application/json:
-              schema: GetTaskImageSchema
+            image/jpeg:
+              schema:
+                type: string
+                format: binary
         '400':
           description: Bad request
         '409':
@@ -1614,7 +1669,12 @@ def task_image(id_contest, id_variant, id_task):
     """
     task = get_task_if_possible(id_contest, id_variant, id_task)
 
-    return {
-               'task_id': task.task_id,
-               'image_of_task': task.image_of_task
-           }, 200
+    if task.image_of_task is None:
+        raise InsufficientData("task", "image_of_task")
+
+    return send_file(io.BytesIO(task.image_of_task),
+                     attachment_filename='task_image.png',
+                     mimetype='image/jpeg'), 200
+
+
+

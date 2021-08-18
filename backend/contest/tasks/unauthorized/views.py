@@ -163,7 +163,7 @@ def olympiads_all(id_base_olympiad):
     base_contest = db_get_or_raise(BaseContest, "base_contest_id", str(id_base_olympiad))
     all_olympiads = [olympiad for olympiad in base_contest.child_contests]
     return {
-               "olympiad_list": all_olympiads
+               "contest_list": all_olympiads
            }, 200
 
 

@@ -112,7 +112,7 @@ def remove_user_from_contest(id_contest):
 
 @module.route(
     '/contest/<int:id_contest>/user/all',
-    methods=['GET'], input_schema=UsersResponseSchema)
+    methods=['GET'], output_schema=UsersResponseSchema)
 def users_all(id_contest):
     """
     Get all users
@@ -148,7 +148,7 @@ def users_all(id_contest):
 
 @module.route(
     'contest/<int:id_contest>/user/<int:id_user>/certificate',
-    methods=['GET'], input_schema=UserCertificateSchema)
+    methods=['GET'], output_schema=UserCertificateSchema)
 def users_certificate(id_contest, id_user):
     """
     Get certificate

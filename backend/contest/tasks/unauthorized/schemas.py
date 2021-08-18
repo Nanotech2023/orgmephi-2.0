@@ -7,7 +7,7 @@ class AllOlympiadTypesSchema(Schema):
 
 
 class AllOlympiadsSchema(Schema):
-    olympiad_list = fields.Nested(ContestSchema, many=True, required=True)
+    contest_list = fields.Nested(ContestSchema, many=True, required=True)
 
 
 class AllBaseContestSchema(Schema):

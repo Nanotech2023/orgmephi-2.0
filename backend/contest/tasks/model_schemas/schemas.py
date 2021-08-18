@@ -1,7 +1,8 @@
-from marshmallow import fields, Schema
+from marshmallow import fields, Schema, validate
 from marshmallow_oneofschema import OneOfSchema
 from marshmallow_sqlalchemy import SQLAlchemySchema, auto_field
 from marshmallow_enum import EnumField
+from marshmallow.fields import String as StringField
 
 from contest.tasks.models import *
 from user.models.auth import *
@@ -35,7 +36,7 @@ class VariantSchema(SQLAlchemySchema):
         sqla_session = db.session
 
     variant_id = auto_field(column_name='variant_id', dump_only=True)
-    contest_id = auto_field(column_name='contest_id', required=True)
+    contest_id = auto_field(column_name='contest_id', required=False)
     variant_number = auto_field(column_name='variant_number', required=True)
     variant_description = auto_field(column_name='variant_description', validate=text_validator, required=True)
 
@@ -43,16 +44,6 @@ class VariantSchema(SQLAlchemySchema):
 """
 Task
 """
-
-# TODO DELETE AFTER TEST, ALREADY EXIST IN MODELS
-
-
-class TaskType(enum.Enum):
-    plain = "PlainTask"
-    range = "RangeTask"
-    multiple = "MultipleChoiceTask"
-    base = "BaseTask"
-
 
 class TaskImageSchema(SQLAlchemySchema):
     class Meta:
@@ -74,6 +65,9 @@ class TaskPlainSchema(SQLAlchemySchema):
     num_of_task = auto_field(column_name='num_of_task', required=True)
     recommended_answer = auto_field(column_name='recommended_answer', validate=text_validator, required=True)
 
+    task_type = StringField(validate=validate.OneOf([TaskTypeEnum.PlainTask.value]),
+                            dump_only=True)
+
 
 class TaskRangeSchema(SQLAlchemySchema):
     class Meta:
@@ -83,8 +77,11 @@ class TaskRangeSchema(SQLAlchemySchema):
 
     task_id = auto_field(column_name='task_id', dump_only=True)
     num_of_task = auto_field(column_name='num_of_task', required=True)
-    start_value = auto_field(column_name='start_value',  required=True)
+    start_value = auto_field(column_name='start_value', required=True)
     end_value = auto_field(column_name='end_value', required=True)
+
+    task_type = StringField(validate=validate.OneOf([TaskTypeEnum.RangeTask.value]),
+                            dump_only=True)
 
 
 class Answers(Schema):
@@ -99,38 +96,34 @@ class TaskMultipleSchema(SQLAlchemySchema):
         sqla_session = db.session
 
     task_id = auto_field(column_name='task_id', dump_only=True)
-    num_of_task = auto_field(column_name='num_of_task', required=True)
-    answers = auto_field(column_name='answers', many=True, required=True)
+    num_of_task = auto_field(column_name='num_of_task', required=False)
+    answers = auto_field(column_name='answers', many=True, required=False)
+
+    task_type = StringField(validate=validate.OneOf([TaskTypeEnum.MultipleChoiceTask.value]),
+                            dump_only=True)
 
 
 class TaskSchema(OneOfSchema):
-    type_schemas = {TaskType.plain.value: TaskPlainSchema,
-                    TaskType.range.value: TaskRangeSchema,
-                    TaskType.multiple.value: TaskMultipleSchema, }
+    type_schemas = {TaskTypeEnum.PlainTask.value: TaskPlainSchema,
+                    TaskTypeEnum.RangeTask.value: TaskRangeSchema,
+                    TaskTypeEnum.MultipleChoiceTask.value: TaskMultipleSchema, }
     type_field = "task_type"
     type_field_remove = False
 
-    class_types = {TaskPlainSchema: TaskType.plain.value,
-                   TaskRangeSchema: TaskType.range.value,
-                   TaskMultipleSchema: TaskType.multiple.value}
+    class_types = {TaskPlainSchema: TaskTypeEnum.PlainTask.value,
+                   TaskRangeSchema: TaskTypeEnum.RangeTask.value,
+                   TaskMultipleSchema: TaskTypeEnum.MultipleChoiceTask.value}
 
     def get_obj_type(self, obj):
-        obj_type = self.class_types.get(type(obj), None)
+        obj_type = obj.task_type
         if obj_type is None:
             raise TypeError(f'Unknown object type: {obj.__class__.__name__}')
-        return obj_type
+        return obj_type.value
 
 
 """
 Contest
 """
-
-
-# TODO DELETE AFTER TEST, ALREADY EXIST IN MODELS
-class ContestType(enum.Enum):
-    contest = "Contest"
-    simpleContest = "SimpleContest"
-    compositeContest = "CompositeContest"
 
 
 class CompositeContestSchema(SQLAlchemySchema):
@@ -141,7 +134,9 @@ class CompositeContestSchema(SQLAlchemySchema):
 
     contest_id = auto_field(column_name='contest_id', dump_only=True)
     visibility = auto_field(column_name='visibility', required=True)
-    composite_type = EnumField(ContestTypeEnum, data_key='composite_type', by_value=True, required=True)
+
+    composite_type = StringField(validate=validate.OneOf([ContestTypeEnum.CompositeContest.value]),
+                                 dump_only=True)
 
 
 class SimpleContestSchema(SQLAlchemySchema):
@@ -150,31 +145,40 @@ class SimpleContestSchema(SQLAlchemySchema):
         load_instance = False
         sqla_session = db.session
 
+    composite_type = StringField(validate=validate.OneOf([ContestTypeEnum.SimpleContest.value]),
+                                 dump_only=True)
+
     contest_id = auto_field(column_name='contest_id', dump_only=True)
     visibility = auto_field(column_name='visibility', required=True)
-    composite_type = EnumField(ContestTypeEnum, data_key='composite_type', by_value=True, required=True)
     location = auto_field(column_name='location', validate=text_validator, required=True)
     start_date = auto_field(column_name='start_date', required=True)
     end_date = auto_field(column_name='end_date', required=True)
     previous_contest_id = auto_field(column_name='previous_contest_id', allow_none=True)
-    previous_participation_condition = auto_field(column_name='previous_participation_condition',
-                                                  validate=text_validator, allow_none=True)
+    previous_participation_condition = EnumField(UserStatusEnum,
+                                                 data_key='previous_participation_condition',
+                                                 by_value=True, required=True)
 
 
 class ContestSchema(OneOfSchema):
-    type_schemas = {ContestType.simpleContest.value: SimpleContestSchema,
-                    ContestType.compositeContest.value: CompositeContestSchema}
+    type_schemas = {ContestTypeEnum.SimpleContest.value: SimpleContestSchema,
+                    ContestTypeEnum.CompositeContest.value: CompositeContestSchema}
     type_field = "composite_type"
     type_field_remove = False
 
-    class_types = {SimpleContestSchema: ContestType.simpleContest.value,
-                   CompositeContestSchema: ContestType.compositeContest.value}
+    class_types = {SimpleContestSchema: ContestTypeEnum.SimpleContest.value,
+                   CompositeContestSchema: ContestTypeEnum.CompositeContest.value}
 
     def get_obj_type(self, obj):
-        obj_type = self.class_types.get(type(obj), None)
+        obj_type = obj.composite_type
         if obj_type is None:
             raise TypeError(f'Unknown object type: {obj.__class__.__name__}')
-        return obj_type
+        return obj_type.value
+
+    def get_data_type(self, data):
+        location = data.get('location', None)
+        if location is not None:
+            return ContestTypeEnum.SimpleContest.value
+        return ContestTypeEnum.CompositeContest.value
 
 
 """
@@ -197,10 +201,6 @@ Base olympiad
 """
 
 
-class TargetClassSchema(SQLAlchemySchema):
-    typeTargetClass = EnumField(TargetClassEnum, data_key='typeTargetClass', by_value=True, required=True)
-
-
 class BaseContestSchema(SQLAlchemySchema):
     class Meta:
         model = BaseContest
@@ -219,7 +219,8 @@ class BaseContestSchema(SQLAlchemySchema):
 
     subject = EnumField(OlympiadSubjectEnum, data_key='subject', by_value=True, required=True)
 
-    target_classes = fields.Nested(TargetClassSchema, many=True, required=True)
+    target_classes = fields.List(EnumField(TargetClassEnum, by_value=True, required=True), data_key='target_classes',
+                                 required=True)
 
 
 class StageSchema(SQLAlchemySchema):
@@ -229,8 +230,8 @@ class StageSchema(SQLAlchemySchema):
         sqla_session = db.session
 
     stage_id = auto_field(column_name='stage_id', dump_only=True)
-    olympiad_id = auto_field(column_name='olympiad_id', required=True)
+    olympiad_id = auto_field(column_name='olympiad_id', required=False)
     stage_name = auto_field(column_name='stage_name', validate=common_name_validator, required=True)
-    condition = auto_field(column_name='condition', validate=text_validator, required=True)
+    condition = EnumField(StageConditionEnum, data_key='condition', required=True, by_value=True)
     this_stage_condition = auto_field(column_name='this_stage_condition', validate=text_validator, required=True)
-    stage_num = EnumField(StageConditionEnum, data_key='subject', by_value=True, required=True)
+    stage_num = auto_field(column_name='stage_num', required=True)

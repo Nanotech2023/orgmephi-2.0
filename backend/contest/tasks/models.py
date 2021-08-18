@@ -438,7 +438,7 @@ class Task(db.Model):
             }
 
 
-def add_plain_task(db_session, num_of_task, image_of_task, recommended_answer):
+def add_plain_task(db_session, num_of_task, recommended_answer, image_of_task = None):
     """
     Create new plain task object
     """
@@ -469,7 +469,7 @@ class PlainTask(Task):
     }
 
 
-def add_range_task(db_session, num_of_task, image_of_task, start_value, end_value):
+def add_range_task(db_session, num_of_task, start_value, end_value, image_of_task = None):
     """
     Create new range task object
     """
@@ -503,7 +503,7 @@ class RangeTask(Task):
     }
 
 
-def add_multiple_task(db_session, num_of_task, image_of_task):
+def add_multiple_task(db_session, num_of_task, image_of_task = None):
     """
     Create new multiple task object
     """
@@ -532,3 +532,4 @@ class MultipleChoiceTask(Task):
     __mapper_args__ = {
         'polymorphic_identity': TaskTypeEnum.MultipleChoiceTask,
     }
+

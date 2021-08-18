@@ -1,4 +1,6 @@
-from flask import abort
+import io
+
+from flask import abort, send_file
 
 from common import get_current_app, get_current_module
 from contest.tasks.control_users.schemas import UserCertificateSchema
@@ -16,7 +18,7 @@ app = get_current_app()
 
 @module.route(
     '/contest/<int:id_contest>/variant/self',
-    methods=['GET'], input_schema=VariantSchema)
+    methods=['GET'], output_schema=VariantSchema)
 def variant_self(id_contest):
     """
     Get variant for user in current contest
@@ -47,7 +49,7 @@ def variant_self(id_contest):
     """
 
     variant = get_user_variant_if_possible(id_contest)
-    return variant.serialize, 200
+    return variant, 200
 
 
 # Task
@@ -135,21 +137,21 @@ def task_get(id_contest, id_task):
 
 @module.route(
     '/contest/<int:id_contest>/tasks/<int:id_task>/image/self',
-    methods=['GET'], output_schema=TaskImageSchema)
+    methods=['GET'])
 def task_image(id_contest, id_task):
     """
-    Get task image for user in current task
+    Get task image
     ---
     get:
       parameters:
         - in: path
-          description: Id of the contest
+          description: ID of the contest
           name: id_contest
           required: true
           schema:
             type: integer
         - in: path
-          description: Id of the task
+          description: ID of the task
           name: id_task
           required: true
           schema:
@@ -161,17 +163,24 @@ def task_image(id_contest, id_task):
         '200':
           description: OK
           content:
-            application/json:
-              schema: TaskImageSchema
+            image/jpeg:
+              schema:
+                type: string
+                format: binary
         '400':
           description: Bad request
         '409':
           description: Olympiad type already in use
-        '404':
-          description: User not found
     """
     task = get_user_task_if_possible(id_contest, id_task)
-    return task, 200
+
+    if task.image_of_task is None:
+        raise InsufficientData("task", "image_of_task")
+
+    return send_file(io.BytesIO(task.image_of_task),
+                     attachment_filename='task_image.png',
+                     mimetype='image/jpeg'), 200
+
 
 
 # Certificate
@@ -179,17 +188,12 @@ def task_image(id_contest, id_task):
 
 @module.route(
     '/contest/<int:id_contest>/certificate/self',
-    methods=['GET'], input_schema=UserCertificateSchema)
+    methods=['GET'], output_schema=UserCertificateSchema)
 def users_certificate(id_contest):
     """
     Get user certificate
     ---
     get:
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema: UserCertificateSchema
       parameters:
         - in: path
           description: Id of the contest

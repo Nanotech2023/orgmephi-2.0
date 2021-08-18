@@ -8,7 +8,7 @@ class UpdateUserInRequestCreatorSchema(Schema):
 
 
 class UsersResponseSchema(Schema):
-    users = fields.Nested(UserInContestSchema, many=True, required=True)
+    user_list = fields.Nested(UserInContestSchema, many=True, required=True)
 
 
 class UserCertificateSchema(Schema):

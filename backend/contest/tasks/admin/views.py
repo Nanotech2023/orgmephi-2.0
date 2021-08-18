@@ -49,7 +49,9 @@ def olympiad_type_create():
         db.session.commit()
     except sqlalchemy.exc.IntegrityError:
         raise AlreadyExists('olympiad_type', olympiad_type)
-    return new_olympiad_type.olympiad_type_id, 200
+    return {
+               "olympiad_type_id": new_olympiad_type.olympiad_type_id
+           }, 200
 
 
 @module.route('/olympiad_type/<int:id_olympiad_type>/remove', methods=['POST'])
