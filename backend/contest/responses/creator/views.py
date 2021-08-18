@@ -1,10 +1,10 @@
-from flask import request, make_response
-from contest.responses.models import *
-from common.errors import NotFound, InsufficientData
+import io
+
+from flask import request, send_file
 from common import get_current_app, get_current_module
 from common.util import db_get_or_raise, db_get_list, db_get_one_or_none
 from contest.responses.util import *
-from contest.responses.model_schemas.schemas import ResponseAnswerSchema, ResponseStatusSchema, AppealSchema
+from contest.responses.model_schemas.schemas import ResponseStatusSchema, AppealSchema
 from .schemas import *
 
 db = get_current_db()
@@ -12,8 +12,7 @@ module = get_current_module()
 app = get_current_app()
 
 
-@module.route('/contest/<int:contest_id>/task/<int:task_id>/user/<int:user_id>', methods=['GET'],
-              output_schema=ResponseAnswerSchema)
+@module.route('/contest/<int:contest_id>/task/<int:task_id>/user/<int:user_id>', methods=['GET'])
 def user_answer_for_task_by_id(contest_id, task_id, user_id):
     """
     Get user answer for the task
@@ -21,6 +20,15 @@ def user_answer_for_task_by_id(contest_id, task_id, user_id):
     get:
       security:
         - JWTAccessToken: []
+      produces:
+        - image/png
+        - application/pdf
+        - image/jpeg
+        - image/gif
+        - text/plain
+        - application/msword
+        - application/vnd.openxmlformats-officedocument.wordprocessingml.document
+        - application/vnd.oasis.opendocument.text
       parameters:
         - in: path
           description: Id of the contest
@@ -43,16 +51,18 @@ def user_answer_for_task_by_id(contest_id, task_id, user_id):
       responses:
         '200':
           description: OK
-          content:
-            application/json:
-              schema: ResponseAnswerSchema      #TODO ReturnFile
+          schema:
+            type: string
+            format: binary
         '403':
           description: Not enough rights for current user
         '404':
           description: User, contest or task not found
     """
     user_answer = user_answer_get(user_id, contest_id, task_id)
-    return user_answer, 200
+    return send_file(io.BytesIO(user_answer.answer),
+                     attachment_filename=f'userid_{user_id}_taskid_{task_id}.{user_answer.filetype.value}',
+                     mimetype=get_mimetype(user_answer.filetype.value)), 200
 
 
 @module.route('/contest/<int:contest_id>/task/<int:task_id>/user/<int:user_id>/<string:filetype>', methods=['POST'])
@@ -108,7 +118,7 @@ def user_answer_for_task_by_id_post(contest_id, task_id, user_id, filetype):
 
 
 @module.route('/contest/<int:contest_id>/user/<int:user_id>/response', methods=['GET'],
-              output_schema=UserResponseAnswersListSchema)
+              output_schema=AllUserAnswersResponseSchema)
 def get_user_all_answers(contest_id, user_id):
     """
     Get all user answers for the contest
@@ -134,7 +144,7 @@ def get_user_all_answers(contest_id, user_id):
           description: OK
           content:
             application/json:
-              schema: UserResponseAnswersListSchema
+              schema: AllUserAnswersResponseSchema
         '403':
           description: Not enough rights for current user
         '404':
@@ -145,11 +155,11 @@ def get_user_all_answers(contest_id, user_id):
         raise NotFound('user_response.answers', 'for user %d' % user_id)
     answers = user_work.answers
     return {
-            "user_id": user_work.user_id,
-            "work_id": user_work.work_id,
-            "contest_id": user_work.contest_id,
-            "user_answers": answers
-        }, 200
+               "user_id": user_work.user_id,
+               "work_id": user_work.work_id,
+               "contest_id": user_work.contest_id,
+               "user_answers": answers
+           }, 200
 
 
 @module.route('/contest/<int:contest_id>/user/<int:user_id>/status', methods=['GET'],
@@ -190,7 +200,7 @@ def user_status_and_mark_for_response_by_id(contest_id, user_id):
 
 
 @module.route('/contest/<int:contest_id>/user/<int:user_id>/status', methods=['POST'],
-              input_schema=ResponseStatusPostSchema)
+              input_schema=UserResponseStatusMarkResponseSchema)
 def user_status_and_mark_for_response_by_id_post(contest_id, user_id):
     """
     Set user's status and mark for response, only for inspector
@@ -216,7 +226,7 @@ def user_status_and_mark_for_response_by_id_post(contest_id, user_id):
         required: true
         content:
           application/json:
-            schema: ResponseStatusPostSchema
+            schema: UserResponseStatusMarkResponseSchema
       responses:
         '200':
           description: OK
@@ -233,7 +243,7 @@ def user_status_and_mark_for_response_by_id_post(contest_id, user_id):
 
 
 @module.route('/contest/<int:contest_id>/user/<int:user_id>/status/history', methods=['GET'],
-              output_schema=UserResponseHistorySchema)
+              output_schema=UserResponseStatusHistoryResponseSchema)
 def user_status_history_for_response_by_id(contest_id, user_id):
     """
     Get status history of user's work
@@ -260,7 +270,7 @@ def user_status_history_for_response_by_id(contest_id, user_id):
           description: OK
           content:
             application/json:
-              schema: UserResponseHistorySchema
+              schema: UserResponseStatusHistoryResponseSchema
         '403':
           description: Not enough rights for current user
         '404':
@@ -269,14 +279,14 @@ def user_status_history_for_response_by_id(contest_id, user_id):
     user_work = get_user_in_contest_work(user_id, contest_id)
     status = user_work.statuses
     return {
-            'user_id': user_id,
-            'contest_id': contest_id,
-            'history': status
-            }, 200
+               'user_id': user_id,
+               'contest_id': contest_id,
+               'history': status
+           }, 200
 
 
 @module.route('/contest/<int:contest_id>/list/', methods=['GET'],
-              output_schema=ContestResultSheetSchema)
+              output_schema=ContestResultSheetResponseSchema)
 def get_list_for_stage(contest_id):
     """
     Get the consolidated sheets within a single competition or stage
@@ -296,19 +306,19 @@ def get_list_for_stage(contest_id):
           description: OK
           content:
             application/json:
-              schema: ContestResultSheetSchema
+              schema: ContestResultSheetResponseSchema
         '404':
           description: Contest not found
     """
     users_in_contest = db_get_list(Response, 'contest_id', contest_id)
     return {
-            'contest_id': contest_id,
-            'user_row': users_in_contest
-          }, 200
+               'contest_id': contest_id,
+               'user_row': users_in_contest
+           }, 200
 
 
 @module.route('/contest/<int:contest_id>/user/<int:user_id>/appeal', methods=['POST'],
-              input_schema=AppealMessageSchema, output_schema=AppealCreateInfoSchema)
+              input_schema=AppealMessageRequestSchema, output_schema=AppealCreateInfoResponseSchema)
 def user_response_appeal_by_id(contest_id, user_id):
     """
     Create appeal for user's response
@@ -334,13 +344,13 @@ def user_response_appeal_by_id(contest_id, user_id):
         required: true
         content:
           application/json:
-            schema: AppealMessageSchema
+            schema: AppealMessageRequestSchema
       responses:
         '200':
           description: OK
           content:
             application/json:
-              schema: AppealCreateInfoSchema
+              schema: AppealCreateInfoResponseSchema
         '404':
           description: User or contest not found
     """
@@ -349,7 +359,7 @@ def user_response_appeal_by_id(contest_id, user_id):
 
 
 @module.route('/contest/<int:contest_id>/appeal/<int:appeal_id>/reply', methods=['POST'],
-              input_schema=AppealReplySchema, output_schema=AppealSchema)
+              input_schema=AppealReplyRequestSchema, output_schema=AppealSchema)
 def reply_to_user_appeal(contest_id, appeal_id):
     """
     Reply appeal for the user's response
@@ -375,7 +385,7 @@ def reply_to_user_appeal(contest_id, appeal_id):
         required: true
         content:
           application/json:
-            schema: AppealReplySchema
+            schema: AppealReplyRequestSchema
       responses:
         '200':
           description: OK

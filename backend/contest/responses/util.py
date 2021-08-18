@@ -18,8 +18,7 @@ def user_answer_get(user_id, contest_id, task_id):
     user_answer = user_work.answers.filter(ResponseAnswer.task_num == task_id).one_or_none()
     if user_answer is None:
         raise NotFound('response_answer', 'for task_id %d' % task_id)
-    print(user_answer.answer, "YAY")
-    return user_answer      #TODO File
+    return user_answer
 
 
 def user_answer_post(answer_file, filetype, user_id, contest_id, task_id):
@@ -68,3 +67,15 @@ def user_response_appeal_create(values, user_id, contest_id):
     db.session.commit()
     return appeal
 
+
+def get_mimetype(filetype):
+    mimetypes = {
+        'pdf': 'application/pdf',
+        'jpg': 'image/jpeg',
+        'png': 'image/png',
+        'git': 'image/gif',
+        'txt': 'text/plain',
+        'doc': 'application/msword',
+        'docx': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+        'odt': 'application/vnd.oasis.opendocument.text'
+    }

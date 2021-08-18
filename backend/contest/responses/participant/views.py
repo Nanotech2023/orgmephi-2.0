@@ -1,19 +1,18 @@
-from flask import request, make_response
-from contest.responses.models import *
+import io
+from flask import request, send_file
 from common import get_current_app, get_current_module
-from common.jwt_verify import jwt_required, jwt_required_role, jwt_get_id
-from common.util import db_get_list, db_get_or_raise
+from common.jwt_verify import jwt_get_id
+from common.util import db_get_or_raise
 from contest.responses.util import *
-from contest.responses.model_schemas.schemas import ResponseAnswerSchema, ResponseStatusSchema, AppealSchema
-from contest.responses.creator.schemas import UserResponseHistorySchema, AppealMessageSchema, AppealCreateInfoSchema
+from contest.responses.model_schemas.schemas import ResponseStatusSchema, AppealSchema
+from contest.responses.creator.schemas import UserResponseStatusHistoryResponseSchema, AppealMessageRequestSchema, AppealCreateInfoResponseSchema
 
 db = get_current_db()
 module = get_current_module()
 app = get_current_app()
 
 
-@module.route('/contest/<int:contest_id>/task/<int:task_id>/user/self', methods=['GET'],
-              output_schema=ResponseAnswerSchema)
+@module.route('/contest/<int:contest_id>/task/<int:task_id>/user/self', methods=['GET'])
 def user_answer_for_task(contest_id, task_id):
     """
     Get current user answer for the task
@@ -21,6 +20,15 @@ def user_answer_for_task(contest_id, task_id):
     get:
       security:
         - JWTAccessToken: []
+      produces:
+        - image/png
+        - application/pdf
+        - image/jpeg
+        - image/gif
+        - text/plain
+        - application/msword
+        - application/vnd.openxmlformats-officedocument.wordprocessingml.document
+        - application/vnd.oasis.opendocument.text
       parameters:
         - in: path
           description: Id of the contest
@@ -37,15 +45,17 @@ def user_answer_for_task(contest_id, task_id):
       responses:
         '200':
           description: OK
-          content:
-            application/json:
-              schema: ResponseAnswerSchema      #TODO return FILE
+          schema:
+            type: string
+            format: binary
         '404':
           description: User, contest or task not found
     """
     self_user_id = jwt_get_id()
     user_answer = user_answer_get(self_user_id, contest_id, task_id)
-    return user_answer, 200
+    return send_file(io.BytesIO(user_answer.answer),
+                     attachment_filename=f'userid_{self_user_id}_taskid_{task_id}.{user_answer.filetype.value}',
+                     mimetype=get_mimetype(user_answer.filetype.value)), 200
 
 
 @module.route('/contest/<int:contest_id>/task/<int:task_id>/user/self/<string:filetype>', methods=['POST'])
@@ -93,8 +103,7 @@ def user_answer_for_task_post(contest_id, task_id, filetype):
     return {}, 200
 
 
-@module.route('/contest/<int:contest_id>/answer/<int:answer_id>', methods=['GET'],
-              output_schema=ResponseAnswerSchema)
+@module.route('/contest/<int:contest_id>/answer/<int:answer_id>', methods=['GET'])
 def get_user_answer_by_id(contest_id, answer_id):
     """
     Get user's answer by id
@@ -102,6 +111,15 @@ def get_user_answer_by_id(contest_id, answer_id):
     get:
       security:
         - JWTAccessToken: []
+      produces:
+        - image/png
+        - application/pdf
+        - image/jpeg
+        - image/gif
+        - text/plain
+        - application/msword
+        - application/vnd.openxmlformats-officedocument.wordprocessingml.document
+        - application/vnd.oasis.opendocument.text
       parameters:
         - in: path
           description: Id of the contest
@@ -118,16 +136,18 @@ def get_user_answer_by_id(contest_id, answer_id):
       responses:
         '200':
           description: OK
-          content:
-            application/json:
-              schema: ResponseAnswerSchema
+          schema:
+            type: string
+            format: binary
         '403':
           description: Not enough rights for current user
         '404':
           description: User or contest not found
    """
     user_answer = db_get_or_raise(ResponseAnswer, 'answer_id', answer_id)
-    return  user_answer, 200    # TODO Test BLOB
+    return send_file(io.BytesIO(user_answer.answer),
+                     attachment_filename=f'answerid_{answer_id}.{user_answer.filetype.value}',
+                     mimetype=get_mimetype(user_answer.filetype.value)), 200
 
 
 @module.route('/contest/<int:contest_id>/user/self/status', methods=['GET'],
@@ -162,7 +182,7 @@ def user_status_and_mark_for_response(contest_id):
 
 
 @module.route('/contest/<int:contest_id>/user/self/status/history', methods=['GET'],
-              output_schema=UserResponseHistorySchema)
+              output_schema=UserResponseStatusHistoryResponseSchema)
 def user_status_history_for_response(contest_id):
     """
     Get status history of current user's work
@@ -182,7 +202,7 @@ def user_status_history_for_response(contest_id):
           description: OK
           content:
             application/json:
-              schema: UserResponseHistorySchema
+              schema: UserResponseStatusHistoryResponseSchema
         '403':
           description: Not enough rights for current user
         '404':
@@ -199,7 +219,7 @@ def user_status_history_for_response(contest_id):
 
 
 @module.route('/contest/<int:contest_id>/user/self/appeal', methods=['POST'],
-              input_schema=AppealMessageSchema, output_schema=AppealCreateInfoSchema)
+              input_schema=AppealMessageRequestSchema, output_schema=AppealCreateInfoResponseSchema)
 def user_response_appeal(contest_id):
     """
     Create appeal for current user's response
@@ -219,13 +239,13 @@ def user_response_appeal(contest_id):
         required: true
         content:
           application/json:
-            schema: AppealMessageSchema
+            schema: AppealMessageRequestSchema
       responses:
         '200':
           description: OK
           content:
             application/json:
-              schema: AppealCreateInfoSchema
+              schema: AppealCreateInfoResponseSchema
         '404':
           description: User or contest not found
     """
