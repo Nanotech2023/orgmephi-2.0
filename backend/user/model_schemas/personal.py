@@ -11,6 +11,18 @@ from .location import LocationSchema
 from .document import DocumentSchema
 
 
+class UserLimitationsSchema(SQLAlchemySchema):
+    class Meta:
+        model = UserLimitations
+        load_instance = True
+        sqla_session = db.session
+
+    user_id = auto_field(column_name='user_id', dump_only=True)
+    hearing = auto_field(column_name='hearing', allow_none=True)
+    sight = auto_field(column_name='sight', allow_none=True)
+    movement = auto_field(column_name='movement', allow_none=True)
+
+
 class UserInfoSchema(SQLAlchemySchema):
     class Meta:
         model = UserInfo
@@ -18,7 +30,7 @@ class UserInfoSchema(SQLAlchemySchema):
         sqla_session = db.session
 
     user_id = auto_field(column_name='user_id', dump_only=True)
-    email = auto_field(attribute='email', allow_none=True)
+    email = auto_field(column_name='email', allow_none=True)
     first_name = auto_field(column_name='first_name', allow_none=True)
     middle_name = auto_field(column_name='middle_name', allow_none=True)
     second_name = auto_field(column_name='second_name', allow_none=True)
@@ -26,6 +38,7 @@ class UserInfoSchema(SQLAlchemySchema):
     gender = EnumField(enum=GenderEnum, allow_none=True, by_value=True)
     dwelling = Nested(nested=LocationSchema, allow_none=True, many=False)
     document = Nested(nested=DocumentSchema, allow_none=True, many=False)
+    limitations = Nested(nested=UserLimitationsSchema, allow_none=True, many=False)
 
     # noinspection PyUnusedLocal
     @pre_load()

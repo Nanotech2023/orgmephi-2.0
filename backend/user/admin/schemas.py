@@ -39,6 +39,12 @@ class PreregisterResponseUserSchema(Schema):
     password = common_fields.Password(required=True)
 
 
+class UserLimitationsRequestUserSchema(Schema):
+    hearing = fields.Boolean()
+    sight = fields.Boolean()
+    movement = fields.Boolean()
+
+
 class UserInfoRequestUserSchema(Schema):
     email = common_fields.Email()
     first_name = common_fields.CommonName()
@@ -48,6 +54,7 @@ class UserInfoRequestUserSchema(Schema):
     gender = EnumField(enum=GenderEnum, by_value=True)
     dwelling = fields.Nested(nested=LocationCompatibleSchema, many=False)
     document = fields.Nested(nested=DocumentCompatibleSchema, many=False)
+    limitations = fields.Nested(nested=UserLimitationsRequestUserSchema, many=False)
 
 
 class StudentInfoRequestUserSchema(Schema):

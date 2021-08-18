@@ -46,3 +46,13 @@ class UserInfo(db.Model):
                                cascade='save-update, merge, delete, delete-orphan')
     document = db.relationship('Document', lazy='select', uselist=False,
                                cascade='save-update, merge, delete, delete-orphan')
+    limitations = db.relationship('UserLimitations', lazy='select', uselist=False,
+                                  cascade='save-update, merge, delete, delete-orphan')
+
+
+class UserLimitations(db.Model):
+    user_id = db.Column(db.Integer, db.ForeignKey(UserInfo.user_id), primary_key=True)
+    hearing = db.Column(db.Boolean, nullable=False, default=False)
+    sight = db.Column(db.Boolean, nullable=False, default=False)
+    movement = db.Column(db.Boolean, nullable=False, default=False)
+
