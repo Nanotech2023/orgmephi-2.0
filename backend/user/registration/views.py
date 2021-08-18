@@ -11,8 +11,8 @@ from user.model_schemas.auth import UserSchema
 from user.model_schemas.personal import UserInfoSchema
 from user.model_schemas.university import StudentInfoSchema
 
-from .schemas import SchoolRequestRegistrationSchema, UniversityRequestRegistrationSchema, \
-    InfoUniversitiesResponseRegistrationSchema, InfoCountriesResponseRegistrationSchema
+from .schemas import SchoolRegistrationRequestUserSchema, UniversityRegistrationRequestUserSchema, \
+    InfoUniversitiesResponseUserSchema, InfoCountriesResponseUserSchema
 
 
 db = get_current_db()
@@ -54,7 +54,7 @@ def register():
 
 
 @module.route('/school', methods=['POST'],
-              input_schema=SchoolRequestRegistrationSchema, output_schema=UserSchema)
+              input_schema=SchoolRegistrationRequestUserSchema, output_schema=UserSchema)
 def register_school():
     """
     Register a school student
@@ -65,7 +65,7 @@ def register_school():
         required: true
         content:
           application/json:
-            schema: SchoolRequestRegistrationSchema
+            schema: SchoolRegistrationRequestUserSchema
       responses:
         '200':
           description: OK
@@ -81,7 +81,7 @@ def register_school():
 
 
 @module.route('/university', methods=['POST'],
-              input_schema=UniversityRequestRegistrationSchema, output_schema=UserSchema)
+              input_schema=UniversityRegistrationRequestUserSchema, output_schema=UserSchema)
 def register_university():
     """
     Register a university student
@@ -91,7 +91,7 @@ def register_university():
         required: true
         content:
           application/json:
-            schema: UniversityRequestRegistrationSchema
+            schema: UniversityRegistrationRequestUserSchema
       responses:
         '200':
           description: OK
@@ -106,7 +106,7 @@ def register_university():
     return register(), 200
 
 
-@module.route('/info/universities', methods=['GET'], output_schema=InfoUniversitiesResponseRegistrationSchema)
+@module.route('/info/universities', methods=['GET'], output_schema=InfoUniversitiesResponseUserSchema)
 def get_universities():
     """
     Get known university list
@@ -117,12 +117,12 @@ def get_universities():
           description: OK
           content:
             application/json:
-              schema: InfoUniversitiesResponseRegistrationSchema
+              schema: InfoUniversitiesResponseUserSchema
     """
     return {"university_list": db_get_all(University)}, 200
 
 
-@module.route('/info/countries', methods=['GET'], output_schema=InfoCountriesResponseRegistrationSchema)
+@module.route('/info/countries', methods=['GET'], output_schema=InfoCountriesResponseUserSchema)
 def get_countries():
     """
     Get known country list
@@ -133,6 +133,6 @@ def get_countries():
           description: OK
           content:
             application/json:
-              schema: InfoCountriesResponseRegistrationSchema
+              schema: InfoCountriesResponseUserSchema
     """
     return {"country_list": db_get_all(Country)}, 200

@@ -1,21 +1,7 @@
 # This file is generated automatically !!!
 components:
   schemas:
-    AuthInfo:
-      properties:
-        email:
-          format: email
-          maxLength: 64
-          type: string
-        password:
-          example: qwertyA*1
-          maxLength: 128
-          type: string
-      required:
-      - email
-      - password
-      type: object
-    CSRFPair:
+    CSRFPairUser:
       properties:
         csrf_access_token:
           type: string
@@ -28,7 +14,6 @@ components:
     Country:
       properties:
         name:
-          maxLength: 32
           type: string
       required:
       - name
@@ -39,10 +24,11 @@ components:
           readOnly: true
           type: integer
         name:
-          maxLength: 32
           type: string
+      required:
+      - name
       type: object
-    GroupAddRequest:
+    GroupAddRequestUser:
       properties:
         name:
           maxLength: 32
@@ -50,7 +36,7 @@ components:
       required:
       - name
       type: object
-    GroupsResponse:
+    GroupListResponseUser:
       properties:
         groups:
           items:
@@ -59,7 +45,7 @@ components:
       required:
       - groups
       type: object
-    InfoCountriesResponse:
+    InfoCountriesResponseUser:
       properties:
         country_list:
           items:
@@ -68,7 +54,7 @@ components:
       required:
       - country_list
       type: object
-    InfoUniversitiesResponse:
+    InfoUniversitiesResponseUser:
       properties:
         university_list:
           items:
@@ -77,7 +63,7 @@ components:
       required:
       - university_list
       type: object
-    LoginRequest:
+    LoginRequestUser:
       properties:
         password:
           example: qwertyA*1
@@ -93,14 +79,14 @@ components:
       - remember_me
       - username
       type: object
-    MembershipRequest:
+    MembershipRequestUser:
       properties:
         group_id:
           type: integer
       required:
       - group_id
       type: object
-    PasswordAdminRequest:
+    PasswordRequestUser:
       properties:
         new_password:
           example: qwertyA*1
@@ -109,21 +95,60 @@ components:
       required:
       - new_password
       type: object
-    PasswordRequest:
+    PreregisterResponseUser:
       properties:
-        new_password:
+        password:
           example: qwertyA*1
           maxLength: 128
           type: string
-        old_password:
+        registration_number:
+          maxLength: 64
+          type: string
+      required:
+      - password
+      - registration_number
+      type: object
+    RegisterConfirmUser:
+      properties:
+        password:
+          example: qwertyA*1
+          maxLength: 128
+          type: string
+        registration_number:
+          maxLength: 64
+          type: string
+      required:
+      - password
+      - registration_number
+      type: object
+    RegisterInternalRequestUser:
+      properties:
+        password:
+          example: qwertyA*1
+          maxLength: 128
+          type: string
+        username:
+          maxLength: 64
+          type: string
+      required:
+      - password
+      - username
+      type: object
+    RegistrationInfoUser:
+      properties:
+        email:
+          format: email
+          maxLength: 64
+          type: string
+        password:
           example: qwertyA*1
           maxLength: 128
           type: string
       required:
-      - new_password
-      - old_password
+      - email
+      - password
       type: object
-    PersonalInfo:
+    RegistrationPersonalInfoUser:
       properties:
         date_of_birth:
           format: date
@@ -143,64 +168,34 @@ components:
       - middle_name
       - second_name
       type: object
-    PreregisterResponse:
+    RegistrationStudentInfoUser:
       properties:
-        password:
-          example: qwertyA*1
-          maxLength: 128
+        admission_year:
+          format: date
           type: string
-        registration_number:
-          maxLength: 64
+        citizenship:
+          maxLength: 32
           type: string
+        city:
+          maxLength: 32
+          type: string
+        phone:
+          example: 8 (800) 555 35 35
+          type: string
+        region:
+          maxLength: 32
+          type: string
+        university:
+          $ref: '#/components/schemas/StudentUniversityCompatible'
       required:
-      - password
-      - registration_number
+      - admission_year
+      - citizenship
+      - city
+      - phone
+      - region
+      - university
       type: object
-    RegisterConfirm:
-      properties:
-        password:
-          example: qwertyA*1
-          maxLength: 128
-          type: string
-        registration_number:
-          maxLength: 64
-          type: string
-      required:
-      - password
-      - registration_number
-      type: object
-    RegisterInternalRequest:
-      properties:
-        password:
-          example: qwertyA*1
-          maxLength: 128
-          type: string
-        username:
-          maxLength: 64
-          type: string
-      required:
-      - password
-      - username
-      type: object
-    ResponseGroupList:
-      properties:
-        groups:
-          items:
-            $ref: '#/components/schemas/Group'
-          type: array
-      required:
-      - groups
-      type: object
-    ResponseUserList:
-      properties:
-        users:
-          items:
-            $ref: '#/components/schemas/User'
-          type: array
-      required:
-      - users
-      type: object
-    RoleRequest:
+    RoleRequestUser:
       properties:
         role:
           enum:
@@ -212,14 +207,14 @@ components:
       required:
       - role
       type: object
-    SchoolRequest:
+    SchoolRegistrationRequestUser:
       properties:
         auth_info:
-          $ref: '#/components/schemas/AuthInfo'
+          $ref: '#/components/schemas/RegistrationInfoUser'
         personal_info:
-          $ref: '#/components/schemas/PersonalInfo'
+          $ref: '#/components/schemas/RegistrationPersonalInfoUser'
         register_confirm:
-          $ref: '#/components/schemas/RegisterConfirm'
+          $ref: '#/components/schemas/RegisterConfirmUser'
         register_type:
           enum:
           - PreUniversity
@@ -231,6 +226,29 @@ components:
       - personal_info
       - register_type
       type: object
+    SelfGroupsResponseUser:
+      properties:
+        groups:
+          items:
+            $ref: '#/components/schemas/Group'
+          type: array
+      required:
+      - groups
+      type: object
+    SelfPasswordRequestUser:
+      properties:
+        new_password:
+          example: qwertyA*1
+          maxLength: 128
+          type: string
+        old_password:
+          example: qwertyA*1
+          maxLength: 128
+          type: string
+      required:
+      - new_password
+      - old_password
+      type: object
     StudentInfo:
       properties:
         admission_year:
@@ -238,49 +256,27 @@ components:
           nullable: true
           type: string
         citizenship:
-          maxLength: 32
-          nullable: true
           type: string
-        citizenship_country_id:
-          description: Framework-specific, ignored on request and never set on on
-            response
-          nullable: true
-          type: integer
         city:
-          maxLength: 32
           nullable: true
           type: string
         phone:
-          example: 8 (800) 555 35 35
           nullable: true
           type: string
         region:
-          maxLength: 32
           nullable: true
           type: string
         university:
-          maxLength: 32
+          allOf:
+          - $ref: '#/components/schemas/StudentUniversity'
           nullable: true
-          type: string
-        university_country:
-          maxLength: 32
-          nullable: true
-          type: string
-        university_country_id:
-          description: Framework-specific, ignored on request and never set on on
-            response
-          nullable: true
-          type: integer
-        university_id:
-          description: Framework-specific, ignored on request and never set on on
-            response
-          nullable: true
-          type: integer
         user_id:
           readOnly: true
           type: integer
+      required:
+      - user_id
       type: object
-    StudentInfoRegistration:
+    StudentInfoRequestUser:
       properties:
         admission_year:
           format: date
@@ -298,21 +294,61 @@ components:
           maxLength: 32
           type: string
         university:
+          $ref: '#/components/schemas/StudentUniversityCompatible'
+      type: object
+    StudentUniversity:
+      discriminator:
+        mapping:
+          Custom: '#/components/schemas/StudentUniversityCustom'
+          Known: '#/components/schemas/StudentUniversityKnown'
+        propertyName: known_type
+      oneOf:
+      - $ref: '#/components/schemas/StudentUniversityKnown'
+      - $ref: '#/components/schemas/StudentUniversityCustom'
+    StudentUniversityCompatible:
+      properties:
+        country:
+          description: Omit this field if university is known by backend
           maxLength: 32
           type: string
-        university_country:
+        university:
           maxLength: 32
           type: string
       required:
-      - admission_year
-      - citizenship
-      - city
-      - phone
-      - region
       - university
-      - university_country
       type: object
-    TypeRequest:
+    StudentUniversityCustom:
+      properties:
+        country:
+          type: string
+        known_type:
+          enum:
+          - Custom
+          readOnly: true
+          type: string
+        university:
+          nullable: true
+          type: string
+      required:
+      - country
+      - university
+      type: object
+    StudentUniversityKnown:
+      properties:
+        country:
+          readOnly: true
+          type: string
+        known_type:
+          enum:
+          - Known
+          readOnly: true
+          type: string
+        university:
+          type: string
+      required:
+      - university
+      type: object
+    TypeRequestUser:
       properties:
         type:
           enum:
@@ -329,23 +365,22 @@ components:
     University:
       properties:
         name:
-          maxLength: 32
           type: string
       required:
       - name
       type: object
-    UniversityRequest:
+    UniversityRegistrationRequestUser:
       properties:
         auth_info:
-          $ref: '#/components/schemas/AuthInfo'
+          $ref: '#/components/schemas/RegistrationInfoUser'
         personal_info:
-          $ref: '#/components/schemas/PersonalInfo'
+          $ref: '#/components/schemas/RegistrationPersonalInfoUser'
         register_type:
           enum:
           - University
           type: string
         student_info:
-          $ref: '#/components/schemas/StudentInfoRegistration'
+          $ref: '#/components/schemas/RegistrationStudentInfoUser'
       required:
       - auth_info
       - personal_info
@@ -374,8 +409,9 @@ components:
           - PreRegister
           type: string
         username:
-          maxLength: 64
           type: string
+      required:
+      - username
       type: object
     UserInfo:
       properties:
@@ -384,19 +420,15 @@ components:
           nullable: true
           type: string
         email:
-          maxLength: 64
           nullable: true
           type: string
         first_name:
-          maxLength: 32
           nullable: true
           type: string
         middle_name:
-          maxLength: 32
           nullable: true
           type: string
         second_name:
-          maxLength: 32
           nullable: true
           type: string
         user_id:
@@ -404,6 +436,34 @@ components:
           type: integer
       required:
       - user_id
+      type: object
+    UserInfoRequestUser:
+      properties:
+        date_of_birth:
+          format: date
+          type: string
+        email:
+          format: email
+          maxLength: 64
+          type: string
+        first_name:
+          maxLength: 32
+          type: string
+        middle_name:
+          maxLength: 32
+          type: string
+        second_name:
+          maxLength: 32
+          type: string
+      type: object
+    UserListResponseUser:
+      properties:
+        users:
+          items:
+            $ref: '#/components/schemas/User'
+          type: array
+      required:
+      - users
       type: object
   securitySchemes:
     CSRFAccessToken:
@@ -433,7 +493,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/SchoolRequest'
+              $ref: '#/components/schemas/SchoolRegistrationRequestUser'
         required: true
       responses:
         '200':
@@ -453,7 +513,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/UniversityRequest'
+              $ref: '#/components/schemas/UniversityRegistrationRequestUser'
         required: true
       responses:
         '200':
@@ -473,7 +533,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/InfoUniversitiesResponse'
+                $ref: '#/components/schemas/InfoUniversitiesResponseUser'
           description: OK
   /user/registration/info/countries:
     get:
@@ -482,7 +542,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/InfoCountriesResponse'
+                $ref: '#/components/schemas/InfoCountriesResponseUser'
           description: OK
   /user/auth/login:
     post:
@@ -490,14 +550,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/LoginRequest'
+              $ref: '#/components/schemas/LoginRequestUser'
         required: true
       responses:
         '200':
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/CSRFPair'
+                $ref: '#/components/schemas/CSRFPairUser'
           description: OK
           headers:
             Set-Cookie:
@@ -517,7 +577,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/CSRFPair'
+                $ref: '#/components/schemas/CSRFPairUser'
           description: OK
           headers:
             Set-Cookie:
@@ -562,7 +622,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/PasswordRequest'
+              $ref: '#/components/schemas/SelfPasswordRequestUser'
         required: true
       responses:
         '200':
@@ -609,7 +669,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/GroupsResponse'
+                $ref: '#/components/schemas/SelfGroupsResponseUser'
           description: OK
         '404':
           description: User not found
@@ -621,7 +681,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/RegisterInternalRequest'
+              $ref: '#/components/schemas/RegisterInternalRequestUser'
         required: true
       responses:
         '200':
@@ -644,7 +704,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/PreregisterResponse'
+                $ref: '#/components/schemas/PreregisterResponseUser'
           description: OK
         '403':
           description: Invalid role of current user
@@ -664,7 +724,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/PasswordAdminRequest'
+              $ref: '#/components/schemas/PasswordRequestUser'
         required: true
       responses:
         '200':
@@ -691,7 +751,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/RoleRequest'
+              $ref: '#/components/schemas/RoleRequestUser'
         required: true
       responses:
         '200':
@@ -716,7 +776,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/TypeRequest'
+              $ref: '#/components/schemas/TypeRequestUser'
         required: true
       responses:
         '200':
@@ -744,7 +804,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/UserInfo'
+              $ref: '#/components/schemas/UserInfoRequestUser'
         required: true
       responses:
         '200':
@@ -771,7 +831,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/StudentInfo'
+              $ref: '#/components/schemas/StudentInfoRequestUser'
         required: true
       responses:
         '200':
@@ -791,7 +851,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/GroupAddRequest'
+              $ref: '#/components/schemas/GroupAddRequestUser'
         required: true
       responses:
         '200':
@@ -841,7 +901,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/MembershipRequest'
+              $ref: '#/components/schemas/MembershipRequestUser'
         required: true
       responses:
         '200':
@@ -868,7 +928,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/MembershipRequest'
+              $ref: '#/components/schemas/MembershipRequestUser'
         required: true
       responses:
         '200':
@@ -909,7 +969,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ResponseUserList'
+                $ref: '#/components/schemas/UserListResponseUser'
           description: OK
         '403':
           description: Invalid role of current user
@@ -929,7 +989,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ResponseUserList'
+                $ref: '#/components/schemas/UserListResponseUser'
           description: OK
         '403':
           description: Invalid role of current user
@@ -1010,7 +1070,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ResponseGroupList'
+                $ref: '#/components/schemas/GroupListResponseUser'
           description: OK
         '403':
           description: Invalid role of current user
@@ -1030,7 +1090,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ResponseGroupList'
+                $ref: '#/components/schemas/GroupListResponseUser'
           description: OK
         '403':
           description: Invalid role of current user

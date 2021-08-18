@@ -10,7 +10,7 @@ from user.model_schemas.auth import UserSchema
 from user.model_schemas.personal import UserInfoSchema
 from user.model_schemas.university import StudentInfoSchema
 
-from .schemas import PasswordRequestProfileSchema, GroupsResponseProfileSchema
+from .schemas import SelfPasswordRequestUserSchema, SelfGroupsResponseUserSchema
 
 db = get_current_db()
 module = get_current_module()
@@ -37,7 +37,7 @@ def get_user_self():
     return db_get_or_raise(User, "id", jwt_get_id()), 200
 
 
-@module.route('/password', methods=['POST'], input_schema=PasswordRequestProfileSchema)
+@module.route('/password', methods=['POST'], input_schema=SelfPasswordRequestUserSchema)
 def change_password_self():
     """
     Change password for current user
@@ -50,7 +50,7 @@ def change_password_self():
         required: true
         content:
           application/json:
-            schema: PasswordRequestProfileSchema
+            schema: SelfPasswordRequestUserSchema
       responses:
         '200':
           description: OK
@@ -113,7 +113,7 @@ def get_university_info_self():
     return user.student_info, 200
 
 
-@module.route('/groups', methods=['GET'], output_schema=GroupsResponseProfileSchema)
+@module.route('/groups', methods=['GET'], output_schema=SelfGroupsResponseUserSchema)
 def get_user_groups_self():
     """
     Get groups for current user
@@ -126,7 +126,7 @@ def get_user_groups_self():
           description: OK
           content:
             application/json:
-              schema: GroupsResponseProfileSchema
+              schema: SelfGroupsResponseUserSchema
         '404':
           description: User not found
     """

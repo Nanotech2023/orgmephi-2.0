@@ -11,9 +11,9 @@ from user.model_schemas.auth import UserSchema, GroupSchema
 from user.model_schemas.personal import UserInfoSchema
 from user.model_schemas.university import StudentInfoSchema
 
-from .schemas import RegisterInternalRequestAdminSchema, PasswordRequestAdminSchema, RoleRequestAdminSchema, \
-    TypeRequestAdminSchema, GroupAddRequestAdminSchema, MembershipRequestAdminSchema, PreregisterResponseAdminSchema, \
-    UserInfoAdminSchema, StudentInfoAdminSchema
+from .schemas import RegisterInternalRequestUserSchema, PasswordRequestUserSchema, RoleRequestUserSchema, \
+    TypeRequestUserSchema, GroupAddRequestUserSchema, MembershipRequestUserSchema, PreregisterResponseUserSchema, \
+    UserInfoRequestUserSchema, StudentInfoRequestUserSchema
 
 db = get_current_db()
 module = get_current_module()
@@ -21,7 +21,7 @@ app = get_current_app()
 
 
 @module.route('/internal_register', methods=['POST'],
-              input_schema=RegisterInternalRequestAdminSchema, output_schema=UserSchema)
+              input_schema=RegisterInternalRequestUserSchema, output_schema=UserSchema)
 def register_internal():
     """
     Register an internal user
@@ -31,7 +31,7 @@ def register_internal():
         required: true
         content:
           application/json:
-            schema: RegisterInternalRequestAdminSchema
+            schema: RegisterInternalRequestUserSchema
       security:
         - JWTAccessToken: [ ]
         - CSRFAccessToken: [ ]
@@ -59,7 +59,7 @@ def register_internal():
     return user, 200
 
 
-@module.route('/preregister', methods=['POST'], output_schema=PreregisterResponseAdminSchema)
+@module.route('/preregister', methods=['POST'], output_schema=PreregisterResponseUserSchema)
 def preregister():
     """
     !NOT IMPLEMENTED!
@@ -74,7 +74,7 @@ def preregister():
           description: OK
           content:
             application/json:
-              schema: PreregisterResponseAdminSchema
+              schema: PreregisterResponseUserSchema
         '403':
           description: Invalid role of current user
     """
@@ -82,7 +82,7 @@ def preregister():
     abort(501)
 
 
-@module.route('/password/<int:user_id>', methods=['POST'], input_schema=PasswordRequestAdminSchema)
+@module.route('/password/<int:user_id>', methods=['POST'], input_schema=PasswordRequestUserSchema)
 def change_password_admin(user_id):
     """
     Change password for another user
@@ -102,7 +102,7 @@ def change_password_admin(user_id):
         required: true
         content:
           application/json:
-            schema: PasswordRequestAdminSchema
+            schema: PasswordRequestUserSchema
       responses:
         '200':
           description: OK
@@ -118,7 +118,7 @@ def change_password_admin(user_id):
     return update_password(user_id, values['new_password'], None, True)
 
 
-@module.route('/role/<int:user_id>', methods=['PUT'], input_schema=RoleRequestAdminSchema)
+@module.route('/role/<int:user_id>', methods=['PUT'], input_schema=RoleRequestUserSchema)
 def set_user_role(user_id):
     """
     Set the role of any user
@@ -138,7 +138,7 @@ def set_user_role(user_id):
         required: true
         content:
           application/json:
-            schema: RoleRequestAdminSchema
+            schema: RoleRequestUserSchema
       responses:
         '200':
           description: OK
@@ -154,7 +154,7 @@ def set_user_role(user_id):
     return {}, 200
 
 
-@module.route('/type/<int:user_id>', methods=['PUT'], input_schema=TypeRequestAdminSchema)
+@module.route('/type/<int:user_id>', methods=['PUT'], input_schema=TypeRequestUserSchema)
 def set_user_type(user_id):
     """
     Set the type of any user
@@ -174,7 +174,7 @@ def set_user_type(user_id):
         required: true
         content:
           application/json:
-            schema: TypeRequestAdminSchema
+            schema: TypeRequestUserSchema
       responses:
         '200':
           description: OK
@@ -216,7 +216,7 @@ def set_user_info_admin(user_id):
         required: true
         content:
           application/json:
-            schema: UserInfoAdminSchema
+            schema: UserInfoRequestUserSchema
       responses:
         '200':
           description: OK
@@ -256,7 +256,7 @@ def set_university_info_admin(user_id):
         required: true
         content:
           application/json:
-            schema: StudentInfoAdminSchema
+            schema: StudentInfoRequestUserSchema
       responses:
         '200':
           description: OK
@@ -277,7 +277,7 @@ def set_university_info_admin(user_id):
     return {}, 200
 
 
-@module.route('/add_group', methods=['POST'], input_schema=GroupAddRequestAdminSchema, output_schema=GroupSchema)
+@module.route('/add_group', methods=['POST'], input_schema=GroupAddRequestUserSchema, output_schema=GroupSchema)
 def add_group_admin():
     """
     Add a group
@@ -290,7 +290,7 @@ def add_group_admin():
         required: true
         content:
           application/json:
-            schema: GroupAddRequestAdminSchema
+            schema: GroupAddRequestUserSchema
       responses:
         '200':
           description: OK
@@ -346,7 +346,7 @@ def remove_group_admin(group_id):
     return {}, 200
 
 
-@module.route('/add_member/<int:user_id>', methods=['POST'], input_schema=MembershipRequestAdminSchema)
+@module.route('/add_member/<int:user_id>', methods=['POST'], input_schema=MembershipRequestUserSchema)
 def add_user_groups(user_id):
     """
     Assign a user to a group
@@ -366,7 +366,7 @@ def add_user_groups(user_id):
         required: true
         content:
           application/json:
-            schema: MembershipRequestAdminSchema
+            schema: MembershipRequestUserSchema
       responses:
         '200':
           description: OK
@@ -387,7 +387,7 @@ def add_user_groups(user_id):
     return {}, 200
 
 
-@module.route('/remove_member/<int:user_id>', methods=['POST'], input_schema=MembershipRequestAdminSchema)
+@module.route('/remove_member/<int:user_id>', methods=['POST'], input_schema=MembershipRequestUserSchema)
 def remove_user_groups(user_id):
     """
     Remove a user from a group
@@ -407,7 +407,7 @@ def remove_user_groups(user_id):
         required: true
         content:
           application/json:
-            schema: MembershipRequestAdminSchema
+            schema: MembershipRequestUserSchema
       responses:
         '200':
           description: OK

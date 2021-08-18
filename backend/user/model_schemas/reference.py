@@ -1,7 +1,6 @@
 from marshmallow_sqlalchemy import SQLAlchemySchema, auto_field
 
 from user.models.reference import *
-from common.fields import common_name_validator
 
 
 class UniversitySchema(SQLAlchemySchema):
@@ -10,7 +9,7 @@ class UniversitySchema(SQLAlchemySchema):
         load_instance = True
         sqla_session = db.session
 
-    name = auto_field(column_name='name', validate=common_name_validator)
+    name = auto_field(column_name='name')
 
 
 class CountrySchema(SQLAlchemySchema):
@@ -19,4 +18,4 @@ class CountrySchema(SQLAlchemySchema):
         load_instance = True
         sqla_session = db.session
 
-    name = auto_field(column_name='name', validate=common_name_validator)
+    name = auto_field(column_name='name')
