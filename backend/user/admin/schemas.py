@@ -2,6 +2,7 @@ from marshmallow import Schema, fields
 from marshmallow_enum import EnumField
 from common import fields as common_fields
 from user.models.auth import UserTypeEnum, UserRoleEnum
+from user.model_schemas.personal import GenderEnum
 from user.model_schemas.university import StudentUniversityCompatibleSchema
 from user.model_schemas.school import SchoolType
 from user.model_schemas.location import LocationCompatibleSchema
@@ -44,6 +45,7 @@ class UserInfoRequestUserSchema(Schema):
     middle_name = common_fields.CommonName()
     second_name = common_fields.CommonName()
     date_of_birth = fields.Date()
+    gender = EnumField(enum=GenderEnum, by_value=True)
     dwelling = fields.Nested(nested=LocationCompatibleSchema, many=False)
     document = fields.Nested(nested=DocumentCompatibleSchema, many=False)
 

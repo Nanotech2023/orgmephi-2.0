@@ -1,9 +1,19 @@
+import enum
 from common import get_current_db, get_current_app
 from .auth import User
 from .location import Location
 
 db = get_current_db()
 app = get_current_app()
+
+
+class GenderEnum(enum.Enum):
+    """
+        Gender enumeration class.
+    """
+
+    male = 'Male'
+    female = 'Female'
 
 
 class UserInfo(db.Model):
@@ -29,6 +39,7 @@ class UserInfo(db.Model):
     middle_name = db.Column(db.String)
     second_name = db.Column(db.String)
     date_of_birth = db.Column(db.Date)
+    gender = db.Column(db.Enum(GenderEnum))
 
     user = db.relationship('User', back_populates='user_info', lazy='select')
     dwelling = db.relationship('Location', lazy='select', uselist=False, single_parent=True,

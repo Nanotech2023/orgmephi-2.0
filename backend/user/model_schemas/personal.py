@@ -1,6 +1,7 @@
 from marshmallow import pre_load
 from marshmallow_sqlalchemy import SQLAlchemySchema, auto_field
 from marshmallow_sqlalchemy.fields import Nested
+from marshmallow_enum import EnumField
 from user.models.personal import *
 
 from common.util import db_get_one_or_none
@@ -22,6 +23,7 @@ class UserInfoSchema(SQLAlchemySchema):
     middle_name = auto_field(column_name='middle_name', allow_none=True)
     second_name = auto_field(column_name='second_name', allow_none=True)
     date_of_birth = auto_field(column_name='date_of_birth', allow_none=True)
+    gender = EnumField(enum=GenderEnum, allow_none=True, by_value=True)
     dwelling = Nested(nested=LocationSchema, allow_none=True, many=False)
     document = Nested(nested=DocumentSchema, allow_none=True, many=False)
 
