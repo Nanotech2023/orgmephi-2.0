@@ -8,7 +8,7 @@ from user.model_schemas.personal import UserInfoSchema
 from user.model_schemas.university import StudentInfoSchema
 from user.model_schemas.school import SchoolInfoSchema
 
-from .schemas import GroupListResponseUserSchema, UserListResponseUserSchema
+from .schemas import GroupListResponseUserSchema, UserListResponseUserSchema, UserFullListResponseUserSchema
 
 db = get_current_db()
 module = get_current_module()
@@ -59,6 +59,27 @@ def get_user_all():
           content:
             application/json:
               schema: UserListResponseUserSchema
+        '403':
+          description: Invalid role of current user
+    """
+    users = db_get_all(User)
+    return {'users': users}, 200
+
+
+@module.route('/user_full/all', methods=['GET'], output_schema=UserFullListResponseUserSchema)
+def get_user_full_all():
+    """
+    Get full info for all users
+    ---
+    get:
+      security:
+        - JWTAccessToken: [ ]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: UserFullListResponseUserSchema
         '403':
           description: Invalid role of current user
     """
