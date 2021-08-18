@@ -79,3 +79,4 @@ def get_mimetype(filetype):
         'docx': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
         'odt': 'application/vnd.oasis.opendocument.text'
     }
+    return mimetypes.get(filetype)

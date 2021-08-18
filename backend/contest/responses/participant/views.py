@@ -5,7 +5,8 @@ from common.jwt_verify import jwt_get_id
 from common.util import db_get_or_raise
 from contest.responses.util import *
 from contest.responses.model_schemas.schemas import ResponseStatusSchema, AppealSchema
-from contest.responses.creator.schemas import UserResponseStatusHistoryResponseSchema, AppealMessageRequestSchema, AppealCreateInfoResponseSchema
+from contest.responses.creator.schemas import UserResponseStatusHistoryResponseSchema, AppealMessageRequestSchema, \
+    AppealCreateInfoResponseSchema
 
 db = get_current_db()
 module = get_current_module()
