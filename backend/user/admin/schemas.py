@@ -6,39 +6,39 @@ from user.model_schemas.university import StudentInfoSchema, StudentUniversityCo
 from user.model_schemas.personal import UserInfoSchema
 
 
-class RegisterInternalRequestAdminSchema(Schema):
+class RegisterInternalRequestUserSchema(Schema):
     username = common_fields.Username(required=True)
     password = common_fields.Password(required=True)
 
 
-class PasswordRequestAdminSchema(Schema):
+class PasswordRequestUserSchema(Schema):
     new_password = common_fields.Password(required=True)
 
 
-class RoleRequestAdminSchema(Schema):
+class RoleRequestUserSchema(Schema):
     role = EnumField(UserRoleEnum, required=True, by_value=True)
 
 
-class TypeRequestAdminSchema(Schema):
+class TypeRequestUserSchema(Schema):
     type = EnumField(UserTypeEnum, required=True, by_value=True)
 
 
-class GroupAddRequestAdminSchema(Schema):
+class GroupAddRequestUserSchema(Schema):
     name = common_fields.CommonName(required=True)
 
 
-class MembershipRequestAdminSchema(Schema):
+class MembershipRequestUserSchema(Schema):
     group_id = fields.Int(required=True)
 
 
-class PreregisterResponseAdminSchema(Schema):
+class PreregisterResponseUserSchema(Schema):
     registration_number = common_fields.Username(required=True)
     password = common_fields.Password(required=True)
 
 
-class UserInfoAdminSchema(UserInfoSchema):
+class UserInfoRequestUserSchema(UserInfoSchema):
     pass
 
 
-class StudentInfoAdminSchema(StudentInfoSchema):
+class StudentInfoRequestUserSchema(StudentInfoSchema):
     university = fields.Nested(nested=StudentUniversityCompatibleSchema, allow_none=True, many=False)
