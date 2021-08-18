@@ -2,9 +2,12 @@ from datetime import timedelta
 
 
 class DefaultConfiguration:
-    SQLALCHEMY_DATABASE_URI = "sqlite:///database.sqlite"
+    SQLALCHEMY_DATABASE_URI = 'sqlite:///database.sqlite'
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     ORGMEPHI_API_PATH = 'api'
+    ORGMEPHI_UNIVERSITY_FILE = 'user/universities.txt'
+    ORGMEPHI_COUNTRY_FILE = 'user/countries.txt'
+    ORGMEPHI_PASSWORD_HASH = 'pbkdf2_sha256'
     ORGMEPHI_PASSWORD_LENGTH = 8
     ORGMEPHI_PASSWORD_UPPERCASE = 1
     ORGMEPHI_PASSWORD_NUMBERS = 1

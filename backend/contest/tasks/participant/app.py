@@ -1,7 +1,7 @@
-from contest.tasks.default_config import DefaultConfiguration
 from common import OrgMephiApp
+from contest.tasks.default_config import DefaultConfiguration
 
-from . import module
+from contest.tasks.participant import module
 
 app = OrgMephiApp('participant', module, default_config=DefaultConfiguration())
 app.set_current()
