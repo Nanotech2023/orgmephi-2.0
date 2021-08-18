@@ -76,6 +76,8 @@ class User(db.Model):
                                 cascade='save-update, merge, delete, delete-orphan')
     student_info = db.relationship('StudentInfo', back_populates='user', lazy=True, uselist=False,
                                    cascade='save-update, merge, delete, delete-orphan')
+    school_info = db.relationship('SchoolInfo', back_populates='user', lazy=True, uselist=False,
+                                  cascade='save-update, merge, delete, delete-orphan')
     groups = db.relationship('Group', secondary=users_in_group, lazy='select', back_populates='users')
 
 

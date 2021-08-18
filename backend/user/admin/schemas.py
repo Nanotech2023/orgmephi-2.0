@@ -3,6 +3,8 @@ from marshmallow_enum import EnumField
 from common import fields as common_fields
 from user.models.auth import UserTypeEnum, UserRoleEnum
 from user.model_schemas.university import StudentUniversityCompatibleSchema
+from user.model_schemas.school import SchoolType
+from user.model_schemas.location import LocationCompatibleSchema
 
 
 class RegisterInternalRequestUserSchema(Schema):
@@ -50,3 +52,11 @@ class StudentInfoRequestUserSchema(Schema):
     citizenship = common_fields.CommonName()
     region = common_fields.CommonName()
     city = common_fields.CommonName()
+
+
+class SchoolInfoRequestUserSchema(Schema):
+    school_type = EnumField(enum=SchoolType, by_value=True)
+    number = fields.Integer()
+    name = fields.String()
+    grade = fields.Integer()
+    location = fields.Nested(nested=LocationCompatibleSchema, many=False)

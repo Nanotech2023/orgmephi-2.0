@@ -10,6 +10,7 @@ from user.models import User, add_user, UserInfo, Group
 from user.model_schemas.auth import UserSchema, GroupSchema
 from user.model_schemas.personal import UserInfoSchema
 from user.model_schemas.university import StudentInfoSchema
+from user.model_schemas.school import SchoolInfoSchema
 
 from .schemas import *
 
@@ -222,8 +223,6 @@ def set_user_info_admin(user_id):
           description: Invalid role of current user
         '404':
           description: User not found
-        '409':
-          description: Personal info is not set and request is not full
     """
     user = db_get_or_raise(User, "id", user_id)
     if user.user_info is None:
@@ -262,8 +261,6 @@ def set_university_info_admin(user_id):
           description: Invalid role of current user
         '404':
           description: User not found or is not a university student
-        '409':
-          description: University info is not set and request is not full
     """
     from user.models.university import StudentInfo
     user = db_get_or_raise(User, "id", user_id)
@@ -271,6 +268,45 @@ def set_university_info_admin(user_id):
         user.student_info = StudentInfo()
     StudentInfoSchema(load_instance=True).load(request.json, instance=user.student_info, session=db.session,
                                                partial=False, unknown=EXCLUDE)
+    db.session.commit()
+    return {}, 200
+
+
+@module.route('/school/<int:user_id>', methods=['PATCH'])
+def set_school_info_admin(user_id):
+    """
+    Set school student info for a user
+    ---
+    patch:
+      security:
+        - JWTAccessToken: [ ]
+        - CSRFAccessToken: [ ]
+      parameters:
+        - in: path
+          description: Id of the user
+          name: user_id
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: SchoolInfoRequestUserSchema
+      responses:
+        '200':
+          description: OK
+        '403':
+          description: Invalid role of current user
+        '404':
+          description: User not found or is not a school student
+    """
+    from user.models.school import SchoolInfo
+    user = db_get_or_raise(User, "id", user_id)
+    if user.school_info is None:
+        user.school_info = SchoolInfo()
+    SchoolInfoSchema(load_instance=True).load(request.json, instance=user.school_info, session=db.session,
+                                              partial=False, unknown=EXCLUDE)
     db.session.commit()
     return {}, 200
 

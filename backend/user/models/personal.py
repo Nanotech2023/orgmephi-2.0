@@ -1,6 +1,6 @@
 from common import get_current_db, get_current_app
 from .auth import User
-from .reference import City, Country
+from .location import Location
 
 db = get_current_db()
 app = get_current_app()
@@ -23,6 +23,7 @@ class UserInfo(db.Model):
     __table_name__ = 'user_info'
 
     user_id = db.Column(db.Integer, db.ForeignKey(User.id), primary_key=True)
+    location_id = db.Column(db.Integer, db.ForeignKey(Location.id))
     email = db.Column(db.String, unique=True)
     first_name = db.Column(db.String)
     middle_name = db.Column(db.String)
@@ -30,40 +31,6 @@ class UserInfo(db.Model):
     date_of_birth = db.Column(db.Date)
 
     user = db.relationship('User', back_populates='user_info', lazy='select')
-    dwelling = db.relationship('Dwelling', back_populates='user_info', lazy='select', uselist=False,
+    dwelling = db.relationship('Location', lazy='select', uselist=False, single_parent=True,
                                cascade='save-update, merge, delete, delete-orphan')
 
-
-class Dwelling(db.Model):
-    user_id = db.Column(db.Integer, db.ForeignKey(UserInfo.user_id), primary_key=True)
-    russian = db.Column(db.Boolean)
-    rural = db.Column(db.Boolean)
-
-    user_info = db.relationship('UserInfo', back_populates='dwelling', lazy='select')
-
-    __mapper_args__ = {
-        'polymorphic_identity': None,
-        'with_polymorphic': '*',
-        "polymorphic_on": russian
-    }
-
-
-class DwellingRussia(Dwelling):
-    city_name = db.Column(db.String, db.ForeignKey(City.name))
-    city = db.relationship('City')
-
-    __mapper_args__ = {
-        'polymorphic_identity': True,
-        'with_polymorphic': '*'
-    }
-
-
-class DwellingOther(Dwelling):
-    country_name = db.Column(db.String, db.ForeignKey(Country.name))
-    location = db.Column(db.String)
-    country = db.relationship('Country')
-
-    __mapper_args__ = {
-        'polymorphic_identity': False,
-        'with_polymorphic': '*'
-    }

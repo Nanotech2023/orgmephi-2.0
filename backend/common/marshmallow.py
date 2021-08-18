@@ -1,4 +1,4 @@
-from typing import Type
+from typing import Type, Optional
 from flask_sqlalchemy import Model
 from marshmallow import ValidationError
 from marshmallow_sqlalchemy.fields import Nested
@@ -72,8 +72,8 @@ def related_to_nested(field):
         raise TypeError(f'Related field has not columns: {repr(field)}')
 
 
-def check_related_existence(data: dict, attribute: str, field: str, sqla_model: Type[Model], table_field: str = None) \
-        -> dict:
+def check_related_existence(data: dict, attribute: str, field: str, sqla_model: Type[Model],
+                            table_field: Optional[str] = None) -> dict:
     """
     Ensures that a database object for a Related-type marshmallow-sqlalchemy field during pre_load
     :param data: Data for deserialization

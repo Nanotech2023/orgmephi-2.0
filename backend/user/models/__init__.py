@@ -2,6 +2,8 @@ from .reference import *
 from .personal import *
 from .auth import *
 from .university import *
+from .school import *
+from .location import *
 
 
 def _year_admission(year):

@@ -4,7 +4,7 @@ from common import fields as common_fields
 from user.models.auth import UserTypeEnum
 from user.model_schemas.reference import UniversitySchema, CountrySchema, RegionSchema, CitySchema
 from user.model_schemas.university import StudentUniversityCompatibleSchema
-from user.model_schemas.personal import DwellingCompatibleSchema
+from user.model_schemas.location import LocationCompatibleSchema
 
 
 class RegistrationInfoUserSchema(Schema):
@@ -27,7 +27,7 @@ class RegisterConfirmUserSchema(Schema):
 class RegistrationStudentInfoUserSchema(Schema):
     phone = common_fields.Phone(required=True)
     grade = common_fields.Grade(required=True, validate=validate.Range(max=5))
-    dwelling = fields.Nested(nested=DwellingCompatibleSchema, required=True)
+    dwelling = fields.Nested(nested=LocationCompatibleSchema, required=True)
     university = fields.Nested(nested=StudentUniversityCompatibleSchema, required=True)
 
 
