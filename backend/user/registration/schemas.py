@@ -1,4 +1,4 @@
-from marshmallow import Schema, fields, validate, post_load
+from marshmallow import Schema, fields, validate
 from marshmallow_enum import EnumField
 from common import fields as common_fields
 from user.models.auth import UserTypeEnum

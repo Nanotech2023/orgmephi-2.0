@@ -2,8 +2,7 @@ from marshmallow import Schema, fields
 from marshmallow_enum import EnumField
 from common import fields as common_fields
 from user.models.auth import UserTypeEnum, UserRoleEnum
-from user.model_schemas.university import StudentInfoSchema, StudentUniversityCompatibleSchema
-from user.model_schemas.personal import UserInfoSchema
+from user.model_schemas.university import StudentUniversityCompatibleSchema
 
 
 class RegisterInternalRequestUserSchema(Schema):
@@ -36,9 +35,18 @@ class PreregisterResponseUserSchema(Schema):
     password = common_fields.Password(required=True)
 
 
-class UserInfoRequestUserSchema(UserInfoSchema):
-    pass
+class UserInfoRequestUserSchema(Schema):
+    email = common_fields.Email()
+    first_name = common_fields.CommonName()
+    middle_name = common_fields.CommonName()
+    second_name = common_fields.CommonName()
+    date_of_birth = fields.Date()
 
 
-class StudentInfoRequestUserSchema(StudentInfoSchema):
-    university = fields.Nested(nested=StudentUniversityCompatibleSchema, allow_none=True, many=False)
+class StudentInfoRequestUserSchema(Schema):
+    phone = common_fields.Phone()
+    university = fields.Nested(nested=StudentUniversityCompatibleSchema, many=False)
+    admission_year = fields.Date()
+    citizenship = common_fields.CommonName()
+    region = common_fields.CommonName()
+    city = common_fields.CommonName()

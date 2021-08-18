@@ -1,10 +1,10 @@
 from marshmallow_sqlalchemy import SQLAlchemySchema, auto_field
 from marshmallow_sqlalchemy.fields import Related, Nested
 from marshmallow_oneofschema import OneOfSchema
-from marshmallow import post_dump, pre_load, validate, Schema
-from marshmallow.fields import String as StringField
+from marshmallow import pre_load, validate, Schema
+from marshmallow import fields
 from user.models.university import *
-from common.fields import phone_validator, common_name_validator, CommonName
+from common.fields import CommonName
 from common.marshmallow import check_related_existence
 
 
@@ -19,20 +19,9 @@ class StudentUniversityKnownSchema(SQLAlchemySchema):
         load_instance = True
         sqla_session = db.session
 
-    known_type = StringField(validate=validate.OneOf([StudentUniversityType.known.value]),
-                             dump_only=True)
+    known_type = fields.String(validate=validate.OneOf([StudentUniversityType.known.value]), dump_only=True)
     university = Related(column=['name'], data_key='university', required=True)
-    country = StringField(dump_only=True)
-
-    @post_dump()
-    def extract_country(self, data, many, **kwargs):
-        from common.util import db_get_one_or_none
-        uni_name = data.get('university', None)
-        if uni_name is not None:
-            uni = db_get_one_or_none(University, 'name', uni_name)
-            if uni is not None:
-                data['country'] = 'Not implemented'  # uni.country.name
-        return data
+    country = fields.String(dump_only=True)
 
     @pre_load()
     def check_university(self, data, many, **kwargs):
@@ -50,9 +39,8 @@ class StudentUniversityCustomSchema(SQLAlchemySchema):
         load_instance = True
         sqla_session = db.session
 
-    known_type = StringField(validate=validate.OneOf([StudentUniversityType.custom.value]),
-                             dump_only=True)
-    university = auto_field(column_name='university_name', validate=common_name_validator, required=True)
+    known_type = fields.String(validate=validate.OneOf([StudentUniversityType.custom.value]), dump_only=True)
+    university = auto_field(column_name='university_name', required=True)
     country = Related(column=['name'], data_key='country', required=True)
 
     @pre_load()
@@ -99,13 +87,13 @@ class StudentInfoSchema(SQLAlchemySchema):
         load_instance = True
         sqla_session = db.session
 
-    user_id = auto_field(column_name='user_id', dump_only=True, required=False)
-    phone = auto_field(column_name='phone', validate=phone_validator, nullable=True, example='8 (800) 555 35 35')
-    university = Nested(nested=StudentUniversitySchema, column_name='university', allow_none=True, many=False)
-    admission_year = auto_field(column_name='admission_year', nullable=True)
+    user_id = auto_field(column_name='user_id', dump_only=True)
+    phone = auto_field(column_name='phone', allow_none=True)
+    university = Nested(nested=StudentUniversitySchema, allow_none=True, many=False)
+    admission_year = auto_field(column_name='admission_year', allow_none=True)
     citizenship = Related(column=['name'], data_key='citizenship')
-    region = auto_field(column_name='region', validate=common_name_validator, nullable=True)
-    city = auto_field(column_name='city', validate=common_name_validator, nullable=True)
+    region = auto_field(column_name='region', allow_none=True)
+    city = auto_field(column_name='city', allow_none=True)
 
     @pre_load()
     def check_citizenship(self, data, many, **kwargs):

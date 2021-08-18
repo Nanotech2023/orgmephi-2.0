@@ -66,6 +66,10 @@ class StudentUniversityKnown(StudentUniversity):
     university_id = db.Column(db.Integer, db.ForeignKey(University.id))
     university = db.relationship('University')
 
+    @property
+    def country(self):
+        return "Not Implemented"
+
     __mapper_args__ = {
         'polymorphic_identity': True,
         'with_polymorphic': '*'
