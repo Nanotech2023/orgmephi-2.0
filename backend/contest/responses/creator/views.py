@@ -358,13 +358,13 @@ def user_response_appeal_by_id(contest_id, user_id):
     return user_response_appeal_create(values, user_id, contest_id), 200
 
 
-@module.route('/contest/<int:contest_id>/appeal/<int:appeal_id>/reply', methods=['POST'],
+@module.route('/contest/<int:contest_id>/appeal/<int:appeal_id>/reply', methods=['PATCH'],
               input_schema=AppealReplyRequestSchema, output_schema=AppealSchema)
 def reply_to_user_appeal(contest_id, appeal_id):
     """
     Reply appeal for the user's response
     ---
-    post:
+    patch:
       security:
         - JWTAccessToken: []
         - CSRFAccessToken: []
@@ -405,7 +405,11 @@ def reply_to_user_appeal(contest_id, appeal_id):
         appeal_new_status = appeal_status['AppealRejected']
         response_new_status = 'Rejected'
     appeal = db_get_or_raise(Appeal, 'appeal_id', appeal_id)
-    appeal.reply_to_appeal(message, appeal_new_status)
+    AppealSchema(load_instance=True).load(
+        {
+            "appeal_status": appeal_new_status,
+            "appeal_response": message
+         }, session=db.session, instance=appeal)
     db.session.commit()
     last_status = db_get_one_or_none(ResponseStatus, 'status_id', appeal.work_status)
     if 'mark' in values and accepted:

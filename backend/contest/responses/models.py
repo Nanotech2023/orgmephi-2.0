@@ -103,10 +103,6 @@ class Appeal(db.Model):
     appeal_message = db.Column(db.Text)
     appeal_response = db.Column(db.Text)
 
-    def reply_to_appeal(self, message, status):
-        self.appeal_response = message
-        self.appeal_status = status
-
 
 class ResponseFiletypeEnum(enum.Enum):
     """

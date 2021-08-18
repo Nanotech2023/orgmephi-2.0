@@ -35,6 +35,7 @@ def user_answer_post(answer_file, filetype, user_id, contest_id, task_id):
         response_answer = add_response_answer(user_work.work_id, task_id, answer_file, filetype)
         user_work.answers.append(response_answer)
     else:
+
         user_answer.update(answer_new=answer_file, filetype_new=filetype)
     db.session.commit()
 

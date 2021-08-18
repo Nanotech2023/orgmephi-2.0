@@ -9,7 +9,7 @@ from common.fields import message_validator
 class ResponseSchema(SQLAlchemySchema):
     class Meta:
         model = Response
-        load_instance = False
+        load_instance = True
         sqla_session = db.session
 
     work_id = auto_field(column_name='work_id', dump_only=True)
@@ -20,7 +20,7 @@ class ResponseSchema(SQLAlchemySchema):
 class ResponseStatusSchema(SQLAlchemySchema):
     class Meta:
         model = ResponseStatus
-        load_instance = False
+        load_instance = True
         sqla_session = db.session
 
     status = EnumField(ResponseStatusEnum, data_key='status', by_value=True)
@@ -42,7 +42,7 @@ class ResponseStatusHistorySchema(SQLAlchemySchema):
 class AppealSchema(SQLAlchemySchema):
     class Meta:
         model = Appeal
-        load_instance = False
+        load_instance = True
         sqla_session = db.session
 
     appeal_id = auto_field(column_name='appeal_id', dump_only=True)
