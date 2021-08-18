@@ -24,10 +24,12 @@ class StudentUniversityKnownSchema(SQLAlchemySchema):
     university = Related(column=['name'], data_key='university', required=True)
     country = fields.String(dump_only=True)
 
+    # noinspection PyUnusedLocal
     @pre_load()
     def check_university(self, data, many, **kwargs):
         return check_related_existence(data, 'university', 'name', University)
 
+    # noinspection PyUnusedLocal
     @pre_load()
     def pop_country(self, data, many, **kwargs):
         data.pop('country', None)
@@ -44,6 +46,7 @@ class StudentUniversityCustomSchema(SQLAlchemySchema):
     university = auto_field(column_name='university_name', required=True)
     country = Related(column=['name'], data_key='country', required=True)
 
+    # noinspection PyUnusedLocal
     @pre_load()
     def check_university(self, data, many, **kwargs):
         check_related_existence(data, 'country', 'name', Country)
@@ -91,4 +94,4 @@ class StudentInfoSchema(SQLAlchemySchema):
     user_id = auto_field(column_name='user_id', dump_only=True)
     phone = auto_field(column_name='phone', allow_none=True)
     university = Nested(nested=StudentUniversitySchema, allow_none=True, many=False)
-    admission_year = auto_field(column_name='admission_year', allow_none=True)
+    grade = fields.Integer(allow_none=True)

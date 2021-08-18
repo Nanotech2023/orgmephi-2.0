@@ -46,7 +46,7 @@ class UserInfoRequestUserSchema(Schema):
 class StudentInfoRequestUserSchema(Schema):
     phone = common_fields.Phone()
     university = fields.Nested(nested=StudentUniversityCompatibleSchema, many=False)
-    admission_year = fields.Date()
+    grade = common_fields.Grade()
     citizenship = common_fields.CommonName()
     region = common_fields.CommonName()
     city = common_fields.CommonName()

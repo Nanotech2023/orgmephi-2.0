@@ -26,7 +26,7 @@ class RegisterConfirmUserSchema(Schema):
 
 class RegistrationStudentInfoUserSchema(Schema):
     phone = common_fields.Phone(required=True)
-    admission_year = fields.Date(required=True)
+    grade = common_fields.Grade(required=True, validate=validate.Range(max=5))
     dwelling = fields.Nested(nested=DwellingCompatibleSchema, required=True)
     university = fields.Nested(nested=StudentUniversityCompatibleSchema, required=True)
 

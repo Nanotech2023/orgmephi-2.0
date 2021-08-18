@@ -5,15 +5,13 @@ from common.errors import NotFound, AlreadyExists, InsufficientData
 from common import get_current_app, get_current_module, get_current_db
 from common.util import db_get_or_raise
 
-from user.models import User, UserRoleEnum, UserTypeEnum, add_user, UserInfo, Group
+from user.models import User, add_user, UserInfo, Group
 
 from user.model_schemas.auth import UserSchema, GroupSchema
 from user.model_schemas.personal import UserInfoSchema
 from user.model_schemas.university import StudentInfoSchema
 
-from .schemas import RegisterInternalRequestUserSchema, PasswordRequestUserSchema, RoleRequestUserSchema, \
-    TypeRequestUserSchema, GroupAddRequestUserSchema, MembershipRequestUserSchema, PreregisterResponseUserSchema, \
-    UserInfoRequestUserSchema, StudentInfoRequestUserSchema
+from .schemas import *
 
 db = get_current_db()
 module = get_current_module()
