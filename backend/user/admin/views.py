@@ -5,7 +5,7 @@ from common.errors import NotFound, AlreadyExists, InsufficientData
 from common import get_current_app, get_current_module, get_current_db
 from common.util import db_get_or_raise
 
-from user.models import User, add_user, UserInfo, Group
+from user.models import User, add_user, UserInfo, Group, Location, Document
 
 from user.model_schemas.auth import UserSchema, GroupSchema
 from user.model_schemas.personal import UserInfoSchema
@@ -195,7 +195,7 @@ def set_user_type(user_id):
     return {}, 200
 
 
-@module.route('/personal/<int:user_id>', methods=['PATCH'])
+@module.route('/personal/<int:user_id>', methods=['PATCH'], input_schema=UserInfoRequestUserSchema)
 def set_user_info_admin(user_id):
     """
     Set personal info for a user
@@ -227,13 +227,17 @@ def set_user_info_admin(user_id):
     user = db_get_or_raise(User, "id", user_id)
     if user.user_info is None:
         user.user_info = UserInfo()
+    if user.user_info.dwelling is None:
+        user.user_info.dwelling = Location()
+    if user.user_info.document is None:
+        user.user_info.document = Document()
     UserInfoSchema(load_instance=True).load(request.json, instance=user.user_info, session=db.session, partial=False,
                                             unknown=EXCLUDE)
     db.session.commit()
     return {}, 200
 
 
-@module.route('/university/<int:user_id>', methods=['PATCH'])
+@module.route('/university/<int:user_id>', methods=['PATCH'], input_schema=StudentInfoRequestUserSchema)
 def set_university_info_admin(user_id):
     """
     Set university student info for a user
@@ -272,7 +276,7 @@ def set_university_info_admin(user_id):
     return {}, 200
 
 
-@module.route('/school/<int:user_id>', methods=['PATCH'])
+@module.route('/school/<int:user_id>', methods=['PATCH'], input_schema=SchoolInfoRequestUserSchema)
 def set_school_info_admin(user_id):
     """
     Set school student info for a user

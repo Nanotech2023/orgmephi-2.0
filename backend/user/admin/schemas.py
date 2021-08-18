@@ -5,6 +5,7 @@ from user.models.auth import UserTypeEnum, UserRoleEnum
 from user.model_schemas.university import StudentUniversityCompatibleSchema
 from user.model_schemas.school import SchoolType
 from user.model_schemas.location import LocationCompatibleSchema
+from user.model_schemas.document import DocumentCompatibleSchema
 
 
 class RegisterInternalRequestUserSchema(Schema):
@@ -43,6 +44,8 @@ class UserInfoRequestUserSchema(Schema):
     middle_name = common_fields.CommonName()
     second_name = common_fields.CommonName()
     date_of_birth = fields.Date()
+    dwelling = fields.Nested(nested=LocationCompatibleSchema, many=False)
+    document = fields.Nested(nested=DocumentCompatibleSchema, many=False)
 
 
 class StudentInfoRequestUserSchema(Schema):

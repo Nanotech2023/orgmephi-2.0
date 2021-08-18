@@ -26,3 +26,6 @@ class DefaultConfiguration:
     ORGMEPHI_JWT_SAMESITE = 'Strict'
     ORGMEPHI_CORS_ENABLED = True
     ORGMEPHI_NATIVE_COUNTRY = 'Россия'
+    ORGMEPHI_NATIVE_DOCUMENT = 'Паспорт гражданина РФ'
+    ORGMEPHI_INTERNATIONAL_DOCUMENT = 'Заграничный паспорт гражданина РФ'
+    ORGMEPHI_FOREIGN_DOCUMENT = 'Паспорт гражданина иностранного государства'

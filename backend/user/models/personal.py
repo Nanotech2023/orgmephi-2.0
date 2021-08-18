@@ -33,4 +33,5 @@ class UserInfo(db.Model):
     user = db.relationship('User', back_populates='user_info', lazy='select')
     dwelling = db.relationship('Location', lazy='select', uselist=False, single_parent=True,
                                cascade='save-update, merge, delete, delete-orphan')
-
+    document = db.relationship('Document', lazy='select', uselist=False,
+                               cascade='save-update, merge, delete, delete-orphan')

@@ -7,6 +7,7 @@ from common.util import db_get_one_or_none
 from common.errors import AlreadyExists
 
 from .location import LocationSchema
+from .document import DocumentSchema
 
 
 class UserInfoSchema(SQLAlchemySchema):
@@ -21,7 +22,8 @@ class UserInfoSchema(SQLAlchemySchema):
     middle_name = auto_field(column_name='middle_name', allow_none=True)
     second_name = auto_field(column_name='second_name', allow_none=True)
     date_of_birth = auto_field(column_name='date_of_birth', allow_none=True)
-    dwelling = Nested(nested=LocationSchema, allow_none=False, many=False)
+    dwelling = Nested(nested=LocationSchema, allow_none=True, many=False)
+    document = Nested(nested=DocumentSchema, allow_none=True, many=False)
 
     # noinspection PyUnusedLocal
     @pre_load()
