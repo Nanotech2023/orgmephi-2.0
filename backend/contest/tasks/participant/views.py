@@ -86,53 +86,11 @@ def task_all(id_contest):
         '404':
           description: User not found
     """
-    # TODO SIMPLIFY
+
     tasks = get_user_tasks_if_possible(id_contest)
     return {
                "tasks_list": tasks
            }, 200
-
-
-@module.route(
-    '/contest/<int:id_contest>/tasks/<int:id_task>/self',
-    methods=['GET'], output_schema=TaskSchema)
-def task_get(id_contest, id_task):
-    """
-    Get task for user in current variant
-    ---
-    get:
-      parameters:
-        - in: path
-          description: Id of the contest
-          name: id_contest
-          required: true
-          schema:
-            type: integer
-        - in: path
-          description: Id of the task
-          name: id_task
-          required: true
-          schema:
-            type: integer
-      security:
-        - JWTAccessToken: [ ]
-        - CSRFAccessToken: [ ]
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema: TaskSchema
-        '400':
-          description: Bad request
-        '409':
-          description: Olympiad type already in use
-        '404':
-          description: User not found
-    """
-
-    task = get_user_task_if_possible(id_contest, id_task)
-    return task, 200
 
 
 @module.route(

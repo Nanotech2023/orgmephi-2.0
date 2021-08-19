@@ -613,8 +613,10 @@ def contest_create_simple(id_olympiad, id_stage):
     start_time = values['start_time']
     end_time = values['end_time']
     location = values.get('location', None)
+    result_publication_date = values.get('result_publication_date', None)
     previous_contest_id = values.get('previous_contest_id', None)
     previous_participation_condition = values.get('previous_participation_condition', None)
+    holding_type = values.get('holding_type', None)
 
     validate_contest_values(previous_contest_id, previous_participation_condition)
 
@@ -631,8 +633,10 @@ def contest_create_simple(id_olympiad, id_stage):
                                  visibility=visibility,
                                  start_date=start_time,
                                  end_date=end_time,
+                                 holding_type=holding_type,
                                  previous_contest_id=previous_contest_id,
                                  previous_participation_condition=previous_participation_condition,
+                                 result_publication_date=result_publication_date,
                                  location=location)
 
     stage.contests.append(contest)
@@ -1174,12 +1178,16 @@ def task_create_plain(id_contest, id_variant):
 
     num_of_task = values['num_of_task']
     recommended_answer = values['recommended_answer']
+    show_answer_after_contest = values.get('show_answer_after_contest', None)
+    task_points = values.get('task_points', None)
 
     variant = get_variant_if_possible(id_contest, id_variant)
 
     task = add_plain_task(db.session,
                           num_of_task=num_of_task,
                           recommended_answer=recommended_answer,
+                          show_answer_after_contest=show_answer_after_contest,
+                          task_points=task_points,
                           )
 
     variant.tasks.append(task)
@@ -1236,12 +1244,16 @@ def task_create_range(id_contest, id_variant):
     num_of_task = values['num_of_task']
     start_value = values['start_value']
     end_value = values['end_value']
+    show_answer_after_contest = values.get('show_answer_after_contest', None)
+    task_points = values.get('task_points', None)
 
     variant = get_variant_if_possible(id_contest, id_variant)
     task = add_range_task(db.session,
                           num_of_task=num_of_task,
                           start_value=start_value,
-                          end_value=end_value
+                          end_value=end_value,
+                          show_answer_after_contest=show_answer_after_contest,
+                          task_points=task_points,
                           )
     variant.tasks.append(task)
     db.session.commit()
@@ -1296,11 +1308,15 @@ def task_create_multiple(id_contest, id_variant):
 
     num_of_task = values['num_of_task']
     answers = values['answers']
+    show_answer_after_contest = values.get('show_answer_after_contest', None)
+    task_points = values.get('task_points', None)
 
     variant = get_variant_if_possible(id_contest, id_variant)
 
     task = add_multiple_task(db.session,
-                             num_of_task=num_of_task
+                             num_of_task=num_of_task,
+                             show_answer_after_contest=show_answer_after_contest,
+                             task_points=task_points,
                              )
     variant.tasks.append(task)
 

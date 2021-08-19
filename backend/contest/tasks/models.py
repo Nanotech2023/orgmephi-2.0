@@ -80,6 +80,24 @@ class OlympiadType(db.Model):
                                backref=db.backref('olympiad_type', lazy='joined'))
 
 
+class Location(db.Model):
+    """
+    This class describing olympiad contest location
+
+    location_id: id of location
+    location: where olympiad take place // link to online service
+
+    """
+
+    __tablename__ = 'location'
+
+    location_id = db.Column(db.Integer, autoincrement=True, primary_key=True)
+    location = db.Column(db.Text, nullable=False, unique=True)
+
+    contests = db.relationship('BaseContest', lazy='select',
+                               backref=db.backref('olympiad_type', lazy='joined'))
+
+
 def add_base_contest(db_session, name, laureate_condition, winning_condition, description, rules, olympiad_type_id,
                      subject, certificate_template):
     """
@@ -100,6 +118,8 @@ def add_base_contest(db_session, name, laureate_condition, winning_condition, de
 
 
 # Contest models
+
+
 class BaseContest(db.Model):
     """
     Base Class describing a Contest model with meta information.
@@ -146,6 +166,19 @@ class ContestTypeEnum(enum.Enum):
     CompositeContest = "CompositeContest"
 
 
+class ContestHoldingTypeEnum(enum.Enum):
+    OfflineContest = "OfflineContest"
+    OnLineContest = "OnLineContest"
+
+
+locationInContest = db.Table('location_in_contest',
+                             db.Column('contest_id', db.Integer, db.ForeignKey('contest.contest_id'),
+                                       primary_key=True),
+                             db.Column('location_id', db.Integer, db.ForeignKey('location.location_id'),
+                                       primary_key=True)
+                             )
+
+
 class Contest(db.Model):
     """
     Class describing a Contest model.
@@ -165,10 +198,15 @@ class Contest(db.Model):
 
     contest_id = db.Column(db.Integer, autoincrement=True, primary_key=True)
     composite_type = db.Column(db.Enum(ContestTypeEnum))
+    holding_type = db.Column(db.Enum(ContestHoldingTypeEnum))
+
     visibility = db.Column(db.Boolean, default=DEFAULT_VISIBILITY, nullable=False)
 
     users = db.relationship('UserInContest', lazy='dynamic',
                             backref=db.backref('contest', lazy='joined'))
+
+    locations = db.relationship('Location', secondary=locationInContest, lazy='subquery',
+                                backref=db.backref('contest', lazy=True))
 
     __mapper_args__ = {
         'polymorphic_identity': ContestTypeEnum.Contest,
@@ -177,8 +215,12 @@ class Contest(db.Model):
 
 
 def add_simple_contest(db_session,
-                       visibility, start_date, end_date, previous_contest_id=None,
-                       previous_participation_condition=None, location=None, base_contest_id=None):
+                       visibility, start_date, end_date, result_publication_date=None,
+                       holding_type=None,
+                       previous_contest_id=None,
+                       previous_participation_condition=None,
+                       location=None,
+                       base_contest_id=None):
     """
     Create new simple contest object
     """
@@ -187,6 +229,8 @@ def add_simple_contest(db_session,
         visibility=visibility,
         start_date=start_date,
         end_date=end_date,
+        holding_type=holding_type,
+        result_publication_date=result_publication_date,
         previous_contest_id=previous_contest_id,
         previous_participation_condition=previous_participation_condition,
         location=location,
@@ -218,6 +262,8 @@ class SimpleContest(Contest):
     end_date = db.Column(db.DateTime, index=True, default=datetime.utcnow)
     location = db.Column(db.Text, index=True, nullable=True)
 
+    result_publication_date = db.Column(db.DateTime, ullable=True)
+
     previous_contest_id = db.Column(db.Integer, db.ForeignKey('simple_contest.contest_id'), nullable=True)
     previous_participation_condition = db.Column(db.Enum(UserStatusEnum))
 
@@ -238,12 +284,13 @@ class SimpleContest(Contest):
             self.previous_participation_condition = previous_participation_condition
 
 
-def add_composite_contest(db_session, visibility, base_contest_id=None):
+def add_composite_contest(db_session, visibility, base_contest_id=None, holding_type=None):
     """
     Create new composite contest object
     """
     composite_contest = CompositeContest(
         base_contest_id=base_contest_id,
+        holding_type=holding_type,
         visibility=visibility,
     )
     db_session.add(composite_contest)
@@ -341,7 +388,7 @@ task_id: id of the task
 
 taskInVariant = db.Table('task_in_variant',
                          db.Column('variant_id', db.Integer, db.ForeignKey('variant.variant_id'), primary_key=True),
-                         db.Column('task_id', db.ForeignKey('base_task.task_id'), primary_key=True)
+                         db.Column('task_id', db.Integer, db.ForeignKey('base_task.task_id'), primary_key=True)
                          )
 
 
@@ -422,7 +469,12 @@ class Task(db.Model):
     __tablename__ = 'base_task'
     task_id = db.Column(db.Integer, autoincrement=True, primary_key=True)
     num_of_task = db.Column(db.Integer, nullable=False)
+
     image_of_task = db.Column(db.LargeBinary, nullable=True)
+
+    show_answer_after_contest = db.Column(db.Boolean, nullable=True)
+    task_points = db.Column(db.Integer, nullable=True)
+
     task_type = db.Column(db.Enum(TaskTypeEnum))
 
     __mapper_args__ = {
@@ -430,21 +482,17 @@ class Task(db.Model):
         'polymorphic_on': task_type
     }
 
-    def serialize_image(self):
-        return \
-            {
-                'task_id': self.task_id,
-                'image_of_task': self.image_of_task
-            }
 
-
-def add_plain_task(db_session, num_of_task, recommended_answer, image_of_task=None):
+def add_plain_task(db_session, num_of_task, recommended_answer, image_of_task=None,
+                   task_points=None, show_answer_after_contest=None):
     """
     Create new plain task object
     """
     task = PlainTask(
         num_of_task=num_of_task,
         image_of_task=image_of_task,
+        show_answer_after_contest=show_answer_after_contest,
+        task_points=task_points,
         recommended_answer=recommended_answer,
     )
     db_session.add(task)
@@ -469,13 +517,16 @@ class PlainTask(Task):
     }
 
 
-def add_range_task(db_session, num_of_task, start_value, end_value, image_of_task=None):
+def add_range_task(db_session, num_of_task, start_value, end_value, image_of_task=None,
+                   task_points=None, show_answer_after_contest=None):
     """
     Create new range task object
     """
     task = RangeTask(
         num_of_task=num_of_task,
         image_of_task=image_of_task,
+        show_answer_after_contest=show_answer_after_contest,
+        task_points=task_points,
         start_value=start_value,
         end_value=end_value,
     )
@@ -503,13 +554,16 @@ class RangeTask(Task):
     }
 
 
-def add_multiple_task(db_session, num_of_task, image_of_task=None):
+def add_multiple_task(db_session, num_of_task, image_of_task=None,
+                      task_points=None, show_answer_after_contest=None):
     """
     Create new multiple task object
     """
     task = MultipleChoiceTask(
         num_of_task=num_of_task,
         image_of_task=image_of_task,
+        show_answer_after_contest=show_answer_after_contest,
+        task_points=task_points,
     )
     db_session.add(task)
     return task

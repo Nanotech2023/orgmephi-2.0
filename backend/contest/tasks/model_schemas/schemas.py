@@ -54,6 +54,8 @@ class PlainTaskSchema(SQLAlchemySchema):
     task_id = auto_field(column_name='task_id', dump_only=True)
     num_of_task = auto_field(column_name='num_of_task', required=True)
     recommended_answer = auto_field(column_name='recommended_answer', validate=text_validator, required=True)
+    show_answer_after_contest = auto_field(column_name='show_answer_after_contest', required=False)
+    task_points = auto_field(column_name='task_points', required=False)
 
 
 class RangeTaskSchema(SQLAlchemySchema):
@@ -66,6 +68,8 @@ class RangeTaskSchema(SQLAlchemySchema):
     num_of_task = auto_field(column_name='num_of_task', required=True)
     start_value = auto_field(column_name='start_value', required=True)
     end_value = auto_field(column_name='end_value', required=True)
+    show_answer_after_contest = auto_field(column_name='show_answer_after_contest', required=False)
+    task_points = auto_field(column_name='task_points', required=False)
 
 
 class MultipleChoiceTaskSchema(SQLAlchemySchema):
@@ -77,18 +81,25 @@ class MultipleChoiceTaskSchema(SQLAlchemySchema):
     task_id = auto_field(column_name='task_id', dump_only=True)
     num_of_task = auto_field(column_name='num_of_task', required=False)
     answers = auto_field(column_name='answers', many=True, required=False)
+    show_answer_after_contest = auto_field(column_name='show_answer_after_contest', required=False)
+    task_points = auto_field(column_name='task_points', required=False)
 
 
 class TaskSchema(OneOfSchema):
-    type_schemas = {TaskTypeEnum.PlainTask.value: PlainTaskSchema,
-                    TaskTypeEnum.RangeTask.value: RangeTaskSchema,
-                    TaskTypeEnum.MultipleChoiceTask.value: MultipleChoiceTaskSchema, }
+    type_schemas = {
+        TaskTypeEnum.PlainTask.value: PlainTaskSchema,
+        TaskTypeEnum.RangeTask.value: RangeTaskSchema,
+        TaskTypeEnum.MultipleChoiceTask.value: MultipleChoiceTaskSchema
+    }
+
     type_field = "task_type"
     type_field_remove = True
 
-    class_types = {PlainTaskSchema: TaskTypeEnum.PlainTask.value,
-                   RangeTaskSchema: TaskTypeEnum.RangeTask.value,
-                   MultipleChoiceTaskSchema: TaskTypeEnum.MultipleChoiceTask.value}
+    class_types = {
+        PlainTaskSchema: TaskTypeEnum.PlainTask.value,
+        RangeTaskSchema: TaskTypeEnum.RangeTask.value,
+        MultipleChoiceTaskSchema: TaskTypeEnum.MultipleChoiceTask.value
+    }
 
     def get_obj_type(self, obj):
         obj_type = obj.task_type
@@ -110,6 +121,9 @@ class CompositeContestSchema(SQLAlchemySchema):
 
     contest_id = auto_field(column_name='contest_id', dump_only=True)
     visibility = auto_field(column_name='visibility', required=True)
+    holding_type = EnumField(ContestHoldingTypeEnum,
+                             data_key='holding_type',
+                             by_value=True, required=True)
 
 
 class SimpleContestSchema(SQLAlchemySchema):
@@ -123,10 +137,14 @@ class SimpleContestSchema(SQLAlchemySchema):
     location = auto_field(column_name='location', validate=text_validator, required=True)
     start_date = auto_field(column_name='start_date', required=True)
     end_date = auto_field(column_name='end_date', required=True)
+    result_publication_date = auto_field(column_name='result_publication_date', required=True)
     previous_contest_id = auto_field(column_name='previous_contest_id', allow_none=True)
     previous_participation_condition = EnumField(UserStatusEnum,
                                                  data_key='previous_participation_condition',
                                                  by_value=True, required=True)
+    holding_type = EnumField(ContestHoldingTypeEnum,
+                             data_key='holding_type',
+                             by_value=True, required=True)
 
 
 class ContestSchema(OneOfSchema):

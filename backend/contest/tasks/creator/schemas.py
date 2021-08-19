@@ -3,7 +3,7 @@ from marshmallow_enum import EnumField
 
 from common import fields as common_fields
 from contest.tasks.model_schemas.schemas import TaskSchema, ContestSchema, BaseContestSchema, StageSchema, VariantSchema
-from contest.tasks.models import OlympiadSubjectEnum, TargetClassEnum, StageConditionEnum
+from contest.tasks.models import OlympiadSubjectEnum, TargetClassEnum, StageConditionEnum, ContestHoldingTypeEnum
 
 
 # Base contest
@@ -53,9 +53,11 @@ class CreateSimpleContestRequestTaskCreatorSchema(Schema):
     location = common_fields.Location(required=True)
     start_time = fields.DateTime(required=True)
     end_time = fields.DateTime(required=True)
+    result_publication_date = fields.DateTime(required=False)
     visibility = fields.Boolean(required=True)
     previous_contest_id = fields.Int(required=False)
     previous_participation_condition = common_fields.Text(required=False)
+    holding_type = EnumField(ContestHoldingTypeEnum, required=True, by_value=True)
 
 
 class CreateCompositeContestRequestTaskCreatorSchema(Schema):
@@ -70,6 +72,7 @@ class CompositeContestResponseTaskCreatorSchema(Schema):
     visibility = fields.Boolean(required=True)
     previous_contest_id = fields.Int(required=False)
     previous_participation_condition = common_fields.Text(required=False)
+    holding_type = EnumField(ContestHoldingTypeEnum, required=False, by_value=True)
 
 
 class ContestIdResponseTaskCreatorSchema(Schema):
@@ -80,9 +83,11 @@ class UpdateContestRequestTaskCreatorSchema(Schema):
     location = common_fields.Location(required=False)
     start_date = fields.DateTime(required=False)
     end_date = fields.DateTime(required=False)
+    result_publication_date = fields.DateTime(required=False)
     visibility = fields.Boolean(required=False)
     previous_contest_id = fields.Int(required=False)
     previous_participation_condition = common_fields.Text(required=False)
+    holding_type = EnumField(ContestHoldingTypeEnum, required=True, by_value=False)
 
 
 class UpdatePreviousContestRequestTaskCreatorSchema(Schema):
@@ -164,16 +169,19 @@ class AllTasksResponseTaskCreatorSchema(Schema):
 
 # Tasks
 
-
 class CreatePlainRequestTaskCreatorSchema(Schema):
     num_of_task = fields.Int(required=True)
     recommended_answer = common_fields.Text(required=True)
+    show_answer_after_contest = fields.Boolean(required=False)
+    task_points = fields.Integer(required=False)
 
 
 class CreateRangeRequestTaskCreatorSchema(Schema):
     num_of_task = fields.Int(required=True)
     start_value = fields.Float(required=True)
     end_value = fields.Float(required=True)
+    show_answer_after_contest = fields.Boolean(required=False)
+    task_points = fields.Integer(required=False)
 
 
 class AnswersInTaskRequestTaskCreatorSchema(Schema):
@@ -183,6 +191,8 @@ class AnswersInTaskRequestTaskCreatorSchema(Schema):
 
 class CreateMultipleRequestTaskCreatorSchema(Schema):
     num_of_task = fields.Int(required=True)
+    show_answer_after_contest = fields.Boolean(required=False)
+    task_points = fields.Integer(required=False)
     answers = fields.List(fields.Nested(AnswersInTaskRequestTaskCreatorSchema), required=True)
 
 
@@ -192,6 +202,8 @@ class TaskResponseTaskCreatorSchema(Schema):
     recommended_answer = common_fields.Text(required=False)
     start_value = fields.Float(required=False)
     end_value = fields.Float(required=False)
+    show_answer_after_contest = fields.Boolean(required=False)
+    task_points = fields.Integer(required=False)
     answers = fields.List(fields.Nested(AnswersInTaskRequestTaskCreatorSchema), required=False)
 
 
@@ -202,14 +214,20 @@ class TaskIdResponseTaskCreatorSchema(Schema):
 class UpdatePlainRequestTaskCreatorSchema(Schema):
     num_of_task = fields.Int(required=False)
     recommended_answer = common_fields.Text(required=False)
+    show_answer_after_contest = fields.Boolean(required=False)
+    task_points = fields.Integer(required=False)
 
 
 class UpdateRangeRequestTaskCreatorSchema(Schema):
     num_of_task = fields.Int(required=False)
     start_value = fields.Float(required=False)
     end_value = fields.Float(required=False)
+    show_answer_after_contest = fields.Boolean(required=False)
+    task_points = fields.Integer(required=False)
 
 
 class UpdateMultipleRequestTaskCreatorSchema(Schema):
     num_of_task = fields.Int(required=False)
     answers = fields.List(fields.Nested(AnswersInTaskRequestTaskCreatorSchema), required=False)
+    show_answer_after_contest = fields.Boolean(required=False)
+    task_points = fields.Integer(required=False)

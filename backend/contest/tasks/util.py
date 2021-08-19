@@ -81,6 +81,11 @@ def get_user_variant_if_possible(id_contest):
 
 def get_user_tasks_if_possible(id_contest):
     variant = get_user_variant_if_possible(id_contest)
+
+    for task in variant.tasks:
+        if 'answers' in task:
+            task.answers = [answer['is_right_answer'] for answer in task.answers]
+
     tasks = [task for task in variant.tasks]
     return tasks
 
