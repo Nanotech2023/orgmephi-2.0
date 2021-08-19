@@ -4,42 +4,50 @@ import {
     RequestLogin,
     RequestRegistrationSchool,
     TypeCSRFPair,
-    TypeRegistrationPersonalInfo,
+    TypePersonalInfo,
     TypeUserInfo
 } from '@/auth/api/models'
 
 
-export const loginAttempt = createAction(
+export const loginRequest = createAction(
     '[Auth] Login Attempt',
     props<{ requestLogin: RequestLogin }>()
 )
-
 export const loginSuccess = createAction(
     '[Auth] Login Success',
     props<{ csrfPair: TypeCSRFPair }>()
 )
 
-export const loginError = createAction(
-    '[Auth] Login Error',
-    props<{ error: ErrorResponse }>()
-)
 
-export const registerAttempt = createAction(
+export const registerRequest = createAction(
     '[Auth] Register Attempt',
     props<{ requestRegistration: RequestRegistrationSchool }>()
 )
-
 export const registerSuccess = createAction(
     '[Auth] Register Success',
     props<{ userInfo: TypeUserInfo }>()
 )
 
-export const registerError = createAction(
-    '[Auth] Register Error',
-    props<{ error: ErrorResponse }>()
+
+export const getUserInfoRequest = createAction(
+    '[Auth] Get UserInfo Request'
+)
+export const getUserInfoSuccess = createAction(
+    '[Auth] Get UserInfo Success',
+    props<{ userInfo: TypeUserInfo }>()
 )
 
-export const pushPersonalInfo = createAction(
-    '[Auth] Push Personal Info',
-    props<{ personalInfo: TypeRegistrationPersonalInfo }>()
+
+export const getPersonalInfoRequest = createAction(
+    '[Auth] Get PersonalInfo Request'
+)
+export const getPersonalInfoSuccess = createAction(
+    '[Auth] Get PersonalInfo Success',
+    props<{ personalInfo: TypePersonalInfo }>()
+)
+
+
+export const error = createAction(
+    '[Auth] Error',
+    props<{ error: ErrorResponse }>()
 )

@@ -1,9 +1,9 @@
-import { Component } from '@angular/core'
+import { Component, OnInit } from '@angular/core'
 import { footerHeight } from '@/shared/consts'
 import { Observable } from 'rxjs'
-import { ContestsInStage } from '@/olympiads/tasks/model/contestsInStage'
-import { TasksServiceMock } from '@/olympiads/tasks/api/tasks.service.mock'
 import { animate, query, stagger, state, style, transition, trigger } from '@angular/animations'
+import { ManageOlympiadsStore } from '@/manage-olympiads/manage-olympiads.store'
+import { ContestsInStageContestsList } from '@/manage-olympiads/api/models'
 
 
 export const fadeAnimation = trigger( 'fadeAnimation', [
@@ -43,20 +43,23 @@ export const rotatedState = trigger( 'rotatedState', [
     styleUrls: [ './participant.component.scss' ],
     animations: [
         fadeAnimation, listAnimation, rotatedState
-    ]
+    ],
+    providers: [ ManageOlympiadsStore ]
 } )
-
-
-export class ParticipantComponent
+export class ParticipantComponent implements OnInit
 {
     showOlympiadsList: boolean
-    olympiads$: Observable<ContestsInStage>
+    olympiads$: Observable<ContestsInStageContestsList[]>
 
-
-    constructor( private service: TasksServiceMock )
+    constructor( private store: ManageOlympiadsStore )
     {
         this.showOlympiadsList = false
-        this.olympiads$ = this.service.olympiadAllGet()
+        this.olympiads$ = this.store.olympiads$
+    }
+
+    ngOnInit(): void
+    {
+        this.store.reload( true )
     }
 
     calculateHeight(): number
@@ -64,7 +67,7 @@ export class ParticipantComponent
         return footerHeight
     }
 
-    collapseOlympiadsList( event: Event ): void
+    collapseOlympiadsList(): void
     {
         this.showOlympiadsList = !this.showOlympiadsList
     }

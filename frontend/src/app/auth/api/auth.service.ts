@@ -17,7 +17,7 @@ import {
     TypeUserInfo
 } from '@/auth/api/models'
 import { Observable } from 'rxjs'
-import { Configuration } from '@/auth/configuration'
+import { Configuration } from '@/shared/configuration'
 
 
 export abstract class AuthService

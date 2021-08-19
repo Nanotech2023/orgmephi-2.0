@@ -1,11 +1,9 @@
 import { createReducer, on } from '@ngrx/store'
 import {
-    loginAttempt,
-    loginError,
+    error,
+    getPersonalInfoSuccess,
+    getUserInfoSuccess,
     loginSuccess,
-    pushPersonalInfo,
-    registerAttempt,
-    registerError,
     registerSuccess
 } from '@/auth/store/auth.actions'
 import { ErrorValue, TypeCSRFPair, TypePersonalInfo, TypeUserInfo } from '@/auth/api/models'
@@ -33,10 +31,6 @@ export const initialState: State = {
 export const reducer =
     createReducer(
         initialState,
-        on( loginAttempt, registerAttempt,
-            ( state ) =>
-                ( { ...state } )
-        ),
         on( loginSuccess,
             ( state, { csrfPair } ) =>
                 ( { ...state, csrfTokens: csrfPair } )
@@ -45,12 +39,14 @@ export const reducer =
             ( state, { userInfo } ) =>
                 ( { ...state, userInfo: userInfo } )
         ),
-        on( loginError, registerError,
+        on( getUserInfoSuccess,
+            ( state, { userInfo } ) =>
+                ( { ...state, userInfo: userInfo } ) ),
+        on( getPersonalInfoSuccess,
+            ( state, { personalInfo } ) =>
+                ( { ...state, personalInfo: personalInfo } ) ),
+        on( error,
             ( state, { error } ) =>
                 ( { ...state, error: error.errors } )
-        ),
-        on( pushPersonalInfo,
-            ( state, { personalInfo } ) =>
-                ( { ...state, personalInfo: personalInfo } ) // TODO this is mock action. Should be removed on production
         )
     )

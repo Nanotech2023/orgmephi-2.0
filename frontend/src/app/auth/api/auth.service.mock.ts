@@ -29,10 +29,10 @@ import {
 } from '@/auth/api/models'
 import { HttpEvent, HttpParams, HttpResponse } from '@angular/common/http'
 import { Observable, of } from 'rxjs'
-import { pushPersonalInfo } from '@/auth/store/auth.actions'
+import { getPersonalInfoSuccess } from '@/auth/store/auth.actions'
 import { AuthSelectors, AuthState } from '@/auth/store'
 import { Store } from '@ngrx/store'
-import { Configuration } from '@/auth/configuration'
+import { Configuration } from '@/shared/configuration'
 
 
 @Injectable()
@@ -167,7 +167,7 @@ export class AuthServiceMock extends AuthService
             type: requestRegistrationSchool.register_type,
             id: 12345
         }
-        this.store.dispatch( pushPersonalInfo( { personalInfo: requestRegistrationSchool.personal_info } ) )
+        this.store.dispatch( getPersonalInfoSuccess( { personalInfo: requestRegistrationSchool.personal_info } ) )
         return of( result )
     }
 

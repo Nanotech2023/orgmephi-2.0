@@ -44,7 +44,7 @@ import {
 } from '@/auth/api/models'
 
 import { BASE_PATH } from '../variables'
-import { Configuration } from '../configuration'
+import { Configuration } from '../../shared/configuration'
 import { AuthService } from '@/auth/api/auth.service'
 
 @Injectable()

@@ -31,14 +31,14 @@ export class LoginComponent implements OnInit
     }
 
     @HostListener( 'window:resize', [ '$event' ] )
-    onResize()
+    onResize(): void
     {
         this.containerHeight = fixedHeight
     }
 
     login( loginAttempt: RequestLogin ): void
     {
-        this.store.dispatch( AuthActions.loginAttempt( { requestLogin: loginAttempt } ) )
+        this.store.dispatch( AuthActions.loginRequest( { requestLogin: loginAttempt } ) )
     }
 
     isValid( loginAttemptUser: RequestLogin ): boolean

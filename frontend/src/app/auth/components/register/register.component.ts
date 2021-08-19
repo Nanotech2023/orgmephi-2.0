@@ -54,6 +54,6 @@ export class RegisterComponent
     register( registerUser: RequestRegistrationSchool ): void
     {
         this.isRegistered = true
-        this.store.dispatch( AuthActions.registerAttempt( { requestRegistration: registerUser } ) )
+        this.store.dispatch( AuthActions.registerRequest( { requestRegistration: registerUser } ) )
     }
 }

@@ -9,12 +9,14 @@ import { OlympiadsModule } from '@/olympiads/olympiads.module'
 import { AppRoutingModule } from '@/app-routing.module'
 import { environment } from '@environments/environment'
 import { AppComponent } from '@/app.component'
-import { UsersModule } from '@/users/users.module';
+import { UsersModule } from '@/users/users.module'
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations'
-import { AdminModule } from '@/admin/admin.module'
 import { AuthService } from '@/auth/api/auth.service'
 import { AuthServiceReal } from '@/auth/api/auth.service.real'
-import { AuthServiceMock } from '@/auth/api/auth.service.mock'
+import { ManageOlympiadsModule } from '@/manage-olympiads/manage-olympiads.module'
+import { ManageUsersModule } from '@/manage-users/manage-users.module'
+import { OlympiadsServiceMock } from '@/manage-olympiads/api/olympiads.service.mock'
+import { OlympiadsService } from '@/manage-olympiads/api/olympiads.service'
 
 
 @NgModule( {
@@ -27,7 +29,8 @@ import { AuthServiceMock } from '@/auth/api/auth.service.mock'
         AuthModule,
         OlympiadsModule,
         UsersModule,
-        AdminModule,
+        ManageUsersModule,
+        ManageOlympiadsModule,
         AppRoutingModule,
         StoreModule.forRoot( {} ),
         EffectsModule.forRoot( [] ),
@@ -35,7 +38,8 @@ import { AuthServiceMock } from '@/auth/api/auth.service.mock'
         BrowserAnimationsModule
     ],
     providers: [
-        { provide: AuthService, useClass: AuthServiceMock }
+        { provide: AuthService, useClass: AuthServiceReal },
+        { provide: OlympiadsService, useClass: OlympiadsServiceMock }
     ],
     bootstrap: [ AppComponent ]
 } )
