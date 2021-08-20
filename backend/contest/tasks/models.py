@@ -13,9 +13,13 @@ class UserStatusEnum(enum.Enum):
     """
     Enum for user statuses
     """
+    Winner_1 = "Winner 1"
+    Winner_2 = "Winner 2"
+    Winner_3 = "Winner 3"
+    Diploma_1 = "Dinner 1"
+    Diploma_2 = "Dinner 2"
+    Diploma_3 = "Dinner 3"
     Participant = "Participant"
-    Laureate = "Laureate"
-    Winner = "Winner"
 
 
 user_status_dict = {status.value: status for status in UserStatusEnum}
@@ -80,6 +84,17 @@ class OlympiadType(db.Model):
                                backref=db.backref('olympiad_type', lazy='joined'))
 
 
+def add_location(db_session, location):
+    """
+    Create new location
+    """
+    location = Location(
+        location=location,
+    )
+    db_session.add(location)
+    return location
+
+
 class Location(db.Model):
     """
     This class describing olympiad contest location
@@ -93,9 +108,6 @@ class Location(db.Model):
 
     location_id = db.Column(db.Integer, autoincrement=True, primary_key=True)
     location = db.Column(db.Text, nullable=False, unique=True)
-
-    contests = db.relationship('BaseContest', lazy='select',
-                               backref=db.backref('olympiad_type', lazy='joined'))
 
 
 def add_base_contest(db_session, name, laureate_condition, winning_condition, description, rules, olympiad_type_id,
@@ -205,9 +217,6 @@ class Contest(db.Model):
     users = db.relationship('UserInContest', lazy='dynamic',
                             backref=db.backref('contest', lazy='joined'))
 
-    locations = db.relationship('Location', secondary=locationInContest, lazy='subquery',
-                                backref=db.backref('contest', lazy=True))
-
     __mapper_args__ = {
         'polymorphic_identity': ContestTypeEnum.Contest,
         'polymorphic_on': composite_type
@@ -247,10 +256,10 @@ class SimpleContest(Contest):
     start_date: start date of contest
     end_date: end date of contest
     location: location of the olympiad
-
     previous_contest_id: previous contest id
     previous_participation_condition: previous participation condition
-
+    contest_duration: previous duration of the contest
+    result_publication_date: result publication date
     variants: variants
     next_contest: next contests
 
@@ -260,9 +269,10 @@ class SimpleContest(Contest):
     contest_id = db.Column(db.Integer, db.ForeignKey('contest.contest_id'), primary_key=True)
     start_date = db.Column(db.DateTime, index=True, default=datetime.utcnow)
     end_date = db.Column(db.DateTime, index=True, default=datetime.utcnow)
-    location = db.Column(db.Text, index=True, nullable=True)
 
-    result_publication_date = db.Column(db.DateTime, ullable=True)
+    result_publication_date = db.Column(db.DateTime, nullable=True)
+
+    contest_duration = db.Column(db.Integer, nullable=True)
 
     previous_contest_id = db.Column(db.Integer, db.ForeignKey('simple_contest.contest_id'), nullable=True)
     previous_participation_condition = db.Column(db.Enum(UserStatusEnum))
@@ -272,6 +282,9 @@ class SimpleContest(Contest):
 
     next_contests = db.relationship('SimpleContest',
                                     foreign_keys=[previous_contest_id])
+
+    locations = db.relationship('Location', secondary=locationInContest, lazy='subquery',
+                                backref=db.backref('contest', lazy=True))
 
     __mapper_args__ = {
         'polymorphic_identity': ContestTypeEnum.SimpleContest,

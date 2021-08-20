@@ -5,7 +5,7 @@ from marshmallow_enum import EnumField
 
 from contest.tasks.models import *
 from user.models.auth import *
-from common.fields import text_validator, common_name_validator
+from common.fields import text_validator, common_name_validator, location_validator
 
 """
 User
@@ -137,6 +137,7 @@ class SimpleContestSchema(SQLAlchemySchema):
     location = auto_field(column_name='location', validate=text_validator, required=True)
     start_date = auto_field(column_name='start_date', required=True)
     end_date = auto_field(column_name='end_date', required=True)
+    contest_duration = auto_field(column_name='contest_duration', required=True)
     result_publication_date = auto_field(column_name='result_publication_date', required=True)
     previous_contest_id = auto_field(column_name='previous_contest_id', allow_none=True)
     previous_participation_condition = EnumField(UserStatusEnum,
@@ -182,6 +183,21 @@ class OlympiadTypeSchema(SQLAlchemySchema):
 
     olympiad_type_id = auto_field(column_name='olympiad_type_id', dump_only=True)
     olympiad_type = auto_field(column_name='olympiad_type', validate=common_name_validator, required=True)
+
+
+"""
+Location
+"""
+
+
+class LocationSchema(SQLAlchemySchema):
+    class Meta:
+        model = Location
+        load_instance = True
+        sqla_session = db.session
+
+    location_id = auto_field(column_name='location_id', dump_only=True)
+    location = auto_field(column_name='location', validate=location_validator, required=True)
 
 
 """

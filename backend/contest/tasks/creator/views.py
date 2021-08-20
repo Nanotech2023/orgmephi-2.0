@@ -4,6 +4,7 @@ from flask import request
 from marshmallow import EXCLUDE
 
 from common import get_current_app, get_current_module
+from common.errors import AlreadyExists
 from contest.tasks.creator.schemas import *
 from contest.tasks.model_schemas.schemas import SimpleContestSchema, CompositeContestSchema, PlainTaskSchema, \
     RangeTaskSchema, MultipleChoiceTaskSchema
@@ -1704,3 +1705,95 @@ def task_image(id_contest, id_variant, id_task):
     return send_file(io.BytesIO(task.image_of_task),
                      attachment_filename='task_image.png',
                      mimetype='image/jpeg'), 200
+
+# Location
+
+
+@module.route('/contest/<int:id_contest>/add_location', methods=['POST'],
+              input_schema=UpdateLocationOfContestRequestTaskCreatorSchema)
+def add_location_to_contest(id_contest):
+    """
+    Add location to contest
+    ---
+    post:
+      parameters:
+        - in: path
+          description: ID of the contest
+          name: id_contest
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: UpdateUserInContestRequestTaskControlUsersSchema
+      security:
+        - JWTAccessToken: [ ]
+        - CSRFAccessToken: [ ]
+      responses:
+        '200':
+          description: OK
+        '400':
+          description: Bad request
+        '409':
+          description: Olympiad type already in use
+    """
+
+    values = request.marshmallow
+    locations = values['locations']
+
+    contest = get_contest_if_possible(id_contest)
+
+    for location_id in locations:
+        location = db_get_or_raise(Location, "location_id", str(location_id))
+
+        contest.locations.append(location)
+
+    db.session.commit()
+    return {}, 200
+
+
+@module.route('/contest/<int:id_location>/remove_location', methods=['POST'],
+              input_schema=UpdateLocationOfContestRequestTaskCreatorSchema)
+def remove_user_from_contest(id_contest):
+    """
+    Remove location from contest
+    ---
+    post:
+      parameters:
+        - in: path
+          description: ID of the location
+          name: id_location
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: UpdateLocationOfContestRequestTaskCreatorSchema
+      security:
+        - JWTAccessToken: [ ]
+        - CSRFAccessToken: [ ]
+      responses:
+        '200':
+          description: OK
+        '400':
+          description: Bad request
+        '409':
+          description: Location already in use
+    """
+
+    values = request.marshmallow
+
+    locations = values['locations']
+
+    contest = get_contest_if_possible(id_contest)
+
+    for location_id in locations:
+        location = db_get_or_raise(Location, "location_id", str(location_id))
+        contest.users.remove(location)
+
+    db.session.commit()
+

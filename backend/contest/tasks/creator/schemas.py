@@ -53,6 +53,7 @@ class CreateSimpleContestRequestTaskCreatorSchema(Schema):
     location = common_fields.Location(required=True)
     start_time = fields.DateTime(required=True)
     end_time = fields.DateTime(required=True)
+    contest_duration = fields.Int(required=False)
     result_publication_date = fields.DateTime(required=False)
     visibility = fields.Boolean(required=True)
     previous_contest_id = fields.Int(required=False)
@@ -62,6 +63,7 @@ class CreateSimpleContestRequestTaskCreatorSchema(Schema):
 
 class CreateCompositeContestRequestTaskCreatorSchema(Schema):
     visibility = fields.Boolean(required=True)
+    holding_type = EnumField(ContestHoldingTypeEnum, required=True, by_value=True)
 
 
 class CompositeContestResponseTaskCreatorSchema(Schema):
@@ -69,6 +71,7 @@ class CompositeContestResponseTaskCreatorSchema(Schema):
     location = common_fields.Location(required=False)
     start_date = fields.DateTime(required=False)
     end_date = fields.DateTime(required=False)
+    contest_duration = fields.Int(required=False)
     visibility = fields.Boolean(required=True)
     previous_contest_id = fields.Int(required=False)
     previous_participation_condition = common_fields.Text(required=False)
@@ -85,6 +88,7 @@ class UpdateContestRequestTaskCreatorSchema(Schema):
     end_date = fields.DateTime(required=False)
     result_publication_date = fields.DateTime(required=False)
     visibility = fields.Boolean(required=False)
+    contest_duration = fields.Int(required=False)
     previous_contest_id = fields.Int(required=False)
     previous_participation_condition = common_fields.Text(required=False)
     holding_type = EnumField(ContestHoldingTypeEnum, required=True, by_value=False)
@@ -231,3 +235,7 @@ class UpdateMultipleRequestTaskCreatorSchema(Schema):
     answers = fields.List(fields.Nested(AnswersInTaskRequestTaskCreatorSchema), required=False)
     show_answer_after_contest = fields.Boolean(required=False)
     task_points = fields.Integer(required=False)
+
+
+class UpdateLocationOfContestRequestTaskCreatorSchema(Schema):
+    locations = fields.List(fields.Int(), required=True)

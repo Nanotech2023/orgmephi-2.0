@@ -1,9 +1,6 @@
 from common import get_current_app, get_current_module
 from common.util import db_get_all
-from contest.tasks.model_schemas.schemas import OlympiadTypeSchema, BaseContestSchema, ContestSchema, StageSchema
-from contest.tasks.unauthorized.schemas import AllOlympiadTypesResponseTaskUnauthorizedSchema, \
-    AllBaseContestResponseTaskUnauthorizedSchema, AllOlympiadsResponseTaskUnauthorizedSchema, \
-    AllStagesResponseTaskUnauthorizedSchema
+from contest.tasks.unauthorized.schemas import *
 from contest.tasks.util import *
 
 db = get_current_db()
@@ -69,6 +66,66 @@ def olympiad_type_get(id_olympiad_type):
     """
     olympiad = db_get_or_raise(OlympiadType, "olympiad_type_id", str(id_olympiad_type))
     return olympiad, 200
+
+
+# Location
+
+
+@module.route('/location/all', methods=['GET'],
+              output_schema=AllLocationResponseTaskUnauthorizedSchema)
+def location_all():
+    """
+    Get all locations
+    ---
+    get:
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: AllLocationResponseTaskUnauthorizedSchema
+        '400':
+          description: Bad request
+        '409':
+          description: Olympiad type already in use
+        '404':
+          description: Olympiad type not found
+    """
+    locations = db_get_all(Location)
+    return {
+               "locations": locations
+           }, 200
+
+
+@module.route('/location/<int:id_location>', methods=['GET'],
+              output_schema=LocationSchema)
+def id_location_get(id_location):
+    """
+    Get location by id
+    ---
+    get:
+      parameters:
+        - in: path
+          description: Id of the location
+          name: id_location
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: LocationSchema
+        '400':
+          description: Bad request
+        '409':
+          description: Olympiad type already in use
+        '404':
+          description: Olympiad type not found
+    """
+    location = db_get_or_raise(Location, "location_id", str(id_location))
+    return location, 200
 
 
 # Olympiad

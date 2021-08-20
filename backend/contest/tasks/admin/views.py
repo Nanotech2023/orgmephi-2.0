@@ -85,3 +85,79 @@ def olympiad_type_remove(id_olympiad_type):
     db.session.commit()
 
     return {}, 200
+
+# Location
+
+
+@module.route('/location/create', methods=['POST'],
+              input_schema=CreateLocationRequestTaskAdminSchema, output_schema=LocationResponseTaskAdminSchema)
+def location_create():
+    """
+    Add new location
+    ---
+    post:
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: CreateLocationRequestTaskAdminSchema
+      security:
+        - JWTAccessToken: [ ]
+        - CSRFAccessToken: [ ]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: LocationResponseTaskAdminSchema
+        '400':
+          description: Bad request
+        '409':
+          description: Olympiad type already in use
+    """
+    import sqlalchemy.exc
+    values = request.marshmallow
+    location = values['location']
+
+    try:
+        new_location = add_location(db.session,
+                                    location=location)
+        db.session.commit()
+    except sqlalchemy.exc.IntegrityError:
+        raise AlreadyExists('location', location)
+    return {
+               "location_id": new_location.location_id
+           }, 200
+
+
+@module.route('/olympiad_type/<int:id_location>/remove', methods=['POST'])
+def location_remove(id_location):
+    """
+    Remove location
+    ---
+    post:
+      parameters:
+        - in: path
+          description: Id of the location
+          name: id_location
+          required: true
+          schema:
+            type: integer
+      security:
+        - JWTAccessToken: [ ]
+        - CSRFAccessToken: [ ]
+      responses:
+        '200':
+          description: OK
+        '400':
+          description: Bad request
+        '409':
+          description: Olympiad type already in use
+        '404':
+          description: Olympiad type not found
+    """
+    location = db_get_or_raise(Location, "location_id", str(id_location))
+    db.session.delete(location)
+    db.session.commit()
+
+    return {}, 200
