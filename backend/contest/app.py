@@ -3,7 +3,7 @@ from common import OrgMephiApp
 
 from . import module
 
-app = OrgMephiApp('contest', module, default_config=DefaultConfiguration())
+app = OrgMephiApp('contest', module, default_config=DefaultConfiguration(), security=True)
 app.set_current()
 app.prepare()
 flask_app = app.app

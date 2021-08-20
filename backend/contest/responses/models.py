@@ -4,6 +4,7 @@ from datetime import datetime
 import enum
 from common import get_current_db
 from contest.tasks.models import UserInContest, Task
+from sqlalchemy.ext.hybrid import hybrid_property
 
 db = get_current_db()
 
@@ -20,19 +21,16 @@ class Response(db.Model):
     answers: answers in user response
     """
 
-
     work_id = db.Column(db.Integer, autoincrement=True, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey(UserInContest.user_id))
     contest_id = db.Column(db.Integer, db.ForeignKey(UserInContest.contest_id))
     statuses = db.relationship('ResponseStatus', backref='response', lazy=True, cascade="all, delete")
     answers = db.relationship('ResponseAnswer', backref='response', lazy='dynamic', cascade="all, delete")
 
-    def prepare_for_list(self):
-        mark = self.statuses[-1].mark
-        return {
-            'user_id': self.user_id,
-            'mark': mark
-        }
+    @hybrid_property
+    def mark(self):
+        if len(self.statuses) > 0:
+            return self.statuses[-1].mark
 
 
 class ResponseStatusEnum(enum.Enum):
@@ -69,34 +67,12 @@ class ResponseStatus(db.Model):
     appeal: an appeal which is linked to this status
     """
 
-
     status_id = db.Column(db.Integer, autoincrement=True, primary_key=True)
     work_id = db.Column(db.Integer, db.ForeignKey(Response.work_id))
     timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
     status = db.Column(db.Enum(ResponseStatusEnum), nullable=False)
     mark = db.Column(db.Float)
     appeal = db.relationship('Appeal', backref='status', lazy=True, uselist=False)
-
-    def serialize(self):
-        if self.mark is None:
-            return {
-                'status': self.status.value
-            }
-        else:
-            return {
-                'status': self.status.value,
-                'mark': self.mark
-            }
-
-    def status_for_history(self):
-        appeal_id = self.appeal.appeal_id if self.appeal is not None else None
-
-        return {
-            'status': self.status.value,
-            'datetime': self.timestamp.isoformat(),
-            'appeal_id': appeal_id,
-            'mark': self.mark
-        }
 
 
 class AppealStatusEnum(enum.Enum):
@@ -127,25 +103,11 @@ class Appeal(db.Model):
     appeal_response: expert's response for user's appeal
     """
 
-
     appeal_id = db.Column(db.Integer, autoincrement=True, primary_key=True)
     work_status = db.Column(db.Integer, db.ForeignKey(ResponseStatus.status_id))
     appeal_status = db.Column(db.Enum(AppealStatusEnum), nullable=False)
     appeal_message = db.Column(db.Text)
     appeal_response = db.Column(db.Text)
-
-    def serialize(self):
-        return {
-                'appeal_id': self.appeal_id,
-                'status_id': self.work_status,
-                'appeal_status': self.appeal_status.value,
-                'appeal_message': self.appeal_message,
-                'appeal_response': self.appeal_response
-            }
-
-    def reply_to_appeal(self, message, status):
-        self.appeal_response = message
-        self.appeal_status = status
 
 
 class ResponseFiletypeEnum(enum.Enum):
@@ -181,22 +143,16 @@ class ResponseAnswer(db.Model):
 
     answer_id: id of the user's answer
     work_id: id of the user's work
-    task_num: id of the task
+    task_id: id of the task
     answer: user's answer as a file
     filetype: user's answer filetype
     """
 
     answer_id = db.Column(db.Integer, autoincrement=True, primary_key=True)
     work_id = db.Column(db.Integer, db.ForeignKey('response.work_id'))
-    task_num = db.Column(db.Integer, db.ForeignKey(f'{Task.__tablename__}.task_id'))
+    task_id = db.Column(db.Integer, db.ForeignKey(f'{Task.__tablename__}.task_id'))
     answer = db.Column(db.LargeBinary, nullable=False)
     filetype = db.Column(db.Enum(ResponseFiletypeEnum), nullable=False)
-
-    def serialize(self):
-        return {
-            'task_id': self.task_num,
-            'answer_id': self.answer_id
-        }
 
     def update(self, answer_new=None, filetype_new=None):
         if answer_new is not None:
@@ -236,7 +192,7 @@ def add_response_status(work_id, status=None, mark=None):
 def add_response_answer(work_id, task_id, answer, filetype):
     response_answer = ResponseAnswer(
         work_id=work_id,
-        task_num=task_id,
+        task_id=task_id,
         answer=answer,
         filetype=filetype_dict[filetype]
     )

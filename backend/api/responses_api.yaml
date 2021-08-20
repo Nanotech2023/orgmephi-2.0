@@ -1,0 +1,682 @@
+components:
+  schemas:
+    AllUserAnswersResponse:
+      properties:
+        contest_id:
+          type: integer
+        user_answers:
+          items:
+            $ref: '#/components/schemas/ResponseAnswerList'
+          type: array
+        user_id:
+          type: integer
+        work_id:
+          type: integer
+      required:
+      - contest_id
+      - user_id
+      - work_id
+      type: object
+    Appeal:
+      properties:
+        appeal_id:
+          readOnly: true
+          type: integer
+        appeal_message:
+          maxLength: 4096
+          nullable: true
+          readOnly: true
+          type: string
+        appeal_response:
+          maxLength: 4096
+          nullable: true
+          type: string
+        appeal_status:
+          enum:
+          - UnderReview
+          - AppealAccepted
+          - AppealRejected
+          type: string
+        status_id:
+          nullable: true
+          readOnly: true
+          type: integer
+      type: object
+    AppealCreateInfoResponse:
+      properties:
+        appeal_id:
+          type: integer
+      required:
+      - appeal_id
+      type: object
+    AppealMessageRequest:
+      properties:
+        message:
+          maxLength: 4096
+          type: string
+      required:
+      - message
+      type: object
+    AppealReplyRequest:
+      properties:
+        accepted:
+          type: boolean
+        mark:
+          type: number
+        message:
+          maxLength: 4096
+          type: string
+      required:
+      - accepted
+      - message
+      type: object
+    ContestResultSheetResponse:
+      properties:
+        contest_id:
+          type: integer
+        user_row:
+          items:
+            $ref: '#/components/schemas/UserResponseList'
+          type: array
+      required:
+      - contest_id
+      - user_row
+      type: object
+    ResponseAnswerList:
+      properties:
+        answer_id:
+          readOnly: true
+          type: integer
+        task_id:
+          nullable: true
+          readOnly: true
+          type: integer
+      type: object
+    ResponseStatus:
+      properties:
+        appeal:
+          type: integer
+        datetime:
+          format: date-time
+          type: string
+        mark:
+          nullable: true
+          type: number
+        status:
+          enum:
+          - NotChecked
+          - Accepted
+          - Rejected
+          - Appeal
+          - Revision
+          type: string
+      type: object
+    ResponseStatusResponse:
+      properties:
+        mark:
+          nullable: true
+          type: number
+        status:
+          enum:
+          - NotChecked
+          - Accepted
+          - Rejected
+          - Appeal
+          - Revision
+          type: string
+      type: object
+    UserResponseList:
+      properties:
+        mark:
+          nullable: true
+          type: number
+        user_id:
+          type: integer
+      required:
+      - user_id
+      type: object
+    UserResponseStatusHistoryResponse:
+      properties:
+        contest_id:
+          type: integer
+        history:
+          items:
+            $ref: '#/components/schemas/ResponseStatus'
+          type: array
+        user_id:
+          type: integer
+      required:
+      - contest_id
+      - history
+      - user_id
+      type: object
+    UserResponseStatusMarkResponse:
+      properties:
+        mark:
+          type: number
+        status:
+          enum:
+          - NotChecked
+          - Accepted
+          - Rejected
+          - Appeal
+          - Revision
+          type: string
+      required:
+      - status
+      type: object
+  securitySchemes:
+    CSRFAccessToken:
+      in: header
+      name: X-CSRF-TOKEN
+      type: apiKey
+    CSRFRefreshToken:
+      in: header
+      name: X-CSRF-TOKEN
+      type: apiKey
+    JWTAccessToken:
+      in: cookie
+      name: access_token_cookie
+      type: apiKey
+    JWTRefreshToken:
+      in: cookie
+      name: refresh_token_cookie
+      type: apiKey
+info:
+  title: aggregate_contest_responses
+  version: 1.0.0
+openapi: 3.0.2
+paths:
+  /responses/creator/contest/{contest_id}/task/{task_id}/user/{user_id}:
+    get:
+      parameters:
+      - description: Id of the contest
+        in: path
+        name: contest_id
+        required: true
+        schema:
+          type: integer
+      - description: Id of the task
+        in: path
+        name: task_id
+        required: true
+        schema:
+          type: integer
+      - description: Id of the user
+        in: path
+        name: user_id
+        required: true
+        schema:
+          type: integer
+      produces:
+      - image/png
+      - application/pdf
+      - image/jpeg
+      - image/gif
+      - text/plain
+      - application/msword
+      - application/vnd.openxmlformats-officedocument.wordprocessingml.document
+      - application/vnd.oasis.opendocument.text
+      responses:
+        '200':
+          description: OK
+          schema:
+            format: binary
+            type: string
+        '403':
+          description: Not enough rights for current user
+        '404':
+          description: User, contest or task not found
+      security:
+      - JWTAccessToken: []
+  /responses/creator/contest/{contest_id}/task/{task_id}/user/{user_id}/{filetype}:
+    post:
+      parameters:
+      - description: Id of the contest
+        in: path
+        name: contest_id
+        required: true
+        schema:
+          type: integer
+      - description: Id of the task
+        in: path
+        name: task_id
+        required: true
+        schema:
+          type: integer
+      - description: Id of the user
+        in: path
+        name: user_id
+        required: true
+        schema:
+          type: integer
+      - description: Filetype
+        in: path
+        name: filetype
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/octet-stream:
+            schema:
+              format: binary
+              type: string
+      responses:
+        '200':
+          description: OK
+        '403':
+          description: Not enough rights for current user
+        '404':
+          description: User, contest or task not found
+      security:
+      - JWTAccessToken: []
+      - CSRFAccessToken: []
+  /responses/creator/contest/{contest_id}/user/{user_id}/response:
+    get:
+      parameters:
+      - description: Id of the contest
+        in: path
+        name: contest_id
+        required: true
+        schema:
+          type: integer
+      - description: Id of the user
+        in: path
+        name: user_id
+        required: true
+        schema:
+          type: integer
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AllUserAnswersResponse'
+          description: OK
+        '403':
+          description: Not enough rights for current user
+        '404':
+          description: User or contest not found
+      security:
+      - JWTAccessToken: []
+  /responses/creator/contest/{contest_id}/user/{user_id}/status:
+    get:
+      parameters:
+      - description: Id of the contest
+        in: path
+        name: contest_id
+        required: true
+        schema:
+          type: integer
+      - description: Id of the user
+        in: path
+        name: user_id
+        required: true
+        schema:
+          type: integer
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponseStatusResponse'
+          description: OK
+        '403':
+          description: Invalid role of current user
+        '404':
+          description: User or contest not found
+      security:
+      - JWTAccessToken: []
+      summary: null
+    post:
+      parameters:
+      - description: Id of the contest
+        in: path
+        name: contest_id
+        required: true
+        schema:
+          type: integer
+      - description: Id of the user
+        in: path
+        name: user_id
+        required: true
+        schema:
+          type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserResponseStatusMarkResponse'
+        required: true
+      responses:
+        '200':
+          description: OK
+        '400':
+          description: Incorrect mark or status
+        '403':
+          description: Invalid role of current user
+        '404':
+          description: User or contest not found
+      security:
+      - JWTAccessToken: []
+      - CSRFAccessToken: []
+  /responses/creator/contest/{contest_id}/user/{user_id}/status/history:
+    get:
+      parameters:
+      - description: Id of the contest
+        in: path
+        name: contest_id
+        required: true
+        schema:
+          type: integer
+      - description: Id of the user
+        in: path
+        name: user_id
+        required: true
+        schema:
+          type: integer
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResponseStatusHistoryResponse'
+          description: OK
+        '403':
+          description: Not enough rights for current user
+        '404':
+          description: User or contest not found
+      security:
+      - JWTAccessToken: []
+      summary: null
+  /responses/creator/contest/{contest_id}/list/:
+    get:
+      parameters:
+      - description: Id of the contest
+        in: path
+        name: contest_id
+        required: true
+        schema:
+          type: integer
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ContestResultSheetResponse'
+          description: OK
+        '404':
+          description: Contest not found
+      security:
+      - JWTAccessToken: []
+  /responses/creator/contest/{contest_id}/user/{user_id}/appeal:
+    post:
+      parameters:
+      - description: Id of the contest
+        in: path
+        name: contest_id
+        required: true
+        schema:
+          type: integer
+      - description: Id of the user
+        in: path
+        name: user_id
+        required: true
+        schema:
+          type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AppealMessageRequest'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AppealCreateInfoResponse'
+          description: OK
+        '404':
+          description: User or contest not found
+      security:
+      - JWTAccessToken: []
+      - CSRFAccessToken: []
+  /responses/creator/contest/{contest_id}/appeal/{appeal_id}/reply:
+    patch:
+      parameters:
+      - description: Id of the contest
+        in: path
+        name: contest_id
+        required: true
+        schema:
+          type: integer
+      - description: Id of the appeal
+        in: path
+        name: appeal_id
+        required: true
+        schema:
+          type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AppealReplyRequest'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Appeal'
+          description: OK
+        '404':
+          description: User or contest not found
+      security:
+      - JWTAccessToken: []
+      - CSRFAccessToken: []
+  /responses/participant/contest/{contest_id}/task/{task_id}/user/self:
+    get:
+      parameters:
+      - description: Id of the contest
+        in: path
+        name: contest_id
+        required: true
+        schema:
+          type: integer
+      - description: Id of the task
+        in: path
+        name: task_id
+        required: true
+        schema:
+          type: integer
+      produces:
+      - image/png
+      - application/pdf
+      - image/jpeg
+      - image/gif
+      - text/plain
+      - application/msword
+      - application/vnd.openxmlformats-officedocument.wordprocessingml.document
+      - application/vnd.oasis.opendocument.text
+      responses:
+        '200':
+          description: OK
+          schema:
+            format: binary
+            type: string
+        '404':
+          description: User, contest or task not found
+      security:
+      - JWTAccessToken: []
+  /responses/participant/contest/{contest_id}/task/{task_id}/user/self/{filetype}:
+    post:
+      parameters:
+      - description: Id of the contest
+        in: path
+        name: contest_id
+        required: true
+        schema:
+          type: integer
+      - description: Id of the task
+        in: path
+        name: task_id
+        required: true
+        schema:
+          type: integer
+      - description: Type of file
+        in: path
+        name: filetype
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/octet-stream:
+            schema:
+              format: binary
+              type: string
+      responses:
+        '200':
+          description: OK
+        '404':
+          description: User, contest or task not found
+      security:
+      - JWTAccessToken: []
+      - CSRFAccessToken: []
+  /responses/participant/contest/{contest_id}/answer/{answer_id}:
+    get:
+      parameters:
+      - description: Id of the contest
+        in: path
+        name: contest_id
+        required: true
+        schema:
+          type: integer
+      - description: Id of the answer
+        in: path
+        name: answer_id
+        required: true
+        schema:
+          type: integer
+      produces:
+      - image/png
+      - application/pdf
+      - image/jpeg
+      - image/gif
+      - text/plain
+      - application/msword
+      - application/vnd.openxmlformats-officedocument.wordprocessingml.document
+      - application/vnd.oasis.opendocument.text
+      responses:
+        '200':
+          description: OK
+          schema:
+            format: binary
+            type: string
+        '403':
+          description: Not enough rights for current user
+        '404':
+          description: User or contest not found
+      security:
+      - JWTAccessToken: []
+  /responses/participant/contest/{contest_id}/user/self/status:
+    get:
+      parameters:
+      - description: Id of the contest
+        in: path
+        name: contest_id
+        required: true
+        schema:
+          type: integer
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponseStatusResponse'
+          description: OK
+        '403':
+          description: Invalid role of current user
+        '404':
+          description: User or contest not found
+      security:
+      - JWTAccessToken: []
+  /responses/participant/contest/{contest_id}/user/self/status/history:
+    get:
+      parameters:
+      - description: Id of the contest
+        in: path
+        name: contest_id
+        required: true
+        schema:
+          type: integer
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResponseStatusHistoryResponse'
+          description: OK
+        '403':
+          description: Not enough rights for current user
+        '404':
+          description: User or contest not found
+      security:
+      - JWTAccessToken: []
+  /responses/participant/contest/{contest_id}/user/self/appeal:
+    post:
+      parameters:
+      - description: Id of the contest
+        in: path
+        name: contest_id
+        required: true
+        schema:
+          type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AppealMessageRequest'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AppealCreateInfoResponse'
+          description: OK
+        '404':
+          description: User or contest not found
+      security:
+      - JWTAccessToken: []
+      - CSRFAccessToken: []
+  /responses/participant/contest/{contest_id}/appeal/{appeal_id}:
+    get:
+      parameters:
+      - description: Id of the contest
+        in: path
+        name: contest_id
+        required: true
+        schema:
+          type: integer
+      - description: Id of the appeal
+        in: path
+        name: appeal_id
+        required: true
+        schema:
+          type: integer
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Appeal'
+          description: OK
+        '404':
+          description: Appeal or contest not found
+      security:
+      - JWTAccessToken: []
+servers:
+- url: /contest
