@@ -160,7 +160,7 @@ class OrgMephiApp:
         self._app.run(**options)
 
     def _init_app(self, default_config: object = None, test_config: object = None):
-        self._app = Flask(__name__)
+        self._app = Flask(__name__, root_path=os.getcwd())
         self._app.config['ORGMEPHI_APP'] = self
         if default_config is not None:
             self._app.config.from_object(default_config)
