@@ -3,11 +3,12 @@ from marshmallow import pre_load, post_dump, fields, Schema, validate
 from marshmallow_sqlalchemy import SQLAlchemySchema, auto_field
 from marshmallow_sqlalchemy.fields import Related
 from marshmallow_oneofschema import OneOfSchema
-from user.models.location import *
-from common import fields as common_fields
 
+from common import fields as common_fields
 from common.errors import NotFound
 from common.marshmallow import check_related_existence
+
+from user.models.location import *
 
 
 native_country = app.config['ORGMEPHI_NATIVE_COUNTRY']
@@ -99,22 +100,22 @@ class LocationSchema(OneOfSchema):
             return LocationTypeEnum.foreign.value
 
 
-class LocationRussiaCompatibleSchema(Schema):
+class LocationRussiaInputSchema(Schema):
     rural = fields.Boolean(required=True)
     country = common_fields.CommonName(required=True, validate=validate.OneOf([native_country]))
     region = common_fields.CommonName(required=True)
     city = common_fields.CommonName(required=True)
 
 
-class LocationOtherCompatibleSchema(Schema):
+class LocationOtherInputSchema(Schema):
     rural = fields.Boolean(required=True)
     country = common_fields.CommonName(required=True, validate=validate.NoneOf([native_country]))
     location = common_fields.FreeDescription(required=True)
 
 
-class LocationCompatibleSchema(OneOfSchema):
-    type_schemas = {LocationTypeEnum.russian.value: LocationRussiaCompatibleSchema,
-                    LocationTypeEnum.foreign.value: LocationOtherCompatibleSchema}
+class LocationInputSchema(OneOfSchema):
+    type_schemas = {LocationTypeEnum.russian.value: LocationRussiaInputSchema,
+                    LocationTypeEnum.foreign.value: LocationOtherInputSchema}
     type_field = "russian"
     type_field_remove = True
 

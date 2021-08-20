@@ -53,6 +53,6 @@ class Document(db.Model):
 
     @document_name.setter
     def document_name(self, value):
-        self.document_type = DocumentTypeEnum.other_document
+        self.other_document_name = value
 
     user = db.relationship('UserInfo', back_populates='document')

@@ -8,9 +8,9 @@ from common.util import db_get_or_raise
 from user.models import User, add_user, UserInfo, Group
 
 from user.model_schemas.auth import UserSchema, GroupSchema
-from user.model_schemas.personal import UserInfoSchema
-from user.model_schemas.university import StudentInfoSchema
-from user.model_schemas.school import SchoolInfoSchema
+from user.model_schemas.personal import UserInfoSchema, UserInfoInputSchema
+from user.model_schemas.university import StudentInfoSchema, StudentInfoInputSchema
+from user.model_schemas.school import SchoolInfoSchema, SchoolInfoInputSchema
 
 from .schemas import *
 
@@ -195,7 +195,7 @@ def set_user_type(user_id):
     return {}, 200
 
 
-@module.route('/personal/<int:user_id>', methods=['PATCH'], input_schema=UserInfoRequestUserSchema)
+@module.route('/personal/<int:user_id>', methods=['PATCH'], input_schema=UserInfoInputSchema)
 def set_user_info_admin(user_id):
     """
     Set personal info for a user
@@ -215,7 +215,7 @@ def set_user_info_admin(user_id):
         required: true
         content:
           application/json:
-            schema: UserInfoRequestUserSchema
+            schema: UserInfoInputSchema
       responses:
         '200':
           description: OK
@@ -233,7 +233,7 @@ def set_user_info_admin(user_id):
     return {}, 200
 
 
-@module.route('/university/<int:user_id>', methods=['PATCH'], input_schema=StudentInfoRequestUserSchema)
+@module.route('/university/<int:user_id>', methods=['PATCH'], input_schema=StudentInfoInputSchema)
 def set_university_info_admin(user_id):
     """
     Set university student info for a user
@@ -253,7 +253,7 @@ def set_university_info_admin(user_id):
         required: true
         content:
           application/json:
-            schema: StudentInfoRequestUserSchema
+            schema: StudentInfoInputSchema
       responses:
         '200':
           description: OK
@@ -272,7 +272,7 @@ def set_university_info_admin(user_id):
     return {}, 200
 
 
-@module.route('/school/<int:user_id>', methods=['PATCH'], input_schema=SchoolInfoRequestUserSchema)
+@module.route('/school/<int:user_id>', methods=['PATCH'], input_schema=SchoolInfoInputSchema)
 def set_school_info_admin(user_id):
     """
     Set school student info for a user
@@ -292,7 +292,7 @@ def set_school_info_admin(user_id):
         required: true
         content:
           application/json:
-            schema: SchoolInfoRequestUserSchema
+            schema: SchoolInfoInputSchema
       responses:
         '200':
           description: OK

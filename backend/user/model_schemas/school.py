@@ -1,9 +1,11 @@
 from marshmallow_sqlalchemy import SQLAlchemySchema, auto_field
 from marshmallow_sqlalchemy.fields import Nested
 from marshmallow_enum import EnumField
-from marshmallow import fields
+from marshmallow import fields, Schema
+
 from user.models.school import *
-from .location import LocationSchema
+
+from .location import LocationSchema, LocationInputSchema
 
 
 class SchoolInfoSchema(SQLAlchemySchema):
@@ -18,3 +20,11 @@ class SchoolInfoSchema(SQLAlchemySchema):
     name = auto_field(column_name='name', allow_none=True)
     grade = fields.Integer(allow_none=True)
     location = Nested(nested=LocationSchema, allow_none=False, many=False)
+
+
+class SchoolInfoInputSchema(Schema):
+    school_type = EnumField(enum=SchoolType, by_value=True)
+    number = fields.Integer()
+    name = fields.String()
+    grade = fields.Integer()
+    location = fields.Nested(nested=LocationInputSchema, many=False)

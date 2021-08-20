@@ -39,6 +39,7 @@ class UserInfo(db.Model):
     middle_name = db.Column(db.String)
     second_name = db.Column(db.String)
     date_of_birth = db.Column(db.Date)
+    place_of_birth = db.Column(db.String)
     gender = db.Column(db.Enum(GenderEnum))
 
     user = db.relationship('User', back_populates='user_info', lazy='select')

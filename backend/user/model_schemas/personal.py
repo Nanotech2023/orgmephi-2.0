@@ -1,14 +1,16 @@
-from marshmallow import pre_load
+from marshmallow import pre_load, fields, Schema
 from marshmallow_sqlalchemy import SQLAlchemySchema, auto_field
 from marshmallow_sqlalchemy.fields import Nested
 from marshmallow_enum import EnumField
-from user.models.personal import *
 
+from common import fields as common_fields
 from common.util import db_get_one_or_none
 from common.errors import AlreadyExists
 
-from .location import LocationSchema
-from .document import DocumentSchema
+from user.models.personal import *
+
+from .location import LocationSchema, LocationInputSchema
+from .document import DocumentSchema, DocumentInputSchema
 
 
 class UserLimitationsSchema(SQLAlchemySchema):
@@ -35,6 +37,7 @@ class UserInfoSchema(SQLAlchemySchema):
     middle_name = auto_field(column_name='middle_name', allow_none=True)
     second_name = auto_field(column_name='second_name', allow_none=True)
     date_of_birth = auto_field(column_name='date_of_birth', allow_none=True)
+    place_of_birth = auto_field(column_name='place_of_birth', allow_none=True)
     gender = EnumField(enum=GenderEnum, allow_none=True, by_value=True)
     dwelling = Nested(nested=LocationSchema, allow_none=True, many=False)
     document = Nested(nested=DocumentSchema, allow_none=True, many=False)
@@ -51,3 +54,22 @@ class UserInfoSchema(SQLAlchemySchema):
                 if current_email != email:
                     raise AlreadyExists('user.email', email)
         return data
+
+
+class UserLimitationsInputSchema(Schema):
+    hearing = fields.Boolean()
+    sight = fields.Boolean()
+    movement = fields.Boolean()
+
+
+class UserInfoInputSchema(Schema):
+    email = common_fields.Email()
+    first_name = common_fields.CommonName()
+    middle_name = common_fields.CommonName()
+    second_name = common_fields.CommonName()
+    date_of_birth = fields.Date()
+    place_of_birth = common_fields.FreeDescription()
+    gender = EnumField(enum=GenderEnum, by_value=True)
+    dwelling = fields.Nested(nested=LocationInputSchema, many=False)
+    document = fields.Nested(nested=DocumentInputSchema, many=False)
+    limitations = fields.Nested(nested=UserLimitationsInputSchema, many=False)

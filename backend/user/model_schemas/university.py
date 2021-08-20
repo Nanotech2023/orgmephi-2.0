@@ -4,9 +4,11 @@ from marshmallow_sqlalchemy.fields import Related, Nested
 from marshmallow_oneofschema import OneOfSchema
 from marshmallow import pre_load, validate, Schema
 from marshmallow import fields
-from user.models.university import *
-from common.fields import CommonName
+
+from common import fields as common_fields
 from common.marshmallow import check_related_existence
+
+from user.models.university import *
 
 
 class StudentUniversityType(enum.Enum):
@@ -80,11 +82,6 @@ class StudentUniversitySchema(OneOfSchema):
         return StudentUniversityType.custom.value
 
 
-class StudentUniversityCompatibleSchema(Schema):
-    university = CommonName(required=True)
-    country = CommonName(required=False, description='Omit this field if university is known by backend')
-
-
 class StudentInfoSchema(SQLAlchemySchema):
     class Meta:
         model = StudentInfo
@@ -95,3 +92,17 @@ class StudentInfoSchema(SQLAlchemySchema):
     phone = auto_field(column_name='phone', allow_none=True)
     university = Nested(nested=StudentUniversitySchema, allow_none=True, many=False)
     grade = fields.Integer(allow_none=True)
+
+
+class StudentUniversityInputSchema(Schema):
+    university = common_fields.CommonName(required=True)
+    country = common_fields.CommonName(required=False, description='Omit this field if university is known by backend')
+
+
+class StudentInfoInputSchema(Schema):
+    phone = common_fields.Phone()
+    university = fields.Nested(nested=StudentUniversityInputSchema, many=False)
+    grade = common_fields.Grade()
+    citizenship = common_fields.CommonName()
+    region = common_fields.CommonName()
+    city = common_fields.CommonName()
