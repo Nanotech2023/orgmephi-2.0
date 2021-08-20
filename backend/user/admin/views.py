@@ -1,11 +1,14 @@
-from flask import request
+from flask import request, abort
 from marshmallow import EXCLUDE
+import sqlalchemy.exc
 
 from common.errors import NotFound, AlreadyExists, InsufficientData
 from common import get_current_app, get_current_module, get_current_db
 from common.util import db_get_or_raise
 
-from user.models import User, add_user, UserInfo, Group
+from user.util import update_password
+
+from user.models import User, add_user, UserInfo, Group, StudentInfo, SchoolInfo
 
 from user.model_schemas.auth import UserSchema, GroupSchema
 from user.model_schemas.personal import UserInfoSchema, UserInfoInputSchema
@@ -45,7 +48,6 @@ def register_internal():
         '409':
           description: Username already in use
     """
-    import sqlalchemy.exc
     values = request.marshmallow
     username = values['username']
     password_hash = app.password_policy.hash_password(values['password'], check=False)
@@ -77,7 +79,6 @@ def preregister():
         '403':
           description: Invalid role of current user
     """
-    from flask import abort
     abort(501)
 
 
@@ -112,7 +113,6 @@ def change_password_admin(user_id):
         '404':
           description: User not found
     """
-    from user.util import update_password
     values = request.marshmallow
     return update_password(user_id, values['new_password'], None, True)
 
@@ -262,7 +262,6 @@ def set_university_info_admin(user_id):
         '404':
           description: User not found or is not a university student
     """
-    from user.models.university import StudentInfo
     user = db_get_or_raise(User, "id", user_id)
     if user.student_info is None:
         user.student_info = StudentInfo()
@@ -301,7 +300,6 @@ def set_school_info_admin(user_id):
         '404':
           description: User not found or is not a school student
     """
-    from user.models.school import SchoolInfo
     user = db_get_or_raise(User, "id", user_id)
     if user.school_info is None:
         user.school_info = SchoolInfo()
@@ -338,7 +336,6 @@ def add_group_admin():
         '409':
           description: Group already exists
     """
-    import sqlalchemy.exc
     values = request.marshmallow
     name = values['name']
     try:

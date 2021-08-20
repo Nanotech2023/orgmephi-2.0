@@ -84,6 +84,7 @@ class User(db.Model):
 def add_user(db_session, username, password_hash, role, reg_type):
     from .personal import UserInfo
     from .university import StudentInfo
+    from .school import SchoolInfo
     user = User(
         username=username,
         password_hash=password_hash,
@@ -92,6 +93,7 @@ def add_user(db_session, username, password_hash, role, reg_type):
     )
     user.user_info = UserInfo()
     user.student_info = StudentInfo()
+    user.school_info = SchoolInfo()
     db_session.add(user)
     return user
 

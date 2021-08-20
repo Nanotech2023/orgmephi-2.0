@@ -37,13 +37,11 @@ def register():
 
     try:
         user = add_user(db.session, username, password_hash, UserRoleEnum.participant, reg_type)
-        user.user_info = UserInfo()
         UserInfoSchema(load_instance=True).load(request.json['personal_info'], instance=user.user_info,
                                                 session=db.session, partial=False, unknown=EXCLUDE)
         user.user_info.email = username
 
         if reg_type == UserTypeEnum.university:
-            user.student_info = StudentInfo()
             StudentInfoSchema(load_instance=True).load(request.json['student_info'], instance=user.student_info,
                                                        session=db.session, partial=False, unknown=EXCLUDE)
             UserInfoSchema(only=['dwelling'], load_instance=True).load(request.json['student_info'],
