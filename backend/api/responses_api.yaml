@@ -94,20 +94,6 @@ components:
       type: object
     ResponseStatus:
       properties:
-        mark:
-          nullable: true
-          type: number
-        status:
-          enum:
-          - NotChecked
-          - Accepted
-          - Rejected
-          - Appeal
-          - Revision
-          type: string
-      type: object
-    ResponseStatusHistory:
-      properties:
         appeal:
           type: integer
         datetime:
@@ -125,9 +111,24 @@ components:
           - Revision
           type: string
       type: object
+    ResponseStatusResponse:
+      properties:
+        mark:
+          nullable: true
+          type: number
+        status:
+          enum:
+          - NotChecked
+          - Accepted
+          - Rejected
+          - Appeal
+          - Revision
+          type: string
+      type: object
     UserResponseList:
       properties:
         mark:
+          nullable: true
           type: number
         user_id:
           type: integer
@@ -140,7 +141,7 @@ components:
           type: integer
         history:
           items:
-            $ref: '#/components/schemas/ResponseStatusHistory'
+            $ref: '#/components/schemas/ResponseStatus'
           type: array
         user_id:
           type: integer
@@ -319,7 +320,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ResponseStatus'
+                $ref: '#/components/schemas/ResponseStatusResponse'
           description: OK
         '403':
           description: Invalid role of current user
@@ -443,7 +444,7 @@ paths:
       - JWTAccessToken: []
       - CSRFAccessToken: []
   /responses/creator/contest/{contest_id}/appeal/{appeal_id}/reply:
-    post:
+    patch:
       parameters:
       - description: Id of the contest
         in: path
@@ -594,7 +595,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ResponseStatus'
+                $ref: '#/components/schemas/ResponseStatusResponse'
           description: OK
         '403':
           description: Invalid role of current user
