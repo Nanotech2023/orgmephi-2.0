@@ -189,7 +189,6 @@ class CreateMultipleRequestTaskCreatorSchema(Schema):
 class TaskResponseTaskCreatorSchema(Schema):
     task_id = fields.Int(required=True)
     num_of_task = fields.Int(required=True)
-    image_of_task = common_fields.BytesField(required=True)
     recommended_answer = common_fields.Text(required=False)
     start_value = fields.Float(required=False)
     end_value = fields.Float(required=False)
