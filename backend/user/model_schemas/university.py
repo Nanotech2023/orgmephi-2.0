@@ -1,11 +1,14 @@
+import enum
 from marshmallow_sqlalchemy import SQLAlchemySchema, auto_field
 from marshmallow_sqlalchemy.fields import Related, Nested
 from marshmallow_oneofschema import OneOfSchema
 from marshmallow import pre_load, validate, Schema
 from marshmallow import fields
-from user.models.university import *
-from common.fields import CommonName
+
+from common import fields as common_fields
 from common.marshmallow import check_related_existence
+
+from user.models.university import *
 
 
 class StudentUniversityType(enum.Enum):
@@ -23,10 +26,12 @@ class StudentUniversityKnownSchema(SQLAlchemySchema):
     university = Related(column=['name'], data_key='university', required=True)
     country = fields.String(dump_only=True)
 
+    # noinspection PyUnusedLocal
     @pre_load()
     def check_university(self, data, many, **kwargs):
         return check_related_existence(data, 'university', 'name', University)
 
+    # noinspection PyUnusedLocal
     @pre_load()
     def pop_country(self, data, many, **kwargs):
         data.pop('country', None)
@@ -43,6 +48,7 @@ class StudentUniversityCustomSchema(SQLAlchemySchema):
     university = auto_field(column_name='university_name', required=True)
     country = Related(column=['name'], data_key='country', required=True)
 
+    # noinspection PyUnusedLocal
     @pre_load()
     def check_university(self, data, many, **kwargs):
         check_related_existence(data, 'country', 'name', Country)
@@ -76,11 +82,6 @@ class StudentUniversitySchema(OneOfSchema):
         return StudentUniversityType.custom.value
 
 
-class StudentUniversityCompatibleSchema(Schema):
-    university = CommonName(required=True)
-    country = CommonName(required=False, description='Omit this field if university is known by backend')
-
-
 class StudentInfoSchema(SQLAlchemySchema):
     class Meta:
         model = StudentInfo
@@ -90,11 +91,18 @@ class StudentInfoSchema(SQLAlchemySchema):
     user_id = auto_field(column_name='user_id', dump_only=True)
     phone = auto_field(column_name='phone', allow_none=True)
     university = Nested(nested=StudentUniversitySchema, allow_none=True, many=False)
-    admission_year = auto_field(column_name='admission_year', allow_none=True)
-    citizenship = Related(column=['name'], data_key='citizenship')
-    region = auto_field(column_name='region', allow_none=True)
-    city = auto_field(column_name='city', allow_none=True)
+    grade = fields.Integer(allow_none=True)
 
-    @pre_load()
-    def check_citizenship(self, data, many, **kwargs):
-        return check_related_existence(data, 'citizenship', 'name', Country)
+
+class StudentUniversityInputSchema(Schema):
+    university = common_fields.CommonName(required=True)
+    country = common_fields.CommonName(required=False, description='Omit this field if university is known by backend')
+
+
+class StudentInfoInputSchema(Schema):
+    phone = common_fields.Phone()
+    university = fields.Nested(nested=StudentUniversityInputSchema, many=False)
+    grade = common_fields.Grade()
+    citizenship = common_fields.CommonName()
+    region = common_fields.CommonName()
+    city = common_fields.CommonName()

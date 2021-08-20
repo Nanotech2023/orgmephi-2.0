@@ -1,19 +1,21 @@
-from flask import request
+from flask import request, abort
 from marshmallow import EXCLUDE
+import sqlalchemy.exc
 
 from common.errors import NotFound, AlreadyExists, InsufficientData
 from common import get_current_app, get_current_module, get_current_db
 from common.util import db_get_or_raise
 
-from user.models import User, UserRoleEnum, UserTypeEnum, add_user, UserInfo, Group
+from user.util import update_password
+
+from user.models import User, add_user, UserInfo, Group, StudentInfo, SchoolInfo
 
 from user.model_schemas.auth import UserSchema, GroupSchema
-from user.model_schemas.personal import UserInfoSchema
-from user.model_schemas.university import StudentInfoSchema
+from user.model_schemas.personal import UserInfoSchema, UserInfoInputSchema
+from user.model_schemas.university import StudentInfoSchema, StudentInfoInputSchema
+from user.model_schemas.school import SchoolInfoSchema, SchoolInfoInputSchema
 
-from .schemas import RegisterInternalRequestUserSchema, PasswordRequestUserSchema, RoleRequestUserSchema, \
-    TypeRequestUserSchema, GroupAddRequestUserSchema, MembershipRequestUserSchema, PreregisterResponseUserSchema, \
-    UserInfoRequestUserSchema, StudentInfoRequestUserSchema
+from .schemas import *
 
 db = get_current_db()
 module = get_current_module()
@@ -46,7 +48,6 @@ def register_internal():
         '409':
           description: Username already in use
     """
-    import sqlalchemy.exc
     values = request.marshmallow
     username = values['username']
     password_hash = app.password_policy.hash_password(values['password'], check=False)
@@ -78,7 +79,6 @@ def preregister():
         '403':
           description: Invalid role of current user
     """
-    from flask import abort
     abort(501)
 
 
@@ -113,7 +113,6 @@ def change_password_admin(user_id):
         '404':
           description: User not found
     """
-    from user.util import update_password
     values = request.marshmallow
     return update_password(user_id, values['new_password'], None, True)
 
@@ -196,7 +195,7 @@ def set_user_type(user_id):
     return {}, 200
 
 
-@module.route('/personal/<int:user_id>', methods=['PATCH'])
+@module.route('/personal/<int:user_id>', methods=['PATCH'], input_schema=UserInfoInputSchema)
 def set_user_info_admin(user_id):
     """
     Set personal info for a user
@@ -216,7 +215,7 @@ def set_user_info_admin(user_id):
         required: true
         content:
           application/json:
-            schema: UserInfoRequestUserSchema
+            schema: UserInfoInputSchema
       responses:
         '200':
           description: OK
@@ -224,8 +223,6 @@ def set_user_info_admin(user_id):
           description: Invalid role of current user
         '404':
           description: User not found
-        '409':
-          description: Personal info is not set and request is not full
     """
     user = db_get_or_raise(User, "id", user_id)
     if user.user_info is None:
@@ -236,7 +233,7 @@ def set_user_info_admin(user_id):
     return {}, 200
 
 
-@module.route('/university/<int:user_id>', methods=['PATCH'])
+@module.route('/university/<int:user_id>', methods=['PATCH'], input_schema=StudentInfoInputSchema)
 def set_university_info_admin(user_id):
     """
     Set university student info for a user
@@ -256,7 +253,7 @@ def set_university_info_admin(user_id):
         required: true
         content:
           application/json:
-            schema: StudentInfoRequestUserSchema
+            schema: StudentInfoInputSchema
       responses:
         '200':
           description: OK
@@ -264,15 +261,50 @@ def set_university_info_admin(user_id):
           description: Invalid role of current user
         '404':
           description: User not found or is not a university student
-        '409':
-          description: University info is not set and request is not full
     """
-    from user.models.university import StudentInfo
     user = db_get_or_raise(User, "id", user_id)
     if user.student_info is None:
         user.student_info = StudentInfo()
     StudentInfoSchema(load_instance=True).load(request.json, instance=user.student_info, session=db.session,
                                                partial=False, unknown=EXCLUDE)
+    db.session.commit()
+    return {}, 200
+
+
+@module.route('/school/<int:user_id>', methods=['PATCH'], input_schema=SchoolInfoInputSchema)
+def set_school_info_admin(user_id):
+    """
+    Set school student info for a user
+    ---
+    patch:
+      security:
+        - JWTAccessToken: [ ]
+        - CSRFAccessToken: [ ]
+      parameters:
+        - in: path
+          description: Id of the user
+          name: user_id
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: SchoolInfoInputSchema
+      responses:
+        '200':
+          description: OK
+        '403':
+          description: Invalid role of current user
+        '404':
+          description: User not found or is not a school student
+    """
+    user = db_get_or_raise(User, "id", user_id)
+    if user.school_info is None:
+        user.school_info = SchoolInfo()
+    SchoolInfoSchema(load_instance=True).load(request.json, instance=user.school_info, session=db.session,
+                                              partial=False, unknown=EXCLUDE)
     db.session.commit()
     return {}, 200
 
@@ -304,7 +336,6 @@ def add_group_admin():
         '409':
           description: Group already exists
     """
-    import sqlalchemy.exc
     values = request.marshmallow
     name = values['name']
     try:

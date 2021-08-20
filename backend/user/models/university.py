@@ -1,5 +1,7 @@
-import enum
 from common import get_current_db, get_current_app
+from user.util import grade_to_admission, admission_to_grade
+from sqlalchemy.ext.associationproxy import association_proxy
+from sqlalchemy.ext.hybrid import hybrid_property
 from .reference import University, Country
 from .auth import User
 
@@ -16,12 +18,6 @@ class StudentInfo(db.Model):
         id: id of the info
         phone: user's phone number
         university: id of student's university from known university list
-        custom_university: name of student's university if the university is not in the known university list
-        admission_year: year of admission to the university
-        university_country_id: country of the university
-        citizenship_country_id: student's citizenship
-        region: student's country region
-        city: student's city
     """
 
     __table_name__ = 'student_info'
@@ -29,15 +25,19 @@ class StudentInfo(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey(User.id), primary_key=True)
     phone = db.Column(db.String)
     admission_year = db.Column(db.Date)
-    citizenship_country_id = db.Column(db.Integer, db.ForeignKey(Country.id))
-    region = db.Column(db.String)
-    city = db.Column(db.String)
 
     university = db.relationship('StudentUniversity', lazy='select', uselist=False,
                                  cascade='save-update, merge, delete, delete-orphan')
-    citizenship = db.relationship('Country', lazy='select')
 
     user = db.relationship('User', lazy='select')
+
+    @hybrid_property
+    def grade(self):
+        return admission_to_grade(self.admission_year)
+
+    @grade.setter
+    def grade(self, value):
+        self.admission_year = grade_to_admission(value)
 
 
 class StudentUniversity(db.Model):
@@ -65,10 +65,7 @@ class StudentUniversityKnown(StudentUniversity):
 
     university_id = db.Column(db.Integer, db.ForeignKey(University.id))
     university = db.relationship('University')
-
-    @property
-    def country(self):
-        return "Not Implemented"
+    country = association_proxy('university', 'country_name')
 
     __mapper_args__ = {
         'polymorphic_identity': True,
@@ -86,7 +83,7 @@ class StudentUniversityCustom(StudentUniversity):
     """
 
     university_name = db.Column(db.String)
-    university_country = db.Column(db.Integer, db.ForeignKey(Country.id))
+    university_country_name = db.Column(db.String, db.ForeignKey(Country.name))
     country = db.relationship('Country')
 
     __mapper_args__ = {

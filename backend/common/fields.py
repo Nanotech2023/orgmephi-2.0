@@ -40,7 +40,8 @@ common_name_validator = validate.Length(max=32)
 group_name_validator = validate.Length(max=32)
 text_validator = validate.Length(max=1024)
 location_validator = validate.Length(max=128)
-
+free_description_validator = validate.Length(max=256)
+grade_validator = validate.Range(min=1)
 
 Email = _apply_validator(fields.Email, email_validator)
 Phone = _add_example(_apply_validator(fields.String, phone_validator), '8 (800) 555 35 35')
@@ -50,6 +51,9 @@ CommonName = _apply_validator(fields.String, common_name_validator)
 GroupName = _apply_validator(fields.String, group_name_validator)
 Text = _apply_validator(fields.String, text_validator)
 Location = _apply_validator(fields.String, location_validator)
+FreeDescription = _apply_validator(fields.String, free_description_validator)
+Grade = _apply_validator(fields.Integer, grade_validator)
+
 
 # For Tasks and Contest
 

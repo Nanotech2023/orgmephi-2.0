@@ -76,12 +76,15 @@ class User(db.Model):
                                 cascade='save-update, merge, delete, delete-orphan')
     student_info = db.relationship('StudentInfo', back_populates='user', lazy=True, uselist=False,
                                    cascade='save-update, merge, delete, delete-orphan')
+    school_info = db.relationship('SchoolInfo', back_populates='user', lazy=True, uselist=False,
+                                  cascade='save-update, merge, delete, delete-orphan')
     groups = db.relationship('Group', secondary=users_in_group, lazy='select', back_populates='users')
 
 
 def add_user(db_session, username, password_hash, role, reg_type):
     from .personal import UserInfo
     from .university import StudentInfo
+    from .school import SchoolInfo
     user = User(
         username=username,
         password_hash=password_hash,
@@ -90,6 +93,7 @@ def add_user(db_session, username, password_hash, role, reg_type):
     )
     user.user_info = UserInfo()
     user.student_info = StudentInfo()
+    user.school_info = SchoolInfo()
     db_session.add(user)
     return user
 

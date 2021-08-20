@@ -6,8 +6,9 @@ from user.models import User, Group
 from user.model_schemas.auth import UserSchema, GroupSchema
 from user.model_schemas.personal import UserInfoSchema
 from user.model_schemas.university import StudentInfoSchema
+from user.model_schemas.school import SchoolInfoSchema
 
-from .schemas import GroupListResponseUserSchema, UserListResponseUserSchema
+from .schemas import GroupListResponseUserSchema, UserListResponseUserSchema, UserFullListResponseUserSchema
 
 db = get_current_db()
 module = get_current_module()
@@ -65,6 +66,27 @@ def get_user_all():
     return {'users': users}, 200
 
 
+@module.route('/user_full/all', methods=['GET'], output_schema=UserFullListResponseUserSchema)
+def get_user_full_all():
+    """
+    Get full info for all users
+    ---
+    get:
+      security:
+        - JWTAccessToken: [ ]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: UserFullListResponseUserSchema
+        '403':
+          description: Invalid role of current user
+    """
+    users = db_get_all(User)
+    return {'users': users}, 200
+
+
 @module.route('/user/by-group/<int:group_id>', methods=['GET'], output_schema=UserListResponseUserSchema)
 def get_user_by_group(group_id):
     """
@@ -98,7 +120,7 @@ def get_user_by_group(group_id):
 @module.route('/personal/<int:user_id>', methods=['GET'], output_schema=UserInfoSchema)
 def get_user_info_admin(user_id):
     """
-    Get personal info for a different user
+    Get personal info for any user
     ---
     get:
       security:
@@ -130,7 +152,7 @@ def get_user_info_admin(user_id):
 @module.route('/university/<int:user_id>', methods=['GET'], output_schema=StudentInfoSchema)
 def get_university_info_admin(user_id):
     """
-    Get university student info for a different user
+    Get university student info for any user
     ---
     get:
       security:
@@ -157,6 +179,38 @@ def get_university_info_admin(user_id):
     if user.student_info is None:
         raise NotFound('user.university_info', 'for user %d' % user.id)
     return user.student_info, 200
+
+
+@module.route('/school/<int:user_id>', methods=['GET'], output_schema=SchoolInfoSchema)
+def get_school_info_admin(user_id):
+    """
+    Get school student info for any user
+    ---
+    get:
+      security:
+        - JWTAccessToken: [ ]
+      parameters:
+        - in: path
+          description: Id of the user
+          name: user_id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: SchoolInfoSchema
+        '403':
+          description: Invalid role of current user
+        '404':
+          description: User not found or is not a school student
+    """
+    user = db_get_or_raise(User, "id", user_id)
+    if user.school_info is None:
+        raise NotFound('user.school_info', 'for user %d' % user.id)
+    return user.school_info, 200
 
 
 @module.route('/group/<int:group_id>', methods=['GET'], output_schema=GroupSchema)

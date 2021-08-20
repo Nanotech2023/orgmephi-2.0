@@ -11,12 +11,180 @@ components:
       - csrf_access_token
       - csrf_refresh_token
       type: object
+    City:
+      properties:
+        name:
+          type: string
+        region:
+          type: string
+      required:
+      - name
+      - region
+      type: object
     Country:
       properties:
         name:
           type: string
       required:
       - name
+      type: object
+    Document:
+      properties:
+        code:
+          description: Only for russian passport
+          nullable: true
+          type: string
+        document_name:
+          nullable: true
+          type: string
+        document_type:
+          enum:
+          - RFPassport
+          - RFInternationalPassport
+          - ForeignPassport
+          - OtherDocument
+          nullable: true
+          type: string
+        issue_date:
+          format: date
+          nullable: true
+          type: string
+        issuer:
+          nullable: true
+          type: string
+        number:
+          nullable: true
+          type: string
+        series:
+          nullable: true
+          type: string
+        user_id:
+          readOnly: true
+          type: integer
+      required:
+      - user_id
+      type: object
+    DocumentForeignPassportInput:
+      properties:
+        document_type:
+          enum:
+          - ForeignPassport
+          type: string
+        issue_date:
+          format: date
+          type: string
+        issuer:
+          maxLength: 256
+          type: string
+        number:
+          example: '1234567'
+          pattern: ^[0-9]{1,32}$
+          type: string
+        series:
+          example: '12'
+          pattern: ^[0-9]{1,16}$
+          type: string
+      required:
+      - document_type
+      type: object
+    DocumentInput:
+      discriminator:
+        mapping:
+          ForeignPassport: '#/components/schemas/DocumentForeignPassportInput'
+          OtherDocument: '#/components/schemas/DocumentOtherInput'
+          RFInternationalPassport: '#/components/schemas/DocumentRFInternationalInput'
+          RFPassport: '#/components/schemas/DocumentRFInput'
+        propertyName: document_type
+      oneOf:
+      - $ref: '#/components/schemas/DocumentRFInput'
+      - $ref: '#/components/schemas/DocumentRFInternationalInput'
+      - $ref: '#/components/schemas/DocumentForeignPassportInput'
+      - $ref: '#/components/schemas/DocumentOtherInput'
+    DocumentOtherInput:
+      properties:
+        document_name:
+          maxLength: 32
+          type: string
+        document_type:
+          enum:
+          - OtherDocument
+          type: string
+        issue_date:
+          format: date
+          type: string
+        issuer:
+          maxLength: 256
+          type: string
+        number:
+          example: '1234567'
+          pattern: ^[0-9]{1,32}$
+          type: string
+        series:
+          example: '12'
+          pattern: ^[0-9]{1,16}$
+          type: string
+      required:
+      - document_type
+      type: object
+    DocumentRFInput:
+      properties:
+        code:
+          example: 123-456
+          pattern: ^[0-9]{3}-[0-9]{3}$
+          type: string
+        document_type:
+          enum:
+          - RFPassport
+          type: string
+        issue_date:
+          format: date
+          type: string
+        issuer:
+          maxLength: 256
+          type: string
+        number:
+          example: '123456'
+          pattern: ^[0-9]{6}$
+          type: string
+        series:
+          example: '4520'
+          pattern: ^[0-9]{4}$
+          type: string
+      required:
+      - document_type
+      type: object
+    DocumentRFInternationalInput:
+      properties:
+        document_type:
+          enum:
+          - RFInternationalPassport
+          type: string
+        issue_date:
+          format: date
+          type: string
+        issuer:
+          maxLength: 256
+          type: string
+        number:
+          example: '1234567'
+          pattern: ^[0-9]{7}$
+          type: string
+        series:
+          example: '12'
+          pattern: ^[0-9]{2}$
+          type: string
+      required:
+      - document_type
+      type: object
+    Field:
+      properties:
+        name:
+          type: string
+        region_name:
+          type: string
+      required:
+      - name
+      - region_name
       type: object
     Group:
       properties:
@@ -45,6 +213,15 @@ components:
       required:
       - groups
       type: object
+    InfoCitiesResponseUser:
+      properties:
+        city_list:
+          items:
+            $ref: '#/components/schemas/City'
+          type: array
+      required:
+      - city_list
+      type: object
     InfoCountriesResponseUser:
       properties:
         country_list:
@@ -54,6 +231,15 @@ components:
       required:
       - country_list
       type: object
+    InfoRegionsResponseUser:
+      properties:
+        region_list:
+          items:
+            $ref: '#/components/schemas/Region'
+          type: array
+      required:
+      - region_list
+      type: object
     InfoUniversitiesResponseUser:
       properties:
         university_list:
@@ -62,6 +248,92 @@ components:
           type: array
       required:
       - university_list
+      type: object
+    Location:
+      discriminator:
+        mapping:
+          Foreign: '#/components/schemas/LocationOther'
+          Russian: '#/components/schemas/LocationRussia'
+        propertyName: russian
+      oneOf:
+      - $ref: '#/components/schemas/LocationRussia'
+      - $ref: '#/components/schemas/LocationOther'
+    LocationInput:
+      discriminator:
+        mapping:
+          Foreign: '#/components/schemas/LocationOtherInput'
+          Russian: '#/components/schemas/LocationRussiaInput'
+        propertyName: russian
+      oneOf:
+      - $ref: '#/components/schemas/LocationRussiaInput'
+      - $ref: '#/components/schemas/LocationOtherInput'
+    LocationOther:
+      properties:
+        country:
+          type: string
+        location:
+          nullable: true
+          type: string
+        rural:
+          nullable: true
+          type: boolean
+        russian:
+          readOnly: true
+          type: string
+      required:
+      - country
+      type: object
+    LocationOtherInput:
+      properties:
+        country:
+          maxLength: 32
+          type: string
+        location:
+          maxLength: 256
+          type: string
+        rural:
+          type: boolean
+      required:
+      - country
+      - location
+      - rural
+      type: object
+    LocationRussia:
+      properties:
+        city:
+          $ref: '#/components/schemas/Field'
+        country:
+          readOnly: true
+          type: string
+        rural:
+          nullable: true
+          type: boolean
+        russian:
+          readOnly: true
+          type: string
+      required:
+      - country
+      type: object
+    LocationRussiaInput:
+      properties:
+        city:
+          maxLength: 32
+          type: string
+        country:
+          enum:
+          - "\u0420\u043E\u0441\u0441\u0438\u044F"
+          maxLength: 32
+          type: string
+        region:
+          maxLength: 32
+          type: string
+        rural:
+          type: boolean
+      required:
+      - city
+      - country
+      - region
+      - rural
       type: object
     LoginRequestUser:
       properties:
@@ -107,6 +379,13 @@ components:
       required:
       - password
       - registration_number
+      type: object
+    Region:
+      properties:
+        name:
+          type: string
+      required:
+      - name
       type: object
     RegisterConfirmUser:
       properties:
@@ -170,29 +449,21 @@ components:
       type: object
     RegistrationStudentInfoUser:
       properties:
-        admission_year:
-          format: date
-          type: string
-        citizenship:
-          maxLength: 32
-          type: string
-        city:
-          maxLength: 32
-          type: string
+        dwelling:
+          $ref: '#/components/schemas/LocationInput'
+        grade:
+          maximum: 5
+          minimum: 1
+          type: integer
         phone:
           example: 8 (800) 555 35 35
           type: string
-        region:
-          maxLength: 32
-          type: string
         university:
-          $ref: '#/components/schemas/StudentUniversityCompatible'
+          $ref: '#/components/schemas/StudentUniversityInput'
       required:
-      - admission_year
-      - citizenship
-      - city
+      - dwelling
+      - grade
       - phone
-      - region
       - university
       type: object
     RoleRequestUser:
@@ -206,6 +477,67 @@ components:
           type: string
       required:
       - role
+      type: object
+    SchoolInfo:
+      properties:
+        grade:
+          nullable: true
+          type: integer
+        location:
+          $ref: '#/components/schemas/Location'
+        name:
+          nullable: true
+          type: string
+        number:
+          nullable: true
+          type: integer
+        school_type:
+          enum:
+          - School
+          - Lyceum
+          - Gymnasium
+          - EducationCenter
+          - NightSchool
+          - Technical
+          - External
+          - Collage
+          - ProfTech
+          - University
+          - Correctional
+          - Other
+          nullable: true
+          type: string
+        user_id:
+          readOnly: true
+          type: integer
+      required:
+      - user_id
+      type: object
+    SchoolInfoInput:
+      properties:
+        grade:
+          type: integer
+        location:
+          $ref: '#/components/schemas/LocationInput'
+        name:
+          type: string
+        number:
+          type: integer
+        school_type:
+          enum:
+          - School
+          - Lyceum
+          - Gymnasium
+          - EducationCenter
+          - NightSchool
+          - Technical
+          - External
+          - Collage
+          - ProfTech
+          - University
+          - Correctional
+          - Other
+          type: string
       type: object
     SchoolRegistrationRequestUser:
       properties:
@@ -251,19 +583,10 @@ components:
       type: object
     StudentInfo:
       properties:
-        admission_year:
-          format: date
+        grade:
           nullable: true
-          type: string
-        citizenship:
-          type: string
-        city:
-          nullable: true
-          type: string
+          type: integer
         phone:
-          nullable: true
-          type: string
-        region:
           nullable: true
           type: string
         university:
@@ -276,17 +599,17 @@ components:
       required:
       - user_id
       type: object
-    StudentInfoRequestUser:
+    StudentInfoInput:
       properties:
-        admission_year:
-          format: date
-          type: string
         citizenship:
           maxLength: 32
           type: string
         city:
           maxLength: 32
           type: string
+        grade:
+          minimum: 1
+          type: integer
         phone:
           example: 8 (800) 555 35 35
           type: string
@@ -294,7 +617,7 @@ components:
           maxLength: 32
           type: string
         university:
-          $ref: '#/components/schemas/StudentUniversityCompatible'
+          $ref: '#/components/schemas/StudentUniversityInput'
       type: object
     StudentUniversity:
       discriminator:
@@ -305,18 +628,6 @@ components:
       oneOf:
       - $ref: '#/components/schemas/StudentUniversityKnown'
       - $ref: '#/components/schemas/StudentUniversityCustom'
-    StudentUniversityCompatible:
-      properties:
-        country:
-          description: Omit this field if university is known by backend
-          maxLength: 32
-          type: string
-        university:
-          maxLength: 32
-          type: string
-      required:
-      - university
-      type: object
     StudentUniversityCustom:
       properties:
         country:
@@ -331,6 +642,18 @@ components:
           type: string
       required:
       - country
+      - university
+      type: object
+    StudentUniversityInput:
+      properties:
+        country:
+          description: Omit this field if university is known by backend
+          maxLength: 32
+          type: string
+        university:
+          maxLength: 32
+          type: string
+      required:
       - university
       type: object
     StudentUniversityKnown:
@@ -364,9 +687,12 @@ components:
       type: object
     University:
       properties:
+        country:
+          type: string
         name:
           type: string
       required:
+      - country
       - name
       type: object
     UniversityRegistrationRequestUser:
@@ -413,19 +739,85 @@ components:
       required:
       - username
       type: object
+    UserFull:
+      properties:
+        groups:
+          items:
+            $ref: '#/components/schemas/Group'
+          type: array
+        id:
+          readOnly: true
+          type: integer
+        role:
+          enum:
+          - Participant
+          - Creator
+          - Admin
+          - System
+          type: string
+        school_info:
+          $ref: '#/components/schemas/SchoolInfo'
+        student_info:
+          $ref: '#/components/schemas/StudentInfo'
+        type:
+          enum:
+          - PreUniversity
+          - Enrollee
+          - School
+          - University
+          - Internal
+          - PreRegister
+          type: string
+        user_info:
+          $ref: '#/components/schemas/UserInfo'
+        username:
+          type: string
+      required:
+      - username
+      type: object
+    UserFullListResponseUser:
+      properties:
+        users:
+          items:
+            $ref: '#/components/schemas/UserFull'
+          type: array
+      required:
+      - users
+      type: object
     UserInfo:
       properties:
         date_of_birth:
           format: date
           nullable: true
           type: string
+        document:
+          allOf:
+          - $ref: '#/components/schemas/Document'
+          nullable: true
+        dwelling:
+          allOf:
+          - $ref: '#/components/schemas/Location'
+          nullable: true
         email:
           nullable: true
           type: string
         first_name:
           nullable: true
           type: string
+        gender:
+          enum:
+          - Male
+          - Female
+          nullable: true
+          type: string
+        limitations:
+          allOf:
+          - $ref: '#/components/schemas/UserLimitations'
+          nullable: true
         middle_name:
+          nullable: true
+          type: string
+        place_of_birth:
           nullable: true
           type: string
         second_name:
@@ -437,11 +829,15 @@ components:
       required:
       - user_id
       type: object
-    UserInfoRequestUser:
+    UserInfoInput:
       properties:
         date_of_birth:
           format: date
           type: string
+        document:
+          $ref: '#/components/schemas/DocumentInput'
+        dwelling:
+          $ref: '#/components/schemas/LocationInput'
         email:
           format: email
           maxLength: 64
@@ -449,12 +845,65 @@ components:
         first_name:
           maxLength: 32
           type: string
+        gender:
+          enum:
+          - Male
+          - Female
+          type: string
+        limitations:
+          $ref: '#/components/schemas/UserLimitationsInput'
         middle_name:
           maxLength: 32
+          type: string
+        place_of_birth:
+          maxLength: 256
           type: string
         second_name:
           maxLength: 32
           type: string
+      type: object
+    UserInfoRestrictedInput:
+      properties:
+        document:
+          $ref: '#/components/schemas/DocumentInput'
+        dwelling:
+          $ref: '#/components/schemas/LocationInput'
+        gender:
+          enum:
+          - Male
+          - Female
+          type: string
+        limitations:
+          $ref: '#/components/schemas/UserLimitationsInput'
+        place_of_birth:
+          maxLength: 256
+          type: string
+      type: object
+    UserLimitations:
+      properties:
+        hearing:
+          nullable: true
+          type: boolean
+        movement:
+          nullable: true
+          type: boolean
+        sight:
+          nullable: true
+          type: boolean
+        user_id:
+          readOnly: true
+          type: integer
+      required:
+      - user_id
+      type: object
+    UserLimitationsInput:
+      properties:
+        hearing:
+          type: boolean
+        movement:
+          type: boolean
+        sight:
+          type: boolean
       type: object
     UserListResponseUser:
       properties:
@@ -544,6 +993,33 @@ paths:
               schema:
                 $ref: '#/components/schemas/InfoCountriesResponseUser'
           description: OK
+  /user/registration/info/regions:
+    get:
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InfoRegionsResponseUser'
+          description: OK
+  /user/registration/info/cities/{region}:
+    get:
+      parameters:
+      - description: Region name
+        in: path
+        name: region
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InfoCitiesResponseUser'
+          description: OK
+        '404':
+          description: Region not found
   /user/auth/login:
     post:
       requestBody:
@@ -649,6 +1125,23 @@ paths:
           description: Personal info is not set or user not found
       security:
       - JWTAccessToken: []
+    patch:
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserInfoRestrictedInput'
+        required: true
+      responses:
+        '200':
+          description: OK
+        '403':
+          description: Invalid role of current user
+        '404':
+          description: User not found
+      security:
+      - JWTAccessToken: []
+      - CSRFAccessToken: []
   /user/profile/university:
     get:
       responses:
@@ -662,6 +1155,53 @@ paths:
           description: User not found or is not a university student
       security:
       - JWTAccessToken: []
+    patch:
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StudentInfoInput'
+        required: true
+      responses:
+        '200':
+          description: OK
+        '403':
+          description: Invalid role of current user
+        '404':
+          description: User not found or is not a university student
+      security:
+      - JWTAccessToken: []
+      - CSRFAccessToken: []
+  /user/profile/school:
+    get:
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SchoolInfo'
+          description: OK
+        '404':
+          description: User not found or is not a school student
+      security:
+      - JWTAccessToken: []
+    patch:
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SchoolInfoInput'
+        required: true
+      responses:
+        '200':
+          description: OK
+        '403':
+          description: Invalid role of current user
+        '404':
+          description: User not found or is not a school student
+      security:
+      - JWTAccessToken: []
+      - CSRFAccessToken: []
   /user/profile/groups:
     get:
       responses:
@@ -804,7 +1344,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/UserInfoRequestUser'
+              $ref: '#/components/schemas/UserInfoInput'
         required: true
       responses:
         '200':
@@ -813,8 +1353,6 @@ paths:
           description: Invalid role of current user
         '404':
           description: User not found
-        '409':
-          description: Personal info is not set and request is not full
       security:
       - JWTAccessToken: []
       - CSRFAccessToken: []
@@ -831,7 +1369,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/StudentInfoRequestUser'
+              $ref: '#/components/schemas/StudentInfoInput'
         required: true
       responses:
         '200':
@@ -840,8 +1378,31 @@ paths:
           description: Invalid role of current user
         '404':
           description: User not found or is not a university student
-        '409':
-          description: University info is not set and request is not full
+      security:
+      - JWTAccessToken: []
+      - CSRFAccessToken: []
+  /user/admin/school/{user_id}:
+    patch:
+      parameters:
+      - description: Id of the user
+        in: path
+        name: user_id
+        required: true
+        schema:
+          type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SchoolInfoInput'
+        required: true
+      responses:
+        '200':
+          description: OK
+        '403':
+          description: Invalid role of current user
+        '404':
+          description: User not found or is not a school student
       security:
       - JWTAccessToken: []
       - CSRFAccessToken: []
@@ -975,6 +1536,19 @@ paths:
           description: Invalid role of current user
       security:
       - JWTAccessToken: []
+  /user/creator/user_full/all:
+    get:
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserFullListResponseUser'
+          description: OK
+        '403':
+          description: Invalid role of current user
+      security:
+      - JWTAccessToken: []
   /user/creator/user/by-group/{group_id}:
     get:
       parameters:
@@ -1041,6 +1615,28 @@ paths:
           description: User not found or is not a university student
       security:
       - JWTAccessToken: []
+  /user/creator/school/{user_id}:
+    get:
+      parameters:
+      - description: Id of the user
+        in: path
+        name: user_id
+        required: true
+        schema:
+          type: integer
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SchoolInfo'
+          description: OK
+        '403':
+          description: Invalid role of current user
+        '404':
+          description: User not found or is not a school student
+      security:
+      - JWTAccessToken: []
   /user/creator/group/{group_id}:
     get:
       parameters:
@@ -1098,3 +1694,5 @@ paths:
           description: User not found
       security:
       - JWTAccessToken: []
+servers:
+- url: ''

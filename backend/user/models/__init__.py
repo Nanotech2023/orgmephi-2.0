@@ -1,8 +1,10 @@
-from common import get_current_db
 from .reference import *
 from .personal import *
 from .auth import *
 from .university import *
+from .school import *
+from .location import *
+from .document import *
 
 
 def _year_admission(year):
