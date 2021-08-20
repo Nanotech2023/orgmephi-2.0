@@ -4,6 +4,7 @@ from datetime import datetime
 import enum
 from common import get_current_db
 from contest.tasks.models import UserInContest, Task
+from sqlalchemy.ext.hybrid import hybrid_property
 
 db = get_current_db()
 
@@ -25,6 +26,11 @@ class Response(db.Model):
     contest_id = db.Column(db.Integer, db.ForeignKey(UserInContest.contest_id))
     statuses = db.relationship('ResponseStatus', backref='response', lazy=True, cascade="all, delete")
     answers = db.relationship('ResponseAnswer', backref='response', lazy='dynamic', cascade="all, delete")
+
+    @hybrid_property
+    def mark(self):
+        if len(self.statuses) > 0:
+            return self.statuses[-1].mark
 
 
 class ResponseStatusEnum(enum.Enum):
@@ -137,14 +143,14 @@ class ResponseAnswer(db.Model):
 
     answer_id: id of the user's answer
     work_id: id of the user's work
-    task_num: id of the task
+    task_id: id of the task
     answer: user's answer as a file
     filetype: user's answer filetype
     """
 
     answer_id = db.Column(db.Integer, autoincrement=True, primary_key=True)
     work_id = db.Column(db.Integer, db.ForeignKey('response.work_id'))
-    task_num = db.Column(db.Integer, db.ForeignKey(f'{Task.__tablename__}.task_id'))
+    task_id = db.Column(db.Integer, db.ForeignKey(f'{Task.__tablename__}.task_id'))
     answer = db.Column(db.LargeBinary, nullable=False)
     filetype = db.Column(db.Enum(ResponseFiletypeEnum), nullable=False)
 
@@ -186,7 +192,7 @@ def add_response_status(work_id, status=None, mark=None):
 def add_response_answer(work_id, task_id, answer, filetype):
     response_answer = ResponseAnswer(
         work_id=work_id,
-        task_num=task_id,
+        task_id=task_id,
         answer=answer,
         filetype=filetype_dict[filetype]
     )

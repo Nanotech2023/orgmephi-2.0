@@ -1,6 +1,6 @@
 from marshmallow import Schema, fields
 from common import fields as common_fields
-from contest.responses.model_schemas.schemas import ResponseAnswerListSchema, ResponseStatusHistorySchema
+from contest.responses.model_schemas.schemas import ResponseAnswerListSchema, ResponseStatusSchema
 from contest.responses.models import ResponseStatusEnum
 from marshmallow_enum import EnumField
 
@@ -20,12 +20,12 @@ class UserResponseStatusMarkResponseSchema(Schema):
 class UserResponseStatusHistoryResponseSchema(Schema):
     user_id = fields.Int(required=True)
     contest_id = fields.Int(required=True)
-    history = fields.Nested(nested=ResponseStatusHistorySchema, many=True, required=True)
+    history = fields.Nested(nested=ResponseStatusSchema, many=True, required=True)
 
 
 class UserResponseListSchema(Schema):
     user_id = fields.Int(required=True)
-    mark = fields.Float(required=False)
+    mark = fields.Float(required=False, allow_none=True)
 
 
 class ContestResultSheetResponseSchema(Schema):

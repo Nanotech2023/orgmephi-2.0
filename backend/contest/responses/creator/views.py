@@ -4,7 +4,7 @@ from flask import request, send_file
 from common import get_current_app, get_current_module
 from common.util import db_get_or_raise, db_get_list, db_get_one_or_none
 from contest.responses.util import *
-from contest.responses.model_schemas.schemas import ResponseStatusSchema, AppealSchema
+from contest.responses.model_schemas.schemas import ResponseStatusResponseSchema, AppealSchema
 from .schemas import *
 
 db = get_current_db()
@@ -163,7 +163,7 @@ def get_user_all_answers(contest_id, user_id):
 
 
 @module.route('/contest/<int:contest_id>/user/<int:user_id>/status', methods=['GET'],
-              output_schema=ResponseStatusSchema)
+              output_schema=ResponseStatusResponseSchema)
 def user_status_and_mark_for_response_by_id(contest_id, user_id):
     """
     Get user's status and mark for response
@@ -190,7 +190,7 @@ def user_status_and_mark_for_response_by_id(contest_id, user_id):
           description: OK
           content:
             application/json:
-              schema: ResponseStatusSchema
+              schema: ResponseStatusResponseSchema
         '403':
           description: Invalid role of current user
         '404':

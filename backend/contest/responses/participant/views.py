@@ -4,7 +4,7 @@ from common import get_current_app, get_current_module
 from common.jwt_verify import jwt_get_id
 from common.util import db_get_or_raise
 from contest.responses.util import *
-from contest.responses.model_schemas.schemas import ResponseStatusSchema, AppealSchema
+from contest.responses.model_schemas.schemas import ResponseStatusResponseSchema, AppealSchema
 from contest.responses.creator.schemas import UserResponseStatusHistoryResponseSchema, AppealMessageRequestSchema, \
     AppealCreateInfoResponseSchema
 
@@ -152,7 +152,7 @@ def get_user_answer_by_id(contest_id, answer_id):
 
 
 @module.route('/contest/<int:contest_id>/user/self/status', methods=['GET'],
-              output_schema=ResponseStatusSchema)
+              output_schema=ResponseStatusResponseSchema)
 def user_status_and_mark_for_response(contest_id):
     """
     Get user's status and mark for response
@@ -172,7 +172,7 @@ def user_status_and_mark_for_response(contest_id):
           description: OK
           content:
             application/json:
-              schema: ResponseStatusSchema
+              schema: ResponseStatusResponseSchema
         '403':
           description: Invalid role of current user
         '404':

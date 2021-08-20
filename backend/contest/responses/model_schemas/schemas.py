@@ -22,21 +22,21 @@ class ResponseStatusSchema(SQLAlchemySchema):
         model = ResponseStatus
         load_instance = True
         sqla_session = db.session
-
-    status = EnumField(ResponseStatusEnum, data_key='status', by_value=True)
-    mark = auto_field(column_name='mark', required=False)
-
-
-class ResponseStatusHistorySchema(SQLAlchemySchema):
-    class Meta:
-        model = ResponseStatus
-        load_instatnce = False
-        sqla_session = db.session
+        exclude = ['work_id']
 
     status = EnumField(ResponseStatusEnum, data_key='status', by_value=True)
     mark = auto_field(column_name='mark', required=False)
     appeal = Related(column=['appeal_id'], data_key='appeal', required=False)
-    datetime = fields.fields.DateTime(format='%Y-%m-%dT%H:%M:%S%z')
+    datetime = fields.fields.DateTime(format='iso')
+    work_id = auto_field(column_name='work_id', required=True)
+
+
+class ResponseStatusResponseSchema(ResponseStatusSchema):
+    class Meta:
+        exclude = ["appeal", "datetime", "work_id"]
+
+    status = EnumField(ResponseStatusEnum, data_key='status', by_value=True)
+    mark = fields.fields.Float(allow_none=True)
 
 
 class AppealSchema(SQLAlchemySchema):
@@ -52,7 +52,7 @@ class AppealSchema(SQLAlchemySchema):
     appeal_response = auto_field(column_name='appeal_response', required=False, validate=message_validator)
 
 
-class ResponseAnswerListSchema(SQLAlchemySchema):
+class ResponseAnswerSchema(SQLAlchemySchema):
     class Meta:
         model = ResponseAnswer
         load_instance = True
@@ -68,3 +68,4 @@ class ResponseAnswerListSchema(SQLAlchemySchema):
 class ResponseAnswerListSchema(ResponseAnswerSchema):
     class Meta:
         exclude = ["answer", "filetype", "work_id"]
+

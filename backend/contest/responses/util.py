@@ -15,7 +15,7 @@ def user_answer_get(user_id, contest_id, task_id):
     user_work = get_user_in_contest_work(user_id, contest_id)
     if user_work.answers is None:
         raise NotFound('user_response.answers', 'for user %d' % user_id)
-    user_answer = user_work.answers.filter(ResponseAnswer.task_num == task_id).one_or_none()
+    user_answer = user_work.answers.filter(ResponseAnswer.task_id == task_id).one_or_none()
     if user_answer is None:
         raise NotFound('response_answer', 'for task_id %d' % task_id)
     return user_answer
@@ -30,12 +30,11 @@ def user_answer_post(answer_file, filetype, user_id, contest_id, task_id):
         user_work = add_user_response(db.session, user_id, contest_id)
         response_status = add_response_status(user_work.work_id)
         user_work.statuses.append(response_status)
-    user_answer = user_work.answers.filter(ResponseAnswer.task_num == task_id).one_or_none()
+    user_answer = user_work.answers.filter(ResponseAnswer.task_id == task_id).one_or_none()
     if user_answer is None:
         response_answer = add_response_answer(user_work.work_id, task_id, answer_file, filetype)
         user_work.answers.append(response_answer)
     else:
-
         user_answer.update(answer_new=answer_file, filetype_new=filetype)
     db.session.commit()
 
