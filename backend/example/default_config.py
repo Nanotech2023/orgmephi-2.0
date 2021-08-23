@@ -5,3 +5,4 @@ class DefaultConfig:
     JWT_ALGORITHM = 'RS256'
     ORGMEPHI_PUBLIC_KEY = 'id_rsa.pub'
     ORGMEPHI_CORS_ENABLED = True
+    ORGMEPHI_AREA = 'both'

@@ -18,11 +18,11 @@ def _enum_allowed_values(enum_type, validator):
 def _enum_allowed_values_list(enum_type, validators):
     allowed = set(enum_type)
     for val in validators:
-        dd = _enum_allowed_values(enum_type, val)
         allowed = allowed & _enum_allowed_values(enum_type, val)
     return allowed
 
 
+# noinspection PyUnusedLocal
 def _enum2properties(self, field, **kwargs):
     import marshmallow_enum
     if isinstance(field, marshmallow_enum.EnumField):
@@ -31,6 +31,7 @@ def _enum2properties(self, field, **kwargs):
     return {}
 
 
+# noinspection PyUnusedLocal
 def _related2properties(self, field, **kwargs):
     from marshmallow_sqlalchemy.fields import Related
     if isinstance(field, Related):
