@@ -5,10 +5,10 @@ from common import get_current_app, get_current_module, get_current_db
 from common.util import db_get_or_raise
 from common.jwt_verify import jwt_get_id
 
-from .schemas import CreateMessageCreatorMessagesRequestSchema, ThreadStatusMessagesRequestSchema, \
-    FilterThreadsMessagesResponseSchema, FilterThreadsMessagesRequestSchema
+from .schemas import CreateMessageCreatorMessagesRequestSchema, ThreadStatusMessagesRequestSchema
 from messages.model_schemas import ThreadSchema, MessageSchema
 from messages.models import ThreadType, ThreadStatus, Thread, Message
+from messages.util import filter_threads_query, FilterThreadsMessagesResponseSchema
 
 from user.models import User
 
@@ -177,21 +177,6 @@ def filter_threads():
           description: OK
           content:
             application/json:
-              schema: ThreadSchema
+              schema: FilterThreadsMessagesResponseSchema
     """
-    marshmallow = FilterThreadsMessagesRequestSchema().load(request.args)
-
-    filters = {v: marshmallow[v] for v in ['resolved', 'answered', 'thread_type', 'category_name'] if v in marshmallow}
-
-    query = Thread.query.filter_by(**filters)
-
-    offset = marshmallow.get('offset', None)
-    limit = marshmallow.get('limit', None)
-    if offset is not None:
-        query = query.order_by(Thread.update_time)
-    if limit is not None:
-        query = query.offset(offset).limit(limit)
-    if marshmallow.get('only_count', False):
-        return {'count': query.count()}, 200
-    else:
-        return {'threads': query.all(), 'count': query.count()}, 200
+    return filter_threads_query(request.args, None)

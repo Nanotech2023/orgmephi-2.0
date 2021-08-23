@@ -8,10 +8,11 @@ from common import get_current_app, get_current_module, get_current_db
 from common.util import db_get_or_raise, db_get_all, db_get_list
 from common.jwt_verify import jwt_get_id
 
-from .schemas import ListCategoriesMessagesResponseSchema, ListThreadsMessagesResponseSchema, \
-    CreateThreadMessagesRequestSchema, CreateMessageMessagesRequestSchema
+from .schemas import ListCategoriesMessagesResponseSchema, CreateThreadMessagesRequestSchema, \
+    CreateMessageMessagesRequestSchema
 from messages.model_schemas import ThreadSchema, MessageSchema
 from messages.models import ThreadCategory, Thread, Message
+from messages.util import filter_threads_query, FilterThreadsMessagesResponseSchema
 
 from user.models import User
 
@@ -42,12 +43,49 @@ def list_categories():
     return {'categories': db_get_all(ThreadCategory)}, 200
 
 
-@module.route('/threads', methods=['GET'], output_schema=ListThreadsMessagesResponseSchema)
-def list_threads():
+@module.route('/threads', methods=['GET'], output_schema=FilterThreadsMessagesResponseSchema)
+def filter_threads():
     """
     List threads that belong to the user
     ---
     get:
+      parameters:
+        - in: query
+          name: offset
+          required: false
+          schema:
+            type: integer
+        - in: query
+          name: limit
+          required: false
+          schema:
+            type: integer
+        - in: query
+          name: resolved
+          required: false
+          schema:
+            type: boolean
+        - in: query
+          name: answered
+          required: false
+          schema:
+            type: boolean
+        - in: query
+          name: thread_type
+          required: false
+          schema:
+            type: string
+            enum: ['Appeal', 'Work', 'Contest', 'General']
+        - in: query
+          name: category_name
+          required: false
+          schema:
+            type: string
+        - in: query
+          name: only_count
+          required: false
+          schema:
+            type: boolean
       security:
         - JWTAccessToken: [ ]
       responses:
@@ -55,9 +93,9 @@ def list_threads():
           description: OK
           content:
             application/json:
-              schema: ListThreadsMessagesResponseSchema
+              schema: FilterThreadsMessagesResponseSchema
     """
-    return {'threads': db_get_list(Thread, 'author_id', jwt_get_id())}, 200
+    return filter_threads_query(request.args, jwt_get_id())
 
 
 @module.route('/thread', methods=['POST'], input_schema=CreateThreadMessagesRequestSchema,

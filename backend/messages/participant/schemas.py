@@ -3,15 +3,11 @@ from marshmallow_enum import EnumField
 from common import fields as common_fields
 
 from messages.models import ThreadType
-from messages.model_schemas import ThreadCategorySchema, ThreadInfoSchema
+from messages.model_schemas import ThreadCategorySchema
 
 
 class ListCategoriesMessagesResponseSchema(Schema):
     categories = fields.Nested(nested=ThreadCategorySchema, many=True)
-
-
-class ListThreadsMessagesResponseSchema(Schema):
-    threads = fields.Nested(nested=ThreadInfoSchema, many=True)
 
 
 class CreateThreadMessagesRequestSchema(Schema):
