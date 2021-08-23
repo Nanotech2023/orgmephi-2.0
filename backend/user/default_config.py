@@ -29,3 +29,4 @@ class DefaultConfiguration:
     ORGMEPHI_NATIVE_DOCUMENT = 'Паспорт гражданина РФ'
     ORGMEPHI_INTERNATIONAL_DOCUMENT = 'Заграничный паспорт гражданина РФ'
     ORGMEPHI_FOREIGN_DOCUMENT = 'Паспорт гражданина иностранного государства'
+    ORGMEPHI_AREA = 'both'

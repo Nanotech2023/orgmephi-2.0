@@ -7,7 +7,7 @@ from typing import Optional, Callable, Any
 
 import os
 
-from .module import OrgMephiModule
+from .module import OrgMephiModule, OrgMephiArea, org_mephi_area_by_name
 from .password import OrgMephiPassword
 from .access_levels import OrgMephiAccessLevel
 
@@ -140,14 +140,17 @@ class OrgMephiApp:
         with self.app.app_context():
             api_path = None
             api_var = 'ORGMEPHI_API_PATH'
+            area_var = 'ORGMEPHI_AREA'
             if api_var in self._app.config:
                 api_path = _path_to_absolute(self._app.config[api_var])
             development = self._app.config['ENV'] == 'development'
-            self._module.prepare(api_path, development, self._module)
-            self._app.register_blueprint(self._module.blueprint)
-            # swagger-ui does not work with nested blueprints
-            for bp in self._module.get_swagger_blueprints():
-                self._app.register_blueprint(bp)
+            area = org_mephi_area_by_name[self._app.config[area_var]]
+            if self._module.appropriate_area(area):
+                self._module.prepare(api_path, development, self._module, area)
+                self._app.register_blueprint(self._module.blueprint)
+                # swagger-ui does not work with nested blueprints
+                for bp in self._module.get_swagger_blueprints():
+                    self._app.register_blueprint(bp)
             self._db.create_all()
             for act in self._db_prepare_actions:
                 act()

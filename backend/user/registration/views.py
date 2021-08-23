@@ -6,7 +6,7 @@ from common.errors import AlreadyExists
 from common import get_current_app, get_current_module, get_current_db
 from common.util import db_get_all, db_get_or_raise
 
-from user.models import add_user, UserRoleEnum, University, Country, UserInfo, StudentInfo, Region
+from user.models import add_user, UserRoleEnum, University, Country, Region
 from user.model_schemas.auth import UserSchema
 from user.model_schemas.personal import UserInfoSchema
 from user.model_schemas.university import StudentInfoSchema

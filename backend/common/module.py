@@ -1,3 +1,4 @@
+import enum
 import importlib
 from functools import wraps
 
@@ -11,11 +12,20 @@ from typing import Callable, Any, Optional
 from .access_levels import OrgMephiAccessLevel
 
 
+class OrgMephiArea(enum.Enum):
+    internal = 1
+    external = 2
+    both = 3
+
+
+org_mephi_area_by_name = {v.name: v for v in OrgMephiArea}
+
+
 class OrgMephiModule:
     """
     Application module
     """
-    def __init__(self, name: str, package: str, access_level: Optional[OrgMephiAccessLevel],
+    def __init__(self, name: str, package: str, access_level: Optional[OrgMephiAccessLevel], area: OrgMephiArea,
                  api_file: Optional[str] = None, marshmallow_api: bool = False):
         """
         Create a new module
@@ -32,6 +42,7 @@ class OrgMephiModule:
         self._package = package
         self._blueprint: Optional[Blueprint] = None
         self._access_level = access_level if access_level is not None else OrgMephiAccessLevel.visitor
+        self._area = area
         self._modules: list[OrgMephiModule] = []
         self._parent: Optional[OrgMephiModule] = None
         self._openapi = None
@@ -113,7 +124,7 @@ class OrgMephiModule:
 
             func_wrapped = f
 
-            func_wrapped = self._wrap_db_commit(f)
+            func_wrapped = self._wrap_db_commit(func_wrapped)
 
             if output_schema is not None:
                 func_wrapped = self._wrap_marshmallow_output(func_wrapped, output_schema)
@@ -149,7 +160,7 @@ class OrgMephiModule:
         self._modules.append(module)
         module._parent = self
 
-    def prepare(self, api_path: str, development: bool, top):
+    def prepare(self, api_path: str, development: bool, top, area: OrgMephiArea):
         """
         Prepare this module for execution
 
@@ -160,6 +171,7 @@ class OrgMephiModule:
         :param api_path: directory with ap files
         :param development: If True development-only options will be enabled (e.g. swagger ui wil be generated)
         :param top: Top-level module
+        :param area: Are that server is launched in
         """
         from . import _orgmephi_current_module
         api_doc_path = None
@@ -182,8 +194,9 @@ class OrgMephiModule:
             except ModuleNotFoundError:
                 pass
             for module in self._modules:
-                module.prepare(api_path, development, top)
-                self._blueprint.register_blueprint(module.blueprint)
+                if module.appropriate_area(area):
+                    module.prepare(api_path, development, top, area)
+                    self._blueprint.register_blueprint(module.blueprint)
             if development and (api_doc_path is not None or self._marshmallow_api):
                 self._init_swagger(top)
                 if self._marshmallow_api:
@@ -363,3 +376,11 @@ class OrgMephiModule:
             return result
 
         return wrapper
+
+    def appropriate_area(self, area: OrgMephiArea) -> bool:
+        """
+        Checks if the module belongs to an area
+        :param area: Are that server is launched in
+        :return: True if the module belongs to the specified area, False otherwise
+        """
+        return self._area == OrgMephiArea.both or area == OrgMephiArea.both or self._area == area
