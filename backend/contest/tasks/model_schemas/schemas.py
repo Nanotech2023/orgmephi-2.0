@@ -135,7 +135,6 @@ class SimpleContestSchema(SQLAlchemySchema):
 
     contest_id = auto_field(column_name='contest_id', dump_only=True)
     visibility = auto_field(column_name='visibility', required=True)
-    location = auto_field(column_name='location', validate=text_validator, required=True)
     start_date = auto_field(column_name='start_date', required=True)
     end_date = auto_field(column_name='end_date', required=True)
     contest_duration = auto_field(column_name='contest_duration', required=True)

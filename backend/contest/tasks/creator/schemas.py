@@ -3,7 +3,8 @@ from marshmallow_enum import EnumField
 
 from common import fields as common_fields
 from contest.tasks.model_schemas.schemas import TaskSchema, ContestSchema, BaseContestSchema, StageSchema, VariantSchema
-from contest.tasks.models import OlympiadSubjectEnum, TargetClassEnum, StageConditionEnum, ContestHoldingTypeEnum
+from contest.tasks.models import OlympiadSubjectEnum, TargetClassEnum, StageConditionEnum, ContestHoldingTypeEnum, \
+    UserStatusEnum
 
 
 # Base contest
@@ -50,14 +51,13 @@ class BaseOlympiadIdResponseTaskCreatorSchema(Schema):
 
 
 class CreateSimpleContestRequestTaskCreatorSchema(Schema):
-    location = common_fields.Location(required=True)
     start_time = fields.DateTime(required=True)
     end_time = fields.DateTime(required=True)
     contest_duration = fields.Int(required=False)
     result_publication_date = fields.DateTime(required=False)
     visibility = fields.Boolean(required=True)
     previous_contest_id = fields.Int(required=False)
-    previous_participation_condition = common_fields.Text(required=False)
+    previous_participation_condition = EnumField(UserStatusEnum, required=False, by_value=True)
     holding_type = EnumField(ContestHoldingTypeEnum, required=True, by_value=True)
 
 
@@ -74,7 +74,7 @@ class CompositeContestResponseTaskCreatorSchema(Schema):
     contest_duration = fields.Int(required=False)
     visibility = fields.Boolean(required=True)
     previous_contest_id = fields.Int(required=False)
-    previous_participation_condition = common_fields.Text(required=False)
+    previous_participation_condition = EnumField(UserStatusEnum, required=False, by_value=True)
     holding_type = EnumField(ContestHoldingTypeEnum, required=False, by_value=True)
 
 
@@ -83,20 +83,19 @@ class ContestIdResponseTaskCreatorSchema(Schema):
 
 
 class UpdateContestRequestTaskCreatorSchema(Schema):
-    location = common_fields.Location(required=False)
     start_date = fields.DateTime(required=False)
     end_date = fields.DateTime(required=False)
     result_publication_date = fields.DateTime(required=False)
     visibility = fields.Boolean(required=False)
     contest_duration = fields.Int(required=False)
     previous_contest_id = fields.Int(required=False)
-    previous_participation_condition = common_fields.Text(required=False)
+    previous_participation_condition = EnumField(UserStatusEnum, required=False, by_value=True)
     holding_type = EnumField(ContestHoldingTypeEnum, required=True, by_value=False)
 
 
 class UpdatePreviousContestRequestTaskCreatorSchema(Schema):
     previous_contest_id = fields.Int(required=True)
-    previous_participation_condition = common_fields.Text(required=True)
+    previous_participation_condition = EnumField(UserStatusEnum, required=True, by_value=True)
 
 
 # Stage
@@ -170,6 +169,7 @@ class UpdateVariantRequestTaskCreatorSchema(Schema):
 
 class AllTasksResponseTaskCreatorSchema(Schema):
     tasks_list = fields.Nested(TaskSchema, many=True, required=True)
+
 
 # Tasks
 

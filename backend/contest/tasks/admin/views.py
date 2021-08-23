@@ -86,6 +86,7 @@ def olympiad_type_remove(id_olympiad_type):
 
     return {}, 200
 
+
 # Location
 
 
@@ -130,7 +131,7 @@ def location_create():
            }, 200
 
 
-@module.route('/olympiad_type/<int:id_location>/remove', methods=['POST'])
+@module.route('/location/<int:id_location>/remove', methods=['POST'])
 def location_remove(id_location):
     """
     Remove location

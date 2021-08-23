@@ -2,9 +2,7 @@ from flask import abort, request
 
 from common import get_current_app, get_current_module
 from common.errors import AlreadyExists
-from contest.tasks.control_users.schemas import UpdateUserInContestRequestTaskControlUsersSchema, \
-    UserCertificateResponseTaskControlUsersSchema, \
-    UsersResponseTaskControlUsersSchema
+from contest.tasks.control_users.schemas import *
 from contest.tasks.util import *
 
 db = get_current_db()

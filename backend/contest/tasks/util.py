@@ -82,11 +82,12 @@ def get_user_variant_if_possible(id_contest):
 def get_user_tasks_if_possible(id_contest):
     variant = get_user_variant_if_possible(id_contest)
 
-    for task in variant.tasks:
-        if 'answers' in task:
+    tasks = variant.tasks[:]
+
+    for task in tasks:
+        if task.task_type == TaskTypeEnum.MultipleChoiceTask:
             task.answers = [answer['is_right_answer'] for answer in task.answers]
 
-    tasks = [task for task in variant.tasks]
     return tasks
 
 
@@ -103,6 +104,8 @@ def get_user_task_if_possible(id_contest, id_task):
 
 def get_contest_if_possible_from_stage(id_olympiad, id_stage, id_contest):
     olympiad = db_get_or_raise(Contest, "contest_id", id_olympiad)
+    if olympiad.composite_type == ContestTypeEnum.SimpleContest:
+        raise InsufficientData('composite_type', 'not Composite contest')
     stage = db_get_or_raise(Stage, "stage_id", str(id_stage))
     contest = db_get_or_raise(Contest, "contest_id", str(id_contest))
     if stage not in olympiad.stages:
@@ -118,7 +121,15 @@ def get_contest_if_possible(id_contest):
 
 
 def get_variant_if_possible(id_contest, id_variant):
+    """
+    Get variant by id
+    :param id_contest: Simple contest
+    :param id_variant:id variant
+    :return:
+    """
     contest = db_get_or_raise(Contest, "contest_id", str(id_contest))
+    if contest.composite_type == ContestTypeEnum.CompositeContest:
+        raise InsufficientData('composite_type', 'not Simple contest')
     variant = contest.variants.filter_by(**{"variant_id": str(id_variant)}).one_or_none()
     if not is_variant_in_contest(variant.variant_id, contest):
         raise InsufficientData('variant_id', 'not in current contests')
@@ -126,7 +137,15 @@ def get_variant_if_possible(id_contest, id_variant):
 
 
 def get_variant_if_possible_by_number(id_contest, variant_num):
+    """
+    Get variant by num
+    :param id_contest: Simple contest
+    :param variant_num: variant num
+    :return:
+    """
     contest = db_get_or_raise(Contest, "contest_id", str(id_contest))
+    if contest.composite_type == ContestTypeEnum.CompositeContest:
+        raise InsufficientData('composite_type', 'not Simple contest')
     variant = contest.variants.filter_by(**{"variant_number": str(variant_num)}).one_or_none()
     if variant is None:
         raise InsufficientData("variant_number", "not in this contest")

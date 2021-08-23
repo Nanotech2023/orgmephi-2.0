@@ -1,16 +1,15 @@
 import io
 
 from flask import request
+from flask import send_file
 from marshmallow import EXCLUDE
 
 from common import get_current_app, get_current_module
-from common.errors import AlreadyExists
+from common.errors import NotFound
 from contest.tasks.creator.schemas import *
 from contest.tasks.model_schemas.schemas import SimpleContestSchema, CompositeContestSchema, PlainTaskSchema, \
     RangeTaskSchema, MultipleChoiceTaskSchema
 from contest.tasks.util import *
-
-from flask import send_file
 
 db = get_current_db()
 module = get_current_module()
@@ -206,7 +205,7 @@ def base_olympiad_patch(id_base_olympiad):
 # Olympiads
 
 
-@module.route('/base_olympiad/<int:id_base_olympiad>/olympiad/createsimple', methods=['POST'],
+@module.route('/base_olympiad/<int:id_base_olympiad>/olympiad/create_simple', methods=['POST'],
               input_schema=CreateSimpleContestRequestTaskCreatorSchema,
               output_schema=ContestIdResponseTaskCreatorSchema)
 def olympiad_create_simple(id_base_olympiad):
@@ -246,7 +245,6 @@ def olympiad_create_simple(id_base_olympiad):
     start_time = values['start_time']
     end_time = values['end_time']
     previous_contest_id = values.get('previous_contest_id', None)
-    location = values.get('location', None)
     previous_participation_condition = values.get('previous_participation_condition', None)
 
     base_contest = db_get_or_raise(BaseContest, "base_contest_id", str(id_base_olympiad))
@@ -255,7 +253,6 @@ def olympiad_create_simple(id_base_olympiad):
                                  start_date=start_time,
                                  end_date=end_time,
                                  previous_participation_condition=previous_participation_condition,
-                                 location=location,
                                  )
     if previous_contest_id is not None:
         prev_contest = db_get_or_raise(Contest, "contest_id", str(previous_contest_id))
@@ -269,7 +266,7 @@ def olympiad_create_simple(id_base_olympiad):
            }, 200
 
 
-@module.route('/base_olympiad/<int:id_base_olympiad>/olympiad/createcomposite', methods=['POST'],
+@module.route('/base_olympiad/<int:id_base_olympiad>/olympiad/create_composite', methods=['POST'],
               input_schema=CreateCompositeContestRequestTaskCreatorSchema,
               output_schema=ContestIdResponseTaskCreatorSchema)
 def olympiad_create_composite(id_base_olympiad):
@@ -410,10 +407,6 @@ def olympiad_patch(id_base_olympiad, id_olympiad):
 
     db.session.commit()
     return contest, 200
-
-#TODO partial
-# by value
-# Stage views
 
 
 @module.route('/olympiad/<int:id_olympiad>/stage/create', methods=['POST'],
@@ -567,7 +560,7 @@ def stage_patch(id_olympiad, id_stage):
 
 
 # Contest views
-@module.route('/olympiad/<int:id_olympiad>/stage/<int:id_stage>/contest/createsimple',
+@module.route('/olympiad/<int:id_olympiad>/stage/<int:id_stage>/contest/create',
               methods=['POST'],
               input_schema=CreateSimpleContestRequestTaskCreatorSchema,
               output_schema=ContestIdResponseTaskCreatorSchema)
@@ -614,7 +607,6 @@ def contest_create_simple(id_olympiad, id_stage):
     visibility = values['visibility']
     start_time = values['start_time']
     end_time = values['end_time']
-    location = values.get('location', None)
     result_publication_date = values.get('result_publication_date', None)
     previous_contest_id = values.get('previous_contest_id', None)
     previous_participation_condition = values.get('previous_participation_condition', None)
@@ -638,8 +630,7 @@ def contest_create_simple(id_olympiad, id_stage):
                                  holding_type=holding_type,
                                  previous_contest_id=previous_contest_id,
                                  previous_participation_condition=previous_participation_condition,
-                                 result_publication_date=result_publication_date,
-                                 location=location)
+                                 result_publication_date=result_publication_date)
 
     stage.contests.append(contest)
 
@@ -1135,7 +1126,7 @@ def task_image_upload(id_contest, id_variant, id_task):
 
 
 @module.route(
-    '/contest/<int:id_contest>/variant/<int:id_variant>/task/createplain',
+    '/contest/<int:id_contest>/variant/<int:id_variant>/task/create_plain',
     methods=['POST'],
     input_schema=CreatePlainRequestTaskCreatorSchema,
     output_schema=TaskIdResponseTaskCreatorSchema)
@@ -1202,7 +1193,7 @@ def task_create_plain(id_contest, id_variant):
 
 
 @module.route(
-    '/contest/<int:id_contest>/variant/<int:id_variant>/task/createrange',
+    '/contest/<int:id_contest>/variant/<int:id_variant>/task/create_range',
     methods=['POST'],
     input_schema=CreateRangeRequestTaskCreatorSchema, output_schema=TaskIdResponseTaskCreatorSchema)
 def task_create_range(id_contest, id_variant):
@@ -1266,7 +1257,7 @@ def task_create_range(id_contest, id_variant):
 
 
 @module.route(
-    '/contest/<int:id_contest>/variant/<int:id_variant>/task/createmultiple',
+    '/contest/<int:id_contest>/variant/<int:id_variant>/task/create_multiple',
     methods=['POST'],
     input_schema=CreateMultipleRequestTaskCreatorSchema, output_schema=TaskIdResponseTaskCreatorSchema)
 def task_create_multiple(id_contest, id_variant):
@@ -1730,7 +1721,7 @@ def add_location_to_contest(id_contest):
         required: true
         content:
           application/json:
-            schema: UpdateUserInContestRequestTaskControlUsersSchema
+            schema: UpdateLocationOfContestRequestTaskCreatorSchema
       security:
         - JWTAccessToken: [ ]
         - CSRFAccessToken: [ ]
@@ -1759,7 +1750,7 @@ def add_location_to_contest(id_contest):
 
 @module.route('/contest/<int:id_location>/remove_location', methods=['POST'],
               input_schema=UpdateLocationOfContestRequestTaskCreatorSchema)
-def remove_user_from_contest(id_contest):
+def remove_location_from_contest(id_location):
     """
     Remove location from contest
     ---
@@ -1792,11 +1783,14 @@ def remove_user_from_contest(id_contest):
 
     locations = values['locations']
 
-    contest = get_contest_if_possible(id_contest)
+    contest = get_contest_if_possible(id_location)
 
     for location_id in locations:
         location = db_get_or_raise(Location, "location_id", str(location_id))
-        contest.users.remove(location)
+        if location in contest.locations:
+            contest.locations.remove(location)
+        else:
+            raise NotFound("contest.locations", str(location_id))
 
     db.session.commit()
-
+    return {}, 200

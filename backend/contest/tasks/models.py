@@ -228,7 +228,6 @@ def add_simple_contest(db_session,
                        holding_type=None,
                        previous_contest_id=None,
                        previous_participation_condition=None,
-                       location=None,
                        base_contest_id=None):
     """
     Create new simple contest object
@@ -242,7 +241,6 @@ def add_simple_contest(db_session,
         result_publication_date=result_publication_date,
         previous_contest_id=previous_contest_id,
         previous_participation_condition=previous_participation_condition,
-        location=location,
     )
     db_session.add(simple_contest)
     return simple_contest
