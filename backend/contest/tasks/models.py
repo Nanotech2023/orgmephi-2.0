@@ -460,6 +460,7 @@ class UserInContest(db.Model):
     contest_id = db.Column(db.Integer, db.ForeignKey('contest.contest_id'), primary_key=True)
     variant_id = db.Column(db.Integer, db.ForeignKey('variant.variant_id'))
     user_status = db.Column(db.Enum(UserStatusEnum))
+    show_results_to_user = db.Column(db.Boolean)
 
 
 class TaskTypeEnum(enum.Enum):

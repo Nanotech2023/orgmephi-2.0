@@ -15,5 +15,3 @@ class AllTaskResponseTaskParticipantSchema(Schema):
     tasks_list = fields.Nested(TaskForUserResponseTaskParticipantSchema, many=True, required=True)
 
 
-
-

@@ -48,6 +48,7 @@ def add_user_to_contest(id_contest):
 
     values = request.marshmallow
     user_ids = values['users_id']
+    show_results_to_user = values['show_results_to_user']
 
     contest = get_contest_if_possible(id_contest)
 
@@ -56,6 +57,7 @@ def add_user_to_contest(id_contest):
             raise AlreadyExists('user_id', user_id)
 
         contest.users.append(UserInContest(user_id=user_id,
+                                           show_results_to_user=show_results_to_user,
                                            variant_id=generate_variant(id_contest, user_id),
                                            user_status=UserStatusEnum.Participant))
 

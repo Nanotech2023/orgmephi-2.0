@@ -3,6 +3,7 @@ import io
 from flask import abort, send_file
 
 from common import get_current_app, get_current_module
+from common.errors import AlreadyExists
 from contest.tasks.control_users.schemas import UserCertificateResponseTaskControlUsersSchema
 from contest.tasks.model_schemas.schemas import VariantSchema, ContestSchema
 from contest.tasks.participant.schemas import *
@@ -50,6 +51,50 @@ def variant_self(id_contest):
 
     variant = get_user_variant_if_possible(id_contest)
     return variant, 200
+
+
+# Enroll in Contest
+
+
+@module.route('/contest/<int:id_contest>/enroll', methods=['POST'])
+def enroll_in_contest(id_contest):
+    """
+    Enroll in contest
+    ---
+    post:
+      parameters:
+        - in: path
+          description: ID of the contest
+          name: id_contest
+          required: true
+          schema:
+            type: integer
+      security:
+        - JWTAccessToken: [ ]
+        - CSRFAccessToken: [ ]
+      responses:
+        '200':
+          description: OK
+        '400':
+          description: Bad request
+        '409':
+          description: User already enrolled
+    """
+
+    user_id = jwt_get_id()
+
+    contest = get_contest_if_possible(id_contest)
+
+    if is_user_in_contest(user_id, contest):
+        raise AlreadyExists('user_id', str(user_id))
+
+    contest.users.append(UserInContest(user_id=user_id,
+                                       show_results_to_user=False,
+                                       variant_id=generate_variant(id_contest, user_id),
+                                       user_status=UserStatusEnum.Participant))
+
+    db.session.commit()
+    return {}, 200
 
 
 # Task

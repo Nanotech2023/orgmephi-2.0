@@ -403,15 +403,16 @@ def olympiad_patch(id_base_olympiad, id_olympiad):
 
     if contest.composite_type == ContestTypeEnum.SimpleContest:
         SimpleContestSchema(load_instance=True).load(request.json, instance=contest, session=db.session,
-                                                     partial=False, unknown=EXCLUDE)
+                                                     partial=True, unknown=EXCLUDE)
     else:
         CompositeContestSchema(load_instance=True).load(request.json, instance=contest, session=db.session,
-                                                        partial=False, unknown=EXCLUDE)
+                                                        partial=True, unknown=EXCLUDE)
 
     db.session.commit()
     return contest, 200
 
-
+#TODO partial
+# by value
 # Stage views
 
 
@@ -1705,6 +1706,8 @@ def task_image(id_contest, id_variant, id_task):
     return send_file(io.BytesIO(task.image_of_task),
                      attachment_filename='task_image.png',
                      mimetype='image/jpeg'), 200
+
+# TODO SIZE RESTRICTION
 
 # Location
 

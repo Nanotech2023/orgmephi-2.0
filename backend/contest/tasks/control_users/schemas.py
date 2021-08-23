@@ -5,6 +5,7 @@ from contest.tasks.model_schemas.schemas import UserInContestSchema
 
 class UpdateUserInContestRequestTaskControlUsersSchema(Schema):
     users_id = fields.List(fields.Int(), required=True)
+    show_results_to_user = fields.Boolean(required=True)
 
 
 class UsersResponseTaskControlUsersSchema(Schema):
