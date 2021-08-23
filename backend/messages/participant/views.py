@@ -3,7 +3,7 @@ from datetime import date
 from flask import request
 from marshmallow import EXCLUDE
 
-from common.errors import QuotaExceeded, NotFound
+from common.errors import QuotaExceeded, NotFound, DataConflict
 from common import get_current_app, get_current_module, get_current_db
 from common.util import db_get_or_raise, db_get_all, db_get_list
 from common.jwt_verify import jwt_get_id
@@ -91,7 +91,12 @@ def create_thread():
         if cnt >= thread_limit:
             raise QuotaExceeded('New threads per day', thread_limit)
 
-    thread = ThreadSchema(load_instance=True).load(values, unknown=EXCLUDE)
+    thread = ThreadSchema(load_instance=True).load(request.json, unknown=EXCLUDE)
+
+    if thread.related_work is not None:
+        if thread.related_work.user_id != author.id:
+            raise NotFound('related_work.id', str(thread.related_work.work_id))
+
     thread.author = author
     thread.messages.append(Message(message=values['message']))
 
@@ -170,8 +175,13 @@ def add_message(thread_id):
     if thread.author != author:
         raise NotFound('id', str(thread_id))
 
+    if thread.resolved:
+        raise DataConflict('Cant post to resolved thread')
+
     if message_limit is not None:
-        cnt = Message.query.filter(Message.thread_id == thread_id, Message.post_time >= date.today()).count()
+        # noinspection PyComparisonWithNone
+        cnt = Message.query.filter(Message.thread_id == thread_id, Message.post_time >= date.today(),
+                                   Message.employee_id == None).count()
         if cnt >= message_limit:
             raise QuotaExceeded('New messages per day per thread', message_limit)
 

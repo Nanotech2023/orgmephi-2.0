@@ -172,3 +172,19 @@ class QuotaExceeded(RequestError):
 
     def get_msg(self) -> str:
         return f'Quota for "{self.action}" ({self.quota}) exceeded'
+
+
+class DataConflict(RequestError):
+    """
+    Conflict in request data
+    """
+    def __init__(self, msg: str):
+        """
+        Create error object
+        :param msg: message
+        """
+        super(DataConflict, self).__init__(409)
+        self.msg = msg
+
+    def get_msg(self) -> str:
+        return self.msg

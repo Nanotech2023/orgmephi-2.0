@@ -120,7 +120,7 @@ def cleanup_threads():
     query = Thread.query
     amount = values['amount']
     if not values['delete_unresolved']:
-        query = query.filter_by(resolved=False)
+        query = query.filter_by(resolved=True)
     query = query.order_by(Thread.post_time.asc()).limit(amount)
     # Can't .delete() after limit
     values = query.all()

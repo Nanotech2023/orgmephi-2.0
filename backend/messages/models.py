@@ -2,6 +2,8 @@ from common import get_current_db, get_current_app
 from datetime import datetime
 import enum
 
+from sqlalchemy import func, select
+from sqlalchemy.sql import case
 from sqlalchemy.ext.hybrid import hybrid_property
 
 from user.models import User
@@ -79,6 +81,30 @@ class Thread(db.Model):
         if not self.messages:
             return False
         return self.messages[-1].employee_id is None
+
+    # noinspection PyMethodParameters
+    @answered.expression
+    def answered(cls):
+        # noinspection PyComparisonWithNone,PyUnresolvedReferences
+        return case([(select(func.count(Message.id) > 0).where(Message.thread_id == cls.id).scalar_subquery(),
+                      select(Message.employee_id != None).where(Message.thread_id == cls.id).
+                      order_by(Message.post_time.desc()).limit(1).scalar_subquery()
+                      )], else_=False)
+
+    @hybrid_property
+    def update_time(self):
+        if not self.messages:
+            return self.post_time
+        return self.messages[-1].post_time
+
+    # noinspection PyMethodParameters
+    @update_time.expression
+    def update_time(cls):
+        # noinspection PyUnresolvedReferences
+        return case([(select(func.count(Message.id) > 0).where(Message.thread_id == cls.id).scalar_subquery(),
+                      select(Message.post_time).where(Message.thread_id == cls.id).
+                      order_by(Message.post_time.desc()).limit(1).scalar_subquery()
+                      )], else_=cls.post_time)
 
 
 class Message(db.Model):
