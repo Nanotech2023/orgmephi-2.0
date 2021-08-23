@@ -6,7 +6,7 @@ from sqlalchemy.ext.hybrid import hybrid_property
 
 from user.models import User
 from contest.tasks.models import Contest
-from contest.responses.models import Response, Appeal
+from contest.responses.models import Response
 
 db = get_current_db()
 app = get_current_app()
@@ -47,7 +47,6 @@ class Thread(db.Model):
 
     related_contest_id = db.Column(db.Integer, db.ForeignKey(Contest.contest_id))
     related_work_id = db.Column(db.Integer, db.ForeignKey(Response.work_id))
-    related_appeal_id = db.Column(db.Integer, db.ForeignKey(Appeal.appeal_id))
 
     messages = db.relationship('Message', back_populates='thread', lazy=True, uselist=True,
                                cascade='save-update, merge, delete, delete-orphan', order_by='Message.post_time')
@@ -58,25 +57,41 @@ class Thread(db.Model):
 
     related_contest = db.relationship('Contest')
     related_work = db.relationship('Response')
-    related_appeal = db.relationship('Appeal')
+
+    @hybrid_property
+    def author_username(self):
+        return getattr(self.author, 'username', None)
+
+    @hybrid_property
+    def author_first_name(self):
+        return getattr(getattr(self.author, 'user_info', None), 'first_name', None)
+
+    @hybrid_property
+    def author_second_name(self):
+        return getattr(getattr(self.author, 'user_info', None), 'second_name', None)
+
+    @hybrid_property
+    def author_middle_name(self):
+        return getattr(getattr(self.author, 'user_info', None), 'middle_name', None)
 
     @hybrid_property
     def answered(self):
         if not self.messages:
             return False
-        return self.messages[-1].from_mephi
+        return self.messages[-1].employee_id is None
 
 
 class Message(db.Model):
-    message_id = db.Column(db.Integer, autoincrement=True, primary_key=True)
+    id = db.Column(db.Integer, autoincrement=True, primary_key=True)
     thread_id = db.Column(db.Integer, db.ForeignKey(Thread.id), nullable=False)
 
     post_time = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
-    from_mephi = db.Column(db.Boolean, nullable=False)
+    employee_id = db.Column(db.Integer, db.ForeignKey(User.id), nullable=True)
 
     message = db.Column(db.String, nullable=False)
 
     thread = db.relationship('Thread', back_populates='messages', lazy=True, uselist=False)
+    employee = db.relationship('User')
 
 
 if __name__ == "__main__":

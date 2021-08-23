@@ -4,7 +4,7 @@ from common.errors import AlreadyExists
 from common import get_current_app, get_current_module, get_current_db
 from common.util import db_exists, db_get_or_raise
 
-from .schemas import AddCategoryMessagesSchema, CleanupMessagesSchema
+from .schemas import AddCategoryMessagesRequestSchema, CleanupMessagesRequestSchema
 from messages.models import ThreadCategory, Thread
 
 db = get_current_db()
@@ -12,7 +12,7 @@ module = get_current_module()
 app = get_current_app()
 
 
-@module.route('/add_category', input_schema=AddCategoryMessagesSchema, methods=['POST'])
+@module.route('/add_category', input_schema=AddCategoryMessagesRequestSchema, methods=['POST'])
 def add_category():
     """
     Add a message thread category
@@ -22,7 +22,7 @@ def add_category():
         required: true
         content:
           application/json:
-            schema: AddCategoryMessagesSchema
+            schema: AddCategoryMessagesRequestSchema
       security:
         - JWTAccessToken: [ ]
         - CSRFAccessToken: [ ]
@@ -98,7 +98,7 @@ def delete_thread(thread_id):
     return {}, 204
 
 
-@module.route('/cleanup', input_schema=CleanupMessagesSchema, methods=['POST'])
+@module.route('/cleanup', input_schema=CleanupMessagesRequestSchema, methods=['POST'])
 def cleanup_threads():
     """
     Cleanup old threads
@@ -108,7 +108,7 @@ def cleanup_threads():
         required: true
         content:
           application/json:
-            schema: CleanupMessagesSchema
+            schema: CleanupMessagesRequestSchema
       security:
         - JWTAccessToken: [ ]
         - CSRFAccessToken: [ ]

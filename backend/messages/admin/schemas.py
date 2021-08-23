@@ -2,10 +2,10 @@ from marshmallow import Schema, fields
 from common import fields as common_fields
 
 
-class AddCategoryMessagesSchema(Schema):
+class AddCategoryMessagesRequestSchema(Schema):
     name = common_fields.CommonName(required=True)
 
 
-class CleanupMessagesSchema(Schema):
+class CleanupMessagesRequestSchema(Schema):
     amount = fields.Integer(required=True)
     delete_unresolved = fields.Boolean(default=False)
