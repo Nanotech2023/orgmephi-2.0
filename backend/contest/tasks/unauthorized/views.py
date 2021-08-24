@@ -124,8 +124,8 @@ def id_location_get(id_location):
         '404':
           description: Olympiad type not found
     """
-    location = db_get_or_raise(OlympiadLocation, "location_id", str(id_location))
-    return location, 200
+    current_location = db_get_or_raise(OlympiadLocation, "location_id", str(id_location))
+    return current_location, 200
 
 
 # Olympiad

@@ -1,5 +1,6 @@
-from datetime import datetime
 import enum
+from datetime import datetime
+
 from common import get_current_db
 
 db = get_current_db()
@@ -63,32 +64,6 @@ class OlympiadType(db.Model):
 
     contests = db.relationship('BaseContest', lazy='select',
                                backref=db.backref('olympiad_type', lazy='joined'))
-
-
-def add_location(db_session, location):
-    """
-    Create new location
-    """
-    location = OlympiadLocation(
-        location=location,
-    )
-    db_session.add(location)
-    return location
-
-
-class OlympiadLocation(db.Model):
-    """
-    This class describing olympiad contest location
-
-    location_id: id of location
-    location: where olympiad take place // link to online service
-
-    """
-
-    __tablename__ = 'olympiad_location'
-
-    location_id = db.Column(db.Integer, autoincrement=True, primary_key=True)
-    location = db.Column(db.Text, nullable=False, unique=True)
 
 
 def add_base_contest(db_session, name, laureate_condition, winning_condition, description, rules, olympiad_type_id,

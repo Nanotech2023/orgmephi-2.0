@@ -90,18 +90,18 @@ def olympiad_type_remove(id_olympiad_type):
 # Location
 
 
-@module.route('/location/create', methods=['POST'],
-              input_schema=CreateLocationRequestTaskAdminSchema, output_schema=LocationResponseTaskAdminSchema)
-def location_create():
+@module.route('/location/create_online', methods=['POST'],
+              input_schema=CreateOnlineLocationRequestTaskAdminSchema, output_schema=LocationResponseTaskAdminSchema)
+def online_location_create():
     """
-    Add new location
+    Add new online location
     ---
     post:
       requestBody:
         required: true
         content:
           application/json:
-            schema: CreateLocationRequestTaskAdminSchema
+            schema: CreateOnlineLocationRequestTaskAdminSchema
       security:
         - JWTAccessToken: [ ]
         - CSRFAccessToken: [ ]
@@ -116,16 +116,98 @@ def location_create():
         '409':
           description: Olympiad type already in use
     """
-    import sqlalchemy.exc
-    values = request.marshmallow
-    location = values['location']
 
-    try:
-        new_location = add_location(db.session,
-                                    location=location)
-        db.session.commit()
-    except sqlalchemy.exc.IntegrityError:
-        raise AlreadyExists('location', location)
+    values = request.marshmallow
+    url = values['url']
+
+    new_location = add_online_location(db.session,
+                                       url=url)
+    db.session.commit()
+
+    return {
+               "location_id": new_location.location_id
+           }, 200
+
+
+@module.route('/location/create/russia', methods=['POST'],
+              input_schema=CreateRussiaLocationRequestTaskAdminSchema, output_schema=LocationResponseTaskAdminSchema)
+def location_create_russia():
+    """
+    Add new location
+    ---
+    post:
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: CreateRussiaLocationRequestTaskAdminSchema
+      security:
+        - JWTAccessToken: [ ]
+        - CSRFAccessToken: [ ]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: LocationResponseTaskAdminSchema
+        '400':
+          description: Bad request
+        '409':
+          description: Olympiad type already in use
+    """
+
+    values = request.marshmallow
+    city_name = values['city_name']
+    region_name = values['region_name']
+    address = values['address']
+
+    new_location = add_russia_location(db.session,
+                                       city_name=city_name,
+                                       region_name=region_name,
+                                       address=address)
+    db.session.commit()
+
+    return {
+               "location_id": new_location.location_id
+           }, 200
+
+
+@module.route('/location/create_other', methods=['POST'],
+              input_schema=CreateOtherLocationRequestTaskAdminSchema, output_schema=LocationResponseTaskAdminSchema)
+def location_create_other():
+    """
+    Add new location
+    ---
+    post:
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: CreateOtherLocationRequestTaskAdminSchema
+      security:
+        - JWTAccessToken: [ ]
+        - CSRFAccessToken: [ ]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: LocationResponseTaskAdminSchema
+        '400':
+          description: Bad request
+        '409':
+          description: Olympiad type already in use
+    """
+
+    values = request.marshmallow
+    country_name = values['country_name']
+    location_ = values['location']
+
+    new_location = add_other_location(db.session,
+                                      country_name=country_name,
+                                      location=location_)
+    db.session.commit()
+
     return {
                "location_id": new_location.location_id
            }, 200

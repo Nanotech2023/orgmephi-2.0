@@ -1,7 +1,8 @@
 from marshmallow import Schema, fields
 
 from contest.tasks.model_schemas.contest import StageSchema
-from contest.tasks.model_schemas.olympiad import OlympiadTypeSchema, OlympiadLocationSchema, ContestSchema, BaseContestSchema
+from contest.tasks.model_schemas.location import OlympiadLocationSchema
+from contest.tasks.model_schemas.olympiad import OlympiadTypeSchema, ContestSchema, BaseContestSchema
 
 
 class AllOlympiadTypesResponseTaskUnauthorizedSchema(Schema):
@@ -10,6 +11,16 @@ class AllOlympiadTypesResponseTaskUnauthorizedSchema(Schema):
 
 class AllLocationResponseTaskUnauthorizedSchema(Schema):
     locations = fields.Nested(OlympiadLocationSchema, many=True, required=True)
+
+
+class LocationResponseTaskUnauthorizedSchema(Schema):
+    location_id = fields.Int(required=False)
+    url = fields.String(required=False)
+    country_name = fields.String(required=False)
+    location = fields.String(required=False)
+    city_name = fields.String(required=False)
+    address = fields.String(required=False)
+    region_name = fields.String(required=False)
 
 
 class AllOlympiadsResponseTaskUnauthorizedSchema(Schema):

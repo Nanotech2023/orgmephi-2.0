@@ -1,11 +1,11 @@
 from marshmallow import fields
+from marshmallow_enum import EnumField
 from marshmallow_oneofschema import OneOfSchema
 from marshmallow_sqlalchemy import SQLAlchemySchema, auto_field
-from marshmallow_enum import EnumField
 
+from common.fields import text_validator, common_name_validator
 from contest.tasks.models import *
 from user.models.auth import *
-from common.fields import text_validator, common_name_validator, location_validator
 
 """
 Olympiad types
@@ -20,21 +20,6 @@ class OlympiadTypeSchema(SQLAlchemySchema):
 
     olympiad_type_id = auto_field(column_name='olympiad_type_id', dump_only=True)
     olympiad_type = auto_field(column_name='olympiad_type', validate=common_name_validator, required=True)
-
-
-"""
-Location
-"""
-
-
-class OlympiadLocationSchema(SQLAlchemySchema):
-    class Meta:
-        model = OlympiadLocation
-        load_instance = True
-        sqla_session = db.session
-
-    location_id = auto_field(column_name='location_id', dump_only=True)
-    location = auto_field(column_name='location', validate=location_validator, required=True)
 
 
 """
