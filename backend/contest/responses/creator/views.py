@@ -1,11 +1,9 @@
 import io
-
 from flask import request, send_file
 from common import get_current_app, get_current_module
 from common.util import db_get_or_raise, db_get_list
 from contest.responses.util import *
-from contest.responses.model_schemas.schemas import PlainAnswerSchema, RangeAnswerSchema, \
-    MultipleChoiceAnswerSchema
+from contest.responses.model_schemas.schemas import PlainAnswerSchema, RangeAnswerSchema, MultipleChoiceAnswerSchema
 from .schemas import *
 
 db = get_current_db()
@@ -354,7 +352,7 @@ def user_answer_for_task_by_id_post_plain_text(contest_id, task_id, user_id):
 
 @module.route('/contest/<int:contest_id>/task/<int:task_id>/user/<int:user_id>/range', methods=['POST'],
               input_schema=RangeAnswerRequestSchema)
-def user_answer_for_task_by_id_post_plain_text(contest_id, task_id, user_id):
+def user_answer_for_task_by_id_range_text(contest_id, task_id, user_id):
     """
     Add user answer for a task
     ---
@@ -414,7 +412,7 @@ def user_answer_for_task_by_id_post_plain_text(contest_id, task_id, user_id):
 
 @module.route('/contest/<int:contest_id>/task/<int:task_id>/user/<int:user_id>/multiple', methods=['POST'],
               input_schema=MultipleAnswerRequestSchema)
-def user_answer_for_task_by_id_post_plain_text(contest_id, task_id, user_id):
+def user_answer_for_task_by_id_multiple(contest_id, task_id, user_id):
     """
     Add user answer for a task
     ---
@@ -474,9 +472,9 @@ def user_answer_for_task_by_id_post_plain_text(contest_id, task_id, user_id):
 
 @module.route('/contest/<int:contest_id>/user/<int:user_id>/status', methods=['POST'],
               input_schema=UserResponseStatusResponseSchema)
-def user_status_and_mark_for_response_by_id_post(contest_id, user_id):
+def user_status_for_response_by_id_post(contest_id, user_id):
     """
-    Set user's status and mark for response, only for inspector
+    Set user's status for response, only for inspector
     ---
     post:
       security:
@@ -518,10 +516,10 @@ def user_status_and_mark_for_response_by_id_post(contest_id, user_id):
 
 
 @module.route('/contest/<int:contest_id>/user/<int:user_id>/status', methods=['GET'],
-              input_schema=UserResponseStatusResponseSchema)
-def user_status_and_mark_for_response_by_id_post(contest_id, user_id):
+              output_schema=UserResponseStatusResponseSchema)
+def user_status_for_response_by_id(contest_id, user_id):
     """
-    Set user's status and mark for response, only for inspector
+    Get user's status for response, only for inspector
     ---
     get:
       security:

@@ -18,17 +18,6 @@ class ResponseSchema(SQLAlchemySchema):
     status = EnumField(ResponseStatusEnum, data_key='status', by_value=True)
 
 
-class AppealSchema(SQLAlchemySchema):
-    class Meta:
-        model = Appeal
-        load_instance = True
-        sqla_session = db.session
-
-    appeal_id = auto_field(column_name='appeal_id', dump_only=True)
-    status_id = auto_field(column_name='work_status', dump_only=True)
-    appeal_status = EnumField(AppealStatusEnum, data_key='appeal_status', by_value=True)
-
-
 class BaseAnswerSchema(SQLAlchemySchema):
     class Meta:
         model = BaseAnswer
