@@ -116,7 +116,7 @@ def id_location_get(id_location):
           description: OK
           content:
             application/json:
-              schema: LocationSchema
+              schema: OlympiadLocationSchema
         '400':
           description: Bad request
         '409':
