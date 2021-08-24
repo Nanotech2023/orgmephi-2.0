@@ -9,8 +9,8 @@ import random
 # Generators
 
 
-def get_last_variant_in_contest(contest):
-    variants = contest.variants.all()
+def get_last_variant_in_contest(current_contest):
+    variants = current_contest.variants.all()
     if len(variants) > 0:
         new_variant = max(variant.variant_number for variant in variants)
     else:
@@ -20,8 +20,8 @@ def get_last_variant_in_contest(contest):
 
 
 def generate_variant(id_contest, user_id):
-    contest = db_get_or_raise(Contest, "contest_id", id_contest)
-    variants_number = len(contest.variants.all())
+    current_contest = db_get_or_raise(Contest, "contest_id", id_contest)
+    variants_number = len(current_contest.variants.all())
     if variants_number == 0:
         raise InsufficientData('variant', 'variants in contest')
     random_number = random.randint(0, variants_number * 2)
@@ -31,15 +31,15 @@ def generate_variant(id_contest, user_id):
 # Functions for tasks/participant
 
 
-def is_user_in_contest(user_id, contest):
-    if contest.users.filter_by(**{"user_id": str(user_id)}).one_or_none() is not None:
+def is_user_in_contest(user_id, current_contest):
+    if current_contest.users.filter_by(**{"user_id": str(user_id)}).one_or_none() is not None:
         return True
     else:
         return False
 
 
-def is_variant_in_contest(variant_id, contest):
-    if contest.variants.filter_by(**{"variant_id": str(variant_id)}).one_or_none() is not None:
+def is_variant_in_contest(variant_id, current_contest):
+    if current_contest.variants.filter_by(**{"variant_id": str(variant_id)}).one_or_none() is not None:
         return True
     else:
         return False
@@ -54,27 +54,27 @@ def is_task_in_variant(task_id, variant):
 
 
 def get_user_contest_if_possible(id_olympiad, id_stage, id_contest):
-    olympiad = db_get_or_raise(Contest, "contest_id", id_olympiad)
+    current_olympiad = db_get_or_raise(Contest, "contest_id", id_olympiad)
     stage = db_get_or_raise(Stage, "stage_id", str(id_stage))
-    if stage not in olympiad.stages:
+    if stage not in current_olympiad.stages:
         raise InsufficientData('stage_id', 'not in current olympiad')
-    contest = db_get_or_raise(Contest, "contest_id", str(id_contest))
-    if contest not in stage.contests:
+    current_contest = db_get_or_raise(Contest, "contest_id", str(id_contest))
+    if current_contest not in stage.contests:
         raise InsufficientData('contest_id', 'not in current stage')
-    if not is_user_in_contest(jwt_get_id(), contest):
+    if not is_user_in_contest(jwt_get_id(), current_contest):
         raise InsufficientData('contest_id', 'not in your contests list')
-    return contest
+    return current_contest
 
 
 def get_user_variant_if_possible(id_contest):
-    contest = db_get_or_raise(Contest, "contest_id", str(id_contest))
-    if contest.composite_type == ContestTypeEnum.CompositeContest:
+    current_contest = db_get_or_raise(Contest, "contest_id", str(id_contest))
+    if current_contest.composite_type == ContestTypeEnum.CompositeContest:
         raise InsufficientData('composite_type', 'not Simple contest')
-    user = db_get_or_raise(UserInContest, "user_id", jwt_get_id())
-    variant = contest.variants.filter_by(**{"variant_id": str(user.variant_id)}).one_or_none()
+    current_user = db_get_or_raise(UserInContest, "user_id", jwt_get_id())
+    variant = current_contest.variants.filter_by(**{"variant_id": str(current_user.variant_id)}).one_or_none()
     if variant is None:
         raise InsufficientData("variant_id", "not in this contest")
-    if not is_variant_in_contest(variant.variant_id, contest):
+    if not is_variant_in_contest(variant.variant_id, current_contest):
         raise InsufficientData('variant_id', 'not in current contests')
     return variant
 
@@ -82,13 +82,13 @@ def get_user_variant_if_possible(id_contest):
 def get_user_tasks_if_possible(id_contest):
     variant = get_user_variant_if_possible(id_contest)
 
-    tasks = variant.tasks[:]
+    current_tasks = variant.tasks[:]
 
-    for task in tasks:
+    for task in current_tasks:
         if task.task_type == TaskTypeEnum.MultipleChoiceTask:
             task.answers = [answer['is_right_answer'] for answer in task.answers]
 
-    return tasks
+    return current_tasks
 
 
 def get_user_task_if_possible(id_contest, id_task):
@@ -103,21 +103,21 @@ def get_user_task_if_possible(id_contest, id_task):
 # Functions for tasks/contest
 
 def get_contest_if_possible_from_stage(id_olympiad, id_stage, id_contest):
-    olympiad = db_get_or_raise(Contest, "contest_id", id_olympiad)
-    if olympiad.composite_type == ContestTypeEnum.SimpleContest:
+    current_olympiad = db_get_or_raise(Contest, "contest_id", id_olympiad)
+    if current_olympiad.composite_type == ContestTypeEnum.SimpleContest:
         raise InsufficientData('composite_type', 'not Composite contest')
     stage = db_get_or_raise(Stage, "stage_id", str(id_stage))
-    contest = db_get_or_raise(Contest, "contest_id", str(id_contest))
-    if stage not in olympiad.stages:
+    current_contest = db_get_or_raise(Contest, "contest_id", str(id_contest))
+    if stage not in current_olympiad.stages:
         raise InsufficientData('stage_id', 'not in current olympiad')
-    if contest not in stage.contests:
+    if current_contest not in stage.contests:
         raise InsufficientData('contest_id', 'not in current stage')
-    return contest
+    return current_contest
 
 
 def get_contest_if_possible(id_contest):
-    contest = db_get_or_raise(Contest, "contest_id", str(id_contest))
-    return contest
+    current_contest = db_get_or_raise(Contest, "contest_id", str(id_contest))
+    return current_contest
 
 
 def get_variant_if_possible(id_contest, id_variant):
@@ -127,11 +127,11 @@ def get_variant_if_possible(id_contest, id_variant):
     :param id_variant:id variant
     :return:
     """
-    contest = db_get_or_raise(Contest, "contest_id", str(id_contest))
-    if contest.composite_type == ContestTypeEnum.CompositeContest:
+    current_contest = db_get_or_raise(Contest, "contest_id", str(id_contest))
+    if current_contest.composite_type == ContestTypeEnum.CompositeContest:
         raise InsufficientData('composite_type', 'not Simple contest')
-    variant = contest.variants.filter_by(**{"variant_id": str(id_variant)}).one_or_none()
-    if not is_variant_in_contest(variant.variant_id, contest):
+    variant = current_contest.variants.filter_by(**{"variant_id": str(id_variant)}).one_or_none()
+    if not is_variant_in_contest(variant.variant_id, current_contest):
         raise InsufficientData('variant_id', 'not in current contests')
     return variant
 
@@ -143,13 +143,13 @@ def get_variant_if_possible_by_number(id_contest, variant_num):
     :param variant_num: variant num
     :return:
     """
-    contest = db_get_or_raise(Contest, "contest_id", str(id_contest))
-    if contest.composite_type == ContestTypeEnum.CompositeContest:
+    current_contest = db_get_or_raise(Contest, "contest_id", str(id_contest))
+    if current_contest.composite_type == ContestTypeEnum.CompositeContest:
         raise InsufficientData('composite_type', 'not Simple contest')
-    variant = contest.variants.filter_by(**{"variant_number": str(variant_num)}).one_or_none()
+    variant = current_contest.variants.filter_by(**{"variant_number": str(variant_num)}).one_or_none()
     if variant is None:
         raise InsufficientData("variant_number", "not in this contest")
-    if not is_variant_in_contest(variant.variant_id, contest):
+    if not is_variant_in_contest(variant.variant_id, current_contest):
         raise InsufficientData('variant_number', 'not in current contests')
     return variant
 

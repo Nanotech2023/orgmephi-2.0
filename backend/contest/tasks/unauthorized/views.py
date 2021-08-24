@@ -64,8 +64,8 @@ def olympiad_type_get(id_olympiad_type):
         '404':
           description: Olympiad type not found
     """
-    olympiad = db_get_or_raise(OlympiadType, "olympiad_type_id", str(id_olympiad_type))
-    return olympiad, 200
+    current_olympiad = db_get_or_raise(OlympiadType, "olympiad_type_id", str(id_olympiad_type))
+    return current_olympiad, 200
 
 
 # Location
@@ -91,14 +91,14 @@ def location_all():
         '404':
           description: Olympiad type not found
     """
-    locations = db_get_all(Location)
+    locations = db_get_all(OlympiadLocation)
     return {
                "locations": locations
            }, 200
 
 
 @module.route('/location/<int:id_location>', methods=['GET'],
-              output_schema=LocationSchema)
+              output_schema=OlympiadLocationSchema)
 def id_location_get(id_location):
     """
     Get location by id
@@ -124,7 +124,7 @@ def id_location_get(id_location):
         '404':
           description: Olympiad type not found
     """
-    location = db_get_or_raise(Location, "location_id", str(id_location))
+    location = db_get_or_raise(OlympiadLocation, "location_id", str(id_location))
     return location, 200
 
 
@@ -217,7 +217,7 @@ def olympiads_all(id_base_olympiad):
           description: Olympiad type not found
     """
     base_contest = db_get_or_raise(BaseContest, "base_contest_id", str(id_base_olympiad))
-    all_olympiads = [olympiad for olympiad in base_contest.child_contests]
+    all_olympiads = [current_olympiad for current_olympiad in base_contest.child_contests]
     return {
                "contest_list": all_olympiads
            }, 200
@@ -257,8 +257,8 @@ def olympiad_get(id_base_olympiad, id_olympiad):
           description: Olympiad type not found
     """
     db_get_or_raise(BaseContest, "base_contest_id", str(id_base_olympiad))
-    contest = db_get_or_raise(Contest, "contest_id", id_olympiad)
-    return contest, 200
+    current_contest = db_get_or_raise(Contest, "contest_id", id_olympiad)
+    return current_contest, 200
 
 
 # Stage
@@ -297,9 +297,9 @@ def stage_get(id_olympiad, id_stage):
         '404':
           description: Olympiad type not found
     """
-    olympiad = db_get_or_raise(Contest, "contest_id", str(id_olympiad))
+    current_olympiad = db_get_or_raise(Contest, "contest_id", str(id_olympiad))
     stage = db_get_or_raise(Stage, "stage_id", str(id_stage))
-    if olympiad.composite_type != ContestTypeEnum.CompositeContest or stage not in olympiad.stages:
+    if current_olympiad.composite_type != ContestTypeEnum.CompositeContest or stage not in current_olympiad.stages:
         raise InsufficientData('stage_id', 'not in current olympiad')
     return stage, 200
 
@@ -332,8 +332,8 @@ def stages_all(id_olympiad):
           description: Olympiad type not found
     """
     db_get_or_raise(Contest, "contest_id", str(id_olympiad))
-    contest = db_get_or_raise(CompositeContest, "contest_id", str(id_olympiad))
-    all_stages = [stage for stage in contest.stages]
+    current_contest = db_get_or_raise(CompositeContest, "contest_id", str(id_olympiad))
+    all_stages = [stage for stage in current_contest.stages]
     return {
                "stages_list": all_stages
            }, 200

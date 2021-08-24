@@ -48,16 +48,16 @@ def add_user_to_contest(id_contest):
     user_ids = values['users_id']
     show_results_to_user = values['show_results_to_user']
 
-    contest = get_contest_if_possible(id_contest)
+    current_contest = get_contest_if_possible(id_contest)
 
     for user_id in user_ids:
-        if is_user_in_contest(user_id, contest):
+        if is_user_in_contest(user_id, current_contest):
             raise AlreadyExists('user_id', user_id)
 
-        contest.users.append(UserInContest(user_id=user_id,
-                                           show_results_to_user=show_results_to_user,
-                                           variant_id=generate_variant(id_contest, user_id),
-                                           user_status=UserStatusEnum.Participant))
+        current_contest.users.append(UserInContest(user_id=user_id,
+                                                   show_results_to_user=show_results_to_user,
+                                                   variant_id=generate_variant(id_contest, user_id),
+                                                   user_status=UserStatusEnum.Participant))
 
     db.session.commit()
     return {}, 200
@@ -97,13 +97,13 @@ def remove_user_from_contest(id_contest):
     values = request.marshmallow
     user_ids = values['users_id']
 
-    contest = get_contest_if_possible(id_contest)
+    current_contest = get_contest_if_possible(id_contest)
 
     for user_id in user_ids:
-        user = contest.users.filter_by(**{"user_id": str(user_id)}).one_or_none()
-        if user is None:
+        current_user = current_contest.users.filter_by(**{"user_id": str(user_id)}).one_or_none()
+        if current_user is None:
             raise InsufficientData('user_id', user_id)
-        db.session.delete(user)
+        db.session.delete(current_user)
 
     db.session.commit()
 
@@ -140,9 +140,9 @@ def users_all(id_contest):
           description: Olympiad type already in use
     """
 
-    contest = get_contest_if_possible(id_contest)
+    current_contest = get_contest_if_possible(id_contest)
     return {
-               "user_list": contest.users.all()
+               "user_list": current_contest.users.all()
            }, 200
 
 

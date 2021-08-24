@@ -80,8 +80,8 @@ def olympiad_type_remove(id_olympiad_type):
         '404':
           description: Olympiad type not found
     """
-    olympiad = db_get_or_raise(OlympiadType, "olympiad_type_id", str(id_olympiad_type))
-    db.session.delete(olympiad)
+    current_olympiad = db_get_or_raise(OlympiadType, "olympiad_type_id", str(id_olympiad_type))
+    db.session.delete(current_olympiad)
     db.session.commit()
 
     return {}, 200
@@ -157,7 +157,7 @@ def location_remove(id_location):
         '404':
           description: Olympiad type not found
     """
-    location = db_get_or_raise(Location, "location_id", str(id_location))
+    location = db_get_or_raise(OlympiadLocation, "location_id", str(id_location))
     db.session.delete(location)
     db.session.commit()
 

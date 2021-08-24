@@ -1,6 +1,6 @@
 from marshmallow import Schema, fields
 from common import fields as common_fields
-from contest.tasks.model_schemas.schemas import UserInContestSchema
+from contest.tasks.model_schemas.user import UserInContestSchema
 
 
 class UpdateUserInContestRequestTaskControlUsersSchema(Schema):

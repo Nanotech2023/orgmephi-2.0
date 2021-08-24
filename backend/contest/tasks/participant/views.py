@@ -5,7 +5,8 @@ from flask import abort, send_file
 from common import get_current_app, get_current_module
 from common.errors import AlreadyExists
 from contest.tasks.control_users.schemas import UserCertificateResponseTaskControlUsersSchema
-from contest.tasks.model_schemas.schemas import VariantSchema, ContestSchema
+from contest.tasks.model_schemas.contest import VariantSchema
+from contest.tasks.model_schemas.olympiad import ContestSchema
 from contest.tasks.participant.schemas import *
 from contest.tasks.unauthorized.schemas import AllOlympiadsResponseTaskUnauthorizedSchema
 from contest.tasks.util import *
@@ -83,15 +84,15 @@ def enroll_in_contest(id_contest):
 
     user_id = jwt_get_id()
 
-    contest = get_contest_if_possible(id_contest)
+    current_contest = get_contest_if_possible(id_contest)
 
-    if is_user_in_contest(user_id, contest):
+    if is_user_in_contest(user_id, current_contest):
         raise AlreadyExists('user_id', str(user_id))
 
-    contest.users.append(UserInContest(user_id=user_id,
-                                       show_results_to_user=False,
-                                       variant_id=generate_variant(id_contest, user_id),
-                                       user_status=UserStatusEnum.Participant))
+    current_contest.users.append(UserInContest(user_id=user_id,
+                                               show_results_to_user=False,
+                                               variant_id=generate_variant(id_contest, user_id),
+                                               user_status=UserStatusEnum.Participant))
 
     db.session.commit()
     return {}, 200
@@ -132,9 +133,9 @@ def task_all(id_contest):
           description: User not found
     """
 
-    tasks = get_user_tasks_if_possible(id_contest)
+    tasks_list = get_user_tasks_if_possible(id_contest)
     return {
-               "tasks_list": tasks
+               "tasks_list": tasks_list
            }, 200
 
 
@@ -261,9 +262,9 @@ def contest_all_self(id_olympiad, id_stage):
         '404':
           description: User not found
     """
-    olympiad = db_get_or_raise(Contest, "contest_id", str(id_olympiad))
+    current_olympiad = db_get_or_raise(Contest, "contest_id", str(id_olympiad))
     stage = db_get_or_raise(Stage, "stage_id", str(id_stage))
-    if olympiad.composite_type != ContestTypeEnum.CompositeContest or stage not in olympiad.stages:
+    if current_olympiad.composite_type != ContestTypeEnum.CompositeContest or stage not in current_olympiad.stages:
         raise InsufficientData('stage_id', 'not in current olympiad')
     all_contest = [contest_
                    for contest_ in stage.contests
@@ -316,5 +317,5 @@ def contest_self(id_olympiad, id_stage, id_contest):
         '404':
           description: User not found
     """
-    contest = get_user_contest_if_possible(id_olympiad, id_stage, id_contest)
-    return contest, 200
+    current_contest = get_user_contest_if_possible(id_olympiad, id_stage, id_contest)
+    return current_contest, 200

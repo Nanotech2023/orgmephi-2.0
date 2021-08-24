@@ -2,7 +2,9 @@ from marshmallow import Schema, fields
 from marshmallow_enum import EnumField
 
 from common import fields as common_fields
-from contest.tasks.model_schemas.schemas import TaskSchema, ContestSchema, BaseContestSchema, StageSchema, VariantSchema
+from contest.tasks.model_schemas.contest import StageSchema, VariantSchema
+from contest.tasks.model_schemas.olympiad import ContestSchema, BaseContestSchema
+from contest.tasks.model_schemas.tasks import TaskSchema
 from contest.tasks.models import OlympiadSubjectEnum, TargetClassEnum, StageConditionEnum, ContestHoldingTypeEnum, \
     UserStatusEnum
 
@@ -17,17 +19,6 @@ class CreateBaseOlympiadRequestTaskCreatorSchema(Schema):
     laureate_condition = fields.Float(required=True)
     olympiad_type_id = fields.Int(required=True)
     subject = EnumField(OlympiadSubjectEnum, required=True, by_value=True)
-    target_classes = fields.List(EnumField(TargetClassEnum, required=True, by_value=True), required=True)
-
-
-class UpdateBaseOlympiadRequestTaskCreatorSchema(Schema):
-    name = common_fields.CommonName(required=False)
-    description = common_fields.Text(required=False)
-    rules = common_fields.Text(required=False)
-    winning_condition = fields.Float(required=False)
-    laureate_condition = fields.Float(required=False)
-    olympiad_type_id = fields.Int(required=False)
-    subject = EnumField(OlympiadSubjectEnum, required=False, by_value=True)
     target_classes = fields.List(EnumField(TargetClassEnum, required=True, by_value=True), required=True)
 
 
@@ -82,22 +73,6 @@ class ContestIdResponseTaskCreatorSchema(Schema):
     contest_id = fields.Int(required=True)
 
 
-class UpdateContestRequestTaskCreatorSchema(Schema):
-    start_date = fields.DateTime(required=False)
-    end_date = fields.DateTime(required=False)
-    result_publication_date = fields.DateTime(required=False)
-    visibility = fields.Boolean(required=False)
-    contest_duration = fields.TimeDelta(required=False)
-    previous_contest_id = fields.Int(required=False)
-    previous_participation_condition = EnumField(UserStatusEnum, required=False, by_value=True)
-    holding_type = EnumField(ContestHoldingTypeEnum, required=True, by_value=False)
-
-
-class UpdatePreviousContestRequestTaskCreatorSchema(Schema):
-    previous_contest_id = fields.Int(required=True)
-    previous_participation_condition = EnumField(UserStatusEnum, required=True, by_value=True)
-
-
 # Stage
 
 
@@ -118,13 +93,6 @@ class StageResponseTaskCreatorSchema(Schema):
 
 class StageIdResponseTaskCreatorSchema(Schema):
     stage_id = fields.Int(required=True)
-
-
-class UpdateStageRequestTaskCreatorSchema(Schema):
-    stage_name = common_fields.CommonName(required=False)
-    stage_num = fields.Int(required=False)
-    this_stage_condition = common_fields.Text(required=False)
-    condition = EnumField(StageConditionEnum, required=False, by_value=True)
 
 
 # All
@@ -160,11 +128,6 @@ class VariantResponseTaskCreatorSchema(Schema):
 
 class VariantIdResponseTaskCreatorSchema(Schema):
     variant_id = fields.Int(required=True)
-
-
-class UpdateVariantRequestTaskCreatorSchema(Schema):
-    variant_number = fields.Int(required=False)
-    variant_description = common_fields.Text(required=False)
 
 
 class AllTasksResponseTaskCreatorSchema(Schema):
@@ -213,29 +176,3 @@ class TaskResponseTaskCreatorSchema(Schema):
 
 class TaskIdResponseTaskCreatorSchema(Schema):
     task_id = fields.Int(required=True)
-
-
-class UpdatePlainRequestTaskCreatorSchema(Schema):
-    num_of_task = fields.Int(required=False)
-    recommended_answer = common_fields.Text(required=False)
-    show_answer_after_contest = fields.Boolean(required=False)
-    task_points = fields.Integer(required=False)
-
-
-class UpdateRangeRequestTaskCreatorSchema(Schema):
-    num_of_task = fields.Int(required=False)
-    start_value = fields.Float(required=False)
-    end_value = fields.Float(required=False)
-    show_answer_after_contest = fields.Boolean(required=False)
-    task_points = fields.Integer(required=False)
-
-
-class UpdateMultipleRequestTaskCreatorSchema(Schema):
-    num_of_task = fields.Int(required=False)
-    answers = fields.List(fields.Nested(AnswersInTaskRequestTaskCreatorSchema), required=False)
-    show_answer_after_contest = fields.Boolean(required=False)
-    task_points = fields.Integer(required=False)
-
-
-class UpdateLocationOfContestRequestTaskCreatorSchema(Schema):
-    locations = fields.List(fields.Int(), required=True)

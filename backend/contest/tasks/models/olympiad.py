@@ -1,5 +1,3 @@
-"""File with models description for contests and tasks management."""
-
 from datetime import datetime
 import enum
 from common import get_current_db
@@ -16,9 +14,9 @@ class UserStatusEnum(enum.Enum):
     Winner_1 = "Winner 1"
     Winner_2 = "Winner 2"
     Winner_3 = "Winner 3"
-    Diploma_1 = "Dinner 1"
-    Diploma_2 = "Dinner 2"
-    Diploma_3 = "Dinner 3"
+    Diploma_1 = "Diploma 1"
+    Diploma_2 = "Diploma 2"
+    Diploma_3 = "Diploma 3"
     Participant = "Participant"
 
 
@@ -35,23 +33,6 @@ class OlympiadSubjectEnum(enum.Enum):
 
 
 olympiad_subject_dict = {subject.value: subject for subject in OlympiadSubjectEnum}
-
-
-class TargetClassEnum(enum.Enum):
-    """
-    Enum for olympiad target classes
-    """
-    class_5 = "5"
-    class_6 = "6"
-    class_7 = "7"
-    class_8 = "8"
-    class_9 = "9"
-    class_10 = "10"
-    class_11 = "11"
-    student = "student"
-
-
-olympiad_target_class_dict = {target.value: target for target in TargetClassEnum}
 
 
 def add_olympiad_type(db_session, olympiad_type):
@@ -88,14 +69,14 @@ def add_location(db_session, location):
     """
     Create new location
     """
-    location = Location(
+    location = OlympiadLocation(
         location=location,
     )
     db_session.add(location)
     return location
 
 
-class Location(db.Model):
+class OlympiadLocation(db.Model):
     """
     This class describing olympiad contest location
 
@@ -104,7 +85,7 @@ class Location(db.Model):
 
     """
 
-    __tablename__ = 'location'
+    __tablename__ = 'olympiad_location'
 
     location_id = db.Column(db.Integer, autoincrement=True, primary_key=True)
     location = db.Column(db.Text, nullable=False, unique=True)
@@ -186,7 +167,7 @@ class ContestHoldingTypeEnum(enum.Enum):
 locationInContest = db.Table('location_in_contest',
                              db.Column('contest_id', db.Integer, db.ForeignKey('contest.contest_id'),
                                        primary_key=True),
-                             db.Column('location_id', db.Integer, db.ForeignKey('location.location_id'),
+                             db.Column('location_id', db.Integer, db.ForeignKey('olympiad_location.location_id'),
                                        primary_key=True)
                              )
 
@@ -281,7 +262,7 @@ class SimpleContest(Contest):
     next_contests = db.relationship('SimpleContest',
                                     foreign_keys=[previous_contest_id])
 
-    locations = db.relationship('Location', secondary=locationInContest, lazy='subquery',
+    locations = db.relationship('OlympiadLocation', secondary=locationInContest, lazy='subquery',
                                 backref=db.backref('contest', lazy=True))
 
     __mapper_args__ = {
@@ -325,276 +306,4 @@ class CompositeContest(Contest):
 
     __mapper_args__ = {
         'polymorphic_identity': ContestTypeEnum.CompositeContest,
-    }
-
-
-"""
-Table describing a Contests In Stage model.
-
-stage_id: id of the stage
-contest_id: id of contest
-"""
-
-contestsInStage = db.Table('contests_in_stage',
-                           db.Column('stage_id', db.Integer, db.ForeignKey('stage.stage_id'),
-                                     primary_key=True),
-                           db.Column('contest_id', db.Integer, db.ForeignKey('contest.contest_id'), primary_key=True)
-                           )
-
-
-class StageConditionEnum(enum.Enum):
-    No = "No"
-    And = "And"
-    Or = "Or"
-
-
-class Stage(db.Model):
-    """
-    Class describing a Stage model.
-
-    stage_id: id of the stage
-    olympiad_id: id of olympiad
-    stage_name: name of the stage
-    stage_num: name of the stage
-
-    this_stage_condition: condition to pass to the next stage
-
-    contests: contests
-    """
-
-    __tablename__ = 'stage'
-
-    stage_id = db.Column(db.Integer, autoincrement=True, primary_key=True)
-    olympiad_id = db.Column(db.Integer, db.ForeignKey('contest.contest_id'))
-    stage_name = db.Column(db.Text, index=True, nullable=False)
-    stage_num = db.Column(db.Integer, nullable=False)
-    condition = db.Column(db.Enum(StageConditionEnum), nullable=True)
-    this_stage_condition = db.Column(db.Text, nullable=False)
-
-    contests = db.relationship('Contest', secondary=contestsInStage, lazy='subquery',
-                               backref=db.backref('stage', lazy=True))
-
-
-def add_stage(db_session, stage_name, condition, stage_num, this_stage_condition, olympiad_id=None):
-    """
-    Create new stage object
-    """
-    stage = Stage(
-        stage_name=stage_name,
-        stage_num=stage_num,
-        condition=condition,
-        this_stage_condition=this_stage_condition,
-        olympiad_id=olympiad_id,
-    )
-    db_session.add(stage)
-    return stage
-
-
-"""
-Class describing a Task in variant model.
-
-variant_id: id of the variant
-task_id: id of the task
-"""
-
-taskInVariant = db.Table('task_in_variant',
-                         db.Column('variant_id', db.Integer, db.ForeignKey('variant.variant_id'), primary_key=True),
-                         db.Column('task_id', db.Integer, db.ForeignKey('base_task.task_id'), primary_key=True)
-                         )
-
-
-def add_variant(db_session, variant_number, variant_description, contest_id=None):
-    """
-    Create new variant object
-    """
-    variant = Variant(
-        contest_id=contest_id,
-        variant_number=variant_number,
-        variant_description=variant_description,
-    )
-    db_session.add(variant)
-    return variant
-
-
-class Variant(db.Model):
-    """
-    Class describing a Task variant model.
-
-    variant_id: id of the variant
-    contest_id: id of contest
-    variant_number: id of the variant number
-    variant_description: description of the variant
-
-    users: users
-    tasks: tasks
-    """
-
-    __tablename__ = 'variant'
-
-    variant_id = db.Column(db.Integer, autoincrement=True, primary_key=True)
-    contest_id = db.Column(db.Integer, db.ForeignKey('contest.contest_id'))
-    variant_number = db.Column(db.Integer)
-    variant_description = db.Column(db.Text)
-
-    users = db.relationship('UserInContest', lazy='select',
-                            backref=db.backref('variant', lazy='joined'))
-
-    tasks = db.relationship('Task', secondary=taskInVariant, lazy='subquery',
-                            backref=db.backref('variant', lazy=True))
-
-
-class UserInContest(db.Model):
-    """
-    Class describing a User in contest model.
-
-    user_id: if of user
-    contest_id: id of the contest
-    variant_id: variant connected with current contest
-    user_status: user status: laureate, winner or custom value
-    """
-
-    __tablename__ = 'user_in_contest'
-    user_id = db.Column(db.Integer, primary_key=True)
-    contest_id = db.Column(db.Integer, db.ForeignKey('contest.contest_id'), primary_key=True)
-    variant_id = db.Column(db.Integer, db.ForeignKey('variant.variant_id'))
-    user_status = db.Column(db.Enum(UserStatusEnum))
-    show_results_to_user = db.Column(db.Boolean)
-
-
-class TaskTypeEnum(enum.Enum):
-    PlainTask = "PlainTask"
-    RangeTask = "RangeTask"
-    MultipleChoiceTask = "MultipleChoiceTask"
-    BaseTask = "BaseTask"
-
-
-class Task(db.Model):
-    """
-    Class describing a Base Task model.
-
-    task_id: id of the task
-    num_of_task: number of the task
-    image_of_task: image file
-    task_type: task type for inheritance
-    """
-
-    __tablename__ = 'base_task'
-    task_id = db.Column(db.Integer, autoincrement=True, primary_key=True)
-    num_of_task = db.Column(db.Integer, nullable=False)
-
-    image_of_task = db.Column(db.LargeBinary, nullable=True)
-
-    show_answer_after_contest = db.Column(db.Boolean, nullable=True)
-    task_points = db.Column(db.Integer, nullable=True)
-
-    task_type = db.Column(db.Enum(TaskTypeEnum))
-
-    __mapper_args__ = {
-        'polymorphic_identity': TaskTypeEnum.BaseTask,
-        'polymorphic_on': task_type
-    }
-
-
-def add_plain_task(db_session, num_of_task, recommended_answer, image_of_task=None,
-                   task_points=None, show_answer_after_contest=None):
-    """
-    Create new plain task object
-    """
-    task = PlainTask(
-        num_of_task=num_of_task,
-        image_of_task=image_of_task,
-        show_answer_after_contest=show_answer_after_contest,
-        task_points=task_points,
-        recommended_answer=recommended_answer,
-    )
-    db_session.add(task)
-    return task
-
-
-class PlainTask(Task):
-    """
-    Class describing a Task with plain text model.
-
-    task_id: id of the task
-    recommended_answer: recommended for student answer
-    """
-
-    __tablename__ = 'plain_task'
-
-    task_id = db.Column(db.Integer, db.ForeignKey('base_task.task_id'), primary_key=True)
-    recommended_answer = db.Column(db.Text, nullable=False)
-
-    __mapper_args__ = {
-        'polymorphic_identity': TaskTypeEnum.PlainTask,
-    }
-
-
-def add_range_task(db_session, num_of_task, start_value, end_value, image_of_task=None,
-                   task_points=None, show_answer_after_contest=None):
-    """
-    Create new range task object
-    """
-    task = RangeTask(
-        num_of_task=num_of_task,
-        image_of_task=image_of_task,
-        show_answer_after_contest=show_answer_after_contest,
-        task_points=task_points,
-        start_value=start_value,
-        end_value=end_value,
-    )
-    db_session.add(task)
-    return task
-
-
-class RangeTask(Task):
-    """
-    Class describing a Task with range model.
-
-    task_id: id of the task
-    start_value: start value of the range of the answer
-    end_value: end value of the range of the answer
-    """
-
-    __tablename__ = 'range_task'
-
-    task_id = db.Column(db.Integer, db.ForeignKey('base_task.task_id'), primary_key=True)
-    start_value = db.Column(db.Float, nullable=False)
-    end_value = db.Column(db.Float, nullable=False)
-
-    __mapper_args__ = {
-        'polymorphic_identity': TaskTypeEnum.RangeTask,
-    }
-
-
-def add_multiple_task(db_session, num_of_task, image_of_task=None,
-                      task_points=None, show_answer_after_contest=None):
-    """
-    Create new multiple task object
-    """
-    task = MultipleChoiceTask(
-        num_of_task=num_of_task,
-        image_of_task=image_of_task,
-        show_answer_after_contest=show_answer_after_contest,
-        task_points=task_points,
-    )
-    db_session.add(task)
-    return task
-
-
-class MultipleChoiceTask(Task):
-    """
-    Class describing a Task with multiple choice model.
-
-    task_id: id of the task
-    answers: answers on multiple tasks
-    """
-
-    __tablename__ = 'multiple_task'
-
-    task_id = db.Column(db.Integer, db.ForeignKey('base_task.task_id'), primary_key=True)
-
-    answers = db.Column(db.PickleType)
-
-    __mapper_args__ = {
-        'polymorphic_identity': TaskTypeEnum.MultipleChoiceTask,
     }
