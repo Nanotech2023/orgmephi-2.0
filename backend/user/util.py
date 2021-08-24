@@ -37,3 +37,14 @@ def grade_to_admission(grade):
 
 def admission_to_grade(admission):
     return admission_date(datetime.utcnow().date()).year - admission.year + 1
+
+
+def get_unfilled(obj, required_fields: list[str], child_fields: list[str]):
+    unfilled = [key for key in required_fields if getattr(obj, key, None) is None]
+    for key in child_fields:
+        attr = getattr(obj, key, None)
+        if attr is not None:
+            unfilled_attr = attr.unfilled()
+            if len(unfilled_attr) > 0:
+                unfilled.append({key: unfilled_attr})
+    return unfilled

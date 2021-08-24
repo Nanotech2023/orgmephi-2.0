@@ -2,6 +2,8 @@ from common import get_current_db, get_current_app
 from datetime import datetime
 import enum
 
+from user.util import get_unfilled
+
 db = get_current_db()
 app = get_current_app()
 
@@ -79,6 +81,19 @@ class User(db.Model):
     school_info = db.relationship('SchoolInfo', back_populates='user', lazy=True, uselist=False,
                                   cascade='save-update, merge, delete, delete-orphan')
     groups = db.relationship('Group', secondary=users_in_group, lazy='select', back_populates='users')
+
+    _required_fields = {
+        UserTypeEnum.pre_university: ['user_info', 'school_info'],
+        UserTypeEnum.enrollee: ['user_info', 'school_info'],
+        UserTypeEnum.school: ['user_info', 'school_info'],
+        UserTypeEnum.university: ['user_info', 'student_info'],
+        UserTypeEnum.internal: ['user_info'],
+        UserTypeEnum.pre_register: ['user_info'],
+    }
+
+    def unfilled(self):
+        req_fields = self._required_fields[self.type]
+        return get_unfilled(self, req_fields, list({'user_info', 'school_info', 'student_info'} & set(req_fields)))
 
 
 def add_user(db_session, username, password_hash, role, reg_type):
