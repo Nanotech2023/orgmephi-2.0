@@ -587,11 +587,11 @@ def get_list_for_stage(contest_id):
            }, 200
 
 
-@module.route('/contest/<int:contest_id>/user/<int:user_id>/task/<int:task_id>/mark', methods=['POST'],
+@module.route('/contest/<int:contest_id>/task/<int:task_id>/user/<int:user_id>/mark', methods=['POST'],
               input_schema=UserAnswerMarkResponseSchema)
 def user_answer_task_mark_post(contest_id, user_id, task_id):
     """
-    Create appeal for user's response
+    Add mark for user's response
     ---
     post:
       security:
@@ -605,14 +605,14 @@ def user_answer_task_mark_post(contest_id, user_id, task_id):
           schema:
             type: integer
         - in: path
-          description: Id of the user
-          name: user_id
+          description: Id of the task
+          name: task_id
           required: true
           schema:
             type: integer
         - in: path
-          description: Id of the task
-          name: task_id
+          description: Id of the user
+          name: user_id
           required: true
           schema:
             type: integer
@@ -637,11 +637,11 @@ def user_answer_task_mark_post(contest_id, user_id, task_id):
     return {}, 200
 
 
-@module.route('/contest/<int:contest_id>/user/<int:user_id>/task/<int:task_id>/mark', methods=['GET'],
+@module.route('/contest/<int:contest_id>/task/<int:task_id>/user/<int:user_id>/mark', methods=['GET'],
               output_schema=UserAnswerMarkResponseSchema)
 def user_answer_task_mark(contest_id, user_id, task_id):
     """
-    Create appeal for user's response
+    Get mark for user's response
     ---
     get:
       security:
@@ -655,14 +655,14 @@ def user_answer_task_mark(contest_id, user_id, task_id):
           schema:
             type: integer
         - in: path
-          description: Id of the user
-          name: user_id
+          description: Id of the task
+          name: task_id
           required: true
           schema:
             type: integer
         - in: path
-          description: Id of the task
-          name: task_id
+          description: Id of the user
+          name: user_id
           required: true
           schema:
             type: integer

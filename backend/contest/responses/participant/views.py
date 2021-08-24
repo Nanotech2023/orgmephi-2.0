@@ -2,10 +2,12 @@ import io
 from flask import request, send_file
 from common import get_current_app, get_current_module
 from common.jwt_verify import jwt_get_id
+from common.util import db_get_or_raise
 from contest.responses.model_schemas.schemas import PlainAnswerSchema, RangeAnswerSchema, MultipleChoiceAnswerSchema
 from contest.responses.util import *
 from contest.responses.creator.schemas import AllUserAnswersResponseSchema, PlainAnswerRequestSchema, \
-    RangeAnswerRequestSchema, MultipleAnswerRequestSchema, UserResponseStatusResponseSchema
+    RangeAnswerRequestSchema, MultipleAnswerRequestSchema, UserResponseStatusResponseSchema, \
+    UserAnswerMarkResponseSchema
 
 db = get_current_db()
 module = get_current_module()
@@ -427,7 +429,7 @@ def self_user_answer_for_task_multiple(contest_id, task_id):
               output_schema=UserResponseStatusResponseSchema)
 def self_user_status_for_response(contest_id):
     """
-    Get current user's status for response, only for inspector
+    Get current user's status for response
     ---
     get:
       security:
@@ -456,3 +458,43 @@ def self_user_status_for_response(contest_id):
     self_user_id = jwt_get_id()
     user_work = get_user_in_contest_work(self_user_id, contest_id)
     return user_work, 200
+
+
+@module.route('/contest/<int:contest_id>/task/<int:task_id>/user/self/mark', methods=['GET'],
+              output_schema=UserAnswerMarkResponseSchema)
+def self_user_answer_task_mark(contest_id, task_id):
+    """
+    Get mark for user's response
+    ---
+    get:
+      security:
+        - JWTAccessToken: []
+        - CSRFAccessToken: []
+      parameters:
+        - in: path
+          description: Id of the contest
+          name: contest_id
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the task
+          name: task_id
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: UserAnswerMarkResponseSchema
+      responses:
+        '200':
+          description: OK
+        '404':
+          description: User or contest not found
+    """
+    self_user_id = jwt_get_id()
+    user_work = get_user_in_contest_work(self_user_id, contest_id)
+    answer = db_get_or_raise(BaseAnswer, 'task_id', task_id)
+    return answer, 200
