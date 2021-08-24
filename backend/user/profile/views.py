@@ -1,5 +1,7 @@
-from flask import request
+from flask import request, render_template, send_file
 from marshmallow import EXCLUDE
+import pdfkit
+from io import BytesIO
 
 from common.errors import NotFound
 from common import get_current_app, get_current_module, get_current_db
@@ -250,3 +252,23 @@ def get_user_groups_self():
     """
     user = db_get_or_raise(User, "id", jwt_get_id())
     return {'groups': user.groups}, 200
+
+
+@module.route('/card', methods=['GET'])
+def generate_card():
+    """
+    Generate a participant card
+    ---
+    get:
+      security:
+        - JWTAccessToken: [ ]
+      responses:
+        '200':
+          description: OK
+        '404':
+          description: User not found
+    """
+    user = db_get_or_raise(User, 'id', jwt_get_id())
+    template = render_template('participant_card.html', u=user)
+    pdf = pdfkit.from_string(template, False, options={'orientation': 'landscape'})
+    return send_file(BytesIO(pdf), 'application/pdf')
