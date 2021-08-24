@@ -5,7 +5,7 @@ from marshmallow import EXCLUDE
 
 from common.errors import QuotaExceeded, NotFound, DataConflict
 from common import get_current_app, get_current_module, get_current_db
-from common.util import db_get_or_raise, db_get_all, db_get_list
+from common.util import db_get_or_raise, db_get_all
 from common.jwt_verify import jwt_get_id
 
 from .schemas import ListCategoriesMessagesResponseSchema, CreateThreadMessagesRequestSchema, \
@@ -86,6 +86,16 @@ def filter_threads():
           required: false
           schema:
             type: boolean
+        - in: query
+          name: contest_id
+          required: false
+          schema:
+            type: integer
+        - in: query
+          name: work_id
+          required: false
+          schema:
+            type: integer
       security:
         - JWTAccessToken: [ ]
       responses:

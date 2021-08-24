@@ -15,6 +15,8 @@ class FilterThreadsMessagesRequestSchema(Schema):
     thread_type = EnumField(enum=ThreadType, by_value=True)
     category_name = common_fields.CommonName()
     only_count = fields.Boolean()
+    contest_id = fields.Integer(attribute='related_contest_id')
+    work_id = fields.Integer(attribute='related_work_id')
 
 
 class FilterThreadsMessagesResponseSchema(Schema):
@@ -22,10 +24,13 @@ class FilterThreadsMessagesResponseSchema(Schema):
     count = fields.Integer()
 
 
+_filter_fields = ['resolved', 'answered', 'thread_type', 'category_name', 'related_contest_id', 'related_work_id']
+
+
 def filter_threads_query(args, user_id):
     marshmallow = FilterThreadsMessagesRequestSchema().load(args)
 
-    filters = {v: marshmallow[v] for v in ['resolved', 'answered', 'thread_type', 'category_name'] if v in marshmallow}
+    filters = {v: marshmallow[v] for v in _filter_fields if v in marshmallow}
 
     query = Thread.query.filter_by(**filters)
 
