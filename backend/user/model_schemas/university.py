@@ -89,7 +89,6 @@ class StudentInfoSchema(SQLAlchemySchema):
         sqla_session = db.session
 
     user_id = auto_field(column_name='user_id', dump_only=True)
-    phone = auto_field(column_name='phone', allow_none=True)
     university = Nested(nested=StudentUniversitySchema, allow_none=True, many=False)
     grade = fields.Integer(allow_none=True)
 
@@ -100,7 +99,6 @@ class StudentUniversityInputSchema(Schema):
 
 
 class StudentInfoInputSchema(Schema):
-    phone = common_fields.Phone()
     university = fields.Nested(nested=StudentUniversityInputSchema, many=False)
     grade = common_fields.Grade()
     citizenship = common_fields.CommonName()

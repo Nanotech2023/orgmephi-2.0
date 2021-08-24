@@ -16,14 +16,12 @@ class StudentInfo(db.Model):
         Attributes:
 
         id: id of the info
-        phone: user's phone number
         university: id of student's university from known university list
     """
 
     __table_name__ = 'student_info'
 
     user_id = db.Column(db.Integer, db.ForeignKey(User.id), primary_key=True)
-    phone = db.Column(db.String)
     admission_year = db.Column(db.Date)
 
     university = db.relationship('StudentUniversity', lazy='select', uselist=False,

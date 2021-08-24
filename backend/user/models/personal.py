@@ -24,6 +24,7 @@ class UserInfo(db.Model):
 
         id: id of the info
         email: email address of the user
+        phone: user's phone number
         first_name: user's first name
         middle_name: user's middle name
         second_name: user's second name
@@ -35,6 +36,7 @@ class UserInfo(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey(User.id), primary_key=True)
     location_id = db.Column(db.Integer, db.ForeignKey(Location.id))
     email = db.Column(db.String, unique=True)
+    phone = db.Column(db.String)
     first_name = db.Column(db.String)
     middle_name = db.Column(db.String)
     second_name = db.Column(db.String)
