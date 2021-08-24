@@ -24,7 +24,6 @@ class ResponseStatusEnum(enum.Enum):
     not_checked = 'NotChecked'
     accepted = 'Accepted'
     rejected = 'Rejected'
-    appeal = 'Appeal'
     correction = 'Correction'
 
 
@@ -63,44 +62,15 @@ class Response(db.Model):
     finish_time = db.Column(db.DateTime, default=datetime.utcnow())
     status = db.Column(db.Enum(ResponseStatusEnum), nullable=False)
 
-    appeal = db.relationship('Appeal', backref='response', lazy='dynamic', uselist=False, cascade="all, delete")
-    answers = db.relationship('ResponseAnswer', backref='response', lazy='dynamic', cascade="all, delete")
+    answers = db.relationship('BaseAnswer', backref='response', lazy='dynamic', cascade="all, delete")
 
     @hybrid_property
     def mark(self):
-        if len(self.statuses) > 0:
-            return self.statuses[-1].mark
-
-
-class AppealStatusEnum(enum.Enum):
-    """
-    Class enumerating statuses of user's work appeal.
-
-    under_review: appeal has been submitted and is under review
-    appeal_accepted: appeal accepted
-    appeal_rejected: appeal rejected
-    """
-
-    under_review = "UnderReview"
-    appeal_accepted = "AppealAccepted"
-    appeal_rejected = "AppealRejected"
-
-
-appeal_status = {status.value: status for status in AppealStatusEnum}
-
-
-class Appeal(db.Model):
-    """
-    Class describing a Appeal for the user's work.
-
-    appeal_id: id of the user's appeal
-    work_id: the id of the work appealed against
-    appeal_status: status of the appeal
-    """
-
-    appeal_id = db.Column(db.Integer, autoincrement=True, primary_key=True)
-    work_id = db.Column(db.Integer, db.ForeignKey(Response.work_id))
-    appeal_status = db.Column(db.Enum(AppealStatusEnum), nullable=False)  # TODO Сообщения создавать на стороне другой
+        mark = 0
+        if len(self.answers) > 0:
+            for elem in self.answers:
+                mark += elem.mark
+            return mark
 
 
 class ResponseFiletypeEnum(enum.Enum):
@@ -150,11 +120,21 @@ class BaseAnswer(db.Model):
     work_id = db.Column(db.Integer, db.ForeignKey('response.work_id'))
     task_id = db.Column(db.Integer, db.ForeignKey(f'{Task.__tablename__}.task_id'))
     answer_type = db.Column(db.Enum(AnswerEnum), nullable=False)
+    mark = db.Column(db.Float, nullable=True)
 
     __mapper_args__ = {
         'polymorphic_identity': AnswerEnum.PlainAnswer,
         'polymorphic_on': answer_type
     }
+
+
+def add_range_answer(work_id, task_id, answer):
+    answer = RangeAnswer(
+        work_id=work_id,
+        task_id=task_id,
+        answer=answer
+    )
+    db.session.add(answer)
 
 
 class RangeAnswer(BaseAnswer):
@@ -171,6 +151,23 @@ class RangeAnswer(BaseAnswer):
     __mapper_args__ = {
         'polymorphic_identity': AnswerEnum.RangeAnswer,
     }
+
+
+def add_plain_answer(work_id, task_id, text=None, filetype=None, file=None):
+    if text is not None:
+        answer = PlainAnswer(
+            work_id=work_id,
+            task_id=task_id,
+            answer_text=text
+        )
+    else:
+        answer = PlainAnswer(
+            work_id=work_id,
+            task_id=task_id,
+            answer_file=file,
+            filetype=filetype
+        )
+    db.session.add(answer)
 
 
 class PlainAnswer(BaseAnswer):
@@ -198,6 +195,16 @@ class PlainAnswer(BaseAnswer):
             self.filetype = filetype_dict[filetype_new]
 
 
+def add_multiple_answer(work_id, task_id, answers):
+    answer = MultipleUserAnswer(
+        work_id=work_id,
+        task_id=task_id
+    )
+    db.session.add(answer)
+    for elem in answers:
+        answer.answers.append(MultipleUserAnswer(text=elem))
+
+
 class MultipleChoiceAnswer(BaseAnswer):
     """
     Class describing answer for multiple choice answer
@@ -219,26 +226,9 @@ class MultipleUserAnswer(db.Model):
     Class describing each user answer for multiple choice task
     """
 
-    answer_id = db.Column(db.Integer, db.ForeignKey(MultipleChoiceAnswer.answer_id), primary_key=True)
-    text = db.Column(db.Text, nullable=False)
-
-
-# def add_response_answer(work_id, task_id, answer, filetype):        #TODO
-#    response_answer = ResponseAnswer(
-#        work_id=work_id,
-#        task_id=task_id,
-#        answer=answer,
-#        filetype=filetype_dict[filetype]
-#    )
-#    return response_answer
-
-
-def add_response_appeal(status_id, message):
-    appeal = Appeal(
-        work_status=status_id,
-        appeal_status=appeal_status['UnderReview'],
-    )
-    return appeal
+    id = db.Column(db.Integer, autoincrement=True, primary_key=True)
+    answer_id = db.Column(db.Integer, db.ForeignKey(MultipleChoiceAnswer.answer_id))
+    answer = db.Column(db.Text, nullable=False)
 
 
 if __name__ == '__main__':
