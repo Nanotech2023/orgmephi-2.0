@@ -10,6 +10,7 @@ from contest.tasks.model_schemas.olympiad import ContestSchema
 from contest.tasks.participant.schemas import *
 from contest.tasks.unauthorized.schemas import AllOlympiadsResponseTaskUnauthorizedSchema
 from contest.tasks.util import *
+from user.models import SchoolInfo
 
 db = get_current_db()
 module = get_current_module()
@@ -84,10 +85,25 @@ def enroll_in_contest(id_contest):
 
     user_id = jwt_get_id()
 
+    current_user: User = db_get_or_raise(User, "id", user_id)
+
+    if current_user.student_info is not None:
+        grade = TargetClassEnum("student")
+    else:
+        school_info: SchoolInfo = current_user.school_info
+        if school_info is None:
+            raise InsufficientData('school_info', "school_info")
+        grade = TargetClassEnum(str(school_info.grade))
+
     current_contest = get_contest_if_possible(id_contest)
+    current_base_contest = get_base_contest(current_contest)
+    target_classes = current_base_contest.target_classes
 
     if is_user_in_contest(user_id, current_contest):
         raise AlreadyExists('user_id', str(user_id))
+
+    if grade not in target_classes:
+        raise InsufficientData('base_contest_id', "current grade of user")
 
     current_contest.users.append(UserInContest(user_id=user_id,
                                                show_results_to_user=False,

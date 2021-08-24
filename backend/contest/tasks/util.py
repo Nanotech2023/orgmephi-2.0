@@ -120,6 +120,16 @@ def get_contest_if_possible(id_contest):
     return current_contest
 
 
+def get_base_contest(current_contest):
+    if current_contest.base_contest is not None:
+        return current_contest.base_contest
+
+    stage = current_contest.stage[0]
+    current_olympiad = db_get_or_raise(Contest, "contest_id", str(stage.olympiad_id))
+
+    return current_olympiad.base_contest
+
+
 def get_variant_if_possible(id_contest, id_variant):
     """
     Get variant by id
