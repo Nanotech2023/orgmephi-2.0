@@ -3,7 +3,7 @@ import bdb
 from .model_schemas.schemas import PlainAnswerSchema, RangeAnswerSchema
 from .models import *
 from datetime import datetime, timedelta
-from common.errors import NotFound
+from common.errors import NotFound, OlympiadIsOver
 from common.util import db_get_one_or_none
 from contest.tasks.models import SimpleContest
 
@@ -50,25 +50,26 @@ def user_answer_post_file(answer_file, filetype, user_id, contest_id, task_id):
         user_work.finish_time = datetime.utcnow()
     except NotFound:
         user_work = add_user_response(db.session, user_id, contest_id)
-    flag, message = check_contest_duration(user_work)
-    if flag:
+    try:
+        check_contest_duration(user_work)
+    except OlympiadIsOver:
         finish_contest(user_work)
-        return message
+        raise
     user_answer = user_work.answers.filter(PlainAnswer.task_id == task_id).one_or_none()
     if user_answer is None:
         add_plain_answer(user_work.work_id, task_id, filetype=filetype, file=answer_file)
     else:
         user_answer.update(answer_new=answer_file, filetype_new=filetype)
     db.session.commit()
-    return message
 
 
 def user_answer_post_plain_text(user_id, contest_id, task_id, values):
     user_work: Response = get_user_in_contest_work(user_id, contest_id)
-    flag, message = check_contest_duration(user_work)
-    if flag:
+    try:
+        check_contest_duration(user_work)
+    except OlympiadIsOver:
         finish_contest(user_work)
-        return message
+        raise
     user_work.finish_time = datetime.utcnow()
     answer = db_get_one_or_none(PlainAnswer, 'task_id', task_id)
     if answer is None:
@@ -76,15 +77,15 @@ def user_answer_post_plain_text(user_id, contest_id, task_id, values):
     else:
         PlainAnswerSchema(load_instance=True).load(values, session=db.session, instance=answer)
     db.session.commit()
-    return message
 
 
 def user_answer_post_range(user_id, contest_id, task_id, values):
     user_work: Response = get_user_in_contest_work(user_id, contest_id)
-    flag, message = check_contest_duration(user_work)
-    if flag:
+    try:
+        check_contest_duration(user_work)
+    except OlympiadIsOver:
         finish_contest(user_work)
-        return message
+        raise
     user_work.finish_time = datetime.utcnow()
     answer = db_get_one_or_none(RangeAnswer, 'task_id', task_id)
     if answer is None:
@@ -92,15 +93,15 @@ def user_answer_post_range(user_id, contest_id, task_id, values):
     else:
         RangeAnswerSchema(load_instance=True).load(values, session=db.session, instance=answer)
     db.session.commit()
-    return message
 
 
 def user_answer_post_multiple(user_id, contest_id, task_id, values):
     user_work: Response = get_user_in_contest_work(user_id, contest_id)
-    flag, message = check_contest_duration(user_work)
-    if flag:
+    try:
+        check_contest_duration(user_work)
+    except OlympiadIsOver:
         finish_contest(user_work)
-        return message, 200
+        raise
     user_work.finish_time = datetime.utcnow()
     answer = db_get_one_or_none(MultipleChoiceAnswer, 'task_id', task_id)
     if answer is None:
@@ -108,7 +109,6 @@ def user_answer_post_multiple(user_id, contest_id, task_id, values):
     else:
         update_multiple_answers(values['answers'], answer)
     db.session.commit()
-    return message
 
 
 def update_multiple_answers(answers, answer):
@@ -133,11 +133,8 @@ def get_mimetype(filetype):
 def check_contest_duration(user_work: Response):
     contest_duration = db_get_one_or_none(SimpleContest, "contest_id", user_work.contest_id).contest_duration
     time_spent = datetime.utcnow() - user_work.start_time
-    if user_work.status == work_status['NotChecked']:
-        return 1, "Already finished"
-    if time_spent + five_minutes > contest_duration:
-        return 1, "No time left"
-    return 0, "OK"
+    if user_work.status == work_status['NotChecked'] or time_spent + five_minutes > contest_duration:
+        raise OlympiadIsOver()
 
 
 def calculate_time_left(user_work: Response):

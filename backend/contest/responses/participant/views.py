@@ -214,8 +214,7 @@ def self_user_answer_for_task_multiple(contest_id, task_id):
     return user_answer
 
 
-@module.route('/contest/<int:contest_id>/task/<int:task_id>/user/self/<string:filetype>', methods=['POST'],
-              output_schema=UserAnswerPostResponseSchema)
+@module.route('/contest/<int:contest_id>/task/<int:task_id>/user/self/<string:filetype>', methods=['POST'])
 def self_user_answer_for_task_post_plain_file(contest_id, task_id, filetype):
     """
     Add current user answer for a task
@@ -252,21 +251,20 @@ def self_user_answer_for_task_post_plain_file(contest_id, task_id, filetype):
       responses:
         '200':
           description: OK
-          content:
-            application/json:
-              schema: UserAnswerPostResponseSchema
         '403':
           description: Not enough rights for current user
         '404':
           description: User, contest or task not found
+        '409':
+          description: Olympiad is over
     """
     self_user_id = jwt_get_id()
-    message = user_answer_post_file(request.data, filetype, self_user_id, contest_id, task_id)
-    return message, 200
+    user_answer_post_file(request.data, filetype, self_user_id, contest_id, task_id)
+    return {}, 200
 
 
 @module.route('/contest/<int:contest_id>/task/<int:task_id>/user/self/plain', methods=['POST'],
-              input_schema=PlainAnswerRequestSchema, output_schema=UserAnswerPostResponseSchema)
+              input_schema=PlainAnswerRequestSchema)
 def self_user_answer_for_task_post_plain_text(contest_id, task_id):
     """
     Add current user answer for a task
@@ -297,21 +295,21 @@ def self_user_answer_for_task_post_plain_text(contest_id, task_id):
       responses:
         '200':
           description: OK
-          content:
-            application/json:
-              schema: UserAnswerPostResponseSchema
         '403':
           description: Not enough rights for current user
         '404':
           description: User, contest or task not found
+        '409':
+          description: Olympiad is over
     """
     values = request.marshmallow
     self_user_id = jwt_get_id()
-    return user_answer_post_plain_text(self_user_id, contest_id, task_id, values), 200
+    user_answer_post_plain_text(self_user_id, contest_id, task_id, values)
+    return {}, 200
 
 
 @module.route('/contest/<int:contest_id>/task/<int:task_id>/user/self/range', methods=['POST'],
-              input_schema=RangeAnswerRequestSchema, output_schema=UserAnswerPostResponseSchema)
+              input_schema=RangeAnswerRequestSchema)
 def self_user_answer_for_task_range(contest_id, task_id):
     """
     Add current user answer for a task
@@ -346,14 +344,17 @@ def self_user_answer_for_task_range(contest_id, task_id):
           description: Not enough rights for current user
         '404':
           description: User, contest or task not found
+        '409':
+          description: Olympiad is over
     """
     values = request.marshmallow
     self_user_id = jwt_get_id()
-    return user_answer_post_range(self_user_id, contest_id, task_id, values), 200
+    user_answer_post_range(self_user_id, contest_id, task_id, values)
+    return {}, 200
 
 
 @module.route('/contest/<int:contest_id>/task/<int:task_id>/user/self/multiple', methods=['POST'],
-              input_schema=MultipleAnswerRequestSchema, output_schema=UserAnswerPostResponseSchema)
+              input_schema=MultipleAnswerRequestSchema)
 def self_user_answer_for_task_multiple(contest_id, task_id):
     """
     Add current user answer for a task
@@ -384,17 +385,17 @@ def self_user_answer_for_task_multiple(contest_id, task_id):
       responses:
         '200':
           description: OK
-          content:
-            application/json:
-              schema: UserAnswerPostResponseSchema
         '403':
           description: Not enough rights for current user
         '404':
           description: User, contest or task not found
+        '409':
+          description: Olympiad is over
     """
     values = request.marshmallow
     self_user_id = jwt_get_id()
-    return user_answer_post_multiple(self_user_id, contest_id, task_id, values), 200
+    user_answer_post_multiple(self_user_id, contest_id, task_id, values)
+    return {}, 200
 
 
 @module.route('/contest/<int:contest_id>/user/self/status', methods=['GET'],
@@ -502,8 +503,6 @@ def self_user_time_left(contest_id):
     user_work = get_user_in_contest_work(self_user_id, contest_id)
     return calculate_time_left(user_work), 200
 
-
-# TODO Одинаковые запросы собрать в одну шляну
 # TODO Проверка всех ответов (автоматических)
 # TODO Закончить олимпиаду
 # TODO ограничения по размеру файлов

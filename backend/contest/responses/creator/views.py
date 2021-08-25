@@ -238,8 +238,7 @@ def user_answer_for_task_by_id_multiple(contest_id, task_id, user_id):
     return user_answer
 
 
-@module.route('/contest/<int:contest_id>/task/<int:task_id>/user/<int:user_id>/<string:filetype>', methods=['POST'],
-              output_schema=UserAnswerPostResponseSchema)
+@module.route('/contest/<int:contest_id>/task/<int:task_id>/user/<int:user_id>/<string:filetype>', methods=['POST'])
 def user_answer_for_task_by_id_post_plain_file(contest_id, task_id, user_id, filetype):
     """
     Add user answer for a task
@@ -282,21 +281,19 @@ def user_answer_for_task_by_id_post_plain_file(contest_id, task_id, user_id, fil
       responses:
         '200':
           description: OK
-          content:
-            application/json:
-              schema: UserAnswerPostResponseSchema
         '403':
           description: Not enough rights for current user
         '404':
           description: User, contest or task not found
-        ''
+        '409':
+          description: Olympiad is over
     """
-    message = user_answer_post_file(request.data, filetype, user_id, contest_id, task_id)
-    return message, 200
+    user_answer_post_file(request.data, filetype, user_id, contest_id, task_id)
+    return {}, 200
 
 
 @module.route('/contest/<int:contest_id>/task/<int:task_id>/user/<int:user_id>/plain', methods=['POST'],
-              input_schema=PlainAnswerRequestSchema, output_schema=UserAnswerPostResponseSchema)
+              input_schema=PlainAnswerRequestSchema)
 def user_answer_for_task_by_id_post_plain_text(contest_id, task_id, user_id):
     """
     Add user answer for a task
@@ -333,20 +330,20 @@ def user_answer_for_task_by_id_post_plain_text(contest_id, task_id, user_id):
       responses:
         '200':
           description: OK
-          content:
-            application/json:
-              schema: UserAnswerPostResponseSchema
         '403':
           description: Not enough rights for current user
         '404':
           description: User, contest or task not found
+        '409':
+          description: Olympiad is over
     """
     values = request.marshmallow
-    return user_answer_post_plain_text(user_id, contest_id, task_id, values), 200
+    user_answer_post_plain_text(user_id, contest_id, task_id, values)
+    return {}, 200
 
 
 @module.route('/contest/<int:contest_id>/task/<int:task_id>/user/<int:user_id>/range', methods=['POST'],
-              input_schema=RangeAnswerRequestSchema, output_schema=UserAnswerPostResponseSchema)
+              input_schema=RangeAnswerRequestSchema)
 def user_answer_for_task_by_id_range(contest_id, task_id, user_id):
     """
     Add user answer for a task
@@ -383,20 +380,20 @@ def user_answer_for_task_by_id_range(contest_id, task_id, user_id):
       responses:
         '200':
           description: OK
-          content:
-            application/json:
-              schema: UserAnswerPostResponseSchema
         '403':
           description: Not enough rights for current user
         '404':
           description: User, contest or task not found
+        '409':
+          description: Olympiad is over
     """
     values = request.marshmallow
-    return user_answer_post_range(user_id, contest_id, task_id, values), 200
+    user_answer_post_range(user_id, contest_id, task_id, values)
+    return {}, 200
 
 
 @module.route('/contest/<int:contest_id>/task/<int:task_id>/user/<int:user_id>/multiple', methods=['POST'],
-              input_schema=MultipleAnswerRequestSchema, output_schema=UserAnswerPostResponseSchema)
+              input_schema=MultipleAnswerRequestSchema)
 def user_answer_for_task_by_id_multiple(contest_id, task_id, user_id):
     """
     Add user answer for a task
@@ -433,16 +430,16 @@ def user_answer_for_task_by_id_multiple(contest_id, task_id, user_id):
       responses:
         '200':
           description: OK
-          content:
-            application/json:
-              schema: UserAnswerPostResponseSchema
         '403':
           description: Not enough rights for current user
         '404':
           description: User, contest or task not found
+        '409':
+          description: Olympiad is over
     """
     values = request.marshmallow
-    return user_answer_post_multiple(user_id, contest_id, task_id, values), 200
+    user_answer_post_multiple(user_id, contest_id, task_id, values)
+    return {}, 200
 
 
 @module.route('/contest/<int:contest_id>/user/<int:user_id>/status', methods=['POST'],

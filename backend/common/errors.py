@@ -143,7 +143,7 @@ class InsufficientData(RequestError):
 
 class FileTooLarge(RequestError):
     """
-    Olympiad is over for current user
+    File is too large
     """
     def __init__(self):
         """
