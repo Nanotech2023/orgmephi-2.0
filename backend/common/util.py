@@ -83,10 +83,10 @@ def db_add_if_not_exists(db_session: Session, table: Type[Model], value, keys: O
     def _get_filter(obj, key_list: list[str]) -> dict[str, object]:
         return {k: getattr(obj, k) for k in key_list if getattr(obj, k) is not None}
 
-    valueFilter = _get_filter(value, keys)
+    value_filter = _get_filter(value, keys)
 
-    if db_exists(db_session, table, filters=valueFilter):
-        raise AlreadyExists(f'{table.__tablename__}({valueFilter.keys()})', f'({valueFilter.values()})')
+    if db_exists(db_session, table, filters=value_filter):
+        raise AlreadyExists(f'{table.__tablename__}({value_filter.keys()})', f'({value_filter.values()})')
     db_session.add(value)
 
 

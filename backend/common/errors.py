@@ -141,6 +141,20 @@ class InsufficientData(RequestError):
         return '%s is missing %s' % (self.obj, self.data)
 
 
+class OlympiadIsOver(RequestError):
+    """
+    Olympiad is over for current user
+    """
+    def __init__(self):
+        """
+        Create error object
+        """
+        super(OlympiadIsOver, self).__init__(409)
+
+    def get_msg(self) -> str:
+        return 'Olympiad is over for current user'
+
+
 class PermissionDenied(RequestError):
     """
     User has insufficient permissions to perform the operation

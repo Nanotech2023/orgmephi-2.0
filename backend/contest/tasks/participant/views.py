@@ -3,7 +3,7 @@ import io
 from flask import abort, send_file
 
 from common import get_current_app, get_current_module
-from common.errors import AlreadyExists
+from common.errors import AlreadyExists, OlympiadIsOver
 from contest.tasks.control_users.schemas import UserCertificateResponseTaskControlUsersSchema
 from contest.tasks.model_schemas.contest import VariantSchema
 from contest.tasks.model_schemas.olympiad import ContestSchema
@@ -152,9 +152,7 @@ def task_all(id_contest):
     current_user = db_get_or_raise(UserInContest, "user_id", str(jwt_get_id()))
 
     if current_user.completed_the_contest:
-        return {
-                   "tasks_list": []
-               }, 200
+        raise OlympiadIsOver()
 
     tasks_list = get_user_tasks_if_possible(id_contest)
     return {
@@ -203,7 +201,7 @@ def task_image(id_contest, id_task):
     current_user = db_get_or_raise(UserInContest, "user_id", str(jwt_get_id()))
 
     if current_user.completed_the_contest:
-        return {}, 200
+        raise OlympiadIsOver()
 
     task = get_user_task_if_possible(id_contest, id_task)
 

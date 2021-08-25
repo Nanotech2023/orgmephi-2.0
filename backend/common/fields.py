@@ -29,17 +29,9 @@ PHONE_REGEX = re.compile(
     r'\d{3}[-.\s]??\d{2}[-.\s]??\d{2})$'
 )
 
-URL_REGEX = re.compile(
-    r'^(?:http|ftp)s?://'  # http:// or https://
-    r'(?:(?:[A-Z0-9](?:[A-Z0-9-]{0,61}[A-Z0-9])?\.)+(?:[A-Z]{2,6}\.?|[A-Z0-9-]{2,}\.?)|'  # domain...
-    r'localhost|'  # localhost...
-    r'\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})'  # ...or ip
-    r'(?::\d+)?'  # optional port
-    r'(?:/?|[/?]\S+)$', re.IGNORECASE)
-
 email_validator = validate.Length(max=64)
 phone_validator = validate.And(validate.Length(max=32), validate.Regexp(PHONE_REGEX))
-url_validator = validate.Regexp(URL_REGEX)
+url_validator = validate.Length(max=128)
 password_validator = validate.Length(max=128)
 username_validator = validate.Length(max=64)
 common_name_validator = validate.Length(max=32)
@@ -53,7 +45,7 @@ news_validator = validate.Length(max=4*1024*1024)  # 4 MB
 
 Email = _apply_validator(fields.Email, email_validator)
 Phone = _add_example(_apply_validator(fields.String, phone_validator), '8 (800) 555 35 35')
-URL = _add_example(_apply_validator(fields.String, url_validator), 'https://www.example.com')
+URL = _add_example(_apply_validator(fields.URL, url_validator), 'https://www.example.com')
 Password = _add_example(_apply_validator(fields.String, password_validator), 'qwertyA*1')
 Username = _apply_validator(fields.String, username_validator)
 CommonName = _apply_validator(fields.String, common_name_validator)

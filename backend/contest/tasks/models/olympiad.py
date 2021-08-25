@@ -226,7 +226,7 @@ class SimpleContest(Contest):
 
     result_publication_date = db.Column(db.DateTime, nullable=True)
 
-    contest_duration = db.Column(db.DateTime, nullable=True)
+    contest_duration = db.Column(db.Interval, nullable=True)
 
     previous_contest_id = db.Column(db.Integer, db.ForeignKey('simple_contest.contest_id'), nullable=True)
     previous_participation_condition = db.Column(db.Enum(UserStatusEnum))
