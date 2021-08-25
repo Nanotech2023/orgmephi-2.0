@@ -324,12 +324,6 @@ def user_answer_for_task_by_id_post_plain_text(contest_id, task_id, user_id):
           required: true
           schema:
             type: integer
-        - in: path
-          description: Filetype
-          name: filetype
-          required: true
-          schema:
-            type: string
       requestBody:
         content:
           description: OK
@@ -348,24 +342,12 @@ def user_answer_for_task_by_id_post_plain_text(contest_id, task_id, user_id):
           description: User, contest or task not found
     """
     values = request.marshmallow
-    user_work: Response = get_user_in_contest_work(user_id, contest_id)
-    flag, message = check_contest_duration(user_work)
-    if flag:
-        finish_contest(user_work)
-        return message, 200
-    user_work.finish_time = datetime.utcnow()
-    answer = db_get_one_or_none(PlainAnswer, 'task_id', task_id)
-    if answer is None:
-        add_plain_answer(user_work.work_id, task_id, text=values['answer_text'])
-    else:
-        PlainAnswerSchema(load_instance=True).load(values, session=db.session, instance=answer)
-    db.session.commit()
-    return message, 200
+    return user_answer_post_plain_text(user_id, contest_id, task_id, values), 200
 
 
 @module.route('/contest/<int:contest_id>/task/<int:task_id>/user/<int:user_id>/range', methods=['POST'],
               input_schema=RangeAnswerRequestSchema, output_schema=UserAnswerPostResponseSchema)
-def user_answer_for_task_by_id_range_text(contest_id, task_id, user_id):
+def user_answer_for_task_by_id_range(contest_id, task_id, user_id):
     """
     Add user answer for a task
     ---
@@ -392,12 +374,6 @@ def user_answer_for_task_by_id_range_text(contest_id, task_id, user_id):
           required: true
           schema:
             type: integer
-        - in: path
-          description: Filetype
-          name: filetype
-          required: true
-          schema:
-            type: string
       requestBody:
         content:
           description: OK
@@ -416,19 +392,7 @@ def user_answer_for_task_by_id_range_text(contest_id, task_id, user_id):
           description: User, contest or task not found
     """
     values = request.marshmallow
-    user_work: Response = get_user_in_contest_work(user_id, contest_id)
-    flag, message = check_contest_duration(user_work)
-    if flag:
-        finish_contest(user_work)
-        return message, 200
-    user_work.finish_time = datetime.utcnow()
-    answer = db_get_one_or_none(RangeAnswer, 'task_id', task_id)
-    if answer is None:
-        add_range_answer(user_work.work_id, task_id, values['answer'])
-    else:
-        RangeAnswerSchema(load_instance=True).load(values, session=db.session, instance=answer)
-    db.session.commit()
-    return message, 200
+    return user_answer_post_range(user_id, contest_id, task_id, values), 200
 
 
 @module.route('/contest/<int:contest_id>/task/<int:task_id>/user/<int:user_id>/multiple', methods=['POST'],
@@ -460,12 +424,6 @@ def user_answer_for_task_by_id_multiple(contest_id, task_id, user_id):
           required: true
           schema:
             type: integer
-        - in: path
-          description: Filetype
-          name: filetype
-          required: true
-          schema:
-            type: string
       requestBody:
         content:
           description: OK
@@ -484,19 +442,7 @@ def user_answer_for_task_by_id_multiple(contest_id, task_id, user_id):
           description: User, contest or task not found
     """
     values = request.marshmallow
-    user_work: Response = get_user_in_contest_work(user_id, contest_id)
-    flag, message = check_contest_duration(user_work)
-    if flag:
-        finish_contest(user_work)
-        return message, 200
-    user_work.finish_time = datetime.utcnow()
-    answer = db_get_one_or_none(MultipleChoiceAnswer, 'task_id', task_id)
-    if answer is None:
-        add_range_answer(user_work.work_id, task_id, values['answers'])
-    else:
-        update_multiple_answers(values['answers'], answer)
-    db.session.commit()
-    return message, 200
+    return user_answer_post_multiple(user_id, contest_id, task_id, values), 200
 
 
 @module.route('/contest/<int:contest_id>/user/<int:user_id>/status', methods=['POST'],

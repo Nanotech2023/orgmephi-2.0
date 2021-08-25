@@ -140,7 +140,7 @@ def self_user_answer_for_task_plain_text(contest_id, task_id):
 
 @module.route('/contest/<int:contest_id>/task/<int:task_id>/user/self/range', methods=['GET'],
               output_schema=RangeAnswerSchema)
-def self_user_answer_for_task_ange(contest_id, task_id):
+def self_user_answer_for_task_range(contest_id, task_id):
     """
     Get current user answer for range task
     ---
@@ -288,12 +288,6 @@ def self_user_answer_for_task_post_plain_text(contest_id, task_id):
           required: true
           schema:
             type: integer
-        - in: path
-          description: Filetype
-          name: filetype
-          required: true
-          schema:
-            type: string
       requestBody:
         content:
           description: OK
@@ -313,24 +307,12 @@ def self_user_answer_for_task_post_plain_text(contest_id, task_id):
     """
     values = request.marshmallow
     self_user_id = jwt_get_id()
-    user_work: Response = get_user_in_contest_work(self_user_id, contest_id)
-    flag, message = check_contest_duration(user_work)
-    if flag:
-        finish_contest(user_work)
-        return message, 200
-    user_work.finish_time = datetime.utcnow()
-    answer = db_get_one_or_none(PlainAnswer, 'task_id', task_id)
-    if answer is None:
-        add_plain_answer(user_work.work_id, task_id, text=values['answer_text'])
-    else:
-        PlainAnswerSchema(load_instance=True).load(values, session=db.session, instance=answer)
-    db.session.commit()
-    return message, 200
+    return user_answer_post_plain_text(self_user_id, contest_id, task_id, values), 200
 
 
 @module.route('/contest/<int:contest_id>/task/<int:task_id>/user/self/range', methods=['POST'],
               input_schema=RangeAnswerRequestSchema, output_schema=UserAnswerPostResponseSchema)
-def self_user_answer_for_task_range_text(contest_id, task_id):
+def self_user_answer_for_task_range(contest_id, task_id):
     """
     Add current user answer for a task
     ---
@@ -351,12 +333,6 @@ def self_user_answer_for_task_range_text(contest_id, task_id):
           required: true
           schema:
             type: integer
-        - in: path
-          description: Filetype
-          name: filetype
-          required: true
-          schema:
-            type: string
       requestBody:
         content:
           description: OK
@@ -373,19 +349,7 @@ def self_user_answer_for_task_range_text(contest_id, task_id):
     """
     values = request.marshmallow
     self_user_id = jwt_get_id()
-    user_work: Response = get_user_in_contest_work(self_user_id, contest_id)
-    flag, message = check_contest_duration(user_work)
-    if flag:
-        finish_contest(user_work)
-        return message, 200
-    user_work.finish_time = datetime.utcnow()
-    answer = db_get_one_or_none(RangeAnswer, 'task_id', task_id)
-    if answer is None:
-        add_range_answer(user_work.work_id, task_id, values['answer'])
-    else:
-        RangeAnswerSchema(load_instance=True).load(values, session=db.session, instance=answer)
-    db.session.commit()
-    return message, 200
+    return user_answer_post_range(self_user_id, contest_id, task_id, values), 200
 
 
 @module.route('/contest/<int:contest_id>/task/<int:task_id>/user/self/multiple', methods=['POST'],
@@ -411,12 +375,6 @@ def self_user_answer_for_task_multiple(contest_id, task_id):
           required: true
           schema:
             type: integer
-        - in: path
-          description: Filetype
-          name: filetype
-          required: true
-          schema:
-            type: string
       requestBody:
         content:
           description: OK
@@ -436,19 +394,7 @@ def self_user_answer_for_task_multiple(contest_id, task_id):
     """
     values = request.marshmallow
     self_user_id = jwt_get_id()
-    user_work: Response = get_user_in_contest_work(self_user_id, contest_id)
-    flag, message = check_contest_duration(user_work)
-    if flag:
-        finish_contest(user_work)
-        return message, 200
-    user_work.finish_time = datetime.utcnow()
-    answer = db_get_one_or_none(MultipleChoiceAnswer, 'task_id', task_id)
-    if answer is None:
-        add_range_answer(user_work.work_id, task_id, values['answers'])
-    else:
-        update_multiple_answers(values['answers'], answer)
-    db.session.commit()
-    return message, 200
+    return user_answer_post_multiple(self_user_id, contest_id, task_id, values), 200
 
 
 @module.route('/contest/<int:contest_id>/user/self/status', methods=['GET'],
