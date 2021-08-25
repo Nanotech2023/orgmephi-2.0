@@ -3,7 +3,7 @@ from marshmallow_enum import EnumField
 
 from common import fields as common_fields
 from contest.tasks.model_schemas.contest import StageSchema, VariantSchema
-from contest.tasks.model_schemas.olympiad import ContestSchema, BaseContestSchema, CompositeContestSchema
+from contest.tasks.model_schemas.olympiad import ContestSchema, BaseContestSchema
 from contest.tasks.model_schemas.tasks import TaskSchema
 from contest.tasks.models import OlympiadSubjectEnum, TargetClassEnum, StageConditionEnum, ContestHoldingTypeEnum, \
     UserStatusEnum
@@ -22,16 +22,9 @@ class CreateBaseOlympiadRequestTaskCreatorSchema(Schema):
     target_classes = fields.List(EnumField(TargetClassEnum, required=True, by_value=True), required=True)
 
 
-class BaseOlympiadResponseTaskCreatorSchema(Schema):
-    base_contest_id = fields.Int(required=True)
-    name = common_fields.CommonName(required=True)
-    description = common_fields.Text(required=True)
-    rules = common_fields.Text(required=True)
-    winning_condition = fields.Float(required=True)
-    laureate_condition = fields.Float(required=True)
-    olympiad_type_id = fields.Int(required=True)
-    subject = EnumField(OlympiadSubjectEnum, required=True, by_value=True)
-    target_classes = fields.List(EnumField(TargetClassEnum, required=True, by_value=True), required=True)
+class BaseOlympiadResponseTaskCreatorSchema(BaseContestSchema):
+    class Meta(BaseContestSchema.Meta):
+        exclude = []
 
 
 class BaseOlympiadIdResponseTaskCreatorSchema(Schema):
@@ -47,6 +40,7 @@ class CreateSimpleContestRequestTaskCreatorSchema(Schema):
     contest_duration = fields.TimeDelta(required=False)
     result_publication_date = fields.DateTime(required=False)
     visibility = fields.Boolean(required=True)
+    stage_id = fields.Int(required=False)
     previous_contest_id = fields.Int(required=False)
     previous_participation_condition = EnumField(UserStatusEnum, required=False, by_value=True)
     holding_type = EnumField(ContestHoldingTypeEnum, required=True, by_value=True)
@@ -57,7 +51,7 @@ class CreateCompositeContestRequestTaskCreatorSchema(Schema):
     holding_type = EnumField(ContestHoldingTypeEnum, required=True, by_value=True)
 
 
-class CompositeContestResponseTaskCreatorSchema(Schema):
+class ContestResponseTaskCreatorSchema(Schema):
     contest_id = fields.Int(required=True)
     location = common_fields.Location(required=False)
     start_date = fields.DateTime(required=False)
@@ -83,12 +77,9 @@ class CreateStageRequestTaskCreatorSchema(Schema):
     condition = EnumField(StageConditionEnum, required=True, by_value=True)
 
 
-class StageResponseTaskCreatorSchema(Schema):
-    stage_id = fields.Int(required=True)
-    stage_name = common_fields.CommonName(required=True)
-    stage_num = fields.Int(required=True)
-    this_stage_condition = common_fields.Text(required=True)
-    condition = EnumField(StageConditionEnum, required=True, by_value=True)
+class StageResponseTaskCreatorSchema(StageSchema):
+    class Meta(StageSchema.Meta):
+        exclude = ['olympiad_id']
 
 
 class StageIdResponseTaskCreatorSchema(Schema):
@@ -120,10 +111,9 @@ class CreateVariantRequestTaskCreatorSchema(Schema):
     variant_description = common_fields.Text(required=True)
 
 
-class VariantResponseTaskCreatorSchema(Schema):
-    variant_id = fields.Int(required=True)
-    variant_number = fields.Int(required=True)
-    variant_description = common_fields.Text(required=True)
+class VariantResponseTaskCreatorSchema(VariantSchema):
+    class Meta(VariantSchema.Meta):
+        exclude = ['contest_id']
 
 
 class VariantIdResponseTaskCreatorSchema(Schema):

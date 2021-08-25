@@ -113,20 +113,33 @@ def olympiad_create_simple(id_base_olympiad):
     visibility = values['visibility']
     start_time = values['start_time']
     end_time = values['end_time']
+    result_publication_date = values.get('result_publication_date', None)
+    stage_id = values.get('stage_id', None)
     previous_contest_id = values.get('previous_contest_id', None)
     previous_participation_condition = values.get('previous_participation_condition', None)
+    holding_type = values.get('holding_type', None)
+
+    validate_contest_values(previous_contest_id, previous_participation_condition)
 
     base_contest = db_get_or_raise(BaseContest, "base_contest_id", str(id_base_olympiad))
+
     current_contest = add_simple_contest(db.session,
                                          visibility=visibility,
                                          start_date=start_time,
                                          end_date=end_time,
+                                         holding_type=holding_type,
+                                         previous_contest_id=previous_contest_id,
                                          previous_participation_condition=previous_participation_condition,
-                                         )
+                                         result_publication_date=result_publication_date)
+
     if previous_contest_id is not None:
         prev_contest = db_get_or_raise(Contest, "contest_id", str(previous_contest_id))
         prev_contest.next_contests.append(current_contest)
     base_contest.child_contests.append(current_contest)
+
+    if stage_id is not None:
+        stage = db_get_or_raise(Stage, "stage_id", str(stage_id))
+        stage.contests.append(current_contest)
 
     db.session.commit()
 
@@ -240,88 +253,6 @@ def stage_create(id_olympiad):
 
     return {
                'stage_id': stage.stage_id
-           }, 200
-
-
-# Contest views
-@module.route('/olympiad/<int:id_olympiad>/stage/<int:id_stage>/contest/create',
-              methods=['POST'],
-              input_schema=CreateSimpleContestRequestTaskCreatorSchema,
-              output_schema=ContestIdResponseTaskCreatorSchema)
-def contest_create_simple(id_olympiad, id_stage):
-    """
-    Create simple contest in stage
-    ---
-    post:
-      parameters:
-        - in: path
-          description: ID of the olympiad
-          name: id_olympiad
-          required: true
-          schema:
-            type: integer
-        - in: path
-          description: ID of the stage
-          name: id_stage
-          required: true
-          schema:
-            type: integer
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema: CreateSimpleContestRequestTaskCreatorSchema
-      security:
-        - JWTAccessToken: [ ]
-        - CSRFAccessToken: [ ]
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema: ContestIdResponseTaskCreatorSchema
-        '400':
-          description: Bad request
-        '409':
-          description: Olympiad type already in use
-    """
-
-    values = request.marshmallow
-
-    visibility = values['visibility']
-    start_time = values['start_time']
-    end_time = values['end_time']
-    result_publication_date = values.get('result_publication_date', None)
-    previous_contest_id = values.get('previous_contest_id', None)
-    previous_participation_condition = values.get('previous_participation_condition', None)
-    holding_type = values.get('holding_type', None)
-
-    validate_contest_values(previous_contest_id, previous_participation_condition)
-
-    stage = db_get_or_raise(Stage, "stage_id", str(id_stage))
-    main_contest = db_get_or_raise(Contest, "contest_id", str(id_olympiad))
-
-    if main_contest.composite_type != ContestTypeEnum.CompositeContest:
-        raise InsufficientData("composite_type", "not Composite")
-
-    if stage not in main_contest.stages:
-        raise InsufficientData("stage_id", "not in current stage")
-
-    current_contest = add_simple_contest(db.session,
-                                         visibility=visibility,
-                                         start_date=start_time,
-                                         end_date=end_time,
-                                         holding_type=holding_type,
-                                         previous_contest_id=previous_contest_id,
-                                         previous_participation_condition=previous_participation_condition,
-                                         result_publication_date=result_publication_date)
-
-    stage.contests.append(current_contest)
-
-    db.session.commit()
-
-    return {
-               'contest_id': current_contest.contest_id
            }, 200
 
 
