@@ -29,7 +29,7 @@ def db_get_or_raise(table: Type[Model], field: str, value: object):
     return result
 
 
-def db_get_list(table: Type[Model], field: str, value: str):
+def db_get_list(table: Type[Model], field: str, value):
     """
 
     Retrieve a list of objects from the database

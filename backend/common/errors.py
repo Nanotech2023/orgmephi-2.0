@@ -155,3 +155,36 @@ class PermissionDenied(RequestError):
 
     def get_msg(self) -> str:
         return 'Roles %s are required to perform this action' % str(self.roles)
+
+
+class QuotaExceeded(RequestError):
+    """
+    User has exceeded quota for some action
+    """
+    def __init__(self, action: str, quota: int):
+        """
+        Create error object
+        :param roles: List of roles that can perform the operation
+        """
+        super(QuotaExceeded, self).__init__(409)
+        self.action = action
+        self.quota = quota
+
+    def get_msg(self) -> str:
+        return f'Quota for "{self.action}" ({self.quota}) exceeded'
+
+
+class DataConflict(RequestError):
+    """
+    Conflict in request data
+    """
+    def __init__(self, msg: str):
+        """
+        Create error object
+        :param msg: message
+        """
+        super(DataConflict, self).__init__(409)
+        self.msg = msg
+
+    def get_msg(self) -> str:
+        return self.msg

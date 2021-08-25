@@ -1,9 +1,9 @@
 from default_config import DefaultConfiguration
 from common import OrgMephiApp
 
-from . import module
+from messages import module
 
-app = OrgMephiApp('responses', module, default_config=DefaultConfiguration(), security=True)
+app = OrgMephiApp('messages', module, default_config=DefaultConfiguration(), security=False)
 app.set_current()
 app.prepare()
 flask_app = app.app

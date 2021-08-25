@@ -1,5 +1,5 @@
 from common import OrgMephiApp
-from contest.default_config import DefaultConfiguration
+from default_config import DefaultConfiguration
 from contest.tasks import module
 
 app = OrgMephiApp('tasks', module, default_config=DefaultConfiguration(), security=True)
