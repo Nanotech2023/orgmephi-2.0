@@ -5,9 +5,7 @@ from common.jwt_verify import jwt_get_id
 from common.util import db_get_or_raise
 from contest.responses.model_schemas.schemas import PlainAnswerSchema, RangeAnswerSchema, MultipleChoiceAnswerSchema
 from contest.responses.util import *
-from contest.responses.creator.schemas import AllUserAnswersResponseSchema, PlainAnswerRequestSchema, \
-    RangeAnswerRequestSchema, MultipleAnswerRequestSchema, UserResponseStatusResponseSchema, \
-    UserAnswerMarkResponseSchema, UserAnswerPostResponseSchema
+from contest.responses.creator.schemas import *
 
 db = get_current_db()
 module = get_current_module()
@@ -528,11 +526,38 @@ def self_user_answer_task_mark(contest_id, task_id):
     return answer, 200
 
 
+@module.route('/contest/<int:contest_id>/user/self/time', methods=['GET'],
+              output_schema=UserTimeResponseRequestSchema)
+def self_user_time_left(contest_id):
+    """
+    Get time left for current user's contest
+    ---
+    get:
+      security:
+        - JWTAccessToken: []
+        - CSRFAccessToken: []
+      parameters:
+        - in: path
+          description: Id of the contest
+          name: contest_id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: UserTimeResponseRequestSchema
+        '404':
+          description: User or contest not found
+    """
+    self_user_id = jwt_get_id()
+    user_work = get_user_in_contest_work(self_user_id, contest_id)
+    return calculate_time_left(user_work), 200
 
 
 # TODO Одинаковые запросы собрать в одну шляну
-# TODO Продление олимпиады запрос для креатора
 # TODO Проверка всех ответов (автоматических)
 # TODO Закончить олимпиаду
-# TODO Сколько времени осталось до конца олимпиады
 # TODO ограничения по размеру файлов

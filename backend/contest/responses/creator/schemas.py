@@ -48,3 +48,7 @@ class UserAnswerMarkResponseSchema(Schema):
 
 class UserAnswerPostResponseSchema(Schema):
     message = common_fields.Text(required=True)
+
+
+class UserTimeResponseRequestSchema(Schema):
+    time = fields.TimeDelta(required=True)

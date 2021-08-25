@@ -710,3 +710,80 @@ def user_answer_task_mark(contest_id, user_id, task_id):
     user_work = get_user_in_contest_work(user_id, contest_id)
     answer = db_get_or_raise(BaseAnswer, 'task_id', task_id)
     return answer, 200
+
+
+@module.route('/contest/<int:contest_id>/user/<int:user_id>/time', methods=['GET'],
+              output_schema=UserTimeResponseRequestSchema)
+def user_by_id_time_left(contest_id, user_id):
+    """
+    Get time left for user's contest
+    ---
+    get:
+      security:
+        - JWTAccessToken: []
+        - CSRFAccessToken: []
+      parameters:
+        - in: path
+          description: Id of the contest
+          name: contest_id
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the user
+          name: user_id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: UserTimeResponseRequestSchema
+        '404':
+          description: User or contest not found
+    """
+    user_work = get_user_in_contest_work(user_id, contest_id)
+    return calculate_time_left(user_work), 200
+
+
+@module.route('/contest/<int:contest_id>/user/<int:user_id>/time', methods=['POST'],
+              input_schema=UserTimeResponseRequestSchema)
+def user_by_id_extend_time(contest_id, user_id):
+    """
+    Extend contest duration for user
+    ---
+    post:
+      security:
+        - JWTAccessToken: []
+        - CSRFAccessToken: []
+      parameters:
+        - in: path
+          description: Id of the contest
+          name: contest_id
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the user
+          name: user_id
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: UserTimeResponseRequestSchema
+      responses:
+        '200':
+          description: OK
+        '404':
+          description: User or contest not found
+    """
+    values = request.marshmallow
+    user_work: Response = get_user_in_contest_work(user_id, contest_id)
+    user_work.time_extension = values['time']
+    db.session.commit()
+    return {}, 200

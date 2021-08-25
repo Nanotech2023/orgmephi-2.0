@@ -1,7 +1,7 @@
 import bdb
 
 from .models import *
-import datetime
+from datetime import datetime, timedelta
 from common.errors import NotFound
 from common.util import db_get_one_or_none
 from contest.tasks.models import SimpleContest
@@ -37,7 +37,7 @@ def user_answer_get(user_id, contest_id, task_id, model):
         raise NotFound('response_answer', 'for task_id %d' % task_id)
     return user_answer
 
-
+# TODO Добавить флаг Мише UserInContest
 def finish_contest(user_work: Response):
     user_work.status = work_status['NotChecked']
     db.session.commit()
@@ -89,3 +89,9 @@ def check_contest_duration(user_work: Response):
     if time_spent + five_minutes > contest_duration:
         return 1, "No time left"
     return 0, "OK"
+
+
+def calculate_time_left(user_work: Response):
+    contest_duration = db_get_one_or_none(SimpleContest, "contest_id", user_work.contest_id).contest_duration
+    time_spent = datetime.utcnow() - user_work.start_time
+    return contest_duration + user_work.time_extension - time_spent
