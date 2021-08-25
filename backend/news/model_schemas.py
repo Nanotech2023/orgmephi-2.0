@@ -26,6 +26,7 @@ class NewsSchema(SQLAlchemySchema):
     category = Related(column=['name'], allow_none=False)
     post_time = auto_field(column_name='post_time', allow_none=False)
     posted = auto_field(column_name='posted', allow_none=False)
+    grade = auto_field(column_name='grade', allow_none=False)
     title = auto_field(column_name='title', allow_none=False)
     body = auto_field(column_name='body', allow_none=False)
     related_contest = Related(column=['contest_id'], many=False, allow_none=True)

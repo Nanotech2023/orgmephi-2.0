@@ -32,11 +32,6 @@ def filter_news():
           schema:
             type: integer
         - in: query
-          name: posted
-          required: false
-          schema:
-            type: boolean
-        - in: query
           name: category_name
           required: false
           schema:

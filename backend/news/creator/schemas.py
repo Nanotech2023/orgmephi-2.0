@@ -17,4 +17,5 @@ class EditNewsRequestSchema(Schema):
     category = common_fields.CommonName()
     title = common_fields.CommonName()
     body = common_fields.News()
+    grade = common_fields.Grade()
     related_contest = fields.Integer()
