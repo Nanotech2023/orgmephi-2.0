@@ -1,3 +1,5 @@
+from flask import request
+
 from common import get_current_app, get_current_module
 from common.util import db_get_all
 from contest.tasks.unauthorized.schemas import *
@@ -189,26 +191,57 @@ def base_olympiad_get(id_base_olympiad):
     return base_contest, 200
 
 
-@module.route('/base_olympiad/<int:id_base_olympiad>/olympiad/all', methods=['GET'],
-              output_schema=AllOlympiadsResponseTaskUnauthorizedSchema)
-def olympiads_all(id_base_olympiad):
+@module.route('/olympiad/all', methods=['GET'],
+              output_schema=FilterSimpleContestResponseSchema)
+def olympiads_all():
     """
     Get olympiads list
     ---
     get:
       parameters:
-        - in: path
-          description: Id of the base contest
-          name: id_base_olympiad
-          required: true
+        - in: query
+          name: offset
+          required: false
           schema:
             type: integer
+        - in: query
+          name: limit
+          required: false
+          schema:
+            type: integer
+        - in: query
+          name: base_contest_id
+          required: false
+          schema:
+            type: integer
+        - in: query
+          name: location_id
+          required: false
+          schema:
+            type: integer
+        - in: query
+          name: end_date
+          required: false
+          schema:
+            format: date-time
+            type: string
+        - in: query
+          name: target_classes
+          required: false
+          schema:
+            type: string
+            enum: ['5', '6', '7', '8', '9', '10', '11', 'student']
+        - in: query
+          name: only_count
+          required: false
+          schema:
+            type: boolean
       responses:
         '200':
           description: OK
           content:
             application/json:
-              schema: AllOlympiadsResponseTaskUnauthorizedSchema
+              schema: FilterSimpleContestResponseSchema
         '400':
           description: Bad request
         '409':
@@ -216,11 +249,8 @@ def olympiads_all(id_base_olympiad):
         '404':
           description: Olympiad type not found
     """
-    base_contest = db_get_or_raise(BaseContest, "base_contest_id", str(id_base_olympiad))
-    all_olympiads = [current_olympiad for current_olympiad in base_contest.child_contests]
-    return {
-               "contest_list": all_olympiads
-           }, 200
+
+    return filter_olympiad_query(request.args)
 
 
 @module.route('/base_olympiad/<int:id_base_olympiad>/olympiad/<int:id_olympiad>', methods=['GET'],

@@ -1,10 +1,12 @@
-from common.errors import InsufficientData
-from common.util import db_get_or_raise
-from common.jwt_verify import jwt_get_id
+import random
 
+from marshmallow import Schema, fields
+from marshmallow_enum import EnumField
+
+from common.errors import InsufficientData
+from common.jwt_verify import jwt_get_id
 from contest.tasks.models import *
 
-import random
 
 # Generators
 
@@ -27,6 +29,7 @@ def generate_variant(id_contest, user_id):
     random_number = random.randint(0, variants_number * 2)
     variant = (user_id + random_number) % variants_number
     return variant
+
 
 # Functions for tasks/participant
 
@@ -184,3 +187,40 @@ def validate_contest_values(previous_contest_id, previous_participation_conditio
     if (previous_participation_condition is None and previous_contest_id is not None) or \
             (previous_participation_condition is not None and previous_contest_id is None):
         raise InsufficientData("previous_contest_id", "id or condition")
+
+
+# Schema
+
+
+class FilterOlympiadAllRequestSchema(Schema):
+    base_contest_id = fields.Integer()
+    location_id = fields.Integer()
+    target_classes = EnumField(enum=TargetClassEnum, by_value=True)
+    end_date = fields.DateTime()
+    only_count = fields.Boolean()
+    offset = fields.Integer()
+    limit = fields.Integer()
+
+
+_filter_fields = ['base_contest_id', 'location_id', 'target_classes', 'end_date']
+
+
+# Olympiad filter
+
+def filter_olympiad_query(args):
+    marshmallow = FilterOlympiadAllRequestSchema().load(args)
+
+    filters = {v: marshmallow[v] for v in _filter_fields if v in marshmallow}
+
+    query = SimpleContest.query.filter_by(**filters)
+
+    offset = marshmallow.get('offset', None)
+    limit = marshmallow.get('limit', None)
+    if offset is not None:
+        query = query.order_by(SimpleContest.start_date)
+    if limit is not None:
+        query = query.offset(offset).limit(limit)
+    if marshmallow.get('only_count', False):
+        return {'count': query.count()}, 200
+    else:
+        return {'contest_list': query.all(), 'count': query.count()}, 200

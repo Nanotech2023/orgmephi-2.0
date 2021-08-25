@@ -2,7 +2,8 @@ from marshmallow import Schema, fields
 
 from contest.tasks.model_schemas.contest import StageSchema
 from contest.tasks.model_schemas.location import OlympiadLocationSchema
-from contest.tasks.model_schemas.olympiad import OlympiadTypeSchema, ContestSchema, BaseContestSchema
+from contest.tasks.model_schemas.olympiad import OlympiadTypeSchema, ContestSchema, BaseContestSchema, \
+    SimpleContestSchema
 
 
 class AllOlympiadTypesResponseTaskUnauthorizedSchema(Schema):
@@ -33,3 +34,8 @@ class AllBaseContestResponseTaskUnauthorizedSchema(Schema):
 
 class AllStagesResponseTaskUnauthorizedSchema(Schema):
     stages_list = fields.Nested(StageSchema, many=True, required=True)
+
+
+class FilterSimpleContestResponseSchema(Schema):
+    contest_list = fields.Nested(nested=SimpleContestSchema, many=True)
+    count = fields.Integer()
