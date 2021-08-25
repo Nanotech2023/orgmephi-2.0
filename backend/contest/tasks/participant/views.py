@@ -1,10 +1,11 @@
 import io
 
-from flask import abort, send_file, request
+import pdfkit
+from flask import send_file, request, render_template
 
 from common import get_current_app, get_current_module
 from common.errors import AlreadyExists, OlympiadIsOver
-from contest.tasks.control_users.schemas import UserCertificateResponseTaskControlUsersSchema
+from contest.responses.util import get_user_in_contest_work
 from contest.tasks.model_schemas.contest import VariantSchema
 from contest.tasks.model_schemas.olympiad import ContestSchema
 from contest.tasks.participant.schemas import *
@@ -284,7 +285,7 @@ def task_image(id_contest, id_task):
 
 @module.route(
     '/contest/<int:id_contest>/certificate/self',
-    methods=['GET'], output_schema=UserCertificateResponseTaskControlUsersSchema)
+    methods=['GET'])
 def users_certificate(id_contest):
     """
     Get user certificate
@@ -303,6 +304,11 @@ def users_certificate(id_contest):
       responses:
         '200':
           description: OK
+          content:
+            application/pdf:
+              schema:
+                type: string
+                format: binary
         '400':
           description: Bad request
         '409':
@@ -310,9 +316,19 @@ def users_certificate(id_contest):
         '404':
           description: User not found
     """
-    # contest = get_user_contest_if_possible(id_contest)
-    # certificate = None
-    abort(502)
+    current_contest = get_contest_if_possible(id_contest)
+    current_user = db_get_or_raise(User, 'id', jwt_get_id())
+    unfilled = current_user.unfilled()
+    if len(unfilled) > 0:
+        raise InsufficientData('user', str(unfilled))
+
+    mark = get_user_in_contest_work(jwt_get_id(), id_contest).mark
+    user_status = db_get_or_raise(UserInContest, 'user_id', jwt_get_id()).user_status
+
+    template = render_template('user_certificate.html', u=user, mark=mark, user_status=user_status,
+                               back=current_contest)
+    pdf = pdfkit.from_string(template, False, options={'orientation': 'landscape', 'quiet': ''})
+    return send_file(io.BytesIO(pdf), 'application/pdf')
 
 
 # Contest

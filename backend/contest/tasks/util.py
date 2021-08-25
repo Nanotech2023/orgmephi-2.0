@@ -207,7 +207,7 @@ class FilterOlympiadAllRequestSchema(Schema):
     limit = fields.Integer()
 
 
-_filter_fields = ['base_contest_id', 'location_id', 'target_classes', 'end_date']
+_filter_fields = ['base_contest_id', 'location_id', 'end_date']
 
 
 # Olympiad filter
@@ -221,8 +221,11 @@ def filter_olympiad_query(args):
 
     offset = marshmallow.get('offset', None)
     limit = marshmallow.get('limit', None)
+    target_classes = marshmallow.get('target_classes', None)
     if offset is not None:
         query = query.order_by(SimpleContest.start_date)
+    # if target_classes is not None:
+    #    query = query.offset(offset).limit(limit)
     if limit is not None:
         query = query.offset(offset).limit(limit)
     if marshmallow.get('only_count', False):

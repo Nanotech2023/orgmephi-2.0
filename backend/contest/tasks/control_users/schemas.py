@@ -18,7 +18,3 @@ class UsersResponseTaskControlUsersSchema(Schema):
     user_list = fields.Nested(UserInContestSchema, many=True, required=True)
 
 
-class UserCertificateResponseTaskControlUsersSchema(Schema):
-    certificate = common_fields.Text(required=True)
-
-

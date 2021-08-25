@@ -780,5 +780,3 @@ def task_image(id_contest, id_variant, id_task):
     return send_file(io.BytesIO(task.image_of_task),
                      attachment_filename='task_image.png',
                      mimetype='image/jpeg'), 200
-
-# TODO SIZE RESTRICTION

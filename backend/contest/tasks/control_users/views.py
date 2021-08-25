@@ -1,7 +1,11 @@
-from flask import abort, request
+import io
+
+import pdfkit
+from flask import request, render_template, send_file
 
 from common import get_current_app, get_current_module
 from common.errors import AlreadyExists
+from contest.responses.util import get_user_in_contest_work
 from contest.tasks.control_users.schemas import *
 from contest.tasks.util import *
 
@@ -206,7 +210,7 @@ def users_all(id_contest):
 
 @module.route(
     'contest/<int:id_contest>/user/<int:id_user>/certificate',
-    methods=['GET'], output_schema=UserCertificateResponseTaskControlUsersSchema)
+    methods=['GET'])
 def users_certificate(id_contest, id_user):
     """
     Get certificate
@@ -231,12 +235,27 @@ def users_certificate(id_contest, id_user):
       responses:
         '200':
           description: OK
+          content:
+            application/pdf:
+              schema:
+                type: string
+                format: binary
         '400':
           description: Bad request
         '409':
           description: Olympiad type already in use
     """
-    # contest = get_contest_if_possible_from_stage(id_olympiad, id_stage, id_contest)
-    # certificate = None
 
-    abort(502)
+    current_contest = get_contest_if_possible(id_contest)
+    current_user = db_get_or_raise(User, 'id', id_user)
+    unfilled = current_user.unfilled()
+    if len(unfilled) > 0:
+        raise InsufficientData('user', str(unfilled))
+
+    mark = get_user_in_contest_work(id_user, id_contest).mark
+    user_status = db_get_or_raise(UserInContest, 'user_id', id_user).user_status
+
+    template = render_template('user_certificate.html', u=user, mark=mark, user_status=user_status,
+                               back=current_contest)
+    pdf = pdfkit.from_string(template, False, options={'orientation': 'landscape', 'quiet': ''})
+    return send_file(io.BytesIO(pdf), 'application/pdf')
