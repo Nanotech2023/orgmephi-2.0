@@ -1,6 +1,6 @@
 """File with models description for response management."""
 
-from datetime import datetime
+from datetime import datetime, timedelta
 import enum
 from common import get_current_db
 from contest.tasks.models import UserInContest, Task
@@ -60,6 +60,7 @@ class Response(db.Model):
     contest_id = db.Column(db.Integer, db.ForeignKey(UserInContest.contest_id))
     start_time = db.Column(db.DateTime, default=datetime.utcnow())
     finish_time = db.Column(db.DateTime, default=datetime.utcnow())
+    time_extension = db.Column(db.Interval, default=timedelta(seconds=0))
     status = db.Column(db.Enum(ResponseStatusEnum), nullable=False)
 
     answers = db.relationship('BaseAnswer', backref='response', lazy='dynamic', cascade="all, delete")
@@ -188,7 +189,7 @@ class PlainAnswer(BaseAnswer):
         'polymorphic_identity': AnswerEnum.PlainAnswer,
     }
 
-    def update(self, answer_new=None, filetype_new=None):  # TODO FIX
+    def update(self, answer_new=None, filetype_new=None):
         if answer_new is not None:
             self.answer_file = answer_new
         if filetype_new is not None:

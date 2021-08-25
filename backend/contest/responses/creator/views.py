@@ -238,7 +238,8 @@ def user_answer_for_task_by_id_multiple(contest_id, task_id, user_id):
     return user_answer
 
 
-@module.route('/contest/<int:contest_id>/task/<int:task_id>/user/<int:user_id>/<string:filetype>', methods=['POST'])
+@module.route('/contest/<int:contest_id>/task/<int:task_id>/user/<int:user_id>/<string:filetype>', methods=['POST'],
+              output_schema=UserAnswerPostResponseSchema)
 def user_answer_for_task_by_id_post_plain_file(contest_id, task_id, user_id, filetype):
     """
     Add user answer for a task
@@ -281,17 +282,21 @@ def user_answer_for_task_by_id_post_plain_file(contest_id, task_id, user_id, fil
       responses:
         '200':
           description: OK
+          content:
+            application/json:
+              schema: UserAnswerPostResponseSchema
         '403':
           description: Not enough rights for current user
         '404':
           description: User, contest or task not found
+        ''
     """
-    user_answer_post_file(request.data, filetype, user_id, contest_id, task_id)
-    return {}, 200
+    message = user_answer_post_file(request.data, filetype, user_id, contest_id, task_id)
+    return message, 200
 
 
 @module.route('/contest/<int:contest_id>/task/<int:task_id>/user/<int:user_id>/plain', methods=['POST'],
-              input_schema=PlainAnswerRequestSchema)
+              input_schema=PlainAnswerRequestSchema, output_schema=UserAnswerPostResponseSchema)
 def user_answer_for_task_by_id_post_plain_text(contest_id, task_id, user_id):
     """
     Add user answer for a task
@@ -334,24 +339,32 @@ def user_answer_for_task_by_id_post_plain_text(contest_id, task_id, user_id):
       responses:
         '200':
           description: OK
+          content:
+            application/json:
+              schema: UserAnswerPostResponseSchema
         '403':
           description: Not enough rights for current user
         '404':
           description: User, contest or task not found
     """
     values = request.marshmallow
-
-    user_work = get_user_in_contest_work(user_id, contest_id)
+    user_work: Response = get_user_in_contest_work(user_id, contest_id)
+    flag, message = check_contest_duration(user_work)
+    if flag:
+        finish_contest(user_work)
+        return message, 200
+    user_work.finish_time = datetime.utcnow()
     answer = db_get_one_or_none(PlainAnswer, 'task_id', task_id)
     if answer is None:
         add_plain_answer(user_work.work_id, task_id, text=values['answer_text'])
     else:
         PlainAnswerSchema(load_instance=True).load(values, session=db.session, instance=answer)
-    return {}, 200
+    db.session.commit()
+    return message, 200
 
 
 @module.route('/contest/<int:contest_id>/task/<int:task_id>/user/<int:user_id>/range', methods=['POST'],
-              input_schema=RangeAnswerRequestSchema)
+              input_schema=RangeAnswerRequestSchema, output_schema=UserAnswerPostResponseSchema)
 def user_answer_for_task_by_id_range_text(contest_id, task_id, user_id):
     """
     Add user answer for a task
@@ -394,24 +407,32 @@ def user_answer_for_task_by_id_range_text(contest_id, task_id, user_id):
       responses:
         '200':
           description: OK
+          content:
+            application/json:
+              schema: UserAnswerPostResponseSchema
         '403':
           description: Not enough rights for current user
         '404':
           description: User, contest or task not found
     """
     values = request.marshmallow
-
-    user_work = get_user_in_contest_work(user_id, contest_id)
+    user_work: Response = get_user_in_contest_work(user_id, contest_id)
+    flag, message = check_contest_duration(user_work)
+    if flag:
+        finish_contest(user_work)
+        return message, 200
+    user_work.finish_time = datetime.utcnow()
     answer = db_get_one_or_none(RangeAnswer, 'task_id', task_id)
     if answer is None:
         add_range_answer(user_work.work_id, task_id, values['answer'])
     else:
         RangeAnswerSchema(load_instance=True).load(values, session=db.session, instance=answer)
-    return {}, 200
+    db.session.commit()
+    return message, 200
 
 
 @module.route('/contest/<int:contest_id>/task/<int:task_id>/user/<int:user_id>/multiple', methods=['POST'],
-              input_schema=MultipleAnswerRequestSchema)
+              input_schema=MultipleAnswerRequestSchema, output_schema=UserAnswerPostResponseSchema)
 def user_answer_for_task_by_id_multiple(contest_id, task_id, user_id):
     """
     Add user answer for a task
@@ -454,20 +475,28 @@ def user_answer_for_task_by_id_multiple(contest_id, task_id, user_id):
       responses:
         '200':
           description: OK
+          content:
+            application/json:
+              schema: UserAnswerPostResponseSchema
         '403':
           description: Not enough rights for current user
         '404':
           description: User, contest or task not found
     """
     values = request.marshmallow
-
-    user_work = get_user_in_contest_work(user_id, contest_id)
+    user_work: Response = get_user_in_contest_work(user_id, contest_id)
+    flag, message = check_contest_duration(user_work)
+    if flag:
+        finish_contest(user_work)
+        return message, 200
+    user_work.finish_time = datetime.utcnow()
     answer = db_get_one_or_none(MultipleChoiceAnswer, 'task_id', task_id)
     if answer is None:
         add_range_answer(user_work.work_id, task_id, values['answers'])
     else:
         update_multiple_answers(values['answers'], answer)
-    return {}, 200
+    db.session.commit()
+    return message, 200
 
 
 @module.route('/contest/<int:contest_id>/user/<int:user_id>/status', methods=['POST'],
@@ -634,6 +663,7 @@ def user_answer_task_mark_post(contest_id, user_id, task_id):
     user_work = get_user_in_contest_work(user_id, contest_id)
     answer = db_get_or_raise(BaseAnswer, 'task_id', task_id)
     answer.mark = values['mark']
+    db.session.commit()
     return {}, 200
 
 

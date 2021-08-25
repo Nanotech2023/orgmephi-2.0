@@ -7,7 +7,7 @@ from contest.responses.model_schemas.schemas import PlainAnswerSchema, RangeAnsw
 from contest.responses.util import *
 from contest.responses.creator.schemas import AllUserAnswersResponseSchema, PlainAnswerRequestSchema, \
     RangeAnswerRequestSchema, MultipleAnswerRequestSchema, UserResponseStatusResponseSchema, \
-    UserAnswerMarkResponseSchema
+    UserAnswerMarkResponseSchema, UserAnswerPostResponseSchema
 
 db = get_current_db()
 module = get_current_module()
@@ -216,7 +216,8 @@ def self_user_answer_for_task_multiple(contest_id, task_id):
     return user_answer
 
 
-@module.route('/contest/<int:contest_id>/task/<int:task_id>/user/self/<string:filetype>', methods=['POST'])
+@module.route('/contest/<int:contest_id>/task/<int:task_id>/user/self/<string:filetype>', methods=['POST'],
+              output_schema=UserAnswerPostResponseSchema)
 def self_user_answer_for_task_post_plain_file(contest_id, task_id, filetype):
     """
     Add current user answer for a task
@@ -253,18 +254,21 @@ def self_user_answer_for_task_post_plain_file(contest_id, task_id, filetype):
       responses:
         '200':
           description: OK
+          content:
+            application/json:
+              schema: UserAnswerPostResponseSchema
         '403':
           description: Not enough rights for current user
         '404':
           description: User, contest or task not found
     """
     self_user_id = jwt_get_id()
-    user_answer_post_file(request.data, filetype, self_user_id, contest_id, task_id)
-    return {}, 200
+    message = user_answer_post_file(request.data, filetype, self_user_id, contest_id, task_id)
+    return message, 200
 
 
 @module.route('/contest/<int:contest_id>/task/<int:task_id>/user/self/plain', methods=['POST'],
-              input_schema=PlainAnswerRequestSchema)
+              input_schema=PlainAnswerRequestSchema, output_schema=UserAnswerPostResponseSchema)
 def self_user_answer_for_task_post_plain_text(contest_id, task_id):
     """
     Add current user answer for a task
@@ -301,6 +305,9 @@ def self_user_answer_for_task_post_plain_text(contest_id, task_id):
       responses:
         '200':
           description: OK
+          content:
+            application/json:
+              schema: UserAnswerPostResponseSchema
         '403':
           description: Not enough rights for current user
         '404':
@@ -308,17 +315,23 @@ def self_user_answer_for_task_post_plain_text(contest_id, task_id):
     """
     values = request.marshmallow
     self_user_id = jwt_get_id()
-    user_work = get_user_in_contest_work(self_user_id, contest_id)
+    user_work: Response = get_user_in_contest_work(self_user_id, contest_id)
+    flag, message = check_contest_duration(user_work)
+    if flag:
+        finish_contest(user_work)
+        return message, 200
+    user_work.finish_time = datetime.utcnow()
     answer = db_get_one_or_none(PlainAnswer, 'task_id', task_id)
     if answer is None:
         add_plain_answer(user_work.work_id, task_id, text=values['answer_text'])
     else:
         PlainAnswerSchema(load_instance=True).load(values, session=db.session, instance=answer)
-    return {}, 200
+    db.session.commit()
+    return message, 200
 
 
 @module.route('/contest/<int:contest_id>/task/<int:task_id>/user/self/range', methods=['POST'],
-              input_schema=RangeAnswerRequestSchema)
+              input_schema=RangeAnswerRequestSchema, output_schema=UserAnswerPostResponseSchema)
 def self_user_answer_for_task_range_text(contest_id, task_id):
     """
     Add current user answer for a task
@@ -362,17 +375,23 @@ def self_user_answer_for_task_range_text(contest_id, task_id):
     """
     values = request.marshmallow
     self_user_id = jwt_get_id()
-    user_work = get_user_in_contest_work(self_user_id, contest_id)
+    user_work: Response = get_user_in_contest_work(self_user_id, contest_id)
+    flag, message = check_contest_duration(user_work)
+    if flag:
+        finish_contest(user_work)
+        return message, 200
+    user_work.finish_time = datetime.utcnow()
     answer = db_get_one_or_none(RangeAnswer, 'task_id', task_id)
     if answer is None:
         add_range_answer(user_work.work_id, task_id, values['answer'])
     else:
         RangeAnswerSchema(load_instance=True).load(values, session=db.session, instance=answer)
-    return {}, 200
+    db.session.commit()
+    return message, 200
 
 
 @module.route('/contest/<int:contest_id>/task/<int:task_id>/user/self/multiple', methods=['POST'],
-              input_schema=MultipleAnswerRequestSchema)
+              input_schema=MultipleAnswerRequestSchema, output_schema=UserAnswerPostResponseSchema)
 def self_user_answer_for_task_multiple(contest_id, task_id):
     """
     Add current user answer for a task
@@ -409,6 +428,9 @@ def self_user_answer_for_task_multiple(contest_id, task_id):
       responses:
         '200':
           description: OK
+          content:
+            application/json:
+              schema: UserAnswerPostResponseSchema
         '403':
           description: Not enough rights for current user
         '404':
@@ -416,13 +438,19 @@ def self_user_answer_for_task_multiple(contest_id, task_id):
     """
     values = request.marshmallow
     self_user_id = jwt_get_id()
-    user_work = get_user_in_contest_work(self_user_id, contest_id)
+    user_work: Response = get_user_in_contest_work(self_user_id, contest_id)
+    flag, message = check_contest_duration(user_work)
+    if flag:
+        finish_contest(user_work)
+        return message, 200
+    user_work.finish_time = datetime.utcnow()
     answer = db_get_one_or_none(MultipleChoiceAnswer, 'task_id', task_id)
     if answer is None:
         add_range_answer(user_work.work_id, task_id, values['answers'])
     else:
         update_multiple_answers(values['answers'], answer)
-    return {}, 200
+    db.session.commit()
+    return message, 200
 
 
 @module.route('/contest/<int:contest_id>/user/self/status', methods=['GET'],
@@ -498,3 +526,13 @@ def self_user_answer_task_mark(contest_id, task_id):
     user_work = get_user_in_contest_work(self_user_id, contest_id)
     answer = db_get_or_raise(BaseAnswer, 'task_id', task_id)
     return answer, 200
+
+
+
+
+# TODO Одинаковые запросы собрать в одну шляну
+# TODO Продление олимпиады запрос для креатора
+# TODO Проверка всех ответов (автоматических)
+# TODO Закончить олимпиаду
+# TODO Сколько времени осталось до конца олимпиады
+# TODO ограничения по размеру файлов

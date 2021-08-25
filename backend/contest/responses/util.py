@@ -1,6 +1,12 @@
+import bdb
+
 from .models import *
-from common.errors import NotFound, InsufficientData
+import datetime
+from common.errors import NotFound
 from common.util import db_get_one_or_none
+from contest.tasks.models import SimpleContest
+
+five_minutes = datetime.timedelta(minutes=5)
 
 
 def get_user_in_contest_work(user_id, contest_id):
@@ -32,32 +38,33 @@ def user_answer_get(user_id, contest_id, task_id, model):
     return user_answer
 
 
+def finish_contest(user_work: Response):
+    user_work.status = work_status['NotChecked']
+    db.session.commit()
+
+
 def user_answer_post_file(answer_file, filetype, user_id, contest_id, task_id):
     try:
-        user_work = get_user_in_contest_work(user_id, contest_id)
+        user_work: Response = get_user_in_contest_work(user_id, contest_id)
+        user_work.finish_time = datetime.utcnow()
     except NotFound:
         user_work = add_user_response(db.session, user_id, contest_id)
+    flag, message = check_contest_duration(user_work)
+    if flag:
+        finish_contest(user_work)
+        return message
     user_answer = user_work.answers.filter(PlainAnswer.task_id == task_id).one_or_none()
     if user_answer is None:
         add_plain_answer(user_work.work_id, task_id, filetype=filetype, file=answer_file)
     else:
         user_answer.update(answer_new=answer_file, filetype_new=filetype)
     db.session.commit()
+    return message
 
 
 def update_multiple_answers(answers, answer):
     answers = [MultipleUserAnswer(text=elem) for elem in answers]
     answer.answers = answers
-
-
-def user_response_appeal_create(values, user_id, contest_id):
-    message = values['message']
-    user_work = get_user_in_contest_work(user_id, contest_id)
-    user_work.status = work_status['Appeal']
-    appeal = add_response_appeal(user_work.work_id)
-    # TODO CREATE MESSAGE
-    db.session.commit()
-    return appeal
 
 
 def get_mimetype(filetype):
@@ -72,3 +79,13 @@ def get_mimetype(filetype):
         'odt': 'application/vnd.oasis.opendocument.text'
     }
     return mimetypes.get(filetype)
+
+    # TODO CHECK
+def check_contest_duration(user_work: Response):
+    contest_duration = db_get_one_or_none(SimpleContest, "contest_id", user_work.contest_id).contest_duration
+    time_spent = datetime.utcnow() - user_work.start_time
+    if user_work.status == work_status['NotChecked']:
+        return 1, "Already finished"
+    if time_spent + five_minutes > contest_duration:
+        return 1, "No time left"
+    return 0, "OK"

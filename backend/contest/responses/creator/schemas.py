@@ -44,3 +44,7 @@ class UserResponseStatusResponseSchema(Schema):
 
 class UserAnswerMarkResponseSchema(Schema):
     mark = fields.Float(required=True)
+
+
+class UserAnswerPostResponseSchema(Schema):
+    message = common_fields.Text(required=True)
