@@ -2,6 +2,7 @@ import enum
 from common import get_current_db, get_current_app
 from .auth import User
 from .location import Location
+from user.util import get_unfilled
 
 db = get_current_db()
 app = get_current_app()
@@ -24,6 +25,7 @@ class UserInfo(db.Model):
 
         id: id of the info
         email: email address of the user
+        phone: user's phone number
         first_name: user's first name
         middle_name: user's middle name
         second_name: user's second name
@@ -35,6 +37,7 @@ class UserInfo(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey(User.id), primary_key=True)
     location_id = db.Column(db.Integer, db.ForeignKey(Location.id))
     email = db.Column(db.String, unique=True)
+    phone = db.Column(db.String)
     first_name = db.Column(db.String)
     middle_name = db.Column(db.String)
     second_name = db.Column(db.String)
@@ -50,6 +53,12 @@ class UserInfo(db.Model):
     limitations = db.relationship('UserLimitations', lazy='select', uselist=False,
                                   cascade='save-update, merge, delete, delete-orphan')
 
+    _required_fields = ['email', 'phone', 'first_name', 'middle_name', 'second_name', 'date_of_birth',
+                        'place_of_birth', 'gender', 'dwelling', 'document', 'limitations']
+
+    def unfilled(self):
+        return get_unfilled(self, self._required_fields, ['dwelling', 'document', 'limitations'])
+
 
 class UserLimitations(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey(UserInfo.user_id), primary_key=True)
@@ -57,3 +66,7 @@ class UserLimitations(db.Model):
     sight = db.Column(db.Boolean, nullable=False, default=False)
     movement = db.Column(db.Boolean, nullable=False, default=False)
 
+    _required_fields = ['hearing', 'sight', 'movement']
+
+    def unfilled(self):
+        return get_unfilled(self, self._required_fields, [])

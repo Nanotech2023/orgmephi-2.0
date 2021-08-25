@@ -157,6 +157,22 @@ class PermissionDenied(RequestError):
         return 'Roles %s are required to perform this action' % str(self.roles)
 
 
+class WrongType(RequestError):
+    """
+    Object type is inappropriate to perform an action
+    """
+    def __init__(self, msg: str):
+        """
+        Create error object
+        :param msg: message
+        """
+        super(WrongType, self).__init__(409)
+        self.msg = msg
+
+    def get_msg(self) -> str:
+        return self.msg
+
+
 class QuotaExceeded(RequestError):
     """
     User has exceeded quota for some action

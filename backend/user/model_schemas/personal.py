@@ -33,6 +33,7 @@ class UserInfoSchema(SQLAlchemySchema):
 
     user_id = auto_field(column_name='user_id', dump_only=True)
     email = auto_field(column_name='email', allow_none=True)
+    phone = auto_field(column_name='phone', allow_none=True)
     first_name = auto_field(column_name='first_name', allow_none=True)
     middle_name = auto_field(column_name='middle_name', allow_none=True)
     second_name = auto_field(column_name='second_name', allow_none=True)
@@ -64,6 +65,7 @@ class UserLimitationsInputSchema(Schema):
 
 class UserInfoInputSchema(Schema):
     email = common_fields.Email()
+    phone = common_fields.Phone()
     first_name = common_fields.CommonName()
     middle_name = common_fields.CommonName()
     second_name = common_fields.CommonName()

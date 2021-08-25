@@ -44,9 +44,10 @@ def register():
         if reg_type == UserTypeEnum.university:
             StudentInfoSchema(load_instance=True).load(request.json['student_info'], instance=user.student_info,
                                                        session=db.session, partial=False, unknown=EXCLUDE)
-            UserInfoSchema(only=['dwelling'], load_instance=True).load(request.json['student_info'],
-                                                                       instance=user.user_info, session=db.session,
-                                                                       partial=False, unknown=EXCLUDE)
+            UserInfoSchema(only=['dwelling', 'phone'], load_instance=True).load(request.json['student_info'],
+                                                                                instance=user.user_info,
+                                                                                session=db.session,
+                                                                                partial=False, unknown=EXCLUDE)
         db.session.commit()
     except sqlalchemy.exc.IntegrityError:
         raise AlreadyExists('username', username)
