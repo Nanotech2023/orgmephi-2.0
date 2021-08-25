@@ -13,6 +13,8 @@ class UserInContest(db.Model):
     contest_id: id of the contest
     variant_id: variant connected with current contest
     user_status: user status: laureate, winner or custom value
+    show_results_to_user: can user see his results
+    completed_the_contest: hsd user completed his contest
     """
 
     __tablename__ = 'user_in_contest'
@@ -23,3 +25,4 @@ class UserInContest(db.Model):
     variant_id = db.Column(db.Integer, db.ForeignKey('variant.variant_id'))
     user_status = db.Column(db.Enum(UserStatusEnum))
     show_results_to_user = db.Column(db.Boolean)
+    completed_the_contest = db.Column(db.Boolean, default=False)

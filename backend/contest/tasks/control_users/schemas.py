@@ -13,6 +13,6 @@ class UsersResponseTaskControlUsersSchema(Schema):
 
 
 class UserCertificateResponseTaskControlUsersSchema(Schema):
-    certificate = common_fields.BytesField(required=True)
+    certificate = common_fields.Text(required=True)
 
 

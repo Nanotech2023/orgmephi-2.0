@@ -1,5 +1,6 @@
-from marshmallow import Schema, fields
+from marshmallow import Schema, fields, validate
 from common import fields as common_fields
+from views import app
 
 
 class CreateOlympiadTypeRequestTaskAdminSchema(Schema):
@@ -11,18 +12,18 @@ class OlympiadTypeResponseTaskAdminSchema(Schema):
 
 
 class CreateOtherLocationRequestTaskAdminSchema(Schema):
-    country_name = common_fields.Text(required=True)
-    location = common_fields.Text(required=True)
+    country_name = common_fields.CommonName(required=True)
+    location = common_fields.FreeDescription(required=True)
 
 
 class CreateOnlineLocationRequestTaskAdminSchema(Schema):
-    url = common_fields.Text(required=True)
+    url = common_fields.URL(required=True)
 
 
 class CreateRussiaLocationRequestTaskAdminSchema(Schema):
-    city_name = common_fields.Text(required=True)
-    region_name = common_fields.Text(required=True)
-    address = common_fields.Text(required=True)
+    city_name = common_fields.CommonName(required=True)
+    region_name = common_fields.CommonName(required=True)
+    address = common_fields.FreeDescription(required=True)
 
 
 class LocationResponseTaskAdminSchema(Schema):

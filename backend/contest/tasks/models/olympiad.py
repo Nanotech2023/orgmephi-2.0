@@ -175,7 +175,8 @@ class Contest(db.Model):
 
     __mapper_args__ = {
         'polymorphic_identity': ContestTypeEnum.Contest,
-        'polymorphic_on': composite_type
+        'polymorphic_on': composite_type,
+        'with_polymorphic': '*'
     }
 
 
@@ -242,6 +243,7 @@ class SimpleContest(Contest):
 
     __mapper_args__ = {
         'polymorphic_identity': ContestTypeEnum.SimpleContest,
+        'with_polymorphic': '*'
     }
 
     def change_previous(self, previous_contest_id=None, previous_participation_condition=None):
@@ -281,4 +283,5 @@ class CompositeContest(Contest):
 
     __mapper_args__ = {
         'polymorphic_identity': ContestTypeEnum.CompositeContest,
+        'with_polymorphic': '*'
     }

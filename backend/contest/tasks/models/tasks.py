@@ -35,7 +35,8 @@ class Task(db.Model):
 
     __mapper_args__ = {
         'polymorphic_identity': TaskTypeEnum.BaseTask,
-        'polymorphic_on': task_type
+        'polymorphic_on': task_type,
+        'with_polymorphic': '*'
     }
 
 
@@ -70,6 +71,7 @@ class PlainTask(Task):
 
     __mapper_args__ = {
         'polymorphic_identity': TaskTypeEnum.PlainTask,
+        'with_polymorphic': '*'
     }
 
 
@@ -107,6 +109,7 @@ class RangeTask(Task):
 
     __mapper_args__ = {
         'polymorphic_identity': TaskTypeEnum.RangeTask,
+        'with_polymorphic': '*'
     }
 
 
@@ -141,4 +144,5 @@ class MultipleChoiceTask(Task):
 
     __mapper_args__ = {
         'polymorphic_identity': TaskTypeEnum.MultipleChoiceTask,
+        'with_polymorphic': '*'
     }

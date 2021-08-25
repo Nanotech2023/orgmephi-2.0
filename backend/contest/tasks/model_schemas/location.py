@@ -1,7 +1,7 @@
 from marshmallow_oneofschema import OneOfSchema
 from marshmallow_sqlalchemy import SQLAlchemySchema, auto_field
+from marshmallow_sqlalchemy.fields import Related
 
-from common.fields import location_validator
 from contest.tasks.models import *
 from user.models.auth import *
 
@@ -29,6 +29,9 @@ class RussiaOlympiadLocationSchema(SQLAlchemySchema):
     location_id = auto_field(column_name='location_id', dump_only=True)
     city_name = auto_field(column_name='city_name', required=True)
     region_name = auto_field(column_name='region_name', required=True)
+
+    city = Related(column=['name', 'region_name'])
+
     address = auto_field(column_name='address', required=True)
 
 
@@ -39,8 +42,10 @@ class OtherOlympiadLocationSchema(SQLAlchemySchema):
         sqla_session = db.session
 
     location_id = auto_field(column_name='location_id', dump_only=True)
-    country_name = auto_field(column_name='country_name', required=True)
+    country_name = auto_field(column_name='country_name')
     location = auto_field(column_name='location', required=True)
+
+    country = Related(column=['name'], required=True)
 
 
 class OlympiadLocationSchema(OneOfSchema):

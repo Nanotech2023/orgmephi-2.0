@@ -48,6 +48,8 @@ def add_online_location(db_session, url):
 class OnlineOlympiadLocation(OlympiadLocation):
     url = db.Column(db.String)
 
+    __tablename__ = 'olympiad_location_online'
+
     __mapper_args__ = {
         'polymorphic_identity': LocationEnum.OnlineOlympiadLocation,
         'with_polymorphic': '*'
@@ -72,10 +74,18 @@ class RussiaOlympiadLocation(OlympiadLocation):
     region_name = db.Column(db.String)
     address = db.Column(db.String)
 
+    city = db.relationship('City')
+
+    __tablename__ = 'olympiad_location_russia'
+
     __mapper_args__ = {
         'polymorphic_identity': LocationEnum.RussiaOlympiadLocation,
         'with_polymorphic': '*'
     }
+
+
+db.ForeignKeyConstraint((RussiaOlympiadLocation.city_name, RussiaOlympiadLocation.region_name),
+                        (City.name, City.region_name))
 
 
 def add_other_location(db_session, country_name, location):
@@ -94,7 +104,9 @@ class OtherOlympiadLocation(OlympiadLocation):
     country_name = db.Column(db.String, db.ForeignKey(Country.name))
     location = db.Column(db.String)
 
-    country = db.relationship(f'{Country.__name__}')
+    country = db.relationship('Country')
+
+    __tablename__ = 'olympiad_location_other'
 
     __mapper_args__ = {
         'polymorphic_identity': LocationEnum.OtherOlympiadLocation,

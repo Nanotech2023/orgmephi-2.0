@@ -149,6 +149,13 @@ def task_all(id_contest):
           description: User not found
     """
 
+    current_user = db_get_or_raise(UserInContest, "user_id", str(jwt_get_id()))
+
+    if current_user.completed_the_contest:
+        return {
+                   "tasks_list": []
+               }, 200
+
     tasks_list = get_user_tasks_if_possible(id_contest)
     return {
                "tasks_list": tasks_list
@@ -192,6 +199,12 @@ def task_image(id_contest, id_task):
         '409':
           description: Olympiad type already in use
     """
+
+    current_user = db_get_or_raise(UserInContest, "user_id", str(jwt_get_id()))
+
+    if current_user.completed_the_contest:
+        return {}, 200
+
     task = get_user_task_if_possible(id_contest, id_task)
 
     if task.image_of_task is None:
