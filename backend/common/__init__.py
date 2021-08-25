@@ -195,7 +195,7 @@ class OrgMephiApp:
         else:
             self._app.config['JWT_COOKIE_SAMESITE'] = "Strict"
 
-        # TODO: self._app.config['JWT_COOKIE_SECURE'] = True When https enabled and FLASK_ENV != 'development'
+        self._app.config['JWT_COOKIE_SECURE'] = self.config['ENV'] != 'development'
 
         self._read_key('SECRET')
         self._read_key('PRIVATE')

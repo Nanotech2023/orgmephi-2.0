@@ -50,6 +50,11 @@ export FLASK_ENV="development"
 python -m flask run [--port номер_порта]
 ```
 
+Для запуска с использованием https необходимо указать опции `--cert=<путь_к_сертификату>` и `--key=<путь_к_ключу>`, например:
+```
+python -m flask run [--port номер_порта] --cert=cert.pem --key=key.pem
+```
+
 Возможен запуск системы при помощи вспомогательных скриптов:
 - `run_microservice.sh [analytics port] [contest port] [user port]` - запуск всех микросервисов отдельно
 - `run_monolith.sh [port]` - запуск всех микросервисов в рамках одного процесса
