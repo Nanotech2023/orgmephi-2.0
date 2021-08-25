@@ -3,9 +3,14 @@ import random
 from marshmallow import Schema, fields
 from marshmallow_enum import EnumField
 
-from common.errors import InsufficientData
+from common.errors import InsufficientData, TooBigFileSize
 from common.jwt_verify import jwt_get_id
 from contest.tasks.models import *
+
+# Constants
+
+
+MAX_FILE_SIZE = 1e7
 
 
 # Generators
@@ -224,3 +229,8 @@ def filter_olympiad_query(args):
         return {'count': query.count()}, 200
     else:
         return {'contest_list': query.all(), 'count': query.count()}, 200
+
+
+def validate_file_size(binary_file):
+    if len(binary_file) > MAX_FILE_SIZE:
+        raise TooBigFileSize()

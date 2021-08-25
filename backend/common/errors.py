@@ -141,6 +141,20 @@ class InsufficientData(RequestError):
         return '%s is missing %s' % (self.obj, self.data)
 
 
+class TooBigFileSize(RequestError):
+    """
+    Olympiad is over for current user
+    """
+    def __init__(self):
+        """
+        Create error object
+        """
+        super(TooBigFileSize, self).__init__(409)
+
+    def get_msg(self) -> str:
+        return 'Uploading file is greater then 10mb'
+
+
 class OlympiadIsOver(RequestError):
     """
     Olympiad is over for current user

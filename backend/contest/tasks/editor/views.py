@@ -52,6 +52,8 @@ def base_olympiad_upload(id_base_olympiad):
 
     certificate_template = request.data
 
+    validate_file_size(certificate_template)
+
     base_contest = db_get_or_raise(BaseContest, "base_contest_id", id_base_olympiad)
     base_contest.certificate_template = certificate_template
     db.session.commit()
@@ -577,6 +579,8 @@ def task_image_upload(id_contest, id_variant, id_task):
     """
 
     image_of_task = request.data
+
+    validate_file_size(image_of_task)
 
     task = get_task_if_possible(id_contest, id_variant, id_task)
     task.image_of_task = image_of_task
