@@ -143,7 +143,7 @@ class InsufficientData(RequestError):
 
 class PermissionDenied(RequestError):
     """
-    User hos insufficient permissions to perform the operation
+    User has insufficient permissions to perform the operation
     """
     def __init__(self, roles: list[str]):
         """
@@ -180,7 +180,8 @@ class QuotaExceeded(RequestError):
     def __init__(self, action: str, quota: int):
         """
         Create error object
-        :param roles: List of roles that can perform the operation
+        :param action: Action to perform
+        :type quota: Quota for the action
         """
         super(QuotaExceeded, self).__init__(409)
         self.action = action
