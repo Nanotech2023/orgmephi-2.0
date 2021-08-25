@@ -1,6 +1,7 @@
 import enum
 
 from common import get_current_db
+from common.util import db_get_or_raise
 from user.models import City, Country
 
 db = get_current_db()
@@ -60,6 +61,10 @@ def add_russia_location(db_session, city_name, region_name, address):
     """
     Create new location
     """
+
+    db_get_or_raise(City, "name", city_name)
+    db_get_or_raise(City, "region_name", region_name)
+
     location = RussiaOlympiadLocation(
         city_name=city_name,
         region_name=region_name,
@@ -92,6 +97,8 @@ def add_other_location(db_session, country_name, location):
     """
     Create new location
     """
+    db_get_or_raise(Country, "name", country_name)
+
     location = OtherOlympiadLocation(
         country_name=country_name,
         location=location,
