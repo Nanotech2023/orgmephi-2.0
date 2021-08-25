@@ -36,14 +36,13 @@ class OlympiadSubjectEnum(enum.Enum):
 olympiad_subject_dict = {subject.value: subject for subject in OlympiadSubjectEnum}
 
 
-def add_olympiad_type(db_session, olympiad_type):
+def add_olympiad_type(olympiad_type):
     """
     Create new olympiad type object
     """
     olympiad = OlympiadType(
         olympiad_type=olympiad_type,
     )
-    db_session.add(olympiad)
     return olympiad
 
 

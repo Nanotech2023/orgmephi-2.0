@@ -1,7 +1,7 @@
 from flask import request
 
 from common import get_current_app, get_current_module
-from common.errors import AlreadyExists
+from common.util import db_add_if_not_exists
 from contest.tasks.admin.schemas import *
 from contest.tasks.util import *
 
@@ -39,16 +39,14 @@ def olympiad_type_create():
         '409':
           description: Olympiad type already in use
     """
-    import sqlalchemy.exc
     values = request.marshmallow
     olympiad_type = values['olympiad_type']
 
-    try:
-        new_olympiad_type = add_olympiad_type(db.session,
-                                              olympiad_type=olympiad_type)
-        db.session.commit()
-    except sqlalchemy.exc.IntegrityError:
-        raise AlreadyExists('olympiad_type', olympiad_type)
+    new_olympiad_type = add_olympiad_type(olympiad_type=olympiad_type)
+
+    db_add_if_not_exists(db.session, OlympiadType, new_olympiad_type, ['olympiad_type'])
+    db.session.commit()
+
     return {
                "olympiad_type_id": new_olympiad_type.olympiad_type_id
            }, 200

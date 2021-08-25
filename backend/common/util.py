@@ -1,4 +1,4 @@
-from .errors import NotFound
+from .errors import NotFound, AlreadyExists
 from typing import Type, Optional
 from flask_sqlalchemy import Model
 from sqlalchemy.orm import Session
@@ -77,6 +77,17 @@ def db_exists(db_session: Session, table: Type[Model], field: Optional[str] = No
         filters = {field: value}
     q = db_session.query(table).filter_by(**filters)
     return db_session.query(q.exists()).scalar()
+
+
+def db_add_if_not_exists(db_session: Session, table: Type[Model], value, keys: Optional[list[str]]):
+    def _get_filter(obj, key_list: list[str]) -> dict[str, object]:
+        return {k: getattr(obj, k) for k in key_list if getattr(obj, k) is not None}
+
+    valueFilter = _get_filter(value, keys)
+
+    if db_exists(db_session, table, filters=valueFilter):
+        raise AlreadyExists(f'{table.__tablename__}({valueFilter.keys()})', f'({valueFilter.values()})')
+    db_session.add(value)
 
 
 def db_populate(db_session: Session, table: Type[Model], values: list, key: Optional[str] = None,

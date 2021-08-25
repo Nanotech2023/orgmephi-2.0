@@ -4,7 +4,7 @@ from marshmallow import EXCLUDE
 from common import get_current_app, get_current_module
 from common.errors import NotFound
 from contest.tasks.creator.schemas import BaseOlympiadResponseTaskCreatorSchema, StageResponseTaskCreatorSchema, \
-    CompositeContestResponseTaskCreatorSchema, TaskResponseTaskCreatorSchema, VariantResponseTaskCreatorSchema
+    ContestResponseTaskCreatorSchema, TaskResponseTaskCreatorSchema, VariantResponseTaskCreatorSchema
 from contest.tasks.editor.schemas import *
 from contest.tasks.model_schemas.contest import StageSchema, VariantSchema
 from contest.tasks.model_schemas.olympiad import BaseContestSchema, SimpleContestSchema, CompositeContestSchema
@@ -186,7 +186,7 @@ def olympiad_remove(id_base_olympiad, id_olympiad):
 
 @module.route('/base_olympiad/<int:id_base_olympiad>/olympiad/<int:id_olympiad>', methods=['PATCH'],
               input_schema=UpdateContestRequestTaskEditorSchema,
-              output_schema=CompositeContestResponseTaskCreatorSchema)
+              output_schema=ContestResponseTaskCreatorSchema)
 def olympiad_patch(id_base_olympiad, id_olympiad):
     """
     Update composite contest
@@ -384,7 +384,7 @@ def contest_remove(id_olympiad, id_stage, id_contest):
     '/olympiad/<int:id_olympiad>/stage/<int:id_stage>/contest/<int:id_contest>',
     methods=['PATCH'],
     input_schema=UpdateContestRequestTaskEditorSchema,
-    output_schema=CompositeContestResponseTaskCreatorSchema)
+    output_schema=ContestResponseTaskCreatorSchema)
 def contest_patch(id_olympiad, id_stage, id_contest):
     """
     Update simple contest in stage

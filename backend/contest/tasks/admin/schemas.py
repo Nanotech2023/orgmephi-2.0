@@ -1,6 +1,5 @@
-from marshmallow import Schema, fields, validate
+from marshmallow import Schema, fields
 from common import fields as common_fields
-from views import app
 
 
 class CreateOlympiadTypeRequestTaskAdminSchema(Schema):
