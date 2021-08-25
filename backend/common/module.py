@@ -1,18 +1,32 @@
+import enum
 import importlib
+from functools import wraps
 
+from apispec import APISpec
 from openapi_core.contrib.flask.decorators import FlaskOpenAPIViewDecorator
+from marshmallow import Schema
+from typing import Type, Union
 from flask import Blueprint, send_file
 from typing import Callable, Any, Optional
 
 from .access_levels import OrgMephiAccessLevel
 
 
+class OrgMephiArea(enum.Enum):
+    internal = 1
+    external = 2
+    both = 3
+
+
+org_mephi_area_by_name = {v.name: v for v in OrgMephiArea}
+
+
 class OrgMephiModule:
     """
     Application module
     """
-    def __init__(self, name: str, package: str, access_level: Optional[OrgMephiAccessLevel],
-                 api_file: Optional[str] = None):
+    def __init__(self, name: str, package: str, access_level: Optional[OrgMephiAccessLevel], area: OrgMephiArea,
+                 api_file: Optional[str] = None, marshmallow_api: bool = False):
         """
         Create a new module
         :param name: name of the module (equals to its path prefix)
@@ -22,16 +36,21 @@ class OrgMephiModule:
                              jwt_required_role.
         :param api_file: name of the file with this module's api. If omitted (or set to None), requests will not be
                          automatically verified in this module and swagger ui will not be generated
+        :param marshmallow_api: if True then marshmallow will be used instead of openapi_core
         """
         self._name = name
         self._package = package
         self._blueprint: Optional[Blueprint] = None
         self._access_level = access_level if access_level is not None else OrgMephiAccessLevel.visitor
+        self._area = area
         self._modules: list[OrgMephiModule] = []
         self._parent: Optional[OrgMephiModule] = None
         self._openapi = None
         self._swagger = None
         self._api_file = api_file
+        self._marshmallow_api: bool = marshmallow_api
+        self._apispec: Optional[APISpec] = None
+        self._api_full_path: Optional[str] = None
 
     @property
     def name(self) -> str:
@@ -57,6 +76,14 @@ class OrgMephiModule:
         """
         return self._swagger
 
+    @property
+    def modules(self):
+        """
+        Child modules
+        :return: List of child modules
+        """
+        return self._modules
+
     def get_full_name(self, top=None) -> str:
         """
         Full name of self, i.e. name that includes all parent names in format <parent.full_name>_<self.name>
@@ -73,11 +100,16 @@ class OrgMephiModule:
         prefix = '/'.join(self._get_parents(top)[1:])
         return '' if prefix == '' else '/' + prefix
 
-    def route(self, rule: str, **options: Any) -> Callable:
+    def route(self, rule: str, refresh: bool = False,
+              input_schema: Union[Type[Schema], Schema] = None,
+              output_schema: Union[Type[Schema], Schema] = None,
+              **options: Any) -> Callable:
         """
         Decorator factory to initialize a new route for self (see flask.Flask.route)
         :param rule: path for this rule
         :param refresh: If True, refresh JWT will be checked for current path instead of access JWT
+        :param input_schema: Marshmallow schema to input data
+        :param output_schema: Marshmallow schema to output data
         :param options: flask.Flask.route options
         :return: decorator
         """
@@ -87,25 +119,33 @@ class OrgMephiModule:
             :param f: function to wrap
             :return: Provided function
             """
-            if 'refresh' in options:
-                refresh = options.pop('refresh')
-            else:
-                refresh = False
             from .jwt_verify import jwt_required, jwt_required_role
             from .errors import _catch_request_error
+
+            func_wrapped = f
+
+            func_wrapped = self._wrap_db_commit(func_wrapped)
+
+            if output_schema is not None:
+                func_wrapped = self._wrap_marshmallow_output(func_wrapped, output_schema)
+
+            if input_schema is not None:
+                func_wrapped = self._wrap_marshmallow_input(func_wrapped, input_schema)
+
             if self._access_level == OrgMephiAccessLevel.visitor:
-                jwt_wrap = f
+                pass
             elif self._access_level == OrgMephiAccessLevel.participant:
-                jwt_wrap = jwt_required(refresh=refresh)(f)
+                func_wrapped = jwt_required(refresh=refresh)(func_wrapped)
             else:
                 roles = [v.value[1] for v in OrgMephiAccessLevel if v.value[0] >= self._access_level.value[0]]
-                jwt_wrap = jwt_required_role(roles=roles, refresh=refresh)(f)
-            catch_error_wrap = _catch_request_error(jwt_wrap)
+                func_wrapped = jwt_required_role(roles=roles, refresh=refresh)(func_wrapped)
+
+            func_wrapped = _catch_request_error(func_wrapped)
+
             if self._openapi is not None:
-                openapi_wrap = self._openapi(catch_error_wrap)
-            else:
-                openapi_wrap = catch_error_wrap
-            self._blueprint.route(rule, **options)(openapi_wrap)
+                func_wrapped = self._openapi(func_wrapped)
+
+            self._blueprint.route(rule, **options)(func_wrapped)
             return f
         return decorator
 
@@ -120,7 +160,7 @@ class OrgMephiModule:
         self._modules.append(module)
         module._parent = self
 
-    def prepare(self, api_path: str, development: bool, top):
+    def prepare(self, api_path: str, development: bool, top, area: OrgMephiArea):
         """
         Prepare this module for execution
 
@@ -131,10 +171,14 @@ class OrgMephiModule:
         :param api_path: directory with ap files
         :param development: If True development-only options will be enabled (e.g. swagger ui wil be generated)
         :param top: Top-level module
+        :param area: Are that server is launched in
         """
         from . import _orgmephi_current_module
+        api_doc_path = None
+        if (not self._marshmallow_api) and (self._api_file is not None and api_path is not None):
+            api_doc_path = f'{api_path}/{self._api_file}'
 
-        if self._parent is None:
+        if self._parent is None or self == top:
             self._blueprint = Blueprint(self._name, __name__)
         else:
             self._blueprint = Blueprint(self._name, __name__, url_prefix='/%s' % self._name)
@@ -143,16 +187,26 @@ class OrgMephiModule:
         _orgmephi_current_module.set(self)
 
         try:
-            self._init_api(api_path, development, top)
+            if api_doc_path is not None:
+                self._init_openapi(api_doc_path)
             try:
                 importlib.import_module('.views', self._package)
             except ModuleNotFoundError:
                 pass
             for module in self._modules:
-                module.prepare(api_path, development, top)
-                self._blueprint.register_blueprint(module.blueprint)
-        finally:
+                if module.appropriate_area(area):
+                    module.prepare(api_path, development, top, area)
+                    self._blueprint.register_blueprint(module.blueprint)
+            if development and (api_doc_path is not None or self._marshmallow_api):
+                self._init_swagger(top)
+                if self._marshmallow_api:
+                    self._api_from_marshmallow(top)
+                else:
+                    self._api_from_file(api_doc_path)
+        except Exception:
             _orgmephi_current_module.set(last_module)
+            raise
+        _orgmephi_current_module.set(last_module)
 
     def get_swagger_blueprints(self) -> list[Blueprint]:
         """
@@ -169,15 +223,16 @@ class OrgMephiModule:
         else:
             return list(itertools.chain([self._swagger], *[mod.get_swagger_blueprints() for mod in self._modules]))
 
-    def _init_api(self, api_path: Optional[str], development: bool, top):
-        if api_path is None or self._api_file is None:
-            return
-        api_doc_path = '%s/%s' % (api_path, self._api_file)
-        self._init_openapi(api_doc_path)
-        if development:
-            self._init_swagger(api_doc_path, top)
-        else:
-            self._swagger = None
+    def get_api(self) -> str:
+        """
+        Generate api for this module
+        :return: Api string in yaml format
+        """
+        if self._apispec is not None:
+            return self._apispec.to_yaml()
+        if self._api_full_path is not None:
+            with open(self._api_full_path) as api_file:
+                return api_file.read()
 
     def _init_openapi(self, api_path: str):
         import yaml
@@ -186,8 +241,9 @@ class OrgMephiModule:
             spec_dict = yaml.safe_load(spec_file)
         spec = create_spec(spec_dict)
         self._openapi = FlaskOpenAPIViewDecorator.from_spec(spec)
+        self._api_full_path = api_path
 
-    def _init_swagger(self, api_doc_path: str, top):
+    def _init_swagger(self, top):
         from flask_swagger_ui import get_swaggerui_blueprint
         full_name = self.get_full_name(top)
         full_path = self.get_prefix(top)
@@ -199,15 +255,132 @@ class OrgMephiModule:
                 'app_name': "orgmephi_%s" % full_name
             }
         )
+        self._swagger = swagger_ui_blueprint
 
-        @swagger_ui_blueprint.route('/api.yaml', methods=['GET'])
+    def _api_from_file(self, api_doc_path: str):
+        @self._swagger.route('/api.yaml', methods=['GET'])
         def serve_api():
             nonlocal api_doc_path
             return send_file(api_doc_path)
 
-        self._swagger = swagger_ui_blueprint
+    _jwt_access_token_schema = {'type': 'apiKey', 'in': 'cookie', 'name': 'access_token_cookie'}
+    _jwt_refresh_token_schema = {'type': 'apiKey', 'in': 'cookie', 'name': 'refresh_token_cookie'}
+    _csrf_access_token_schema = {'type': 'apiKey', 'in': 'header', 'name': 'X-CSRF-TOKEN'}
+    _csrf_refresh_token_schema = {'type': 'apiKey', 'in': 'header', 'name': 'X-CSRF-TOKEN'}
+
+    def _init_apispec(self, title, top):
+        from flask import Flask
+        from apispec_webframeworks.flask import FlaskPlugin
+        from apispec_oneofschema import MarshmallowPlugin
+        from .marshmallow import _enum2properties, _related2properties
+
+        plugin = MarshmallowPlugin()
+        opts = {}
+        if self != top:
+            opts['servers'] = [{"url": self.get_prefix(top).removesuffix(self._blueprint.url_prefix)}]
+        spec = APISpec(
+            title=title,
+            version='1.0.0',
+            openapi_version='3.0.2',
+            plugins=[FlaskPlugin(), plugin],
+            **opts
+        )
+
+        plugin.converter.add_attribute_function(_enum2properties)
+        plugin.converter.add_attribute_function(_related2properties)
+
+        spec.components.security_scheme('JWTAccessToken', self._jwt_access_token_schema)
+        spec.components.security_scheme('JWTRefreshToken', self._jwt_refresh_token_schema)
+        spec.components.security_scheme('CSRFAccessToken', self._csrf_access_token_schema)
+        spec.components.security_scheme('CSRFRefreshToken', self._csrf_refresh_token_schema)
+
+        tmp_app = Flask('tmp_app')
+        tmp_app.register_blueprint(self._blueprint)
+
+        static_endpoint = tmp_app.view_functions.get('static', None)
+
+        with tmp_app.test_request_context():
+            for endpoint in tmp_app.view_functions.values():
+                if endpoint.__doc__ is not None and endpoint != static_endpoint:
+                    spec.path(view=endpoint)
+
+        self._apispec = spec
+
+    def _api_from_marshmallow(self, top):
+
+        self._init_apispec(self.get_full_name(top), top)
+
+        api = self._apispec.to_yaml()
+
+        @self._swagger.route('/api.yaml', methods=['GET'])
+        def serve_api():
+            nonlocal api
+            return api, 200, {'Content-Type': 'text/plain'}
 
     def _get_parents(self, top=None):
         if self._parent is None or self == top:
             return [self._name]
         return self._parent._get_parents() + [self._name]
+
+    @staticmethod
+    def _wrap_marshmallow_input(f: Callable, schema: Union[Type[Schema], Schema]):
+
+        if issubclass(schema, Schema):
+            # noinspection PyCallingNonCallable
+            schema = schema()
+
+        @wraps(f)
+        def wrapper(*args, **kwargs):
+            from flask import request
+            from marshmallow import RAISE
+            from marshmallow_sqlalchemy import SQLAlchemySchema
+            if isinstance(schema, SQLAlchemySchema) and getattr(schema.Meta, 'load_instance', False):
+                raise TypeError('Trying to load instance with SQLAlchemySchema on request')
+            else:
+                request.marshmallow = schema.load(data=request.json, unknown=RAISE)
+            return f(*args, **kwargs)
+
+        return wrapper
+
+    @staticmethod
+    def _wrap_marshmallow_output(f: Callable, schema: Union[Type[Schema], Schema]):
+
+        if issubclass(schema, Schema):
+            # noinspection PyCallingNonCallable
+            schema = schema()
+
+        @wraps(f)
+        def wrapper(*args, **kwargs):
+            from flask import make_response
+            result = f(*args, **kwargs)
+            if len(result) == 0:
+                return make_response()
+            serialized = schema.dump(obj=result[0])
+            return make_response(serialized, *result[1:])
+
+        return wrapper
+
+    @staticmethod
+    def _wrap_db_commit(f: Callable):
+        from . import get_current_db
+
+        @wraps(f)
+        def wrapper(*args, **kwargs):
+            db = get_current_db()
+            try:
+                result = f(*args, **kwargs)
+            except Exception:
+                db.session.rollback()
+                raise
+            db.session.rollback()
+            return result
+
+        return wrapper
+
+    def appropriate_area(self, area: OrgMephiArea) -> bool:
+        """
+        Checks if the module belongs to an area
+        :param area: Are that server is launched in
+        :return: True if the module belongs to the specified area, False otherwise
+        """
+        return self._area == OrgMephiArea.both or area == OrgMephiArea.both or self._area == area

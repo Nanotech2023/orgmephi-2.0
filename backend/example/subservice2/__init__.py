@@ -1,3 +1,4 @@
-from common import OrgMephiModule, OrgMephiAccessLevel
+from common import OrgMephiModule, OrgMephiAccessLevel, OrgMephiArea
 
-module = OrgMephiModule('subservice2', __package__, OrgMephiAccessLevel.visitor, 'example_subservice2.yaml')
+module = OrgMephiModule('subservice2', __package__, OrgMephiAccessLevel.visitor, marshmallow_api=True,
+                        area=OrgMephiArea.both)

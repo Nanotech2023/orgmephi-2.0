@@ -7,7 +7,7 @@ from typing import Optional, Callable, Any
 
 import os
 
-from .module import OrgMephiModule
+from .module import OrgMephiModule, OrgMephiArea, org_mephi_area_by_name
 from .password import OrgMephiPassword
 from .access_levels import OrgMephiAccessLevel
 
@@ -128,7 +128,7 @@ class OrgMephiApp:
         This is normally only needed if you are going to call get_current_app from within a view function,
         because self will be set as current automatically while executing OrgMephiApp.prepare
         """
-        _orgmephi_current_app.set(self)
+        self.app.app_context().push()
 
     def prepare(self):
         """
@@ -137,25 +137,23 @@ class OrgMephiApp:
         Loads views, loads api, initializes swagger-ui, registers paths, creates database,
             prepares database (see OrgMephiApp.db_prepare_action)
         """
-        last_app = get_current_app()
-        self.set_current()
-        try:
+        with self.app.app_context():
+            api_path = None
             api_var = 'ORGMEPHI_API_PATH'
+            area_var = 'ORGMEPHI_AREA'
             if api_var in self._app.config:
                 api_path = _path_to_absolute(self._app.config[api_var])
-            else:
-                api_path = None
             development = self._app.config['ENV'] == 'development'
-            self._module.prepare(api_path, development, self._module)
-            self._app.register_blueprint(self._module.blueprint)
-            # swagger-ui does not work with nested blueprints
-            for bp in self._module.get_swagger_blueprints():
-                self._app.register_blueprint(bp)
+            area = org_mephi_area_by_name[self._app.config[area_var]]
+            if self._module.appropriate_area(area):
+                self._module.prepare(api_path, development, self._module, area)
+                self._app.register_blueprint(self._module.blueprint)
+                # swagger-ui does not work with nested blueprints
+                for bp in self._module.get_swagger_blueprints():
+                    self._app.register_blueprint(bp)
             self._db.create_all()
             for act in self._db_prepare_actions:
                 act()
-        finally:
-            _orgmephi_current_app.set(last_app)
 
     def run(self, **options: Any):
         """
@@ -165,7 +163,8 @@ class OrgMephiApp:
         self._app.run(**options)
 
     def _init_app(self, default_config: object = None, test_config: object = None):
-        self._app = Flask(__name__)
+        self._app = Flask(__name__, root_path=os.getcwd())
+        self._app.config['ORGMEPHI_APP'] = self
         if default_config is not None:
             self._app.config.from_object(default_config)
         config_var = 'ORGMEPHI_%s_CONFIG' % self._service_name.upper()
@@ -225,7 +224,6 @@ class OrgMephiApp:
             )
 
 
-_orgmephi_current_app: ContextVar[Optional[OrgMephiApp]] = ContextVar('orgmephi_current_app', default=None)
 _orgmephi_current_module: ContextVar[Optional[OrgMephiModule]] = ContextVar('orgmephi_current_module', default=None)
 
 
@@ -234,7 +232,8 @@ def get_current_app() -> OrgMephiApp:
     Get current application
     :return: Current application
     """
-    return _orgmephi_current_app.get()
+    from flask import current_app
+    return current_app.config.get('ORGMEPHI_APP', None)
 
 
 def get_current_flask_app() -> Flask:
@@ -242,7 +241,7 @@ def get_current_flask_app() -> Flask:
     Get flask app of current application, synonym to get_current_app().app
     :return: Flask app of current application
     """
-    return _orgmephi_current_app.get().app
+    return get_current_app().app
 
 
 def get_current_db() -> SQLAlchemy:
@@ -251,7 +250,7 @@ def get_current_db() -> SQLAlchemy:
     :return: Database object of current application
     :return:
     """
-    return _orgmephi_current_app.get().db
+    return get_current_app().db
 
 
 def get_current_module() -> OrgMephiModule:
