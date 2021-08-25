@@ -5,14 +5,16 @@ from common.util import db_exists, db_get_or_raise
 from common.errors import AlreadyExists
 
 from .schemas import AddCategoryNewsRequestSchema
-from news.models import NewsCategory
+from news.models import NewsCategory, News
+from news.model_schemas import NewsCategorySchema
 
 db = get_current_db()
 module = get_current_module()
 app = get_current_app()
 
 
-@module.route('/add_category', input_schema=AddCategoryNewsRequestSchema, methods=['POST'])
+@module.route('/add_category', input_schema=AddCategoryNewsRequestSchema, methods=['POST'],
+              output_schema=NewsCategorySchema)
 def add_category():
     """
     Add a news category
@@ -27,8 +29,11 @@ def add_category():
         - JWTAccessToken: [ ]
         - CSRFAccessToken: [ ]
       responses:
-        '204':
+        '200':
           description: OK
+          content:
+            application/json:
+              schema: NewsCategorySchema
         '409':
           description: Category with this name already exists
     """
@@ -39,7 +44,7 @@ def add_category():
     category = NewsCategory(name=name)
     db.session.add(category)
     db.session.commit()
-    return {}, 204
+    return category, 200
 
 
 @module.route('/delete_category/<string:category_name>', methods=['POST'])
@@ -66,5 +71,33 @@ def delete_category(category_name):
     """
     category = db_get_or_raise(NewsCategory, 'name', category_name)
     db.session.delete(category)
+    db.session.commit()
+    return {}, 204
+
+
+@module.route('/news/<int:news_id>/delete', methods=['POST'])
+def delete_news(news_id):
+    """
+    Delete news
+    ---
+    post:
+      parameters:
+        - in: path
+          description: ID of news
+          name: news_id
+          required: true
+          schema:
+            type: integer
+      security:
+        - JWTAccessToken: [ ]
+        - CSRFAccessToken: [ ]
+      responses:
+        '204':
+          description: OK
+        '404':
+          description: News not found
+    """
+    news = db_get_or_raise(News, 'id', news_id)
+    db.session.delete(news)
     db.session.commit()
     return {}, 204
