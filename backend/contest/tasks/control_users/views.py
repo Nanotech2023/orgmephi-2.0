@@ -47,6 +47,10 @@ def add_user_to_contest(id_contest):
     values = request.marshmallow
     user_ids = values['users_id']
     show_results_to_user = values['show_results_to_user']
+    location_id = values.get('location_id', None)
+
+    if location_id is not None:
+        db_get_or_raise(OlympiadLocation, "location_id", location_id)
 
     current_contest = get_contest_if_possible(id_contest)
 
@@ -56,6 +60,7 @@ def add_user_to_contest(id_contest):
 
         current_contest.users.append(UserInContest(user_id=user_id,
                                                    show_results_to_user=show_results_to_user,
+                                                   location_id=location_id,
                                                    variant_id=generate_variant(id_contest, user_id),
                                                    user_status=UserStatusEnum.Participant))
 
@@ -103,6 +108,59 @@ def remove_user_from_contest(id_contest):
         current_user = current_contest.users.filter_by(**{"user_id": str(user_id)}).one_or_none()
         if current_user is None:
             raise InsufficientData('user_id', user_id)
+        db.session.delete(current_user)
+
+    db.session.commit()
+
+    return {}, 200
+
+
+@module.route('/contest/<int:id_contest>/change_location', methods=['POST'],
+              input_schema=ChangeUsersLocationInContestRequestTaskControlUsersSchema)
+def change_user_location(id_contest):
+    """
+    Change users location
+    ---
+    post:
+      parameters:
+        - in: path
+          description: ID of the contest
+          name: id_contest
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: ChangeUsersLocationInContestRequestTaskControlUsersSchema
+      security:
+        - JWTAccessToken: [ ]
+        - CSRFAccessToken: [ ]
+      responses:
+        '200':
+          description: OK
+        '400':
+          description: Bad request
+        '409':
+          description: Olympiad type already in use
+    """
+
+    values = request.marshmallow
+    user_ids = values['users_id']
+
+    location_id = values.get('location_id', None)
+
+    if location_id is not None:
+        db_get_or_raise(OlympiadLocation, "location_id", location_id)
+
+    current_contest = get_contest_if_possible(id_contest)
+
+    for user_id in user_ids:
+        current_user = current_contest.users.filter_by(**{"user_id": str(user_id)}).one_or_none()
+        if current_user is None:
+            raise InsufficientData('user_id', user_id)
+        current_user.location_id = location_id
         db.session.delete(current_user)
 
     db.session.commit()

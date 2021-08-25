@@ -1,6 +1,6 @@
 import io
 
-from flask import abort, send_file
+from flask import abort, send_file, request
 
 from common import get_current_app, get_current_module
 from common.errors import AlreadyExists, OlympiadIsOver
@@ -10,7 +10,7 @@ from contest.tasks.model_schemas.olympiad import ContestSchema
 from contest.tasks.participant.schemas import *
 from contest.tasks.unauthorized.schemas import AllOlympiadsResponseTaskUnauthorizedSchema
 from contest.tasks.util import *
-from user.models import SchoolInfo
+from user.models import SchoolInfo, UserTypeEnum
 
 db = get_current_db()
 module = get_current_module()
@@ -58,12 +58,18 @@ def variant_self(id_contest):
 # Enroll in Contest
 
 
-@module.route('/contest/<int:id_contest>/enroll', methods=['POST'])
+@module.route('/contest/<int:id_contest>/enroll', methods=['POST'],
+              input_schema=EnrollRequestTaskParticipantSchema)
 def enroll_in_contest(id_contest):
     """
     Enroll in contest
     ---
     post:
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: EnrollRequestTaskParticipantSchema
       parameters:
         - in: path
           description: ID of the contest
@@ -83,17 +89,29 @@ def enroll_in_contest(id_contest):
           description: User already enrolled
     """
 
+    values = request.marshmallow
+
+    location_id = values.get('location_id', None)
     user_id = jwt_get_id()
+
+    if location_id is not None:
+        db_get_or_raise(OlympiadLocation, "location_id", location_id)
 
     current_user: User = db_get_or_raise(User, "id", user_id)
 
-    if current_user.student_info is not None:
+    # unfilled = current_user.unfilled()
+
+    if current_user.type == UserTypeEnum.university:
+        # if 'admission_year' in unfilled['student_info']:
+        # raise InsufficientData('student_info', "admission_year")
         grade = TargetClassEnum("student")
-    else:
+    elif current_user.type == UserTypeEnum.school:
         school_info: SchoolInfo = current_user.school_info
-        if school_info is None:
-            raise InsufficientData('school_info', "school_info")
+        # if 'admission_year' in unfilled['school_info']:
+        # raise InsufficientData('school_info', "admission_year")
         grade = TargetClassEnum(str(school_info.grade))
+    else:
+        raise InsufficientData('type', "university or school")
 
     current_contest = get_contest_if_possible(id_contest)
     current_base_contest = get_base_contest(current_contest)
@@ -108,7 +126,55 @@ def enroll_in_contest(id_contest):
     current_contest.users.append(UserInContest(user_id=user_id,
                                                show_results_to_user=False,
                                                variant_id=generate_variant(id_contest, user_id),
+                                               location_id=location_id,
                                                user_status=UserStatusEnum.Participant))
+
+    db.session.commit()
+    return {}, 200
+
+
+@module.route('/contest/<int:id_contest>/change_location', methods=['POST'],
+              input_schema=EnrollRequestTaskParticipantSchema)
+def change_location_in_contest(id_contest):
+    """
+    EChange user location
+    ---
+    post:
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: EnrollRequestTaskParticipantSchema
+      parameters:
+        - in: path
+          description: ID of the contest
+          name: id_contest
+          required: true
+          schema:
+            type: integer
+      security:
+        - JWTAccessToken: [ ]
+        - CSRFAccessToken: [ ]
+      responses:
+        '200':
+          description: OK
+        '400':
+          description: Bad request
+        '409':
+          description: User already enrolled
+    """
+
+    values = request.marshmallow
+
+    location_id = values.get('location_id', None)
+    user_id = jwt_get_id()
+
+    if location_id is not None:
+        db_get_or_raise(OlympiadLocation, "location_id", location_id)
+
+    current_user: User = db_get_or_raise(User, "id", user_id)
+
+    current_user.location_id = location_id
 
     db.session.commit()
     return {}, 200

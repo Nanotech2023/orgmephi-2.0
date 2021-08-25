@@ -26,3 +26,5 @@ class UserInContest(db.Model):
     user_status = db.Column(db.Enum(UserStatusEnum))
     show_results_to_user = db.Column(db.Boolean)
     completed_the_contest = db.Column(db.Boolean, default=False)
+
+    location_id = db.Column(db.Integer, db.ForeignKey('olympiad_location.location_id'))

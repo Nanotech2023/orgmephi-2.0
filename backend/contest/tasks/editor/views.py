@@ -381,66 +381,6 @@ def contest_remove(id_olympiad, id_stage, id_contest):
 
 
 @module.route(
-    '/olympiad/<int:id_olympiad>/stage/<int:id_stage>/contest/<int:id_contest>',
-    methods=['PATCH'],
-    input_schema=UpdateContestRequestTaskEditorSchema,
-    output_schema=ContestResponseTaskCreatorSchema)
-def contest_patch(id_olympiad, id_stage, id_contest):
-    """
-    Update simple contest in stage
-    ---
-    patch:
-      parameters:
-        - in: path
-          description: ID of the olympiad
-          name: id_olympiad
-          required: true
-          schema:
-            type: integer
-        - in: path
-          description: ID of the stage
-          name: id_stage
-          required: true
-          schema:
-            type: integer
-        - in: path
-          description: ID of the contest
-          name: id_contest
-          required: true
-          schema:
-            type: integer
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema: UpdateContestRequestTaskEditorSchema
-      security:
-        - JWTAccessToken: [ ]
-        - CSRFAccessToken: [ ]
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema: CompositeContestResponseTaskCreatorSchema
-        '400':
-          description: Bad request
-        '404':
-          description: Not found
-        '409':
-          description: Olympiad type already in use
-    """
-
-    current_contest = get_contest_if_possible_from_stage(id_olympiad, id_stage, id_contest)
-
-    SimpleContestSchema(load_instance=True).load(request.json, instance=current_contest, session=db.session,
-                                                 partial=False, unknown=EXCLUDE)
-
-    db.session.commit()
-    return current_contest, 200
-
-
-@module.route(
     '/olympiad/<int:id_olympiad>/stage/<int:id_stage>/contest/<int:id_contest>/add_previous',
     methods=['PATCH'], input_schema=UpdatePreviousContestRequestTaskEditorSchema)
 def contest_add_previous(id_olympiad, id_stage, id_contest):
