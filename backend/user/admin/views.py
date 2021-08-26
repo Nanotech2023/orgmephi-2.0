@@ -1,14 +1,15 @@
-from flask import request, abort
+import secrets
+from flask import request
 from marshmallow import EXCLUDE
 import sqlalchemy.exc
 
 from common.errors import NotFound, AlreadyExists, InsufficientData
 from common import get_current_app, get_current_module, get_current_db
-from common.util import db_get_or_raise
+from common.util import db_get_or_raise, db_exists
 
 from user.util import update_password
 
-from user.models import User, add_user, UserInfo, Group, StudentInfo, SchoolInfo
+from user.models import User, init_user, UserInfo, Group, StudentInfo, SchoolInfo
 
 from user.model_schemas.auth import UserSchema, GroupSchema
 from user.model_schemas.personal import UserInfoSchema, UserInfoInputSchema
@@ -52,7 +53,8 @@ def register_internal():
     username = values['username']
     password_hash = app.password_policy.hash_password(values['password'], check=False)
     try:
-        user = add_user(db.session, username, password_hash, UserRoleEnum.participant, UserTypeEnum.internal)
+        user = init_user(username, password_hash, UserRoleEnum.participant, UserTypeEnum.internal)
+        db.session.add(user)
         db.session.commit()
     except sqlalchemy.exc.IntegrityError:
         raise AlreadyExists('username', username)
@@ -63,7 +65,6 @@ def register_internal():
 @module.route('/preregister', methods=['POST'], output_schema=PreregisterResponseUserSchema)
 def preregister():
     """
-    !NOT IMPLEMENTED!
     Register an unconfirmed user with a one-time password
     ---
     post:
@@ -79,7 +80,15 @@ def preregister():
         '403':
           description: Invalid role of current user
     """
-    abort(501)
+    rand_name = secrets.token_urlsafe(16)
+    while db_exists(db.session, User, 'username', rand_name):
+        rand_name = secrets.token_urlsafe(16)
+    rand_pass = secrets.token_urlsafe(app.config['ORGMEPHI_PREREGISTER_PASSWORD_LENGTH'])
+    user = User(username=rand_name, role=UserRoleEnum.unconfirmed, type=UserTypeEnum.pre_register)
+    user.password_hash = app.password_policy.hash_password(rand_pass, check=False)
+    db.session.add(user)
+    db.session.commit()
+    return {'registration_number': user.id, 'password': rand_pass}, 200
 
 
 @module.route('/password/<int:user_id>', methods=['POST'], input_schema=PasswordRequestUserSchema)

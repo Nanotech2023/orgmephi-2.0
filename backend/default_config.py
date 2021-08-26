@@ -43,3 +43,4 @@ class DefaultConfiguration:
     ORGMEPHI_MAIL_CONFIRM_EXPIRATION = timedelta(days=1)
     ORGMEPHI_MAIL_CONFIRM_SUBJECT = 'Подтверждение почтового адреса'
     ORGMEPHI_MAIL_RECOVER_SUBJECT = 'Сброс пароля'
+    ORGMEPHI_PREREGISTER_PASSWORD_LENGTH = 8
