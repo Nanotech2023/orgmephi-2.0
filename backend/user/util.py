@@ -15,6 +15,7 @@ def update_password(user_id, new_password, old_password, admin=False):
         app.password_policy.validate_password(old_password, user.password_hash)
     password_hash = app.password_policy.hash_password(new_password, check=not admin)
     user.password_hash = password_hash
+    user.password_changed = datetime.utcnow()
     db.session.commit()
     return make_response({}, 200)
 

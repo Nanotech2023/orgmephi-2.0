@@ -71,6 +71,7 @@ class User(db.Model):
     id = db.Column(db.Integer, autoincrement=True, primary_key=True)
     username = db.Column(db.String, index=True, nullable=False, unique=True)
     password_hash = db.Column(db.String, nullable=False)
+    password_changed = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
     role = db.Column(db.Enum(UserRoleEnum), nullable=False)
     type = db.Column(db.Enum(UserTypeEnum), nullable=False)
     registration_date = db.Column(db.DateTime, default=datetime.utcnow)
