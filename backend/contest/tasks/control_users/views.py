@@ -256,5 +256,5 @@ def users_certificate(id_contest, id_user):
     mark = get_user_in_contest_work(id_user, id_contest).mark
     user_status = db_get_or_raise(UserInContest, 'user_id', id_user).user_status
 
-    send_pdf('user_certificate.html', u=user, mark=mark, user_status=user_status,
-             back=current_contest)
+    return send_pdf('user_certificate.html', u=user, mark=mark, user_status=user_status,
+                    back=current_contest)

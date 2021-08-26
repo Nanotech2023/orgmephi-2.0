@@ -296,4 +296,4 @@ def generate_card():
     if len(unfilled) > 0:
         raise InsufficientData('user', str(unfilled))
     # noinspection PyUnresolvedReferences
-    send_pdf('participant_card.html', u=user)
+    return send_pdf('participant_card.html', u=user)

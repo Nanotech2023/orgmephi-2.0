@@ -324,8 +324,8 @@ def users_certificate(id_contest):
     mark = get_user_in_contest_work(jwt_get_id(), id_contest).mark
     user_status = db_get_or_raise(UserInContest, 'user_id', jwt_get_id()).user_status
 
-    send_pdf('user_certificate.html', u=user, mark=mark, user_status=user_status,
-             back=current_contest)
+    return send_pdf('user_certificate.html', u=user, mark=mark, user_status=user_status,
+                    back=current_contest)
 
 
 # Contest

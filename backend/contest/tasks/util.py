@@ -3,7 +3,7 @@ import random
 from marshmallow import Schema, fields
 from marshmallow_enum import EnumField
 
-from common.errors import InsufficientData, FileTooLarge, UserIsNotRegistered
+from common.errors import InsufficientData, FileTooLarge, DataConflict
 from common.jwt_verify import jwt_get_id
 from contest.default_config import DefaultConfiguration
 from contest.tasks.models import *
@@ -70,7 +70,7 @@ def get_user_contest_if_possible(id_olympiad, id_stage, id_contest):
     if current_contest not in stage.contests:
         raise InsufficientData('contest_id', 'not in current stage')
     if not is_user_in_contest(jwt_get_id(), current_contest):
-        raise UserIsNotRegistered()
+        raise DataConflict("User is not registered for this olympiad")
     return current_contest
 
 

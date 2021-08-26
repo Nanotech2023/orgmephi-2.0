@@ -170,20 +170,6 @@ class TimeOver(RequestError):
         return 'Time is over for %s' % self.data
 
 
-class UserIsNotRegistered(RequestError):
-    """
-    Olympiad is over for current user
-    """
-    def __init__(self):
-        """
-        Create error object
-        """
-        super(UserIsNotRegistered, self).__init__(409)
-
-    def get_msg(self) -> str:
-        return 'This user is not registered for this contest'
-
-
 class PermissionDenied(RequestError):
     """
     User has insufficient permissions to perform the operation
