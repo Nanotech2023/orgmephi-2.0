@@ -1,19 +1,43 @@
+import datetime
+
 from flask import request, make_response
+from functools import wraps
 
 from common.errors import WrongCredentials, PermissionDenied
 from common import get_current_app, get_current_module, get_current_db
 from common.util import db_get_one_or_none, db_get_or_raise
 from common.jwt_verify import jwt_required, jwt_get_id
 from flask_jwt_extended import create_access_token, set_access_cookies, create_refresh_token, set_refresh_cookies,\
-    get_csrf_token, unset_jwt_cookies, get_jwt
+    get_csrf_token, unset_jwt_cookies, get_jwt, verify_jwt_in_request
 
-from user.models import User, UserRoleEnum
+from user.models import User
 
 from .schemas import LoginRequestUserSchema
 
 db = get_current_db()
 module = get_current_module()
 app = get_current_app()
+
+
+def _jwt_required_refresh(roles=None):
+
+    def decorator(function):
+
+        @wraps(function)
+        def wrapper(*args, **kwargs):
+            verify_jwt_in_request(refresh=True)
+            claims = get_jwt()
+            user_id = claims.get('orig_sub', None)
+            user = db_get_or_raise(User, 'id', user_id)
+            if roles is not None:
+                if user.role.value not in roles:
+                    raise PermissionDenied(roles)
+            issued_at = datetime.datetime.utcfromtimestamp(claims['iat'])
+            if user.password_changed > issued_at:
+                raise WrongCredentials()
+            return function(*args, **kwargs)
+        return wrapper
+    return decorator
 
 
 def generate_access_token(user):
@@ -99,7 +123,7 @@ def login():
 
 
 @module.route('/refresh', methods=['POST'])
-@jwt_required(refresh=True)
+@_jwt_required_refresh()
 def refresh():
     """
     Refresh JWT token for current user
@@ -120,6 +144,8 @@ def refresh():
           content:
             application/json:
               schema: CSRFPairUserSchema
+        '401':
+          description: Password changed since token was issues
     """
     user_id = jwt_get_id()
     user = db_get_or_raise(User, "id", user_id)
@@ -149,6 +175,8 @@ def logout():
                 description: Set both access_token_cookie and refresh_token_cookie
                 type: string
                 example: access_token_cookie=deleted; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT
+        '401':
+          description: Password changed since token was issues
     """
     response = make_response({}, 200)
     unset_jwt_cookies(response)
@@ -156,7 +184,7 @@ def logout():
 
 
 @module.route('/impersonate/<int:user_id>', methods=['POST'])
-@jwt_required(refresh=True)
+@_jwt_required_refresh(roles=['Admin', 'System'])
 def impersonate(user_id):
     """
     Impersonate a user
@@ -184,13 +212,13 @@ def impersonate(user_id):
           content:
             application/json:
               schema: CSRFPairUserSchema
+        '401':
+          description: Password changed since token was issues
         '404':
           description: User not found
     """
     orig_id = get_jwt()['orig_sub']
     orig_user = db_get_or_raise(User, "id", orig_id)
-    if orig_user.role not in [UserRoleEnum.admin, UserRoleEnum.system]:
-        raise PermissionDenied(['Admin', 'System'])
 
     user = db_get_or_raise(User, "id", user_id)
 
@@ -198,7 +226,7 @@ def impersonate(user_id):
 
 
 @module.route('/unimpersonate', methods=['POST'])
-@jwt_required(refresh=True)
+@_jwt_required_refresh(roles=['Admin', 'System'])
 def unimpersonate():
     """
     Stop impersonating another user
@@ -219,6 +247,8 @@ def unimpersonate():
           content:
             application/json:
               schema: CSRFPairUserSchema
+        '401':
+          description: Password changed since token was issues
     """
     orig_id = get_jwt()['orig_sub']
     orig_user = db_get_or_raise(User, "id", orig_id)
