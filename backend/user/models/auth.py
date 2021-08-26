@@ -98,20 +98,23 @@ class User(db.Model):
         return get_unfilled(self, req_fields, list({'user_info', 'school_info', 'student_info'} & set(req_fields)))
 
 
-def add_user(db_session, username, password_hash, role, reg_type):
+def init_user(username, password_hash, user_role, user_type, user=None):
     from .personal import UserInfo
     from .university import StudentInfo
     from .school import SchoolInfo
-    user = User(
-        username=username,
-        password_hash=password_hash,
-        role=role,
-        type=reg_type
-    )
-    user.user_info = UserInfo()
-    user.student_info = StudentInfo()
-    user.school_info = SchoolInfo()
-    db_session.add(user)
+    if user is None:
+        user = User()
+    user.username = username
+    user.password_hash = password_hash
+    user.password_changed = datetime.utcnow()
+    user.role = user_role
+    user.type = user_type
+    if user.user_info is None:
+        user.user_info = UserInfo()
+    if user.student_info is None:
+        user.student_info = StudentInfo()
+    if user.school_info is None:
+        user.school_info = SchoolInfo()
     return user
 
 

@@ -9,8 +9,8 @@ from common.errors import AlreadyExists, NotFound
 from common import get_current_app, get_current_module, get_current_db
 from common.util import db_get_all, db_get_or_raise, db_get_one_or_none
 
-from user.models import add_user, UserRoleEnum, University, Country, Region, UserInfo
-from user.model_schemas.auth import UserSchema
+from user.models import init_user, UserRoleEnum, University, Country, Region, UserInfo
+from user.model_schemas.auth import User, UserSchema
 from user.model_schemas.personal import UserInfoSchema
 from user.model_schemas.university import StudentInfoSchema
 
@@ -82,7 +82,19 @@ def register():
             raise AlreadyExists('email', username)
 
     default_role = UserRoleEnum.unconfirmed if email_confirm else UserRoleEnum.participant
-    user = add_user(db.session, username, password_hash, default_role, reg_type)
+
+    register_confirm = values.get('register_confirm', None)
+    if register_confirm is not None:
+        user_id = register_confirm['registration_number']
+        user = db_get_or_raise(User, 'id', user_id)
+        if user.type != UserTypeEnum.pre_register:
+            raise NotFound('id', user_id)
+        app.password_policy.validate_password(register_confirm['password'], user.password_hash)
+        init_user(username, password_hash, default_role, reg_type, user=user)
+    else:
+        user = init_user(username, password_hash, default_role, reg_type)
+        db.session.add(user)
+
     UserInfoSchema(load_instance=True).load(request.json['personal_info'], instance=user.user_info,
                                             session=db.session, partial=False, unknown=EXCLUDE)
     user.user_info.email = username

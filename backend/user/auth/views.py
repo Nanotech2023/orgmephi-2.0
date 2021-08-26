@@ -3,14 +3,14 @@ import datetime
 from flask import request, make_response
 from functools import wraps
 
-from common.errors import WrongCredentials, PermissionDenied
+from common.errors import WrongCredentials, PermissionDenied, WrongType
 from common import get_current_app, get_current_module, get_current_db
 from common.util import db_get_one_or_none, db_get_or_raise
 from common.jwt_verify import jwt_required, jwt_get_id
 from flask_jwt_extended import create_access_token, set_access_cookies, create_refresh_token, set_refresh_cookies,\
     get_csrf_token, unset_jwt_cookies, get_jwt, verify_jwt_in_request
 
-from user.models import User
+from user.models import User, UserRoleEnum, UserTypeEnum
 
 from .schemas import LoginRequestUserSchema
 
@@ -117,8 +117,12 @@ def login():
         app.password_policy.validate_password(values['password'],
                                               '$pbkdf2-sha256$29000$h8DWeu8dg3CudQ4BAACg1A'
                                               '$JMTWWR9uLxzruMTaZObU8CJxMJoDTjJPwfL.aboeCIM')
-        raise WrongCredentials
+        raise WrongCredentials()
 
+    if user.type == UserTypeEnum.pre_register:
+        raise WrongCredentials()
+    if user.role == UserRoleEnum.unconfirmed:
+        raise WrongType('User account is not confirmed')
     return serve_tokens(user, user, values['remember_me'])
 
 
