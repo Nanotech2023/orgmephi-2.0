@@ -109,9 +109,12 @@ def init_user(username, password_hash, user_role, user_type, user=None):
     user.password_changed = datetime.utcnow()
     user.role = user_role
     user.type = user_type
-    user.user_info = UserInfo()
-    user.student_info = StudentInfo()
-    user.school_info = SchoolInfo()
+    if user.user_info is None:
+        user.user_info = UserInfo()
+    if user.student_info is None:
+        user.student_info = StudentInfo()
+    if user.school_info is None:
+        user.school_info = SchoolInfo()
     return user
 
 
