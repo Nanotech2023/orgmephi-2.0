@@ -49,6 +49,10 @@ class UniversityRegistrationRequestUserSchema(Schema):
     student_info = fields.Nested(nested=RegistrationStudentInfoUserSchema, required=True)
 
 
+class ResetPasswordUserSchema(Schema):
+    password = common_fields.Password(required=True)
+
+
 class InfoUniversitiesResponseUserSchema(Schema):
     university_list = fields.Nested(UniversitySchema, many=True, required=True)
 
