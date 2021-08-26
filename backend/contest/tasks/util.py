@@ -3,14 +3,12 @@ import random
 from marshmallow import Schema, fields
 from marshmallow_enum import EnumField
 
-from common.errors import InsufficientData, TooBigFileSize
+from common.errors import InsufficientData, FileTooLarge, UserIsNotRegistered
 from common.jwt_verify import jwt_get_id
+from contest.default_config import DefaultConfiguration
 from contest.tasks.models import *
 
 # Constants
-
-
-MAX_FILE_SIZE = 1e7
 
 
 # Generators
@@ -31,7 +29,7 @@ def generate_variant(id_contest, user_id):
     variants_number = len(current_contest.variants.all())
     if variants_number == 0:
         raise InsufficientData('variant', 'variants in contest')
-    random_number = random.randint(0, variants_number * 2)
+    random_number = random.randint(1, variants_number * 2)
     variant = (user_id + random_number) % variants_number
     return variant
 
@@ -63,6 +61,8 @@ def is_task_in_variant(task_id, variant):
 
 def get_user_contest_if_possible(id_olympiad, id_stage, id_contest):
     current_olympiad = db_get_or_raise(Contest, "contest_id", id_olympiad)
+    if current_olympiad.composite_type == ContestTypeEnum.SimpleContest:
+        raise InsufficientData('composite_type', 'not Composite contest')
     stage = db_get_or_raise(Stage, "stage_id", str(id_stage))
     if stage not in current_olympiad.stages:
         raise InsufficientData('stage_id', 'not in current olympiad')
@@ -70,7 +70,7 @@ def get_user_contest_if_possible(id_olympiad, id_stage, id_contest):
     if current_contest not in stage.contests:
         raise InsufficientData('contest_id', 'not in current stage')
     if not is_user_in_contest(jwt_get_id(), current_contest):
-        raise InsufficientData('contest_id', 'not in your contests list')
+        raise UserIsNotRegistered()
     return current_contest
 
 
@@ -221,9 +221,9 @@ def filter_olympiad_query(args):
 
     offset = marshmallow.get('offset', None)
     limit = marshmallow.get('limit', None)
-    target_classes = marshmallow.get('target_classes', None)
-    if offset is not None:
-        query = query.order_by(SimpleContest.start_date)
+    # TODO Target classes filtering
+    # target_classes = marshmallow.get('target_classes', None)
+    query = query.order_by(SimpleContest.start_date)
     # if target_classes is not None:
     #    query = query.offset(offset).limit(limit)
     if limit is not None:
@@ -235,5 +235,5 @@ def filter_olympiad_query(args):
 
 
 def validate_file_size(binary_file):
-    if len(binary_file) > MAX_FILE_SIZE:
-        raise TooBigFileSize()
+    if len(binary_file) > DefaultConfiguration.MAX_FILE_SIZE:
+        raise FileTooLarge()

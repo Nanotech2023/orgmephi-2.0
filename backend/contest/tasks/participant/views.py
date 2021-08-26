@@ -4,7 +4,7 @@ import pdfkit
 from flask import send_file, request, render_template
 
 from common import get_current_app, get_current_module
-from common.errors import AlreadyExists, OlympiadIsOver
+from common.errors import AlreadyExists, TimeOver
 from contest.responses.util import get_user_in_contest_work
 from contest.tasks.model_schemas.contest import VariantSchema
 from contest.tasks.model_schemas.olympiad import ContestSchema
@@ -100,16 +100,15 @@ def enroll_in_contest(id_contest):
 
     current_user: User = db_get_or_raise(User, "id", user_id)
 
-    # unfilled = current_user.unfilled()
+    unfilled = current_user.unfilled()
+
+    if len(unfilled) > 0:
+        raise InsufficientData('user', str(unfilled))
 
     if current_user.type == UserTypeEnum.university:
-        # if 'admission_year' in unfilled['student_info']:
-        # raise InsufficientData('student_info', "admission_year")
         grade = TargetClassEnum("student")
     elif current_user.type == UserTypeEnum.school:
         school_info: SchoolInfo = current_user.school_info
-        # if 'admission_year' in unfilled['school_info']:
-        # raise InsufficientData('school_info', "admission_year")
         grade = TargetClassEnum(str(school_info.grade))
     else:
         raise InsufficientData('type', "university or school")
@@ -219,7 +218,7 @@ def task_all(id_contest):
     current_user = db_get_or_raise(UserInContest, "user_id", str(jwt_get_id()))
 
     if current_user.completed_the_contest:
-        raise OlympiadIsOver()
+        raise TimeOver("olympiad")
 
     tasks_list = get_user_tasks_if_possible(id_contest)
     return {
@@ -268,7 +267,7 @@ def task_image(id_contest, id_task):
     current_user = db_get_or_raise(UserInContest, "user_id", str(jwt_get_id()))
 
     if current_user.completed_the_contest:
-        raise OlympiadIsOver()
+        raise TimeOver("olympiad")
 
     task = get_user_task_if_possible(id_contest, id_task)
 

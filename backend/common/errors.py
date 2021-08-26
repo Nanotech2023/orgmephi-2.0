@@ -141,7 +141,7 @@ class InsufficientData(RequestError):
         return '%s is missing %s' % (self.obj, self.data)
 
 
-class TooBigFileSize(RequestError):
+class FileTooLarge(RequestError):
     """
     Olympiad is over for current user
     """
@@ -149,13 +149,28 @@ class TooBigFileSize(RequestError):
         """
         Create error object
         """
-        super(TooBigFileSize, self).__init__(409)
+        super(FileTooLarge, self).__init__(409)
 
     def get_msg(self) -> str:
         return 'Uploading file is greater then 10mb'
 
 
-class OlympiadIsOver(RequestError):
+class TimeOver(RequestError):
+    """
+    Time over for operation
+    """
+    def __init__(self, data: str):
+        """
+        Create error object
+        """
+        super(TimeOver, self).__init__(409)
+        self.data = data
+
+    def get_msg(self) -> str:
+        return 'Time is over for %s' % self.data
+
+
+class UserIsNotRegistered(RequestError):
     """
     Olympiad is over for current user
     """
@@ -163,10 +178,10 @@ class OlympiadIsOver(RequestError):
         """
         Create error object
         """
-        super(OlympiadIsOver, self).__init__(409)
+        super(UserIsNotRegistered, self).__init__(409)
 
     def get_msg(self) -> str:
-        return 'Olympiad is over for current user'
+        return 'This user is not registered for this contest'
 
 
 class PermissionDenied(RequestError):

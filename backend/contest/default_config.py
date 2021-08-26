@@ -26,3 +26,4 @@ class DefaultConfiguration:
     ORGMEPHI_JWT_SAMESITE = 'Strict'
     ORGMEPHI_CORS_ENABLED = True
     ORGMEPHI_AREA = 'both'
+    MAX_FILE_SIZE = 1e7
