@@ -1,4 +1,4 @@
-import random
+import secrets
 
 from marshmallow import Schema, fields
 from marshmallow_enum import EnumField
@@ -32,8 +32,8 @@ def generate_variant(id_contest, user_id):
     variants_number = len(current_contest.variants.all())
     if variants_number == 0:
         raise InsufficientData('variant', 'variants in contest')
-    random_number = random.randint(1, variants_number * 2)
-    variant = (user_id + random_number) % variants_number
+    random_number = secrets.choice(range(0, variants_number * 420))
+    variant = (user_id + random_number) % variants_number + 1
     return variant
 
 
