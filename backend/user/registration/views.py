@@ -1,6 +1,6 @@
 import datetime
 
-from flask import request, render_template
+from flask import request, render_template, abort
 from flask_mail import Message
 from marshmallow import EXCLUDE
 from itsdangerous import URLSafeTimedSerializer
@@ -32,19 +32,35 @@ def grade_to_year(grade):
     return admission_date
 
 
-def generate_email_token(email):
+def dump_email_token(claims, token_type):
     serializer = URLSafeTimedSerializer(app.config['ORGMEPHI_MAIL_CONFIRM_KEY'])
-    token = serializer.dumps(email, salt=app.config['ORGMEPHI_MAIL_CONFIRM_SALT'])
+    token = serializer.dumps({'claims': claims, 'type': token_type}, salt=app.config['ORGMEPHI_MAIL_CONFIRM_SALT'])
     return token
 
 
-def send_email_confirmation(user):
-    token = generate_email_token(user.user_info.email)
-    subj = app.config['ORGMEPHI_MAIL_CONFIRM_SUBJECT']
-    # noinspection PyUnresolvedReferences
-    msg_body = render_template('email_confirmation.html', confirmation_token=token)
-    msg = Message(subject=subj, body=msg_body, html=msg_body, recipients=[user.user_info.email])
+def load_email_token(token, token_type, return_timestamp=False):
+    serializer = URLSafeTimedSerializer(app.config['ORGMEPHI_MAIL_CONFIRM_KEY'])
+    try:
+        values, timestamp = serializer.loads(
+            token,
+            salt=app.config['ORGMEPHI_MAIL_CONFIRM_SALT'],
+            max_age=app.config['ORGMEPHI_MAIL_CONFIRM_EXPIRATION'].total_seconds(),
+            return_timestamp=True
+        )
+        received_type = values['type']
+        claims = values['claims']
+    except Exception:
+        raise NotFound('token', token)
+    if received_type != token_type:
+        raise NotFound('token', token)
+    if return_timestamp:
+        return claims, timestamp
+    return claims
 
+
+def send_email(subject, recipient, template_name_or_list, **context):
+    msg_body = render_template(template_name_or_list, **context)
+    msg = Message(subject=subject, body=msg_body, html=msg_body, recipients=[recipient])
     app.mail.send(msg)
 
 
@@ -80,7 +96,9 @@ def register():
                                                                             partial=False, unknown=EXCLUDE)
 
     if email_confirm:
-        send_email_confirmation(user)
+        token = dump_email_token(user.user_info.email, 'confirm')
+        subj = app.config['ORGMEPHI_MAIL_CONFIRM_SUBJECT']
+        send_email(subj, user.user_info.email, 'email_confirmation.html', confirmation_token=token)
 
     db.session.commit()
     return user
@@ -158,20 +176,82 @@ def confirm_email(token):
         '404':
           description: Wrong token
     """
-    serializer = URLSafeTimedSerializer(app.config['ORGMEPHI_MAIL_CONFIRM_KEY'])
-    try:
-        email = serializer.loads(
-            token,
-            salt=app.config['ORGMEPHI_MAIL_CONFIRM_SALT'],
-            max_age=app.config['ORGMEPHI_MAIL_CONFIRM_EXPIRATION'].total_seconds()
-        )
-    except Exception:
+    if not app.config.get('ORGMEPHI_CONFIRM_EMAIL', False):
+        abort(404)
+    email = load_email_token(token, 'confirm')
+    if not isinstance(email, str):
         raise NotFound('token', token)
     user_info = db_get_or_raise(UserInfo, 'email', email)
     if user_info.user.role == UserRoleEnum.unconfirmed:
         user_info.user.role = UserRoleEnum.participant
     else:
         raise NotFound('token', token)
+    db.session.commit()
+    return {}, 204
+
+
+@module.route('/forgot/<string:email>', methods=['POST'])
+def forgot_password(email):
+    """
+    send email for password recovery
+    ---
+    post:
+      parameters:
+        - in: path
+          description: User's email
+          name: email
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: OK
+    """
+    if not app.config.get('ORGMEPHI_ENABLE_PASSWORD_RECOVERY', False):
+        abort(404)
+    user = getattr(db_get_one_or_none(UserInfo, 'email', email), 'user', None)
+    if user is None:
+        return {}, 204
+    token = dump_email_token(user.user_info.email, 'recover')
+    subj = app.config['ORGMEPHI_MAIL_RECOVER_SUBJECT']
+    send_email(subj, user.user_info.email, 'password_reset.html', reset_token=token)
+    return {}, 204
+
+
+@module.route('/recover/<string:token>', methods=['POST'], input_schema=ResetPasswordUserSchema)
+def recover_password(token):
+    """
+    Recover password
+    ---
+    post:
+      parameters:
+        - in: path
+          description: Recovery token
+          name: token
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: ResetPasswordUserSchema
+      responses:
+        '204':
+          description: OK
+    """
+    if not app.config.get('ORGMEPHI_ENABLE_PASSWORD_RECOVERY', False):
+        abort(404)
+    email, timestamp = load_email_token(token, 'recover', True)
+    user = getattr(db_get_one_or_none(UserInfo, 'email', email), 'user', None)
+    if user is None:
+        raise NotFound('token', token)
+    if user.password_changed.replace(tzinfo=datetime.timezone.utc) > timestamp.replace(tzinfo=datetime.timezone.utc):
+        raise NotFound('token', token)
+    values = request.marshmallow
+    password_hash = app.password_policy.hash_password(values['password'], check=True)
+    user.password_hash = password_hash
+    user.password_changed = datetime.datetime.utcnow()
     db.session.commit()
     return {}, 204
 
