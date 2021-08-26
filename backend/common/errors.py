@@ -170,6 +170,20 @@ class TimeOver(RequestError):
         return 'Time is over for %s' % self.data
 
 
+class ContestIsNotOver(RequestError):
+    """
+    Contest is not over for auto check
+    """
+    def __init__(self):
+        """
+        Create error object
+        """
+        super(ContestIsNotOver, self).__init__(409)
+
+    def get_msg(self) -> str:
+        return 'Contest is not over for auto check'
+
+
 class PermissionDenied(RequestError):
     """
     User has insufficient permissions to perform the operation

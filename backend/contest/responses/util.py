@@ -1,13 +1,11 @@
-import bdb
-
 from .model_schemas.schemas import PlainAnswerSchema, RangeAnswerSchema
 from .models import *
 from datetime import datetime, timedelta
-from common.errors import NotFound, OlympiadIsOver
+from common.errors import NotFound, OlympiadIsOver, ContestIsNotOver
 from common.util import db_get_one_or_none
-from contest.tasks.models import SimpleContest
+from contest.tasks.models import SimpleContest, RangeTask, MultipleChoiceTask
 
-five_minutes = datetime.timedelta(minutes=5)
+five_minutes = timedelta(minutes=5)
 
 
 def get_user_in_contest_work(user_id, contest_id):
@@ -116,6 +114,19 @@ def update_multiple_answers(answers, answer):
     answer.answers = answers
 
 
+def get_all_user_answers(user_id, contest_id):
+    user_work = get_user_in_contest_work(user_id, contest_id)
+    if user_work.answers is None:
+        raise NotFound('user_response.answers', 'for user %d' % user_id)
+    answers = user_work.answers
+    return {
+               "user_id": user_work.user_id,
+               "work_id": user_work.work_id,
+               "contest_id": user_work.contest_id,
+               "user_answers": answers
+           }
+
+
 def get_mimetype(filetype):
     mimetypes = {
         'pdf': 'application/pdf',
@@ -141,3 +152,46 @@ def calculate_time_left(user_work: Response):
     contest_duration = db_get_one_or_none(SimpleContest, "contest_id", user_work.contest_id).contest_duration
     time_spent = datetime.utcnow() - user_work.start_time
     return contest_duration + user_work.time_extension - time_spent
+
+
+def range_answer_check(answer: BaseAnswer):
+    range_answer: RangeAnswer = db_get_one_or_none(RangeAnswer, 'answer_id', answer.answer_id)
+    range_task: RangeTask = db_get_one_or_none(RangeTask, 'task_id', answer.task_id)
+    if range_task.start_value <= range_answer.answer <= range_task.end_value:
+        range_answer.mark = range_task.task_points  # TODO CHECK
+    else:
+        range_answer.mark = 0
+
+
+def multiple_answer_check(answer: BaseAnswer):
+    multiple_answer: MultipleChoiceAnswer = db_get_one_or_none(MultipleChoiceAnswer, 'answer_id', answer.answer_id)
+    multiple_task: MultipleChoiceTask = db_get_one_or_none(MultipleChoiceTask, 'task_id', answer.task_id)
+    user_answers = multiple_answer.answers
+    answers = multiple_task.answers
+    right_answers = [elem['answer'] for elem in answers if elem['is_right_answer']]
+    count = 0
+    for elem in user_answers:
+        if elem.text in right_answers:
+            count += 1
+        else:
+            count -= 1
+    if count == len(right_answers):
+        multiple_answer.mark = multiple_task.task_points
+    else:
+        multiple_answer.mark = 0
+
+
+def check_user_work(user_work: Response):
+    for answer in user_work.answers:
+        if answer.answer_type == answer_dict['RangeAnswer']:
+            range_answer_check(answer)
+        elif answer.answer_type == answer_dict['MultipleChoiceAnswer']:
+            multiple_answer_check(answer)
+    user_work.status = work_status['Accepted']
+    db.session.commit()
+
+
+def is_contest_over(contest_id):
+    time = db_get_one_or_none(SimpleContest, 'contest_id', contest_id).end_date
+    if datetime.utcnow() < time:
+        raise ContestIsNotOver

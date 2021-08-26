@@ -3,7 +3,7 @@ from flask import request, send_file
 from common import get_current_app, get_current_module
 from common.jwt_verify import jwt_get_id
 from common.util import db_get_or_raise
-from contest.responses.model_schemas.schemas import PlainAnswerSchema, RangeAnswerSchema, MultipleChoiceAnswerSchema
+from contest.responses.model_schemas.schemas import MultipleChoiceAnswerSchema
 from contest.responses.util import *
 from contest.responses.creator.schemas import *
 
@@ -40,16 +40,7 @@ def get_self_user_all_answers(contest_id):
           description: User or contest not found
     """
     self_user_id = jwt_get_id()
-    user_work = get_user_in_contest_work(self_user_id, contest_id)
-    if user_work.answers is None:
-        raise NotFound('user_response.answers', 'for user %d' % self_user_id)
-    answers = user_work.answers
-    return {
-               "user_id": user_work.user_id,
-               "work_id": user_work.work_id,
-               "contest_id": user_work.contest_id,
-               "user_answers": answers
-           }, 200
+    return get_all_user_answers(self_user_id, contest_id), 200
 
 
 @module.route('/contest/<int:contest_id>/task/<int:task_id>/user/self/plain/file', methods=['GET'])
@@ -503,6 +494,30 @@ def self_user_time_left(contest_id):
     user_work = get_user_in_contest_work(self_user_id, contest_id)
     return calculate_time_left(user_work), 200
 
-# TODO Проверка всех ответов (автоматических)
-# TODO Закончить олимпиаду
-# TODO ограничения по размеру файлов
+
+@module.route('/contest/<int:contest_id>/user/self/finish', methods=['GET'])
+def self_user_finish_contest(contest_id):
+    """
+    Finish current user's contest
+    ---
+    get:
+      security:
+        - JWTAccessToken: []
+        - CSRFAccessToken: []
+      parameters:
+        - in: path
+          description: Id of the contest
+          name: contest_id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: OK
+        '404':
+          description: User or contest not found
+    """
+    self_user_id = jwt_get_id()
+    user_work = get_user_in_contest_work(self_user_id, contest_id)
+    finish_contest(user_work)
+    return {}, 200

@@ -44,16 +44,7 @@ def get_user_all_answers(contest_id, user_id):
         '404':
           description: User or contest not found
     """
-    user_work = get_user_in_contest_work(user_id, contest_id)
-    if user_work.answers is None:
-        raise NotFound('user_response.answers', 'for user %d' % user_id)
-    answers = user_work.answers
-    return {
-               "user_id": user_work.user_id,
-               "work_id": user_work.work_id,
-               "contest_id": user_work.contest_id,
-               "user_answers": answers
-           }, 200
+    return get_all_user_answers(user_id, contest_id), 200
 
 
 @module.route('/contest/<int:contest_id>/task/<int:task_id>/user/<int:user_id>/plain/file', methods=['GET'])
@@ -527,7 +518,7 @@ def user_status_for_response_by_id(contest_id, user_id):
     return user_work, 200
 
 
-@module.route('/contest/<int:contest_id>/list/', methods=['GET'],
+@module.route('/contest/<int:contest_id>/list', methods=['GET'],
               output_schema=ContestResultSheetResponseSchema)
 def get_list_for_stage(contest_id):
     """
@@ -729,4 +720,68 @@ def user_by_id_extend_time(contest_id, user_id):
     user_work: Response = get_user_in_contest_work(user_id, contest_id)
     user_work.time_extension = values['time']
     db.session.commit()
+    return {}, 200
+
+
+@module.route('/contest/<int:contest_id>/user/<int:user_id>/finish', methods=['GET'])
+def user_by_id_finish_contest(contest_id, user_id):
+    """
+    Finish user's contest
+    ---
+    get:
+      security:
+        - JWTAccessToken: []
+        - CSRFAccessToken: []
+      parameters:
+        - in: path
+          description: Id of the contest
+          name: contest_id
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the user
+          name: user_id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: OK
+        '404':
+          description: User or contest not found
+    """
+    user_work = get_user_in_contest_work(user_id, contest_id)
+    finish_contest(user_work)
+    return {}, 200
+
+
+@module.route('/contest/<int:contest_id>/check', methods=['GET'])
+def auto_check_users_answers(contest_id):
+    """
+    Auto check all users' responses for contest
+    ---
+    get:
+      security:
+        - JWTAccessToken: []
+      parameters:
+        - in: path
+          description: Id of the contest
+          name: contest_id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: OK
+        '404':
+          description: Contest not found
+        '409':
+          description: Contest is not over
+    """
+    is_contest_over(contest_id)
+    users_in_contest = db_get_list(Response, 'contest_id', contest_id)
+    for user_work in users_in_contest:
+        if user_work.status == work_status['InProgress'] or user_work.status == work_status['NotChecked']:
+            check_user_work(user_work)
     return {}, 200

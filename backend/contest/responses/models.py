@@ -4,6 +4,8 @@ from datetime import datetime, timedelta
 import enum
 from common import get_current_db
 from contest.tasks.models import UserInContest, Task
+from messages.models import Thread
+from common.util import db_get_one_or_none
 from sqlalchemy.ext.hybrid import hybrid_property
 
 db = get_current_db()
@@ -24,6 +26,7 @@ class ResponseStatusEnum(enum.Enum):
     not_checked = 'NotChecked'
     accepted = 'Accepted'
     rejected = 'Rejected'
+    appeal = 'Appeal'
     correction = 'Correction'
 
 
@@ -73,6 +76,17 @@ class Response(db.Model):
                 mark += elem.mark
             return mark
 
+    @hybrid_property
+    def status(self):
+        if db_get_one_or_none(Thread, 'related_work_id', self.work_id) is not None:
+            return work_status['Appeal']
+        else:
+            return self.status
+
+    @status.setter
+    def status(self, value):
+        self.status = value
+
 
 class ResponseFiletypeEnum(enum.Enum):
     """
@@ -106,6 +120,9 @@ class AnswerEnum(enum.Enum):
     RangeAnswer = "RangeAnswer"
     MultipleChoiceAnswer = "MultipleChoiceAnswer"
     BaseAnswer = "BaseAnswer"
+
+
+answer_dict = {answer.value: answer for answer in AnswerEnum}
 
 
 class BaseAnswer(db.Model):
