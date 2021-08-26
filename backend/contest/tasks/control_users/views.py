@@ -1,9 +1,6 @@
-import io
+from flask import request
 
-import pdfkit
-from flask import request, render_template, send_file
-
-from common import get_current_app, get_current_module
+from common import get_current_module
 from common.errors import AlreadyExists
 from common.util import send_pdf
 from contest.responses.util import get_user_in_contest_work

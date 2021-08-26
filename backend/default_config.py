@@ -29,18 +29,4 @@ class DefaultConfiguration:
     ORGMEPHI_AREA = 'both'
     ORGMEPHI_DAILY_THREAD_LIMIT = 5
     ORGMEPHI_DAILY_MESSAGE_LIMIT = 10
-    ORGMEPHI_CONFIRM_EMAIL = False
-    ORGMEPHI_ENABLE_PASSWORD_RECOVERY = False
-    MAIL_SERVER = 'localhost'
-    MAIL_PORT = 25
-    MAIL_USE_TLS = False
-    MAIL_USE_SSL = False
-    MAIL_USERNAME = None
-    MAIL_PASSWORD = None
-    MAIL_DEFAULT_SENDER = None
-    ORGMEPHI_MAIL_CONFIRM_KEY = b'\r\xa2\x96\xef\t\x8c\xfe\xa8\x83\xb5\x89\x10\xf4i\x9cL'
-    ORGMEPHI_MAIL_CONFIRM_SALT = b'\xcd\x985a\xd5^:-\xcd\x01\xbdN\xac\x9e\xec\xd5'
-    ORGMEPHI_MAIL_CONFIRM_EXPIRATION = timedelta(days=1)
-    ORGMEPHI_MAIL_CONFIRM_SUBJECT = 'Подтверждение почтового адреса'
-    ORGMEPHI_MAIL_RECOVER_SUBJECT = 'Сброс пароля'
-    ORGMEPHI_PREREGISTER_PASSWORD_LENGTH = 8
+    ORGMEPHI_MAX_FILE_SIZE = 1e7

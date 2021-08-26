@@ -1,6 +1,6 @@
 from flask import request
 
-from common import get_current_app, get_current_module
+from common import get_current_module
 from common.util import db_add_if_not_exists
 from contest.tasks.admin.schemas import *
 from contest.tasks.util import *

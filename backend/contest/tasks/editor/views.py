@@ -1,7 +1,7 @@
 from flask import request
 from marshmallow import EXCLUDE
 
-from common import get_current_app, get_current_module
+from common import get_current_module
 from common.errors import NotFound
 from contest.tasks.creator.schemas import BaseOlympiadResponseTaskCreatorSchema, StageResponseTaskCreatorSchema, \
     ContestResponseTaskCreatorSchema, TaskResponseTaskCreatorSchema, VariantResponseTaskCreatorSchema

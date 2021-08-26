@@ -3,7 +3,7 @@ import io
 from flask import request
 from flask import send_file
 
-from common import get_current_app, get_current_module
+from common import get_current_module
 from contest.tasks.creator.schemas import *
 from contest.tasks.util import *
 

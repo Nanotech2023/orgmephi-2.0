@@ -3,10 +3,13 @@ import random
 from marshmallow import Schema, fields
 from marshmallow_enum import EnumField
 
+from common import get_current_app
 from common.errors import InsufficientData, FileTooLarge, DataConflict
 from common.jwt_verify import jwt_get_id
-from contest.default_config import DefaultConfiguration
 from contest.tasks.models import *
+
+app = get_current_app()
+
 
 # Constants
 
@@ -221,13 +224,20 @@ def filter_olympiad_query(args):
 
     offset = marshmallow.get('offset', None)
     limit = marshmallow.get('limit', None)
+
     # TODO Target classes filtering
     # target_classes = marshmallow.get('target_classes', None)
-    query = query.order_by(SimpleContest.start_date)
     # if target_classes is not None:
-    #    query = query.offset(offset).limit(limit)
+    #    ..
+
+    query = query.order_by(SimpleContest.start_date)
+
     if limit is not None:
-        query = query.offset(offset).limit(limit)
+        if offset is not None:
+            query = query.offset(offset).limit(limit)
+        else:
+            query = query.limit(limit)
+
     if marshmallow.get('only_count', False):
         return {'count': query.count()}, 200
     else:
@@ -235,5 +245,5 @@ def filter_olympiad_query(args):
 
 
 def validate_file_size(binary_file):
-    if len(binary_file) > DefaultConfiguration.MAX_FILE_SIZE:
+    if len(binary_file) > app.config['ORGMEPHI_MAX_FILE_SIZE']:
         raise FileTooLarge()
