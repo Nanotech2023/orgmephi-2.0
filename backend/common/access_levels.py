@@ -18,7 +18,8 @@ class OrgMephiAccessLevel(enum.Enum):
     system: used for requests from other services and inner requests
     """
     visitor = (1, None)
-    participant = (2, 'Participant')
-    creator = (3, 'Creator')
-    admin = (4, 'Admin')
-    system = (5, 'System')
+    unconfirmed = (2, 'Unconfirmed')
+    participant = (3, 'Participant')
+    creator = (4, 'Creator')
+    admin = (5, 'Admin')
+    system = (6, 'System')

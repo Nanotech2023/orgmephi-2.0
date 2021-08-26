@@ -2,6 +2,7 @@ from flask import Flask, Config
 from flask_sqlalchemy import SQLAlchemy
 from flask_jwt_extended import JWTManager
 from flask_cors import CORS
+from flask_mail import Mail
 from contextvars import ContextVar
 from typing import Optional, Callable, Any
 
@@ -47,6 +48,7 @@ class OrgMephiApp:
         self._init_jwt()
         self._init_cors()
         self._init_security(security)
+        self._init_mail()
 
     @property
     def name(self) -> str:
@@ -79,6 +81,14 @@ class OrgMephiApp:
         :return: JWT manager of self
         """
         return self._jwt
+
+    @property
+    def mail(self) -> Mail:
+        """
+        Mail object
+        :return: Mail object of self
+        """
+        return self._mail
 
     @property
     def password_policy(self) -> OrgMephiPassword:
@@ -222,6 +232,9 @@ class OrgMephiApp:
                 special=self.app.config['ORGMEPHI_PASSWORD_SPECIAL'],
                 nonletters=self.app.config['ORGMEPHI_PASSWORD_NONLETTERS']
             )
+
+    def _init_mail(self):
+        self._mail = Mail(self._app)
 
 
 _orgmephi_current_module: ContextVar[Optional[OrgMephiModule]] = ContextVar('orgmephi_current_module', default=None)

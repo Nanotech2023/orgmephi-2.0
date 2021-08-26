@@ -17,6 +17,7 @@ class UserRoleEnum(enum.Enum):
         admin: administrator user
         system: may be used for maintenance or by connected services
     """
+    unconfirmed = 'Unconfirmed'
     participant = 'Participant'
     creator = 'Creator'
     admin = 'Admin'

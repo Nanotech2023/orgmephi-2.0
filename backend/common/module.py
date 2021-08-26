@@ -119,7 +119,7 @@ class OrgMephiModule:
             :param f: function to wrap
             :return: Provided function
             """
-            from .jwt_verify import jwt_required, jwt_required_role
+            from .jwt_verify import jwt_required_role
             from .errors import _catch_request_error
 
             func_wrapped = f
@@ -134,8 +134,6 @@ class OrgMephiModule:
 
             if self._access_level == OrgMephiAccessLevel.visitor:
                 pass
-            elif self._access_level == OrgMephiAccessLevel.participant:
-                func_wrapped = jwt_required(refresh=refresh)(func_wrapped)
             else:
                 roles = [v.value[1] for v in OrgMephiAccessLevel if v.value[0] >= self._access_level.value[0]]
                 func_wrapped = jwt_required_role(roles=roles, refresh=refresh)(func_wrapped)
