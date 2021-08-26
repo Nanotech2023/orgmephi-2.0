@@ -38,10 +38,11 @@ def filter_threads_query(args, user_id):
     limit = marshmallow.get('limit', None)
     if user_id is not None:
         query = query.filter(Thread.author_id == user_id)
+    query = query.order_by(Thread.update_time)
     if offset is not None:
-        query = query.order_by(Thread.update_time)
+        query = query.offset(offset)
     if limit is not None:
-        query = query.offset(offset).limit(limit)
+        query = query.limit(limit)
     if marshmallow.get('only_count', False):
         return {'count': query.count()}, 200
     else:
