@@ -3,7 +3,7 @@ from .models import *
 from datetime import datetime, timedelta
 from common.errors import NotFound, OlympiadIsOver, ContestIsNotOver
 from common.util import db_get_one_or_none
-from contest.tasks.models import SimpleContest, RangeTask, MultipleChoiceTask
+from contest.tasks.models import SimpleContest, RangeTask, MultipleChoiceTask, PlainTask
 
 five_minutes = timedelta(minutes=5)
 
@@ -24,6 +24,8 @@ def user_answer_get_file(user_id, contest_id, task_id):
     user_answer = db_get_one_or_none(PlainAnswer, 'task_id', task_id)
     if user_answer is None:
         raise NotFound('response_answer', 'for task_id %d' % task_id)
+    if user_answer.answer_file is None:
+        raise NotFound('answer_file', 'for task_id %d it is text' % task_id)
     return user_answer
 
 
@@ -35,6 +37,18 @@ def user_answer_get(user_id, contest_id, task_id, model):
     if user_answer is None:
         raise NotFound('response_answer', 'for task_id %d' % task_id)
     return user_answer
+
+
+def check_task_type(task_id, task_type):
+    task = None
+    if task_type == answer_dict['Plain']:
+        task = db_get_one_or_none(PlainTask, "task_id", task_id)
+    elif task_type == answer_dict['RangeAnswer']:
+        task = db_get_one_or_none(RangeTask, "task_id", task_id)
+    elif task_type == answer_dict['MultipleChoiceAnswer']:
+        task = db_get_one_or_none(MultipleChoiceTask, "task_id", task_id)
+    if task is None:
+        raise NotFound("response_answer", f'task_id - {task_id} for type {task_type.value}')
 
 # TODO Добавить флаг Мише UserInContest
 def finish_contest(user_work: Response):

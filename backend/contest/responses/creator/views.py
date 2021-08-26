@@ -279,6 +279,7 @@ def user_answer_for_task_by_id_post_plain_file(contest_id, task_id, user_id, fil
         '409':
           description: Olympiad is over
     """
+    check_task_type(task_id, answer_dict['PlainAnswer'])
     user_answer_post_file(request.data, filetype, user_id, contest_id, task_id)
     return {}, 200
 
@@ -328,6 +329,7 @@ def user_answer_for_task_by_id_post_plain_text(contest_id, task_id, user_id):
         '409':
           description: Olympiad is over
     """
+    check_task_type(task_id, answer_dict['PlainAnswer'])
     values = request.marshmallow
     user_answer_post_plain_text(user_id, contest_id, task_id, values)
     return {}, 200
@@ -378,6 +380,7 @@ def user_answer_for_task_by_id_range(contest_id, task_id, user_id):
         '409':
           description: Olympiad is over
     """
+    check_task_type(task_id, answer_dict['RangeAnswer'])
     values = request.marshmallow
     user_answer_post_range(user_id, contest_id, task_id, values)
     return {}, 200
@@ -428,6 +431,7 @@ def user_answer_for_task_by_id_multiple(contest_id, task_id, user_id):
         '409':
           description: Olympiad is over
     """
+    check_task_type(task_id, answer_dict['MultipleChoiceAnswer'])
     values = request.marshmallow
     user_answer_post_multiple(user_id, contest_id, task_id, values)
     return {}, 200
