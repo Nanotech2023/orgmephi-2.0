@@ -1,19 +1,15 @@
-from flask import request, render_template, send_file
+from flask import request
 from marshmallow import EXCLUDE
-import pdfkit
-from io import BytesIO
 
-from common.errors import NotFound, InsufficientData, WrongType
 from common import get_current_app, get_current_module, get_current_db
-from common.util import db_get_or_raise
+from common.errors import NotFound, InsufficientData, WrongType
 from common.jwt_verify import jwt_get_id
-
-from user.models import User, UserInfo, StudentInfo, SchoolInfo, UserTypeEnum
+from common.util import db_get_or_raise
 from user.model_schemas.auth import UserSchema
 from user.model_schemas.personal import UserInfoSchema
-from user.model_schemas.university import StudentInfoSchema, StudentInfoInputSchema
 from user.model_schemas.school import SchoolInfoSchema, SchoolInfoInputSchema
-
+from user.model_schemas.university import StudentInfoSchema, StudentInfoInputSchema
+from user.models import User, UserInfo, StudentInfo, SchoolInfo, UserTypeEnum
 from .schemas import SelfPasswordRequestUserSchema, SelfGroupsResponseUserSchema, UserInfoRestrictedInputSchema
 
 db = get_current_db()
@@ -300,6 +296,4 @@ def generate_card():
     if len(unfilled) > 0:
         raise InsufficientData('user', str(unfilled))
     # noinspection PyUnresolvedReferences
-    template = render_template('participant_card.html', u=user)
-    pdf = pdfkit.from_string(template, False, options={'orientation': 'landscape', 'quiet': ''})
-    return send_file(BytesIO(pdf), 'application/pdf')
+    send_pdf('participant_card.html', u=user)

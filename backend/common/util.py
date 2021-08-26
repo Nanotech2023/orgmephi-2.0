@@ -1,3 +1,8 @@
+import io
+
+import pdfkit
+from flask import render_template, send_file
+
 from .errors import NotFound, AlreadyExists
 from typing import Type, Optional
 from flask_sqlalchemy import Model
@@ -108,3 +113,9 @@ def db_populate(db_session: Session, table: Type[Model], values: list, key: Opti
         keys = [key]
     new_values = [v for v in values if not db_exists(db_session, table, filters=_get_filter(v, keys))]
     db_session.add_all(new_values)
+
+
+def send_pdf(template_name_or_list, **context):
+    template = render_template(template_name_or_list, **context)
+    pdf = pdfkit.from_string(template, False, options={'orientation': 'landscape', 'quiet': ''})
+    return send_file(io.BytesIO(pdf), 'application/pdf')

@@ -5,6 +5,7 @@ from flask import request, render_template, send_file
 
 from common import get_current_app, get_current_module
 from common.errors import AlreadyExists
+from common.util import send_pdf
 from contest.responses.util import get_user_in_contest_work
 from contest.tasks.control_users.schemas import *
 from contest.tasks.util import *
@@ -255,7 +256,5 @@ def users_certificate(id_contest, id_user):
     mark = get_user_in_contest_work(id_user, id_contest).mark
     user_status = db_get_or_raise(UserInContest, 'user_id', id_user).user_status
 
-    template = render_template('user_certificate.html', u=user, mark=mark, user_status=user_status,
-                               back=current_contest)
-    pdf = pdfkit.from_string(template, False, options={'orientation': 'landscape', 'quiet': ''})
-    return send_file(io.BytesIO(pdf), 'application/pdf')
+    send_pdf('user_certificate.html', u=user, mark=mark, user_status=user_status,
+             back=current_contest)

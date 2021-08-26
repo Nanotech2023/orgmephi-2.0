@@ -1,10 +1,10 @@
 import io
 
-import pdfkit
-from flask import send_file, request, render_template
+from flask import send_file, request
 
 from common import get_current_app, get_current_module
 from common.errors import AlreadyExists, TimeOver
+from common.util import send_pdf
 from contest.responses.util import get_user_in_contest_work
 from contest.tasks.model_schemas.contest import VariantSchema
 from contest.tasks.model_schemas.olympiad import ContestSchema
@@ -324,10 +324,8 @@ def users_certificate(id_contest):
     mark = get_user_in_contest_work(jwt_get_id(), id_contest).mark
     user_status = db_get_or_raise(UserInContest, 'user_id', jwt_get_id()).user_status
 
-    template = render_template('user_certificate.html', u=user, mark=mark, user_status=user_status,
-                               back=current_contest)
-    pdf = pdfkit.from_string(template, False, options={'orientation': 'landscape', 'quiet': ''})
-    return send_file(io.BytesIO(pdf), 'application/pdf')
+    send_pdf('user_certificate.html', u=user, mark=mark, user_status=user_status,
+             back=current_contest)
 
 
 # Contest
