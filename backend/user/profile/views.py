@@ -4,7 +4,7 @@ from marshmallow import EXCLUDE
 from common import get_current_app, get_current_module, get_current_db
 from common.errors import NotFound, InsufficientData, WrongType
 from common.jwt_verify import jwt_get_id
-from common.util import db_get_or_raise
+from common.util import db_get_or_raise, send_pdf
 from user.model_schemas.auth import UserSchema
 from user.model_schemas.personal import UserInfoSchema
 from user.model_schemas.school import SchoolInfoSchema, SchoolInfoInputSchema
@@ -295,5 +295,4 @@ def generate_card():
     unfilled = user.unfilled()
     if len(unfilled) > 0:
         raise InsufficientData('user', str(unfilled))
-    # noinspection PyUnresolvedReferences
     return send_pdf('participant_card.html', u=user)

@@ -32,7 +32,7 @@ def generate_variant(id_contest, user_id):
     variants_number = len(current_contest.variants.all())
     if variants_number == 0:
         raise InsufficientData('variant', 'variants in contest')
-    random_number = secrets.choice(range(0, variants_number * 420))
+    random_number = secrets.randbelow(variants_number * 420)
     variant = (user_id + random_number) % variants_number + 1
     return variant
 

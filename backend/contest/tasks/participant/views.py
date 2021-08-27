@@ -100,15 +100,16 @@ def enroll_in_contest(id_contest):
 
     current_user: User = db_get_or_raise(User, "id", user_id)
 
-    unfilled = current_user.unfilled()
-
-    if len(unfilled) > 0:
-        raise InsufficientData('user', str(unfilled))
-
     if current_user.type == UserTypeEnum.university:
+        unfilled = current_user.student_info.unfilled()
+        if len(unfilled) > 0:
+            raise InsufficientData('user.student_info', str(unfilled))
         grade = TargetClassEnum("student")
     elif current_user.type == UserTypeEnum.school:
         school_info: SchoolInfo = current_user.school_info
+        unfilled = school_info.unfilled()
+        if len(unfilled) > 0:
+            raise InsufficientData('user.school_info', str(unfilled))
         grade = TargetClassEnum(str(school_info.grade))
     else:
         raise InsufficientData('type', "university or school")
