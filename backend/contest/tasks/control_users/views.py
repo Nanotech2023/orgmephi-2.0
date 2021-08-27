@@ -6,6 +6,7 @@ from common.util import send_pdf
 from contest.responses.util import get_user_in_contest_work
 from contest.tasks.control_users.schemas import *
 from contest.tasks.util import *
+from user.models import UserTypeEnum, SchoolInfo
 
 db = get_current_db()
 module = get_current_module()
@@ -55,10 +56,30 @@ def add_user_to_contest(id_contest):
         db_get_or_raise(OlympiadLocation, "location_id", location_id)
 
     current_contest = get_contest_if_possible(id_contest)
+    current_base_contest = get_base_contest(current_contest)
+    target_classes = current_base_contest.target_classes
 
     for user_id in user_ids:
+        current_user: User = db_get_or_raise(User, "id", user_id)
+
+        unfilled = current_user.unfilled()
+
+        if len(unfilled) > 0:
+            raise InsufficientData('user', str(unfilled))
+
         if is_user_in_contest(user_id, current_contest):
             raise AlreadyExists('user_id', user_id)
+
+        if current_user.type == UserTypeEnum.university:
+            grade = TargetClassEnum("student")
+        elif current_user.type == UserTypeEnum.school:
+            school_info: SchoolInfo = current_user.school_info
+            grade = TargetClassEnum(str(school_info.grade))
+        else:
+            raise InsufficientData('type', "university or school")
+
+        if grade not in target_classes:
+            raise InsufficientData('base_contest_id', "current grade of user")
 
         current_contest.users.append(UserInContest(user_id=user_id,
                                                    show_results_to_user=show_results_to_user,
@@ -246,6 +267,10 @@ def users_certificate(id_contest, id_user):
 
     current_contest = get_contest_if_possible(id_contest)
     current_user = db_get_or_raise(User, 'id', id_user)
+
+    if not is_user_in_contest(id_user, current_contest):
+        raise InsufficientData('user_id', id_user)
+
     unfilled = current_user.unfilled()
     if len(unfilled) > 0:
         raise InsufficientData('user', str(unfilled))
