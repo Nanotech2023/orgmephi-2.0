@@ -71,10 +71,9 @@ class Response(db.Model):
     @hybrid_property
     def mark(self):
         mark = 0
-        if len(self.answers) > 0:
-            for elem in self.answers:
-                mark += elem.mark
-            return mark
+        for elem in self.answers:
+            mark += elem.mark
+        return mark
 
     @hybrid_property
     def status(self):
@@ -116,7 +115,8 @@ filetype_dict = {filetype.value: filetype for filetype in ResponseFiletypeEnum}
 
 
 class AnswerEnum(enum.Enum):
-    PlainAnswer = "PlainAnswer"
+    PlainAnswerText = "PlainAnswerText"
+    PlainAnswerFile = "PlainAnswerFile"
     RangeAnswer = "RangeAnswer"
     MultipleChoiceAnswer = "MultipleChoiceAnswer"
     BaseAnswer = "BaseAnswer"
@@ -141,16 +141,16 @@ class BaseAnswer(db.Model):
     mark = db.Column(db.Float, nullable=True)
 
     __mapper_args__ = {
-        'polymorphic_identity': AnswerEnum.PlainAnswer,
+        'polymorphic_identity': AnswerEnum.BaseAnswer,
         'polymorphic_on': answer_type
     }
 
 
-def add_range_answer(work_id, task_id, answer):
+def add_range_answer(work_id, task_id, values):
     answer = RangeAnswer(
         work_id=work_id,
         task_id=task_id,
-        answer=answer
+        answer=values['answer']
     )
     db.session.add(answer)
 
@@ -171,39 +171,56 @@ class RangeAnswer(BaseAnswer):
     }
 
 
-def add_plain_answer(work_id, task_id, text=None, filetype=None, file=None):
-    if text is not None:
-        answer = PlainAnswer(
-            work_id=work_id,
-            task_id=task_id,
-            answer_text=text
-        )
-    else:
-        answer = PlainAnswer(
-            work_id=work_id,
-            task_id=task_id,
-            answer_file=file,
-            filetype=filetype
-        )
+def add_plain_answer_text(work_id, task_id, values):
+    answer = PlainAnswerText(
+        work_id=work_id,
+        task_id=task_id,
+        answer_text=values['answer_text']
+    )
     db.session.add(answer)
 
 
-class PlainAnswer(BaseAnswer):
+class PlainAnswerText(BaseAnswer):
+    """
+    Class describing answer for plain task with text
+
+    answer_id: id of the answer
+    answer_text: user's answer
+    """
+
+    answer_id = db.Column(db.Integer, db.ForeignKey(BaseAnswer.answer_id), primary_key=True)
+    answer_text = db.Column(db.Text)
+
+    __mapper_args__ = {
+        'polymorphic_identity': AnswerEnum.PlainAnswerText,
+    }
+
+
+def add_plain_answer_file(work_id, task_id, filetype, file):
+    answer = PlainAnswerFile(
+        work_id=work_id,
+        task_id=task_id,
+        answer_file=file,
+        filetype=filetype
+    )
+    db.session.add(answer)
+
+
+class PlainAnswerFile(BaseAnswer):
     """
     Class describing answer for plain task
 
     answer_id: id of the answer
-    answer: user's answer as a file
+    answer_file: user's answer as a file
     filetype: user's answer filetype
     """
 
     answer_id = db.Column(db.Integer, db.ForeignKey(BaseAnswer.answer_id), primary_key=True)
-    answer_text = db.Column(db.Text, nullable=True)
-    answer_file = db.Column(db.LargeBinary, nullable=True)
-    filetype = db.Column(db.Enum(ResponseFiletypeEnum), nullable=True)
+    answer_file = db.Column(db.LargeBinary)
+    filetype = db.Column(db.Enum(ResponseFiletypeEnum))
 
     __mapper_args__ = {
-        'polymorphic_identity': AnswerEnum.PlainAnswer,
+        'polymorphic_identity': AnswerEnum.PlainAnswerFile,
     }
 
     def update(self, answer_new=None, filetype_new=None):
@@ -213,14 +230,13 @@ class PlainAnswer(BaseAnswer):
             self.filetype = filetype_dict[filetype_new]
 
 
-def add_multiple_answer(work_id, task_id, answers):
-    answer = MultipleUserAnswer(
+def add_multiple_answer(work_id, task_id, values):
+    answer = MultipleChoiceAnswer(
         work_id=work_id,
-        task_id=task_id
+        task_id=task_id,
+        answers=values['answers']
     )
     db.session.add(answer)
-    for elem in answers:
-        answer.answers.append(MultipleUserAnswer(text=elem))
 
 
 class MultipleChoiceAnswer(BaseAnswer):
@@ -228,25 +244,16 @@ class MultipleChoiceAnswer(BaseAnswer):
     Class describing answer for multiple choice answer
 
     answer_id: id of the answer
+    answers: answers
     """
 
     answer_id = db.Column(db.Integer, db.ForeignKey(BaseAnswer.answer_id), primary_key=True)
 
-    answers = db.relationship('MultipleUserAnswer', lazy='dynamic', cascade="all, delete")
+    answers = db.Column(db.JSON)
 
     __mapper_args__ = {
         'polymorphic_identity': AnswerEnum.MultipleChoiceAnswer,
     }
-
-
-class MultipleUserAnswer(db.Model):
-    """
-    Class describing each user answer for multiple choice task
-    """
-
-    id = db.Column(db.Integer, autoincrement=True, primary_key=True)
-    answer_id = db.Column(db.Integer, db.ForeignKey(MultipleChoiceAnswer.answer_id))
-    answer = db.Column(db.Text, nullable=False)
 
 
 if __name__ == '__main__':

@@ -3,7 +3,7 @@ from flask import request, send_file
 from common import get_current_app, get_current_module
 from common.util import db_get_or_raise, db_get_list
 from contest.responses.util import *
-from contest.responses.model_schemas.schemas import PlainAnswerSchema, RangeAnswerSchema, MultipleChoiceAnswerSchema
+from contest.responses.model_schemas.schemas import AnswerSchema
 from .schemas import *
 
 db = get_current_db()
@@ -100,11 +100,11 @@ def user_answer_for_task_by_id_plain_file(contest_id, task_id, user_id):
                      mimetype=get_mimetype(user_answer.filetype.value)), 200
 
 
-@module.route('/contest/<int:contest_id>/task/<int:task_id>/user/<int:user_id>/plain', methods=['GET'],
-              output_schema=PlainAnswerSchema)
-def user_answer_for_task_by_id_plain_text(contest_id, task_id, user_id):
+@module.route('/contest/<int:contest_id>/task/<int:task_id>/user/<int:user_id>', methods=['GET'],
+              output_schema=AnswerSchema)
+def user_answer_for_task_by_id(contest_id, task_id, user_id):
     """
-    Get user answer text for plain task
+    Get user answer for task
     ---
     get:
       security:
@@ -133,100 +133,13 @@ def user_answer_for_task_by_id_plain_text(contest_id, task_id, user_id):
           description: OK
           content:
             application/json:
-              schema: PlainAnswerSchema
+              schema: AnswerSchema
         '403':
           description: Not enough rights for current user
         '404':
           description: User, contest or task not found
     """
-    user_answer = user_answer_get(user_id, contest_id, task_id, PlainAnswer)
-    return user_answer
-
-
-@module.route('/contest/<int:contest_id>/task/<int:task_id>/user/<int:user_id>/range', methods=['GET'],
-              output_schema=RangeAnswerSchema)
-def user_answer_for_task_by_id_range(contest_id, task_id, user_id):
-    """
-    Get user answer for range task
-    ---
-    get:
-      security:
-        - JWTAccessToken: []
-      parameters:
-        - in: path
-          description: Id of the contest
-          name: contest_id
-          required: true
-          schema:
-            type: integer
-        - in: path
-          description: Id of the task
-          name: task_id
-          required: true
-          schema:
-            type: integer
-        - in: path
-          description: Id of the user
-          name: user_id
-          required: true
-          schema:
-            type: integer
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema: RangeAnswerSchema
-        '403':
-          description: Not enough rights for current user
-        '404':
-          description: User, contest or task not found
-    """
-    user_answer = user_answer_get(user_id, contest_id, task_id, RangeAnswer)
-    return user_answer
-
-
-@module.route('/contest/<int:contest_id>/task/<int:task_id>/user/<int:user_id>/multiple', methods=['GET'],
-              output_schema=MultipleChoiceAnswerSchema)
-def user_answer_for_task_by_id_multiple(contest_id, task_id, user_id):
-    """
-    Get user answer for multiple choice task
-    ---
-    get:
-      security:
-        - JWTAccessToken: []
-      parameters:
-        - in: path
-          description: Id of the contest
-          name: contest_id
-          required: true
-          schema:
-            type: integer
-        - in: path
-          description: Id of the task
-          name: task_id
-          required: true
-          schema:
-            type: integer
-        - in: path
-          description: Id of the user
-          name: user_id
-          required: true
-          schema:
-            type: integer
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema: MultipleChoiceAnswerSchema
-        '403':
-          description: Not enough rights for current user
-        '404':
-          description: User, contest or task not found
-    """
-    user_answer = user_answer_get(user_id, contest_id, task_id, MultipleUserAnswer)
-    return user_answer
+    return user_answer_get(user_id, contest_id, task_id), 200
 
 
 @module.route('/contest/<int:contest_id>/task/<int:task_id>/user/<int:user_id>/<string:filetype>', methods=['POST'])
@@ -331,7 +244,7 @@ def user_answer_for_task_by_id_post_plain_text(contest_id, task_id, user_id):
     """
     check_task_type(task_id, answer_dict['PlainAnswer'])
     values = request.marshmallow
-    user_answer_post_plain_text(user_id, contest_id, task_id, values)
+    user_answer_post(user_id, contest_id, task_id, values, 'PlainAnswerText')
     return {}, 200
 
 
@@ -382,7 +295,7 @@ def user_answer_for_task_by_id_range(contest_id, task_id, user_id):
     """
     check_task_type(task_id, answer_dict['RangeAnswer'])
     values = request.marshmallow
-    user_answer_post_range(user_id, contest_id, task_id, values)
+    user_answer_post(user_id, contest_id, task_id, values, 'RangeAnswer')
     return {}, 200
 
 
@@ -433,7 +346,7 @@ def user_answer_for_task_by_id_multiple(contest_id, task_id, user_id):
     """
     check_task_type(task_id, answer_dict['MultipleChoiceAnswer'])
     values = request.marshmallow
-    user_answer_post_multiple(user_id, contest_id, task_id, values)
+    user_answer_post(user_id, contest_id, task_id, values, 'MultipleChoiceAnswer')
     return {}, 200
 
 
@@ -645,7 +558,7 @@ def user_answer_task_mark(contest_id, user_id, task_id):
         '404':
           description: User or contest not found
     """
-    user_work = get_user_in_contest_work(user_id, contest_id)
+    get_user_in_contest_work(user_id, contest_id)
     answer = db_get_or_raise(BaseAnswer, 'task_id', task_id)
     return answer, 200
 
@@ -727,7 +640,7 @@ def user_by_id_extend_time(contest_id, user_id):
     return {}, 200
 
 
-@module.route('/contest/<int:contest_id>/user/<int:user_id>/finish', methods=['GET'])
+@module.route('/contest/<int:contest_id>/user/<int:user_id>/finish', methods=['POST'])
 def user_by_id_finish_contest(contest_id, user_id):
     """
     Finish user's contest
@@ -760,7 +673,7 @@ def user_by_id_finish_contest(contest_id, user_id):
     return {}, 200
 
 
-@module.route('/contest/<int:contest_id>/check', methods=['GET'])
+@module.route('/contest/<int:contest_id>/check', methods=['POST'])
 def auto_check_users_answers(contest_id):
     """
     Auto check all users' responses for contest

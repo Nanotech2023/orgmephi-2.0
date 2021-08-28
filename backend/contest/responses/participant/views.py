@@ -3,7 +3,7 @@ from flask import request, send_file
 from common import get_current_app, get_current_module
 from common.jwt_verify import jwt_get_id
 from common.util import db_get_or_raise
-from contest.responses.model_schemas.schemas import MultipleChoiceAnswerSchema
+from contest.responses.model_schemas.schemas import AnswerSchema
 from contest.responses.util import *
 from contest.responses.creator.schemas import *
 
@@ -91,11 +91,11 @@ def get_self_user_answer_for_task_plain_file(contest_id, task_id):
                      mimetype=get_mimetype(user_answer.filetype.value)), 200
 
 
-@module.route('/contest/<int:contest_id>/task/<int:task_id>/user/self/plain', methods=['GET'],
-              output_schema=PlainAnswerSchema)
-def self_user_answer_for_task_plain_text(contest_id, task_id):
+@module.route('/contest/<int:contest_id>/task/<int:task_id>/user/self', methods=['GET'],
+              output_schema=AnswerSchema)
+def user_answer_for_task_self(contest_id, task_id, user_id):
     """
-    Get current user answer text for plain task
+    Get current user answer for task
     ---
     get:
       security:
@@ -113,41 +113,9 @@ def self_user_answer_for_task_plain_text(contest_id, task_id):
           required: true
           schema:
             type: integer
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema: PlainAnswerSchema
-        '403':
-          description: Not enough rights for current user
-        '404':
-          description: User, contest or task not found
-    """
-    self_user_id = jwt_get_id()
-    user_answer = user_answer_get(self_user_id, contest_id, task_id, PlainAnswer)
-    return user_answer
-
-
-@module.route('/contest/<int:contest_id>/task/<int:task_id>/user/self/range', methods=['GET'],
-              output_schema=RangeAnswerSchema)
-def self_user_answer_for_task_range(contest_id, task_id):
-    """
-    Get current user answer for range task
-    ---
-    get:
-      security:
-        - JWTAccessToken: []
-      parameters:
         - in: path
-          description: Id of the contest
-          name: contest_id
-          required: true
-          schema:
-            type: integer
-        - in: path
-          description: Id of the task
-          name: task_id
+          description: Id of the user
+          name: user_id
           required: true
           schema:
             type: integer
@@ -156,53 +124,13 @@ def self_user_answer_for_task_range(contest_id, task_id):
           description: OK
           content:
             application/json:
-              schema: RangeAnswerSchema
+              schema: AnswerSchema
         '403':
           description: Not enough rights for current user
         '404':
           description: User, contest or task not found
     """
-    self_user_id = jwt_get_id()
-    user_answer = user_answer_get(self_user_id, contest_id, task_id, RangeAnswer)
-    return user_answer
-
-
-@module.route('/contest/<int:contest_id>/task/<int:task_id>/user/self/multiple', methods=['GET'],
-              output_schema=MultipleChoiceAnswerSchema)
-def self_user_answer_for_task_multiple(contest_id, task_id):
-    """
-    Get current user answer for multiple choice task
-    ---
-    get:
-      security:
-        - JWTAccessToken: []
-      parameters:
-        - in: path
-          description: Id of the contest
-          name: contest_id
-          required: true
-          schema:
-            type: integer
-        - in: path
-          description: Id of the task
-          name: task_id
-          required: true
-          schema:
-            type: integer
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema: MultipleChoiceAnswerSchema
-        '403':
-          description: Not enough rights for current user
-        '404':
-          description: User, contest or task not found
-    """
-    self_user_id = jwt_get_id()
-    user_answer = user_answer_get(self_user_id, contest_id, task_id, MultipleUserAnswer)
-    return user_answer
+    return user_answer_get(user_id, contest_id, task_id), 200
 
 
 @module.route('/contest/<int:contest_id>/task/<int:task_id>/user/self/<string:filetype>', methods=['POST'])
@@ -297,7 +225,7 @@ def self_user_answer_for_task_post_plain_text(contest_id, task_id):
     check_task_type(task_id, answer_dict['PlainAnswer'])
     values = request.marshmallow
     self_user_id = jwt_get_id()
-    user_answer_post_plain_text(self_user_id, contest_id, task_id, values)
+    user_answer_post(self_user_id, contest_id, task_id, values, 'PlainAnswerText')
     return {}, 200
 
 
@@ -343,7 +271,7 @@ def self_user_answer_for_task_range(contest_id, task_id):
     check_task_type(task_id, answer_dict['RangeAnswer'])
     values = request.marshmallow
     self_user_id = jwt_get_id()
-    user_answer_post_range(self_user_id, contest_id, task_id, values)
+    user_answer_post(self_user_id, contest_id, task_id, values, 'RangeAnswer')
     return {}, 200
 
 
@@ -389,7 +317,7 @@ def self_user_answer_for_task_multiple(contest_id, task_id):
     check_task_type(task_id, answer_dict['MultipleChoiceAnswer'])
     values = request.marshmallow
     self_user_id = jwt_get_id()
-    user_answer_post_multiple(self_user_id, contest_id, task_id, values)
+    user_answer_post(self_user_id, contest_id, task_id, values, 'MultipleChoiceAnswer')
     return {}, 200
 
 
@@ -499,7 +427,7 @@ def self_user_time_left(contest_id):
     return calculate_time_left(user_work), 200
 
 
-@module.route('/contest/<int:contest_id>/user/self/finish', methods=['GET'])
+@module.route('/contest/<int:contest_id>/user/self/finish', methods=['POST'])
 def self_user_finish_contest(contest_id):
     """
     Finish current user's contest

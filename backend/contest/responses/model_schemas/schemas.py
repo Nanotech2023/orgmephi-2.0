@@ -1,3 +1,4 @@
+from marshmallow_oneofschema import OneOfSchema
 from marshmallow_sqlalchemy import SQLAlchemySchema, auto_field, fields
 from marshmallow_enum import EnumField
 from marshmallow_sqlalchemy.fields import Related
@@ -43,13 +44,38 @@ class MultipleChoiceAnswerSchema(SQLAlchemySchema):
         load_instance = True
         sqla_session = db.session
 
-    answers = Related(column=['answer'], data_key='answers', required=True)
+    answers = auto_field(column_name='answers', many=True, required=True)
 
 
-class PlainAnswerSchema(SQLAlchemySchema):
+class PlainAnswerTextSchema(SQLAlchemySchema):
     class Meta:
-        model = PlainAnswer
+        model = PlainAnswerText
         load_instance = True
         sqla_session = db.session
 
     answer_text = auto_field(column_name='answer_text', dump_only=True)
+
+
+class AnswerSchema(OneOfSchema):
+    type_schemas = {
+        AnswerEnum.PlainAnswerText.value: PlainAnswerTextSchema,
+        AnswerEnum.RangeAnswer.value: RangeAnswerSchema,
+        AnswerEnum.MultipleChoiceAnswer.value: MultipleChoiceAnswerSchema
+    }
+
+    type_field = "answer_type"
+    type_field_remove = True
+
+    class_types = {
+        PlainAnswerTextSchema: AnswerEnum.PlainAnswerText.value,
+        RangeAnswerSchema: AnswerEnum.RangeAnswer.value,
+        MultipleChoiceAnswerSchema: AnswerEnum.MultipleChoiceAnswer.value
+    }
+
+    def get_obj_type(self, obj):
+        obj_type = obj.task_type
+        if obj_type is None:
+            raise TypeError(f'Unknown object type: {obj.__class__.__name__}')
+        return obj_type.value
+
+

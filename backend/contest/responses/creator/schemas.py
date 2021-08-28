@@ -13,7 +13,7 @@ class AllUserAnswersResponseSchema(Schema):
 
 
 class PlainAnswerRequestSchema(Schema):
-    answer_text = common_fields.UserAnswer(required=True)
+    answer_text = common_fields.Text(required=True)
 
 
 class RangeAnswerRequestSchema(Schema):
@@ -21,7 +21,7 @@ class RangeAnswerRequestSchema(Schema):
 
 
 class MultipleUserAnswerRequestSchema(Schema):
-    answer = common_fields.UserAnswer(required=True)
+    answer = common_fields.Text(required=True)
 
 
 class MultipleAnswerRequestSchema(Schema):
