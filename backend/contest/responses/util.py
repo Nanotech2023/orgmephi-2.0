@@ -106,9 +106,8 @@ def user_answer_post(user_id, contest_id, task_id, values, answer_type):
     db.session.commit()
 
 
-# TODO
 def update_multiple_answers(answers, answer):
-    pass
+    answer.answers = [elem['answer'] for elem in answers]
 
 
 def get_all_user_answers(user_id, contest_id):

@@ -234,7 +234,7 @@ def add_multiple_answer(work_id, task_id, values):
     answer = MultipleChoiceAnswer(
         work_id=work_id,
         task_id=task_id,
-        answers=values['answers']
+        answers=[elem['answer'] for elem in values['answers']]
     )
     db.session.add(answer)
 
@@ -249,7 +249,7 @@ class MultipleChoiceAnswer(BaseAnswer):
 
     answer_id = db.Column(db.Integer, db.ForeignKey(BaseAnswer.answer_id), primary_key=True)
 
-    answers = db.Column(db.JSON)
+    answers = db.Column(db.PickleType)
 
     __mapper_args__ = {
         'polymorphic_identity': AnswerEnum.MultipleChoiceAnswer,

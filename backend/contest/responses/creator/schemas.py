@@ -25,7 +25,7 @@ class MultipleUserAnswerRequestSchema(Schema):
 
 
 class MultipleAnswerRequestSchema(Schema):
-    answers = fields.Nested(nested=MultipleUserAnswerRequestSchema, many=True, required=True)
+    answers = fields.List(fields.Nested(MultipleUserAnswerRequestSchema), required=True)
 
 
 class UserResponseListSchema(Schema):
