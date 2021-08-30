@@ -233,10 +233,10 @@ def filter_olympiad_query(args):
     query = query.order_by(SimpleContest.start_date)
 
     if limit is not None:
-        if offset is not None:
-            query = query.offset(offset).limit(limit)
-        else:
-            query = query.limit(limit)
+        query = query.limit(limit)
+
+    if offset is not None:
+        query = query.offset(offset)
 
     if marshmallow.get('only_count', False):
         return {'count': query.count()}, 200
