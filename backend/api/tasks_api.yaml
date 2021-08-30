@@ -9,6 +9,15 @@ components:
       required:
       - olympiad_list
       type: object
+    AllLocationResponseTaskUnauthorized:
+      properties:
+        locations:
+          items:
+            $ref: '#/components/schemas/OlympiadLocation'
+          type: array
+      required:
+      - locations
+      type: object
     AllOlympiadTypesResponseTaskUnauthorized:
       properties:
         olympiad_types:
@@ -49,7 +58,7 @@ components:
       properties:
         tasks_list:
           items:
-            $ref: '#/components/schemas/Task'
+            $ref: '#/components/schemas/TaskForUserResponseTaskParticipant'
           type: array
       required:
       - tasks_list
@@ -82,6 +91,25 @@ components:
       required:
       - answer
       - is_right_answer
+      type: object
+    AnswersInTaskRequestTaskEditor:
+      properties:
+        answer:
+          maxLength: 1024
+          type: string
+        is_right_answer:
+          type: boolean
+      required:
+      - answer
+      - is_right_answer
+      type: object
+    AnswersInTaskRequestTaskParticipant:
+      properties:
+        answer:
+          maxLength: 1024
+          type: string
+      required:
+      - answer
       type: object
     BaseContest:
       properties:
@@ -192,18 +220,32 @@ components:
         contest_id:
           readOnly: true
           type: integer
+        holding_type:
+          enum:
+          - OfflineContest
+          - OnLineContest
+          type: string
         visibility:
           type: boolean
       required:
       - contest_id
+      - holding_type
       - visibility
       type: object
     CompositeContestResponseTaskCreator:
       properties:
+        contest_duration:
+          type: integer
+          x-unit: seconds
         contest_id:
           type: integer
         end_date:
           format: date-time
+          type: string
+        holding_type:
+          enum:
+          - OfflineContest
+          - OnLineContest
           type: string
         location:
           maxLength: 128
@@ -211,7 +253,14 @@ components:
         previous_contest_id:
           type: integer
         previous_participation_condition:
-          maxLength: 1024
+          enum:
+          - Winner 1
+          - Winner 2
+          - Winner 3
+          - Diploma 1
+          - Diploma 2
+          - Diploma 3
+          - Participant
           type: string
         start_date:
           format: date-time
@@ -286,10 +335,24 @@ components:
       type: object
     CreateCompositeContestRequestTaskCreator:
       properties:
+        holding_type:
+          enum:
+          - OfflineContest
+          - OnLineContest
+          type: string
         visibility:
           type: boolean
       required:
+      - holding_type
       - visibility
+      type: object
+    CreateLocationRequestTaskAdmin:
+      properties:
+        location:
+          maxLength: 128
+          type: string
+      required:
+      - location
       type: object
     CreateMultipleRequestTaskCreator:
       properties:
@@ -298,6 +361,10 @@ components:
             $ref: '#/components/schemas/AnswersInTaskRequestTaskCreator'
           type: array
         num_of_task:
+          type: integer
+        show_answer_after_contest:
+          type: boolean
+        task_points:
           type: integer
       required:
       - answers
@@ -318,6 +385,10 @@ components:
         recommended_answer:
           maxLength: 1024
           type: string
+        show_answer_after_contest:
+          type: boolean
+        task_points:
+          type: integer
       required:
       - num_of_task
       - recommended_answer
@@ -328,8 +399,12 @@ components:
           type: number
         num_of_task:
           type: integer
+        show_answer_after_contest:
+          type: boolean
         start_value:
           type: number
+        task_points:
+          type: integer
       required:
       - end_value
       - num_of_task
@@ -337,16 +412,31 @@ components:
       type: object
     CreateSimpleContestRequestTaskCreator:
       properties:
+        contest_duration:
+          type: integer
+          x-unit: seconds
         end_time:
           format: date-time
           type: string
-        location:
-          maxLength: 128
+        holding_type:
+          enum:
+          - OfflineContest
+          - OnLineContest
           type: string
         previous_contest_id:
           type: integer
         previous_participation_condition:
-          maxLength: 1024
+          enum:
+          - Winner 1
+          - Winner 2
+          - Winner 3
+          - Diploma 1
+          - Diploma 2
+          - Diploma 3
+          - Participant
+          type: string
+        result_publication_date:
+          format: date-time
           type: string
         start_time:
           format: date-time
@@ -355,7 +445,7 @@ components:
           type: boolean
       required:
       - end_time
-      - location
+      - holding_type
       - start_time
       - visibility
       type: object
@@ -389,6 +479,13 @@ components:
       required:
       - variant_description
       type: object
+    LocationResponseTaskAdmin:
+      properties:
+        location_id:
+          type: integer
+      required:
+      - location_id
+      type: object
     MultipleChoiceTask:
       properties:
         answers:
@@ -396,11 +493,28 @@ components:
           type: string
         num_of_task:
           type: integer
+        show_answer_after_contest:
+          nullable: true
+          type: boolean
         task_id:
           readOnly: true
           type: integer
+        task_points:
+          nullable: true
+          type: integer
       required:
       - task_id
+      type: object
+    OlympiadLocation:
+      properties:
+        location:
+          maxLength: 128
+          type: string
+        location_id:
+          readOnly: true
+          type: integer
+      required:
+      - location
       type: object
     OlympiadType:
       properties:
@@ -427,8 +541,14 @@ components:
         recommended_answer:
           maxLength: 1024
           type: string
+        show_answer_after_contest:
+          nullable: true
+          type: boolean
         task_id:
           readOnly: true
+          type: integer
+        task_points:
+          nullable: true
           type: integer
       required:
       - num_of_task
@@ -441,10 +561,16 @@ components:
           type: number
         num_of_task:
           type: integer
+        show_answer_after_contest:
+          nullable: true
+          type: boolean
         start_value:
           type: number
         task_id:
           readOnly: true
+          type: integer
+        task_points:
+          nullable: true
           type: integer
       required:
       - end_value
@@ -454,6 +580,10 @@ components:
       type: object
     SimpleContest:
       properties:
+        contest_duration:
+          format: date-time
+          nullable: true
+          type: string
         contest_id:
           readOnly: true
           type: integer
@@ -461,18 +591,27 @@ components:
           format: date-time
           nullable: true
           type: string
-        location:
-          maxLength: 1024
-          nullable: true
+        holding_type:
+          enum:
+          - OfflineContest
+          - OnLineContest
           type: string
         previous_contest_id:
           nullable: true
           type: integer
         previous_participation_condition:
           enum:
+          - Winner 1
+          - Winner 2
+          - Winner 3
+          - Diploma 1
+          - Diploma 2
+          - Diploma 3
           - Participant
-          - Laureate
-          - Winner
+          type: string
+        result_publication_date:
+          format: date-time
+          nullable: true
           type: string
         start_date:
           format: date-time
@@ -481,10 +620,12 @@ components:
         visibility:
           type: boolean
       required:
+      - contest_duration
       - contest_id
       - end_date
-      - location
+      - holding_type
       - previous_participation_condition
+      - result_publication_date
       - start_date
       - visibility
       type: object
@@ -559,6 +700,17 @@ components:
       - $ref: '#/components/schemas/PlainTask'
       - $ref: '#/components/schemas/RangeTask'
       - $ref: '#/components/schemas/MultipleChoiceTask'
+    TaskForUserResponseTaskParticipant:
+      properties:
+        answers:
+          items:
+            $ref: '#/components/schemas/AnswersInTaskRequestTaskParticipant'
+          type: array
+        task_id:
+          type: integer
+      required:
+      - task_id
+      type: object
     TaskIdResponseTaskCreator:
       properties:
         task_id:
@@ -574,22 +726,24 @@ components:
           type: array
         end_value:
           type: number
-        image_of_task: {}
         num_of_task:
           type: integer
         recommended_answer:
           maxLength: 1024
           type: string
+        show_answer_after_contest:
+          type: boolean
         start_value:
           type: number
         task_id:
           type: integer
+        task_points:
+          type: integer
       required:
-      - image_of_task
       - num_of_task
       - task_id
       type: object
-    UpdateBaseOlympiadRequestTaskCreator:
+    UpdateBaseOlympiadRequestTaskEditor:
       properties:
         description:
           maxLength: 1024
@@ -628,63 +782,108 @@ components:
       required:
       - target_classes
       type: object
-    UpdateContestRequestTaskCreator:
+    UpdateContestRequestTaskEditor:
       properties:
+        contest_duration:
+          type: integer
+          x-unit: seconds
         end_date:
           format: date-time
           type: string
-        location:
-          maxLength: 128
+        holding_type:
+          enum:
+          - OfflineContest
+          - OnLineContest
           type: string
         previous_contest_id:
           type: integer
         previous_participation_condition:
-          maxLength: 1024
+          enum:
+          - Winner 1
+          - Winner 2
+          - Winner 3
+          - Diploma 1
+          - Diploma 2
+          - Diploma 3
+          - Participant
+          type: string
+        result_publication_date:
+          format: date-time
           type: string
         start_date:
           format: date-time
           type: string
         visibility:
           type: boolean
+      required:
+      - holding_type
       type: object
-    UpdateMultipleRequestTaskCreator:
+    UpdateLocationOfContestRequestTaskEditor:
+      properties:
+        locations:
+          items:
+            type: integer
+          type: array
+      required:
+      - locations
+      type: object
+    UpdateMultipleRequestTaskEditor:
       properties:
         answers:
           items:
-            $ref: '#/components/schemas/AnswersInTaskRequestTaskCreator'
+            $ref: '#/components/schemas/AnswersInTaskRequestTaskEditor'
           type: array
         num_of_task:
           type: integer
+        show_answer_after_contest:
+          type: boolean
+        task_points:
+          type: integer
       type: object
-    UpdatePlainRequestTaskCreator:
+    UpdatePlainRequestTaskEditor:
       properties:
         num_of_task:
           type: integer
         recommended_answer:
           maxLength: 1024
           type: string
+        show_answer_after_contest:
+          type: boolean
+        task_points:
+          type: integer
       type: object
-    UpdatePreviousContestRequestTaskCreator:
+    UpdatePreviousContestRequestTaskEditor:
       properties:
         previous_contest_id:
           type: integer
         previous_participation_condition:
-          maxLength: 1024
+          enum:
+          - Winner 1
+          - Winner 2
+          - Winner 3
+          - Diploma 1
+          - Diploma 2
+          - Diploma 3
+          - Participant
           type: string
       required:
       - previous_contest_id
       - previous_participation_condition
       type: object
-    UpdateRangeRequestTaskCreator:
+    UpdateRangeRequestTaskEditor:
       properties:
         end_value:
           type: number
         num_of_task:
           type: integer
+        show_answer_after_contest:
+          type: boolean
         start_value:
           type: number
+        task_points:
+          type: integer
       type: object
-    UpdateStageRequestTaskCreator:
+    UpdateStageRequestTaskEditor:
       properties:
         condition:
           enum:
@@ -703,14 +902,17 @@ components:
       type: object
     UpdateUserInContestRequestTaskControlUsers:
       properties:
+        show_results_to_user:
+          type: boolean
         users_id:
           items:
             type: integer
           type: array
       required:
+      - show_results_to_user
       - users_id
       type: object
-    UpdateVariantRequestTaskCreator:
+    UpdateVariantRequestTaskEditor:
       properties:
         variant_description:
           maxLength: 1024
@@ -720,14 +922,21 @@ components:
       type: object
     UserInContest:
       properties:
+        show_results_to_user:
+          nullable: true
+          type: boolean
         user_id:
           readOnly: true
           type: integer
         user_status:
           enum:
+          - Winner 1
+          - Winner 2
+          - Winner 3
+          - Diploma 1
+          - Diploma 2
+          - Diploma 3
           - Participant
-          - Laureate
-          - Winner
           type: string
         variant_id:
           nullable: true
@@ -830,83 +1039,7 @@ paths:
       security:
       - JWTAccessToken: []
       - CSRFAccessToken: []
-  /tasks/creator/base_olympiad/{id_base_olympiad}/upload_certificate:
-    post:
-      parameters:
-      - description: Id of the olympiad
-        in: path
-        name: id_base_olympiad
-        required: true
-        schema:
-          type: integer
-      requestBody:
-        content:
-          application/octet-stream:
-            schema:
-              format: binary
-              type: string
-        required: true
-      responses:
-        '200':
-          description: OK
-        '400':
-          description: Bad request
-        '404':
-          description: Base contest not found
-        '409':
-          description: Wrong value
-      security:
-      - JWTAccessToken: []
-      - CSRFAccessToken: []
-  /tasks/creator/base_olympiad/{id_base_olympiad}/remove:
-    post:
-      parameters:
-      - description: ID of the base olympiad
-        in: path
-        name: id_base_olympiad
-        required: true
-        schema:
-          type: integer
-      responses:
-        '200':
-          description: OK
-        '403':
-          description: Invalid role of current user
-        '404':
-          description: Group not found
-      security:
-      - JWTAccessToken: []
-      - CSRFAccessToken: []
-  /tasks/creator/base_olympiad/{id_base_olympiad}:
-    patch:
-      parameters:
-      - description: ID of the base olympiad
-        in: path
-        name: id_base_olympiad
-        required: true
-        schema:
-          type: integer
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/UpdateBaseOlympiadRequestTaskCreator'
-        required: true
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/BaseOlympiadResponseTaskCreator'
-          description: OK
-        '400':
-          description: Bad request
-        '409':
-          description: Olympiad type already in use
-      security:
-      - JWTAccessToken: []
-      - CSRFAccessToken: []
-  /tasks/creator/base_olympiad/{id_base_olympiad}/olympiad/createsimple:
+  /tasks/creator/base_olympiad/{id_base_olympiad}/olympiad/create_simple:
     post:
       parameters:
       - description: ID of the base olympiad
@@ -935,7 +1068,7 @@ paths:
       security:
       - JWTAccessToken: []
       - CSRFAccessToken: []
-  /tasks/creator/base_olympiad/{id_base_olympiad}/olympiad/createcomposite:
+  /tasks/creator/base_olympiad/{id_base_olympiad}/olympiad/create_composite:
     post:
       parameters:
       - description: ID of the base olympiad
@@ -956,66 +1089,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ContestIdResponseTaskCreator'
-          description: OK
-        '400':
-          description: Bad request
-        '409':
-          description: Olympiad type already in use
-      security:
-      - JWTAccessToken: []
-      - CSRFAccessToken: []
-  /tasks/creator/base_olympiad/{id_base_olympiad}/olympiad/{id_olympiad}/remove:
-    post:
-      parameters:
-      - description: ID of the base olympiad
-        in: path
-        name: id_base_olympiad
-        required: true
-        schema:
-          type: integer
-      - description: ID of the olympiad
-        in: path
-        name: id_olympiad
-        required: true
-        schema:
-          type: integer
-      responses:
-        '200':
-          description: OK
-        '403':
-          description: Invalid role of current user
-        '404':
-          description: Olympiad not found
-      security:
-      - JWTAccessToken: []
-      - CSRFAccessToken: []
-  /tasks/creator/base_olympiad/{id_base_olympiad}/olympiad/{id_olympiad}:
-    patch:
-      parameters:
-      - description: ID of the base olympiad
-        in: path
-        name: id_base_olympiad
-        required: true
-        schema:
-          type: integer
-      - description: ID of the olympiad
-        in: path
-        name: id_olympiad
-        required: true
-        schema:
-          type: integer
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/UpdateContestRequestTaskCreator'
-        required: true
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/CompositeContestResponseTaskCreator'
           description: OK
         '400':
           description: Bad request
@@ -1053,67 +1126,7 @@ paths:
       security:
       - JWTAccessToken: []
       - CSRFAccessToken: []
-  /tasks/creator/olympiad/{id_olympiad}/stage/{id_stage}/remove:
-    post:
-      parameters:
-      - description: ID of the olympiad
-        in: path
-        name: id_olympiad
-        required: true
-        schema:
-          type: integer
-      - description: ID of the stage
-        in: path
-        name: id_stage
-        required: true
-        schema:
-          type: integer
-      responses:
-        '200':
-          description: OK
-        '403':
-          description: Invalid role of current user
-        '404':
-          description: Olympiad not found
-      security:
-      - JWTAccessToken: []
-      - CSRFAccessToken: []
-  /tasks/creator/olympiad/{id_olympiad}/stage/{id_stage}:
-    patch:
-      parameters:
-      - description: ID of the olympiad
-        in: path
-        name: id_olympiad
-        required: true
-        schema:
-          type: integer
-      - description: ID of the stage
-        in: path
-        name: id_stage
-        required: true
-        schema:
-          type: integer
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/UpdateStageRequestTaskCreator'
-        required: true
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/StageResponseTaskCreator'
-          description: OK
-        '403':
-          description: Invalid role of current user
-        '404':
-          description: Stage not found
-      security:
-      - JWTAccessToken: []
-      - CSRFAccessToken: []
-  /tasks/creator/olympiad/{id_olympiad}/stage/{id_stage}/contest/createsimple:
+  /tasks/creator/olympiad/{id_olympiad}/stage/{id_stage}/contest/create:
     post:
       parameters:
       - description: ID of the olympiad
@@ -1140,117 +1153,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ContestIdResponseTaskCreator'
-          description: OK
-        '400':
-          description: Bad request
-        '409':
-          description: Olympiad type already in use
-      security:
-      - JWTAccessToken: []
-      - CSRFAccessToken: []
-  /tasks/creator/olympiad/{id_olympiad}/stage/{id_stage}/contest/{id_contest}/remove:
-    post:
-      parameters:
-      - description: ID of the olympiad
-        in: path
-        name: id_olympiad
-        required: true
-        schema:
-          type: integer
-      - description: ID of the stage
-        in: path
-        name: id_stage
-        required: true
-        schema:
-          type: integer
-      - description: ID of the contest
-        in: path
-        name: id_contest
-        required: true
-        schema:
-          type: integer
-      responses:
-        '200':
-          description: OK
-        '403':
-          description: Invalid role of current user
-        '404':
-          description: Olympiad not found
-      security:
-      - JWTAccessToken: []
-      - CSRFAccessToken: []
-  /tasks/creator/olympiad/{id_olympiad}/stage/{id_stage}/contest/{id_contest}:
-    patch:
-      parameters:
-      - description: ID of the olympiad
-        in: path
-        name: id_olympiad
-        required: true
-        schema:
-          type: integer
-      - description: ID of the stage
-        in: path
-        name: id_stage
-        required: true
-        schema:
-          type: integer
-      - description: ID of the contest
-        in: path
-        name: id_contest
-        required: true
-        schema:
-          type: integer
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/UpdateContestRequestTaskCreator'
-        required: true
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/CompositeContestResponseTaskCreator'
-          description: OK
-        '400':
-          description: Bad request
-        '404':
-          description: Not found
-        '409':
-          description: Olympiad type already in use
-      security:
-      - JWTAccessToken: []
-      - CSRFAccessToken: []
-  /tasks/creator/olympiad/{id_olympiad}/stage/{id_stage}/contest/{id_contest}/add_previous:
-    patch:
-      parameters:
-      - description: ID of the olympiad
-        in: path
-        name: id_olympiad
-        required: true
-        schema:
-          type: integer
-      - description: ID of the stage
-        in: path
-        name: id_stage
-        required: true
-        schema:
-          type: integer
-      - description: ID of the contest
-        in: path
-        name: id_contest
-        required: true
-        schema:
-          type: integer
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/UpdatePreviousContestRequestTaskCreator'
-        required: true
-      responses:
-        '200':
           description: OK
         '400':
           description: Bad request
@@ -1317,31 +1219,6 @@ paths:
       security:
       - JWTAccessToken: []
       - CSRFAccessToken: []
-  /tasks/creator/contest/{id_contest}/variant/{id_variant}/remove:
-    post:
-      parameters:
-      - description: ID of the contest
-        in: path
-        name: id_contest
-        required: true
-        schema:
-          type: integer
-      - description: ID of the variant
-        in: path
-        name: id_variant
-        required: true
-        schema:
-          type: integer
-      responses:
-        '200':
-          description: OK
-        '403':
-          description: Invalid role of current user
-        '404':
-          description: Olympiad not found
-      security:
-      - JWTAccessToken: []
-      - CSRFAccessToken: []
   /tasks/creator/contest/{id_contest}/variant/{variant_num}:
     get:
       parameters:
@@ -1357,40 +1234,6 @@ paths:
         required: true
         schema:
           type: integer
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/VariantResponseTaskCreator'
-          description: OK
-        '400':
-          description: Bad request
-        '409':
-          description: Olympiad type already in use
-      security:
-      - JWTAccessToken: []
-      - CSRFAccessToken: []
-    patch:
-      parameters:
-      - description: ID of the contest
-        in: path
-        name: id_contest
-        required: true
-        schema:
-          type: integer
-      - description: Num of the variant
-        in: path
-        name: variant_num
-        required: true
-        schema:
-          type: integer
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/UpdateVariantRequestTaskCreator'
-        required: true
       responses:
         '200':
           content:
@@ -1428,47 +1271,7 @@ paths:
       security:
       - JWTAccessToken: []
       - CSRFAccessToken: []
-  /tasks/creator/contest/{id_contest}/variant/{id_variant}/task/{id_task}/upload_image:
-    post:
-      parameters:
-      - description: ID of the contest
-        in: path
-        name: id_contest
-        required: true
-        schema:
-          type: integer
-      - description: ID of the variant
-        in: path
-        name: id_variant
-        required: true
-        schema:
-          type: integer
-      - description: ID of the task
-        in: path
-        name: id_task
-        required: true
-        schema:
-          type: integer
-      requestBody:
-        content:
-          application/octet-stream:
-            schema:
-              format: binary
-              type: string
-        required: true
-      responses:
-        '200':
-          description: OK
-        '400':
-          description: Bad request
-        '404':
-          description: Base contest not found
-        '409':
-          description: Wrong value
-      security:
-      - JWTAccessToken: []
-      - CSRFAccessToken: []
-  /tasks/creator/contest/{id_contest}/variant/{id_variant}/task/createplain:
+  /tasks/creator/contest/{id_contest}/variant/{id_variant}/task/create_plain:
     post:
       parameters:
       - description: ID of the contest
@@ -1503,7 +1306,7 @@ paths:
       security:
       - JWTAccessToken: []
       - CSRFAccessToken: []
-  /tasks/creator/contest/{id_contest}/variant/{id_variant}/task/createrange:
+  /tasks/creator/contest/{id_contest}/variant/{id_variant}/task/create_range:
     post:
       parameters:
       - description: ID of the contest
@@ -1538,7 +1341,7 @@ paths:
       security:
       - JWTAccessToken: []
       - CSRFAccessToken: []
-  /tasks/creator/contest/{id_contest}/variant/{id_variant}/task/createmultiple:
+  /tasks/creator/contest/{id_contest}/variant/{id_variant}/task/create_multiple:
     post:
       parameters:
       - description: ID of the contest
@@ -1573,37 +1376,6 @@ paths:
       security:
       - JWTAccessToken: []
       - CSRFAccessToken: []
-  /tasks/creator/contest/{id_contest}/variant/{id_variant}/task/{id_task}/remove:
-    post:
-      parameters:
-      - description: ID of the contest
-        in: path
-        name: id_contest
-        required: true
-        schema:
-          type: integer
-      - description: ID of the variant
-        in: path
-        name: id_variant
-        required: true
-        schema:
-          type: integer
-      - description: ID of the task
-        in: path
-        name: id_task
-        required: true
-        schema:
-          type: integer
-      responses:
-        '200':
-          description: OK
-        '403':
-          description: Invalid role of current user
-        '404':
-          description: Olympiad not found
-      security:
-      - JWTAccessToken: []
-      - CSRFAccessToken: []
   /tasks/creator/contest/{id_contest}/variant/{id_variant}/task/{id_task}:
     get:
       parameters:
@@ -1625,129 +1397,6 @@ paths:
         required: true
         schema:
           type: integer
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/TaskResponseTaskCreator'
-          description: OK
-        '400':
-          description: Bad request
-        '409':
-          description: Olympiad type already in use
-      security:
-      - JWTAccessToken: []
-      - CSRFAccessToken: []
-  /tasks/creator/contest/{id_contest}/variant/{id_variant}/task/{id_task}/plain:
-    patch:
-      parameters:
-      - description: ID of the contest
-        in: path
-        name: id_contest
-        required: true
-        schema:
-          type: integer
-      - description: ID of the variant
-        in: path
-        name: id_variant
-        required: true
-        schema:
-          type: integer
-      - description: ID of the task
-        in: path
-        name: id_task
-        required: true
-        schema:
-          type: integer
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/UpdatePlainRequestTaskCreator'
-        required: true
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/TaskResponseTaskCreator'
-          description: OK
-        '400':
-          description: Bad request
-        '409':
-          description: Olympiad type already in use
-      security:
-      - JWTAccessToken: []
-      - CSRFAccessToken: []
-  /tasks/creator/contest/{id_contest}/variant/{id_variant}/task/{id_task}/range:
-    patch:
-      parameters:
-      - description: ID of the contest
-        in: path
-        name: id_contest
-        required: true
-        schema:
-          type: integer
-      - description: ID of the variant
-        in: path
-        name: id_variant
-        required: true
-        schema:
-          type: integer
-      - description: ID of the task
-        in: path
-        name: id_task
-        required: true
-        schema:
-          type: integer
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/UpdateRangeRequestTaskCreator'
-        required: true
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/TaskResponseTaskCreator'
-          description: OK
-        '400':
-          description: Bad request
-        '409':
-          description: Olympiad type already in use
-      security:
-      - JWTAccessToken: []
-      - CSRFAccessToken: []
-  /tasks/creator/contest/{id_contest}/variant/{id_variant}/task/{id_task}/multiple:
-    patch:
-      parameters:
-      - description: ID of the contest
-        in: path
-        name: id_contest
-        required: true
-        schema:
-          type: integer
-      - description: ID of the variant
-        in: path
-        name: id_variant
-        required: true
-        schema:
-          type: integer
-      - description: ID of the task
-        in: path
-        name: id_task
-        required: true
-        schema:
-          type: integer
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/UpdateMultipleRequestTaskCreator'
-        required: true
       responses:
         '200':
           content:
@@ -1827,6 +1476,617 @@ paths:
       security:
       - JWTAccessToken: []
       - CSRFAccessToken: []
+  /tasks/editor/base_olympiad/{id_base_olympiad}/upload_certificate:
+    post:
+      parameters:
+      - description: Id of the olympiad
+        in: path
+        name: id_base_olympiad
+        required: true
+        schema:
+          type: integer
+      requestBody:
+        content:
+          application/octet-stream:
+            schema:
+              format: binary
+              type: string
+        required: true
+      responses:
+        '200':
+          description: OK
+        '400':
+          description: Bad request
+        '404':
+          description: Base contest not found
+        '409':
+          description: Wrong value
+      security:
+      - JWTAccessToken: []
+      - CSRFAccessToken: []
+  /tasks/editor/base_olympiad/{id_base_olympiad}/remove:
+    post:
+      parameters:
+      - description: ID of the base olympiad
+        in: path
+        name: id_base_olympiad
+        required: true
+        schema:
+          type: integer
+      responses:
+        '200':
+          description: OK
+        '403':
+          description: Invalid role of current user
+        '404':
+          description: Group not found
+      security:
+      - JWTAccessToken: []
+      - CSRFAccessToken: []
+  /tasks/editor/base_olympiad/{id_base_olympiad}:
+    patch:
+      parameters:
+      - description: ID of the base olympiad
+        in: path
+        name: id_base_olympiad
+        required: true
+        schema:
+          type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateBaseOlympiadRequestTaskEditor'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseOlympiadResponseTaskCreator'
+          description: OK
+        '400':
+          description: Bad request
+        '409':
+          description: Olympiad type already in use
+      security:
+      - JWTAccessToken: []
+      - CSRFAccessToken: []
+  /tasks/editor/base_olympiad/{id_base_olympiad}/olympiad/{id_olympiad}/remove:
+    post:
+      parameters:
+      - description: ID of the base olympiad
+        in: path
+        name: id_base_olympiad
+        required: true
+        schema:
+          type: integer
+      - description: ID of the olympiad
+        in: path
+        name: id_olympiad
+        required: true
+        schema:
+          type: integer
+      responses:
+        '200':
+          description: OK
+        '403':
+          description: Invalid role of current user
+        '404':
+          description: Olympiad not found
+      security:
+      - JWTAccessToken: []
+      - CSRFAccessToken: []
+  /tasks/editor/base_olympiad/{id_base_olympiad}/olympiad/{id_olympiad}:
+    patch:
+      parameters:
+      - description: ID of the base olympiad
+        in: path
+        name: id_base_olympiad
+        required: true
+        schema:
+          type: integer
+      - description: ID of the olympiad
+        in: path
+        name: id_olympiad
+        required: true
+        schema:
+          type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateContestRequestTaskEditor'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CompositeContestResponseTaskCreator'
+          description: OK
+        '400':
+          description: Bad request
+        '409':
+          description: Olympiad type already in use
+      security:
+      - JWTAccessToken: []
+      - CSRFAccessToken: []
+  /tasks/editor/olympiad/{id_olympiad}/stage/{id_stage}/remove:
+    post:
+      parameters:
+      - description: ID of the olympiad
+        in: path
+        name: id_olympiad
+        required: true
+        schema:
+          type: integer
+      - description: ID of the stage
+        in: path
+        name: id_stage
+        required: true
+        schema:
+          type: integer
+      responses:
+        '200':
+          description: OK
+        '403':
+          description: Invalid role of current user
+        '404':
+          description: Olympiad not found
+      security:
+      - JWTAccessToken: []
+      - CSRFAccessToken: []
+  /tasks/editor/olympiad/{id_olympiad}/stage/{id_stage}:
+    patch:
+      parameters:
+      - description: ID of the olympiad
+        in: path
+        name: id_olympiad
+        required: true
+        schema:
+          type: integer
+      - description: ID of the stage
+        in: path
+        name: id_stage
+        required: true
+        schema:
+          type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateStageRequestTaskEditor'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StageResponseTaskCreator'
+          description: OK
+        '403':
+          description: Invalid role of current user
+        '404':
+          description: Stage not found
+      security:
+      - JWTAccessToken: []
+      - CSRFAccessToken: []
+  /tasks/editor/olympiad/{id_olympiad}/stage/{id_stage}/contest/{id_contest}/remove:
+    post:
+      parameters:
+      - description: ID of the olympiad
+        in: path
+        name: id_olympiad
+        required: true
+        schema:
+          type: integer
+      - description: ID of the stage
+        in: path
+        name: id_stage
+        required: true
+        schema:
+          type: integer
+      - description: ID of the contest
+        in: path
+        name: id_contest
+        required: true
+        schema:
+          type: integer
+      responses:
+        '200':
+          description: OK
+        '403':
+          description: Invalid role of current user
+        '404':
+          description: Olympiad not found
+      security:
+      - JWTAccessToken: []
+      - CSRFAccessToken: []
+  /tasks/editor/olympiad/{id_olympiad}/stage/{id_stage}/contest/{id_contest}:
+    patch:
+      parameters:
+      - description: ID of the olympiad
+        in: path
+        name: id_olympiad
+        required: true
+        schema:
+          type: integer
+      - description: ID of the stage
+        in: path
+        name: id_stage
+        required: true
+        schema:
+          type: integer
+      - description: ID of the contest
+        in: path
+        name: id_contest
+        required: true
+        schema:
+          type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateContestRequestTaskEditor'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CompositeContestResponseTaskCreator'
+          description: OK
+        '400':
+          description: Bad request
+        '404':
+          description: Not found
+        '409':
+          description: Olympiad type already in use
+      security:
+      - JWTAccessToken: []
+      - CSRFAccessToken: []
+  /tasks/editor/olympiad/{id_olympiad}/stage/{id_stage}/contest/{id_contest}/add_previous:
+    patch:
+      parameters:
+      - description: ID of the olympiad
+        in: path
+        name: id_olympiad
+        required: true
+        schema:
+          type: integer
+      - description: ID of the stage
+        in: path
+        name: id_stage
+        required: true
+        schema:
+          type: integer
+      - description: ID of the contest
+        in: path
+        name: id_contest
+        required: true
+        schema:
+          type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdatePreviousContestRequestTaskEditor'
+        required: true
+      responses:
+        '200':
+          description: OK
+        '400':
+          description: Bad request
+        '409':
+          description: Olympiad type already in use
+      security:
+      - JWTAccessToken: []
+      - CSRFAccessToken: []
+  /tasks/editor/contest/{id_contest}/variant/{id_variant}/remove:
+    post:
+      parameters:
+      - description: ID of the contest
+        in: path
+        name: id_contest
+        required: true
+        schema:
+          type: integer
+      - description: ID of the variant
+        in: path
+        name: id_variant
+        required: true
+        schema:
+          type: integer
+      responses:
+        '200':
+          description: OK
+        '403':
+          description: Invalid role of current user
+        '404':
+          description: Olympiad not found
+      security:
+      - JWTAccessToken: []
+      - CSRFAccessToken: []
+  /tasks/editor/contest/{id_contest}/variant/{variant_num}:
+    patch:
+      parameters:
+      - description: ID of the contest
+        in: path
+        name: id_contest
+        required: true
+        schema:
+          type: integer
+      - description: Num of the variant
+        in: path
+        name: variant_num
+        required: true
+        schema:
+          type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateVariantRequestTaskEditor'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VariantResponseTaskCreator'
+          description: OK
+        '400':
+          description: Bad request
+        '409':
+          description: Olympiad type already in use
+      security:
+      - JWTAccessToken: []
+      - CSRFAccessToken: []
+  /tasks/editor/contest/{id_contest}/variant/{id_variant}/task/{id_task}/upload_image:
+    post:
+      parameters:
+      - description: ID of the contest
+        in: path
+        name: id_contest
+        required: true
+        schema:
+          type: integer
+      - description: ID of the variant
+        in: path
+        name: id_variant
+        required: true
+        schema:
+          type: integer
+      - description: ID of the task
+        in: path
+        name: id_task
+        required: true
+        schema:
+          type: integer
+      requestBody:
+        content:
+          application/octet-stream:
+            schema:
+              format: binary
+              type: string
+        required: true
+      responses:
+        '200':
+          description: OK
+        '400':
+          description: Bad request
+        '404':
+          description: Base contest not found
+        '409':
+          description: Wrong value
+      security:
+      - JWTAccessToken: []
+      - CSRFAccessToken: []
+  /tasks/editor/contest/{id_contest}/variant/{id_variant}/task/{id_task}/remove:
+    post:
+      parameters:
+      - description: ID of the contest
+        in: path
+        name: id_contest
+        required: true
+        schema:
+          type: integer
+      - description: ID of the variant
+        in: path
+        name: id_variant
+        required: true
+        schema:
+          type: integer
+      - description: ID of the task
+        in: path
+        name: id_task
+        required: true
+        schema:
+          type: integer
+      responses:
+        '200':
+          description: OK
+        '403':
+          description: Invalid role of current user
+        '404':
+          description: Olympiad not found
+      security:
+      - JWTAccessToken: []
+      - CSRFAccessToken: []
+  /tasks/editor/contest/{id_contest}/variant/{id_variant}/task/{id_task}/plain:
+    patch:
+      parameters:
+      - description: ID of the contest
+        in: path
+        name: id_contest
+        required: true
+        schema:
+          type: integer
+      - description: ID of the variant
+        in: path
+        name: id_variant
+        required: true
+        schema:
+          type: integer
+      - description: ID of the task
+        in: path
+        name: id_task
+        required: true
+        schema:
+          type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdatePlainRequestTaskEditor'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TaskResponseTaskCreator'
+          description: OK
+        '400':
+          description: Bad request
+        '409':
+          description: Olympiad type already in use
+      security:
+      - JWTAccessToken: []
+      - CSRFAccessToken: []
+  /tasks/editor/contest/{id_contest}/variant/{id_variant}/task/{id_task}/range:
+    patch:
+      parameters:
+      - description: ID of the contest
+        in: path
+        name: id_contest
+        required: true
+        schema:
+          type: integer
+      - description: ID of the variant
+        in: path
+        name: id_variant
+        required: true
+        schema:
+          type: integer
+      - description: ID of the task
+        in: path
+        name: id_task
+        required: true
+        schema:
+          type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateRangeRequestTaskEditor'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TaskResponseTaskCreator'
+          description: OK
+        '400':
+          description: Bad request
+        '409':
+          description: Olympiad type already in use
+      security:
+      - JWTAccessToken: []
+      - CSRFAccessToken: []
+  /tasks/editor/contest/{id_contest}/variant/{id_variant}/task/{id_task}/multiple:
+    patch:
+      parameters:
+      - description: ID of the contest
+        in: path
+        name: id_contest
+        required: true
+        schema:
+          type: integer
+      - description: ID of the variant
+        in: path
+        name: id_variant
+        required: true
+        schema:
+          type: integer
+      - description: ID of the task
+        in: path
+        name: id_task
+        required: true
+        schema:
+          type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateMultipleRequestTaskEditor'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TaskResponseTaskCreator'
+          description: OK
+        '400':
+          description: Bad request
+        '409':
+          description: Olympiad type already in use
+      security:
+      - JWTAccessToken: []
+      - CSRFAccessToken: []
+  /tasks/editor/contest/{id_contest}/add_location:
+    post:
+      parameters:
+      - description: ID of the contest
+        in: path
+        name: id_contest
+        required: true
+        schema:
+          type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateLocationOfContestRequestTaskEditor'
+        required: true
+      responses:
+        '200':
+          description: OK
+        '400':
+          description: Bad request
+        '409':
+          description: Olympiad type already in use
+      security:
+      - JWTAccessToken: []
+      - CSRFAccessToken: []
+  /tasks/editor/contest/{id_location}/remove_location:
+    post:
+      parameters:
+      - description: ID of the location
+        in: path
+        name: id_location
+        required: true
+        schema:
+          type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateLocationOfContestRequestTaskEditor'
+        required: true
+      responses:
+        '200':
+          description: OK
+        '400':
+          description: Bad request
+        '409':
+          description: Location already in use
+      security:
+      - JWTAccessToken: []
+      - CSRFAccessToken: []
   /tasks/admin/olympiad_type/create:
     post:
       requestBody:
@@ -1870,6 +2130,49 @@ paths:
       security:
       - JWTAccessToken: []
       - CSRFAccessToken: []
+  /tasks/admin/location/create:
+    post:
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateLocationRequestTaskAdmin'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LocationResponseTaskAdmin'
+          description: OK
+        '400':
+          description: Bad request
+        '409':
+          description: Olympiad type already in use
+      security:
+      - JWTAccessToken: []
+      - CSRFAccessToken: []
+  /tasks/admin/location/{id_location}/remove:
+    post:
+      parameters:
+      - description: Id of the location
+        in: path
+        name: id_location
+        required: true
+        schema:
+          type: integer
+      responses:
+        '200':
+          description: OK
+        '400':
+          description: Bad request
+        '409':
+          description: Olympiad type already in use
+        '404':
+          description: Olympiad type not found
+      security:
+      - JWTAccessToken: []
+      - CSRFAccessToken: []
   /tasks/participant/contest/{id_contest}/variant/self:
     get:
       parameters:
@@ -1895,6 +2198,25 @@ paths:
       security:
       - JWTAccessToken: []
       - CSRFAccessToken: []
+  /tasks/participant/contest/{id_contest}/enroll:
+    post:
+      parameters:
+      - description: ID of the contest
+        in: path
+        name: id_contest
+        required: true
+        schema:
+          type: integer
+      responses:
+        '200':
+          description: OK
+        '400':
+          description: Bad request
+        '409':
+          description: User already enrolled
+      security:
+      - JWTAccessToken: []
+      - CSRFAccessToken: []
   /tasks/participant/contest/{id_contest}/tasks/self:
     get:
       parameters:
@@ -1910,37 +2232,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/AllTaskResponseTaskParticipant'
-          description: OK
-        '400':
-          description: Bad request
-        '409':
-          description: Olympiad type already in use
-        '404':
-          description: User not found
-      security:
-      - JWTAccessToken: []
-      - CSRFAccessToken: []
-  /tasks/participant/contest/{id_contest}/tasks/{id_task}/self:
-    get:
-      parameters:
-      - description: Id of the contest
-        in: path
-        name: id_contest
-        required: true
-        schema:
-          type: integer
-      - description: Id of the task
-        in: path
-        name: id_task
-        required: true
-        schema:
-          type: integer
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Task'
           description: OK
         '400':
           description: Bad request
@@ -2100,6 +2391,43 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/OlympiadType'
+          description: OK
+        '400':
+          description: Bad request
+        '409':
+          description: Olympiad type already in use
+        '404':
+          description: Olympiad type not found
+  /tasks/unauthorized/location/all:
+    get:
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AllLocationResponseTaskUnauthorized'
+          description: OK
+        '400':
+          description: Bad request
+        '409':
+          description: Olympiad type already in use
+        '404':
+          description: Olympiad type not found
+  /tasks/unauthorized/location/{id_location}:
+    get:
+      parameters:
+      - description: Id of the location
+        in: path
+        name: id_location
+        required: true
+        schema:
+          type: integer
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OlympiadLocation'
           description: OK
         '400':
           description: Bad request

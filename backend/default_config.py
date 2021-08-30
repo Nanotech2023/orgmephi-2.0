@@ -44,3 +44,4 @@ class DefaultConfiguration:
     ORGMEPHI_MAIL_CONFIRM_SUBJECT = 'Подтверждение почтового адреса'
     ORGMEPHI_MAIL_RECOVER_SUBJECT = 'Сброс пароля'
     ORGMEPHI_PREREGISTER_PASSWORD_LENGTH = 8
+    ORGMEPHI_MAX_FILE_SIZE = 1e7
