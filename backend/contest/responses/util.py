@@ -1,11 +1,26 @@
 from .model_schemas.schemas import PlainAnswerTextSchema, RangeAnswerSchema
 from .models import *
 from datetime import datetime, timedelta
-from common.errors import NotFound, OlympiadTiming
+from common.errors import NotFound, RequestError
 from common.util import db_get_one_or_none
 from contest.tasks.models import SimpleContest, RangeTask, MultipleChoiceTask, PlainTask
 
 five_minutes = timedelta(minutes=5)
+
+
+class OlympiadTiming(RequestError):
+    """
+    Olympiad bad timing
+    """
+    def __init__(self, message):
+        """
+        Create error object
+        """
+        super(OlympiadTiming, self).__init__(409)
+        self.message = message
+
+    def get_msg(self) -> str:
+        return self.message
 
 
 def get_user_in_contest_work(user_id, contest_id):

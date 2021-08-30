@@ -56,11 +56,21 @@ class PlainAnswerTextSchema(SQLAlchemySchema):
     answer_text = auto_field(column_name='answer_text', dump_only=True)
 
 
+class PlainAnswerFileSchema(SQLAlchemySchema):
+    class Meta:
+        model = PlainAnswerFile
+        load_instance = True
+        sqla_session = db.session
+
+    filetype = EnumField(ResponseFiletypeEnum, data_key='filetype', by_value=True)
+
+
 class AnswerSchema(OneOfSchema):
     type_schemas = {
         AnswerEnum.PlainAnswerText.value: PlainAnswerTextSchema,
         AnswerEnum.RangeAnswer.value: RangeAnswerSchema,
-        AnswerEnum.MultipleChoiceAnswer.value: MultipleChoiceAnswerSchema
+        AnswerEnum.MultipleChoiceAnswer.value: MultipleChoiceAnswerSchema,
+        AnswerEnum.PlainAnswerFile.value: PlainAnswerFileSchema
     }
 
     type_field = "answer_type"
@@ -69,7 +79,8 @@ class AnswerSchema(OneOfSchema):
     class_types = {
         PlainAnswerTextSchema: AnswerEnum.PlainAnswerText.value,
         RangeAnswerSchema: AnswerEnum.RangeAnswer.value,
-        MultipleChoiceAnswerSchema: AnswerEnum.MultipleChoiceAnswer.value
+        MultipleChoiceAnswerSchema: AnswerEnum.MultipleChoiceAnswer.value,
+        PlainAnswerFileSchema: AnswerEnum.PlainAnswerFile.value
     }
 
     def get_obj_type(self, obj):
