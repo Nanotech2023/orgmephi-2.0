@@ -1,16 +1,19 @@
 import datetime
+import secrets
+import string
 
-from flask import request, render_template, abort
+from flask import request, render_template, abort, send_file
 from flask_mail import Message
 from marshmallow import EXCLUDE
 from itsdangerous import URLSafeTimedSerializer
+from captcha.image import ImageCaptcha
 
-from common.errors import AlreadyExists, NotFound
+from common.errors import AlreadyExists, NotFound, CaptchaError
 from common import get_current_app, get_current_module, get_current_db
-from common.util import db_get_all, db_get_or_raise, db_get_one_or_none
+from common.util import db_get_all, db_get_or_raise, db_get_one_or_none, db_exists
 
 from user.models import init_user, UserRoleEnum, University, Country, Region, UserInfo
-from user.model_schemas.auth import User, UserSchema
+from user.model_schemas.auth import User, UserSchema, Captcha
 from user.model_schemas.personal import UserInfoSchema
 from user.model_schemas.university import StudentInfoSchema
 
@@ -64,8 +67,41 @@ def send_email(subject, recipient, template_name_or_list, **context):
     app.mail.send(msg)
 
 
+_captcha_chars = string.ascii_uppercase + string.digits
+_captcha_chars = _captcha_chars.replace('1', '').replace('I', '').replace('0', '').replace('O', '')
+
+
+def generate_captcha(width, height):
+    captcha_gen = ImageCaptcha(width=width, height=height)
+    captcha_len = app.config['ORGMEPHI_CAPTCHA_LENGTH']
+
+    answer = ''.join(secrets.choice(_captcha_chars) for _ in range(captcha_len))
+    while db_exists(db.session, Captcha, 'answer', answer):
+        answer = secrets.token_urlsafe(app.config['ORGMEPHI_CAPTCHA_LENGTH'])
+    image = captcha_gen.generate(answer)
+    Captcha.cleanup()
+    captcha = Captcha(answer=answer)
+    db.session.add(captcha)
+    db.session.commit()
+    return image
+
+
+def check_captcha(answer):
+    Captcha.cleanup()
+    captcha = db_get_one_or_none(Captcha, 'answer', answer)
+    if captcha is None:
+        raise CaptchaError()
+    db.session.delete(captcha)
+    db.session.commit()
+
+
 def register():
     values = request.marshmallow
+
+    if app.config['ORGMEPHI_CAPTCHA_ENABLE']:
+        answer = values.get('captcha', '')
+        check_captcha(answer)
+
     username = values['auth_info']['email']
     reg_type = values['register_type']
     password_hash = app.password_policy.hash_password(values['auth_info']['password'], check=True)
@@ -114,6 +150,24 @@ def register():
 
     db.session.commit()
     return user
+
+
+@module.route('/captcha', methods=['GET'])
+def get_captcha():
+    """
+    Generate captcha
+    ---
+    get:
+      responses:
+        '200':
+          description: OK
+          content:
+            application/png:
+              type: string
+              format: binary
+    """
+    captcha = generate_captcha(280, 90)
+    return send_file(captcha, mimetype='image/png')
 
 
 @module.route('/school', methods=['POST'],

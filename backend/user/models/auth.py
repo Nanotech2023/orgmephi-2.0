@@ -134,3 +134,13 @@ class Group(db.Model):
     name = db.Column(db.String, nullable=False, unique=True)
 
     users = db.relationship('User', secondary=users_in_group, lazy='subquery', back_populates='groups')
+
+
+class Captcha(db.Model):
+    answer = db.Column(db.String, nullable=False, primary_key=True)
+    post_time = db.Column(db.DateTime, default=datetime.utcnow, nullable=False, index=True)
+
+    @classmethod
+    def cleanup(cls):
+        expire_time = app.config['ORGMEPHI_CAPTCHA_EXPIRATION']
+        db.session.query(cls).filter(cls.post_time < datetime.utcnow() - expire_time).delete()

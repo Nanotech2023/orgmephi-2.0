@@ -234,3 +234,17 @@ class DataConflict(RequestError):
 
     def get_msg(self) -> str:
         return self.msg
+
+
+class CaptchaError(RequestError):
+    """
+    Wrong or expired captcha
+    """
+    def __init__(self):
+        """
+        Create error object
+        """
+        super(CaptchaError, self).__init__(409)
+
+    def get_msg(self) -> str:
+        return 'Captcha is wrong'
