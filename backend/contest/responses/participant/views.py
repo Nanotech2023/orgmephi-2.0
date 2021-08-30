@@ -1,6 +1,6 @@
 import io
 from flask import request, send_file
-from common import get_current_app, get_current_module
+from common import get_current_app, get_current_module, get_current_db
 from common.jwt_verify import jwt_get_id
 from common.util import db_get_or_raise
 from contest.responses.model_schemas.schemas import AnswerSchema
@@ -175,9 +175,9 @@ def self_user_answer_for_task_post_plain_file(contest_id, task_id, filetype):
         '404':
           description: User, contest or task not found
         '409':
-          description: Olympiad is over
+          description: Olympiad is over or file is too large
     """
-    check_task_type(task_id, answer_dict['PlainAnswer'])
+    check_task_type(task_id, answer_dict['PlainAnswerFile'])
     self_user_id = jwt_get_id()
     user_answer_post_file(request.data, filetype, self_user_id, contest_id, task_id)
     return {}, 200
@@ -222,7 +222,7 @@ def self_user_answer_for_task_post_plain_text(contest_id, task_id):
         '409':
           description: Olympiad is over
     """
-    check_task_type(task_id, answer_dict['PlainAnswer'])
+    check_task_type(task_id, answer_dict['PlainAnswerText'])
     values = request.marshmallow
     self_user_id = jwt_get_id()
     user_answer_post(self_user_id, contest_id, task_id, values, 'PlainAnswerText')

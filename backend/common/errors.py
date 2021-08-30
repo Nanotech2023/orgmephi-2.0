@@ -141,7 +141,6 @@ class InsufficientData(RequestError):
         return '%s is missing %s' % (self.obj, self.data)
 
 
-<<<<<<< HEAD
 class FileTooLarge(RequestError):
     """
     File is too large

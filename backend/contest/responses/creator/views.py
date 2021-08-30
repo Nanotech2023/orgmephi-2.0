@@ -1,6 +1,6 @@
 import io
 from flask import request, send_file
-from common import get_current_app, get_current_module
+from common import get_current_app, get_current_module, get_current_db
 from common.util import db_get_or_raise, db_get_list
 from contest.responses.util import *
 from contest.responses.model_schemas.schemas import AnswerSchema
@@ -190,7 +190,7 @@ def user_answer_for_task_by_id_post_plain_file(contest_id, task_id, user_id, fil
         '404':
           description: User, contest or task not found
         '409':
-          description: Olympiad is over
+          description: Olympiad is over or file is too large
     """
     check_task_type(task_id, answer_dict['PlainAnswer'])
     user_answer_post_file(request.data, filetype, user_id, contest_id, task_id)
@@ -694,7 +694,7 @@ def auto_check_users_answers(contest_id):
         '404':
           description: Contest not found
         '409':
-          description: Contest is not over
+          description: Contest error
     """
     is_contest_over(contest_id)
     users_in_contest = db_get_list(Response, 'contest_id', contest_id)

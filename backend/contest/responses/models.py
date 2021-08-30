@@ -4,8 +4,6 @@ from datetime import datetime, timedelta
 import enum
 from common import get_current_db
 from contest.tasks.models import UserInContest, Task
-from messages.models import Thread
-from common.util import db_get_one_or_none
 from sqlalchemy.ext.hybrid import hybrid_property
 
 db = get_current_db()
@@ -36,8 +34,7 @@ work_status = {status.value: status for status in ResponseStatusEnum}
 def add_user_response(db_session, user_id, contest_id):
     user_work = Response(
         user_id=user_id,
-        contest_id=contest_id,
-        status=work_status['InProgress']
+        contest_id=contest_id
     )
     db_session.add(user_work)
     return user_work
@@ -64,7 +61,7 @@ class Response(db.Model):
     start_time = db.Column(db.DateTime, default=datetime.utcnow())
     finish_time = db.Column(db.DateTime, default=datetime.utcnow())
     time_extension = db.Column(db.Interval, default=timedelta(seconds=0))
-    status = db.Column(db.Enum(ResponseStatusEnum), nullable=False)
+    status = db.Column(db.Enum(ResponseStatusEnum), default=ResponseStatusEnum.in_progress, nullable=False)
 
     answers = db.relationship('BaseAnswer', backref='response', lazy='dynamic', cascade="all, delete")
 
@@ -77,8 +74,14 @@ class Response(db.Model):
 
     @hybrid_property
     def status(self):
-        if db_get_one_or_none(Thread, 'related_work_id', self.work_id) is not None:
-            return work_status['Appeal']
+        from common.util import db_get_one_or_none
+        from messages.models import Thread, ThreadStatus
+        thread = db_get_one_or_none(Thread, 'related_work_id', self.work_id)
+        if thread is not None:
+            if thread.status == ThreadStatus.open:
+                return work_status['Appeal']
+            else:
+                return self.status
         else:
             return self.status
 

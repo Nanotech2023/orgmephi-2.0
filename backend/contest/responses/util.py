@@ -1,14 +1,20 @@
+from messages.models import Thread, ThreadStatus
+from .creator.views import db
 from .model_schemas.schemas import PlainAnswerTextSchema, RangeAnswerSchema
-from .models import *
 from datetime import datetime, timedelta
 from common.errors import NotFound, RequestError
 from common.util import db_get_one_or_none
-from contest.tasks.models import SimpleContest, RangeTask, MultipleChoiceTask, PlainTask
+from contest.tasks.models import SimpleContest, RangeTask, MultipleChoiceTask, PlainTask, ContestHoldingTypeEnum, \
+    UserInContest
+from .models import Response, PlainAnswerText, RangeAnswer, MultipleChoiceAnswer, PlainAnswerFile, BaseAnswer, \
+    answer_dict, work_status, add_user_response, add_plain_answer_file, add_plain_answer_text, add_range_answer, \
+    add_multiple_answer
+from ..tasks.util import validate_file_size
 
 five_minutes = timedelta(minutes=5)
 
 
-class OlympiadTiming(RequestError):
+class OlympiadError(RequestError):
     """
     Olympiad bad timing
     """
@@ -16,7 +22,7 @@ class OlympiadTiming(RequestError):
         """
         Create error object
         """
-        super(OlympiadTiming, self).__init__(409)
+        super(OlympiadError, self).__init__(409)
         self.message = message
 
     def get_msg(self) -> str:
@@ -71,10 +77,19 @@ def check_task_type(task_id, task_type):
     if task is None:
         raise NotFound("response_answer", f'task_id - {task_id} for type {task_type.value}')
 
-# TODO Добавить флаг Мише UserInContest
+
 def finish_contest(user_work: Response):
     user_work.status = work_status['NotChecked']
+    user_in_contest: UserInContest = UserInContest.query.filter_by(**{"contest_id": user_work.contest_id,
+                                                                      "user_id": user_work.user_id}).one_or_none()
+    user_in_contest.completed_the_contest = True
     db.session.commit()
+
+
+def check_contest_time_left(contest_id):
+    simple_contest: SimpleContest = db_get_one_or_none(SimpleContest, 'contest_id', contest_id)
+    if datetime.utcnow() + simple_contest.contest_duration > simple_contest.end_date:
+        raise OlympiadError("Olympiad is over")
 
 
 def user_answer_post_file(answer_file, filetype, user_id, contest_id, task_id):
@@ -82,9 +97,11 @@ def user_answer_post_file(answer_file, filetype, user_id, contest_id, task_id):
         user_work: Response = get_user_in_contest_work(user_id, contest_id)
         user_work.finish_time = datetime.utcnow()
     except NotFound:
+        check_contest_time_left(contest_id)
         user_work = add_user_response(db.session, user_id, contest_id)
     check_contest_duration(user_work)
     user_work.finish_time = datetime.utcnow()
+    validate_file_size(answer_file)
     user_answer = user_work.answers.filter(PlainAnswerFile.task_id == task_id).one_or_none()
     if user_answer is None:
         add_plain_answer_file(user_work.work_id, task_id, filetype=filetype, file=answer_file)
@@ -99,7 +116,6 @@ funcs_dict = {
     'MultipleChoiceAnswer': add_multiple_answer
 }
 
-
 schemas_dict = {
     'PlainAnswerText': PlainAnswerTextSchema,
     'RangeAnswer': RangeAnswerSchema
@@ -107,7 +123,12 @@ schemas_dict = {
 
 
 def user_answer_post(user_id, contest_id, task_id, values, answer_type):
-    user_work: Response = get_user_in_contest_work(user_id, contest_id)
+    try:
+        user_work: Response = get_user_in_contest_work(user_id, contest_id)
+        user_work.finish_time = datetime.utcnow()
+    except NotFound:
+        check_contest_time_left(contest_id)
+        user_work = add_user_response(db.session, user_id, contest_id)
     check_contest_duration(user_work)
     user_work.finish_time = datetime.utcnow()
     answer = db_get_one_or_none(models_dict.get(answer_type), 'task_id', task_id)
@@ -131,11 +152,11 @@ def get_all_user_answers(user_id, contest_id):
         raise NotFound('user_response.answers', 'for user %d' % user_id)
     answers = user_work.answers
     return {
-               "user_id": user_work.user_id,
-               "work_id": user_work.work_id,
-               "contest_id": user_work.contest_id,
-               "user_answers": answers
-           }
+        "user_id": user_work.user_id,
+        "work_id": user_work.work_id,
+        "contest_id": user_work.contest_id,
+        "user_answers": answers
+    }
 
 
 def get_mimetype(filetype):
@@ -157,7 +178,7 @@ def check_contest_duration(user_work: Response):
     time_spent = datetime.utcnow() - user_work.start_time
     if user_work.status == work_status['NotChecked'] or time_spent + five_minutes > contest_duration:
         finish_contest(user_work)
-        raise OlympiadTiming("Olympiad is over for current user")
+        raise OlympiadError("Olympiad is over for current user")
 
 
 def calculate_time_left(user_work: Response):
@@ -204,6 +225,9 @@ def check_user_work(user_work: Response):
 
 
 def is_contest_over(contest_id):
-    time = db_get_one_or_none(SimpleContest, 'contest_id', contest_id).end_date
+    simple_contest: SimpleContest = db_get_one_or_none(SimpleContest, 'contest_id', contest_id)
+    time = simple_contest.end_date
+    if simple_contest.holding_type == ContestHoldingTypeEnum.OfflineContest:
+        raise OlympiadError("Olympiad is offline type")
     if datetime.utcnow() < time:
-        raise OlympiadTiming("Olympiad is not over yet")
+        raise OlympiadError("Olympiad is not over yet")
