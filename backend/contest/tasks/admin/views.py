@@ -127,7 +127,7 @@ def online_location_create():
            }, 200
 
 
-@module.route('/location/create/russia', methods=['POST'],
+@module.route('/location/create_russia', methods=['POST'],
               input_schema=CreateRussiaLocationRequestTaskAdminSchema, output_schema=LocationResponseTaskAdminSchema)
 def location_create_russia():
     """

@@ -193,7 +193,7 @@ def change_user_location(id_contest):
 @module.route(
     '/contest/<int:id_contest>/user/all',
     methods=['GET'], output_schema=UsersResponseTaskControlUsersSchema)
-def users_all(id_contest):
+def get_all_users_in_contest(id_contest):
     """
     Get all users
     ---
@@ -229,7 +229,7 @@ def users_all(id_contest):
 @module.route(
     'contest/<int:id_contest>/user/<int:id_user>/certificate',
     methods=['GET'])
-def users_certificate(id_contest, id_user):
+def get_user_certificate_in_contest(id_contest, id_user):
     """
     Get certificate
     ---

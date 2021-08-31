@@ -23,7 +23,7 @@ app = get_current_app()
 @module.route(
     '/contest/<int:id_contest>/variant/self',
     methods=['GET'], output_schema=VariantSchema)
-def variant_self(id_contest):
+def get_variant_self(id_contest):
     """
     Get variant for user in current contest
     ---
@@ -133,7 +133,7 @@ def enroll_in_contest(id_contest):
 
 @module.route('/contest/<int:id_contest>/change_location', methods=['POST'],
               input_schema=EnrollRequestTaskParticipantSchema)
-def change_location_in_contest(id_contest):
+def change_user_location_in_contest(id_contest):
     """
     EChange user location
     ---
@@ -193,7 +193,7 @@ def change_location_in_contest(id_contest):
 @module.route(
     '/contest/<int:id_contest>/tasks/self',
     methods=['GET'], output_schema=AllTaskResponseTaskParticipantSchema)
-def task_all(id_contest):
+def get_all_tasks_self(id_contest):
     """
     Get tasks for user in current variant
     ---
@@ -223,7 +223,7 @@ def task_all(id_contest):
     """
 
     current_user = db_get_or_raise(UserInContest, "user_id", str(jwt_get_id()))
-    current_response = db_get_or_raise(Response, "user_id", str(jwt_get_id()))
+    # current_response = db_get_or_raise(Response, "user_id", str(jwt_get_id()))
 
     # TODO Show variant while contest IN PROGRESS -> MARAT
     # if current_response.statuses = ResponseStatusEnum.???
@@ -240,7 +240,7 @@ def task_all(id_contest):
 @module.route(
     '/contest/<int:id_contest>/tasks/<int:id_task>/image/self',
     methods=['GET'])
-def task_image(id_contest, id_task):
+def get_task_image_self(id_contest, id_task):
     """
     Get task image
     ---
@@ -299,7 +299,7 @@ def task_image(id_contest, id_task):
 @module.route(
     '/contest/<int:id_contest>/certificate/self',
     methods=['GET'])
-def users_certificate(id_contest):
+def get_user_certificate_self(id_contest):
     """
     Get user certificate
     ---
@@ -348,7 +348,7 @@ def users_certificate(id_contest):
 @module.route(
     '/olympiad/<int:id_olympiad>/stage/<int:id_stage>/contest/all',
     methods=['GET'], output_schema=AllOlympiadsResponseTaskUnauthorizedSchema)
-def contest_all_self(id_olympiad, id_stage):
+def get_all_contests_self(id_olympiad, id_stage):
     """
     Get all contests in stage
     ---
@@ -397,7 +397,7 @@ def contest_all_self(id_olympiad, id_stage):
 @module.route(
     '/olympiad/<int:id_olympiad>/stage/<int:id_stage>/contest/<int:id_contest>',
     methods=['GET'], output_schema=ContestSchema)
-def contest_self(id_olympiad, id_stage, id_contest):
+def get_contest_self(id_olympiad, id_stage, id_contest):
     """
     Get current contest in stage
     ---
