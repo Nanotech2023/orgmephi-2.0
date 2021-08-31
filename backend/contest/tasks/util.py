@@ -7,6 +7,7 @@ from common import get_current_app
 from common.errors import FileTooLarge, DataConflict
 from common.jwt_verify import jwt_get_id
 from contest.tasks.models import *
+from user.models import UserTypeEnum
 
 app = get_current_app()
 
@@ -82,6 +83,13 @@ def generate_variant(contest_id, user_id):
 
 
 # User module
+
+
+def is_stage_in_contest(current_olympiad, stage):
+    if current_olympiad.composite_type != ContestTypeEnum.CompositeContest or stage not in current_olympiad.stages:
+        raise InsufficientData('stage_id', 'not in current olympiad')
+    else:
+        return True
 
 
 def is_user_in_contest(user_id, current_contest):
@@ -409,3 +417,19 @@ def filter_olympiad_query(args):
 def validate_file_size(binary_file):
     if len(binary_file) > app.config['ORGMEPHI_MAX_FILE_SIZE']:
         raise FileTooLarge()
+
+
+def check_user_unfilled_for_enroll(current_user: User):
+    unfilled = current_user.unfilled()
+
+    if current_user.type == UserTypeEnum.university:
+        if len(unfilled) > 0:
+            raise InsufficientData('user.student_info', str(unfilled))
+        grade = TargetClassEnum("student")
+    elif current_user.type == UserTypeEnum.school:
+        if len(unfilled) > 0:
+            raise InsufficientData('user.school_info', str(unfilled))
+        grade = TargetClassEnum(str(current_user.school_info.grade))
+    else:
+        raise InsufficientData('type', "university or school")
+    return grade

@@ -12,7 +12,6 @@ from contest.tasks.model_schemas.olympiad import ContestSchema
 from contest.tasks.participant.schemas import *
 from contest.tasks.unauthorized.schemas import AllOlympiadsResponseTaskUnauthorizedSchema
 from contest.tasks.util import *
-from user.models import UserTypeEnum
 
 db = get_current_db()
 module = get_current_module()
@@ -52,6 +51,9 @@ def variant_self(id_contest):
         '404':
           description: User not found
     """
+
+    # TODO Show variant while contest IN PROGRESS -> MARAT
+    # if current_response.statuses = ResponseStatusEnum.???
 
     variant = get_user_variant_if_possible(id_contest)
     return variant, 200
@@ -93,37 +95,29 @@ def enroll_in_contest(id_contest):
 
     values = request.marshmallow
 
+    location_id = values.get('location_id', None)
+
+    user_id = jwt_get_id()
     current_contest: SimpleContest = get_contest_if_possible(id_contest)
     current_base_contest = get_base_contest(current_contest)
-    target_classes = current_base_contest.target_classes
 
+    # Can't enroll after deadline
     if datetime.utcnow().date() > current_contest.end_of_enroll_date:
         raise TimeOver("Time for enrolling is over")
 
-    location_id = values.get('location_id', None)
-    user_id = jwt_get_id()
-
+    # Can't add without location
     if location_id is not None:
         db_get_or_raise(OlympiadLocation, "location_id", location_id)
 
-    current_user: User = db_get_or_raise(User, "id", user_id)
-
-    unfilled = current_user.unfilled()
-
-    if current_user.type == UserTypeEnum.university:
-        if len(unfilled) > 0:
-            raise InsufficientData('user.student_info', str(unfilled))
-        grade = TargetClassEnum("student")
-    elif current_user.type == UserTypeEnum.school:
-        if len(unfilled) > 0:
-            raise InsufficientData('user.school_info', str(unfilled))
-        grade = TargetClassEnum(str(current_user.school_info.grade))
-    else:
-        raise InsufficientData('type', "university or school")
-
+    # User is already enrolled
     if is_user_in_contest(user_id, current_contest):
         raise AlreadyExists('user_id', str(user_id))
 
+    target_classes = current_base_contest.target_classes
+    current_user = db_get_or_raise(User, "id", user_id)
+    grade = check_user_unfilled_for_enroll(current_user)
+
+    # Wrong user class
     if grade not in target_classes:
         raise InsufficientData('base_contest_id', "current grade of user")
 
@@ -229,11 +223,9 @@ def task_all(id_contest):
     """
 
     current_user = db_get_or_raise(UserInContest, "user_id", str(jwt_get_id()))
-
-    # TODO Show task while contest in progress
-    # Wait for Marat's MR
     current_response = db_get_or_raise(Response, "user_id", str(jwt_get_id()))
 
+    # TODO Show variant while contest IN PROGRESS -> MARAT
     # if current_response.statuses = ResponseStatusEnum.???
 
     if current_user.completed_the_contest:
@@ -284,6 +276,9 @@ def task_image(id_contest, id_task):
     """
 
     current_user = db_get_or_raise(UserInContest, "user_id", str(jwt_get_id()))
+
+    # TODO Show variant while contest IN PROGRESS -> MARAT
+    # if current_response.statuses = ResponseStatusEnum.???
 
     if current_user.completed_the_contest:
         raise TimeOver("olympiad")
@@ -389,14 +384,14 @@ def contest_all_self(id_olympiad, id_stage):
     """
     current_olympiad = db_get_or_raise(Contest, "contest_id", str(id_olympiad))
     stage = db_get_or_raise(Stage, "stage_id", str(id_stage))
-    if current_olympiad.composite_type != ContestTypeEnum.CompositeContest or stage not in current_olympiad.stages:
-        raise InsufficientData('stage_id', 'not in current olympiad')
-    all_contest = [contest_
-                   for contest_ in stage.contests
-                   if is_user_in_contest(jwt_get_id(), contest_)]
-    return {
-               "contest_list": all_contest
-           }, 200
+
+    if is_stage_in_contest(current_olympiad, stage):
+        contest_list = [contest_
+                        for contest_ in stage.contests
+                        if is_user_in_contest(jwt_get_id(), contest_)]
+        return {
+                   "contest_list": contest_list
+               }, 200
 
 
 @module.route(
