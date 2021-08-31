@@ -1,5 +1,5 @@
 import { Component, OnInit, ViewChild } from '@angular/core'
-import { RequestRegistrationSchool, TypeUserInfo } from '@/auth/api/models'
+import { SchoolRegistrationRequestUser, User } from '@/auth/api/models'
 import { fixedHeight } from '@/shared/consts'
 import { AgGridAngular } from 'ag-grid-angular'
 import { ManageUsersStore } from '@/manage-users/manage-users.store'
@@ -24,7 +24,7 @@ export class ManageUsersComponent implements OnInit
     addUserVisible: boolean = false
     editUserVisible: boolean = false
     editingUser: any = null
-    users$: Observable<TypeUserInfo[]> = this.store.users$
+    users$: Observable<User[]> = this.store.users$
     @ViewChild( 'table_users' ) agGrid!: AgGridAngular
 
     constructor( private store: ManageUsersStore ) {}
@@ -34,7 +34,7 @@ export class ManageUsersComponent implements OnInit
         this.store.reload( true )
     }
 
-    onUserAdd( requestRegistration: RequestRegistrationSchool ): void
+    onUserAdd( requestRegistration: SchoolRegistrationRequestUser ): void
     {
         this.store.add( requestRegistration )
     }
@@ -58,12 +58,12 @@ export class ManageUsersComponent implements OnInit
         }
     }
 
-    onUserEdit( userInfo: TypeUserInfo ): void
+    onUserEdit( user: User ): void
     {
-        this.store.edit( userInfo )
+        this.store.edit( user )
     }
 
-    getRowNodeId( data: TypeUserInfo ): number | undefined
+    getRowNodeId( data: User ): number | undefined
     {
         return data.id
     }

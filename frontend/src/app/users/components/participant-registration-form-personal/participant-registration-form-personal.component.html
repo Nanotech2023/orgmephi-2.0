@@ -1,103 +1,103 @@
 <div class="container">
-    <ng-container *ngIf="userInfo$ | async as userInfo">
-        <ng-container *ngIf="personalInfo$ | async as personalInfo">
-            <fieldset class="form-group">
-                <legend>Личные данные</legend>
-                <div class="form-group row">
-                    <label class="col-sm-4 col-form-label">E-mail:</label>
-                    <div class="col-sm-4">
-                        <input class="form-control" disabled type="email" [value]="userInfo.username">
-                    </div>
+    <ng-container *ngIf="user$ | async as user">
+        <fieldset class="form-group">
+            <legend>Личные данные</legend>
+            <div class="form-group row">
+                <label class="col-sm-4 col-form-label">E-mail:</label>
+                <div class="col-sm-4">
+                    <input class="form-control" disabled type="email" [value]="user.username">
                 </div>
-                <br/>
-                <div class="form-group row">
-                    <label class="col-sm-4 col-form-label">Имя:</label>
-                    <div class="col-sm-4">
-                        <input class="form-control" disabled type="text" [value]="personalInfo.first_name">
-                    </div>
-                </div>
-                <br/>
-                <div class="form-group row">
-                    <label class="col-sm-4 col-form-label">Фамилия:</label>
-                    <div class="col-sm-4">
-                        <input class="form-control" disabled type="text" [value]="personalInfo.second_name">
-                    </div>
-                </div>
-                <br/>
-                <div class="form-group row">
-                    <label class="col-sm-4 col-form-label">Отчество:</label>
-                    <div class="col-sm-4">
-                        <input class="form-control" disabled type="text" [value]="personalInfo.middle_name">
-                    </div>
-                </div>
-                <br/>
-                <div class="form-group row">
-                    <label class="col-sm-4 col-form-label">Дата рождения:</label>
-                    <div class="col-sm-4">
-                        <input class="form-control" disabled type="date" [value]="personalInfo.date_of_birth">
-                    </div>
-                </div>
-                <br/>
-                <div class="form-group row">
-                    <label class="col-sm-4 col-form-label">Место рождения <span class="accent_red">*</span>:</label>
-                    <div class="col-sm-4">
+            </div>
+            <br/>
+<!--            <ng-container *ngIf="personalInfo$ | async as personalInfo">-->
+<!--                <div class="form-group row">-->
+<!--                    <label class="col-sm-4 col-form-label">Имя:</label>-->
+<!--                    <div class="col-sm-4">-->
+<!--                        <input class="form-control" disabled type="text" [value]="personalInfo.first_name">-->
+<!--                    </div>-->
+<!--                </div>-->
+<!--                <br/>-->
+<!--                <div class="form-group row">-->
+<!--                    <label class="col-sm-4 col-form-label">Фамилия:</label>-->
+<!--                    <div class="col-sm-4">-->
+<!--                        <input class="form-control" disabled type="text" [value]="personalInfo.second_name">-->
+<!--                    </div>-->
+<!--                </div>-->
+<!--                <br/>-->
+<!--                <div class="form-group row">-->
+<!--                    <label class="col-sm-4 col-form-label">Отчество:</label>-->
+<!--                    <div class="col-sm-4">-->
+<!--                        <input class="form-control" disabled type="text" [value]="personalInfo.middle_name">-->
+<!--                    </div>-->
+<!--                </div>-->
+<!--                <br/>-->
+<!--                <div class="form-group row">-->
+<!--                    <label class="col-sm-4 col-form-label">Дата рождения:</label>-->
+<!--                    <div class="col-sm-4">-->
+<!--                        <input class="form-control" disabled type="date" [value]="personalInfo.date_of_birth">-->
+<!--                    </div>-->
+<!--                </div>-->
+<!--            </ng-container>-->
+            <br/>
+            <div class="form-group row">
+                <label class="col-sm-4 col-form-label">Место рождения <span class="accent_red">*</span>:</label>
+                <div class="col-sm-4">
                 <textarea class="form-control" type="text" rows="6" required [(ngModel)]="participant.birthPlace"
                           #birthPlace="ngModel" name="birthPlace"></textarea>
-                        <div *ngIf="birthPlace.invalid && (birthPlace.dirty || birthPlace.touched)"
-                             class="alert alert-danger">
-                            <div *ngIf="birthPlace.errors?.required">
-                                Поле обязательно для заполнения
-                            </div>
+                    <div *ngIf="birthPlace.invalid && (birthPlace.dirty || birthPlace.touched)"
+                         class="alert alert-danger">
+                        <div *ngIf="birthPlace.errors?.required">
+                            Поле обязательно для заполнения
                         </div>
                     </div>
                 </div>
-                <br/>
-                <div class="form-group row">
-                    <label class="col-sm-4 col-form-label">Пол <span class="accent_red">*</span>:</label>
-                    <div class="col-sm-4">
-                        <select class="form-select" required [(ngModel)]="participant.gender"
-                                name="email">
-                            <option *ngFor="let gender of genderOptions" [ngValue]="gender"
-                                    [selected]="participant.gender == gender">
-                                {{gender}}
-                            </option>
-                        </select>
-                    </div>
+            </div>
+            <br/>
+            <div class="form-group row">
+                <label class="col-sm-4 col-form-label">Пол <span class="accent_red">*</span>:</label>
+                <div class="col-sm-4">
+                    <select class="form-select" required [(ngModel)]="participant.gender"
+                            name="email">
+                        <option *ngFor="let gender of genderOptions" [ngValue]="gender"
+                                [selected]="participant.gender == gender">
+                            {{gender}}
+                        </option>
+                    </select>
                 </div>
-                <br/>
-                <div class="form-group row">
-                    <label class="col-sm-4 col-form-label">Гражданство <span class="accent_red">*</span>:</label>
-                    <div class="col-sm-4">
-                        <select class="form-select" required [(ngModel)]="participant.country"
-                                name="email">
-                            <option *ngFor="let country of countriesList" [ngValue]="country"
-                                    [selected]="participant.country == country">
-                                {{country}}
-                            </option>
-                        </select>
-                    </div>
+            </div>
+            <br/>
+            <div class="form-group row">
+                <label class="col-sm-4 col-form-label">Гражданство <span class="accent_red">*</span>:</label>
+                <div class="col-sm-4">
+                    <select class="form-select" required [(ngModel)]="participant.country"
+                            name="email">
+                        <option *ngFor="let country of countriesList" [ngValue]="country"
+                                [selected]="participant.country == country">
+                            {{country}}
+                        </option>
+                    </select>
                 </div>
-                <br/>
-                <div class="form-group row">
-                    <label class="col-sm-4 col-form-label">Номер сотового телефона <span
-                        class="accent_red">*</span>:</label>
-                    <div class="col-sm-4">
-                        <input class="form-control" type="tel" [pattern]="'[- +()0-9]+'" required
-                               [(ngModel)]="participant.phoneNumber"
-                               name="phoneNumber" #phoneNumber="ngModel" #phone>
-                        <div *ngIf="phoneNumber.invalid && (phoneNumber.dirty || phoneNumber.touched)"
-                             class="alert alert-danger">
-                            <div *ngIf="phoneNumber?.errors?.required">
-                                Поле обязательно для заполнения
-                            </div>
-                            <div *ngIf="phoneNumber?.errors?.pattern">
-                                Введено некорректное значение
-                            </div>
+            </div>
+            <br/>
+            <div class="form-group row">
+                <label class="col-sm-4 col-form-label">Номер сотового телефона <span
+                    class="accent_red">*</span>:</label>
+                <div class="col-sm-4">
+                    <input class="form-control" type="tel" [pattern]="'[- +()0-9]+'" required
+                           [(ngModel)]="participant.phoneNumber"
+                           name="phoneNumber" #phoneNumber="ngModel" #phone>
+                    <div *ngIf="phoneNumber.invalid && (phoneNumber.dirty || phoneNumber.touched)"
+                         class="alert alert-danger">
+                        <div *ngIf="phoneNumber?.errors?.required">
+                            Поле обязательно для заполнения
+                        </div>
+                        <div *ngIf="phoneNumber?.errors?.pattern">
+                            Введено некорректное значение
                         </div>
                     </div>
                 </div>
-            </fieldset>
-        </ng-container>
+            </div>
+        </fieldset>
     </ng-container>
 </div>
 

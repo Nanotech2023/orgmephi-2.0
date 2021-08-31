@@ -1,15 +1,8 @@
-import { Component, ElementRef, EventEmitter, Input, OnInit, Output, ViewChild } from '@angular/core'
-import { Agreements } from '@/auth/agreements'
-import {
-    RequestRegistrationSchool,
-    TypeRegistrationPersonalInfo,
-    TypeUserType,
-    TypeUserTypeSchool
-} from '@/auth/api/models'
-import { Store } from '@ngrx/store'
-import { AuthState } from '@/auth/store'
+import { Component, ElementRef, EventEmitter, Input, Output, ViewChild } from '@angular/core'
+import { SchoolRegistrationRequestUser, TypeRequestUser } from '@/auth/api/models'
 
 
+// @ts-nocheck
 @Component( {
     selector: 'app-add-user-modal',
     templateUrl: './add-user-modal.component.html',
@@ -18,17 +11,18 @@ import { AuthState } from '@/auth/store'
         '(document:click)': 'onClick($event)'
     }
 } )
+// @ts-check
 export class AddUserModalComponent
 {
     @Input() modalVisible!: boolean
     @Output() modalVisibleChange: EventEmitter<boolean> = new EventEmitter<boolean>()
-    @Output() userAdd: EventEmitter<RequestRegistrationSchool> = new EventEmitter<RequestRegistrationSchool>()
+    @Output() userAdd: EventEmitter<SchoolRegistrationRequestUser> = new EventEmitter<SchoolRegistrationRequestUser>()
     @ViewChild( 'modal' ) modal!: ElementRef
 
-    registerTypes: TypeUserTypeSchool[] = [ TypeUserTypeSchool.PreUniversity, TypeUserTypeSchool.School, TypeUserTypeSchool.Enrollee ]
-    registerAttempt: RequestRegistrationSchool // TODO support RequestRegistrationUniversity
+    registerTypes: SchoolRegistrationRequestUser.RegisterTypeEnum[] = [ SchoolRegistrationRequestUser.RegisterTypeEnum.PreUniversity, SchoolRegistrationRequestUser.RegisterTypeEnum.School, SchoolRegistrationRequestUser.RegisterTypeEnum.Enrollee ]
+    registerAttempt: SchoolRegistrationRequestUser // TODO support RequestRegistrationUniversity
     isRegistered: boolean
-    selectedUserType: TypeUserType | null
+    selectedUserType: TypeRequestUser.TypeEnum | null
     hasRegisterNumber: boolean
     agreementAccepted: boolean
 
@@ -46,17 +40,17 @@ export class AddUserModalComponent
         this.hasRegisterNumber = false
     }
 
-    selectRegisterType( userType: TypeUserTypeSchool ): void
+    selectRegisterType( userType: SchoolRegistrationRequestUser.RegisterTypeEnum ): void
     {
         this.selectedUserType = userType
     }
 
     isAvailable(): boolean
     {
-        return this.selectedUserType !== null && this.selectedUserType == TypeUserTypeSchool.School
+        return this.selectedUserType !== null && this.selectedUserType == TypeRequestUser.TypeEnum.School
     }
 
-    isValid( registration: RequestRegistrationSchool ): boolean
+    isValid( registration: SchoolRegistrationRequestUser ): boolean
     {
         return !!( this.registerAttempt.personal_info.date_of_birth && this.registerAttempt.personal_info.first_name &&
             this.registerAttempt.personal_info.middle_name &&
@@ -66,14 +60,14 @@ export class AddUserModalComponent
         )
     }
 
-    register( registerUser: RequestRegistrationSchool ): void
+    register( registerUser: SchoolRegistrationRequestUser ): void
     {
         this.isRegistered = true
         this.userAdd.emit( registerUser )
     }
 
 
-    onClick( $event: any )
+    onClick( $event: any ): void
     {
         if ( $event.target == this.modal?.nativeElement )
             this.modalVisible = false

@@ -1,6 +1,5 @@
-import { Component, ElementRef, EventEmitter, Input, OnInit, Output, ViewChild } from '@angular/core'
-import { TypeRegistrationPersonalInfo, TypeUserInfo, TypeUserRole, TypeUserTypeSchool } from '@/auth/api/models'
-import { AuthService } from '@/auth/api/auth.service'
+import { Component, ElementRef, EventEmitter, Input, Output, ViewChild } from '@angular/core'
+import { User } from '@/auth/api/models'
 
 
 @Component( {
@@ -11,32 +10,21 @@ import { AuthService } from '@/auth/api/auth.service'
         '(document:click)': 'onClick($event)'
     }
 } )
-export class EditUserModalComponent implements OnInit
+export class EditUserModalComponent
 {
     @Input() modalVisible!: boolean
-    @Input() user!: TypeUserInfo
+    @Input() user!: User
     @Output() modalVisibleChange: EventEmitter<boolean> = new EventEmitter<boolean>()
-    @Output() userEdit: EventEmitter<TypeUserInfo> = new EventEmitter<TypeUserInfo>()
+    @Output() userEdit: EventEmitter<User> = new EventEmitter<User>()
     @ViewChild( 'modal' ) modal!: ElementRef
 
-    registerTypes: TypeUserTypeSchool[] = [ TypeUserTypeSchool.PreUniversity, TypeUserTypeSchool.School, TypeUserTypeSchool.Enrollee ]
-    roles: TypeUserRole[] = [ TypeUserRole.Admin, TypeUserRole.Creator, TypeUserRole.System, TypeUserRole.Participant ]
-
-
-    constructor( private readonly service: AuthService ) { }
-
-    ngOnInit(): void
-    {
-    }
+    registerTypes: User.TypeEnum[] = [ User.TypeEnum.PreUniversity, User.TypeEnum.School, User.TypeEnum.Enrollee ]
+    roles: User.RoleEnum[] = [ User.RoleEnum.Admin, User.RoleEnum.Creator, User.RoleEnum.System, User.RoleEnum.Participant ]
 
     confirm()
     {
         if ( !!( this.user ) )
         {
-            // // @ts-ignore
-            // this.service.userUserIdRolePut( this.user.id, { role: this.user.role } )
-            // // @ts-ignore
-            // this.service.userUserIdTypePut( this.user.id, { type: this.user.type } )
             this.userEdit.emit( this.user )
         }
 

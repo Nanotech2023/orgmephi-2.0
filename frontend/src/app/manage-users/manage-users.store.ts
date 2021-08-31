@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core'
 import { ComponentStore, tapResponse } from '@ngrx/component-store'
-import { RequestRegistrationSchool, ResponseUserAll, TypeUserInfo } from '@/auth/api/models'
+import { SchoolRegistrationRequestUser, User, UserListResponseUser } from '@/auth/api/models'
 import { EMPTY, Observable } from 'rxjs'
 import { catchError, concatMap } from 'rxjs/operators'
 import { AuthService } from '@/auth/api/auth.service'
@@ -9,7 +9,7 @@ import { CallState, getError, LoadingState } from '@/shared/callState'
 
 export interface ManageUsersState
 {
-    users: Array<TypeUserInfo>
+    users: Array<User>
     callState: CallState
 }
 
@@ -22,7 +22,7 @@ export class ManageUsersStore extends ComponentStore<ManageUsersState>
         super( { users: [], callState: LoadingState.INIT } )
     }
 
-    readonly users$: Observable<TypeUserInfo[]> = this.select( state => state.users )
+    readonly users$: Observable<User[]> = this.select( state => state.users )
     private readonly loading$: Observable<boolean> = this.select( state => state.callState === LoadingState.LOADING )
     private readonly error$: Observable<string | null> = this.select( state => getError( state.callState ) )
 
@@ -45,11 +45,11 @@ export class ManageUsersStore extends ComponentStore<ManageUsersState>
             callState: LoadingState.LOADED
         } ) )
 
-    readonly updateUsers = this.updater( ( state: ManageUsersState, userInfo: TypeUserInfo ) =>
+    readonly updateUsers = this.updater( ( state: ManageUsersState, user: User ) =>
         ( {
             ...state,
             error: "",
-            users: [ ...state.users, userInfo ]
+            users: [ ...state.users, user ]
         } ) )
 
     // EFFECTS
@@ -58,9 +58,9 @@ export class ManageUsersStore extends ComponentStore<ManageUsersState>
             concatMap( ( dummy: boolean ) =>
                 {
                     this.setLoading()
-                    return this.authService.userAllGet().pipe(
+                    return this.authService.userCreatorUserAllGet().pipe(
                         tapResponse(
-                            ( response: ResponseUserAll ) =>
+                            ( response: UserListResponseUser ) =>
                                 this.setState( { users: response.users, callState: LoadingState.LOADED } ),
                             ( error: string ) => this.updateError( error )
                         ),
@@ -71,17 +71,17 @@ export class ManageUsersStore extends ComponentStore<ManageUsersState>
         ) )
 
 
-    readonly add = this.effect( ( requestRegistration$: Observable<RequestRegistrationSchool> ) =>
+    readonly add = this.effect( ( requestRegistration$: Observable<SchoolRegistrationRequestUser> ) =>
         requestRegistration$.pipe(
-            concatMap( ( requestRegistration: RequestRegistrationSchool ) =>
+            concatMap( ( requestRegistration: SchoolRegistrationRequestUser ) =>
             {
                 this.setLoading()
-                return this.authService.registerSchoolPost( requestRegistration ).pipe(
+                return this.authService.userRegistrationSchoolPost( requestRegistration ).pipe(
                     tapResponse(
-                        typeUserInfo =>
+                        ( user: User ) =>
                         {
                             this.setLoaded()
-                            this.updateUsers( typeUserInfo )
+                            this.updateUsers( user )
                         },
                         ( error: string ) => this.updateError( error )
                     ),
@@ -90,15 +90,15 @@ export class ManageUsersStore extends ComponentStore<ManageUsersState>
             } )
         ) )
 
-    readonly edit = this.effect( ( userInfo$: Observable<TypeUserInfo> ) =>
-        userInfo$.pipe(
-            concatMap( ( userInfo: TypeUserInfo ) =>
+    readonly edit = this.effect( ( user$: Observable<User> ) =>
+        user$.pipe(
+            concatMap( ( user: User ) =>
             {
                 this.setLoading()
                 // @ts-ignore
-                return this.authService.userUserIdPersonalPatch( userInfo ).pipe(
+                return this.authService.userAdminSchoolUserIdPatch( user ).pipe(
                     tapResponse(
-                        typeUserInfo =>
+                        ( typeUserInfo ) =>
                         {
                             this.setLoaded()
                             this.updateUsers( typeUserInfo )

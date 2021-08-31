@@ -3,7 +3,7 @@ import { ManageOlympiadsStore } from '@/manage-olympiads/manage-olympiads.store'
 import { ContestsInStageContestsList } from '@/manage-olympiads/api/models'
 import { Observable } from 'rxjs'
 import { fixedHeight } from '@/shared/consts'
-import { TypeUserInfo } from '@/auth/api/models'
+import { User } from '@/auth/api/models'
 
 
 @Component( {
@@ -37,7 +37,7 @@ export class ManageOlympiadsComponent implements OnInit
         this.store.reload( true )
     }
 
-    getRowNodeId( data: TypeUserInfo ): number | undefined
+    getRowNodeId( data: User ): number | undefined
     {
         return data.id
     }
