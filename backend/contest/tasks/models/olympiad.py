@@ -180,7 +180,11 @@ class Contest(db.Model):
 
 
 def add_simple_contest(db_session,
-                       visibility, start_date, end_date, result_publication_date=None,
+                       visibility,
+                       start_date,
+                       end_date,
+                       result_publication_date=None,
+                       end_of_enroll_date=None,
                        holding_type=None,
                        previous_contest_id=None,
                        previous_participation_condition=None,
@@ -195,6 +199,7 @@ def add_simple_contest(db_session,
         end_date=end_date,
         holding_type=holding_type,
         result_publication_date=result_publication_date,
+        end_of_enroll_date=end_of_enroll_date,
         previous_contest_id=previous_contest_id,
         previous_participation_condition=previous_participation_condition,
     )
@@ -207,13 +212,16 @@ class SimpleContest(Contest):
     Simple contest model.
 
     contest_id: id of contest
+
     start_date: start date of contest
+    end_of_enroll_date: end of enroll date
     end_date: end date of contest
+    result_publication_date: result publication date
+
     location: location of the olympiad
     previous_contest_id: previous contest id
     previous_participation_condition: previous participation condition
     contest_duration: previous duration of the contest
-    result_publication_date: result publication date
     variants: variants
     next_contest: next contests
 
@@ -221,10 +229,11 @@ class SimpleContest(Contest):
     __tablename__ = 'simple_contest'
 
     contest_id = db.Column(db.Integer, db.ForeignKey('contest.contest_id'), primary_key=True)
+
     start_date = db.Column(db.DateTime, index=True, default=datetime.utcnow)
     end_date = db.Column(db.DateTime, index=True, default=datetime.utcnow)
-
     result_publication_date = db.Column(db.DateTime, nullable=True)
+    end_of_enroll_date = db.Column(db.DateTime, nullable=True)
 
     contest_duration = db.Column(db.Interval, nullable=True)
 

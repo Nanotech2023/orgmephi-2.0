@@ -53,14 +53,16 @@ class CreateCompositeContestRequestTaskCreatorSchema(Schema):
 
 class ContestResponseTaskCreatorSchema(Schema):
     contest_id = fields.Int(required=True)
+    holding_type = EnumField(ContestHoldingTypeEnum, required=False, by_value=True)
     location = common_fields.Location(required=False)
     start_date = fields.DateTime(required=False)
+    end_of_enroll_date = fields.DateTime(required=False)
     end_date = fields.DateTime(required=False)
+    result_publication_date = fields.DateTime(required=False)
     contest_duration = fields.TimeDelta(required=False)
     visibility = fields.Boolean(required=True)
     previous_contest_id = fields.Int(required=False)
     previous_participation_condition = EnumField(UserStatusEnum, required=False, by_value=True)
-    holding_type = EnumField(ContestHoldingTypeEnum, required=False, by_value=True)
 
 
 class ContestIdResponseTaskCreatorSchema(Schema):

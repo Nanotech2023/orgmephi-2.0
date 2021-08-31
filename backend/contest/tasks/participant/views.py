@@ -5,6 +5,7 @@ from flask import send_file, request
 from common import get_current_module
 from common.errors import AlreadyExists, TimeOver, InsufficientData
 from common.util import send_pdf
+from contest.responses.models import Response
 from contest.responses.util import get_user_in_contest_work
 from contest.tasks.model_schemas.contest import VariantSchema
 from contest.tasks.model_schemas.olympiad import ContestSchema
@@ -92,6 +93,13 @@ def enroll_in_contest(id_contest):
 
     values = request.marshmallow
 
+    current_contest: SimpleContest = get_contest_if_possible(id_contest)
+    current_base_contest = get_base_contest(current_contest)
+    target_classes = current_base_contest.target_classes
+
+    if datetime.utcnow().date() > current_contest.end_of_enroll_date:
+        raise TimeOver("Time for enrolling is over")
+
     location_id = values.get('location_id', None)
     user_id = jwt_get_id()
 
@@ -112,10 +120,6 @@ def enroll_in_contest(id_contest):
         grade = TargetClassEnum(str(current_user.school_info.grade))
     else:
         raise InsufficientData('type', "university or school")
-
-    current_contest = get_contest_if_possible(id_contest)
-    current_base_contest = get_base_contest(current_contest)
-    target_classes = current_base_contest.target_classes
 
     if is_user_in_contest(user_id, current_contest):
         raise AlreadyExists('user_id', str(user_id))
@@ -169,10 +173,19 @@ def change_location_in_contest(id_contest):
     location_id = values.get('location_id', None)
     user_id = jwt_get_id()
 
+    current_contest: SimpleContest = get_contest_if_possible(id_contest)
+
+    if datetime.utcnow().date() > current_contest.end_of_enroll_date:
+        raise TimeOver("Time for enrolling is over")
+
     if location_id is not None:
         db_get_or_raise(OlympiadLocation, "location_id", location_id)
 
-    current_user: User = db_get_or_raise(User, "id", user_id)
+    current_user = current_contest.users.filter_by(
+        **{
+            "user_id": str(user_id)
+        }
+    ).one_or_none()
 
     current_user.location_id = location_id
 
@@ -216,6 +229,12 @@ def task_all(id_contest):
     """
 
     current_user = db_get_or_raise(UserInContest, "user_id", str(jwt_get_id()))
+
+    # TODO Show task while contest in progress
+    # Wait for Marat's MR
+    current_response = db_get_or_raise(Response, "user_id", str(jwt_get_id()))
+
+    # if current_response.statuses = ResponseStatusEnum.???
 
     if current_user.completed_the_contest:
         raise TimeOver("olympiad")
