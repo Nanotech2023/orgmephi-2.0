@@ -32,6 +32,16 @@ class OrgMephiTestingClient:
         self._refresh_csrf = resp.json.get('csrf_refresh_token', None)
         return resp
 
+    def fake_login(self, username: str = 'school', role: str = 'Participant', user_id: int = 1):
+        from flask_jwt_extended import create_access_token, create_refresh_token, get_csrf_token
+        access_token = create_access_token(identity=user_id, additional_claims={"name": username, "role": role})
+        refresh_token = create_refresh_token(identity=user_id,
+                                             additional_claims={"remember": False, "orig_sub": user_id})
+        self.client.set_cookie('', 'access_token_cookie', access_token)
+        self.client.set_cookie('', 'refresh_token_cookie', refresh_token)
+        self._access_csrf = get_csrf_token(access_token)
+        self._refresh_csrf = get_csrf_token(refresh_token)
+
     def logout(self, *args, **kwargs):
         kwargs = self._add_csrf_token(False, kwargs)
         resp = self._client.post(*args, **kwargs)
