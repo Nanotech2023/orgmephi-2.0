@@ -25,8 +25,9 @@ class OrgMephiTestingClient:
     def client(self):
         return self._client
 
-    def login(self, *args, **kwargs):
-        resp = self._client.post(*args, **kwargs)
+    def login(self, url, username, password, remember_me=False, **kwargs):
+        json = {'username': username, 'password': password, 'remember_me': remember_me}
+        resp = self._client.post(url, json=json, **kwargs)
         self._access_csrf = resp.json.get('csrf_access_token', None)
         self._refresh_csrf = resp.json.get('csrf_refresh_token', None)
         return resp
