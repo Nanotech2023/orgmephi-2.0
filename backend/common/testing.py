@@ -9,6 +9,10 @@ from common import OrgMephiApp, OrgMephiModule
 class OrgMephiTestingClient:
 
     def __init__(self, client: FlaskClient):
+        """
+        Initialize test client
+        :param client: Flask test client (app.test_client())
+        """
         self._client: FlaskClient = client
         self._access_csrf = None
         self._refresh_csrf = None
@@ -23,9 +27,22 @@ class OrgMephiTestingClient:
 
     @property
     def client(self):
+        """
+        Get stored flask test client
+        :return: Flask test client
+        """
         return self._client
 
     def login(self, url, username, password, remember_me=False, **kwargs):
+        """
+        Login with auth server
+        :param url: URL for login
+        :param username: Name of the user to login as
+        :param password: User's password
+        :param remember_me: Remember me flag
+        :param kwargs: Additional arguments passed to FlaskClient.post
+        :return: response object
+        """
         json = {'username': username, 'password': password, 'remember_me': remember_me}
         resp = self._client.post(url, json=json, **kwargs)
         self._access_csrf = resp.json.get('csrf_access_token', None)
@@ -33,6 +50,14 @@ class OrgMephiTestingClient:
         return resp
 
     def fake_login(self, username: str = 'school', role: str = 'Participant', user_id: int = 1):
+        """
+        Login without an auth server (for testing most of the modules)
+        Login will always be successful regardless of server's state, thus user's name and role may differ from actual
+            data stored on server
+        :param username: Name of the user to login as
+        :param role: User's role
+        :param user_id: User's id
+        """
         from flask_jwt_extended import create_access_token, create_refresh_token, get_csrf_token
         access_token = create_access_token(identity=user_id, additional_claims={"name": username, "role": role})
         refresh_token = create_refresh_token(identity=user_id,
@@ -43,6 +68,12 @@ class OrgMephiTestingClient:
         self._refresh_csrf = get_csrf_token(refresh_token)
 
     def logout(self, *args, **kwargs):
+        """
+        Logout from server
+        :param args: args passed to FlaskClient.post
+        :param kwargs: kwargs passed to FlaskClient.post
+        :return: response object
+        """
         kwargs = self._add_csrf_token(False, kwargs)
         resp = self._client.post(*args, **kwargs)
         self._access_csrf = None
@@ -50,6 +81,12 @@ class OrgMephiTestingClient:
         return resp
 
     def refresh(self, *args, **kwargs):
+        """
+        Refresh login information
+        :param args: args passed to FlaskClient.post
+        :param kwargs: kwargs passed to FlaskClient.post
+        :return: response object
+        """
         kwargs = self._add_csrf_token(True, kwargs)
         resp = self._client.post(*args, **kwargs)
         self._access_csrf = resp.json.get('csrf_access_token', None)
@@ -57,21 +94,36 @@ class OrgMephiTestingClient:
         return resp
 
     def get(self, *args, **kwargs):
+        """
+        See FlaskClient.get
+        """
         return self._client.get(*args, **kwargs)
 
     def post(self, *args, **kwargs):
+        """
+        See FlaskClient.post
+        """
         kwargs = self._add_csrf_token(False, kwargs)
         return self._client.post(*args, **kwargs)
 
     def put(self, *args, **kwargs):
+        """
+        See FlaskClient.put
+        """
         kwargs = self._add_csrf_token(False, kwargs)
         return self._client.put(*args, **kwargs)
 
     def delete(self, *args, **kwargs):
+        """
+        See FlaskClient.delete
+        """
         kwargs = self._add_csrf_token(False, kwargs)
         return self._client.delete(*args, **kwargs)
 
     def patch(self, *args, **kwargs):
+        """
+        See FlaskClient.patch
+        """
         kwargs = self._add_csrf_token(False, kwargs)
         return self._client.patch(*args, **kwargs)
 
@@ -90,6 +142,15 @@ def _generate_users(app):
 
 
 def get_test_app(module: OrgMephiModule, config: Optional[object], service_name: Optional[str] = None):
+    """
+    Generate application for testing
+    :param module: Top-level module
+    :param config: Configuration class, defaults to DefaultTestConfiguration
+    :param service_name: Name of the service, defaults to module.name
+    :return: OrgMephiApp object
+    """
+    if config is None:
+        config = DefaultTestConfiguration()
     if service_name is None:
         service_name = module.name
     app = OrgMephiApp(service_name, module, security=True, test_config=config)
@@ -101,6 +162,9 @@ def get_test_app(module: OrgMephiModule, config: Optional[object], service_name:
 
 
 class DefaultTestConfiguration:
+    """
+    Default configuration for tests
+    """
     SQLALCHEMY_DATABASE_URI = "sqlite:///:memory:"
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     ORGMEPHI_API_PATH = 'api'
