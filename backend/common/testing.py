@@ -80,6 +80,15 @@ class OrgMephiTestingClient:
         self._refresh_csrf = None
         return resp
 
+    def fake_logout(self):
+        """
+        Logout without an auth server (for testing most of the modules)
+        """
+        self.client.delete_cookie('', 'access_token_cookie')
+        self.client.delete_cookie('', 'refresh_token_cookie')
+        self._access_csrf = None
+        self._refresh_csrf = None
+
     def refresh(self, *args, **kwargs):
         """
         Refresh login information
