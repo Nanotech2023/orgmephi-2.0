@@ -209,7 +209,7 @@ class DefaultTestConfiguration:
     MAIL_USE_SSL = False
     MAIL_USERNAME = None
     MAIL_PASSWORD = None
-    MAIL_DEFAULT_SENDER = None
+    MAIL_DEFAULT_SENDER = 'default@example.org'
     ORGMEPHI_MAIL_CONFIRM_KEY = b'\r\xa2\x96\xef\t\x8c\xfe\xa8\x83\xb5\x89\x10\xf4i\x9cL'
     ORGMEPHI_MAIL_CONFIRM_SALT = b'\xcd\x985a\xd5^:-\xcd\x01\xbdN\xac\x9e\xec\xd5'
     ORGMEPHI_MAIL_CONFIRM_EXPIRATION = timedelta(days=1)
