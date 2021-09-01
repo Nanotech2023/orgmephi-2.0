@@ -47,4 +47,4 @@ class UserAnswerMarkResponseSchema(Schema):
 
 
 class UserTimeResponseRequestSchema(Schema):
-    time = fields.TimeDelta(required=True)
+    time = fields.TimeDelta(required=True, nullable=False)

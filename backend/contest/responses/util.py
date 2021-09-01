@@ -1,5 +1,4 @@
-from messages.models import Thread, ThreadStatus
-from .creator.views import db
+from common import get_current_db
 from .model_schemas.schemas import PlainAnswerTextSchema, RangeAnswerSchema
 from datetime import datetime, timedelta
 from common.errors import NotFound, RequestError
@@ -11,6 +10,7 @@ from .models import Response, PlainAnswerText, RangeAnswer, MultipleChoiceAnswer
     add_multiple_answer
 from ..tasks.util import validate_file_size
 
+db = get_current_db()
 five_minutes = timedelta(minutes=5)
 
 
@@ -38,18 +38,15 @@ def get_user_in_contest_work(user_id, contest_id):
     return user_work
 
 
-def user_answer_get_file(user_id, contest_id, task_id):
-    user_work = get_user_in_contest_work(user_id, contest_id)
-    if len(user_work.answers) == 0:
-        raise NotFound('user_response.answers', 'for user %d' % user_id)
-    user_answer = db_get_one_or_none(PlainAnswerFile, 'task_id', task_id)
-    if user_answer is None:
-        raise NotFound('plain_task_file', 'for task_id %d' % task_id)
+def get_answer_by_task_id_and_work_id(model, task_id, work_id):
+    user_answer = model.query.filter_by(**{"task_id": task_id,
+                                           "work_id": work_id}).one_or_none()
     return user_answer
 
 
 models_dict = {
     'PlainAnswerText': PlainAnswerText,
+    'PlainAnswerFile': PlainAnswerFile,
     'RangeAnswer': RangeAnswer,
     'MultipleChoiceAnswer': MultipleChoiceAnswer
 }
@@ -57,18 +54,20 @@ models_dict = {
 
 def user_answer_get(user_id, contest_id, task_id):
     user_work = get_user_in_contest_work(user_id, contest_id)
-    if len(user_work.answers) == 0:
+    if len(user_work.answers.all()) == 0:
         raise NotFound('user_response.answers', 'for user %d' % user_id)
-    base_answer: BaseAnswer = db_get_one_or_none(BaseAnswer, 'task_id', task_id)
+    base_answer: BaseAnswer = get_answer_by_task_id_and_work_id(BaseAnswer, task_id, user_work.work_id)
     if base_answer is None:
-        raise NotFound('answer', 'for task_id %d' % task_id)
-    user_answer = db_get_one_or_none(models_dict.get(base_answer.answer_type), 'task_id', task_id)
+        raise NotFound('No answer', 'for task_id %d' % task_id)
+    user_answer = db_get_one_or_none(models_dict.get(base_answer.answer_type.value), 'answer_id', base_answer.answer_id)
     return user_answer
 
 
 def check_task_type(task_id, task_type):
     task = None
-    if task_type == answer_dict['Plain']:
+    if task_type == answer_dict['PlainAnswerFile']:
+        task = db_get_one_or_none(PlainTask, "task_id", task_id)
+    elif task_type == answer_dict['PlainAnswerText']:
         task = db_get_one_or_none(PlainTask, "task_id", task_id)
     elif task_type == answer_dict['RangeAnswer']:
         task = db_get_one_or_none(RangeTask, "task_id", task_id)
@@ -79,7 +78,7 @@ def check_task_type(task_id, task_type):
 
 
 def finish_contest(user_work: Response):
-    user_work.status = work_status['NotChecked']
+    user_work.work_status = work_status['NotChecked']
     user_in_contest: UserInContest = UserInContest.query.filter_by(**{"contest_id": user_work.contest_id,
                                                                       "user_id": user_work.user_id}).one_or_none()
     user_in_contest.completed_the_contest = True
@@ -88,7 +87,10 @@ def finish_contest(user_work: Response):
 
 def check_contest_time_left(contest_id):
     simple_contest: SimpleContest = db_get_one_or_none(SimpleContest, 'contest_id', contest_id)
-    if datetime.utcnow() + simple_contest.contest_duration > simple_contest.end_date:
+    duration = simple_contest.contest_duration
+    if duration is None:
+        duration = timedelta(seconds=0)
+    if datetime.utcnow() + duration > simple_contest.end_date:
         raise OlympiadError("Olympiad is over")
 
 
@@ -131,14 +133,14 @@ def user_answer_post(user_id, contest_id, task_id, values, answer_type):
         user_work = add_user_response(db.session, user_id, contest_id)
     check_contest_duration(user_work)
     user_work.finish_time = datetime.utcnow()
-    answer = db_get_one_or_none(models_dict.get(answer_type), 'task_id', task_id)
-    if answer is None:
+    user_answer = get_answer_by_task_id_and_work_id(models_dict.get(answer_type), task_id, user_work.work_id)
+    if user_answer is None:
         funcs_dict.get(answer_type)(user_work.work_id, task_id, values)
     else:
         if answer_type != 'MultipleChoiceAnswer':
-            schemas_dict.get(answer_type)(load_instance=True).load(values, session=db.session, instance=answer)
+            schemas_dict.get(answer_type)(load_instance=True).load(values, session=db.session, instance=user_answer)
         else:
-            update_multiple_answers(values['answers'], answer)
+            update_multiple_answers(values['answers'], user_answer)
     db.session.commit()
 
 
@@ -176,15 +178,20 @@ def get_mimetype(filetype):
 def check_contest_duration(user_work: Response):
     contest_duration = db_get_one_or_none(SimpleContest, "contest_id", user_work.contest_id).contest_duration
     time_spent = datetime.utcnow() - user_work.start_time
-    if user_work.status == work_status['NotChecked'] or time_spent + five_minutes > contest_duration:
+    if user_work.work_status == work_status['NotChecked'] or time_spent + five_minutes > contest_duration:
         finish_contest(user_work)
         raise OlympiadError("Olympiad is over for current user")
 
 
 def calculate_time_left(user_work: Response):
     contest_duration = db_get_one_or_none(SimpleContest, "contest_id", user_work.contest_id).contest_duration
+    if user_work.work_status != work_status['InProgress']:
+        return timedelta(seconds=0)
     time_spent = datetime.utcnow() - user_work.start_time
-    return contest_duration + user_work.time_extension - time_spent
+    time_left = contest_duration + user_work.time_extension - time_spent
+    if time_left < timedelta(seconds=0):
+        time_left = timedelta(seconds=0)
+    return time_left
 
 
 def range_answer_check(answer: BaseAnswer):
@@ -204,7 +211,7 @@ def multiple_answer_check(answer: BaseAnswer):
     right_answers = [elem['answer'] for elem in answers if elem['is_right_answer']]
     count = 0
     for elem in user_answers:
-        if elem.text in right_answers:
+        if elem in right_answers:
             count += 1
         else:
             count -= 1
@@ -220,7 +227,7 @@ def check_user_work(user_work: Response):
             range_answer_check(answer)
         elif answer.answer_type == answer_dict['MultipleChoiceAnswer']:
             multiple_answer_check(answer)
-    user_work.status = work_status['Accepted']
+    user_work.work_status = work_status['Accepted']
     db.session.commit()
 
 

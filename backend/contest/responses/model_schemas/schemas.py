@@ -35,7 +35,7 @@ class RangeAnswerSchema(SQLAlchemySchema):
         load_instance = True
         sqla_session = db.session
 
-    answer = auto_field(column_name='answer', dump_only=True)
+    answer = auto_field(column_name='answer')
 
 
 class MultipleChoiceAnswerSchema(SQLAlchemySchema):
@@ -53,7 +53,7 @@ class PlainAnswerTextSchema(SQLAlchemySchema):
         load_instance = True
         sqla_session = db.session
 
-    answer_text = auto_field(column_name='answer_text', dump_only=True)
+    answer_text = auto_field(column_name='answer_text')
 
 
 class PlainAnswerFileSchema(SQLAlchemySchema):
@@ -84,7 +84,7 @@ class AnswerSchema(OneOfSchema):
     }
 
     def get_obj_type(self, obj):
-        obj_type = obj.task_type
+        obj_type = obj.answer_type
         if obj_type is None:
             raise TypeError(f'Unknown object type: {obj.__class__.__name__}')
         return obj_type.value

@@ -85,7 +85,7 @@ def get_self_user_answer_for_task_plain_file(contest_id, task_id):
           description: User, contest or task not found
     """
     self_user_id = jwt_get_id()
-    user_answer = user_answer_get_file(self_user_id, contest_id, task_id)
+    user_answer = user_answer_get(self_user_id, contest_id, task_id)
     return send_file(io.BytesIO(user_answer.answer_file),
                      attachment_filename=f'userid_{self_user_id}_taskid_{task_id}.{user_answer.filetype.value}',
                      mimetype=get_mimetype(user_answer.filetype.value)), 200
@@ -93,7 +93,7 @@ def get_self_user_answer_for_task_plain_file(contest_id, task_id):
 
 @module.route('/contest/<int:contest_id>/task/<int:task_id>/user/self', methods=['GET'],
               output_schema=AnswerSchema)
-def user_answer_for_task_self(contest_id, task_id, user_id):
+def user_answer_for_task_self(contest_id, task_id):
     """
     Get current user answer for task
     ---
@@ -113,12 +113,6 @@ def user_answer_for_task_self(contest_id, task_id, user_id):
           required: true
           schema:
             type: integer
-        - in: path
-          description: Id of the user
-          name: user_id
-          required: true
-          schema:
-            type: integer
       responses:
         '200':
           description: OK
@@ -130,7 +124,8 @@ def user_answer_for_task_self(contest_id, task_id, user_id):
         '404':
           description: User, contest or task not found
     """
-    return user_answer_get(user_id, contest_id, task_id), 200
+    self_user_id = jwt_get_id()
+    return user_answer_get(self_user_id, contest_id, task_id), 200
 
 
 @module.route('/contest/<int:contest_id>/task/<int:task_id>/user/self/<string:filetype>', methods=['POST'])
@@ -208,10 +203,8 @@ def self_user_answer_for_task_post_plain_text(contest_id, task_id):
             type: integer
       requestBody:
         content:
-          description: OK
-          content:
-            application/json:
-              schema: PlainAnswerRequestSchema
+          application/json:
+            schema: PlainAnswerRequestSchema
       responses:
         '200':
           description: OK
@@ -254,10 +247,8 @@ def self_user_answer_for_task_range(contest_id, task_id):
             type: integer
       requestBody:
         content:
-          description: OK
-          content:
-            application/json:
-              schema: RangeAnswerRequestSchema
+          application/json:
+            schema: RangeAnswerRequestSchema
       responses:
         '200':
           description: OK
@@ -300,10 +291,8 @@ def self_user_answer_for_task_multiple(contest_id, task_id):
             type: integer
       requestBody:
         content:
-          description: OK
-          content:
-            application/json:
-              schema: MultipleAnswerRequestSchema
+          application/json:
+            schema: MultipleAnswerRequestSchema
       responses:
         '200':
           description: OK
@@ -379,20 +368,18 @@ def self_user_answer_task_mark(contest_id, task_id):
           required: true
           schema:
             type: integer
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema: UserAnswerMarkResponseSchema
       responses:
         '200':
           description: OK
+          content:
+            application/json:
+              schema: UserAnswerMarkResponseSchema
         '404':
           description: User or contest not found
     """
     self_user_id = jwt_get_id()
     user_work = get_user_in_contest_work(self_user_id, contest_id)
-    answer = db_get_or_raise(BaseAnswer, 'task_id', task_id)
+    answer = get_answer_by_task_id_and_work_id(BaseAnswer, task_id, user_work.work_id)
     return answer, 200
 
 
@@ -424,7 +411,9 @@ def self_user_time_left(contest_id):
     """
     self_user_id = jwt_get_id()
     user_work = get_user_in_contest_work(self_user_id, contest_id)
-    return calculate_time_left(user_work), 200
+    return {
+        "time": calculate_time_left(user_work)
+           }, 200
 
 
 @module.route('/contest/<int:contest_id>/user/self/finish', methods=['POST'])
@@ -432,7 +421,7 @@ def self_user_finish_contest(contest_id):
     """
     Finish current user's contest
     ---
-    get:
+    post:
       security:
         - JWTAccessToken: []
         - CSRFAccessToken: []

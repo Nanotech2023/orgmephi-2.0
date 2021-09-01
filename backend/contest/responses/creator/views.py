@@ -13,7 +13,7 @@ app = get_current_app()
 
 @module.route('/contest/<int:contest_id>/user/<int:user_id>/response', methods=['GET'],
               output_schema=AllUserAnswersResponseSchema)
-def get_user_all_answers(contest_id, user_id):
+def get_user_by_id_all_answers(contest_id, user_id):
     """
     Get all user answers for the contest
     ---
@@ -94,7 +94,7 @@ def user_answer_for_task_by_id_plain_file(contest_id, task_id, user_id):
         '404':
           description: User, contest or task not found
     """
-    user_answer = user_answer_get_file(user_id, contest_id, task_id)
+    user_answer = user_answer_get(user_id, contest_id, task_id)
     return send_file(io.BytesIO(user_answer.answer_file),
                      attachment_filename=f'userid_{user_id}_taskid_{task_id}.{user_answer.filetype.value}',
                      mimetype=get_mimetype(user_answer.filetype.value)), 200
@@ -192,7 +192,7 @@ def user_answer_for_task_by_id_post_plain_file(contest_id, task_id, user_id, fil
         '409':
           description: Olympiad is over or file is too large
     """
-    check_task_type(task_id, answer_dict['PlainAnswer'])
+    check_task_type(task_id, answer_dict['PlainAnswerFile'])
     user_answer_post_file(request.data, filetype, user_id, contest_id, task_id)
     return {}, 200
 
@@ -228,10 +228,8 @@ def user_answer_for_task_by_id_post_plain_text(contest_id, task_id, user_id):
             type: integer
       requestBody:
         content:
-          description: OK
-          content:
-            application/json:
-              schema: PlainAnswerRequestSchema
+          application/json:
+            schema: PlainAnswerRequestSchema
       responses:
         '200':
           description: OK
@@ -242,7 +240,7 @@ def user_answer_for_task_by_id_post_plain_text(contest_id, task_id, user_id):
         '409':
           description: Olympiad is over
     """
-    check_task_type(task_id, answer_dict['PlainAnswer'])
+    check_task_type(task_id, answer_dict['PlainAnswerText'])
     values = request.marshmallow
     user_answer_post(user_id, contest_id, task_id, values, 'PlainAnswerText')
     return {}, 200
@@ -279,10 +277,8 @@ def user_answer_for_task_by_id_range(contest_id, task_id, user_id):
             type: integer
       requestBody:
         content:
-          description: OK
-          content:
-            application/json:
-              schema: RangeAnswerRequestSchema
+          application/json:
+            schema: RangeAnswerRequestSchema
       responses:
         '200':
           description: OK
@@ -330,10 +326,8 @@ def user_answer_for_task_by_id_multiple(contest_id, task_id, user_id):
             type: integer
       requestBody:
         content:
-          description: OK
-          content:
-            application/json:
-              schema: MultipleAnswerRequestSchema
+          application/json:
+            schema: MultipleAnswerRequestSchema
       responses:
         '200':
           description: OK
@@ -390,7 +384,7 @@ def user_status_for_response_by_id_post(contest_id, user_id):
     """
     values = request.marshmallow
     user_work = get_user_in_contest_work(user_id, contest_id)
-    user_work.status = values['status']
+    user_work.work_status = values['status']
     db.session.commit()
     return {}, 200
 
@@ -504,14 +498,11 @@ def user_answer_task_mark_post(contest_id, user_id, task_id):
       responses:
         '200':
           description: OK
-          content:
-            application/json:
-              schema: UserAnswerMarkResponseSchema
         '404':
           description: User or contest not found
     """
     values = request.marshmallow
-    user_work = get_user_in_contest_work(user_id, contest_id)
+    get_user_in_contest_work(user_id, contest_id)
     answer = db_get_or_raise(BaseAnswer, 'task_id', task_id)
     answer.mark = values['mark']
     db.session.commit()
@@ -547,14 +538,12 @@ def user_answer_task_mark(contest_id, user_id, task_id):
           required: true
           schema:
             type: integer
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema: UserAnswerMarkResponseSchema
       responses:
         '200':
           description: OK
+          content:
+            application/json:
+              schema: UserAnswerMarkResponseSchema
         '404':
           description: User or contest not found
     """
@@ -596,7 +585,9 @@ def user_by_id_time_left(contest_id, user_id):
           description: User or contest not found
     """
     user_work = get_user_in_contest_work(user_id, contest_id)
-    return calculate_time_left(user_work), 200
+    return {
+        "time": calculate_time_left(user_work)
+           }, 200
 
 
 @module.route('/contest/<int:contest_id>/user/<int:user_id>/time', methods=['POST'],
@@ -645,7 +636,7 @@ def user_by_id_finish_contest(contest_id, user_id):
     """
     Finish user's contest
     ---
-    get:
+    post:
       security:
         - JWTAccessToken: []
         - CSRFAccessToken: []
@@ -678,9 +669,10 @@ def auto_check_users_answers(contest_id):
     """
     Auto check all users' responses for contest
     ---
-    get:
+    post:
       security:
         - JWTAccessToken: []
+        - CSRFAccessToken: []
       parameters:
         - in: path
           description: Id of the contest

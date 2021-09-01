@@ -61,7 +61,7 @@ class Response(db.Model):
     start_time = db.Column(db.DateTime, default=datetime.utcnow())
     finish_time = db.Column(db.DateTime, default=datetime.utcnow())
     time_extension = db.Column(db.Interval, default=timedelta(seconds=0))
-    status = db.Column(db.Enum(ResponseStatusEnum), default=ResponseStatusEnum.in_progress, nullable=False)
+    work_status = db.Column(db.Enum(ResponseStatusEnum), default=ResponseStatusEnum.in_progress, nullable=False)
 
     answers = db.relationship('BaseAnswer', backref='response', lazy='dynamic', cascade="all, delete")
 
@@ -75,15 +75,15 @@ class Response(db.Model):
     @hybrid_property
     def status(self):
         from common.util import db_get_one_or_none
-        from messages.models import Thread, ThreadStatus
+        from messages.models import Thread, ThreadStatus, ThreadType
         thread = db_get_one_or_none(Thread, 'related_work_id', self.work_id)
         if thread is not None:
-            if thread.status == ThreadStatus.open:
+            if thread.status == ThreadStatus.open and thread.thread_type == ThreadType.appeal:
                 return work_status['Appeal']
             else:
-                return self.status
+                return self.work_status
         else:
-            return self.status
+            return self.work_status
 
     @status.setter
     def status(self, value):
@@ -141,7 +141,7 @@ class BaseAnswer(db.Model):
     work_id = db.Column(db.Integer, db.ForeignKey('response.work_id'))
     task_id = db.Column(db.Integer, db.ForeignKey(f'{Task.__tablename__}.task_id'))
     answer_type = db.Column(db.Enum(AnswerEnum), nullable=False)
-    mark = db.Column(db.Float, nullable=True)
+    mark = db.Column(db.Float, default=0)
 
     __mapper_args__ = {
         'polymorphic_identity': AnswerEnum.BaseAnswer,
