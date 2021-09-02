@@ -183,7 +183,7 @@ def get_test_app(module: OrgMephiModule):
         app._module = module
     else:
         app = OrgMephiApp('test_app', module, security=True, test_config=DefaultTestConfiguration())
-        app.app.testing = True
+        app.config['JWT_SECRET_KEY'] = 'super-secret'
         _test_app = app
     app.set_current()
     app.prepare()
@@ -209,9 +209,7 @@ class DefaultTestConfiguration:
     SQLALCHEMY_DATABASE_URI = "sqlite:///:memory:"
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     ORGMEPHI_API_PATH = 'api'
-    JWT_ALGORITHM = 'RS256'
-    ORGMEPHI_PUBLIC_KEY = 'id_rsa.pub'
-    ORGMEPHI_PRIVATE_KEY = 'id_rsa'
+    JWT_ALGORITHM = 'HS256'
     ORGMEPHI_UNIVERSITY_FILE = None
     ORGMEPHI_COUNTRY_FILE = None
     ORGMEPHI_REGION_FILE = None
