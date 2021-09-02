@@ -30,5 +30,5 @@ class MembershipRequestUserSchema(Schema):
 
 
 class PreregisterResponseUserSchema(Schema):
-    registration_number = common_fields.Username(required=True)
+    registration_number = fields.Integer(required=True)
     password = common_fields.Password(required=True)

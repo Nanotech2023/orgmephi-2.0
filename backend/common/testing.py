@@ -150,24 +150,56 @@ def _generate_users(app):
     app.db.session.commit()
 
 
-def get_test_app(module: OrgMephiModule, config: Optional[object], service_name: Optional[str] = None):
+def _generate_locations(app):
+    from user.models import Country, Region, City, University
+    country_native = Country(name='native')
+    country_foreign = Country(name='foreign')
+    region = Region(name='test')
+    city = City(name='test')
+    city.region = region
+    university = University(name='test')
+    university.country = country_native
+
+    app.db.session.add(country_native)
+    app.db.session.add(country_foreign)
+    app.db.session.add(region)
+    app.db.session.add(city)
+    app.db.session.add(university)
+    app.db.session.commit()
+
+
+_test_app: Optional[OrgMephiApp] = None
+
+
+def get_test_app(module: OrgMephiModule):
     """
     Generate application for testing
     :param module: Top-level module
-    :param config: Configuration class, defaults to DefaultTestConfiguration
-    :param service_name: Name of the service, defaults to module.name
     :return: OrgMephiApp object
     """
-    if config is None:
-        config = DefaultTestConfiguration()
-    if service_name is None:
-        service_name = module.name
-    app = OrgMephiApp(service_name, module, security=True, test_config=config)
-    app.app.testing = True
+    global _test_app
+    if _test_app is not None:
+        app = _test_app
+        app._module = module
+    else:
+        app = OrgMephiApp('test_app', module, security=True, test_config=DefaultTestConfiguration())
+        app.app.testing = True
+        _test_app = app
     app.set_current()
     app.prepare()
-    _generate_users(app)
+    reset_db(app)
     return app
+
+
+def reset_db(app):
+    """
+    Reset database before/after a test case
+    :param app: Test application object
+    """
+    app.db.drop_all()
+    app.db.create_all()
+    _generate_locations(app)
+    _generate_users(app)
 
 
 class DefaultTestConfiguration:
@@ -180,10 +212,10 @@ class DefaultTestConfiguration:
     JWT_ALGORITHM = 'RS256'
     ORGMEPHI_PUBLIC_KEY = 'id_rsa.pub'
     ORGMEPHI_PRIVATE_KEY = 'id_rsa'
-    ORGMEPHI_UNIVERSITY_FILE = 'user/universities.txt'
-    ORGMEPHI_COUNTRY_FILE = 'user/countries.txt'
-    ORGMEPHI_REGION_FILE = 'user/regions.txt'
-    ORGMEPHI_CITY_FILE = 'user/cities.txt'
+    ORGMEPHI_UNIVERSITY_FILE = None
+    ORGMEPHI_COUNTRY_FILE = None
+    ORGMEPHI_REGION_FILE = None
+    ORGMEPHI_CITY_FILE = None
     ORGMEPHI_PASSWORD_HASH = 'pbkdf2_sha256'
     ORGMEPHI_PASSWORD_LENGTH = 8
     ORGMEPHI_PASSWORD_UPPERCASE = 1
@@ -194,7 +226,7 @@ class DefaultTestConfiguration:
     JWT_REFRESH_TOKEN_EXPIRES = timedelta(hours=1)
     ORGMEPHI_REMEMBER_ME_TIME = timedelta(days=30)
     ORGMEPHI_CORS_ENABLED = True
-    ORGMEPHI_NATIVE_COUNTRY = 'Россия'
+    ORGMEPHI_NATIVE_COUNTRY = 'native'
     ORGMEPHI_NATIVE_DOCUMENT = 'Паспорт гражданина РФ'
     ORGMEPHI_INTERNATIONAL_DOCUMENT = 'Заграничный паспорт гражданина РФ'
     ORGMEPHI_FOREIGN_DOCUMENT = 'Паспорт гражданина иностранного государства'
@@ -209,7 +241,7 @@ class DefaultTestConfiguration:
     MAIL_USE_SSL = False
     MAIL_USERNAME = None
     MAIL_PASSWORD = None
-    MAIL_DEFAULT_SENDER = None
+    MAIL_DEFAULT_SENDER = 'default@example.org'
     ORGMEPHI_MAIL_CONFIRM_KEY = b'\r\xa2\x96\xef\t\x8c\xfe\xa8\x83\xb5\x89\x10\xf4i\x9cL'
     ORGMEPHI_MAIL_CONFIRM_SALT = b'\xcd\x985a\xd5^:-\xcd\x01\xbdN\xac\x9e\xec\xd5'
     ORGMEPHI_MAIL_CONFIRM_EXPIRATION = timedelta(days=1)

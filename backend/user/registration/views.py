@@ -25,19 +25,11 @@ module = get_current_module()
 app = get_current_app()
 
 
-def grade_to_year(grade):
-    from datetime import date, datetime
-    now = datetime.utcnow().date()
-    last_admission = date(now.year, 9, 1)
-    if now < last_admission:
-        last_admission = date(now.year - 1, 9, 1)
-    admission_date = date(last_admission.year - grade + 1, 9, 1)
-    return admission_date
-
-
 def dump_email_token(claims, token_type):
     serializer = URLSafeTimedSerializer(app.config['ORGMEPHI_MAIL_CONFIRM_KEY'])
     token = serializer.dumps({'claims': claims, 'type': token_type}, salt=app.config['ORGMEPHI_MAIL_CONFIRM_SALT'])
+    if app.config.get('TESTING', False):
+        app.config['TESTING_LAST_EMAIL_TOKEN'] = token
     return token
 
 
@@ -107,12 +99,14 @@ def register():
     password_hash = app.password_policy.hash_password(values['auth_info']['password'], check=True)
     email_confirm = app.config.get('ORGMEPHI_CONFIRM_EMAIL', False)
 
-    existing_user = db_get_one_or_none(UserInfo, 'email', username)
+    existing_user = db_get_one_or_none(User, 'username', username)
     if existing_user is not None:
-        age = datetime.date.today() - existing_user.user.registration_date.date()
+        age = datetime.date.today() - existing_user.registration_date.date()
         max_age = app.config['ORGMEPHI_MAIL_CONFIRM_EXPIRATION']
-        if existing_user.user.role == UserRoleEnum.unconfirmed and age > max_age:
-            db.session.delete(existing_user.user)
+        if existing_user.role == UserRoleEnum.unconfirmed \
+                and existing_user.type != UserTypeEnum.pre_register \
+                and age > max_age:
+            db.session.delete(existing_user)
             db.session.flush()
         else:
             raise AlreadyExists('email', username)
