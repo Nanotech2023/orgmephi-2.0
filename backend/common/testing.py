@@ -182,7 +182,7 @@ def get_test_app(module: OrgMephiModule):
         app = _test_app
         app._module = module
     else:
-        app = OrgMephiApp('test_app', module, security=True, test_config=DefaultTestConfiguration())
+        app = OrgMephiApp('test_app', module, security=True, test_config=DefaultTestConfiguration(), testing=True)
         app.config['JWT_SECRET_KEY'] = 'super-secret'
         _test_app = app
     app.set_current()
