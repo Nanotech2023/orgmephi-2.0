@@ -1,5 +1,3 @@
-import datetime
-
 import pytest
 
 from common.testing import get_test_app, OrgMephiTestingClient, DefaultTestConfiguration, reset_db
@@ -132,6 +130,7 @@ def test_get_group_all(client):
     assert grp_data['name'] == grp.name
 
 
+# noinspection DuplicatedCode
 def test_get_user_groups(client):
     from user.models import Group, User
     user = User.query.first()
@@ -148,6 +147,7 @@ def test_get_user_groups(client):
     assert resp.json['groups'][0]['name'] == grp.name
 
 
+# noinspection DuplicatedCode
 def test_get_user_by_group(client):
     from user.models import Group, User
     user = User.query.first()

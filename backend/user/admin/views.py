@@ -3,7 +3,7 @@ from flask import request
 from marshmallow import EXCLUDE
 import sqlalchemy.exc
 
-from common.errors import NotFound, AlreadyExists, InsufficientData
+from common.errors import NotFound, AlreadyExists
 from common import get_current_app, get_current_module, get_current_db
 from common.util import db_get_or_raise, db_exists
 
@@ -190,15 +190,9 @@ def set_user_type(user_id):
           description: Invalid role of current user
         '404':
           description: User not found
-        '409':
-          description: User is missing required info (e.g. university info for a university student)
     """
     user_type = request.marshmallow['type']
     user = db_get_or_raise(User, 'id', user_id)
-    if user_type != UserTypeEnum.internal and user_type != UserTypeEnum.pre_register and user.user_info is None:
-        raise InsufficientData('user', 'personal info')
-    if user_type == UserTypeEnum.university and user.student_info is None:
-        raise InsufficientData('user', 'university info')
     user.type = user_type
     db.session.commit()
     return {}, 200
