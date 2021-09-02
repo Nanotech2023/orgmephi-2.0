@@ -116,6 +116,10 @@ def db_populate(db_session: Session, table: Type[Model], values: list, key: Opti
 
 
 def send_pdf(template_name_or_list, **context):
+    from . import get_current_app
     template = render_template(template_name_or_list, **context)
-    pdf = pdfkit.from_string(template, False, options={'orientation': 'landscape', 'quiet': ''})
+    if get_current_app().app.testing:
+        pdf = b''
+    else:
+        pdf = pdfkit.from_string(template, False, options={'orientation': 'landscape', 'quiet': ''})
     return send_file(io.BytesIO(pdf), 'application/pdf')

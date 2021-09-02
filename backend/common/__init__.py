@@ -25,7 +25,7 @@ class OrgMephiApp:
     """
 
     def __init__(self, service_name: str, top_module: OrgMephiModule, security: bool = False,
-                 default_config: object = None, test_config: object = None):
+                 default_config: object = None, test_config: object = None, testing: bool = False):
         """
         Create an application object
 
@@ -44,6 +44,7 @@ class OrgMephiApp:
         self._db_prepare_actions: list[Callable] = []
         self._init_app(default_config, test_config)
         self._module: OrgMephiModule = top_module
+        self.app.testing = testing
         self._init_db()
         self._init_jwt()
         self._init_cors()
