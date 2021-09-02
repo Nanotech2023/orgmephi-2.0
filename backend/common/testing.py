@@ -212,10 +212,10 @@ class DefaultTestConfiguration:
     JWT_ALGORITHM = 'RS256'
     ORGMEPHI_PUBLIC_KEY = 'id_rsa.pub'
     ORGMEPHI_PRIVATE_KEY = 'id_rsa'
-    ORGMEPHI_UNIVERSITY_FILE = 'user/universities.txt'
-    ORGMEPHI_COUNTRY_FILE = 'user/countries.txt'
-    ORGMEPHI_REGION_FILE = 'user/regions.txt'
-    ORGMEPHI_CITY_FILE = 'user/cities.txt'
+    ORGMEPHI_UNIVERSITY_FILE = None
+    ORGMEPHI_COUNTRY_FILE = None
+    ORGMEPHI_REGION_FILE = None
+    ORGMEPHI_CITY_FILE = None
     ORGMEPHI_PASSWORD_HASH = 'pbkdf2_sha256'
     ORGMEPHI_PASSWORD_LENGTH = 8
     ORGMEPHI_PASSWORD_UPPERCASE = 1
