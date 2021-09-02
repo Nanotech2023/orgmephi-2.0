@@ -150,6 +150,24 @@ def _generate_users(app):
     app.db.session.commit()
 
 
+def _generate_locations(app):
+    from user.models import Country, Region, City, University
+    country_native = Country(name='native')
+    country_foreign = Country(name='foreign')
+    region = Region(name='test')
+    city = City(name='test')
+    city.region = region
+    university = University(name='test')
+    university.country = country_native
+
+    app.db.session.add(country_native)
+    app.db.session.add(country_foreign)
+    app.db.session.add(region)
+    app.db.session.add(city)
+    app.db.session.add(university)
+    app.db.session.commit()
+
+
 def get_test_app(module: OrgMephiModule, config: Optional[object], service_name: Optional[str] = None):
     """
     Generate application for testing
@@ -167,6 +185,7 @@ def get_test_app(module: OrgMephiModule, config: Optional[object], service_name:
     app.set_current()
     app.prepare()
     _generate_users(app)
+    _generate_locations(app)
     return app
 
 
@@ -194,7 +213,7 @@ class DefaultTestConfiguration:
     JWT_REFRESH_TOKEN_EXPIRES = timedelta(hours=1)
     ORGMEPHI_REMEMBER_ME_TIME = timedelta(days=30)
     ORGMEPHI_CORS_ENABLED = True
-    ORGMEPHI_NATIVE_COUNTRY = 'Россия'
+    ORGMEPHI_NATIVE_COUNTRY = 'native'
     ORGMEPHI_NATIVE_DOCUMENT = 'Паспорт гражданина РФ'
     ORGMEPHI_INTERNATIONAL_DOCUMENT = 'Заграничный паспорт гражданина РФ'
     ORGMEPHI_FOREIGN_DOCUMENT = 'Паспорт гражданина иностранного государства'

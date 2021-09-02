@@ -103,15 +103,15 @@ def test_registration_university(client):
         "register_type": "University",
         "student_info": {
             "dwelling": {
-                "city": "Москва",
-                "country": "Россия",
-                "region": "Московская обл.",
+                "city": "test",
+                "country": "native",
+                "region": "test",
                 "rural": False
             },
             "grade": 5,
             "phone": "8 (800) 555 35 35",
             "university": {
-                "university": "МИФИ"
+                "university": "test"
             }
         }
     }
@@ -137,12 +137,12 @@ def test_registration_university(client):
     assert user.user_info.date_of_birth == datetime.date.fromisoformat('2021-09-01')
     assert user.user_info.phone == '8 (800) 555 35 35'
     assert user.user_info.dwelling.russian
-    assert user.user_info.dwelling.city_name == 'Москва'
-    assert user.user_info.dwelling.region_name == 'Московская обл.'
+    assert user.user_info.dwelling.city_name == 'test'
+    assert user.user_info.dwelling.region_name == 'test'
     assert not user.user_info.dwelling.rural
     assert user.student_info.grade == 5
     assert user.student_info.university.known
-    assert user.student_info.university.university.name == 'МИФИ'
+    assert user.student_info.university.university.name == 'test'
 
 
 def test_registration_existing(client):
