@@ -189,6 +189,17 @@ def get_test_app(module: OrgMephiModule, config: Optional[object], service_name:
     return app
 
 
+def reset_db(app):
+    """
+    Reset database before/after a test case
+    :param app: Test application object
+    """
+    app.db.drop_all()
+    app.db.create_all()
+    _generate_locations(app)
+    _generate_users(app)
+
+
 class DefaultTestConfiguration:
     """
     Default configuration for tests
