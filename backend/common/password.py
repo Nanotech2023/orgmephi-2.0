@@ -58,5 +58,5 @@ def get_password_policy():
     Synonym to get_current_app().password_policy
     :return: Current password policy
     """
-    from . import _orgmephi_current_app
-    return _orgmephi_current_app.get().password_policy
+    from . import get_current_app
+    return get_current_app().password_policy
