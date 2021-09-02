@@ -3,11 +3,11 @@ import datetime
 import pytest
 from flask_jwt_extended import decode_token
 
-from common.testing import get_test_app, OrgMephiTestingClient, DefaultTestConfiguration
+from common.testing import get_test_app, OrgMephiTestingClient
 
 from user.auth import module
 
-test_app = get_test_app(module, DefaultTestConfiguration())
+test_app = get_test_app(module)
 
 
 def find_cookie(headers, name):

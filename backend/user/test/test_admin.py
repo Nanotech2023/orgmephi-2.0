@@ -1,11 +1,11 @@
 import pytest
 
-from common.testing import get_test_app, OrgMephiTestingClient, DefaultTestConfiguration, reset_db
+from common.testing import get_test_app, OrgMephiTestingClient, reset_db
 
 from user.admin import module
 
 # noinspection DuplicatedCode
-test_app = get_test_app(module, DefaultTestConfiguration())
+test_app = get_test_app(module)
 
 
 @pytest.fixture

@@ -168,24 +168,26 @@ def _generate_locations(app):
     app.db.session.commit()
 
 
-def get_test_app(module: OrgMephiModule, config: Optional[object], service_name: Optional[str] = None):
+_test_app: Optional[OrgMephiApp] = None
+
+
+def get_test_app(module: OrgMephiModule):
     """
     Generate application for testing
     :param module: Top-level module
-    :param config: Configuration class, defaults to DefaultTestConfiguration
-    :param service_name: Name of the service, defaults to module.name
     :return: OrgMephiApp object
     """
-    if config is None:
-        config = DefaultTestConfiguration()
-    if service_name is None:
-        service_name = module.name
-    app = OrgMephiApp(service_name, module, security=True, test_config=config)
-    app.app.testing = True
+    global _test_app
+    if _test_app is not None:
+        app = _test_app
+        app._module = module
+    else:
+        app = OrgMephiApp('test_app', module, security=True, test_config=DefaultTestConfiguration())
+        app.app.testing = True
+        _test_app = app
     app.set_current()
     app.prepare()
-    _generate_users(app)
-    _generate_locations(app)
+    reset_db(app)
     return app
 
 
