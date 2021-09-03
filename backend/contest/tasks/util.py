@@ -11,9 +11,6 @@ from contest.tasks.models import *
 app = get_current_app()
 
 
-# Constants
-
-
 # Generators
 
 
@@ -47,7 +44,7 @@ def generate_variant(contest_id, user_id):
     return final_variant_number
 
 
-# Functions for tasks/participant
+# User module
 
 
 def is_user_in_contest(user_id, current_contest):
@@ -59,6 +56,8 @@ def is_user_in_contest(user_id, current_contest):
     """
     return current_contest.users.filter_by(**{"user_id": str(user_id)}).one_or_none() is not None
 
+
+# Contest content module
 
 def is_variant_in_contest(variant_id, current_contest):
     """
@@ -97,10 +96,23 @@ def is_task_in_contest(task_id, contest_id):
     return task_variant in current_contest.variants
 
 
+# Participant module
+
+
 def get_user_contest_if_possible(olympiad_id, stage_id, contest_id):
+    """
+    Get contest for user or raise exception
+    :param olympiad_id:
+    :param stage_id:
+    :param contest_id:
+    :return:
+    """
     current_olympiad = db_get_or_raise(Contest, "contest_id", olympiad_id)
+
+    # can't get stages
     if current_olympiad.composite_type == ContestTypeEnum.SimpleContest:
-        raise InsufficientData('composite_type', 'not Composite contest')
+        raise DataConflict('Olympiad type is not composite one')
+
     stage = db_get_or_raise(Stage, "stage_id", str(stage_id))
     if stage not in current_olympiad.stages:
         raise InsufficientData('stage_id', 'not in current olympiad')
