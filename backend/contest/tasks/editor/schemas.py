@@ -16,7 +16,7 @@ class UpdateBaseOlympiadRequestTaskEditorSchema(Schema):
     laureate_condition = fields.Float(required=False)
     olympiad_type_id = fields.Int(required=False)
     subject = EnumField(OlympiadSubjectEnum, required=False, by_value=True)
-    target_classes = fields.List(EnumField(TargetClassEnum, required=True, by_value=True), required=True)
+    target_classes = fields.List(EnumField(TargetClassEnum, required=True, by_value=True), required=False)
 
 
 # Contest
@@ -30,7 +30,7 @@ class UpdateContestRequestTaskEditorSchema(Schema):
     contest_duration = fields.TimeDelta(required=False)
     previous_contest_id = fields.Int(required=False)
     previous_participation_condition = EnumField(UserStatusEnum, required=False, by_value=True)
-    holding_type = EnumField(ContestHoldingTypeEnum, required=True, by_value=False)
+    holding_type = EnumField(ContestHoldingTypeEnum, required=False, by_value=False)
 
 
 class UpdatePreviousContestRequestTaskEditorSchema(Schema):
