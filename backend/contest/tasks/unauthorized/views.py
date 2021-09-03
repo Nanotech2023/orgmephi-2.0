@@ -132,7 +132,6 @@ def id_location_get(id_location):
 
 
 # Olympiad
-# TODO Target class checking ???
 
 
 @module.route('/base_olympiad/all', methods=['GET'],

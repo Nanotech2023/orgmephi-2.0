@@ -237,8 +237,8 @@ def location_remove(id_location):
         '404':
           description: Olympiad type not found
     """
-    location = db_get_or_raise(OlympiadLocation, "location_id", str(id_location))
-    db.session.delete(location)
+    current_location = db_get_or_raise(OlympiadLocation, "location_id", str(id_location))
+    db.session.delete(current_location)
     db.session.commit()
 
     return {}, 200

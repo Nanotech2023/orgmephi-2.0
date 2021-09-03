@@ -60,8 +60,8 @@ def add_user_to_contest(id_contest):
     target_classes = current_base_contest.target_classes
 
     for user_id in user_ids:
-        # User is already enrolled
 
+        # User is already enrolled
         if is_user_in_contest(user_id, current_contest):
             raise AlreadyExists('user_id', user_id)
 
@@ -69,7 +69,6 @@ def add_user_to_contest(id_contest):
         grade = check_user_unfilled_for_enroll(current_user)
 
         # Wrong user class
-
         if grade not in target_classes:
             raise InsufficientData('base_contest_id', "current grade of user")
 
