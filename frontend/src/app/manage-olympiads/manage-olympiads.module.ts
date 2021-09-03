@@ -2,7 +2,7 @@ import { NgModule } from '@angular/core'
 import { ManageOlympiadsComponent } from '@/manage-olympiads/containers/manage-olympiads/manage-olympiads.component'
 import { SharedModule } from '@/shared/shared.module'
 import { AgGridModule } from 'ag-grid-angular'
-import { ManageOlympiadsModuleRouting } from '@/manage-olympiads/manage-olympiads.module.routing'
+import { ManageOlympiadsRoutingModule } from '@/manage-olympiads/manage-olympiads.routing.module'
 
 
 const COMPONENTS = [ ManageOlympiadsComponent ]
@@ -13,7 +13,7 @@ const COMPONENTS = [ ManageOlympiadsComponent ]
     imports: [
         SharedModule,
         AgGridModule,
-        ManageOlympiadsModuleRouting
+        ManageOlympiadsRoutingModule
     ]
 } )
 export class ManageOlympiadsModule {}

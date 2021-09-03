@@ -4,7 +4,7 @@ import { AddUserModalComponent } from '@/manage-users/components/add-user-modal/
 import { EditUserModalComponent } from '@/manage-users/components/edit-user-modal/edit-user-modal.component'
 import { SharedModule } from '@/shared/shared.module'
 import { AgGridModule } from 'ag-grid-angular'
-import { ManageUsersModuleRouting } from '@/manage-users/manage-users.module.routing'
+import { ManageUsersRoutingModule } from '@/manage-users/manage-users.routing.module'
 
 
 const COMPONENTS = [
@@ -21,10 +21,10 @@ const COMPONENTS = [
     imports: [
         SharedModule,
         AgGridModule,
-        ManageUsersModuleRouting
+        ManageUsersRoutingModule
     ],
     exports: [
-        ManageUsersModuleRouting
+        ManageUsersRoutingModule
     ]
 } )
 export class ManageUsersModule {}

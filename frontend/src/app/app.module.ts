@@ -16,6 +16,7 @@ import { ManageOlympiadsModule } from '@/manage-olympiads/manage-olympiads.modul
 import { ManageUsersModule } from '@/manage-users/manage-users.module'
 import { OlympiadsServiceMock } from '@/manage-olympiads/api/olympiads.service.mock'
 import { OlympiadsService } from '@/manage-olympiads/api/olympiads.service'
+import { AuthGuardService } from '@/shared/auth.guard.service'
 
 
 @NgModule( {
@@ -38,7 +39,8 @@ import { OlympiadsService } from '@/manage-olympiads/api/olympiads.service'
     ],
     providers: [
         { provide: AuthService },
-        { provide: OlympiadsService, useClass: OlympiadsServiceMock }
+        { provide: OlympiadsService, useClass: OlympiadsServiceMock },
+        { provide: AuthGuardService }
     ],
     bootstrap: [ AppComponent ]
 } )

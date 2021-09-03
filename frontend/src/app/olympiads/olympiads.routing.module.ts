@@ -1,6 +1,7 @@
 import { NgModule } from '@angular/core'
 import { RouterModule, Routes } from '@angular/router'
-import { ManageUsersComponent } from '@/manage-users/containers/manage-users/manage-users.component'
+import { AuthGuardService } from '@/shared/auth.guard.service'
+import { HomeComponent } from '@/olympiads/containers/home/home.component'
 
 
 const routes: Routes = [
@@ -8,7 +9,7 @@ const routes: Routes = [
         path: '',
         children: [
             {
-                path: 'manage/users', component: ManageUsersComponent
+                path: 'user', component: HomeComponent, canActivate: [ AuthGuardService ]
             }
         ]
     }
@@ -19,4 +20,4 @@ const routes: Routes = [
     imports: [ RouterModule.forChild( routes ) ],
     exports: [ RouterModule ]
 } )
-export class ManageUsersModuleRouting {}
+export class OlympiadsRoutingModule {}
