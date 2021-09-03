@@ -249,7 +249,8 @@ def olympiads_all():
         '404':
           description: Olympiad type not found
     """
-
+    # TODO IN NEXT MR
+    # TODO FILTER
     return filter_olympiad_query(request.args)
 
 

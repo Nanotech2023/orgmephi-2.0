@@ -10,7 +10,8 @@ from contest.responses.util import get_user_in_contest_work
 from contest.tasks.model_schemas.contest import VariantSchema
 from contest.tasks.model_schemas.olympiad import ContestSchema
 from contest.tasks.participant.schemas import *
-from contest.tasks.unauthorized.schemas import AllOlympiadsResponseTaskUnauthorizedSchema
+from contest.tasks.unauthorized.schemas import AllOlympiadsResponseTaskUnauthorizedSchema, \
+    FilterSimpleContestResponseSchema
 from contest.tasks.util import *
 
 db = get_current_db()
@@ -369,7 +370,7 @@ def get_user_certificate_self(id_contest):
 @module.route(
     '/olympiad/<int:id_olympiad>/stage/<int:id_stage>/contest/all',
     methods=['GET'], output_schema=AllOlympiadsResponseTaskUnauthorizedSchema)
-def get_all_contests_self(id_olympiad, id_stage):
+def get_all_contests_in_stage_self(id_olympiad, id_stage):
     """
     Get all contests in stage
     ---
@@ -416,9 +417,76 @@ def get_all_contests_self(id_olympiad, id_stage):
 
 
 @module.route(
+    '/olympiad/all',
+    methods=['GET'], output_schema=FilterSimpleContestResponseSchema)
+def get_all_contests_self():
+    """
+    Get all contests for user
+    ---
+    get:
+      parameters:
+        - in: query
+          name: offset
+          required: false
+          schema:
+            type: integer
+        - in: query
+          name: limit
+          required: false
+          schema:
+            type: integer
+        - in: query
+          name: base_contest_id
+          required: false
+          schema:
+            type: integer
+        - in: query
+          name: location_id
+          required: false
+          schema:
+            type: integer
+        - in: query
+          name: end_date
+          required: false
+          schema:
+            format: date-time
+            type: string
+        - in: query
+          name: target_classes
+          required: false
+          schema:
+            type: string
+            enum: ['5', '6', '7', '8', '9', '10', '11', 'student']
+        - in: query
+          name: only_count
+          required: false
+          schema:
+            type: boolean
+      security:
+        - JWTAccessToken: [ ]
+        - CSRFAccessToken: [ ]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: AllOlympiadsResponseTaskUnauthorizedSchema
+        '400':
+          description: Bad request
+        '409':
+          description: Olympiad type already in use
+        '404':
+          description: User not found
+    """
+    # TODO IN NEXT MR
+    # TODO FILTER
+    return filter_olympiad_query(request.args)
+
+
+@module.route(
     '/olympiad/<int:id_olympiad>/stage/<int:id_stage>/contest/<int:id_contest>',
     methods=['GET'], output_schema=ContestSchema)
-def get_contest_self(id_olympiad, id_stage, id_contest):
+def get_contest_in_stage_self(id_olympiad, id_stage, id_contest):
     """
     Get current contest in stage
     ---
@@ -459,4 +527,39 @@ def get_contest_self(id_olympiad, id_stage, id_contest):
           description: User not found
     """
     current_contest = get_user_contest_if_possible(id_olympiad, id_stage, id_contest)
+    return current_contest, 200
+
+
+@module.route(
+    '/olympiad/<int:id_olympiad>',
+    methods=['GET'], output_schema=ContestSchema)
+def get_contest_self(id_olympiad):
+    """
+    Get current contest in stage
+    ---
+    get:
+      parameters:
+        - in: path
+          description: Id of the olympiad
+          name: id_olympiad
+          required: true
+          schema:
+            type: integer
+      security:
+        - JWTAccessToken: [ ]
+        - CSRFAccessToken: [ ]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: ContestSchema
+        '400':
+          description: Bad request
+        '409':
+          description: Olympiad type already in use
+        '404':
+          description: User not found
+    """
+    current_contest = get_user_simple_contest_if_possible(id_olympiad)
     return current_contest, 200
