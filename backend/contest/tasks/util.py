@@ -51,25 +51,50 @@ def generate_variant(id_contest, user_id):
 
 
 def is_user_in_contest(user_id, current_contest):
-    if current_contest.users.filter_by(**{"user_id": str(user_id)}).one_or_none() is not None:
-        return True
-    else:
-        return False
+    """
+    Check if user in current contest
+    :param user_id:
+    :param current_contest:
+    :return:
+    """
+    return current_contest.users.filter_by(**{"user_id": str(user_id)}).one_or_none() is not None
 
 
 def is_variant_in_contest(variant_id, current_contest):
-    if current_contest.variants.filter_by(**{"variant_id": str(variant_id)}).one_or_none() is not None:
-        return True
-    else:
-        return False
+    """
+    Check if variant in contest
+    :param variant_id:
+    :param current_contest:
+    :return:
+    """
+    return current_contest.variants.filter_by(**{"variant_id": str(variant_id)}).one_or_none() is not None
 
 
 def is_task_in_variant(task_id, variant):
+    """
+    Check if task in current variant
+    :param task_id:
+    :param variant:
+    :return:
+    """
     task = db_get_or_raise(Task, "task_id", task_id)
-    if task in variant.tasks:
-        return True
-    else:
-        return False
+    return task in variant.tasks
+
+
+def is_task_in_contest(task_id, contest_id):
+    """
+    Check if task in contest
+    :param task_id:
+    :param contest_id:
+    :return:
+    """
+
+    current_contest = db_get_or_raise(Contest, "contest_id", contest_id)
+    task = db_get_or_raise(Task, "task_id", task_id)
+    task_variant = task.variant
+    if task_variant is None:
+        raise DataConflict("Task variant is missing")
+    return task_variant in current_contest.variants
 
 
 def get_user_contest_if_possible(id_olympiad, id_stage, id_contest):
