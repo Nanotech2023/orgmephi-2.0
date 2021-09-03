@@ -31,7 +31,7 @@ export class ManageUsersComponent implements OnInit
 
     ngOnInit(): void
     {
-        this.store.reload( true )
+        this.store.reload()
     }
 
     onUserAdd( requestRegistration: SchoolRegistrationRequestUser ): void

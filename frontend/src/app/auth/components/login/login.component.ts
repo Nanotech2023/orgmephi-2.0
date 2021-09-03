@@ -2,7 +2,7 @@ import { Component, HostListener, OnInit } from '@angular/core'
 import { Store } from '@ngrx/store'
 import { AuthActions, AuthSelectors, AuthState } from '@/auth/store'
 import { Observable } from 'rxjs'
-import { ErrorValue, LoginRequestUser } from '@/auth/api/models'
+import { LoginRequestUser } from '@/auth/api/models'
 import { fixedHeight } from '@/shared/consts'
 
 
@@ -15,7 +15,6 @@ export class LoginComponent implements OnInit
 {
     loginAttempt: LoginRequestUser
     isAuthenticated$!: Observable<boolean>
-    error$!: Observable<ErrorValue[] | null>
     containerHeight: number
 
     constructor( private readonly store: Store<AuthState.State> )
@@ -26,8 +25,7 @@ export class LoginComponent implements OnInit
 
     ngOnInit(): void
     {
-        this.isAuthenticated$ = this.store.select( AuthSelectors.selectIsAuthenticated )
-        this.error$ = this.store.select( AuthSelectors.selectError )
+        this.isAuthenticated$ = this.store.select( AuthSelectors.selectIsAuthorized )
     }
 
     @HostListener( 'window:resize', [ '$event' ] )

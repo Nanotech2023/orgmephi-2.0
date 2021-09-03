@@ -59,7 +59,7 @@ export class ParticipantComponent implements OnInit
 
     ngOnInit(): void
     {
-        this.store.reload( true )
+        this.store.reload()
     }
 
     calculateHeight(): number

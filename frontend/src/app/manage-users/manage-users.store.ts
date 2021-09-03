@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core'
 import { ComponentStore, tapResponse } from '@ngrx/component-store'
-import { SchoolRegistrationRequestUser, User, UserListResponseUser } from '@/auth/api/models'
+import { SchoolRegistrationRequestUser, User, UserFull, UserFullListResponseUser } from '@/auth/api/models'
 import { EMPTY, Observable } from 'rxjs'
 import { catchError, concatMap } from 'rxjs/operators'
 import { AuthService } from '@/auth/api/auth.service'
@@ -9,7 +9,7 @@ import { CallState, getError, LoadingState } from '@/shared/callState'
 
 export interface ManageUsersState
 {
-    users: Array<User>
+    users: Array<UserFull>
     callState: CallState
 }
 
@@ -53,22 +53,17 @@ export class ManageUsersStore extends ComponentStore<ManageUsersState>
         } ) )
 
     // EFFECTS
-    readonly reload = this.effect( ( dummy$: Observable<boolean> ) =>
-        dummy$.pipe(
-            concatMap( ( dummy: boolean ) =>
-                {
-                    this.setLoading()
-                    return this.authService.userCreatorUserAllGet().pipe(
-                        tapResponse(
-                            ( response: UserListResponseUser ) =>
-                                this.setState( { users: response.users, callState: LoadingState.LOADED } ),
-                            ( error: string ) => this.updateError( error )
-                        ),
-                        catchError( () => EMPTY )
-                    )
-                }
-            )
-        ) )
+    readonly reload = this.effect( () =>
+    {
+        this.setLoading()
+        return this.authService.userCreatorUserFullAllGet().pipe(
+            tapResponse( ( response: UserFullListResponseUser ) =>
+                    this.setState( { users: response.users, callState: LoadingState.LOADED } ),
+                ( error: string ) => this.updateError( error )
+            ),
+            catchError( () => EMPTY )
+        )
+    } )
 
 
     readonly add = this.effect( ( requestRegistration$: Observable<SchoolRegistrationRequestUser> ) =>
@@ -78,11 +73,7 @@ export class ManageUsersStore extends ComponentStore<ManageUsersState>
                 this.setLoading()
                 return this.authService.userRegistrationSchoolPost( requestRegistration ).pipe(
                     tapResponse(
-                        ( user: User ) =>
-                        {
-                            this.setLoaded()
-                            this.updateUsers( user )
-                        },
+                        () => this.reload(),
                         ( error: string ) => this.updateError( error )
                     ),
                     catchError( () => EMPTY )
@@ -96,13 +87,10 @@ export class ManageUsersStore extends ComponentStore<ManageUsersState>
             {
                 this.setLoading()
                 // @ts-ignore
-                return this.authService.userAdminSchoolUserIdPatch( user ).pipe(
+                // TODO
+                return this.authService.userAdminSchoolUserIdPatch( user.id, user ).pipe(
                     tapResponse(
-                        ( typeUserInfo ) =>
-                        {
-                            this.setLoaded()
-                            this.updateUsers( typeUserInfo )
-                        },
+                        () => this.reload(),
                         ( error: string ) => this.updateError( error )
                     ),
                     catchError( () => EMPTY )

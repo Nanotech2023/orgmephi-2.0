@@ -3,7 +3,7 @@ import { ComponentStore, tapResponse } from '@ngrx/component-store'
 import { ContestsInStage, ContestsInStageContestsList } from '@/manage-olympiads/api/models'
 import { CallState, getError, LoadingState } from '@/shared/callState'
 import { EMPTY, Observable } from 'rxjs'
-import { catchError, concatMap } from 'rxjs/operators'
+import { catchError } from 'rxjs/operators'
 import { OlympiadsService } from '@/manage-olympiads/api/olympiads.service'
 
 
@@ -54,25 +54,21 @@ export class ManageOlympiadsStore extends ComponentStore<ManageOlympiadsState>
         } ) )
 
     // EFFECTS
-    readonly reload = this.effect( ( dummy$: Observable<boolean> ) =>
-        dummy$.pipe(
-            concatMap( ( dummy: boolean ) =>
-                {
-                    this.setLoading()
-                    return this.olympiadsService.olympiadAllGet().pipe(
-                        tapResponse(
-                            ( response: ContestsInStage ) =>
-                                this.setState( {
-                                    olympiads: response.contests_list ?? [],
-                                    callState: LoadingState.LOADED
-                                } ),
-                            ( error: string ) => this.updateError( error )
-                        ),
-                        catchError( () => EMPTY )
-                    )
-                }
-            )
-        ) )
+    readonly reload = this.effect( () =>
+    {
+        this.setLoading()
+        return this.olympiadsService.olympiadAllGet().pipe(
+            tapResponse(
+                ( response: ContestsInStage ) =>
+                    this.setState( {
+                        olympiads: response.contests_list ?? [],
+                        callState: LoadingState.LOADED
+                    } ),
+                ( error: string ) => this.updateError( error )
+            ),
+            catchError( () => EMPTY )
+        )
+    } )
 
 
     // readonly add = this.effect( ( xxx$: Observable<XXX> ) =>

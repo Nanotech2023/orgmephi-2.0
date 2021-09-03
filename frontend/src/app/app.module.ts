@@ -12,7 +12,6 @@ import { AppComponent } from '@/app.component'
 import { UsersModule } from '@/users/users.module'
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations'
 import { AuthService } from '@/auth/api/auth.service'
-import { AuthServiceReal } from '@/auth/api/auth.service.real'
 import { ManageOlympiadsModule } from '@/manage-olympiads/manage-olympiads.module'
 import { ManageUsersModule } from '@/manage-users/manage-users.module'
 import { OlympiadsServiceMock } from '@/manage-olympiads/api/olympiads.service.mock'
@@ -38,7 +37,7 @@ import { OlympiadsService } from '@/manage-olympiads/api/olympiads.service'
         BrowserAnimationsModule
     ],
     providers: [
-        { provide: AuthService, useClass: AuthServiceReal },
+        { provide: AuthService },
         { provide: OlympiadsService, useClass: OlympiadsServiceMock }
     ],
     bootstrap: [ AppComponent ]

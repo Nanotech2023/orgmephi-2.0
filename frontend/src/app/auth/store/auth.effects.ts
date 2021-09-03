@@ -3,7 +3,7 @@ import { Actions, createEffect, ofType } from '@ngrx/effects'
 import { AuthService } from '@/auth/api/auth.service'
 import {
     getUserInfoRequest,
-    getUserInfoSuccess,
+    getUserInfoSuccess, getUserSuccess,
     loginRequest,
     loginSuccess,
     registerRequest,
@@ -12,7 +12,7 @@ import {
 import { catchError, concatMap, mergeMap, switchMap } from 'rxjs/operators'
 import { of } from 'rxjs'
 import { Router } from '@angular/router'
-import { CSRFPairUser, User } from '@/auth/api/models'
+import { CSRFPairUser, User, UserInfo } from '@/auth/api/models'
 
 
 // noinspection JSUnusedGlobalSymbols
@@ -51,7 +51,19 @@ export class AuthEffects
         this.actions$.pipe(
             ofType( loginSuccess ),
             switchMap( () => [ getUserInfoRequest() ] )
-            // switchMap( () => [ getPersonalInfoRequest(), getUserInfoRequest() ] )
+        )
+    )
+
+
+    getUserRequest$ = createEffect( () =>
+        this.actions$.pipe(
+            ofType( getUserInfoRequest ),
+            concatMap( () =>
+                this.authService.userProfileUserGet().pipe(
+                    mergeMap( ( user: User ) => of( getUserSuccess( { user: user } ) ) ),
+                    catchError( error => of( error( { error: error } ) ) )
+                )
+            )
         )
     )
 
@@ -60,28 +72,13 @@ export class AuthEffects
             ofType( getUserInfoRequest ),
             concatMap( () =>
                 this.authService.userProfilePersonalGet().pipe(
-                    mergeMap( ( user: User ) =>
-                        of( getUserInfoSuccess( { user: user } ) )
-                    ),
+                    mergeMap( ( userInfo: UserInfo ) => of( getUserInfoSuccess( { userInfo: userInfo } ) ) ),
                     catchError( error => of( error( { error: error } ) ) )
                 )
             )
         )
     )
 
-    // getPersonalInfoRequest$ = createEffect( () =>
-    //     this.actions$.pipe(
-    //         ofType( getPersonalInfoRequest ),
-    //         concatMap( () =>
-    //             this.authService.userProfilePersonalGet().pipe(
-    //                 mergeMap( ( personalInfo: TypePersonalInfo ) =>
-    //                     of( getPersonalInfoSuccess( { personalInfo: personalInfo } ) )
-    //                 ),
-    //                 catchError( error => of( error( { error: error } ) ) )
-    //             )
-    //         )
-    //     )
-    // )
 
     registerAttempt$ = createEffect( () =>
         this.actions$.pipe
@@ -89,11 +86,8 @@ export class AuthEffects
             ofType( registerRequest ),
             concatMap( ( { registrationRequestUser } ) =>
                 this.authService.userRegistrationSchoolPost( registrationRequestUser ).pipe(
-                    mergeMap( ( user: User ) =>
-                        of( registerSuccess( { user: user } ) ) ),
-                    catchError(
-                        error =>
-                            of( error( { error: error } ) )
+                    mergeMap( () => of( registerSuccess() ) ),
+                    catchError( error => of( error( { error: error } ) )
                     )
                 )
             )

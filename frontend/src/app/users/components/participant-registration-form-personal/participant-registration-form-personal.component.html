@@ -9,35 +9,35 @@
                 </div>
             </div>
             <br/>
-<!--            <ng-container *ngIf="personalInfo$ | async as personalInfo">-->
-<!--                <div class="form-group row">-->
-<!--                    <label class="col-sm-4 col-form-label">Имя:</label>-->
-<!--                    <div class="col-sm-4">-->
-<!--                        <input class="form-control" disabled type="text" [value]="personalInfo.first_name">-->
-<!--                    </div>-->
-<!--                </div>-->
-<!--                <br/>-->
-<!--                <div class="form-group row">-->
-<!--                    <label class="col-sm-4 col-form-label">Фамилия:</label>-->
-<!--                    <div class="col-sm-4">-->
-<!--                        <input class="form-control" disabled type="text" [value]="personalInfo.second_name">-->
-<!--                    </div>-->
-<!--                </div>-->
-<!--                <br/>-->
-<!--                <div class="form-group row">-->
-<!--                    <label class="col-sm-4 col-form-label">Отчество:</label>-->
-<!--                    <div class="col-sm-4">-->
-<!--                        <input class="form-control" disabled type="text" [value]="personalInfo.middle_name">-->
-<!--                    </div>-->
-<!--                </div>-->
-<!--                <br/>-->
-<!--                <div class="form-group row">-->
-<!--                    <label class="col-sm-4 col-form-label">Дата рождения:</label>-->
-<!--                    <div class="col-sm-4">-->
-<!--                        <input class="form-control" disabled type="date" [value]="personalInfo.date_of_birth">-->
-<!--                    </div>-->
-<!--                </div>-->
-<!--            </ng-container>-->
+            <ng-container *ngIf="userInfo$ | async as userInfo">
+                <div class="form-group row">
+                    <label class="col-sm-4 col-form-label">Имя:</label>
+                    <div class="col-sm-4">
+                        <input class="form-control" disabled type="text" [value]="userInfo.first_name">
+                    </div>
+                </div>
+                <br/>
+                <div class="form-group row">
+                    <label class="col-sm-4 col-form-label">Фамилия:</label>
+                    <div class="col-sm-4">
+                        <input class="form-control" disabled type="text" [value]="userInfo.second_name">
+                    </div>
+                </div>
+                <br/>
+                <div class="form-group row">
+                    <label class="col-sm-4 col-form-label">Отчество:</label>
+                    <div class="col-sm-4">
+                        <input class="form-control" disabled type="text" [value]="userInfo.middle_name">
+                    </div>
+                </div>
+                <br/>
+                <div class="form-group row">
+                    <label class="col-sm-4 col-form-label">Дата рождения:</label>
+                    <div class="col-sm-4">
+                        <input class="form-control" disabled type="date" [value]="userInfo.date_of_birth">
+                    </div>
+                </div>
+            </ng-container>
             <br/>
             <div class="form-group row">
                 <label class="col-sm-4 col-form-label">Место рождения <span class="accent_red">*</span>:</label>

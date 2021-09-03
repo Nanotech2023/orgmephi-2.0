@@ -12,7 +12,7 @@
 import { StudentInfo } from './studentInfo';
 import { Group } from './group';
 import { SchoolInfo } from './schoolInfo';
-import { User } from './user';
+import { UserInfo } from './userInfo';
 
 
 export interface UserFull { 
@@ -22,7 +22,7 @@ export interface UserFull {
     school_info?: SchoolInfo;
     student_info?: StudentInfo;
     type?: UserFull.TypeEnum;
-    user_info?: User;
+    user_info?: UserInfo;
     username: string;
 }
 export namespace UserFull {

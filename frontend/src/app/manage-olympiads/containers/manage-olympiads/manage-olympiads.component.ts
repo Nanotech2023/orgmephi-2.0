@@ -34,7 +34,7 @@ export class ManageOlympiadsComponent implements OnInit
 
     ngOnInit(): void
     {
-        this.store.reload( true )
+        this.store.reload()
     }
 
     getRowNodeId( data: User ): number | undefined

@@ -1,6 +1,6 @@
 import { createFeatureSelector, createSelector, MemoizedSelector } from '@ngrx/store'
 import { featureKey, State } from '@/auth/store/auth.reducer'
-import { ErrorValue, CSRFPairUser, User } from '@/auth/api/models'
+import { CSRFPairUser, User, UserInfo } from '@/auth/api/models'
 
 
 export const selectFeature: MemoizedSelector<object, State> = createFeatureSelector<State>( featureKey )
@@ -11,23 +11,22 @@ export const selectApiKeys: MemoizedSelector<State, CSRFPairUser | null> = creat
         state.csrfTokens
 )
 
-export const selectIsAuthenticated: MemoizedSelector<State, boolean> = createSelector(
+export const selectIsAuthorized: MemoizedSelector<State, boolean> = createSelector(
     selectFeature,
     ( state: State ) =>
         state.csrfTokens !== null
 )
 
-export const selectUserInfo: MemoizedSelector<State, User | null> = createSelector(
+export const selectUser: MemoizedSelector<State, User | null> = createSelector(
     selectFeature,
     ( state: State ) =>
         state.user
 )
-
-// export const selectPersonalInfo: MemoizedSelector<State, TypePersonalInfo | null> = createSelector(
-//     selectFeature,
-//     ( state: State ) =>
-//         state.personalInfo
-// )
+export const selectUserInfo: MemoizedSelector<State, UserInfo | null> = createSelector(
+    selectFeature,
+    ( state: State ) =>
+        state.userInfo
+)
 
 export const selectIsParticipant: MemoizedSelector<State, boolean>= createSelector(
     selectFeature,
@@ -39,10 +38,4 @@ export const selectAccessToManagePages: MemoizedSelector<State, boolean> = creat
     selectFeature,
     ( state: State ) =>
         state.user?.role === User.RoleEnum.Creator || state.user?.role === User.RoleEnum.Admin || state.user?.role === User.RoleEnum.System
-)
-
-export const selectError: MemoizedSelector<State, ErrorValue[] | null> = createSelector(
-    selectFeature,
-    ( state: State ) =>
-        state.errors
 )

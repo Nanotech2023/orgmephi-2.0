@@ -14,20 +14,20 @@ import { Document } from './document';
 import { Location } from './location';
 
 
-export interface User { 
+export interface UserInfo { 
     date_of_birth?: string | null;
     document?: Document | null;
     dwelling?: Location | null;
     email?: string | null;
     first_name?: string | null;
-    gender?: User.GenderEnum | null;
+    gender?: UserInfo.GenderEnum | null;
     limitations?: UserLimitations | null;
     middle_name?: string | null;
     place_of_birth?: string | null;
     second_name?: string | null;
     readonly user_id: number;
 }
-export namespace User {
+export namespace UserInfo {
     export type GenderEnum = 'Male' | 'Female';
     export const GenderEnum = {
         Male: 'Male' as GenderEnum,
