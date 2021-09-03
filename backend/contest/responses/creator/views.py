@@ -1,10 +1,9 @@
 import io
-
 from flask import request, send_file
-from common import get_current_app, get_current_module
-from common.util import db_get_or_raise, db_get_list, db_get_one_or_none
+from common import get_current_app, get_current_module, get_current_db
+from common.util import db_get_or_raise, db_get_list
 from contest.responses.util import *
-from contest.responses.model_schemas.schemas import ResponseStatusResponseSchema, AppealSchema
+from contest.responses.model_schemas.schemas import AnswerSchema
 from .schemas import *
 
 db = get_current_db()
@@ -12,10 +11,46 @@ module = get_current_module()
 app = get_current_app()
 
 
-@module.route('/contest/<int:contest_id>/task/<int:task_id>/user/<int:user_id>', methods=['GET'])
-def user_answer_for_task_by_id(contest_id, task_id, user_id):
+@module.route('/contest/<int:contest_id>/user/<int:user_id>/response', methods=['GET'],
+              output_schema=AllUserAnswersResponseSchema)
+def get_user_by_id_all_answers(contest_id, user_id):
     """
-    Get user answer for the task
+    Get all user answers for the contest
+    ---
+    get:
+      security:
+        - JWTAccessToken: []
+      parameters:
+        - in: path
+          description: Id of the contest
+          name: contest_id
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the user
+          name: user_id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: AllUserAnswersResponseSchema
+        '403':
+          description: Not enough rights for current user
+        '404':
+          description: User or contest not found
+    """
+    return get_all_user_answers(user_id, contest_id), 200
+
+
+@module.route('/contest/<int:contest_id>/task/<int:task_id>/user/<int:user_id>/plain/file', methods=['GET'])
+def user_answer_for_task_by_id_plain_file(contest_id, task_id, user_id):
+    """
+    Get user answer file for plain task
     ---
     get:
       security:
@@ -60,13 +95,55 @@ def user_answer_for_task_by_id(contest_id, task_id, user_id):
           description: User, contest or task not found
     """
     user_answer = user_answer_get(user_id, contest_id, task_id)
-    return send_file(io.BytesIO(user_answer.answer),
+    return send_file(io.BytesIO(user_answer.answer_file),
                      attachment_filename=f'userid_{user_id}_taskid_{task_id}.{user_answer.filetype.value}',
                      mimetype=get_mimetype(user_answer.filetype.value)), 200
 
 
+@module.route('/contest/<int:contest_id>/task/<int:task_id>/user/<int:user_id>', methods=['GET'],
+              output_schema=AnswerSchema)
+def user_answer_for_task_by_id(contest_id, task_id, user_id):
+    """
+    Get user answer for task
+    ---
+    get:
+      security:
+        - JWTAccessToken: []
+      parameters:
+        - in: path
+          description: Id of the contest
+          name: contest_id
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the task
+          name: task_id
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the user
+          name: user_id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: AnswerSchema
+        '403':
+          description: Not enough rights for current user
+        '404':
+          description: User, contest or task not found
+    """
+    return user_answer_get(user_id, contest_id, task_id), 200
+
+
 @module.route('/contest/<int:contest_id>/task/<int:task_id>/user/<int:user_id>/<string:filetype>', methods=['POST'])
-def user_answer_for_task_by_id_post(contest_id, task_id, user_id, filetype):
+def user_answer_for_task_by_id_post_plain_file(contest_id, task_id, user_id, filetype):
     """
     Add user answer for a task
     ---
@@ -112,24 +189,34 @@ def user_answer_for_task_by_id_post(contest_id, task_id, user_id, filetype):
           description: Not enough rights for current user
         '404':
           description: User, contest or task not found
+        '409':
+          description: Olympiad is over or file is too large
     """
-    user_answer_post(request.data, filetype, user_id, contest_id, task_id)
+    check_task_type(task_id, answer_dict['PlainAnswerFile'])
+    user_answer_post_file(request.data, filetype, user_id, contest_id, task_id)
     return {}, 200
 
 
-@module.route('/contest/<int:contest_id>/user/<int:user_id>/response', methods=['GET'],
-              output_schema=AllUserAnswersResponseSchema)
-def get_user_all_answers(contest_id, user_id):
+@module.route('/contest/<int:contest_id>/task/<int:task_id>/user/<int:user_id>/plain', methods=['POST'],
+              input_schema=PlainAnswerRequestSchema)
+def user_answer_for_task_by_id_post_plain_text(contest_id, task_id, user_id):
     """
-    Get all user answers for the contest
+    Add user answer for a task
     ---
-    get:
+    post:
       security:
         - JWTAccessToken: []
+        - CSRFAccessToken: []
       parameters:
         - in: path
           description: Id of the contest
           name: contest_id
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the task
+          name: task_id
           required: true
           schema:
             type: integer
@@ -139,43 +226,46 @@ def get_user_all_answers(contest_id, user_id):
           required: true
           schema:
             type: integer
+      requestBody:
+        content:
+          application/json:
+            schema: PlainAnswerRequestSchema
       responses:
         '200':
           description: OK
-          content:
-            application/json:
-              schema: AllUserAnswersResponseSchema
         '403':
           description: Not enough rights for current user
         '404':
-          description: User or contest not found
+          description: User, contest or task not found
+        '409':
+          description: Olympiad is over
     """
-    user_work = get_user_in_contest_work(user_id, contest_id)
-    if user_work.answers is None:
-        raise NotFound('user_response.answers', 'for user %d' % user_id)
-    answers = user_work.answers
-    return {
-               "user_id": user_work.user_id,
-               "work_id": user_work.work_id,
-               "contest_id": user_work.contest_id,
-               "user_answers": answers
-           }, 200
+    check_task_type(task_id, answer_dict['PlainAnswerText'])
+    values = request.marshmallow
+    user_answer_post(user_id, contest_id, task_id, values, 'PlainAnswerText')
+    return {}, 200
 
 
-@module.route('/contest/<int:contest_id>/user/<int:user_id>/status', methods=['GET'],
-              output_schema=ResponseStatusResponseSchema)
-def user_status_and_mark_for_response_by_id(contest_id, user_id):
+@module.route('/contest/<int:contest_id>/task/<int:task_id>/user/<int:user_id>/range', methods=['POST'],
+              input_schema=RangeAnswerRequestSchema)
+def user_answer_for_task_by_id_range(contest_id, task_id, user_id):
     """
-    Get user's status and mark for response
+    Add user answer for a task
     ---
-    get:
-      summary:
+    post:
       security:
         - JWTAccessToken: []
+        - CSRFAccessToken: []
       parameters:
         - in: path
           description: Id of the contest
           name: contest_id
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the task
+          name: task_id
           required: true
           schema:
             type: integer
@@ -185,25 +275,80 @@ def user_status_and_mark_for_response_by_id(contest_id, user_id):
           required: true
           schema:
             type: integer
+      requestBody:
+        content:
+          application/json:
+            schema: RangeAnswerRequestSchema
       responses:
         '200':
           description: OK
-          content:
-            application/json:
-              schema: ResponseStatusResponseSchema
         '403':
-          description: Invalid role of current user
+          description: Not enough rights for current user
         '404':
-          description: User or contest not found
+          description: User, contest or task not found
+        '409':
+          description: Olympiad is over
     """
-    return user_answer_status_get(user_id, contest_id), 200
+    check_task_type(task_id, answer_dict['RangeAnswer'])
+    values = request.marshmallow
+    user_answer_post(user_id, contest_id, task_id, values, 'RangeAnswer')
+    return {}, 200
+
+
+@module.route('/contest/<int:contest_id>/task/<int:task_id>/user/<int:user_id>/multiple', methods=['POST'],
+              input_schema=MultipleAnswerRequestSchema)
+def user_answer_for_task_by_id_multiple(contest_id, task_id, user_id):
+    """
+    Add user answer for a task
+    ---
+    post:
+      security:
+        - JWTAccessToken: []
+        - CSRFAccessToken: []
+      parameters:
+        - in: path
+          description: Id of the contest
+          name: contest_id
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the task
+          name: task_id
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the user
+          name: user_id
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        content:
+          application/json:
+            schema: MultipleAnswerRequestSchema
+      responses:
+        '200':
+          description: OK
+        '403':
+          description: Not enough rights for current user
+        '404':
+          description: User, contest or task not found
+        '409':
+          description: Olympiad is over
+    """
+    check_task_type(task_id, answer_dict['MultipleChoiceAnswer'])
+    values = request.marshmallow
+    user_answer_post(user_id, contest_id, task_id, values, 'MultipleChoiceAnswer')
+    return {}, 200
 
 
 @module.route('/contest/<int:contest_id>/user/<int:user_id>/status', methods=['POST'],
-              input_schema=UserResponseStatusMarkResponseSchema)
-def user_status_and_mark_for_response_by_id_post(contest_id, user_id):
+              input_schema=UserResponseStatusResponseSchema)
+def user_status_for_response_by_id_post(contest_id, user_id):
     """
-    Set user's status and mark for response, only for inspector
+    Set user's status for response, only for inspector
     ---
     post:
       security:
@@ -226,7 +371,7 @@ def user_status_and_mark_for_response_by_id_post(contest_id, user_id):
         required: true
         content:
           application/json:
-            schema: UserResponseStatusMarkResponseSchema
+            schema: UserResponseStatusResponseSchema
       responses:
         '200':
           description: OK
@@ -238,20 +383,22 @@ def user_status_and_mark_for_response_by_id_post(contest_id, user_id):
           description: User or contest not found
     """
     values = request.marshmallow
-    user_answer_status_post(values, user_id, contest_id)
+    user_work = get_user_in_contest_work(user_id, contest_id)
+    user_work.work_status = values['status']
+    db.session.commit()
     return {}, 200
 
 
-@module.route('/contest/<int:contest_id>/user/<int:user_id>/status/history', methods=['GET'],
-              output_schema=UserResponseStatusHistoryResponseSchema)
-def user_status_history_for_response_by_id(contest_id, user_id):
+@module.route('/contest/<int:contest_id>/user/<int:user_id>/status', methods=['GET'],
+              output_schema=UserResponseStatusResponseSchema)
+def user_status_for_response_by_id(contest_id, user_id):
     """
-    Get status history of user's work
+    Get user's status for response, only for inspector
     ---
     get:
-      summary:
       security:
         - JWTAccessToken: []
+        - CSRFAccessToken: []
       parameters:
         - in: path
           description: Id of the contest
@@ -270,22 +417,19 @@ def user_status_history_for_response_by_id(contest_id, user_id):
           description: OK
           content:
             application/json:
-              schema: UserResponseStatusHistoryResponseSchema
+              schema: UserResponseStatusResponseSchema
+        '400':
+          description: Incorrect mark or status
         '403':
-          description: Not enough rights for current user
+          description: Invalid role of current user
         '404':
           description: User or contest not found
     """
     user_work = get_user_in_contest_work(user_id, contest_id)
-    status = user_work.statuses
-    return {
-               'user_id': user_id,
-               'contest_id': contest_id,
-               'history': status
-           }, 200
+    return user_work, 200
 
 
-@module.route('/contest/<int:contest_id>/list/', methods=['GET'],
+@module.route('/contest/<int:contest_id>/list', methods=['GET'],
               output_schema=ContestResultSheetResponseSchema)
 def get_list_for_stage(contest_id):
     """
@@ -317,11 +461,140 @@ def get_list_for_stage(contest_id):
            }, 200
 
 
-@module.route('/contest/<int:contest_id>/user/<int:user_id>/appeal', methods=['POST'],
-              input_schema=AppealMessageRequestSchema, output_schema=AppealCreateInfoResponseSchema)
-def user_response_appeal_by_id(contest_id, user_id):
+@module.route('/contest/<int:contest_id>/task/<int:task_id>/user/<int:user_id>/mark', methods=['POST'],
+              input_schema=UserAnswerMarkResponseSchema)
+def user_answer_task_mark_post(contest_id, user_id, task_id):
     """
-    Create appeal for user's response
+    Add mark for user's response
+    ---
+    post:
+      security:
+        - JWTAccessToken: []
+        - CSRFAccessToken: []
+      parameters:
+        - in: path
+          description: Id of the contest
+          name: contest_id
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the task
+          name: task_id
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the user
+          name: user_id
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: UserAnswerMarkResponseSchema
+      responses:
+        '200':
+          description: OK
+        '404':
+          description: User or contest not found
+    """
+    values = request.marshmallow
+    get_user_in_contest_work(user_id, contest_id)
+    answer = db_get_or_raise(BaseAnswer, 'task_id', task_id)
+    answer.mark = values['mark']
+    db.session.commit()
+    return {}, 200
+
+
+@module.route('/contest/<int:contest_id>/task/<int:task_id>/user/<int:user_id>/mark', methods=['GET'],
+              output_schema=UserAnswerMarkResponseSchema)
+def user_answer_task_mark(contest_id, user_id, task_id):
+    """
+    Get mark for user's response
+    ---
+    get:
+      security:
+        - JWTAccessToken: []
+        - CSRFAccessToken: []
+      parameters:
+        - in: path
+          description: Id of the contest
+          name: contest_id
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the task
+          name: task_id
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the user
+          name: user_id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: UserAnswerMarkResponseSchema
+        '404':
+          description: User or contest not found
+    """
+    get_user_in_contest_work(user_id, contest_id)
+    answer = db_get_or_raise(BaseAnswer, 'task_id', task_id)
+    return answer, 200
+
+
+@module.route('/contest/<int:contest_id>/user/<int:user_id>/time', methods=['GET'],
+              output_schema=UserTimeResponseRequestSchema)
+def user_by_id_time_left(contest_id, user_id):
+    """
+    Get time left for user's contest
+    ---
+    get:
+      security:
+        - JWTAccessToken: []
+        - CSRFAccessToken: []
+      parameters:
+        - in: path
+          description: Id of the contest
+          name: contest_id
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the user
+          name: user_id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: UserTimeResponseRequestSchema
+        '404':
+          description: User or contest not found
+    """
+    user_work = get_user_in_contest_work(user_id, contest_id)
+    return {
+        "time": calculate_time_left(user_work)
+           }, 200
+
+
+@module.route('/contest/<int:contest_id>/user/<int:user_id>/time', methods=['POST'],
+              input_schema=UserTimeResponseRequestSchema)
+def user_by_id_extend_time(contest_id, user_id):
+    """
+    Extend contest duration for user
     ---
     post:
       security:
@@ -344,27 +617,26 @@ def user_response_appeal_by_id(contest_id, user_id):
         required: true
         content:
           application/json:
-            schema: AppealMessageRequestSchema
+            schema: UserTimeResponseRequestSchema
       responses:
         '200':
           description: OK
-          content:
-            application/json:
-              schema: AppealCreateInfoResponseSchema
         '404':
           description: User or contest not found
     """
     values = request.marshmallow
-    return user_response_appeal_create(values, user_id, contest_id), 200
+    user_work: Response = get_user_in_contest_work(user_id, contest_id)
+    user_work.time_extension = values['time']
+    db.session.commit()
+    return {}, 200
 
 
-@module.route('/contest/<int:contest_id>/appeal/<int:appeal_id>/reply', methods=['PATCH'],
-              input_schema=AppealReplyRequestSchema, output_schema=AppealSchema)
-def reply_to_user_appeal(contest_id, appeal_id):
+@module.route('/contest/<int:contest_id>/user/<int:user_id>/finish', methods=['POST'])
+def user_by_id_finish_contest(contest_id, user_id):
     """
-    Reply appeal for the user's response
+    Finish user's contest
     ---
-    patch:
+    post:
       security:
         - JWTAccessToken: []
         - CSRFAccessToken: []
@@ -376,48 +648,49 @@ def reply_to_user_appeal(contest_id, appeal_id):
           schema:
             type: integer
         - in: path
-          description: Id of the appeal
-          name: appeal_id
+          description: Id of the user
+          name: user_id
           required: true
           schema:
             type: integer
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema: AppealReplyRequestSchema
       responses:
         '200':
           description: OK
-          content:
-            application/json:
-              schema: AppealSchema
         '404':
           description: User or contest not found
     """
-    values = request.marshmallow
-    message = values['message']
-    accepted = values['accepted']
-    if accepted:
-        appeal_new_status = appeal_status['AppealAccepted']
-        response_new_status = 'Accepted'
-    else:
-        appeal_new_status = appeal_status['AppealRejected']
-        response_new_status = 'Rejected'
-    appeal = db_get_or_raise(Appeal, 'appeal_id', appeal_id)
-    AppealSchema(load_instance=True).load(
-        {
-            "appeal_status": appeal_new_status,
-            "appeal_response": message
-         }, session=db.session, instance=appeal)
-    db.session.commit()
-    last_status = db_get_one_or_none(ResponseStatus, 'status_id', appeal.work_status)
-    if 'mark' in values and accepted:
-        new_mark = values['mark']
-    else:
-        new_mark = last_status.mark
-    new_response_status = add_response_status(last_status.work_id, status=response_new_status,
-                                              mark=new_mark)
-    db.session.add(new_response_status)
-    db.session.commit()
-    return appeal, 200
+    user_work = get_user_in_contest_work(user_id, contest_id)
+    finish_contest(user_work)
+    return {}, 200
+
+
+@module.route('/contest/<int:contest_id>/check', methods=['POST'])
+def auto_check_users_answers(contest_id):
+    """
+    Auto check all users' responses for contest
+    ---
+    post:
+      security:
+        - JWTAccessToken: []
+        - CSRFAccessToken: []
+      parameters:
+        - in: path
+          description: Id of the contest
+          name: contest_id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: OK
+        '404':
+          description: Contest not found
+        '409':
+          description: Contest error
+    """
+    is_contest_over(contest_id)
+    users_in_contest = db_get_list(Response, 'contest_id', contest_id)
+    for user_work in users_in_contest:
+        if user_work.status == work_status['InProgress'] or user_work.status == work_status['NotChecked']:
+            check_user_work(user_work)
+    return {}, 200
