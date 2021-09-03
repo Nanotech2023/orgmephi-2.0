@@ -1,3 +1,5 @@
+from datetime import timedelta
+
 from marshmallow import Schema, fields
 from marshmallow_enum import EnumField
 
@@ -35,9 +37,10 @@ class BaseOlympiadIdResponseTaskCreatorSchema(Schema):
 
 
 class CreateSimpleContestRequestTaskCreatorSchema(Schema):
-    start_time = fields.DateTime(required=True)
-    end_time = fields.DateTime(required=True)
-    contest_duration = fields.TimeDelta(required=False)
+    start_date = fields.DateTime(required=True)
+    end_date = fields.DateTime(required=True)
+    end_of_enroll_date = fields.DateTime(required=False)
+    contest_duration = fields.TimeDelta(required=False, default=timedelta(seconds=0))
     result_publication_date = fields.DateTime(required=False)
     visibility = fields.Boolean(required=True)
     stage_id = fields.Int(required=False)

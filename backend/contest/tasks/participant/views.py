@@ -5,7 +5,7 @@ from flask import send_file, request
 from common import get_current_module
 from common.errors import AlreadyExists, TimeOver, InsufficientData
 from common.util import send_pdf
-from contest.responses.models import Response
+from contest.responses.models import ResponseStatusEnum
 from contest.responses.util import get_user_in_contest_work
 from contest.tasks.model_schemas.contest import VariantSchema
 from contest.tasks.model_schemas.olympiad import ContestSchema
@@ -52,8 +52,16 @@ def get_variant_self(id_contest):
           description: User not found
     """
 
-    # TODO Show variant while contest IN PROGRESS -> MARAT
-    # if current_response.statuses = ResponseStatusEnum.???
+    current_user = db_get_or_raise(UserInContest, "user_id", str(jwt_get_id()))
+    current_response = get_user_in_contest_work(str(jwt_get_id()), id_contest)
+
+    # Contest not started
+    if current_response.status != ResponseStatusEnum.in_progress:
+        raise ContestContentAccessDenied()
+
+    # Contest ended
+    if current_user.completed_the_contest:
+        raise TimeOver("olympiad")
 
     variant = get_user_variant_if_possible(id_contest)
     return variant, 200
@@ -169,6 +177,7 @@ def change_user_location_in_contest(id_contest):
 
     current_contest: SimpleContest = get_contest_if_possible(id_contest)
 
+    # Can't enroll after deadline
     if datetime.utcnow().date() > current_contest.end_of_enroll_date:
         raise TimeOver("Time for enrolling is over")
 
@@ -223,11 +232,13 @@ def get_all_tasks_self(id_contest):
     """
 
     current_user = db_get_or_raise(UserInContest, "user_id", str(jwt_get_id()))
-    # current_response = db_get_or_raise(Response, "user_id", str(jwt_get_id()))
+    current_response = get_user_in_contest_work(str(jwt_get_id()), id_contest)
 
-    # TODO Show variant while contest IN PROGRESS -> MARAT
-    # if current_response.statuses = ResponseStatusEnum.???
+    # Contest not started
+    if current_response.status != ResponseStatusEnum.in_progress:
+        raise ContestContentAccessDenied()
 
+    # Contest ended
     if current_user.completed_the_contest:
         raise TimeOver("olympiad")
 
@@ -276,10 +287,13 @@ def get_task_image_self(id_contest, id_task):
     """
 
     current_user = db_get_or_raise(UserInContest, "user_id", str(jwt_get_id()))
+    current_response = get_user_in_contest_work(str(jwt_get_id()), id_contest)
 
-    # TODO Show variant while contest IN PROGRESS -> MARAT
-    # if current_response.statuses = ResponseStatusEnum.???
+    # Contest not started
+    if current_response.status != ResponseStatusEnum.in_progress:
+        raise ContestContentAccessDenied()
 
+    # Contest ended
     if current_user.completed_the_contest:
         raise TimeOver("olympiad")
 
@@ -329,6 +343,13 @@ def get_user_certificate_self(id_contest):
         '404':
           description: User not found
     """
+
+    current_contest: SimpleContest = get_contest_if_possible(id_contest)
+
+    # Try to see the results before contest
+    if datetime.utcnow().date() < current_contest.result_publication_date:
+        raise ContestIsStillOnReview()
+
     current_contest = get_contest_if_possible(id_contest)
     current_user = db_get_or_raise(User, 'id', jwt_get_id())
     unfilled = current_user.unfilled()
