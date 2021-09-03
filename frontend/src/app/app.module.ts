@@ -9,7 +9,6 @@ import { OlympiadsModule } from '@/olympiads/olympiads.module'
 import { AppRoutingModule } from '@/app-routing.module'
 import { environment } from '@environments/environment'
 import { AppComponent } from '@/app.component'
-import { UsersModule } from '@/users/users.module'
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations'
 import { AuthService } from '@/auth/api/auth.service'
 import { ManageOlympiadsModule } from '@/manage-olympiads/manage-olympiads.module'
@@ -28,14 +27,12 @@ import { AuthGuardService } from '@/shared/auth.guard.service'
         LayoutModule,
         AuthModule,
         OlympiadsModule,
-        UsersModule,
         ManageUsersModule,
         ManageOlympiadsModule,
         AppRoutingModule,
         StoreModule.forRoot( {} ),
         EffectsModule.forRoot( [] ),
-        environment.production ? [] : StoreDevtoolsModule.instrument(),
-        BrowserAnimationsModule
+        environment.production ? [] : StoreDevtoolsModule.instrument()
     ],
     providers: [
         { provide: AuthService },
