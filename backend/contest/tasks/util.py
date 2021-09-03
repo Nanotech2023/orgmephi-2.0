@@ -18,23 +18,33 @@ app = get_current_app()
 
 
 def get_last_variant_in_contest(current_contest):
+    """
+    Get last variant number in current contest
+    :param current_contest:
+    :return:
+    """
     variants = current_contest.variants.all()
     if len(variants) > 0:
-        new_variant = max(variant.variant_number for variant in variants)
+        return max(variant.variant_number for variant in variants)
     else:
-        new_variant = 0
-
-    return new_variant
+        return 0
 
 
 def generate_variant(id_contest, user_id):
+    """
+    Generate random variant number for user
+    :param id_contest:
+    :param user_id:
+    :return:
+    """
     current_contest = db_get_or_raise(Contest, "contest_id", id_contest)
-    variants_number = len(current_contest.variants.all())
-    if variants_number == 0:
-        raise InsufficientData('variant', 'variants in contest')
-    random_number = secrets.randbelow(variants_number * 420)
-    variant = (user_id + random_number) % variants_number + 1
-    return variant
+    variant_numbers_list = [variant.variant_number for variant in current_contest.variants.all()]
+    variants_amount = len(variant_numbers_list)
+    if variants_amount == 0:
+        raise DataConflict('No variants found in current contest')
+    random_number = secrets.randbelow(variants_amount * 420)
+    final_variant_number = variant_numbers_list[(user_id + random_number) % variants_amount]
+    return final_variant_number
 
 
 # Functions for tasks/participant
