@@ -1,6 +1,6 @@
 import io
 from flask import request, send_file
-from common import get_current_app, get_current_module, get_current_db
+from common import get_current_app, get_current_module
 from common.jwt_verify import jwt_get_id
 from common.util import db_get_or_raise
 from contest.responses.model_schemas.schemas import AnswerSchema
@@ -10,6 +10,35 @@ from contest.responses.creator.schemas import *
 db = get_current_db()
 module = get_current_module()
 app = get_current_app()
+
+
+@module.route('/contest/<int:contest_id>/user/self/create', methods=['POST'])
+def create_user_self_response_for_contest(contest_id):
+    """
+    Create current user's response for contest
+    ---
+    post:
+      security:
+        - JWTAccessToken: []
+        - CSRFAccessToken: []
+      parameters:
+        - in: path
+          description: Id of the contest
+          name: contest_id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: OK
+        '404':
+          description: User or contest not found
+        '409':
+          description: Olympiad error
+    """
+    self_user_id = jwt_get_id()
+    create_user_response(contest_id, self_user_id)
+    return {}, 200
 
 
 @module.route('/contest/<int:contest_id>/user/self/response', methods=['GET'],

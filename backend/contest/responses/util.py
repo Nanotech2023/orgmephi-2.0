@@ -1,7 +1,7 @@
 from common import get_current_db
 from .model_schemas.schemas import PlainAnswerTextSchema, RangeAnswerSchema
 from datetime import datetime, timedelta
-from common.errors import NotFound, RequestError
+from common.errors import NotFound, RequestError, AlreadyExists
 from common.util import db_get_one_or_none
 from contest.tasks.models import SimpleContest, RangeTask, MultipleChoiceTask, PlainTask, ContestHoldingTypeEnum, \
     UserInContest
@@ -18,6 +18,7 @@ class OlympiadError(RequestError):
     """
     Olympiad bad timing
     """
+
     def __init__(self, message):
         """
         Create error object
@@ -42,6 +43,23 @@ def get_answer_by_task_id_and_work_id(model, task_id, work_id):
     user_answer = model.query.filter_by(**{"task_id": task_id,
                                            "work_id": work_id}).one_or_none()
     return user_answer
+
+
+def create_user_response(contest_id, user_id):
+    check_contest_time_left(contest_id)
+    user_in_contest = UserInContest.query.filter_by(**{"contest_id": contest_id,
+                                                       "user_id": user_id}).one_or_none()
+    if user_in_contest is None:
+        raise NotFound(field='user_id , contest_id', value='{user_id} , {contest_id}'.format(user_id=user_id,
+                                                                                             contest_id=contest_id))
+    user_work = Response.query.filter_by(**{"contest_id": contest_id,
+                                            "user_id": user_id}).one_or_none()
+    if user_work is None:
+        add_user_response(db.session, user_id, contest_id)
+    else:
+        raise AlreadyExists(field='user_id ,contest_id', value='{user_id} ,{contest_id}'.format(user_id=user_id,
+                                                                                                contest_id=contest_id))
+    db.session.commit()
 
 
 models_dict = {
@@ -95,12 +113,8 @@ def check_contest_time_left(contest_id):
 
 
 def user_answer_post_file(answer_file, filetype, user_id, contest_id, task_id):
-    try:
-        user_work: Response = get_user_in_contest_work(user_id, contest_id)
-        user_work.finish_time = datetime.utcnow()
-    except NotFound:
-        check_contest_time_left(contest_id)
-        user_work = add_user_response(db.session, user_id, contest_id)
+    user_work: Response = get_user_in_contest_work(user_id, contest_id)
+    user_work.finish_time = datetime.utcnow()
     check_contest_duration(user_work)
     user_work.finish_time = datetime.utcnow()
     validate_file_size(answer_file)
@@ -125,12 +139,8 @@ schemas_dict = {
 
 
 def user_answer_post(user_id, contest_id, task_id, values, answer_type):
-    try:
-        user_work: Response = get_user_in_contest_work(user_id, contest_id)
-        user_work.finish_time = datetime.utcnow()
-    except NotFound:
-        check_contest_time_left(contest_id)
-        user_work = add_user_response(db.session, user_id, contest_id)
+    user_work: Response = get_user_in_contest_work(user_id, contest_id)
+    user_work.finish_time = datetime.utcnow()
     check_contest_duration(user_work)
     user_work.finish_time = datetime.utcnow()
     user_answer = get_answer_by_task_id_and_work_id(models_dict.get(answer_type), task_id, user_work.work_id)
@@ -174,7 +184,7 @@ def get_mimetype(filetype):
     }
     return mimetypes.get(filetype)
 
-    # TODO CHECK
+
 def check_contest_duration(user_work: Response):
     contest_duration = db_get_one_or_none(SimpleContest, "contest_id", user_work.contest_id).contest_duration
     time_spent = datetime.utcnow() - user_work.start_time
@@ -198,7 +208,7 @@ def range_answer_check(answer: BaseAnswer):
     range_answer: RangeAnswer = db_get_one_or_none(RangeAnswer, 'answer_id', answer.answer_id)
     range_task: RangeTask = db_get_one_or_none(RangeTask, 'task_id', answer.task_id)
     if range_task.start_value <= range_answer.answer <= range_task.end_value:
-        range_answer.mark = range_task.task_points  # TODO CHECK
+        range_answer.mark = range_task.task_points
     else:
         range_answer.mark = 0
 
@@ -206,9 +216,10 @@ def range_answer_check(answer: BaseAnswer):
 def multiple_answer_check(answer: BaseAnswer):
     multiple_answer: MultipleChoiceAnswer = db_get_one_or_none(MultipleChoiceAnswer, 'answer_id', answer.answer_id)
     multiple_task: MultipleChoiceTask = db_get_one_or_none(MultipleChoiceTask, 'task_id', answer.task_id)
-    user_answers = multiple_answer.answers
+    user_answers = set(multiple_answer.answers)
     answers = multiple_task.answers
     right_answers = [elem['answer'] for elem in answers if elem['is_right_answer']]
+    print(user_answers)
     count = 0
     for elem in user_answers:
         if elem in right_answers:

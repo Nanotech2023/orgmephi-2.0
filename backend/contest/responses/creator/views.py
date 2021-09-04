@@ -1,6 +1,6 @@
 import io
 from flask import request, send_file
-from common import get_current_app, get_current_module, get_current_db
+from common import get_current_app, get_current_module
 from common.util import db_get_or_raise, db_get_list
 from contest.responses.util import *
 from contest.responses.model_schemas.schemas import AnswerSchema
@@ -9,6 +9,40 @@ from .schemas import *
 db = get_current_db()
 module = get_current_module()
 app = get_current_app()
+
+
+@module.route('/contest/<int:contest_id>/user/<int:user_id>/create', methods=['POST'])
+def create_user_response_for_contest(contest_id, user_id):
+    """
+    Create user's response for contest
+    ---
+    post:
+      security:
+        - JWTAccessToken: []
+        - CSRFAccessToken: []
+      parameters:
+        - in: path
+          description: Id of the contest
+          name: contest_id
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the user
+          name: user_id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: OK
+        '404':
+          description: User or contest not found
+        '409':
+          description: Olympiad error
+    """
+    create_user_response(contest_id, user_id)
+    return {}, 200
 
 
 @module.route('/contest/<int:contest_id>/user/<int:user_id>/response', methods=['GET'],
@@ -547,8 +581,8 @@ def user_answer_task_mark(contest_id, user_id, task_id):
         '404':
           description: User or contest not found
     """
-    get_user_in_contest_work(user_id, contest_id)
-    answer = db_get_or_raise(BaseAnswer, 'task_id', task_id)
+    user_work = get_user_in_contest_work(user_id, contest_id)
+    answer = get_answer_by_task_id_and_work_id(BaseAnswer, task_id, user_work.work_id)
     return answer, 200
 
 
