@@ -185,6 +185,31 @@ info:
   version: 1.0.0
 openapi: 3.0.2
 paths:
+  /responses/creator/contest/{contest_id}/user/{user_id}/create:
+    post:
+      parameters:
+      - description: Id of the contest
+        in: path
+        name: contest_id
+        required: true
+        schema:
+          type: integer
+      - description: Id of the user
+        in: path
+        name: user_id
+        required: true
+        schema:
+          type: integer
+      responses:
+        '200':
+          description: OK
+        '404':
+          description: User or contest not found
+        '409':
+          description: Olympiad error
+      security:
+      - JWTAccessToken: []
+      - CSRFAccessToken: []
   /responses/creator/contest/{contest_id}/user/{user_id}/response:
     get:
       parameters:
@@ -692,6 +717,25 @@ paths:
           description: Contest not found
         '409':
           description: Contest error
+      security:
+      - JWTAccessToken: []
+      - CSRFAccessToken: []
+  /responses/participant/contest/{contest_id}/user/self/create:
+    post:
+      parameters:
+      - description: Id of the contest
+        in: path
+        name: contest_id
+        required: true
+        schema:
+          type: integer
+      responses:
+        '200':
+          description: OK
+        '404':
+          description: User or contest not found
+        '409':
+          description: Olympiad error
       security:
       - JWTAccessToken: []
       - CSRFAccessToken: []
