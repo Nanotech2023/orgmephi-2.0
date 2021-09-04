@@ -1,7 +1,7 @@
 from flask import request
 
 from common import get_current_module
-from common.errors import AlreadyExists
+from common.errors import AlreadyExists, InsufficientData
 from common.util import send_pdf
 from contest.responses.util import get_user_in_contest_work
 from contest.tasks.control_users.schemas import *

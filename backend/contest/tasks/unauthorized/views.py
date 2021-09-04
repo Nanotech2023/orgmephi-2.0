@@ -1,6 +1,7 @@
 from flask import request
 
 from common import get_current_module
+from common.errors import InsufficientData
 from common.util import db_get_all
 from contest.tasks.unauthorized.schemas import *
 from contest.tasks.util import *
