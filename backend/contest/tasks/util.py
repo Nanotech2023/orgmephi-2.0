@@ -17,8 +17,8 @@ app = get_current_app()
 def get_last_variant_in_contest(current_contest):
     """
     Get last variant number in current contest
-    :param current_contest:
-    :return:
+    :param current_contest: current contest
+    :return: max number of the variant
     """
     variants = current_contest.variants.all()
     if len(variants) > 0:
@@ -30,9 +30,9 @@ def get_last_variant_in_contest(current_contest):
 def generate_variant(contest_id, user_id):
     """
     Generate random variant number for user
-    :param contest_id:
-    :param user_id:
-    :return:
+    :param contest_id: contest id
+    :param user_id: user id
+    :return: final variant number
     """
     current_contest = db_get_or_raise(Contest, "contest_id", contest_id)
     variant_numbers_list = [variant.variant_number for variant in current_contest.variants.all()]
@@ -50,9 +50,9 @@ def generate_variant(contest_id, user_id):
 def is_user_in_contest(user_id, current_contest):
     """
     Check if user in current contest
-    :param user_id:
-    :param current_contest:
-    :return:
+    :param user_id: user id
+    :param current_contest: current contest
+    :return: boolean value if user in current contest
     """
     return current_contest.users.filter_by(**{"user_id": str(user_id)}).one_or_none() is not None
 
@@ -62,9 +62,9 @@ def is_user_in_contest(user_id, current_contest):
 def is_variant_in_contest(variant_id, current_contest):
     """
     Check if variant in contest
-    :param variant_id:
-    :param current_contest:
-    :return:
+    :param variant_id: variant id
+    :param current_contest: current contest
+    :return: boolean value if variant in contest
     """
     return current_contest.variants.filter_by(**{"variant_id": str(variant_id)}).one_or_none() is not None
 
@@ -72,9 +72,9 @@ def is_variant_in_contest(variant_id, current_contest):
 def is_task_in_variant(task_id, variant):
     """
     Check if task in current variant
-    :param task_id:
-    :param variant:
-    :return:
+    :param task_id: task id
+    :param variant: current variant
+    :return: boolean value if task in current variant
     """
     task = db_get_or_raise(Task, "task_id", task_id)
     return task in variant.tasks
@@ -83,9 +83,9 @@ def is_task_in_variant(task_id, variant):
 def is_task_in_contest(task_id, contest_id):
     """
     Check if task in contest
-    :param task_id:
-    :param contest_id:
-    :return:
+    :param task_id: task id
+    :param contest_id: contest id
+    :return: boolean value if task in contest
     """
 
     current_contest = db_get_or_raise(Contest, "contest_id", contest_id)
@@ -105,7 +105,7 @@ def get_user_contest_if_possible(olympiad_id, stage_id, contest_id):
     :param olympiad_id:
     :param stage_id:
     :param contest_id:
-    :return:
+    :return: user contest
     """
     current_olympiad = db_get_or_raise(Contest, "contest_id", olympiad_id)
 
@@ -114,71 +114,150 @@ def get_user_contest_if_possible(olympiad_id, stage_id, contest_id):
         raise DataConflict('Olympiad type is not composite one')
 
     stage = db_get_or_raise(Stage, "stage_id", str(stage_id))
+
+    # stage is not in current olympiad
     if stage not in current_olympiad.stages:
-        raise InsufficientData('stage_id', 'not in current olympiad')
+        raise DataConflict("Stage is not in current olympiad")
+
     current_contest = db_get_or_raise(Contest, "contest_id", str(contest_id))
+
+    # contest is not in stage
     if current_contest not in stage.contests:
-        raise InsufficientData('contest_id', 'not in current stage')
+        raise DataConflict("Current contest is not in chosen stage")
+
+    # user is not registered
     if not is_user_in_contest(jwt_get_id(), current_contest):
         raise DataConflict("User is not registered for this olympiad")
+
     return current_contest
 
 
+def get_user_simple_contest_if_possible(olympiad_id):
+    """
+    Get contest for user or raise exception
+    :param olympiad_id:
+    :return: user contest
+    """
+    current_olympiad = db_get_or_raise(Contest, "contest_id", olympiad_id)
+
+    # can't get stages
+    if current_olympiad.composite_type == ContestTypeEnum.CompositeContest:
+        raise DataConflict('Olympiad type is not simple one')
+
+    # user is not registered
+    if not is_user_in_contest(jwt_get_id(), current_olympiad):
+        raise DataConflict("User is not registered for this olympiad")
+
+    return current_olympiad
+
+
 def get_user_variant_if_possible(contest_id):
+    """
+    Get user variant if possible
+    :param contest_id:
+    :return: user variant
+    """
     current_contest = db_get_or_raise(Contest, "contest_id", str(contest_id))
+
     if current_contest.composite_type == ContestTypeEnum.CompositeContest:
-        raise InsufficientData('composite_type', 'not Simple contest')
+        raise DataConflict('Current contest type is not simple one')
+
     current_user = db_get_or_raise(UserInContest, "user_id", jwt_get_id())
     variant = current_contest.variants.filter_by(**{"variant_id": str(current_user.variant_id)}).one_or_none()
+
+    # no variant in user profile
     if variant is None:
-        raise InsufficientData("variant_id", "not in this contest")
+        raise DataConflict('User isn\'t linked with any variant')
+
+    # variant is not in contest
     if not is_variant_in_contest(variant.variant_id, current_contest):
-        raise InsufficientData('variant_id', 'not in current contests')
+        raise DataConflict('Variant is not in current contests')
+
     return variant
 
 
 def get_user_tasks_if_possible(contest_id):
+    """
+    Get user tasks if possible (in contest)
+    :param contest_id:
+    :return: user task
+    """
+
     variant = get_user_variant_if_possible(contest_id)
 
-    current_tasks = variant.tasks[:]
+    tasks_list = variant.tasks[:]
 
-    for task in current_tasks:
+    for task in tasks_list:
         if task.task_type == TaskTypeEnum.MultipleChoiceTask:
             task.answers = [answer['is_right_answer'] for answer in task.answers]
 
-    return current_tasks
+    return tasks_list
 
 
 def get_user_task_if_possible(contest_id, task_id):
+    """
+    Get user task if possible
+    :param contest_id: contest id
+    :param task_id: task id
+    :return: user tasks
+    """
+
     variant = get_user_variant_if_possible(contest_id)
     if is_task_in_variant(task_id, variant):
         task = db_get_or_raise(Task, "task_id", str(task_id))
         return task
     else:
-        raise InsufficientData('task_id', 'not in current variant')
+        raise DataConflict('Task is not in current variant')
 
 
 # Functions for tasks/contest
 
 def get_contest_if_possible_from_stage(olympiad_id, stage_id, contest_id):
+    """
+    Get contest if possible (from stage)
+    :param olympiad_id: olympiad id
+    :param stage_id: stage id
+    :param contest_id: contest id
+    :return: contest
+    """
+
     current_olympiad = db_get_or_raise(Contest, "contest_id", olympiad_id)
+
+    # Can't get stages in Simple contest
     if current_olympiad.composite_type == ContestTypeEnum.SimpleContest:
-        raise InsufficientData('composite_type', 'not Composite contest')
+        raise DataConflict('Olympiad type is not composite one')
+
     stage = db_get_or_raise(Stage, "stage_id", str(stage_id))
-    current_contest = db_get_or_raise(Contest, "contest_id", str(contest_id))
+
     if stage not in current_olympiad.stages:
-        raise InsufficientData('stage_id', 'not in current olympiad')
+        raise DataConflict('Stage is not current olympiad')
+
+    current_contest = db_get_or_raise(Contest, "contest_id", str(contest_id))
+
     if current_contest not in stage.contests:
-        raise InsufficientData('contest_id', 'not in current stage')
+        raise DataConflict('Contest is not current stage')
+
     return current_contest
 
 
 def get_contest_if_possible(contest_id):
+    """
+    Get contest
+    :param contest_id: contest id
+    :return: contest
+    """
     current_contest = db_get_or_raise(Contest, "contest_id", str(contest_id))
     return current_contest
 
 
 def get_base_contest(current_contest):
+    """
+    Get base contest
+    :param current_contest: current contest
+    :return: base contest
+    """
+
+    # If current contest doesn't have base contest
     if current_contest.base_contest is not None:
         return current_contest.base_contest
 
@@ -196,11 +275,15 @@ def get_variant_if_possible(contest_id, variant_id):
     :return:
     """
     current_contest = db_get_or_raise(Contest, "contest_id", str(contest_id))
+
     if current_contest.composite_type == ContestTypeEnum.CompositeContest:
-        raise InsufficientData('composite_type', 'not Simple contest')
+        raise DataConflict('Contest is not Simple')
+
     variant = current_contest.variants.filter_by(**{"variant_id": str(variant_id)}).one_or_none()
+
     if not is_variant_in_contest(variant.variant_id, current_contest):
-        raise InsufficientData('variant_id', 'not in current contests')
+        raise DataConflict('Variant is not in current stage')
+
     return variant
 
 
@@ -212,36 +295,62 @@ def get_variant_if_possible_by_number(contest_id, variant_num):
     :return:
     """
     current_contest = db_get_or_raise(Contest, "contest_id", str(contest_id))
+
     if current_contest.composite_type == ContestTypeEnum.CompositeContest:
-        raise InsufficientData('composite_type', 'not Simple contest')
+        raise DataConflict('Contest is not Simple')
+
     variant = current_contest.variants.filter_by(**{"variant_number": str(variant_num)}).one_or_none()
+
     if variant is None:
-        raise InsufficientData("variant_number", "not in this contest")
+        raise DataConflict('No variants in this contest')
+
     if not is_variant_in_contest(variant.variant_id, current_contest):
-        raise InsufficientData('variant_number', 'not in current contests')
+        raise DataConflict('Variant with is number is not in current contest')
+
     return variant
 
 
 def get_tasks_if_possible(contest_id, variant_id):
+    """
+    Get tasks if possible
+    :param contest_id: contest id
+    :param variant_id: variant id
+    :return: tasks
+    """
     variant = get_variant_if_possible(contest_id, variant_id)
     return variant.tasks
 
 
 def get_task_if_possible(contest_id, variant_id, task_id):
+    """
+    Get task if possible
+    :param contest_id: contest id
+    :param variant_id: variant id
+    :param task_id: task id
+    :return: task
+    """
     variant = get_variant_if_possible(contest_id, variant_id)
     if is_task_in_variant(task_id, variant):
         task = db_get_or_raise(Task, "task_id", str(task_id))
         return task
     else:
-        raise InsufficientData('task_id', 'not in current variant')
+        raise DataConflict('Task not in current variant')
 
 
 # Validators
 
+# TODO Refactor in next MR
 def validate_contest_values(previous_contest_id, previous_participation_condition):
+    """
+    Check previous contest conditions
+    :param previous_contest_id:
+    :param previous_participation_condition:
+    :return:
+    """
     if (previous_participation_condition is None and previous_contest_id is not None) or \
             (previous_participation_condition is not None and previous_contest_id is None):
-        raise InsufficientData("previous_contest_id", "id or condition")
+        raise DataConflict('Can\t create contest with only one of following attributes: previous_contest_id, '
+                           'previous_participation_condition')
 
 
 # Schema
@@ -272,7 +381,7 @@ def filter_olympiad_query(args):
     offset = marshmallow.get('offset', None)
     limit = marshmallow.get('limit', None)
 
-    # TODO Target classes filtering
+    # TODO Target classes filtering in next MR
     # target_classes = marshmallow.get('target_classes', None)
     # if target_classes is not None:
     #    ..
