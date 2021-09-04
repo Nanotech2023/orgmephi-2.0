@@ -4,6 +4,7 @@ from flask import request
 from flask import send_file
 
 from common import get_current_module
+from common.errors import InsufficientData
 from contest.tasks.creator.schemas import *
 from contest.tasks.util import *
 
@@ -239,9 +240,8 @@ def stage_create(id_olympiad):
     condition = values['condition']
     this_stage_condition = values['this_stage_condition']
 
-    current_contest = db_get_or_raise(Contest, "contest_id", str(id_olympiad))
-    if current_contest.composite_type == ContestTypeEnum.SimpleContest:
-        raise InsufficientData('contest.composite_type', 'not composite')
+    current_contest = get_composite_contest_if_possible(id_olympiad)
+
     stage = add_stage(db.session,
                       stage_name=stage_name,
                       stage_num=stage_num,
@@ -338,9 +338,10 @@ def variant_create(id_contest):
           description: Olympiad type already in use
     """
     values = request.marshmallow
+    variant_description = values['variant_description']
+
     current_contest = get_contest_if_possible(id_contest)
     last_variant_number = get_last_variant_in_contest(current_contest)
-    variant_description = values['variant_description']
 
     variant = add_variant(db.session,
                           variant_number=last_variant_number + 1,

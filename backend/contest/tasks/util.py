@@ -4,11 +4,48 @@ from marshmallow import Schema, fields
 from marshmallow_enum import EnumField
 
 from common import get_current_app
-from common.errors import InsufficientData, FileTooLarge, DataConflict
+from common.errors import FileTooLarge, DataConflict
 from common.jwt_verify import jwt_get_id
 from contest.tasks.models import *
 
 app = get_current_app()
+
+
+# Contest getters
+
+
+def get_contest_if_possible(contest_id):
+    """
+    Get contest
+    :param contest_id: contest id
+    :return: contest
+    """
+    current_contest = db_get_or_raise(Contest, "contest_id", str(contest_id))
+    return current_contest
+
+
+def get_simple_contest_if_possible(contest_id):
+    """
+    Get simple contest
+    :param contest_id: contest id
+    :return: simple contest
+    """
+    current_contest = db_get_or_raise(Contest, "contest_id", str(contest_id))
+    if current_contest.composite_type == ContestTypeEnum.CompositeContest:
+        raise DataConflict('Current contest type is not simple one')
+    return current_contest
+
+
+def get_composite_contest_if_possible(contest_id):
+    """
+    Get composite contest
+    :param contest_id: contest id
+    :return: composite contest
+    """
+    current_contest = db_get_or_raise(Contest, "contest_id", str(contest_id))
+    if current_contest.composite_type == ContestTypeEnum.SimpleContest:
+        raise DataConflict('Current contest type is not composite one')
+    return current_contest
 
 
 # Generators
@@ -107,11 +144,7 @@ def get_user_contest_if_possible(olympiad_id, stage_id, contest_id):
     :param contest_id:
     :return: user contest
     """
-    current_olympiad = db_get_or_raise(Contest, "contest_id", olympiad_id)
-
-    # can't get stages
-    if current_olympiad.composite_type == ContestTypeEnum.SimpleContest:
-        raise DataConflict('Olympiad type is not composite one')
+    current_olympiad = get_composite_contest_if_possible(olympiad_id)
 
     stage = db_get_or_raise(Stage, "stage_id", str(stage_id))
 
@@ -138,11 +171,7 @@ def get_user_simple_contest_if_possible(olympiad_id):
     :param olympiad_id:
     :return: user contest
     """
-    current_olympiad = db_get_or_raise(Contest, "contest_id", olympiad_id)
-
-    # can't get stages
-    if current_olympiad.composite_type == ContestTypeEnum.CompositeContest:
-        raise DataConflict('Olympiad type is not simple one')
+    current_olympiad = get_simple_contest_if_possible(olympiad_id)
 
     # user is not registered
     if not is_user_in_contest(jwt_get_id(), current_olympiad):
@@ -157,10 +186,7 @@ def get_user_variant_if_possible(contest_id):
     :param contest_id:
     :return: user variant
     """
-    current_contest = db_get_or_raise(Contest, "contest_id", str(contest_id))
-
-    if current_contest.composite_type == ContestTypeEnum.CompositeContest:
-        raise DataConflict('Current contest type is not simple one')
+    current_contest = get_simple_contest_if_possible(contest_id)
 
     current_user = db_get_or_raise(UserInContest, "user_id", jwt_get_id())
     variant = current_contest.variants.filter_by(**{"variant_id": str(current_user.variant_id)}).one_or_none()
@@ -221,11 +247,7 @@ def get_contest_if_possible_from_stage(olympiad_id, stage_id, contest_id):
     :return: contest
     """
 
-    current_olympiad = db_get_or_raise(Contest, "contest_id", olympiad_id)
-
-    # Can't get stages in Simple contest
-    if current_olympiad.composite_type == ContestTypeEnum.SimpleContest:
-        raise DataConflict('Olympiad type is not composite one')
+    current_olympiad = get_composite_contest_if_possible(contest_id)
 
     stage = db_get_or_raise(Stage, "stage_id", str(stage_id))
 
@@ -237,16 +259,6 @@ def get_contest_if_possible_from_stage(olympiad_id, stage_id, contest_id):
     if current_contest not in stage.contests:
         raise DataConflict('Contest is not current stage')
 
-    return current_contest
-
-
-def get_contest_if_possible(contest_id):
-    """
-    Get contest
-    :param contest_id: contest id
-    :return: contest
-    """
-    current_contest = db_get_or_raise(Contest, "contest_id", str(contest_id))
     return current_contest
 
 
@@ -274,10 +286,7 @@ def get_variant_if_possible(contest_id, variant_id):
     :param variant_id:id variant
     :return:
     """
-    current_contest = db_get_or_raise(Contest, "contest_id", str(contest_id))
-
-    if current_contest.composite_type == ContestTypeEnum.CompositeContest:
-        raise DataConflict('Contest is not Simple')
+    current_contest = get_simple_contest_if_possible(contest_id)
 
     variant = current_contest.variants.filter_by(**{"variant_id": str(variant_id)}).one_or_none()
 
@@ -294,10 +303,7 @@ def get_variant_if_possible_by_number(contest_id, variant_num):
     :param variant_num: variant num
     :return:
     """
-    current_contest = db_get_or_raise(Contest, "contest_id", str(contest_id))
-
-    if current_contest.composite_type == ContestTypeEnum.CompositeContest:
-        raise DataConflict('Contest is not Simple')
+    current_contest = get_simple_contest_if_possible(contest_id)
 
     variant = current_contest.variants.filter_by(**{"variant_number": str(variant_num)}).one_or_none()
 
