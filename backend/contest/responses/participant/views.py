@@ -405,8 +405,11 @@ def self_user_answer_task_mark(contest_id, task_id):
               schema: UserAnswerMarkResponseSchema
         '404':
           description: User or contest not found
+        '409':
+          description: The results have not yet been published
     """
     self_user_id = jwt_get_id()
+    check_time_publishing(contest_id)
     user_work = get_user_in_contest_work(self_user_id, contest_id)
     answer = get_answer_by_task_id_and_work_id(BaseAnswer, task_id, user_work.work_id)
     return answer, 200

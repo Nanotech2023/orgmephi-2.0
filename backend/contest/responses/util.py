@@ -95,6 +95,12 @@ def check_task_type(task_id, task_type):
         raise NotFound("response_answer", f'task_id - {task_id} for type {task_type.value}')
 
 
+def check_time_publishing(contest_id):
+    simple_contest: SimpleContest = db_get_one_or_none(SimpleContest, 'contest_id', contest_id)
+    if datetime.utcnow() < simple_contest.result_publication_date:
+        raise OlympiadError("The results have not yet been published")
+
+
 def finish_contest(user_work: Response):
     user_work.work_status = work_status['NotChecked']
     user_in_contest: UserInContest = UserInContest.query.filter_by(**{"contest_id": user_work.contest_id,
