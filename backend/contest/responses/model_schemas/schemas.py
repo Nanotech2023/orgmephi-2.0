@@ -1,7 +1,6 @@
 from marshmallow_oneofschema import OneOfSchema
-from marshmallow_sqlalchemy import SQLAlchemySchema, auto_field, fields
+from marshmallow_sqlalchemy import SQLAlchemySchema, auto_field
 from marshmallow_enum import EnumField
-from marshmallow_sqlalchemy.fields import Related
 
 from contest.responses.models import *
 
