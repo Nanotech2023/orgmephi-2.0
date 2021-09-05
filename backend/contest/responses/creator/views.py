@@ -85,7 +85,7 @@ def get_user_by_id_all_answers(contest_id, user_id):
               output_schema=AllUserMarksResponseSchema)
 def get_user_by_id_all_marks(contest_id, user_id):
     """
-    Get all user answers for the contest
+    Get all user marks for the contest
     ---
     get:
       security:

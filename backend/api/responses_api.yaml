@@ -6,6 +6,23 @@ components:
           type: integer
         user_answers:
           items:
+            $ref: '#/components/schemas/AnswerWithoutMark'
+          type: array
+        user_id:
+          type: integer
+        work_id:
+          type: integer
+      required:
+      - contest_id
+      - user_id
+      - work_id
+      type: object
+    AllUserMarksResponse:
+      properties:
+        contest_id:
+          type: integer
+        user_answers:
+          items:
             $ref: '#/components/schemas/BaseAnswer'
           type: array
         user_id:
@@ -30,6 +47,20 @@ components:
       - $ref: '#/components/schemas/RangeAnswer'
       - $ref: '#/components/schemas/MultipleChoiceAnswer'
       - $ref: '#/components/schemas/PlainAnswerFile'
+    AnswerWithoutMark:
+      properties:
+        answer_id:
+          readOnly: true
+          type: integer
+        answer_type:
+          enum:
+          - PlainAnswerText
+          - PlainAnswerFile
+          - RangeAnswer
+          - MultipleChoiceAnswer
+          - BaseAnswer
+          type: string
+      type: object
     BaseAnswer:
       properties:
         answer_id:
@@ -43,6 +74,10 @@ components:
           - MultipleChoiceAnswer
           - BaseAnswer
           type: string
+        mark:
+          nullable: true
+          readOnly: true
+          type: number
       type: object
     ContestResultSheetResponse:
       properties:
@@ -231,6 +266,34 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/AllUserAnswersResponse'
+          description: OK
+        '403':
+          description: Not enough rights for current user
+        '404':
+          description: User or contest not found
+      security:
+      - JWTAccessToken: []
+  /responses/creator/contest/{contest_id}/user/{user_id}/mark:
+    get:
+      parameters:
+      - description: Id of the contest
+        in: path
+        name: contest_id
+        required: true
+        schema:
+          type: integer
+      - description: Id of the user
+        in: path
+        name: user_id
+        required: true
+        schema:
+          type: integer
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AllUserMarksResponse'
           description: OK
         '403':
           description: Not enough rights for current user
@@ -761,6 +824,30 @@ paths:
           description: User or contest not found
       security:
       - JWTAccessToken: []
+  /responses/participant/contest/{contest_id}/user/self/mark:
+    get:
+      parameters:
+      - description: Id of the contest
+        in: path
+        name: contest_id
+        required: true
+        schema:
+          type: integer
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AllUserMarksResponse'
+          description: OK
+        '403':
+          description: Not enough rights for current user
+        '404':
+          description: User or contest not found
+        '409':
+          description: The results have not yet been published
+      security:
+      - JWTAccessToken: []
   /responses/participant/contest/{contest_id}/task/{task_id}/user/self/plain/file:
     get:
       parameters:
@@ -1009,6 +1096,8 @@ paths:
           description: OK
         '404':
           description: User or contest not found
+        '409':
+          description: The results have not yet been published
       security:
       - JWTAccessToken: []
       - CSRFAccessToken: []
