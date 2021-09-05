@@ -26,6 +26,12 @@ class BaseAnswerSchema(SQLAlchemySchema):
 
     answer_id = auto_field(column_name='answer_id', dump_only=True)
     answer_type = EnumField(AnswerEnum, data_key='answer_type', by_value=True)
+    mark = auto_field(column_name='mark', dump_only=True)
+
+
+class AnswerWithoutMarkSchema(BaseAnswerSchema):
+    class Meta(BaseAnswerSchema.Meta):
+        exclude = ['mark']
 
 
 class RangeAnswerSchema(SQLAlchemySchema):

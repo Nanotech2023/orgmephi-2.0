@@ -72,6 +72,40 @@ def get_self_user_all_answers(contest_id):
     return get_all_user_answers(self_user_id, contest_id), 200
 
 
+@module.route('/contest/<int:contest_id>/user/self/mark', methods=['GET'],
+              output_schema=AllUserMarksResponseSchema)
+def get_user_by_id_all_marks(contest_id):
+    """
+    Get all user answers for the contest
+    ---
+    get:
+      security:
+        - JWTAccessToken: []
+      parameters:
+        - in: path
+          description: Id of the contest
+          name: contest_id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: AllUserMarksResponseSchema
+        '403':
+          description: Not enough rights for current user
+        '404':
+          description: User or contest not found
+        '409':
+          description: The results have not yet been published
+    """
+    self_user_id = jwt_get_id()
+    check_time_publishing(contest_id)
+    return get_all_user_answers(self_user_id, contest_id), 200
+
+
 @module.route('/contest/<int:contest_id>/task/<int:task_id>/user/self/plain/file', methods=['GET'])
 def get_self_user_answer_for_task_plain_file(contest_id, task_id):
     """
