@@ -12,16 +12,16 @@ class UserStatusEnum(enum.Enum):
     """
     Enum for user statuses
     """
-    Winner_1 = "Winner 1"
-    Winner_2 = "Winner 2"
-    Winner_3 = "Winner 3"
-    Diploma_1 = "Diploma 1"
-    Diploma_2 = "Diploma 2"
-    Diploma_3 = "Diploma 3"
-    Participant = "Participant"
+    Winner_1 = ("Winner 1", 6)
+    Winner_2 = ("Winner 2", 5)
+    Winner_3 = ("Winner 3", 4)
+    Diploma_1 = ("Diploma 1", 3)
+    Diploma_2 = ("Diploma 2", 2)
+    Diploma_3 = ("Diploma 3", 1)
+    Participant = ("Participant", 0)
 
 
-user_status_dict = {status.value: status for status in UserStatusEnum}
+user_status_dict = {status.value[0]: status for status in UserStatusEnum}
 
 
 class OlympiadSubjectEnum(enum.Enum):

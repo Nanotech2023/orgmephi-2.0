@@ -4,7 +4,7 @@ from marshmallow import Schema, fields
 from marshmallow_enum import EnumField
 
 from common import get_current_app
-from common.errors import InsufficientData, FileTooLarge, DataConflict, RequestError
+from common.errors import FileTooLarge, DataConflict, InsufficientData, RequestError
 from common.jwt_verify import jwt_get_id
 from contest.tasks.models import *
 from user.models import UserTypeEnum
@@ -12,37 +12,34 @@ from user.models import UserTypeEnum
 app = get_current_app()
 
 
-class ContestContentAccessDenied(RequestError):
-    """
-    User has no access to contest
-    """
-
-    def init(self):
-        """
-        Create error object
-        """
-        super(ContestContentAccessDenied, self).init(403)
-
-    def get_msg(self) -> str:
-        return 'User has no access to this contest'
-
-
-class ContestIsStillOnReview(RequestError):
-    """
-    Contest is still on review
-    """
-
-    def init(self):
-        """
-        Create error object
-        """
-        super(ContestIsStillOnReview, self).init(403)
-
-    def get_msg(self) -> str:
-        return 'Contest is still on review'
-
-
 # Contest getters
+
+
+def get_previous_contest_if_possible(contest_id):
+    """
+    Get contest
+    :param contest_id: contest id
+    :return: contest
+    """
+    current_contest: SimpleContest = db_get_or_raise(Contest, "contest_id", str(contest_id))
+    if current_contest.previous_contest_id is not None:
+        return db_get_or_raise(Contest, "contest_id", str(current_contest.previous_contest_id))
+    else:
+        return None
+
+
+def check_previous_contest_condition_if_possible(contest_id, user_id):
+    """
+    Get contest
+    :param user_id: user id
+    :param contest_id: contest id
+    :return: contest
+    """
+    current_contest: SimpleContest = get_previous_contest_if_possible(contest_id)
+    participation_condition_weight = current_contest.previous_participation_condition[0]
+    user_in_contest_status_weight = get_user_in_contest_by_id_if_possible(contest_id, user_id).user_status[0]
+
+    return user_in_contest_status_weight >= participation_condition_weight
 
 
 def get_contest_if_possible(contest_id):
@@ -77,7 +74,6 @@ def get_composite_contest_if_possible(contest_id):
     if current_contest.composite_type == ContestTypeEnum.SimpleContest:
         raise DataConflict('Current contest type is not composite one')
     return current_contest
-# Constants
 
 
 # Generators
@@ -219,6 +215,24 @@ def get_user_simple_contest_if_possible(olympiad_id):
     return current_olympiad
 
 
+def get_user_in_contest_by_id_if_possible(contest_id, user_id) -> UserInContest:
+    """
+    Get contest for user or raise exception
+    :param user_id: user id
+    :param contest_id: contest id
+    :return: user contest
+    """
+    current_contest = get_simple_contest_if_possible(contest_id)
+
+    # user is not registered
+    if not is_user_in_contest(user_id, current_contest):
+        raise DataConflict("User is not registered for this olympiad")
+
+    return current_contest.users.filter_by(**{"user_id": user_id,
+                                              "contest_id": contest_id}).one_or_none()
+
+
+# TODO
 def get_user_variant_if_possible(contest_id):
     """
     Get user variant if possible
@@ -227,7 +241,7 @@ def get_user_variant_if_possible(contest_id):
     """
     current_contest = get_simple_contest_if_possible(contest_id)
 
-    current_user = db_get_or_raise(UserInContest, "user_id", jwt_get_id())
+    current_user = get_user_in_contest_by_id_if_possible(contest_id, jwt_get_id())
     variant = current_contest.variants.filter_by(variant_id=str(current_user.variant_id)).one_or_none()
 
     # no variant in user profile
@@ -464,3 +478,33 @@ def check_user_unfilled_for_enroll(current_user: User):
     else:
         raise InsufficientData('type', "university or school")
     return grade
+
+
+class ContestContentAccessDenied(RequestError):
+    """
+    User has no access to contest
+    """
+
+    def __init__(self):
+        """
+        Create error object
+        """
+        super(ContestContentAccessDenied, self).__init__(403)
+
+    def get_msg(self) -> str:
+        return 'User has no access to this contest'
+
+
+class ContestIsStillOnReview(RequestError):
+    """
+    Contest is still on review
+    """
+
+    def __init__(self):
+        """
+        Create error object
+        """
+        super(ContestIsStillOnReview, self).__init__(403)
+
+    def get_msg(self) -> str:
+        return 'Contest is still on review'
