@@ -16,6 +16,7 @@ class OrgMephiTestingClient:
         self._client: FlaskClient = client
         self._access_csrf = None
         self._refresh_csrf = None
+        self._prefix = ''
 
     def _add_csrf_token(self, refresh: bool, kwargs):
         headers = kwargs.pop('headers', None)
@@ -33,10 +34,10 @@ class OrgMephiTestingClient:
         """
         return self._client
 
-    def login(self, url, username, password, remember_me=False, **kwargs):
+    def login(self, full_path, username, password, remember_me=False, **kwargs):
         """
         Login with auth server
-        :param url: URL for login
+        :param full_path: URL for login
         :param username: Name of the user to login as
         :param password: User's password
         :param remember_me: Remember me flag
@@ -44,7 +45,7 @@ class OrgMephiTestingClient:
         :return: response object
         """
         json = {'username': username, 'password': password, 'remember_me': remember_me}
-        resp = self._client.post(url, json=json, **kwargs)
+        resp = self._client.post(full_path, json=json, **kwargs)
         self._access_csrf = resp.json.get('csrf_access_token', None)
         self._refresh_csrf = resp.json.get('csrf_refresh_token', None)
         return resp
@@ -62,20 +63,21 @@ class OrgMephiTestingClient:
         access_token = create_access_token(identity=user_id, additional_claims={"name": username, "role": role})
         refresh_token = create_refresh_token(identity=user_id,
                                              additional_claims={"remember": False, "orig_sub": user_id})
-        self.client.set_cookie('', 'access_token_cookie', access_token)
-        self.client.set_cookie('', 'refresh_token_cookie', refresh_token)
+        self.client.set_cookie('localhost.local', 'access_token_cookie', access_token)
+        self.client.set_cookie('localhost.local', 'refresh_token_cookie', refresh_token)
         self._access_csrf = get_csrf_token(access_token)
         self._refresh_csrf = get_csrf_token(refresh_token)
 
-    def logout(self, *args, **kwargs):
+    def logout(self, full_path, *args, **kwargs):
         """
         Logout from server
+        :param full_path: URL for logout
         :param args: args passed to FlaskClient.post
         :param kwargs: kwargs passed to FlaskClient.post
         :return: response object
         """
         kwargs = self._add_csrf_token(False, kwargs)
-        resp = self._client.post(*args, **kwargs)
+        resp = self._client.post(full_path, *args, **kwargs)
         self._access_csrf = None
         self._refresh_csrf = None
         return resp
@@ -84,88 +86,61 @@ class OrgMephiTestingClient:
         """
         Logout without an auth server (for testing most of the modules)
         """
-        self.client.delete_cookie('', 'access_token_cookie')
-        self.client.delete_cookie('', 'refresh_token_cookie')
+        self.client.delete_cookie('localhost.local', 'access_token_cookie')
+        self.client.delete_cookie('localhost.local', 'refresh_token_cookie')
         self._access_csrf = None
         self._refresh_csrf = None
 
-    def refresh(self, *args, **kwargs):
+    def refresh(self, full_path, *args, **kwargs):
         """
         Refresh login information
+        :param full_path: URL for refresh
         :param args: args passed to FlaskClient.post
         :param kwargs: kwargs passed to FlaskClient.post
         :return: response object
         """
         kwargs = self._add_csrf_token(True, kwargs)
-        resp = self._client.post(*args, **kwargs)
+        resp = self._client.post(full_path, *args, **kwargs)
         self._access_csrf = resp.json.get('csrf_access_token', None)
         self._refresh_csrf = resp.json.get('csrf_refresh_token', None)
         return resp
 
-    def get(self, *args, **kwargs):
+    def set_prefix(self, prefix: str):
+        self._prefix = prefix
+
+    def get(self, path, *args, **kwargs):
         """
         See FlaskClient.get
         """
-        return self._client.get(*args, **kwargs)
+        return self._client.get(self._prefix + path, *args, **kwargs)
 
-    def post(self, *args, **kwargs):
+    def post(self, path, *args, **kwargs):
         """
         See FlaskClient.post
         """
         kwargs = self._add_csrf_token(False, kwargs)
-        return self._client.post(*args, **kwargs)
+        return self._client.post(self._prefix + path, *args, **kwargs)
 
-    def put(self, *args, **kwargs):
+    def put(self, path, *args, **kwargs):
         """
         See FlaskClient.put
         """
         kwargs = self._add_csrf_token(False, kwargs)
-        return self._client.put(*args, **kwargs)
+        return self._client.put(self._prefix + path, *args, **kwargs)
 
-    def delete(self, *args, **kwargs):
+    def delete(self, path, *args, **kwargs):
         """
         See FlaskClient.delete
         """
         kwargs = self._add_csrf_token(False, kwargs)
-        return self._client.delete(*args, **kwargs)
+        return self._client.delete(self._prefix + path, *args, **kwargs)
 
-    def patch(self, *args, **kwargs):
+    def patch(self, path, *args, **kwargs):
         """
         See FlaskClient.patch
         """
         kwargs = self._add_csrf_token(False, kwargs)
-        return self._client.patch(*args, **kwargs)
-
-
-def _generate_users(app):
-    from user.models import init_user, UserTypeEnum, UserRoleEnum
-    for user_data in [('admin', UserRoleEnum.admin, UserTypeEnum.internal),
-                      ('creator', UserRoleEnum.creator, UserTypeEnum.internal),
-                      ('school', UserRoleEnum.participant, UserTypeEnum.school),
-                      ('university', UserRoleEnum.participant, UserTypeEnum.university)]:
-        password_hash = app.password_policy.hash_password('test-password', False)
-        user = init_user(user_data[0], password_hash, user_data[1], user_data[2])
-        app.db.session.add(user)
-
-    app.db.session.commit()
-
-
-def _generate_locations(app):
-    from user.models import Country, Region, City, University
-    country_native = Country(name='native')
-    country_foreign = Country(name='foreign')
-    region = Region(name='test')
-    city = City(name='test')
-    city.region = region
-    university = University(name='test')
-    university.country = country_native
-
-    app.db.session.add(country_native)
-    app.db.session.add(country_foreign)
-    app.db.session.add(region)
-    app.db.session.add(city)
-    app.db.session.add(university)
-    app.db.session.commit()
+        return self._client.patch(self._prefix + path, *args, **kwargs)
 
 
 _test_app: Optional[OrgMephiApp] = None
@@ -198,8 +173,6 @@ def reset_db(app):
     """
     app.db.drop_all()
     app.db.create_all()
-    _generate_locations(app)
-    _generate_users(app)
 
 
 class DefaultTestConfiguration:
