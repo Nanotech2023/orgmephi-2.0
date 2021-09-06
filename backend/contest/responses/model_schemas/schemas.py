@@ -1,7 +1,6 @@
 from marshmallow_oneofschema import OneOfSchema
-from marshmallow_sqlalchemy import SQLAlchemySchema, auto_field, fields
+from marshmallow_sqlalchemy import SQLAlchemySchema, auto_field
 from marshmallow_enum import EnumField
-from marshmallow_sqlalchemy.fields import Related
 
 from contest.responses.models import *
 
@@ -27,6 +26,12 @@ class BaseAnswerSchema(SQLAlchemySchema):
 
     answer_id = auto_field(column_name='answer_id', dump_only=True)
     answer_type = EnumField(AnswerEnum, data_key='answer_type', by_value=True)
+    mark = auto_field(column_name='mark', dump_only=True)
+
+
+class AnswerWithoutMarkSchema(BaseAnswerSchema):
+    class Meta(BaseAnswerSchema.Meta):
+        exclude = ['mark']
 
 
 class RangeAnswerSchema(SQLAlchemySchema):

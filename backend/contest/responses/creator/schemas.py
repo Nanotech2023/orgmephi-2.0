@@ -1,11 +1,18 @@
 from marshmallow import Schema, fields
 from common import fields as common_fields
-from contest.responses.model_schemas.schemas import BaseAnswerSchema
+from contest.responses.model_schemas.schemas import BaseAnswerSchema, AnswerWithoutMarkSchema
 from contest.responses.models import ResponseStatusEnum
 from marshmallow_enum import EnumField
 
 
 class AllUserAnswersResponseSchema(Schema):
+    user_id = fields.Int(required=True)
+    work_id = fields.Int(required=True)
+    contest_id = fields.Int(required=True)
+    user_answers = fields.Nested(nested=AnswerWithoutMarkSchema, many=True, required=False)
+
+
+class AllUserMarksResponseSchema(Schema):
     user_id = fields.Int(required=True)
     work_id = fields.Int(required=True)
     contest_id = fields.Int(required=True)
