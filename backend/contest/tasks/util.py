@@ -4,7 +4,7 @@ from marshmallow import Schema, fields
 from marshmallow_enum import EnumField
 
 from common import get_current_app
-from common.errors import FileTooLarge, DataConflict
+from common.errors import FileTooLarge, DataConflict, InsufficientData
 from common.jwt_verify import jwt_get_id
 from contest.tasks.models import *
 from user.models import UserTypeEnum
