@@ -1,13 +1,13 @@
-import datetime
+from . import *
 
-import pytest
+import datetime
 from flask_jwt_extended import decode_token
 
-from common.testing import get_test_app, OrgMephiTestingClient
 
-from user.auth import module
-
-test_app = get_test_app(module)
+@pytest.fixture
+def client(client_visitor):
+    client_visitor.set_prefix('/user/auth')
+    yield client_visitor
 
 
 def find_cookie(headers, name):
@@ -34,21 +34,15 @@ def shift_password_change(username):
     test_app.db.session.commit()
 
 
-@pytest.fixture
-def client():
-    with test_app.app.test_client() as client:
-        yield OrgMephiTestingClient(client)
-
-
 def test_login_success(client):
-    resp = client.login('/login', 'school', 'test-password')
+    resp = client.login('/user/auth/login', 'school', 'test-password')
     assert resp.status_code == 200
     assert 'csrf_access_token' in resp.json
     assert 'csrf_refresh_token' in resp.json
 
     check_jwt(resp, 'school', 'Participant')
 
-    resp = client.login('/login', 'admin', 'test-password')
+    resp = client.login('/user/auth/login', 'admin', 'test-password')
     assert resp.status_code == 200
     assert 'csrf_access_token' in resp.json
     assert 'csrf_refresh_token' in resp.json
@@ -57,25 +51,25 @@ def test_login_success(client):
 
 
 def test_login_wrong_username(client):
-    resp = client.login('/login', 'not-school', 'test-password')
+    resp = client.login('/user/auth/login', 'not-school', 'test-password')
     assert resp.status_code == 401
 
 
 def test_login_wrong_password(client):
-    resp = client.login('/login', 'school', 'not-test-password')
+    resp = client.login('/user/auth/login', 'school', 'not-test-password')
     assert resp.status_code == 401
 
 
 def test_logout(client):
-    client.login('/login', 'school', 'test-password')
-    resp = client.logout('/logout')
+    client.login('/user/auth/login', 'school', 'test-password')
+    resp = client.logout('/user/auth/logout')
     assert resp.status_code == 200
 
 
 def test_refresh(client):
     shift_password_change('school')
-    client.login('/login', 'school', 'test-password')
-    resp = client.refresh('/refresh')
+    client.login('/user/auth/login', 'school', 'test-password')
+    resp = client.refresh('/user/auth/refresh')
     assert resp.status_code == 200
 
     check_jwt(resp, 'school', 'Participant')
@@ -86,15 +80,15 @@ def test_impersonate(client):
     shift_password_change('admin')
     shift_password_change('school')
 
-    resp = client.login('/login', 'school', 'test-password')
+    resp = client.login('/user/auth/login', 'school', 'test-password')
     school_id = decode_token(find_cookie(resp.headers, 'access_token_cookie'))['sub']
 
-    resp = client.login('/login', 'admin', 'test-password')
+    resp = client.login('/user/auth/login', 'admin', 'test-password')
     admin_id = decode_token(find_cookie(resp.headers, 'access_token_cookie'))['sub']
 
     assert school_id != admin_id
 
-    resp = client.refresh(f'/impersonate/{school_id}')
+    resp = client.refresh(f'/user/auth/impersonate/{school_id}')
     assert resp.status_code == 200
     check_jwt(resp, 'school', 'Participant')
 
@@ -108,15 +102,15 @@ def test_impersonate_no_perms(client):
     shift_password_change('admin')
     shift_password_change('school')
 
-    resp = client.login('/login', 'admin', 'test-password')
+    resp = client.login('/user/auth/login', 'admin', 'test-password')
     admin_id = decode_token(find_cookie(resp.headers, 'access_token_cookie'))['sub']
 
-    resp = client.login('/login', 'school', 'test-password')
+    resp = client.login('/user/auth/login', 'school', 'test-password')
     school_id = decode_token(find_cookie(resp.headers, 'access_token_cookie'))['sub']
 
     assert school_id != admin_id
 
-    resp = client.refresh(f'/impersonate/{admin_id}')
+    resp = client.refresh(f'/user/auth/impersonate/{admin_id}')
     assert resp.status_code == 403
 
 
@@ -125,17 +119,17 @@ def test_unimpersonate(client):
     shift_password_change('admin')
     shift_password_change('school')
 
-    resp = client.login('/login', 'school', 'test-password')
+    resp = client.login('/user/auth/login', 'school', 'test-password')
     school_id = decode_token(find_cookie(resp.headers, 'access_token_cookie'))['sub']
 
-    resp = client.login('/login', 'admin', 'test-password')
+    resp = client.login('/user/auth/login', 'admin', 'test-password')
     admin_id = decode_token(find_cookie(resp.headers, 'access_token_cookie'))['sub']
 
     assert school_id != admin_id
 
-    client.refresh(f'/impersonate/{school_id}')
+    client.refresh(f'/user/auth/impersonate/{school_id}')
 
-    resp = client.refresh(f'/unimpersonate')
+    resp = client.refresh(f'/user/auth/unimpersonate')
     returned_id = decode_token(find_cookie(resp.headers, 'access_token_cookie'))['sub']
 
     assert returned_id == admin_id
@@ -145,21 +139,21 @@ def test_refresh_old_password(client):
     shift_password_change('school')
 
     from user.models import User
-    client.login('/login', 'school', 'test-password')
+    client.login('/user/auth/login', 'school', 'test-password')
     user = User.query.filter_by(username='school').one_or_none()
     user.password_changed = datetime.datetime.utcnow() + datetime.timedelta(minutes=1)
     test_app.db.session.commit()
-    resp = client.refresh('/refresh')
+    resp = client.refresh('/user/auth/refresh')
     assert resp.status_code == 401
 
 
 def test_remember_me(client):
-    resp = client.login('/login', 'school', 'test-password', remember_me=False)
+    resp = client.login('/user/auth/login', 'school', 'test-password', remember_me=False)
     iat = decode_token(find_cookie(resp.headers, 'refresh_token_cookie'))['iat']
     exp = decode_token(find_cookie(resp.headers, 'refresh_token_cookie'))['exp']
     assert not decode_token(find_cookie(resp.headers, 'refresh_token_cookie'))['remember']
     delta = exp - iat
-    resp = client.login('/login', 'school', 'test-password', remember_me=True)
+    resp = client.login('/user/auth/login', 'school', 'test-password', remember_me=True)
     iat_remember = decode_token(find_cookie(resp.headers, 'refresh_token_cookie'))['iat']
     exp_remember = decode_token(find_cookie(resp.headers, 'refresh_token_cookie'))['exp']
     delta_remember = exp_remember - iat_remember

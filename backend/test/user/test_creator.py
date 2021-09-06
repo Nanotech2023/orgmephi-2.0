@@ -1,24 +1,15 @@
-import pytest
-
-from common.testing import get_test_app, OrgMephiTestingClient, reset_db
-
-from user.creator import module
-
-
-test_app = get_test_app(module)
+from . import *
 
 
 @pytest.fixture
-def client():
-    reset_db(test_app)
-    with test_app.app.test_client() as client:
-        yield OrgMephiTestingClient(client)
+def client(client_creator):
+    client_creator.set_prefix('/user/creator')
+    yield client_creator
 
 
 def test_get_auth_info(client):
     from user.models import User
     user = User.query.first()
-    client.fake_login(role='Creator')
 
     resp = client.get(f'/user/{user.id}')
     assert resp.status_code == 200
@@ -32,7 +23,6 @@ def test_get_auth_info(client):
 def test_get_all_auth_info(client):
     from user.models import User
     user = User.query.first()
-    client.fake_login(role='Creator')
 
     resp = client.get(f'/user/all')
     assert resp.status_code == 200
@@ -49,7 +39,6 @@ def test_get_all_auth_info(client):
 def test_get_all_full_info(client):
     from user.models import User
     user = User.query.first()
-    client.fake_login(role='Creator')
 
     resp = client.get(f'/user_full/all')
     assert resp.status_code == 200
@@ -70,8 +59,6 @@ def test_user_info_get(client):
     from user.models import User
     user = User.query.first()
 
-    client.fake_login(role='Creator')
-
     resp = client.get(f'/personal/{user.id}')
     assert resp.status_code == 200
     assert resp.json is not None
@@ -81,8 +68,6 @@ def test_university_info_get(client):
     from user.models import User
     user = User.query.first()
 
-    client.fake_login(role='Creator')
-
     resp = client.get(f'/university/{user.id}')
     assert resp.status_code == 200
     assert resp.json is not None
@@ -91,8 +76,6 @@ def test_university_info_get(client):
 def test_school_info_get(client):
     from user.models import User
     user = User.query.first()
-
-    client.fake_login(role='Creator')
 
     resp = client.get(f'/school/{user.id}')
     assert resp.status_code == 200
@@ -105,8 +88,6 @@ def test_get_group(client):
     test_app.db.session.add(grp)
     test_app.db.session.commit()
 
-    client.fake_login(role='Creator')
-
     resp = client.get(f'/group/{grp.id}')
     assert resp.status_code == 200
     assert resp.json['id'] == grp.id
@@ -118,8 +99,6 @@ def test_get_group_all(client):
     grp = Group(name='test')
     test_app.db.session.add(grp)
     test_app.db.session.commit()
-
-    client.fake_login(role='Creator')
 
     resp = client.get(f'/group/all')
     assert resp.status_code == 200
@@ -138,8 +117,6 @@ def test_get_user_groups(client):
     user.groups = [grp]
     test_app.db.session.commit()
 
-    client.fake_login(role='Creator')
-
     resp = client.get(f'/membership/{user.id}')
     assert resp.status_code == 200
     assert len(resp.json['groups']) == 1
@@ -154,8 +131,6 @@ def test_get_user_by_group(client):
     grp = Group(name='test')
     user.groups = [grp]
     test_app.db.session.commit()
-
-    client.fake_login(role='Creator')
 
     resp = client.get(f'/user/by-group/{grp.id}')
     assert resp.status_code == 200

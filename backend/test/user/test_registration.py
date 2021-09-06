@@ -1,19 +1,11 @@
+from . import *
 import datetime
-
-import pytest
-
-from common.testing import get_test_app, OrgMephiTestingClient
-
-from user.registration import module
-
-
-test_app = get_test_app(module)
 
 
 @pytest.fixture
-def client():
-    with test_app.app.test_client() as client:
-        yield OrgMephiTestingClient(client)
+def client(client_visitor):
+    client_visitor.set_prefix('/user/registration')
+    yield client_visitor
 
 
 def test_get_universities(client):
@@ -427,7 +419,7 @@ def test_recover_password(client):
         }
         client.post('/school', json=request)
 
-        resp = client.client.post('/forgot/forgot@example.com')
+        resp = client.client.post('/user/registration/forgot/forgot@example.com')
         assert resp.status_code == 204
         assert len(outbox) == 1
         assert outbox[0].recipients[0] == 'forgot@example.com'
@@ -441,12 +433,12 @@ def test_recover_password(client):
         test_app.db.session.commit()
 
         request = {'password': 'qwertyA*2'}
-        resp = client.client.post(f'/recover/{token}', json=request)
+        resp = client.client.post(f'/user/registration/recover/{token}', json=request)
         assert resp.status_code == 204
         user = User.query.filter_by(username='forgot@example.com').one_or_none()
         test_app.password_policy.validate_password('qwertyA*2', user.password_hash)
 
-        resp = client.client.post(f'/recover/{token}', json=request)
+        resp = client.client.post(f'/user/registration/recover/{token}', json=request)
         assert resp.status_code == 404
 
     test_app.config['ORGMEPHI_ENABLE_PASSWORD_RECOVERY'] = False

@@ -1,31 +1,4 @@
-import pytest
-
-from common.testing import get_test_app, OrgMephiTestingClient, reset_db
-
-from news import module
-
-# noinspection DuplicatedCode
-test_app = get_test_app(module)
-
-
-@pytest.fixture
-def client():
-    reset_db(test_app)
-    with test_app.app.test_client() as client:
-        yield OrgMephiTestingClient(client)
-
-
-@pytest.fixture
-def client_creator(client):
-    client.fake_login(role='Creator')
-    yield client
-
-
-@pytest.fixture
-def client_admin(client):
-    client.fake_login(role='Admin')
-    yield client
-
+from .. import *
 
 @pytest.fixture
 def test_categories():

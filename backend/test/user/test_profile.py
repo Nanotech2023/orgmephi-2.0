@@ -1,72 +1,11 @@
+from . import *
 import datetime
-
-import pytest
-
-from common.testing import get_test_app, OrgMephiTestingClient, reset_db
-
-from user.profile import module
-
-
-test_app = get_test_app(module)
 
 
 @pytest.fixture
-def client():
-    reset_db(test_app)
-    with test_app.app.test_client() as client:
-        yield OrgMephiTestingClient(client)
-
-
-test_user_info = {
-    "document": {
-        "code": "123-456",
-        "document_type": "RFPassport",
-        "issue_date": "2021-09-02",
-        "issuer": "string",
-        "number": "123456",
-        "series": "4520"
-    },
-    "dwelling": {
-        "city": "test",
-        "country": "native",
-        "region": "test",
-        "rural": True
-    },
-    "gender": "Male",
-    "limitations": {
-        "hearing": True,
-        "movement": True,
-        "sight": True
-    },
-    "phone": "8 (800) 555 35 35",
-    "place_of_birth": "string"
-}
-
-
-test_university_info = {
-    "citizenship": "native",
-    "city": "test",
-    "grade": 1,
-    "region": "test",
-    "university": {
-        "country": "native",
-        "university": "test"
-    }
-}
-
-
-test_school_info = {
-    "grade": 1,
-    "location": {
-        "city": "test",
-        "country": "native",
-        "region": "test",
-        "rural": True
-    },
-    "name": "string",
-    "number": 0,
-    "school_type": "School"
-}
+def client(client_school):
+    client_school.set_prefix('/user/profile')
+    yield client_school
 
 
 def test_auth_info_get(client):
@@ -83,13 +22,11 @@ def test_auth_info_get(client):
 
 
 def test_user_info_patch(client):
-    client.fake_login()
     resp = client.patch('/personal', json=test_user_info)
     assert resp.status_code == 200
 
 
 def test_user_info_get(client):
-    client.fake_login()
     client.patch('/personal', json=test_user_info)
 
     resp = client.get('/personal')
@@ -98,13 +35,11 @@ def test_user_info_get(client):
 
 
 def test_university_info_patch(client):
-    client.fake_login()
     resp = client.patch('/university', json=test_university_info)
     assert resp.status_code == 200
 
 
 def test_university_info_get(client):
-    client.fake_login()
     client.patch('/university', json=test_university_info)
 
     resp = client.get('/university')
@@ -113,13 +48,11 @@ def test_university_info_get(client):
 
 
 def test_school_info_patch(client):
-    client.fake_login()
     resp = client.patch('/school', json=test_school_info)
     assert resp.status_code == 200
 
 
 def test_school_info_get(client):
-    client.fake_login()
     client.patch('/school', json=test_school_info)
 
     resp = client.get('/school')
