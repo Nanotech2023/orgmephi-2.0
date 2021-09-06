@@ -1,0 +1,603 @@
+components:
+  schemas:
+    AddCategoryMessagesRequest:
+      properties:
+        name:
+          maxLength: 32
+          type: string
+      required:
+      - name
+      type: object
+    CleanupMessagesRequest:
+      properties:
+        amount:
+          type: integer
+        delete_unresolved:
+          type: boolean
+      required:
+      - amount
+      type: object
+    CreateMessageCreatorMessagesRequest:
+      properties:
+        message:
+          maxLength: 4096
+          type: string
+      required:
+      - message
+      type: object
+    CreateMessageMessagesRequest:
+      properties:
+        message:
+          maxLength: 4096
+          type: string
+      required:
+      - message
+      type: object
+    CreateThreadMessagesRequest:
+      properties:
+        category:
+          maxLength: 32
+          type: string
+        message:
+          maxLength: 4096
+          type: string
+        related_contest:
+          type: integer
+        related_work:
+          type: integer
+        thread_type:
+          enum:
+          - Appeal
+          - Work
+          - Contest
+          - General
+          type: string
+        topic:
+          maxLength: 32
+          type: string
+      required:
+      - category
+      - message
+      - thread_type
+      - topic
+      type: object
+    FilterThreadsMessagesResponse:
+      properties:
+        count:
+          type: integer
+        threads:
+          items:
+            $ref: '#/components/schemas/ThreadInfo'
+          type: array
+      type: object
+    ListCategoriesMessagesResponse:
+      properties:
+        categories:
+          items:
+            $ref: '#/components/schemas/ThreadCategory'
+          type: array
+      type: object
+    Message:
+      properties:
+        employee:
+          description: null if sent by the participant
+          type: integer
+        message:
+          type: string
+        message_id:
+          readOnly: true
+          type: integer
+        post_time:
+          format: date-time
+          type: string
+      required:
+      - message
+      type: object
+    Thread:
+      properties:
+        author:
+          type: integer
+        author_first_name:
+          nullable: true
+          readOnly: true
+          type: string
+        author_middle_name:
+          nullable: true
+          readOnly: true
+          type: string
+        author_second_name:
+          nullable: true
+          readOnly: true
+          type: string
+        author_username:
+          nullable: true
+          readOnly: true
+          type: string
+        category:
+          type: string
+        id:
+          readOnly: true
+          type: integer
+        messages:
+          items:
+            $ref: '#/components/schemas/Message'
+          readOnly: true
+          type: array
+        post_time:
+          format: date-time
+          type: string
+        related_contest:
+          nullable: true
+          type: integer
+        related_work:
+          nullable: true
+          type: integer
+        resolve_time:
+          format: date-time
+          nullable: true
+          type: string
+        resolved:
+          type: boolean
+        status:
+          enum:
+          - Open
+          - Closed
+          - Accepted
+          - Rejected
+          type: string
+        thread_type:
+          enum:
+          - Appeal
+          - Work
+          - Contest
+          - General
+          type: string
+        topic:
+          type: string
+      required:
+      - topic
+      type: object
+    ThreadCategory:
+      properties:
+        name:
+          type: string
+      required:
+      - name
+      type: object
+    ThreadInfo:
+      properties:
+        author:
+          type: integer
+        author_first_name:
+          nullable: true
+          readOnly: true
+          type: string
+        author_middle_name:
+          nullable: true
+          readOnly: true
+          type: string
+        author_second_name:
+          nullable: true
+          readOnly: true
+          type: string
+        author_username:
+          nullable: true
+          readOnly: true
+          type: string
+        category:
+          type: string
+        id:
+          readOnly: true
+          type: integer
+        post_time:
+          format: date-time
+          type: string
+        related_contest:
+          nullable: true
+          type: integer
+        related_work:
+          nullable: true
+          type: integer
+        resolve_time:
+          format: date-time
+          nullable: true
+          type: string
+        resolved:
+          type: boolean
+        status:
+          enum:
+          - Open
+          - Closed
+          - Accepted
+          - Rejected
+          type: string
+        thread_type:
+          enum:
+          - Appeal
+          - Work
+          - Contest
+          - General
+          type: string
+        topic:
+          type: string
+      required:
+      - topic
+      type: object
+    ThreadStatusMessagesRequest:
+      properties:
+        status:
+          enum:
+          - Open
+          - Closed
+          - Accepted
+          - Rejected
+          type: string
+      required:
+      - status
+      type: object
+  securitySchemes:
+    CSRFAccessToken:
+      in: header
+      name: X-CSRF-TOKEN
+      type: apiKey
+    CSRFRefreshToken:
+      in: header
+      name: X-CSRF-TOKEN
+      type: apiKey
+    JWTAccessToken:
+      in: cookie
+      name: access_token_cookie
+      type: apiKey
+    JWTRefreshToken:
+      in: cookie
+      name: refresh_token_cookie
+      type: apiKey
+info:
+  title: aggregate_messages
+  version: 1.0.0
+openapi: 3.0.2
+paths:
+  /messages/participant/categories:
+    get:
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListCategoriesMessagesResponse'
+          description: OK
+      security:
+      - JWTAccessToken: []
+  /messages/participant/threads:
+    get:
+      parameters:
+      - in: query
+        name: offset
+        required: false
+        schema:
+          type: integer
+      - in: query
+        name: limit
+        required: false
+        schema:
+          type: integer
+      - in: query
+        name: resolved
+        required: false
+        schema:
+          type: boolean
+      - in: query
+        name: answered
+        required: false
+        schema:
+          type: boolean
+      - in: query
+        name: thread_type
+        required: false
+        schema:
+          enum:
+          - Appeal
+          - Work
+          - Contest
+          - General
+          type: string
+      - in: query
+        name: category_name
+        required: false
+        schema:
+          type: string
+      - in: query
+        name: only_count
+        required: false
+        schema:
+          type: boolean
+      - in: query
+        name: contest_id
+        required: false
+        schema:
+          type: integer
+      - in: query
+        name: work_id
+        required: false
+        schema:
+          type: integer
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FilterThreadsMessagesResponse'
+          description: OK
+      security:
+      - JWTAccessToken: []
+  /messages/participant/thread:
+    post:
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateThreadMessagesRequest'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Thread'
+          description: OK
+        '409':
+          description: Exceeded daily thread threshold
+      security:
+      - JWTAccessToken: []
+      - CSRFAccessToken: []
+  /messages/participant/thread/{thread_id}:
+    get:
+      parameters:
+      - description: ID of the thread
+        in: path
+        name: thread_id
+        required: true
+        schema:
+          type: integer
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Thread'
+          description: OK
+        '404':
+          description: Thread not found
+      security:
+      - JWTAccessToken: []
+  /messages/participant/message/{thread_id}:
+    post:
+      parameters:
+      - description: ID of the thread
+        in: path
+        name: thread_id
+        required: true
+        schema:
+          type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateMessageMessagesRequest'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+          description: OK
+        '404':
+          description: Thread not found
+        '409':
+          description: Exceeded daily message threshold
+      security:
+      - JWTAccessToken: []
+      - CSRFAccessToken: []
+  /messages/creator/thread/{thread_id}:
+    get:
+      parameters:
+      - description: ID of the thread
+        in: path
+        name: thread_id
+        required: true
+        schema:
+          type: integer
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Thread'
+          description: OK
+        '404':
+          description: Thread not found
+      security:
+      - JWTAccessToken: []
+  /messages/creator/message/{thread_id}:
+    post:
+      parameters:
+      - description: ID of the thread
+        in: path
+        name: thread_id
+        required: true
+        schema:
+          type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateMessageCreatorMessagesRequest'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+          description: OK
+        '404':
+          description: Thread not found
+      security:
+      - JWTAccessToken: []
+      - CSRFAccessToken: []
+  /messages/creator/thread_status/{thread_id}:
+    post:
+      parameters:
+      - description: ID of the thread
+        in: path
+        name: thread_id
+        required: true
+        schema:
+          type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ThreadStatusMessagesRequest'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Thread'
+          description: OK
+        '404':
+          description: Thread not found
+      security:
+      - JWTAccessToken: []
+      - CSRFAccessToken: []
+  /messages/creator/filter_threads:
+    get:
+      parameters:
+      - in: query
+        name: offset
+        required: false
+        schema:
+          type: integer
+      - in: query
+        name: limit
+        required: false
+        schema:
+          type: integer
+      - in: query
+        name: resolved
+        required: false
+        schema:
+          type: boolean
+      - in: query
+        name: answered
+        required: false
+        schema:
+          type: boolean
+      - in: query
+        name: thread_type
+        required: false
+        schema:
+          enum:
+          - Appeal
+          - Work
+          - Contest
+          - General
+          type: string
+      - in: query
+        name: category_name
+        required: false
+        schema:
+          type: string
+      - in: query
+        name: only_count
+        required: false
+        schema:
+          type: boolean
+      - in: query
+        name: contest_id
+        required: false
+        schema:
+          type: integer
+      - in: query
+        name: work_id
+        required: false
+        schema:
+          type: integer
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FilterThreadsMessagesResponse'
+          description: OK
+      security:
+      - JWTAccessToken: []
+  /messages/admin/add_category:
+    post:
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AddCategoryMessagesRequest'
+        required: true
+      responses:
+        '204':
+          description: OK
+        '409':
+          description: Category with this name already exists
+      security:
+      - JWTAccessToken: []
+      - CSRFAccessToken: []
+  /messages/admin/delete_category/{category_name}:
+    post:
+      parameters:
+      - description: Name of the category
+        in: path
+        name: category_name
+        required: true
+        schema:
+          type: string
+      responses:
+        '204':
+          description: OK
+        '404':
+          description: Category not found
+      security:
+      - JWTAccessToken: []
+      - CSRFAccessToken: []
+  /messages/admin/delete_thread/{thread_id}:
+    post:
+      parameters:
+      - description: ID of the thread
+        in: path
+        name: thread_id
+        required: true
+        schema:
+          type: integer
+      responses:
+        '204':
+          description: OK
+        '404':
+          description: Category not found
+      security:
+      - JWTAccessToken: []
+      - CSRFAccessToken: []
+  /messages/admin/cleanup:
+    post:
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CleanupMessagesRequest'
+        required: true
+      responses:
+        '204':
+          description: OK
+      security:
+      - JWTAccessToken: []
+      - CSRFAccessToken: []
+servers:
+- url: ''

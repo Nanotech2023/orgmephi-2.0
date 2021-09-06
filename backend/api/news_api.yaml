@@ -1,0 +1,468 @@
+components:
+  schemas:
+    AddCategoryNewsRequest:
+      properties:
+        name:
+          maxLength: 32
+          type: string
+      required:
+      - name
+      type: object
+    CreateNewsRequest:
+      properties:
+        category:
+          maxLength: 32
+          type: string
+        title:
+          maxLength: 32
+          type: string
+      required:
+      - category
+      - title
+      type: object
+    EditNewsRequest:
+      properties:
+        body:
+          maxLength: 4194304
+          type: string
+        category:
+          maxLength: 32
+          type: string
+        grade:
+          minimum: 1
+          type: integer
+        related_contest:
+          type: integer
+        title:
+          maxLength: 32
+          type: string
+      type: object
+    FilterNewsResponse:
+      properties:
+        count:
+          type: integer
+        news:
+          items:
+            $ref: '#/components/schemas/NewsInfo'
+          type: array
+      type: object
+    ListCategoriesNewsResponse:
+      properties:
+        categories:
+          items:
+            $ref: '#/components/schemas/NewsCategory'
+          type: array
+      type: object
+    News:
+      properties:
+        body:
+          type: string
+        category:
+          type: string
+        grade:
+          type: integer
+        id:
+          readOnly: true
+          type: integer
+        post_time:
+          format: date-time
+          type: string
+        posted:
+          type: boolean
+        related_contest:
+          nullable: true
+          type: integer
+        title:
+          type: string
+      required:
+      - title
+      type: object
+    NewsCategory:
+      properties:
+        name:
+          type: string
+      required:
+      - name
+      type: object
+    NewsInfo:
+      properties:
+        category:
+          type: string
+        grade:
+          type: integer
+        id:
+          readOnly: true
+          type: integer
+        post_time:
+          format: date-time
+          type: string
+        posted:
+          type: boolean
+        related_contest:
+          nullable: true
+          type: integer
+        title:
+          type: string
+      required:
+      - title
+      type: object
+  securitySchemes:
+    CSRFAccessToken:
+      in: header
+      name: X-CSRF-TOKEN
+      type: apiKey
+    CSRFRefreshToken:
+      in: header
+      name: X-CSRF-TOKEN
+      type: apiKey
+    JWTAccessToken:
+      in: cookie
+      name: access_token_cookie
+      type: apiKey
+    JWTRefreshToken:
+      in: cookie
+      name: refresh_token_cookie
+      type: apiKey
+info:
+  title: aggregate_news
+  version: 1.0.0
+openapi: 3.0.2
+paths:
+  /news/visitor/news:
+    get:
+      parameters:
+      - in: query
+        name: offset
+        required: false
+        schema:
+          type: integer
+      - in: query
+        name: limit
+        required: false
+        schema:
+          type: integer
+      - in: query
+        name: category_name
+        required: false
+        schema:
+          type: string
+      - in: query
+        name: grade
+        required: false
+        schema:
+          type: integer
+      - in: query
+        name: title
+        required: false
+        schema:
+          type: string
+      - in: query
+        name: contest_id
+        required: false
+        schema:
+          type: integer
+      - in: query
+        name: only_count
+        required: false
+        schema:
+          type: boolean
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FilterNewsResponse'
+          description: OK
+  /news/visitor/news/{news_id}:
+    get:
+      parameters:
+      - description: ID of news
+        in: path
+        name: news_id
+        required: true
+        schema:
+          type: integer
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/News'
+          description: OK
+        '404':
+          description: News not found
+  /news/visitor/news/{news_id}/image:
+    get:
+      parameters:
+      - description: ID of news
+        in: path
+        name: news_id
+        required: true
+        schema:
+          type: integer
+      responses:
+        '200':
+          content:
+            image/*:
+              schema:
+                format: binary
+                type: string
+          description: OK
+        '404':
+          description: News not found
+  /news/creator/categories:
+    get:
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListCategoriesNewsResponse'
+          description: OK
+      security:
+      - JWTAccessToken: []
+  /news/creator/news:
+    get:
+      parameters:
+      - in: query
+        name: offset
+        required: false
+        schema:
+          type: integer
+      - in: query
+        name: limit
+        required: false
+        schema:
+          type: integer
+      - in: query
+        name: posted
+        required: false
+        schema:
+          type: boolean
+      - in: query
+        name: category_name
+        required: false
+        schema:
+          type: string
+      - in: query
+        name: grade
+        required: false
+        schema:
+          type: integer
+      - in: query
+        name: title
+        required: false
+        schema:
+          type: string
+      - in: query
+        name: contest_id
+        required: false
+        schema:
+          type: integer
+      - in: query
+        name: only_count
+        required: false
+        schema:
+          type: boolean
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FilterNewsResponse'
+          description: OK
+      security:
+      - JWTAccessToken: []
+    post:
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateNewsRequest'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/News'
+          description: OK
+      security:
+      - JWTAccessToken: []
+      - CSRFAccessToken: []
+  /news/creator/news/{news_id}:
+    patch:
+      parameters:
+      - description: ID of news
+        in: path
+        name: news_id
+        required: true
+        schema:
+          type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EditNewsRequest'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/News'
+          description: OK
+      security:
+      - JWTAccessToken: []
+      - CSRFAccessToken: []
+    get:
+      parameters:
+      - description: ID of news
+        in: path
+        name: news_id
+        required: true
+        schema:
+          type: integer
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/News'
+          description: OK
+        '404':
+          description: News not found
+      security:
+      - JWTAccessToken: []
+  /news/creator/news/{news_id}/image:
+    post:
+      parameters:
+      - description: ID of news
+        in: path
+        name: news_id
+        required: true
+        schema:
+          type: integer
+      requestBody:
+        content:
+          image/*:
+            schema:
+              format: binary
+              type: string
+        required: true
+      responses:
+        '204':
+          description: OK
+      security:
+      - JWTAccessToken: []
+      - CSRFAccessToken: []
+    get:
+      parameters:
+      - description: ID of news
+        in: path
+        name: news_id
+        required: true
+        schema:
+          type: integer
+      responses:
+        '200':
+          content:
+            image/*:
+              schema:
+                format: binary
+                type: string
+          description: OK
+        '404':
+          description: News not found
+      security:
+      - JWTAccessToken: []
+  /news/creator/news/{news_id}/post:
+    post:
+      parameters:
+      - description: ID of news
+        in: path
+        name: news_id
+        required: true
+        schema:
+          type: integer
+      responses:
+        '204':
+          description: OK
+        '404':
+          description: News not found
+      security:
+      - JWTAccessToken: []
+      - CSRFAccessToken: []
+  /news/creator/news/{news_id}/hide:
+    post:
+      parameters:
+      - description: ID of news
+        in: path
+        name: news_id
+        required: true
+        schema:
+          type: integer
+      responses:
+        '204':
+          description: OK
+        '404':
+          description: News not found
+      security:
+      - JWTAccessToken: []
+      - CSRFAccessToken: []
+  /news/admin/add_category:
+    post:
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AddCategoryNewsRequest'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NewsCategory'
+          description: OK
+        '409':
+          description: Category with this name already exists
+      security:
+      - JWTAccessToken: []
+      - CSRFAccessToken: []
+  /news/admin/delete_category/{category_name}:
+    post:
+      parameters:
+      - description: Name of the category
+        in: path
+        name: category_name
+        required: true
+        schema:
+          type: string
+      responses:
+        '204':
+          description: OK
+        '404':
+          description: Category not found
+      security:
+      - JWTAccessToken: []
+      - CSRFAccessToken: []
+  /news/admin/news/{news_id}/delete:
+    post:
+      parameters:
+      - description: ID of news
+        in: path
+        name: news_id
+        required: true
+        schema:
+          type: integer
+      responses:
+        '204':
+          description: OK
+        '404':
+          description: News not found
+      security:
+      - JWTAccessToken: []
+      - CSRFAccessToken: []
+servers:
+- url: ''
