@@ -144,8 +144,8 @@ def check_contest_time_left(contest_id):
 def check_contest_duration(user_work: Response):
     contest_duration = db_get_one_or_none(SimpleContest, "contest_id", user_work.contest_id).contest_duration
     time_spent = datetime.utcnow() - user_work.start_time
-    extra_minutes = timedelta(minutes=app.config['RESPONSE_EXTRA_MINUTES'])
-    if user_work.work_status == work_status['NotChecked'] or time_spent + extra_minutes > contest_duration:
+    if user_work.work_status == work_status['NotChecked'] or \
+            time_spent + app.config['RESPONSE_EXTRA_MINUTES'] > contest_duration:
         finish_contest(user_work)
         raise OlympiadError("Olympiad is over for current user")
 
