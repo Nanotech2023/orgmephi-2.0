@@ -38,66 +38,53 @@ def test_preregister(client):
     test_app.password_policy.validate_password(resp.json['password'], user.password_hash)
 
 
-def test_change_password(client):
-    from user.models import User
-    user = User.query.first()
+def test_change_password(client, test_user):
+    pre_password_changed = test_user.password_changed
 
-    pre_password_changed = user.password_changed
-
-    resp = client.post(f'/password/{user.id}', json={'new_password': 'qwertyA*1'})
+    resp = client.post(f'/password/{test_user.id}', json={'new_password': 'qwertyA*1'})
     assert resp.status_code == 200
 
-    test_app.db.session.refresh(user)
-    assert user.password_changed > pre_password_changed
-    test_app.password_policy.validate_password('qwertyA*1', user.password_hash)
+    test_app.db.session.refresh(test_user)
+    assert test_user.password_changed > pre_password_changed
+    test_app.password_policy.validate_password('qwertyA*1', test_user.password_hash)
 
 
-def test_set_role(client):
-    from user.models import User
+def test_set_role(client, test_user):
     test_role = 'Unconfirmed'
-    user = User.query.first()
-    if user.role.value == 'Unconfirmed':
+    if test_user.role.value == 'Unconfirmed':
         test_role = 'Participant'
 
-    resp = client.put(f'/role/{user.id}', json={'role': test_role})
+    resp = client.put(f'/role/{test_user.id}', json={'role': test_role})
     assert resp.status_code == 200
 
-    test_app.db.session.refresh(user)
-    assert user.role.value == test_role
+    test_app.db.session.refresh(test_user)
+    assert test_user.role.value == test_role
 
 
-def test_set_type(client):
-    from user.models import User
+def test_set_type(client, test_user):
     test_type = 'PreRegister'
-    user = User.query.first()
-    if user.role.value == 'PreRegister':
+    if test_user.role.value == 'PreRegister':
         test_type = 'Internal'
 
-    resp = client.put(f'/type/{user.id}', json={'type': test_type})
+    resp = client.put(f'/type/{test_user.id}', json={'type': test_type})
     assert resp.status_code == 200
 
-    test_app.db.session.refresh(user)
-    assert user.type.value == test_type
+    test_app.db.session.refresh(test_user)
+    assert test_user.type.value == test_type
 
 
-def test_user_info_patch(client):
-    from user.models import User
-    user = User.query.first()
-    resp = client.patch(f'/personal/{user.id}', json=test_user_info)
-    assert resp.status_code == 200
-
-
-def test_university_info_patch(client):
-    from user.models import User
-    user = User.query.first()
-    resp = client.patch(f'/university/{user.id}', json=test_university_info)
+def test_user_info_patch(client, test_user, test_country_native, test_region, test_city):
+    resp = client.patch(f'/personal/{test_user.id}', json=test_user_info)
     assert resp.status_code == 200
 
 
-def test_school_info_patch(client):
-    from user.models import User
-    user = User.query.first()
-    resp = client.patch(f'/school/{user.id}', json=test_school_info)
+def test_university_info_patch(client, test_user, test_country_native, test_region, test_city):
+    resp = client.patch(f'/university/{test_user.id}', json=test_university_info)
+    assert resp.status_code == 200
+
+
+def test_school_info_patch(client, test_user, test_country_native, test_region, test_city):
+    resp = client.patch(f'/school/{test_user.id}', json=test_school_info)
     assert resp.status_code == 200
 
 
@@ -112,64 +99,44 @@ def test_add_group(client):
     assert grp.name == resp.json['name'] == 'test'
 
 
-def test_add_group_exists(client):
-    client.post('/add_group', json={'name': 'test'})
-    resp = client.post('/add_group', json={'name': 'test'})
+def test_add_group_exists(client, test_group):
+    resp = client.post('/add_group', json={'name': test_group.name})
     assert resp.status_code == 409
 
 
-def test_remove_group(client):
+def test_remove_group(client, test_group):
     from user.models import Group
-    resp = client.post('/add_group', json={'name': 'test'})
-    resp = client.post(f'/remove_group/{resp.json["id"]}')
-
+    resp = client.post(f'/remove_group/{test_group.id}')
     assert resp.status_code == 200
 
-    grp = Group.query.filter_by(name='test').one_or_none()
-
-    assert grp is None
+    assert not test_app.db.session.query(Group.query.filter_by(name='test').exists()).scalar()
 
 
-def test_user_add_group(client):
-    from user.models import User
-    user = User.query.first()
-    resp = client.post('/add_group', json={'name': 'test'})
-    grp_id = resp.json['id']
-    resp = client.post(f'/add_member/{user.id}', json={'group_id': grp_id})
+def test_user_add_group(client, test_user, test_group):
+    resp = client.post(f'/add_member/{test_user.id}', json={'group_id': test_group.id})
     assert resp.status_code == 200
-    test_app.db.session.refresh(user)
-    assert len(user.groups) == 1
-    assert user.groups[0].id == grp_id
-    assert user.groups[0].name == 'test'
+    test_app.db.session.refresh(test_user)
+    assert len(test_user.groups) == 1
+    assert test_user.groups[0].id == test_group.id
+    assert test_user.groups[0].name == test_group.name
 
 
 # noinspection DuplicatedCode
-def test_user_add_group_exists(client):
-    from user.models import User
-    user = User.query.first()
-    resp = client.post('/add_group', json={'name': 'test'})
-    grp_id = resp.json['id']
-    client.post(f'/add_member/{user.id}', json={'group_id': grp_id})
-    resp = client.post(f'/add_member/{user.id}', json={'group_id': grp_id})
+def test_user_add_group_exists(client, test_user, test_group):
+    client.post(f'/add_member/{test_user.id}', json={'group_id': test_group.id})
+    resp = client.post(f'/add_member/{test_user.id}', json={'group_id': test_group.id})
     assert resp.status_code == 409
 
 
 # noinspection DuplicatedCode
-def test_user_remove_group(client):
-    from user.models import User
-    user = User.query.first()
-    resp = client.post('/add_group', json={'name': 'test'})
-    grp_id = resp.json['id']
-    client.post(f'/add_member/{user.id}', json={'group_id': grp_id})
-    resp = client.post(f'/remove_member/{user.id}', json={'group_id': grp_id})
+def test_user_remove_group(client, test_user, test_group):
+    client.post(f'/add_member/{test_user.id}', json={'group_id': test_group.id})
+    resp = client.post(f'/remove_member/{test_user.id}', json={'group_id': test_group.id})
     assert resp.status_code == 200
-    test_app.db.session.refresh(user)
-    assert len(user.groups) == 0
+    test_app.db.session.refresh(test_user)
+    assert len(test_user.groups) == 0
 
 
-def test_user_remove_group_not_exists(client):
-    from user.models import User
-    user = User.query.first()
-    resp = client.post('/add_group', json={'name': 'test'})
-    resp = client.post(f'/remove_member/{user.id}', json={'group_id': resp.json['id']})
+def test_user_remove_group_not_exists(client, test_user, test_group):
+    resp = client.post(f'/remove_member/{test_user.id}', json={'group_id': test_group.id})
     assert resp.status_code == 404

@@ -63,8 +63,8 @@ class OrgMephiTestingClient:
         access_token = create_access_token(identity=user_id, additional_claims={"name": username, "role": role})
         refresh_token = create_refresh_token(identity=user_id,
                                              additional_claims={"remember": False, "orig_sub": user_id})
-        self.client.set_cookie('', 'access_token_cookie', access_token)
-        self.client.set_cookie('', 'refresh_token_cookie', refresh_token)
+        self.client.set_cookie('localhost.local', 'access_token_cookie', access_token)
+        self.client.set_cookie('localhost.local', 'refresh_token_cookie', refresh_token)
         self._access_csrf = get_csrf_token(access_token)
         self._refresh_csrf = get_csrf_token(refresh_token)
 
@@ -86,8 +86,8 @@ class OrgMephiTestingClient:
         """
         Logout without an auth server (for testing most of the modules)
         """
-        self.client.delete_cookie('', 'access_token_cookie')
-        self.client.delete_cookie('', 'refresh_token_cookie')
+        self.client.delete_cookie('localhost.local', 'access_token_cookie')
+        self.client.delete_cookie('localhost.local', 'refresh_token_cookie')
         self._access_csrf = None
         self._refresh_csrf = None
 
@@ -143,37 +143,6 @@ class OrgMephiTestingClient:
         return self._client.patch(self._prefix + path, *args, **kwargs)
 
 
-def _generate_users(app):
-    from user.models import init_user, UserTypeEnum, UserRoleEnum
-    for user_data in [('admin', UserRoleEnum.admin, UserTypeEnum.internal),
-                      ('creator', UserRoleEnum.creator, UserTypeEnum.internal),
-                      ('school', UserRoleEnum.participant, UserTypeEnum.school),
-                      ('university', UserRoleEnum.participant, UserTypeEnum.university)]:
-        password_hash = app.password_policy.hash_password('test-password', False)
-        user = init_user(user_data[0], password_hash, user_data[1], user_data[2])
-        app.db.session.add(user)
-
-    app.db.session.commit()
-
-
-def _generate_locations(app):
-    from user.models import Country, Region, City, University
-    country_native = Country(name='native')
-    country_foreign = Country(name='foreign')
-    region = Region(name='test')
-    city = City(name='test')
-    city.region = region
-    university = University(name='test')
-    university.country = country_native
-
-    app.db.session.add(country_native)
-    app.db.session.add(country_foreign)
-    app.db.session.add(region)
-    app.db.session.add(city)
-    app.db.session.add(university)
-    app.db.session.commit()
-
-
 _test_app: Optional[OrgMephiApp] = None
 
 
@@ -204,8 +173,6 @@ def reset_db(app):
     """
     app.db.drop_all()
     app.db.create_all()
-    _generate_locations(app)
-    _generate_users(app)
 
 
 class DefaultTestConfiguration:

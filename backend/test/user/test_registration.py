@@ -8,7 +8,7 @@ def client(client_visitor):
     yield client_visitor
 
 
-def test_get_universities(client):
+def test_get_universities(client, test_university):
     resp = client.get('/info/universities')
     assert resp.status_code == 200
     assert len(resp.json['university_list']) > 0
@@ -16,21 +16,21 @@ def test_get_universities(client):
     assert 'name' in resp.json['university_list'][0]
 
 
-def test_get_countries(client):
+def test_get_countries(client, test_country_native):
     resp = client.get('/info/countries')
     assert resp.status_code == 200
     assert len(resp.json['country_list']) > 0
     assert 'name' in resp.json['country_list'][0]
 
 
-def test_get_regions(client):
+def test_get_regions(client, test_region):
     resp = client.get('/info/regions')
     assert resp.status_code == 200
     assert len(resp.json['region_list']) > 0
     assert 'name' in resp.json['region_list'][0]
 
 
-def test_get_cities(client):
+def test_get_cities(client, test_city):
     resp = client.get('/info/regions')
     region_name = resp.json['region_list'][0]['name']
     resp = client.get(f'/info/cities/{region_name}')
@@ -78,7 +78,7 @@ def test_registration_school(client):
     assert user.user_info.date_of_birth == datetime.date.fromisoformat('2021-09-01')
 
 
-def test_registration_university(client):
+def test_registration_university(client, test_country_native, test_region, test_city, test_university):
     from user.models import User
     pre_date = datetime.datetime.utcnow()
     request = {
