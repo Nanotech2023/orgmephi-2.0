@@ -5,7 +5,7 @@ from marshmallow import EXCLUDE
 
 from common import get_current_app, get_current_module, get_current_db
 from common.util import db_get_all, db_get_or_raise
-from common.errors import InsufficientData, QuotaExceeded
+from common.errors import InsufficientData, QuotaExceeded, DataConflict
 
 from news.models import NewsCategory, News
 from news.util import filter_news_query, FilterNewsResponseSchema
@@ -187,7 +187,7 @@ def post_news_image(news_id):
           description: OK
     """
     file = request.data
-    if file is None:
+    if file == b'':
         raise InsufficientData('request', 'image')
     if len(file) > 4 * 1024 * 1024:
         raise QuotaExceeded('Image is too large', 4 * 1024 * 1024)
@@ -251,6 +251,8 @@ def get_image(news_id):
           description: News not found
     """
     news = db_get_or_raise(News, 'id', news_id)
+    if news.image is None:
+        raise DataConflict('Image not present')
     return send_file(io.BytesIO(news.image), mimetype='image/*')
 
 
