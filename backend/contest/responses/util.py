@@ -1,8 +1,8 @@
-from common import get_current_db
+from common import get_current_db, get_current_app
 from .model_schemas.schemas import PlainAnswerTextSchema, RangeAnswerSchema
 from datetime import datetime, timedelta
 from common.errors import NotFound, RequestError, AlreadyExists
-from common.util import db_get_one_or_none
+from common.util import db_get_one_or_none, db_exists
 from contest.tasks.models import SimpleContest, RangeTask, MultipleChoiceTask, PlainTask, ContestHoldingTypeEnum, \
     UserInContest
 from .models import Response, PlainAnswerText, RangeAnswer, MultipleChoiceAnswer, PlainAnswerFile, BaseAnswer, \
@@ -11,9 +11,7 @@ from .models import Response, PlainAnswerText, RangeAnswer, MultipleChoiceAnswer
 from ..tasks.util import validate_file_size
 
 db = get_current_db()
-five_minutes = timedelta(minutes=5)
-
-
+app = get_current_app()
 # Errors
 
 
@@ -52,6 +50,17 @@ funcs_dict = {
 schemas_dict = {
     'PlainAnswerText': PlainAnswerTextSchema,
     'RangeAnswer': RangeAnswerSchema
+}
+
+mimetypes = {
+    'pdf': 'application/pdf',
+    'jpg': 'image/jpeg',
+    'png': 'image/png',
+    'git': 'image/gif',
+    'txt': 'text/plain',
+    'doc': 'application/msword',
+    'docx': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+    'odt': 'application/vnd.oasis.opendocument.text'
 }
 
 
@@ -98,16 +107,6 @@ def get_all_user_answers(user_id, contest_id):
 
 
 def get_mimetype(filetype):
-    mimetypes = {
-        'pdf': 'application/pdf',
-        'jpg': 'image/jpeg',
-        'png': 'image/png',
-        'git': 'image/gif',
-        'txt': 'text/plain',
-        'doc': 'application/msword',
-        'docx': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-        'odt': 'application/vnd.oasis.opendocument.text'
-    }
     return mimetypes.get(filetype)
 
 
@@ -145,7 +144,8 @@ def check_contest_time_left(contest_id):
 def check_contest_duration(user_work: Response):
     contest_duration = db_get_one_or_none(SimpleContest, "contest_id", user_work.contest_id).contest_duration
     time_spent = datetime.utcnow() - user_work.start_time
-    if user_work.work_status == work_status['NotChecked'] or time_spent + five_minutes > contest_duration:
+    extra_minutes = timedelta(minutes=app.config['RESPONSE_EXTRA_MINUTES'])
+    if user_work.work_status == work_status['NotChecked'] or time_spent + extra_minutes > contest_duration:
         finish_contest(user_work)
         raise OlympiadError("Olympiad is over for current user")
 
@@ -164,14 +164,10 @@ def is_contest_over(contest_id):
 
 def create_user_response(contest_id, user_id):
     check_contest_time_left(contest_id)
-    user_in_contest = UserInContest.query.filter_by(**{"contest_id": contest_id,
-                                                       "user_id": user_id}).one_or_none()
-    if user_in_contest is None:
+    if not db_exists(db.session, UserInContest, filters={"contest_id": contest_id, "user_id": user_id}):
         raise NotFound(field='user_id , contest_id', value='{user_id} , {contest_id}'.format(user_id=user_id,
                                                                                              contest_id=contest_id))
-    user_work = Response.query.filter_by(**{"contest_id": contest_id,
-                                            "user_id": user_id}).one_or_none()
-    if user_work is None:
+    if not db_exists(db.session, Response, filters={"contest_id": contest_id, "user_id": user_id}):
         add_user_response(db.session, user_id, contest_id)
     else:
         raise AlreadyExists(field='user_id ,contest_id', value='{user_id} ,{contest_id}'.format(user_id=user_id,
@@ -181,8 +177,8 @@ def create_user_response(contest_id, user_id):
 
 def finish_contest(user_work: Response):
     user_work.work_status = work_status['NotChecked']
-    user_in_contest: UserInContest = UserInContest.query.filter_by(**{"contest_id": user_work.contest_id,
-                                                                      "user_id": user_work.user_id}).one_or_none()
+    user_in_contest: UserInContest = UserInContest.query.filter_by(contest_id=user_work.contest_id,
+                                                                   user_id=user_work.user_id).one_or_none()
     user_in_contest.completed_the_contest = True
     db.session.commit()
 
@@ -247,7 +243,6 @@ def multiple_answer_check(answer: BaseAnswer):
     user_answers = set(multiple_answer.answers)
     answers = multiple_task.answers
     right_answers = [elem['answer'] for elem in answers if elem['is_right_answer']]
-    print(user_answers)
     count = 0
     for elem in user_answers:
         if elem in right_answers:
