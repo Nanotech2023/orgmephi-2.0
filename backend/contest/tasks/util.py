@@ -99,7 +99,7 @@ def is_user_in_contest(user_id, current_contest):
     :param current_contest: current contest
     :return: boolean value if user in current contest
     """
-    return current_contest.users.filter_by(**{"user_id": str(user_id)}).one_or_none() is not None
+    return current_contest.users.filter_by(user_id=str(user_id)).one_or_none() is not None
 
 
 # Contest content module
@@ -111,7 +111,7 @@ def is_variant_in_contest(variant_id, current_contest):
     :param current_contest: current contest
     :return: boolean value if variant in contest
     """
-    return current_contest.variants.filter_by(**{"variant_id": str(variant_id)}).one_or_none() is not None
+    return current_contest.variants.filter_by(variant_id=str(variant_id)).one_or_none() is not None
 
 
 def is_task_in_variant(task_id, variant):
@@ -197,7 +197,7 @@ def get_user_variant_if_possible(contest_id):
     current_contest = get_simple_contest_if_possible(contest_id)
 
     current_user = db_get_or_raise(UserInContest, "user_id", jwt_get_id())
-    variant = current_contest.variants.filter_by(**{"variant_id": str(current_user.variant_id)}).one_or_none()
+    variant = current_contest.variants.filter_by(variant_id=str(current_user.variant_id)).one_or_none()
 
     # no variant in user profile
     if variant is None:
@@ -255,7 +255,7 @@ def get_contest_if_possible_from_stage(olympiad_id, stage_id, contest_id):
     :return: contest
     """
 
-    current_olympiad = get_composite_contest_if_possible(contest_id)
+    current_olympiad = get_composite_contest_if_possible(olympiad_id)
 
     stage = db_get_or_raise(Stage, "stage_id", str(stage_id))
 
@@ -296,7 +296,7 @@ def get_variant_if_possible(contest_id, variant_id):
     """
     current_contest = get_simple_contest_if_possible(contest_id)
 
-    variant = current_contest.variants.filter_by(**{"variant_id": str(variant_id)}).one_or_none()
+    variant = current_contest.variants.filter_by(variant_id=str(variant_id)).one_or_none()
 
     if not is_variant_in_contest(variant.variant_id, current_contest):
         raise DataConflict('Variant is not in current stage')
@@ -313,7 +313,7 @@ def get_variant_if_possible_by_number(contest_id, variant_num):
     """
     current_contest = get_simple_contest_if_possible(contest_id)
 
-    variant = current_contest.variants.filter_by(**{"variant_number": str(variant_num)}).one_or_none()
+    variant = current_contest.variants.filter_by(variant_number=str(variant_num)).one_or_none()
 
     if variant is None:
         raise DataConflict('No variants in this contest')
