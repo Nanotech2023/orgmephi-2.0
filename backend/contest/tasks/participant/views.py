@@ -3,7 +3,7 @@ import io
 from flask import send_file, request
 
 from common import get_current_module
-from common.errors import AlreadyExists, TimeOver
+from common.errors import AlreadyExists, TimeOver, InsufficientData
 from common.util import send_pdf
 from contest.responses.util import get_user_in_contest_work
 from contest.tasks.model_schemas.contest import VariantSchema
@@ -11,7 +11,7 @@ from contest.tasks.model_schemas.olympiad import ContestSchema
 from contest.tasks.participant.schemas import *
 from contest.tasks.unauthorized.schemas import AllOlympiadsResponseTaskUnauthorizedSchema
 from contest.tasks.util import *
-from user.models import SchoolInfo, UserTypeEnum
+from user.models import UserTypeEnum
 
 db = get_current_db()
 module = get_current_module()
@@ -272,7 +272,7 @@ def task_image(id_contest, id_task):
     task = get_user_task_if_possible(id_contest, id_task)
 
     if task.image_of_task is None:
-        raise InsufficientData("task", "image_of_task")
+        raise DataConflict("Task does not have image")
 
     return send_file(io.BytesIO(task.image_of_task),
                      attachment_filename='task_image.png',
