@@ -3,7 +3,7 @@ from flask import request, send_file
 
 from common import get_current_app, get_current_module, get_current_db
 from common.util import db_get_or_raise
-from common.errors import NotFound
+from common.errors import NotFound, DataConflict
 
 from news.util import FilterNewsResponseSchema, filter_news_query
 from news.model_schemas import NewsSchema
@@ -121,4 +121,6 @@ def get_image(news_id):
     news = db_get_or_raise(News, 'id', news_id)
     if not news.posted:
         raise NotFound('id', news_id)
+    if news.image is None:
+        raise DataConflict('Image not present')
     return send_file(io.BytesIO(news.image), mimetype='image/*')
