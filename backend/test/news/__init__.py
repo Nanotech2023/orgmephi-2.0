@@ -1,4 +1,7 @@
+# noinspection PyUnresolvedReferences
 from .. import *
+from ..tasks import *  # Fixtures
+
 
 @pytest.fixture
 def test_categories():
@@ -7,23 +10,6 @@ def test_categories():
     test_app.db.session.add_all(categories)
     test_app.db.session.commit()
     yield categories
-
-
-@pytest.fixture
-def test_contests():
-    from contest.tasks.models import Contest, BaseContest, OlympiadType, OlympiadSubjectEnum, ContestTypeEnum, \
-        ContestHoldingTypeEnum
-    olympiad_type = OlympiadType(olympiad_type='test')
-    base = BaseContest(name='test', rules='test', description='test', subject=OlympiadSubjectEnum.Math,
-                       winning_condition=1.0, laureate_condition=1.0, target_classes=[11])
-    olympiad_type.contests = [base]
-
-    contests = [Contest(composite_type=ContestTypeEnum.Contest, holding_type=ContestHoldingTypeEnum.OfflineContest)
-                for _ in range(4)]
-    base.child_contests = contests
-    test_app.db.session.add_all(contests)
-    test_app.db.session.commit()
-    yield contests
 
 
 @pytest.fixture

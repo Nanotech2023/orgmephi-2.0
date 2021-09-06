@@ -12,8 +12,9 @@ def test_list_categories(client, test_categories):
     assert resp.status_code == 200
     assert len(resp.json['categories']) == len(test_categories)
     assert set([v.name for v in test_categories]) == set([v['name'] for v in resp.json['categories']])
-    
 
+
+# noinspection DuplicatedCode
 def test_get_all(client, test_news):
     resp = client.get('/news')
     assert resp.status_code == 200

@@ -7,6 +7,7 @@ def client(client_visitor):
     yield client_visitor
 
 
+# noinspection DuplicatedCode
 def test_get_all(client, test_news_posted):
     resp = client.get('/news')
     assert resp.status_code == 200
