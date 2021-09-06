@@ -132,7 +132,6 @@ def id_location_get(id_location):
 
 
 # Olympiad
-# TODO Target class checking ???
 
 
 @module.route('/base_olympiad/all', methods=['GET'],
@@ -250,7 +249,8 @@ def olympiads_all():
         '404':
           description: Olympiad type not found
     """
-
+    # TODO IN NEXT MR
+    # TODO FILTER
     return filter_olympiad_query(request.args)
 
 

@@ -6,7 +6,6 @@ from common.util import send_pdf
 from contest.responses.util import get_user_in_contest_work
 from contest.tasks.control_users.schemas import *
 from contest.tasks.util import *
-from user.models import UserTypeEnum, SchoolInfo
 
 db = get_current_db()
 module = get_current_module()
@@ -52,6 +51,7 @@ def add_user_to_contest(id_contest):
     show_results_to_user = values['show_results_to_user']
     location_id = values.get('location_id', None)
 
+    # Can't add without location
     if location_id is not None:
         db_get_or_raise(OlympiadLocation, "location_id", location_id)
 
@@ -60,23 +60,15 @@ def add_user_to_contest(id_contest):
     target_classes = current_base_contest.target_classes
 
     for user_id in user_ids:
-        current_user: User = db_get_or_raise(User, "id", user_id)
+
+        # User is already enrolled
         if is_user_in_contest(user_id, current_contest):
             raise AlreadyExists('user_id', user_id)
 
-        unfilled = current_user.unfilled()
+        current_user: User = db_get_or_raise(User, "id", user_id)
+        grade = check_user_unfilled_for_enroll(current_user)
 
-        if current_user.type == UserTypeEnum.university:
-            if len(unfilled) > 0:
-                raise InsufficientData('user.student_info', str(unfilled))
-            grade = TargetClassEnum("student")
-        elif current_user.type == UserTypeEnum.school:
-            if len(unfilled) > 0:
-                raise InsufficientData('user.school_info', str(unfilled))
-            grade = TargetClassEnum(str(current_user.school_info.grade))
-        else:
-            raise InsufficientData('type', "university or school")
-
+        # Wrong user class
         if grade not in target_classes:
             raise InsufficientData('base_contest_id', "current grade of user")
 
@@ -128,8 +120,11 @@ def remove_user_from_contest(id_contest):
 
     for user_id in user_ids:
         current_user = current_contest.users.filter_by(**{"user_id": str(user_id)}).one_or_none()
+
+        # If user is not in current contest
         if current_user is None:
             raise InsufficientData('user_id', user_id)
+
         db.session.delete(current_user)
 
     db.session.commit()
@@ -170,18 +165,22 @@ def change_user_location(id_contest):
 
     values = request.marshmallow
     user_ids = values['users_id']
-
     location_id = values.get('location_id', None)
 
+    # Can't change without location
     if location_id is not None:
         db_get_or_raise(OlympiadLocation, "location_id", location_id)
 
     current_contest = get_contest_if_possible(id_contest)
 
     for user_id in user_ids:
+
         current_user = current_contest.users.filter_by(**{"user_id": str(user_id)}).one_or_none()
+
+        # If user is not in current contest
         if current_user is None:
             raise InsufficientData('user_id', user_id)
+
         current_user.location_id = location_id
         db.session.delete(current_user)
 
@@ -193,7 +192,7 @@ def change_user_location(id_contest):
 @module.route(
     '/contest/<int:id_contest>/user/all',
     methods=['GET'], output_schema=UsersResponseTaskControlUsersSchema)
-def users_all(id_contest):
+def get_all_users_in_contest(id_contest):
     """
     Get all users
     ---
@@ -229,7 +228,7 @@ def users_all(id_contest):
 @module.route(
     'contest/<int:id_contest>/user/<int:id_user>/certificate',
     methods=['GET'])
-def users_certificate(id_contest, id_user):
+def get_user_certificate_in_contest(id_contest, id_user):
     """
     Get certificate
     ---
@@ -267,15 +266,22 @@ def users_certificate(id_contest, id_user):
     current_contest = get_contest_if_possible(id_contest)
     current_user = db_get_or_raise(User, 'id', id_user)
 
+    # If user not in contest
     if not is_user_in_contest(id_user, current_contest):
         raise InsufficientData('user_id', id_user)
 
     unfilled = current_user.unfilled()
+
+    # If user didn't fill some information
     if len(unfilled) > 0:
         raise InsufficientData('user', str(unfilled))
 
     mark = get_user_in_contest_work(id_user, id_contest).mark
-    user_status = db_get_or_raise(UserInContest, 'user_id', id_user).user_status
+
+    user_in_contest = current_contest.users.filter_by(
+        **{"user_id": str(id_user)}
+    ).one_or_none()
+    user_status = user_in_contest.user_status
 
     return send_pdf('user_certificate.html', u=user, mark=mark, user_status=user_status,
                     back=current_contest)

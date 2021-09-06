@@ -6,7 +6,7 @@ from contest.tasks.model_schemas.user import UserInContestSchema
 class UpdateUserInContestRequestTaskControlUsersSchema(Schema):
     users_id = fields.List(fields.Int(), required=True)
     location_id = fields.Int(required=False)
-    show_results_to_user = fields.Boolean(required=True)
+    show_results_to_user = fields.Boolean(required=False)
 
 
 class ChangeUsersLocationInContestRequestTaskControlUsersSchema(Schema):

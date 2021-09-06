@@ -79,6 +79,7 @@ class SimpleContestSchema(SQLAlchemySchema):
     end_date = auto_field(column_name='end_date', required=True)
     contest_duration = auto_field(column_name='contest_duration', required=True)
     result_publication_date = auto_field(column_name='result_publication_date', required=True)
+    end_of_enroll_date = auto_field(column_name='end_of_enroll_date', required=True)
     previous_contest_id = auto_field(column_name='previous_contest_id', allow_none=True)
     previous_participation_condition = EnumField(UserStatusEnum,
                                                  data_key='previous_participation_condition',

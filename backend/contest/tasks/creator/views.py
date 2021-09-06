@@ -112,9 +112,11 @@ def olympiad_create_simple(id_base_olympiad):
     values = request.marshmallow
 
     visibility = values['visibility']
-    start_time = values['start_time']
-    end_time = values['end_time']
+    start_date = values['start_date']
+    end_date = values['end_date']
+    contest_duration = values.get('contest_duration', None)
     result_publication_date = values.get('result_publication_date', None)
+    end_of_enroll_date = values.get('end_of_enroll_date', None)
     stage_id = values.get('stage_id', None)
     previous_contest_id = values.get('previous_contest_id', None)
     previous_participation_condition = values.get('previous_participation_condition', None)
@@ -126,11 +128,13 @@ def olympiad_create_simple(id_base_olympiad):
 
     current_contest = add_simple_contest(db.session,
                                          visibility=visibility,
-                                         start_date=start_time,
-                                         end_date=end_time,
+                                         start_date=start_date,
+                                         end_date=end_date,
                                          holding_type=holding_type,
                                          previous_contest_id=previous_contest_id,
                                          previous_participation_condition=previous_participation_condition,
+                                         end_of_enroll_date=end_of_enroll_date,
+                                         contest_duration=contest_duration,
                                          result_publication_date=result_publication_date)
 
     if previous_contest_id is not None:
