@@ -4,12 +4,42 @@ from marshmallow import Schema, fields
 from marshmallow_enum import EnumField
 
 from common import get_current_app
-from common.errors import FileTooLarge, DataConflict, InsufficientData
+from common.errors import InsufficientData, FileTooLarge, DataConflict, RequestError
 from common.jwt_verify import jwt_get_id
 from contest.tasks.models import *
 from user.models import UserTypeEnum
 
 app = get_current_app()
+
+
+class ContestContentAccessDenied(RequestError):
+    """
+    User has no access to contest
+    """
+
+    def init(self):
+        """
+        Create error object
+        """
+        super(ContestContentAccessDenied, self).init(403)
+
+    def get_msg(self) -> str:
+        return 'User has no access to this contest'
+
+
+class ContestIsStillOnReview(RequestError):
+    """
+    Contest is still on review
+    """
+
+    def init(self):
+        """
+        Create error object
+        """
+        super(ContestIsStillOnReview, self).init(403)
+
+    def get_msg(self) -> str:
+        return 'Contest is still on review'
 
 
 # Contest getters
@@ -47,6 +77,7 @@ def get_composite_contest_if_possible(contest_id):
     if current_contest.composite_type == ContestTypeEnum.SimpleContest:
         raise DataConflict('Current contest type is not composite one')
     return current_contest
+# Constants
 
 
 # Generators
