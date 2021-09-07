@@ -28,6 +28,13 @@ def get_previous_contest_if_possible(current_contest):
 
 
 def compare_conditions_weights(current_contest, prev_contest, user_id):
+    """
+    Compare conditions weights
+    :param current_contest: current contest
+    :param prev_contest: prev contest
+    :param user_id: user id
+    :return:
+    """
     participation_condition_weight = user_status_weights_dict[
         current_contest.previous_participation_condition.value]
     user_in_contest_status_weight = user_status_weights_dict[
@@ -37,6 +44,13 @@ def compare_conditions_weights(current_contest, prev_contest, user_id):
 
 
 def check_stage_condition(prev_contest, user_id, current_step_condition):
+    """
+    Check enrollment to the next stage condition
+    :param prev_contest: prev contest
+    :param user_id: user if
+    :param current_step_condition: current step condition
+    :return:
+    """
     stage_num = prev_contest.stage[0].stage_num
     parent_contest: CompositeContest = prev_contest.stage[0].composite_contest
     prev_stage: Stage = parent_contest.stages.filter_by(stage_num=stage_num).one_or_none()
@@ -58,7 +72,7 @@ def check_stage_condition(prev_contest, user_id, current_step_condition):
 
 def check_previous_contest_condition_if_possible(contest_id, user_id):
     """
-    Get contest
+    Check contest condition
     :param user_id: user id
     :param contest_id: contest id
     :return: contest
