@@ -292,7 +292,7 @@ class CompositeContest(Contest):
 
     contest_id = db.Column(db.Integer, db.ForeignKey('contest.contest_id'), primary_key=True)
 
-    stages = db.relationship('Stage', lazy='select',
+    stages = db.relationship('Stage', lazy='dynamic',
                              backref=db.backref('composite_contest', lazy='joined'))
 
     __mapper_args__ = {

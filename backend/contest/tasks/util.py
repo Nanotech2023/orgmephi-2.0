@@ -27,6 +27,39 @@ def get_previous_contest_if_possible(current_contest):
         return None
 
 
+def compare_conditions_weights(current_contest, prev_contest, user_id):
+    participation_condition_weight = user_status_weights_dict[
+        current_contest.previous_participation_condition.value]
+    user_in_contest_status_weight = user_status_weights_dict[
+        get_user_in_contest_by_id_if_possible(prev_contest.contest_id, user_id).user_status.value]
+
+    return user_in_contest_status_weight >= participation_condition_weight
+
+
+def check_stage_condition(prev_contest, user_id, current_step_condition):
+    stage_num = prev_contest.stage[0].stage_num
+    parent_contest: CompositeContest = prev_contest.stage[0].composite_contest
+    prev_stage: Stage = parent_contest.stages.filter_by(stage_num=stage_num).one_or_none()
+    condition = prev_stage.condition
+    if condition == StageConditionEnum.No:
+        return True and current_step_condition
+    elif condition == StageConditionEnum.And:
+        for simple_contest in prev_stage.contests:
+            if simple_contest.previous_participation_condition is not None:
+                prev_contest: SimpleContest = get_previous_contest_if_possible(simple_contest)
+                if not compare_conditions_weights(simple_contest, prev_contest, user_id):
+                    return False
+
+        return True and current_step_condition
+    elif condition == StageConditionEnum.Or:
+        for simple_contest in prev_stage.contests:
+            if simple_contest.previous_participation_condition is not None:
+                prev_contest: SimpleContest = get_previous_contest_if_possible(simple_contest)
+                if compare_conditions_weights(simple_contest, prev_contest, user_id):
+                    return True
+        return current_step_condition
+
+
 def check_previous_contest_condition_if_possible(contest_id, user_id):
     """
     Get contest
@@ -34,17 +67,23 @@ def check_previous_contest_condition_if_possible(contest_id, user_id):
     :param contest_id: contest id
     :return: contest
     """
-    current_contest: SimpleContest = db_get_or_raise(Contest, "contest_id", str(contest_id))
-    prev_contest: SimpleContest = get_previous_contest_if_possible(current_contest)
+    current_contest = db_get_or_raise(Contest, "contest_id", str(contest_id))
+    prev_contest = get_previous_contest_if_possible(current_contest)
     if prev_contest is None:
         return True
 
-    participation_condition_weight = user_status_weights_dict[
-       current_contest.previous_participation_condition.value]
-    user_in_contest_status_weight = user_status_weights_dict[
-        get_user_in_contest_by_id_if_possible(prev_contest.contest_id, user_id).user_status.value]
+    current_step_condition = compare_conditions_weights(current_contest, prev_contest, user_id)
+    current_stage_step_condition = check_stage_condition(prev_contest, user_id, current_step_condition)
 
-    return user_in_contest_status_weight >= participation_condition_weight
+    if current_contest.stage is not None and prev_contest.stage is not None:
+        if current_contest.stage[0].stage_num == prev_contest.stage[0].stage_num:
+            return current_step_condition
+        else:
+            return current_stage_step_condition
+    elif prev_contest.stage is not None:
+        return current_stage_step_condition
+    else:
+        return current_step_condition
 
 
 def get_contest_if_possible(contest_id):
