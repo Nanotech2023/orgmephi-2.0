@@ -4,7 +4,7 @@ from marshmallow import Schema, fields
 from marshmallow_enum import EnumField
 
 from common import get_current_app
-from common.errors import FileTooLarge, DataConflict, InsufficientData, RequestError
+from common.errors import FileTooLarge, DataConflict, InsufficientData, RequestError, NotFound
 from common.jwt_verify import jwt_get_id
 from contest.tasks.models import *
 from user.models import UserTypeEnum
@@ -43,6 +43,18 @@ def compare_conditions_weights(current_contest, prev_contest, user_id):
     return user_in_contest_status_weight >= participation_condition_weight
 
 
+def _get_passed(simple_contest, user_id):
+    """
+    Get passed
+    :param contest:
+    :return:
+    """
+    if simple_contest.previous_participation_condition is None:
+        return True
+    prev_contest: SimpleContest = get_previous_contest_if_possible(simple_contest)
+    return compare_conditions_weights(simple_contest, prev_contest, user_id)
+
+
 def check_stage_condition(prev_contest, user_id, current_step_condition):
     """
     Check enrollment to the next stage condition
@@ -55,18 +67,13 @@ def check_stage_condition(prev_contest, user_id, current_step_condition):
     parent_contest: CompositeContest = prev_contest.stage[0].composite_contest
     prev_stage: Stage = parent_contest.stages.filter_by(stage_num=stage_num).one_or_none()
     condition = prev_stage.condition
+
+    passed_list = (_get_passed(simple_contest, user_id) for simple_contest in prev_stage.contests)
     if condition == StageConditionEnum.And:
-        for simple_contest in prev_stage.contests:
-            if simple_contest.previous_participation_condition is not None:
-                prev_contest: SimpleContest = get_previous_contest_if_possible(simple_contest)
-                if not compare_conditions_weights(simple_contest, prev_contest, user_id):
-                    return False
+        return all(passed_list)
     elif condition == StageConditionEnum.Or:
-        for simple_contest in prev_stage.contests:
-            if simple_contest.previous_participation_condition is not None:
-                prev_contest: SimpleContest = get_previous_contest_if_possible(simple_contest)
-                if compare_conditions_weights(simple_contest, prev_contest, user_id):
-                    return True
+        return any(passed_list)
+
     return current_step_condition
 
 
@@ -280,7 +287,7 @@ def get_user_in_contest_by_id_if_possible(contest_id, user_id) -> UserInContest:
 
     # user is not registered
     if not is_user_in_contest(user_id, current_contest):
-        raise DataConflict(f"User is not registered for the olympiad with id: {contest_id}")
+        raise NotFound("user_id", str(user_id))
 
     return current_contest.users.filter_by(**{"user_id": user_id,
                                               "contest_id": contest_id}).one_or_none()
