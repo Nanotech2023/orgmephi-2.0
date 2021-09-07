@@ -131,6 +131,15 @@ def base_olympiad_patch(id_base_olympiad):
     base_contest = db_get_or_raise(BaseContest, "base_contest_id", id_base_olympiad)
     db_get_or_raise(OlympiadType, "olympiad_type_id", values["olympiad_type_id"])
 
+    conditions = values['conditions']
+
+    if len(conditions) != 6:
+        raise DataConflict("6 conditions expected: Diploma 3, Diploma 2, Diploma 1, Winner 3, Winner 2, Winner 1")
+
+    for condition in conditions:
+        if condition < 1 or condition > 100:
+            raise DataConflict("Condition between 1 and 100 expected")
+
     target_classes = set(values['target_classes'])
     del values["target_classes"]
 

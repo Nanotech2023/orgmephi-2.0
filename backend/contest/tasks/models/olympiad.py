@@ -65,7 +65,7 @@ class OlympiadType(db.Model):
                                backref=db.backref('olympiad_type', lazy='joined'))
 
 
-def add_base_contest(db_session, name, laureate_condition, winning_condition, description, rules, olympiad_type_id,
+def add_base_contest(db_session, name, conditions, description, rules, olympiad_type_id,
                      subject, certificate_template):
     """
     Create new base content object
@@ -75,8 +75,7 @@ def add_base_contest(db_session, name, laureate_condition, winning_condition, de
         name=name,
         certificate_template=certificate_template,
         rules=rules,
-        winning_condition=winning_condition,
-        laureate_condition=laureate_condition,
+        conditions=conditions,
         olympiad_type_id=olympiad_type_id,
         subject=subject
     )
@@ -99,10 +98,7 @@ class BaseContest(db.Model):
     olympiad_type_id: olympiad type id
     subject: subject
     certificate_template: contest certificate template
-
-    winning_condition: minimum passing scores
-    laureate_condition: minimum passing scores
-
+    conditions: Diploma 3, Diploma 2, Diploma 1, Winner 3, Winner 2, Winner 1
     target_class: target class
     child_contests: child contests
     """
@@ -117,9 +113,7 @@ class BaseContest(db.Model):
     olympiad_type_id = db.Column(db.Integer, db.ForeignKey('olympiad_type.olympiad_type_id'), nullable=False)
     subject = db.Column(db.Enum(OlympiadSubjectEnum), nullable=False)
     certificate_template = db.Column(db.Text, nullable=True)
-
-    winning_condition = db.Column(db.Float, nullable=False)
-    laureate_condition = db.Column(db.Float, nullable=False)
+    conditions = db.Column(db.PickleType, nullable=False)
 
     target_classes = db.Column(db.PickleType)
 

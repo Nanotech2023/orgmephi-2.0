@@ -47,8 +47,16 @@ def base_olympiad_create():
     description = values['description']
     rules = values['rules']
     olympiad_type_id = values['olympiad_type_id']
-    winning_condition = values['winning_condition']
-    laureate_condition = values['laureate_condition']
+
+    conditions = values['conditions']
+
+    if len(conditions) != 6:
+        raise DataConflict("6 conditions expected: Diploma 3, Diploma 2, Diploma 1, Winner 3, Winner 2, Winner 1")
+
+    for condition in conditions:
+        if condition < 1 or condition > 100:
+            raise DataConflict("Condition between 1 and 100 expected")
+
     subject = values['subject']
     target_classes = set(values['target_classes'])
 
@@ -57,8 +65,7 @@ def base_olympiad_create():
                                     description=description,
                                     name=name,
                                     certificate_template=None,
-                                    winning_condition=winning_condition,
-                                    laureate_condition=laureate_condition,
+                                    conditions=conditions,
                                     rules=rules,
                                     olympiad_type_id=olympiad_type_id,
                                     subject=subject)

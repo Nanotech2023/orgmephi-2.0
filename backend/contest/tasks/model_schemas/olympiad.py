@@ -37,14 +37,9 @@ class BaseContestSchema(SQLAlchemySchema):
     name = auto_field(column_name='name', required=True)
     description = auto_field(column_name='description', validate=text_validator, required=True)
     rules = auto_field(column_name='rules', validate=text_validator, required=True)
-
-    winning_condition = auto_field(column_name='winning_condition', required=True)
-    laureate_condition = auto_field(column_name='laureate_condition', required=True)
-
+    conditions = auto_field(column_name='conditions', many=True, required=False)
     olympiad_type_id = auto_field(column_name='olympiad_type_id', required=True)
-
     subject = EnumField(OlympiadSubjectEnum, data_key='subject', by_value=True, required=True)
-
     target_classes = fields.List(EnumField(TargetClassEnum, by_value=True, required=True), data_key='target_classes',
                                  required=True)
 
