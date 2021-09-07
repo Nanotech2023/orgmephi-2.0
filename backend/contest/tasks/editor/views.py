@@ -220,7 +220,7 @@ def olympiad_patch(id_base_olympiad, id_olympiad):
           description: OK
           content:
             application/json:
-              schema: ContestResponseTaskCreatorSchemas
+              schema: ContestResponseTaskCreatorSchema
         '400':
           description: Bad request
         '409':
