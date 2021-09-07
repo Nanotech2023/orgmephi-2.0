@@ -15,13 +15,12 @@ app = get_current_app()
 # Contest getters
 
 
-def get_previous_contest_if_possible(contest_id):
+def get_previous_contest_if_possible(current_contest):
     """
     Get contest
-    :param contest_id: contest id
+    :param current_contest: current contest
     :return: contest
     """
-    current_contest: SimpleContest = db_get_or_raise(Contest, "contest_id", str(contest_id))
     if current_contest.previous_contest_id is not None:
         return db_get_or_raise(Contest, "contest_id", str(current_contest.previous_contest_id))
     else:
@@ -35,9 +34,15 @@ def check_previous_contest_condition_if_possible(contest_id, user_id):
     :param contest_id: contest id
     :return: contest
     """
-    current_contest: SimpleContest = get_previous_contest_if_possible(contest_id)
-    participation_condition_weight = current_contest.previous_participation_condition[0]
-    user_in_contest_status_weight = get_user_in_contest_by_id_if_possible(contest_id, user_id).user_status[0]
+    current_contest: SimpleContest = db_get_or_raise(Contest, "contest_id", str(contest_id))
+    prev_contest: SimpleContest = get_previous_contest_if_possible(current_contest)
+    if prev_contest is None:
+        return True
+
+    participation_condition_weight = user_status_weights_dict[
+       current_contest.previous_participation_condition.value]
+    user_in_contest_status_weight = user_status_weights_dict[
+        get_user_in_contest_by_id_if_possible(prev_contest.contest_id, user_id).user_status.value]
 
     return user_in_contest_status_weight >= participation_condition_weight
 
@@ -226,7 +231,7 @@ def get_user_in_contest_by_id_if_possible(contest_id, user_id) -> UserInContest:
 
     # user is not registered
     if not is_user_in_contest(user_id, current_contest):
-        raise DataConflict("User is not registered for this olympiad")
+        raise DataConflict(f"User is not registered for the olympiad with id: {contest_id}")
 
     return current_contest.users.filter_by(**{"user_id": user_id,
                                               "contest_id": contest_id}).one_or_none()

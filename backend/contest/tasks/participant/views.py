@@ -110,8 +110,11 @@ def enroll_in_contest(id_contest):
     current_contest: SimpleContest = get_contest_if_possible(id_contest)
     current_base_contest = get_base_contest(current_contest)
 
+    if not check_previous_contest_condition_if_possible(id_contest, user_id):
+        raise ContestContentAccessDenied()
+
     # Can't enroll after deadline
-    if datetime.utcnow().date() > current_contest.end_of_enroll_date:
+    if datetime.utcnow() > current_contest.end_of_enroll_date:
         raise TimeOver("Time for enrolling is over")
 
     # Can't add without location
