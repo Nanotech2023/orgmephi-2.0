@@ -41,23 +41,19 @@ def check_stage_condition(prev_contest, user_id, current_step_condition):
     parent_contest: CompositeContest = prev_contest.stage[0].composite_contest
     prev_stage: Stage = parent_contest.stages.filter_by(stage_num=stage_num).one_or_none()
     condition = prev_stage.condition
-    if condition == StageConditionEnum.No:
-        return current_step_condition
-    elif condition == StageConditionEnum.And:
+    if condition == StageConditionEnum.And:
         for simple_contest in prev_stage.contests:
             if simple_contest.previous_participation_condition is not None:
                 prev_contest: SimpleContest = get_previous_contest_if_possible(simple_contest)
                 if not compare_conditions_weights(simple_contest, prev_contest, user_id):
                     return False
-
-        return True and current_step_condition
     elif condition == StageConditionEnum.Or:
         for simple_contest in prev_stage.contests:
             if simple_contest.previous_participation_condition is not None:
                 prev_contest: SimpleContest = get_previous_contest_if_possible(simple_contest)
                 if compare_conditions_weights(simple_contest, prev_contest, user_id):
                     return True
-        return current_step_condition
+    return current_step_condition
 
 
 def check_previous_contest_condition_if_possible(contest_id, user_id):
