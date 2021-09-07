@@ -258,51 +258,6 @@ components:
       required:
       - contest_id
       type: object
-    ContestResponseTaskCreator:
-      properties:
-        contest_duration:
-          type: integer
-          x-unit: seconds
-        contest_id:
-          type: integer
-        end_date:
-          format: date-time
-          type: string
-        end_of_enroll_date:
-          format: date-time
-          type: string
-        holding_type:
-          enum:
-          - OfflineContest
-          - OnLineContest
-          type: string
-        location:
-          maxLength: 128
-          type: string
-        previous_contest_id:
-          type: integer
-        previous_participation_condition:
-          enum:
-          - Winner 1
-          - Winner 2
-          - Winner 3
-          - Diploma 1
-          - Diploma 2
-          - Diploma 3
-          - Participant
-          type: string
-        result_publication_date:
-          format: date-time
-          type: string
-        start_date:
-          format: date-time
-          type: string
-        visibility:
-          type: boolean
-      required:
-      - contest_id
-      - visibility
-      type: object
     CreateBaseOlympiadRequestTaskCreator:
       properties:
         description:
@@ -1030,6 +985,8 @@ components:
       type: object
     UpdateUserInContestRequestTaskControlUsers:
       properties:
+        check_condition:
+          type: boolean
         location_id:
           type: integer
         show_results_to_user:
@@ -1699,7 +1656,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ContestResponseTaskCreator'
+                $ref: '#/components/schemas/ContestResponseTaskCreatorSchemas'
           description: OK
         '400':
           description: Bad request
