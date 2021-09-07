@@ -42,7 +42,7 @@ def check_stage_condition(prev_contest, user_id, current_step_condition):
     prev_stage: Stage = parent_contest.stages.filter_by(stage_num=stage_num).one_or_none()
     condition = prev_stage.condition
     if condition == StageConditionEnum.No:
-        return True and current_step_condition
+        return current_step_condition
     elif condition == StageConditionEnum.And:
         for simple_contest in prev_stage.contests:
             if simple_contest.previous_participation_condition is not None:
