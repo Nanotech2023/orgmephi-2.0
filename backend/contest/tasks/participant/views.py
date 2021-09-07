@@ -104,18 +104,18 @@ def enroll_in_contest(id_contest):
 
     values = request.marshmallow
 
-    location_id = values.get('location_id', None)
-
     user_id = jwt_get_id()
     current_contest: SimpleContest = get_contest_if_possible(id_contest)
-    current_base_contest = get_base_contest(current_contest)
 
+    # Id user doesn't win previous contest
     if not check_previous_contest_condition_if_possible(id_contest, user_id):
         raise ContestContentAccessDenied()
 
     # Can't enroll after deadline
     if datetime.utcnow() > current_contest.end_of_enroll_date:
         raise TimeOver("Time for enrolling is over")
+
+    location_id = values.get('location_id', None)
 
     # Can't add without location
     if location_id is not None:
@@ -124,6 +124,8 @@ def enroll_in_contest(id_contest):
     # User is already enrolled
     if is_user_in_contest(user_id, current_contest):
         raise AlreadyExists('user_id', str(user_id))
+
+    current_base_contest = get_base_contest(current_contest)
 
     target_classes = current_base_contest.target_classes
     current_user = db_get_or_raise(User, "id", user_id)

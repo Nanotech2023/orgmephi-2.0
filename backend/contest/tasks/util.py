@@ -430,10 +430,15 @@ class FilterOlympiadAllRequestSchema(Schema):
     limit = fields.Integer()
 
 
+class FilterUserAddingRequestSchema(Schema):
+    condition = EnumField(enum=UserStatusEnum, by_value=True)
+
+
 _filter_fields = ['base_contest_id', 'location_id', 'end_date']
 
 
 # Olympiad filter
+
 
 def filter_olympiad_query(args):
     marshmallow = FilterOlympiadAllRequestSchema().load(args)
@@ -483,6 +488,9 @@ def check_user_unfilled_for_enroll(current_user: User):
     else:
         raise InsufficientData('type', "university or school")
     return grade
+
+
+# Exceptions
 
 
 class ContestContentAccessDenied(RequestError):
