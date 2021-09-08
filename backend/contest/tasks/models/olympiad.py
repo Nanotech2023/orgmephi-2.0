@@ -141,7 +141,7 @@ class BaseContest(db.Model):
 
     target_classes = db.Column(db.PickleType)
 
-    child_contests = db.relationship('Contest', lazy='select',
+    child_contests = db.relationship('Contest', lazy='dynamic',
                                      backref=db.backref('base_contest', lazy='joined'), cascade="all, delete-orphan")
 
 

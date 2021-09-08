@@ -12,6 +12,36 @@ from user.models import UserTypeEnum
 app = get_current_app()
 
 
+class ContestContentAccessDenied(RequestError):
+    """
+    User has no access to contest
+    """
+
+    def init(self):
+        """
+        Create error object
+        """
+        super(ContestContentAccessDenied, self).__init__(403)
+
+    def get_msg(self) -> str:
+        return 'User has no access to this contest'
+
+
+class ContestIsStillOnReview(RequestError):
+    """
+    Contest is still on review
+    """
+
+    def init(self):
+        """
+        Create error object
+        """
+        super(ContestIsStillOnReview, self).__init__(403)
+
+    def get_msg(self) -> str:
+        return 'Contest is still on review'
+
+
 # Contest getters
 
 
@@ -133,6 +163,9 @@ def get_composite_contest_if_possible(contest_id):
     if current_contest.composite_type == ContestTypeEnum.SimpleContest:
         raise DataConflict('Current contest type is not composite one')
     return current_contest
+
+
+# Constants
 
 
 # Generators
@@ -457,7 +490,6 @@ def get_task_if_possible(contest_id, variant_id, task_id):
 
 # Validators
 
-# TODO Refactor in next MR
 def validate_contest_values(previous_contest_id, previous_participation_condition):
     """
     Check previous contest conditions
@@ -520,11 +552,21 @@ def filter_olympiad_query(args):
 
 
 def validate_file_size(binary_file):
+    """
+    Check size of binary file
+    :param binary_file:  file
+    :return: size
+    """
     if len(binary_file) > app.config['ORGMEPHI_MAX_FILE_SIZE']:
         raise FileTooLarge()
 
 
 def check_user_unfilled_for_enroll(current_user: User):
+    """
+    Check user unfilled for enroll
+    :param current_user:
+    :return: grade
+    """
     unfilled = current_user.unfilled()
 
     if current_user.type == UserTypeEnum.university:

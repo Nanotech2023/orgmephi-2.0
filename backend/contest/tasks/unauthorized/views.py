@@ -1,9 +1,9 @@
 from flask import request
 
 from common import get_current_module
-from common.errors import InsufficientData
 from common.util import db_get_all
 from contest.tasks.unauthorized.schemas import *
+from contest.tasks.unauthorized.util import filter_olympiad_query
 from contest.tasks.util import *
 
 db = get_current_db()
@@ -226,7 +226,7 @@ def olympiads_all():
             format: date-time
             type: string
         - in: query
-          name: target_classes
+          name: target_class
           required: false
           schema:
             type: string
@@ -249,8 +249,6 @@ def olympiads_all():
         '404':
           description: Olympiad type not found
     """
-    # TODO IN NEXT MR
-    # TODO FILTER
     return filter_olympiad_query(request.args)
 
 

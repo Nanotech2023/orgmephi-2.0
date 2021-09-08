@@ -1,9 +1,11 @@
 from marshmallow import Schema, fields
+from marshmallow_enum import EnumField
 
 from contest.tasks.model_schemas.contest import StageSchema
 from contest.tasks.model_schemas.location import OlympiadLocationSchema
 from contest.tasks.model_schemas.olympiad import OlympiadTypeSchema, ContestSchema, BaseContestSchema, \
     SimpleContestSchema
+from contest.tasks.models import TargetClassEnum
 
 
 class AllOlympiadTypesResponseTaskUnauthorizedSchema(Schema):
@@ -39,3 +41,15 @@ class AllStagesResponseTaskUnauthorizedSchema(Schema):
 class FilterSimpleContestResponseSchema(Schema):
     contest_list = fields.Nested(nested=SimpleContestSchema, many=True)
     count = fields.Integer()
+
+# For filter query
+
+
+class FilterOlympiadAllRequestSchema(Schema):
+    base_contest_id = fields.Integer()
+    location_id = fields.Integer()
+    target_class = EnumField(enum=TargetClassEnum, by_value=True)
+    end_date = fields.DateTime()
+    only_count = fields.Boolean()
+    offset = fields.Integer()
+    limit = fields.Integer()

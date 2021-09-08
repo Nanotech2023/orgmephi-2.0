@@ -4,7 +4,6 @@ from flask import request
 from flask import send_file
 
 from common import get_current_module
-from common.errors import InsufficientData
 from contest.tasks.creator.schemas import *
 from contest.tasks.util import *
 
