@@ -125,15 +125,6 @@ def user_answer_for_task_by_id_plain_file(contest_id, task_id, user_id):
     get:
       security:
         - JWTAccessToken: []
-      produces:
-        - image/png
-        - application/pdf
-        - image/jpeg
-        - image/gif
-        - text/plain
-        - application/msword
-        - application/vnd.openxmlformats-officedocument.wordprocessingml.document
-        - application/vnd.oasis.opendocument.text
       parameters:
         - in: path
           description: Id of the contest
@@ -156,15 +147,21 @@ def user_answer_for_task_by_id_plain_file(contest_id, task_id, user_id):
       responses:
         '200':
           description: OK
-          schema:
-            type: string
-            format: binary
+          content:
+            image/png: {schema: {format: binary, type: string}}
+            application/pdf: {schema: {format: binary, type: string}}
+            image/jpeg: {schema: {format: binary, type: string}}
+            image/gif: {schema: {format: binary, type: string}}
+            text/plain: {schema: {format: binary, type: string}}
+            application/msword: {schema: {format: binary, type: string}}
+            application/vnd.openxmlformats-officedocument.wordprocessingml.document: {schema: {format: binary, type: string}}
+            application/vnd.oasis.opendocument.text: {schema: {format: binary, type: string}}
         '403':
           description: Not enough rights for current user
         '404':
           description: User, contest or task not found
     """
-    user_answer = user_answer_get(user_id, contest_id, task_id)
+    user_answer = user_answer_get(user_id, contest_id, task_id, 'PlainAnswerFile')
     return send_file(io.BytesIO(user_answer.answer_file),
                      attachment_filename=f'userid_{user_id}_taskid_{task_id}.{user_answer.filetype.value}',
                      mimetype=get_mimetype(user_answer.filetype.value)), 200
