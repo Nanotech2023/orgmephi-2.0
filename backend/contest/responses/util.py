@@ -136,6 +136,8 @@ def check_time_publishing(contest_id):
 
 def check_contest_time_left(contest_id):
     simple_contest: SimpleContest = db_get_one_or_none(SimpleContest, 'contest_id', contest_id)
+    if simple_contest is None:
+        raise NotFound(field='contest_id', value=contest_id)
     duration = simple_contest.contest_duration
     if duration is None:
         duration = timedelta(seconds=0)
@@ -146,7 +148,7 @@ def check_contest_time_left(contest_id):
 def check_contest_duration(user_work: Response):
     contest_duration = db_get_one_or_none(SimpleContest, "contest_id", user_work.contest_id).contest_duration
     time_spent = datetime.utcnow() - user_work.start_time
-    if user_work.work_status == work_status['NotChecked'] or \
+    if user_work.work_status != work_status['InProgress'] or \
             time_spent + app.config['RESPONSE_EXTRA_MINUTES'] > contest_duration:
         finish_contest(user_work)
         raise OlympiadError("Olympiad is over for current user")

@@ -1,5 +1,3 @@
-import pytest
-
 from .. import *
 import datetime
 
@@ -44,10 +42,17 @@ def create_simple_contest(create_base_contest):
 @pytest.fixture
 def create_olympiad_location(create_simple_contest):
     from contest.tasks.models.location import add_russia_location
-    location = add_russia_location(db_session=test_app.db.session, city_name='Москва',
-                                   region_name='Москвоская обл.', address='address')
+    from user.models import Region, City
+    region = Region(name='test')
+    test_app.db.session.add(region)
+    city = City(name='test')
+    city.region = region
+    test_app.db.session.add(city)
+    location = add_russia_location(db_session=test_app.db.session, city_name='test',
+                                   region_name='test', address='address')
     test_app.db.session.commit()
-    yield create_simple_contest.append(location)
+    create_simple_contest.append(location)
+    yield create_simple_contest
 
 
 @pytest.fixture
@@ -56,7 +61,8 @@ def create_variant(create_olympiad_location):
     variant = add_variant(db_session=test_app.db.session, variant_number=1,
                           variant_description='description', contest_id=create_olympiad_location[0].contest_id)
     test_app.db.session.commit()
-    yield create_olympiad_location.append(variant)
+    create_olympiad_location.append(variant)
+    yield create_olympiad_location
 
 
 @pytest.fixture
@@ -71,7 +77,8 @@ def create_user_in_contest(create_variant, test_user_university):
                          location_id=location_id)
     test_app.db.session.add(user)
     test_app.db.session.commit()
-    yield create_variant.append(user_id)
+    create_variant.append(user_id)
+    yield create_variant
 
 
 @pytest.fixture
@@ -81,7 +88,8 @@ def create_plain_task(create_user_in_contest):
                                 task_points=11)
     create_user_in_contest[2].tasks.append(plain_task)
     test_app.db.session.commit()
-    yield create_user_in_contest.append(plain_task)
+    create_user_in_contest.append(plain_task)
+    yield create_user_in_contest
 
 
 @pytest.fixture
@@ -91,7 +99,8 @@ def create_range_task(create_user_in_contest):
                                 end_value=0.7, task_points=5)
     create_user_in_contest[2].tasks.append(range_task)
     test_app.db.session.commit()
-    yield create_user_in_contest.append(range_task)
+    create_user_in_contest.append(range_task)
+    yield create_user_in_contest
 
 
 @pytest.fixture
@@ -115,7 +124,8 @@ def create_multiple_task(create_user_in_contest):
     multiple_task.answers = answers
     create_user_in_contest[2].tasks.append(multiple_task)
     test_app.db.session.commit()
-    yield create_user_in_contest.append(multiple_task)
+    create_user_in_contest.append(multiple_task)
+    yield create_user_in_contest
 
 
 def get_contest_id(array):
