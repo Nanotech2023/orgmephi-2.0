@@ -112,7 +112,7 @@
             <div *ngIf="!(isAuthenticated$ | async)">
                 <div class="form-floating">
                     <input type="email" class="form-control" required email placeholder="name@example.com"
-                           [(ngModel)]="loginAttempt.auth_credentials.username" #email="ngModel" name="email">
+                           [(ngModel)]="loginAttempt.username" #email="ngModel" name="email">
                     <label>Электронная почта</label>
                     <div *ngIf="email.invalid && (email.dirty || email.touched)"
                          class="input_error">
@@ -127,7 +127,7 @@
                 <br/>
                 <div class="form-floating">
                     <input type="password" class="form-control" placeholder="Пароль"
-                           [(ngModel)]="loginAttempt.auth_credentials.password">
+                           [(ngModel)]="loginAttempt.password">
                     <label>Пароль</label>
                 </div>
                 <br/>

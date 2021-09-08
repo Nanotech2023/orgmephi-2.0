@@ -1,11 +1,18 @@
 import { Injectable } from '@angular/core'
 import { Actions, createEffect, ofType } from '@ngrx/effects'
 import { AuthService } from '@/auth/api/auth.service'
-import { loginAttempt, loginError, loginSuccess, registerAttempt, registerSuccess } from '@/auth/store/auth.actions'
-import { catchError, concatMap, mergeMap } from 'rxjs/operators'
+import {
+    getUserInfoRequest,
+    getUserInfoSuccess, getUserSuccess,
+    loginRequest,
+    loginSuccess,
+    registerRequest,
+    registerSuccess
+} from '@/auth/store/auth.actions'
+import { catchError, concatMap, mergeMap, switchMap } from 'rxjs/operators'
 import { of } from 'rxjs'
-import { TypeCSRFPair, TypeUserInfo } from '@/auth/api/models'
 import { Router } from '@angular/router'
+import { CSRFPairUser, User, UserInfo } from '@/auth/api/models'
 
 
 // noinspection JSUnusedGlobalSymbols
@@ -19,10 +26,10 @@ export class AuthEffects
     loginAttempt$ = createEffect( () =>
         this.actions$.pipe
         (
-            ofType( loginAttempt ),
-            concatMap( ( { requestLogin } ) =>
-                this.authService.loginPost( requestLogin ).pipe(
-                    mergeMap( ( csrfPair: TypeCSRFPair ) =>
+            ofType( loginRequest ),
+            concatMap( ( { loginRequestUser } ) =>
+                this.authService.userAuthLoginPost( loginRequestUser ).pipe(
+                    mergeMap( ( csrfPair: CSRFPairUser ) =>
                         {
                             this.authService.configuration.credentials[ "CSRFAcessToken" ] = csrfPair.csrf_access_token
                             this.router.navigate( [ '/users' ] )
@@ -34,26 +41,53 @@ export class AuthEffects
                             } ) )
                         }
                     ),
-                    catchError(
-                        error =>
-                            of( loginError( { error: error } ) )
-                    )
+                    catchError( error => of( error( { error: error } ) ) )
                 )
             )
         )
     )
 
+    loginSuccess$ = createEffect( () =>
+        this.actions$.pipe(
+            ofType( loginSuccess ),
+            switchMap( () => [ getUserInfoRequest() ] )
+        )
+    )
+
+
+    getUserRequest$ = createEffect( () =>
+        this.actions$.pipe(
+            ofType( getUserInfoRequest ),
+            concatMap( () =>
+                this.authService.userProfileUserGet().pipe(
+                    mergeMap( ( user: User ) => of( getUserSuccess( { user: user } ) ) ),
+                    catchError( error => of( error( { error: error } ) ) )
+                )
+            )
+        )
+    )
+
+    getUserInfoRequest$ = createEffect( () =>
+        this.actions$.pipe(
+            ofType( getUserInfoRequest ),
+            concatMap( () =>
+                this.authService.userProfilePersonalGet().pipe(
+                    mergeMap( ( userInfo: UserInfo ) => of( getUserInfoSuccess( { userInfo: userInfo } ) ) ),
+                    catchError( error => of( error( { error: error } ) ) )
+                )
+            )
+        )
+    )
+
+
     registerAttempt$ = createEffect( () =>
         this.actions$.pipe
         (
-            ofType( registerAttempt ),
-            concatMap( ( { requestRegistration } ) =>
-                this.authService.registerSchoolPost( requestRegistration ).pipe(
-                    mergeMap( ( userInfo: TypeUserInfo ) =>
-                        of( registerSuccess( { userInfo: userInfo } ) ) ),
-                    catchError(
-                        error =>
-                            of( loginError( { error: error } ) )
+            ofType( registerRequest ),
+            concatMap( ( { registrationRequestUser } ) =>
+                this.authService.userRegistrationSchoolPost( registrationRequestUser ).pipe(
+                    mergeMap( () => of( registerSuccess() ) ),
+                    catchError( error => of( error( { error: error } ) )
                     )
                 )
             )

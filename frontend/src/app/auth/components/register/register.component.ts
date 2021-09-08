@@ -1,7 +1,7 @@
 import { Component } from '@angular/core'
 import { AuthActions, AuthState } from '@/auth/store'
 import { Store } from '@ngrx/store'
-import { RequestRegistrationSchool, TypeUserType, TypeUserTypeSchool } from '@/auth/api/models'
+import { SchoolRegistrationRequestUser } from '@/auth/api/models'
 import { Agreements } from '@/auth/agreements'
 
 
@@ -13,12 +13,12 @@ import { Agreements } from '@/auth/agreements'
 export class RegisterComponent
 {
     agreements: string[] = Agreements
-    registerTypes: TypeUserTypeSchool[] = [ TypeUserTypeSchool.PreUniversity, TypeUserTypeSchool.School, TypeUserTypeSchool.Enrollee ]
+    registerTypes: SchoolRegistrationRequestUser.RegisterTypeEnum[] = [ SchoolRegistrationRequestUser.RegisterTypeEnum.PreUniversity, SchoolRegistrationRequestUser.RegisterTypeEnum.School, SchoolRegistrationRequestUser.RegisterTypeEnum.Enrollee ]
 
-    registerAttempt: RequestRegistrationSchool // TODO support RequestRegistrationUniversity
+    registerAttempt: SchoolRegistrationRequestUser // TODO support RequestRegistrationUniversity
     isRegistered: boolean
 
-    selectedUserType: TypeUserType | null
+    selectedUserType: SchoolRegistrationRequestUser.RegisterTypeEnum | null
     hasRegisterNumber: boolean
     agreementAccepted: boolean
 
@@ -36,24 +36,24 @@ export class RegisterComponent
         this.hasRegisterNumber = false
     }
 
-    selectRegisterType( userType: TypeUserTypeSchool ): void
+    selectRegisterType( userType: SchoolRegistrationRequestUser.RegisterTypeEnum ): void
     {
         this.selectedUserType = userType
     }
 
     isAvailable(): boolean
     {
-        return this.selectedUserType !== null && this.selectedUserType == TypeUserTypeSchool.School
+        return this.selectedUserType !== null && this.selectedUserType == SchoolRegistrationRequestUser.RegisterTypeEnum.School
     }
 
-    isValid( registration: RequestRegistrationSchool ): boolean
+    isValid( registration: SchoolRegistrationRequestUser ): boolean
     {
         return this.agreementAccepted
     }
 
-    register( registerUser: RequestRegistrationSchool ): void
+    register( registerUser: SchoolRegistrationRequestUser ): void
     {
         this.isRegistered = true
-        this.store.dispatch( AuthActions.registerAttempt( { requestRegistration: registerUser } ) )
+        this.store.dispatch( AuthActions.registerRequest( { registrationRequestUser: registerUser } ) )
     }
 }

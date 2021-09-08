@@ -9,12 +9,13 @@ import { OlympiadsModule } from '@/olympiads/olympiads.module'
 import { AppRoutingModule } from '@/app-routing.module'
 import { environment } from '@environments/environment'
 import { AppComponent } from '@/app.component'
-import { UsersModule } from '@/users/users.module';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations'
-import { AdminModule } from '@/admin/admin.module'
 import { AuthService } from '@/auth/api/auth.service'
-import { AuthServiceReal } from '@/auth/api/auth.service.real'
-import { AuthServiceMock } from '@/auth/api/auth.service.mock'
+import { ManageOlympiadsModule } from '@/manage-olympiads/manage-olympiads.module'
+import { ManageUsersModule } from '@/manage-users/manage-users.module'
+import { OlympiadsServiceMock } from '@/manage-olympiads/api/olympiads.service.mock'
+import { OlympiadsService } from '@/manage-olympiads/api/olympiads.service'
+import { AuthGuardService } from '@/shared/auth.guard.service'
 
 
 @NgModule( {
@@ -26,16 +27,17 @@ import { AuthServiceMock } from '@/auth/api/auth.service.mock'
         LayoutModule,
         AuthModule,
         OlympiadsModule,
-        UsersModule,
-        AdminModule,
+        ManageUsersModule,
+        ManageOlympiadsModule,
         AppRoutingModule,
         StoreModule.forRoot( {} ),
         EffectsModule.forRoot( [] ),
-        environment.production ? [] : StoreDevtoolsModule.instrument(),
-        BrowserAnimationsModule
+        environment.production ? [] : StoreDevtoolsModule.instrument()
     ],
     providers: [
-        { provide: AuthService, useClass: AuthServiceMock }
+        { provide: AuthService },
+        { provide: OlympiadsService, useClass: OlympiadsServiceMock },
+        { provide: AuthGuardService }
     ],
     bootstrap: [ AppComponent ]
 } )

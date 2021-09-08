@@ -1,5 +1,5 @@
 <header>
-    <ng-container *ngIf="hasAccessToManagePages$ | async; then adminHeader; else defaultHeader">
+    <ng-container *ngIf="hasAccessToManagePages$ | async; then manageHeader; else defaultHeader">
     </ng-container>
 </header>
 
@@ -17,13 +17,13 @@
                 <span class="reg-number_title">Ваш регистрационный номер</span>
             </li>
             <li class="nav-item">
-                <span class="reg-number">{{ ( userInfo | async )?.id ?? "Отсутствует" }}</span>
+                <span class="reg-number">{{ ( user$ | async )?.id ?? "Отсутствует" }}</span>
             </li>
         </ul>
         <div class="actions">
             <div class="button_container">
-                <div class="user-info" *ngIf="userInfo | async as userInfo">
-                    {{ userInfo.username }}
+                <div class="user-info" *ngIf="user$ | async as user">
+                    {{ user.username }}
                 </div>
             </div>
             <div class="button_container">
@@ -32,7 +32,7 @@
         </div>
     </nav>
 </ng-template>
-<ng-template #adminHeader>
+<ng-template #manageHeader>
     <header>
         <nav class="navbar navbar-expand-md navbar-dark fixed-top bg-light">
             <a class="navbar-brand" routerLink="/">
@@ -43,24 +43,19 @@
                     <span>/</span>
                 </li>
                 <li class="nav-item">
-                    <a routerLink="/admin/users" routerLinkActive="active">Управление пользователями</a>
+                    <a routerLink="/manage/users" routerLinkActive="active">Управление пользователями</a>
                 </li>
                 <li class="nav-item divider">
                     <span>/</span>
                 </li>
                 <li class="nav-item">
-                    <a routerLink="/admin/olympiads" routerLinkActive="active">Управление олимпиадами</a>
+                    <a routerLink="/manage/olympiads" routerLinkActive="active">Управление олимпиадами</a>
                 </li>
             </ul>
             <div class="actions">
                 <div class="button_container">
-                    <div class="button_logout">
-                        <a routerLink="/admin">Admin</a>
-                    </div>
-                </div>
-                <div class="button_container">
-                    <div class="user-info" *ngIf="userInfo | async as userInfo">
-                        {{ userInfo.username }}
+                    <div class="user-info" *ngIf="user$ | async as user">
+                        {{ user.username }}
                     </div>
                 </div>
                 <div class="button_container">

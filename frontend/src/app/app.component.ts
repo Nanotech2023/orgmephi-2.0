@@ -19,6 +19,6 @@ export class AppComponent implements OnInit
 
     ngOnInit(): void
     {
-        this.isAuthorized$ = this.store.pipe( select( AuthSelectors.selectIsAuthenticated ) )
+        this.isAuthorized$ = this.store.pipe( select( AuthSelectors.selectIsAuthorized ) )
     }
 }
