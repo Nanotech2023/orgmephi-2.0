@@ -12,6 +12,7 @@ from contest.tasks.model_schemas.olympiad import ContestSchema
 from contest.tasks.participant.schemas import *
 from contest.tasks.unauthorized.schemas import AllOlympiadsResponseTaskUnauthorizedSchema, \
     FilterSimpleContestResponseSchema
+from contest.tasks.unauthorized.util import filter_olympiad_query
 from contest.tasks.util import *
 
 db = get_current_db()
@@ -483,8 +484,6 @@ def get_all_contests_self():
         '404':
           description: User not found
     """
-    # TODO IN NEXT MR
-    # TODO FILTER
     return filter_olympiad_query(request.args)
 
 
