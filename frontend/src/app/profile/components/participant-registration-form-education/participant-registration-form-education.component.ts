@@ -1,4 +1,7 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core'
+import { ParticipantRegister } from '@/users/models/participant'
+import { ParticipantService } from '@/users/services/participant.service'
+import { SchoolType } from '@/users/models/participant/education'
 
 
 @Component( {
