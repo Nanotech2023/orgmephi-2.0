@@ -322,21 +322,42 @@ paths:
         required: true
         schema:
           type: integer
-      produces:
-      - image/png
-      - application/pdf
-      - image/jpeg
-      - image/gif
-      - text/plain
-      - application/msword
-      - application/vnd.openxmlformats-officedocument.wordprocessingml.document
-      - application/vnd.oasis.opendocument.text
       responses:
         '200':
+          content:
+            application/msword:
+              schema:
+                format: binary
+                type: string
+            application/pdf:
+              schema:
+                format: binary
+                type: string
+            application/vnd.oasis.opendocument.text:
+              schema:
+                format: binary
+                type: string
+            application/vnd.openxmlformats-officedocument.wordprocessingml.document:
+              schema:
+                format: binary
+                type: string
+            image/gif:
+              schema:
+                format: binary
+                type: string
+            image/jpeg:
+              schema:
+                format: binary
+                type: string
+            image/png:
+              schema:
+                format: binary
+                type: string
+            text/plain:
+              schema:
+                format: binary
+                type: string
           description: OK
-          schema:
-            format: binary
-            type: string
         '403':
           description: Not enough rights for current user
         '404':
@@ -863,21 +884,42 @@ paths:
         required: true
         schema:
           type: integer
-      produces:
-      - image/png
-      - application/pdf
-      - image/jpeg
-      - image/gif
-      - text/plain
-      - application/msword
-      - application/vnd.openxmlformats-officedocument.wordprocessingml.document
-      - application/vnd.oasis.opendocument.text
       responses:
         '200':
+          content:
+            application/msword:
+              schema:
+                format: binary
+                type: string
+            application/pdf:
+              schema:
+                format: binary
+                type: string
+            application/vnd.oasis.opendocument.text:
+              schema:
+                format: binary
+                type: string
+            application/vnd.openxmlformats-officedocument.wordprocessingml.document:
+              schema:
+                format: binary
+                type: string
+            image/gif:
+              schema:
+                format: binary
+                type: string
+            image/jpeg:
+              schema:
+                format: binary
+                type: string
+            image/png:
+              schema:
+                format: binary
+                type: string
+            text/plain:
+              schema:
+                format: binary
+                type: string
           description: OK
-          schema:
-            format: binary
-            type: string
         '403':
           description: Not enough rights for current user
         '404':

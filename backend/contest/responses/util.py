@@ -82,13 +82,15 @@ def get_answer_by_task_id_and_work_id(model, task_id, work_id):
     return user_answer
 
 
-def user_answer_get(user_id, contest_id, task_id):
+def user_answer_get(user_id, contest_id, task_id, answer_type=None):
     user_work = get_user_in_contest_work(user_id, contest_id)
     if len(user_work.answers.all()) == 0:
         raise NotFound('user_response.answers', 'for user %d' % user_id)
     base_answer: BaseAnswer = get_answer_by_task_id_and_work_id(BaseAnswer, task_id, user_work.work_id)
     if base_answer is None:
         raise NotFound('No answer', 'for task_id %d' % task_id)
+    if answer_type is not None and base_answer.answer_type.value != answer_type:
+        raise NotFound('Wrong type', 'for task_id %d' % task_id)
     user_answer = db_get_one_or_none(models_dict.get(base_answer.answer_type.value), 'answer_id', base_answer.answer_id)
     return user_answer
 
