@@ -3,7 +3,7 @@ from sqlalchemy.ext.hybrid import hybrid_property
 
 from common import get_current_db, get_current_app
 from .auth import User
-from user.util import admission_to_grade, grade_to_admission
+from user.util import admission_to_grade, grade_to_admission, get_unfilled
 from .location import Location
 
 db = get_current_db()
@@ -43,3 +43,8 @@ class SchoolInfo(db.Model):
     @grade.setter
     def grade(self, value):
         self.admission_year = grade_to_admission(value)
+
+    _required_fields = ['school_type', 'number', 'name', 'admission_year', 'location']
+
+    def unfilled(self):
+        return get_unfilled(self, self._required_fields, ['location'])

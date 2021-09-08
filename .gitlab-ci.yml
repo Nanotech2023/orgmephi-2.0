@@ -1,5 +1,6 @@
 stages:
   - build
+  - test
 
 
 
@@ -29,6 +30,20 @@ stages:
   artifacts:
     paths:
     - public
+.job_template: &test-backend
+  image: python:3.9-slim
+  stage: test
+  before_script:
+    - pip install -r backend/requirements.txt
+  script:
+    - cd backend
+    - python -m pytest --cov=. --rootdir=.. .
+    - cd ..
+    - coverage combine backend/.coverage
+    - coverage xml
+  artifacts:
+    reports:
+      cobertura: coverage.xml
 
 
 .dev:
@@ -62,4 +77,13 @@ build-openapi-prod:
 
 build-openapi-dev:
   <<: *build-openapi
+  extends: .dev
+
+
+test-backend-prod:
+  <<: *test-backend
+  extends: .prod
+
+test-backend-dev:
+  <<: *test-backend
   extends: .dev

@@ -1,6 +1,6 @@
 import os
 
-from aggregate.default_config import DefaultConfiguration
+from default_config import DefaultConfiguration
 from common import OrgMephiApp, OrgMephiModule
 
 from aggregate import module

@@ -1,4 +1,9 @@
-from .errors import NotFound
+import io
+
+import pdfkit
+from flask import render_template, send_file
+
+from .errors import NotFound, AlreadyExists
 from typing import Type, Optional
 from flask_sqlalchemy import Model
 from sqlalchemy.orm import Session
@@ -29,7 +34,7 @@ def db_get_or_raise(table: Type[Model], field: str, value: object):
     return result
 
 
-def db_get_list(table: Type[Model], field: str, value: str):
+def db_get_list(table: Type[Model], field: str, value):
     """
 
     Retrieve a list of objects from the database
@@ -79,6 +84,17 @@ def db_exists(db_session: Session, table: Type[Model], field: Optional[str] = No
     return db_session.query(q.exists()).scalar()
 
 
+def db_add_if_not_exists(db_session: Session, table: Type[Model], value, keys: Optional[list[str]]):
+    def _get_filter(obj, key_list: list[str]) -> dict[str, object]:
+        return {k: getattr(obj, k) for k in key_list if getattr(obj, k) is not None}
+
+    value_filter = _get_filter(value, keys)
+
+    if db_exists(db_session, table, filters=value_filter):
+        raise AlreadyExists(f'{table.__tablename__}({value_filter.keys()})', f'({value_filter.values()})')
+    db_session.add(value)
+
+
 def db_populate(db_session: Session, table: Type[Model], values: list, key: Optional[str] = None,
                 keys: Optional[list[str]] = None) -> None:
     """
@@ -97,3 +113,13 @@ def db_populate(db_session: Session, table: Type[Model], values: list, key: Opti
         keys = [key]
     new_values = [v for v in values if not db_exists(db_session, table, filters=_get_filter(v, keys))]
     db_session.add_all(new_values)
+
+
+def send_pdf(template_name_or_list, **context):
+    from . import get_current_app
+    template = render_template(template_name_or_list, **context)
+    if get_current_app().app.testing:
+        pdf = b''
+    else:
+        pdf = pdfkit.from_string(template, False, options={'orientation': 'landscape', 'quiet': ''})
+    return send_file(io.BytesIO(pdf), 'application/pdf')

@@ -1,5 +1,5 @@
 from common import get_current_db, get_current_app
-from user.util import grade_to_admission, admission_to_grade
+from user.util import grade_to_admission, admission_to_grade, get_unfilled
 from sqlalchemy.ext.associationproxy import association_proxy
 from sqlalchemy.ext.hybrid import hybrid_property
 from .reference import University, Country
@@ -16,14 +16,12 @@ class StudentInfo(db.Model):
         Attributes:
 
         id: id of the info
-        phone: user's phone number
         university: id of student's university from known university list
     """
 
     __table_name__ = 'student_info'
 
     user_id = db.Column(db.Integer, db.ForeignKey(User.id), primary_key=True)
-    phone = db.Column(db.String)
     admission_year = db.Column(db.Date)
 
     university = db.relationship('StudentUniversity', lazy='select', uselist=False,
@@ -39,6 +37,11 @@ class StudentInfo(db.Model):
     def grade(self, value):
         self.admission_year = grade_to_admission(value)
 
+    _required_fields = ['admission_year', 'university']
+
+    def unfilled(self):
+        return get_unfilled(self, self._required_fields, ['university'])
+
 
 class StudentUniversity(db.Model):
     """
@@ -46,12 +49,17 @@ class StudentUniversity(db.Model):
     """
 
     user_id = db.Column(db.Integer, db.ForeignKey(StudentInfo.user_id), primary_key=True)
-    known = db.Column(db.Boolean)
+    known = db.Column(db.Boolean, nullable=False)
 
     __mapper_args__ = {
         'with_polymorphic': '*',
         "polymorphic_on": known
     }
+
+    _required_fields = ['known']
+
+    def unfilled(self):
+        return get_unfilled(self, self._required_fields, [])
 
 
 class StudentUniversityKnown(StudentUniversity):
@@ -72,6 +80,11 @@ class StudentUniversityKnown(StudentUniversity):
         'with_polymorphic': '*'
     }
 
+    _required_fields = ['university']
+
+    def unfilled(self):
+        return get_unfilled(self, self._required_fields, []) + super().unfilled()
+
 
 class StudentUniversityCustom(StudentUniversity):
     """
@@ -90,3 +103,8 @@ class StudentUniversityCustom(StudentUniversity):
         'polymorphic_identity': False,
         'with_polymorphic': '*'
     }
+
+    _required_fields = ['university_name', 'country']
+
+    def unfilled(self):
+        return get_unfilled(self, self._required_fields, []) + super().unfilled()

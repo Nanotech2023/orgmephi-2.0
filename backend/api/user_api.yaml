@@ -1,4 +1,3 @@
-# This file is generated automatically !!!
 components:
   schemas:
     CSRFPairUser:
@@ -374,8 +373,7 @@ components:
           maxLength: 128
           type: string
         registration_number:
-          maxLength: 64
-          type: string
+          type: integer
       required:
       - password
       - registration_number
@@ -394,8 +392,7 @@ components:
           maxLength: 128
           type: string
         registration_number:
-          maxLength: 64
-          type: string
+          type: integer
       required:
       - password
       - registration_number
@@ -466,10 +463,20 @@ components:
       - phone
       - university
       type: object
+    ResetPasswordUser:
+      properties:
+        password:
+          example: qwertyA*1
+          maxLength: 128
+          type: string
+      required:
+      - password
+      type: object
     RoleRequestUser:
       properties:
         role:
           enum:
+          - Unconfirmed
           - Participant
           - Creator
           - Admin
@@ -543,6 +550,9 @@ components:
       properties:
         auth_info:
           $ref: '#/components/schemas/RegistrationInfoUser'
+        captcha:
+          maxLength: 32
+          type: string
         personal_info:
           $ref: '#/components/schemas/RegistrationPersonalInfoUser'
         register_confirm:
@@ -586,9 +596,6 @@ components:
         grade:
           nullable: true
           type: integer
-        phone:
-          nullable: true
-          type: string
         university:
           allOf:
           - $ref: '#/components/schemas/StudentUniversity'
@@ -610,9 +617,6 @@ components:
         grade:
           minimum: 1
           type: integer
-        phone:
-          example: 8 (800) 555 35 35
-          type: string
         region:
           maxLength: 32
           type: string
@@ -699,6 +703,9 @@ components:
       properties:
         auth_info:
           $ref: '#/components/schemas/RegistrationInfoUser'
+        captcha:
+          maxLength: 32
+          type: string
         personal_info:
           $ref: '#/components/schemas/RegistrationPersonalInfoUser'
         register_type:
@@ -720,6 +727,7 @@ components:
           type: integer
         role:
           enum:
+          - Unconfirmed
           - Participant
           - Creator
           - Admin
@@ -750,6 +758,7 @@ components:
           type: integer
         role:
           enum:
+          - Unconfirmed
           - Participant
           - Creator
           - Admin
@@ -817,6 +826,9 @@ components:
         middle_name:
           nullable: true
           type: string
+        phone:
+          nullable: true
+          type: string
         place_of_birth:
           nullable: true
           type: string
@@ -855,6 +867,9 @@ components:
         middle_name:
           maxLength: 32
           type: string
+        phone:
+          example: 8 (800) 555 35 35
+          type: string
         place_of_birth:
           maxLength: 256
           type: string
@@ -875,6 +890,9 @@ components:
           type: string
         limitations:
           $ref: '#/components/schemas/UserLimitationsInput'
+        phone:
+          example: 8 (800) 555 35 35
+          type: string
         place_of_birth:
           maxLength: 256
           type: string
@@ -936,6 +954,15 @@ info:
   version: 1.0.0
 openapi: 3.0.2
 paths:
+  /user/registration/captcha:
+    get:
+      responses:
+        '200':
+          content:
+            application/png:
+              format: binary
+              type: string
+          description: OK
   /user/registration/school:
     post:
       requestBody:
@@ -975,6 +1002,50 @@ paths:
           description: Bad request or weak password
         '409':
           description: Username already in use
+  /user/registration/confirm/{token}:
+    post:
+      parameters:
+      - description: Email confirmation token
+        in: path
+        name: token
+        required: true
+        schema:
+          type: string
+      responses:
+        '204':
+          description: OK
+        '404':
+          description: Wrong token
+  /user/registration/forgot/{email}:
+    post:
+      parameters:
+      - description: User's email
+        in: path
+        name: email
+        required: true
+        schema:
+          type: string
+      responses:
+        '204':
+          description: OK
+  /user/registration/recover/{token}:
+    post:
+      parameters:
+      - description: Recovery token
+        in: path
+        name: token
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ResetPasswordUser'
+        required: true
+      responses:
+        '204':
+          description: OK
   /user/registration/info/universities:
     get:
       responses:
@@ -1061,6 +1132,8 @@ paths:
                 description: Set both access_token_cookie and refresh_token_cookie
                 example: access_token_cookie=eyJ0eXAi...; Path=/; HttpOnly
                 type: string
+        '401':
+          description: Password changed since token was issues
       security:
       - JWTRefreshToken: []
       - CSRFRefreshToken: []
@@ -1076,9 +1149,60 @@ paths:
                 example: access_token_cookie=deleted; path=/; expires=Thu, 01 Jan
                   1970 00:00:00 GMT
                 type: string
+        '401':
+          description: Password changed since token was issues
       security:
       - JWTAccessToken: []
       - CSRFAccessToken: []
+  /user/auth/impersonate/{user_id}:
+    post:
+      parameters:
+      - description: Id of the user
+        in: path
+        name: user_id
+        required: true
+        schema:
+          type: integer
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CSRFPairUser'
+          description: OK
+          headers:
+            Set-Cookie:
+              schema:
+                description: Set both access_token_cookie and refresh_token_cookie
+                example: access_token_cookie=eyJ0eXAi...; Path=/; HttpOnly
+                type: string
+        '401':
+          description: Password changed since token was issues
+        '404':
+          description: User not found
+      security:
+      - JWTRefreshToken: []
+      - CSRFRefreshToken: []
+  /user/auth/unimpersonate:
+    post:
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CSRFPairUser'
+          description: OK
+          headers:
+            Set-Cookie:
+              schema:
+                description: Set both access_token_cookie and refresh_token_cookie
+                example: access_token_cookie=eyJ0eXAi...; Path=/; HttpOnly
+                type: string
+        '401':
+          description: Password changed since token was issues
+      security:
+      - JWTRefreshToken: []
+      - CSRFRefreshToken: []
   /user/profile/user:
     get:
       responses:
@@ -1215,6 +1339,31 @@ paths:
           description: User not found
       security:
       - JWTAccessToken: []
+  /user/profile/unfilled:
+    get:
+      responses:
+        '200':
+          description: Returns missing fields
+        '404':
+          description: User not found
+      security:
+      - JWTAccessToken: []
+  /user/profile/card:
+    get:
+      responses:
+        '200':
+          content:
+            application/pdf:
+              schema:
+                format: binary
+                type: string
+          description: OK
+        '404':
+          description: User not found
+        '409':
+          description: User is not a school student or has missing data
+      security:
+      - JWTAccessToken: []
   /user/admin/internal_register:
     post:
       requestBody:
@@ -1325,9 +1474,6 @@ paths:
           description: Invalid role of current user
         '404':
           description: User not found
-        '409':
-          description: User is missing required info (e.g. university info for a university
-            student)
       security:
       - JWTAccessToken: []
       - CSRFAccessToken: []
