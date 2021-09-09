@@ -93,18 +93,39 @@ def create_plain_task(create_user_in_contest):
 
 
 @pytest.fixture
-def create_range_task(create_user_in_contest):
-    from contest.tasks.models.tasks import add_range_task
-    range_task = add_range_task(db_session=test_app.db.session, num_of_task=2, start_value=0.5,
-                                end_value=0.7, task_points=5)
-    create_user_in_contest[2].tasks.append(range_task)
+def create_user_response(create_user_in_contest):
+    from contest.responses.models import add_user_response
+    response = add_user_response(test_app.db.session, user_id=get_user_id(create_user_in_contest),
+                                 contest_id=get_contest_id(create_user_in_contest))
     test_app.db.session.commit()
-    create_user_in_contest.append(range_task)
+    create_user_in_contest.append(response)
     yield create_user_in_contest
 
 
 @pytest.fixture
-def create_multiple_task(create_user_in_contest):
+def create_one_task(create_user_response):
+    from contest.tasks.models.tasks import add_plain_task
+    plain_task = add_plain_task(db_session=test_app.db.session, num_of_task=1, recommended_answer='answer',
+                                task_points=11)
+    create_user_response[2].tasks.append(plain_task)
+    test_app.db.session.commit()
+    create_user_response.append(plain_task)
+    yield create_user_response
+
+
+@pytest.fixture
+def create_two_tasks(create_one_task):
+    from contest.tasks.models.tasks import add_range_task
+    range_task = add_range_task(db_session=test_app.db.session, num_of_task=2, start_value=0.5,
+                                end_value=0.7, task_points=5)
+    create_one_task[2].tasks.append(range_task)
+    test_app.db.session.commit()
+    create_one_task.append(range_task)
+    yield create_one_task
+
+
+@pytest.fixture
+def create_three_tasks(create_two_tasks):
     from contest.tasks.models.tasks import add_multiple_task
     multiple_task = add_multiple_task(db_session=test_app.db.session, num_of_task=3, task_points=7)
     answers = [
@@ -122,10 +143,10 @@ def create_multiple_task(create_user_in_contest):
         }
     ]
     multiple_task.answers = answers
-    create_user_in_contest[2].tasks.append(multiple_task)
+    create_two_tasks[2].tasks.append(multiple_task)
     test_app.db.session.commit()
-    create_user_in_contest.append(multiple_task)
-    yield create_user_in_contest
+    create_two_tasks.append(multiple_task)
+    yield create_two_tasks
 
 
 def get_contest_id(array):
@@ -144,5 +165,17 @@ def get_user_id(array):
     return array[3]
 
 
-def get_task_id(array):
-    return array[4].task_id
+def get_work_id(array):
+    return array[4].work_id
+
+
+def get_plain_task_id(array):
+    return array[5].task_id
+
+
+def get_range_task_id(array):
+    return array[6].task_id
+
+
+def get_multiple_task_id(array):
+    return array[7].task_id

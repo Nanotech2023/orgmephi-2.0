@@ -569,8 +569,10 @@ def user_answer_task_mark_post(contest_id, user_id, task_id):
           description: User or contest not found
     """
     values = request.marshmallow
-    get_user_in_contest_work(user_id, contest_id)
-    answer = db_get_or_raise(BaseAnswer, 'task_id', task_id)
+    user_work = get_user_in_contest_work(user_id, contest_id)
+    answer = get_answer_by_task_id_and_work_id(BaseAnswer, task_id, user_work.work_id)
+    if answer is None:
+        raise NotFound('task_id for user_id', f'{task_id, user_id}')
     answer.mark = values['mark']
     db.session.commit()
     return {}, 200
@@ -616,6 +618,8 @@ def user_answer_task_mark(contest_id, user_id, task_id):
     """
     user_work = get_user_in_contest_work(user_id, contest_id)
     answer = get_answer_by_task_id_and_work_id(BaseAnswer, task_id, user_work.work_id)
+    if answer is None:
+        raise NotFound('task_id for user_id', f'{task_id, user_id}')
     return answer, 200
 
 
