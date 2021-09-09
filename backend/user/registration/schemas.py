@@ -20,7 +20,7 @@ class RegistrationPersonalInfoUserSchema(Schema):
 
 
 class RegisterConfirmUserSchema(Schema):
-    registration_number = common_fields.Username(required=True)
+    registration_number = fields.Integer(required=True)
     password = common_fields.Password(required=True)
 
 
@@ -39,6 +39,7 @@ class SchoolRegistrationRequestUserSchema(Schema):
                                                        UserTypeEnum.pre_university,
                                                        UserTypeEnum.enrollee]))
     register_confirm = fields.Nested(nested=RegisterConfirmUserSchema)
+    captcha = common_fields.CommonName()
 
 
 class UniversityRegistrationRequestUserSchema(Schema):
@@ -47,6 +48,11 @@ class UniversityRegistrationRequestUserSchema(Schema):
     register_type = EnumField(UserTypeEnum, by_value=True, required=True,
                               validate=validate.OneOf([UserTypeEnum.university]))
     student_info = fields.Nested(nested=RegistrationStudentInfoUserSchema, required=True)
+    captcha = common_fields.CommonName()
+
+
+class ResetPasswordUserSchema(Schema):
+    password = common_fields.Password(required=True)
 
 
 class InfoUniversitiesResponseUserSchema(Schema):

@@ -2,6 +2,8 @@ from common import get_current_db, get_current_app
 from datetime import datetime
 import enum
 
+from user.util import get_unfilled
+
 db = get_current_db()
 app = get_current_app()
 
@@ -15,6 +17,7 @@ class UserRoleEnum(enum.Enum):
         admin: administrator user
         system: may be used for maintenance or by connected services
     """
+    unconfirmed = 'Unconfirmed'
     participant = 'Participant'
     creator = 'Creator'
     admin = 'Admin'
@@ -68,6 +71,7 @@ class User(db.Model):
     id = db.Column(db.Integer, autoincrement=True, primary_key=True)
     username = db.Column(db.String, index=True, nullable=False, unique=True)
     password_hash = db.Column(db.String, nullable=False)
+    password_changed = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
     role = db.Column(db.Enum(UserRoleEnum), nullable=False)
     type = db.Column(db.Enum(UserTypeEnum), nullable=False)
     registration_date = db.Column(db.DateTime, default=datetime.utcnow)
@@ -80,21 +84,37 @@ class User(db.Model):
                                   cascade='save-update, merge, delete, delete-orphan')
     groups = db.relationship('Group', secondary=users_in_group, lazy='select', back_populates='users')
 
+    _required_fields = {
+        UserTypeEnum.pre_university: ['user_info', 'school_info'],
+        UserTypeEnum.enrollee: ['user_info', 'school_info'],
+        UserTypeEnum.school: ['user_info', 'school_info'],
+        UserTypeEnum.university: ['user_info', 'student_info'],
+        UserTypeEnum.internal: ['user_info'],
+        UserTypeEnum.pre_register: ['user_info'],
+    }
 
-def add_user(db_session, username, password_hash, role, reg_type):
+    def unfilled(self):
+        req_fields = self._required_fields[self.type]
+        return get_unfilled(self, req_fields, list({'user_info', 'school_info', 'student_info'} & set(req_fields)))
+
+
+def init_user(username, password_hash, user_role, user_type, user=None):
     from .personal import UserInfo
     from .university import StudentInfo
     from .school import SchoolInfo
-    user = User(
-        username=username,
-        password_hash=password_hash,
-        role=role,
-        type=reg_type
-    )
-    user.user_info = UserInfo()
-    user.student_info = StudentInfo()
-    user.school_info = SchoolInfo()
-    db_session.add(user)
+    if user is None:
+        user = User()
+    user.username = username
+    user.password_hash = password_hash
+    user.password_changed = datetime.utcnow()
+    user.role = user_role
+    user.type = user_type
+    if user.user_info is None:
+        user.user_info = UserInfo()
+    if user.student_info is None:
+        user.student_info = StudentInfo()
+    if user.school_info is None:
+        user.school_info = SchoolInfo()
     return user
 
 
@@ -114,3 +134,13 @@ class Group(db.Model):
     name = db.Column(db.String, nullable=False, unique=True)
 
     users = db.relationship('User', secondary=users_in_group, lazy='subquery', back_populates='groups')
+
+
+class Captcha(db.Model):
+    answer = db.Column(db.String, nullable=False, primary_key=True)
+    post_time = db.Column(db.DateTime, default=datetime.utcnow, nullable=False, index=True)
+
+    @classmethod
+    def cleanup(cls):
+        expire_time = app.config['ORGMEPHI_CAPTCHA_EXPIRATION']
+        db.session.query(cls).filter(cls.post_time < datetime.utcnow() - expire_time).delete()

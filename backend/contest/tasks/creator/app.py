@@ -1,4 +1,4 @@
-from contest.default_config import DefaultConfiguration
+from default_config import DefaultConfiguration
 from common import OrgMephiApp
 
 from contest.tasks.creator import module

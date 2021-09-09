@@ -1,0 +1,174 @@
+<!-- This is a draft to test the service during development, do not use for production -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <style>
+        html * {
+           font-size: 0.98em;
+        }
+    </style>
+</head>
+<body>
+{% set genders = ({"Male": "Мужской", "Female": "Женский"}) %}
+{% set school_types = ({"School": "Школа", "Lyceum": "Лицей", "Gymnasium": "Гимназия", "EducationCenter": "Центр образования", "NightSchool": "Вечерняя школа", "Technical": "Техникум", "External": "Экстернат", "Collage": "Колледж", "ProfTech": "ПТУ", "University": "ВУЗ", "Correctional": "Коррекционное образовательное учреждение/класс", "Other": "Другое"}) %}
+<table style="border-collapse: collapse; width: 100%; height: 34px; vertical-align: top;" border="0" cellpadding="10">
+    <tbody>
+    <tr style="height: 34px; vertical-align: top;">
+        <td style="width: 47.8229%; height: 34px; vertical-align: top;">
+            <p><strong>Карточка участника олимпиады </strong><br/><strong>(сдается в обмен на вариант задания)</strong>
+            </p>
+            <table style="border-collapse: collapse; width: 97.7077%; height: 504px;" border="1" cellpadding="5">
+                <tbody>
+                <tr style="height: 18px;">
+                    <td style="width: 50%; height: 18px;"><strong>Регистрационный номер</strong></td>
+                    <td style="width: 50%; height: 18px;"><strong>{{ u.id }}</strong></td>
+                </tr>
+                <tr style="height: 18px;">
+                    <td style="width: 100%; height: 18px;" colspan="2"><strong>Личные данные</strong></td>
+                </tr>
+                <tr style="height: 18px;">
+                    <td style="width: 50%; height: 18px;">Фамилия</td>
+                    <td style="width: 50%; height: 18px;">{{ u.user_info.second_name }}</td>
+                </tr>
+                <tr style="height: 18px;">
+                    <td style="width: 50%; height: 18px;">Имя</td>
+                    <td style="width: 50%; height: 18px;">{{ u.user_info.first_name }}</td>
+                </tr>
+                <tr style="height: 18px;">
+                    <td style="width: 50%; height: 18px;">Отчество</td>
+                    <td style="width: 50%; height: 18px;">{{ u.user_info.middle_name }}</td>
+                </tr>
+                <tr style="height: 18px;">
+                    <td style="width: 50%; height: 18px;">Пол</td>
+                    <td style="width: 50%; height: 18px;">{{ genders[u.user_info.gender.value] }}</td>
+                </tr>
+                <tr style="height: 18px;">
+                    <td style="width: 50%; height: 18px;">Дата рождения</td>
+                    <td style="width: 50%; height: 18px;">{{ u.user_info.date_of_birth }}</td>
+                </tr>
+                <tr style="height: 18px;">
+                    <td style="width: 50%; height: 18px;">Мобильный телефон</td>
+                    <td style="width: 50%; height: 18px;">{{ u.user_info.phone }}</td>
+                </tr>
+                <tr style="height: 18px;">
+                    <td style="width: 100%; height: 18px;" colspan="2"><strong>Нуждаюсь в особых условиях участия в
+                        связи с ограниченными возможностями здоровья</strong></td>
+                </tr>
+                <tr style="height: 18px;">
+                    <td style="width: 50%; height: 18px;">По слуху</td>
+                    <td style="width: 50%; height: 18px;">{{ 'Да' if u.user_info.limitations.hearing else 'Нет' }}</td>
+                </tr>
+                <tr style="height: 18px;">
+                    <td style="width: 50%; height: 18px;">По зрению</td>
+                    <td style="width: 50%; height: 18px;">{{ 'Да' if u.user_info.limitations.sight else 'Нет' }}</td>
+                </tr>
+                <tr style="height: 18px;">
+                    <td style="width: 50%; height: 18px;">Опорно-двигательного аппарата</td>
+                    <td style="width: 50%; height: 18px;">{{ 'Да' if u.user_info.limitations.movement else 'Нет' }}</td>
+                </tr>
+                <tr style="height: 18px;">
+                    <td style="width: 100%; height: 18px;" colspan="2"><strong>Место прописки</strong></td>
+                </tr>
+                <tr style="height: 18px;">
+                    <td style="width: 50%; height: 18px;">{{ 'Регион' if u.user_info.dwelling.russian else 'Страна' }}</td>
+                    <td style="width: 50%; height: 18px;">{{ u.user_info.dwelling.region_name if u.user_info.dwelling.russian else u.user_info.dwelling.country_name }}</td>
+                </tr>
+                <tr style="height: 18px;">
+                    <td style="width: 50%; height: 18px;">{{ 'Населенный пункт' if u.user_info.dwelling.russian else 'Адрес проживания' }}</td>
+                    <td style="width: 50%; height: 18px;">{{ u.user_info.dwelling.city_name if u.user_info.dwelling.russian else u.user_info.dwelling.location }}</td>
+                </tr>
+                <tr style="height: 18px;">
+                    <td style="width: 100%; height: 18px;" colspan="2"><strong>Сведения об образовательном
+                        учреждении</strong></td>
+                </tr>
+                <tr style="height: 18px;">
+                    <td style="width: 50%; height: 18px;">{{ 'Регион' if u.school_info.location.russian else 'Страна' }}</td>
+                    <td style="width: 50%; height: 18px;">{{ u.school_info.location.region_name if u.school_info.location.russian else u.school_info.location.country_name }}</td>
+                </tr>
+                <tr style="height: 18px;">
+                    <td style="width: 50%; height: 18px;">{{ 'Населенный пункт' if u.school_info.location.russian else 'Адрес проживания' }}</td>
+                    <td style="width: 50%; height: 18px;">{{ u.school_info.location.city_name if u.school_info.location.russian else u.school_info.location.location }}</td>
+                </tr>
+                <tr style="height: 18px;">
+                    <td style="width: 50%; height: 18px;">Тип образовательного учреждения</td>
+                    <td style="width: 50%; height: 18px;">{{ school_types[u.school_info.school_type.value] }}</td>
+                </tr>
+                <tr style="height: 18px;">
+                    <td style="width: 50%; height: 18px;">Номер образовательного учреждения (ноль,<br/>если нет номера)
+                    </td>
+                    <td style="width: 50%; height: 18px;">{{ u.school_info.number if u.school_info.number else 0 }}</td>
+                </tr>
+                <tr style="height: 18px;">
+                    <td style="width: 50%; height: 18px;">Класс</td>
+                    <td style="width: 50%; height: 18px;">{{ u.school_info.grade }}</td>
+                </tr>
+                </tbody>
+            </table>
+            <p>Подпись _____________ Дата&emsp;&emsp;&emsp;&emsp; &laquo;____&raquo;_________________20____г<br/>Я -
+                родитель (законный представитель) участника олимпиады, подтверждаю свое согласие на обработку
+                персональных данных участника олимпиады, связанных с его участием в олимпиадах НИЯУ МИФИ, включая
+                сбор, запись, систематизацию, накопление, хранение, извлечение, использование, передачу
+                (распространение, предоставление, доступ), обезличивание, блокирование, удаление, уничтожение, на
+                публикацию его олимпиадной работы с указанием персональных данных на официальном сайте НИЯУ МИФИ,
+                а также на передачу персональных данных в государственный информационный ресурс о детях, проявивших
+                выдающиеся способности.<br/><br/>___________________ /_____________________/<br/>&emsp;&emsp;&emsp;Подпись&emsp;&emsp;&emsp;&emsp;Фамилия
+                И.О.</p>
+        </td>
+        <td style="width: 52.1771%; height: 34px; vertical-align: top;">&nbsp;
+            <table style="border-collapse: collapse; width: 100%;" border="0">
+                <tbody>
+                <tr>
+                    <td style="width: 25%;"><img
+                            src="https://upload.wikimedia.org/wikipedia/ru/9/95/MEPhI_Logo2014_ru.png"
+                            alt="Национальный исследовательский ядерный университет &laquo;МИФИ&raquo; &mdash; Википедия"
+                            width="79" height="81"/></td>
+                    <td style="width: 75%;">НАЦИОНАЛЬНЫЙ ИССЛЕДОВАТЕЛЬСКИЙ ЯДЕРНЫЙ УНИВЕРСИТЕТ &laquo;МИФИ&raquo;
+                        Отраслевая физико-математическая олимпиада школьников &laquo;Росатом&raquo;, инженерная
+                        олимпиада школьников
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+            <p><strong> Карточка участника олимпиады (остается у участника)</strong></p>
+            <table style="border-collapse: collapse; width: 100%; height: 107px;" border="1" cellpadding="5">
+                <tbody>
+                <tr style="height: 35px;">
+                    <td style="width: 50%; height: 35px;"><strong>Регистрационный номер</strong></td>
+                    <td style="width: 50%; height: 35px;"><strong>{{ u.id }}</strong></td>
+                </tr>
+                <tr style="height: 18px;">
+                    <td style="width: 50%; height: 18px;">Фамилия</td>
+                    <td style="width: 50%; height: 18px;">{{ u.user_info.second_name }}</td>
+                </tr>
+                <tr style="height: 18px;">
+                    <td style="width: 50%; height: 18px;">Имя</td>
+                    <td style="width: 50%; height: 18px;">{{ u.user_info.first_name }}</td>
+                </tr>
+                <tr style="height: 18px;">
+                    <td style="width: 50%; height: 18px;">Отчество</td>
+                    <td style="width: 50%; height: 18px;">{{ u.user_info.middle_name }}</td>
+                </tr>
+                <tr style="height: 18px;">
+                    <td style="width: 50%; height: 18px;">Адрес электронной почты(email)</td>
+                    <td style="width: 50%; height: 18px;">{{ u.user_info.email }} (является логином для входа в
+                        информационную систему)
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+            <p><strong>Для доступа в личный кабинет зайдите на сайт org.mephi.ru, выберите в меню пункт &laquo;авторизация&raquo;,
+                введите логин (адрес электронной почты) и пароль, который Вы вводили при регистрации в информационной
+                системе олимпиады. В личном кабинете Вы сможете узнать результаты своего участия в олимпиаде.</strong>
+            </p>
+            <p>Если Вы забыли пароль, который Вы вводили при регистрации в информационной системе олимпиады, зайдите на
+                сайт org.mephi.ru, выберите в меню пункт &laquo;авторизация&raquo;, &laquo;забыли пароль?&raquo; и далее
+                следуйте инструкциям.</p>
+            <p>Подпись _____________ Дата&emsp;&emsp;&emsp;&emsp; &laquo;____&raquo;_________________20____г</p>
+        </td>
+    </tr>
+    </tbody>
+</table>
+</body>
+</html>

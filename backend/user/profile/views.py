@@ -1,17 +1,15 @@
 from flask import request
 from marshmallow import EXCLUDE
 
-from common.errors import NotFound
 from common import get_current_app, get_current_module, get_current_db
-from common.util import db_get_or_raise
+from common.errors import NotFound, InsufficientData, WrongType
 from common.jwt_verify import jwt_get_id
-
-from user.models import User, UserInfo, StudentInfo, SchoolInfo
+from common.util import db_get_or_raise, send_pdf
 from user.model_schemas.auth import UserSchema
 from user.model_schemas.personal import UserInfoSchema
-from user.model_schemas.university import StudentInfoSchema, StudentInfoInputSchema
 from user.model_schemas.school import SchoolInfoSchema, SchoolInfoInputSchema
-
+from user.model_schemas.university import StudentInfoSchema, StudentInfoInputSchema
+from user.models import User, UserInfo, StudentInfo, SchoolInfo, UserTypeEnum
 from .schemas import SelfPasswordRequestUserSchema, SelfGroupsResponseUserSchema, UserInfoRestrictedInputSchema
 
 db = get_current_db()
@@ -250,3 +248,51 @@ def get_user_groups_self():
     """
     user = db_get_or_raise(User, "id", jwt_get_id())
     return {'groups': user.groups}, 200
+
+
+@module.route('/unfilled', methods=['GET'])
+def check_filled():
+    """
+    Get fields of a user that must be filled to take part in a contest
+    ---
+    get:
+      security:
+        - JWTAccessToken: [ ]
+      responses:
+        '200':
+          description: Returns missing fields
+        '404':
+          description: User not found
+    """
+    user = db_get_or_raise(User, 'id', jwt_get_id())
+    return {'unfilled': user.unfilled()}, 200
+
+
+@module.route('/card', methods=['GET'])
+def generate_card():
+    """
+    Generate a participant card
+    ---
+    get:
+      security:
+        - JWTAccessToken: [ ]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/pdf:
+              schema:
+                type: string
+                format: binary
+        '404':
+          description: User not found
+        '409':
+          description: User is not a school student or has missing data
+    """
+    user = db_get_or_raise(User, 'id', jwt_get_id())
+    if user.type not in [UserTypeEnum.pre_university, UserTypeEnum.enrollee, UserTypeEnum.school]:
+        raise WrongType('User is not a school student')
+    unfilled = user.unfilled()
+    if len(unfilled) > 0:
+        raise InsufficientData('user', str(unfilled))
+    return send_pdf('participant_card.html', u=user)
