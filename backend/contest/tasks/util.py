@@ -63,9 +63,7 @@ def check_stage_condition(prev_contest, user_id, current_step_condition):
     :param current_step_condition: current step condition
     :return:
     """
-    stage_num = prev_contest.stage[0].stage_num
-    parent_contest: CompositeContest = prev_contest.stage[0].composite_contest
-    prev_stage: Stage = parent_contest.stages.filter_by(stage_num=stage_num).one_or_none()
+    prev_stage = prev_contest.stage
     condition = prev_stage.condition
 
     passed_list = (_get_passed(simple_contest, user_id) for simple_contest in prev_stage.contests)
@@ -93,7 +91,7 @@ def check_previous_contest_condition_if_possible(contest_id, user_id):
     current_stage_step_condition = check_stage_condition(prev_contest, user_id, current_step_condition)
 
     if current_contest.stage is not None and prev_contest.stage is not None:
-        if current_contest.stage[0].stage_num == prev_contest.stage[0].stage_num:
+        if current_contest.stage.stage_num == prev_contest.stage.stage_num:
             return current_step_condition
         else:
             return current_stage_step_condition
@@ -484,10 +482,6 @@ class FilterOlympiadAllRequestSchema(Schema):
     only_count = fields.Boolean()
     offset = fields.Integer()
     limit = fields.Integer()
-
-
-class FilterUserAddingRequestSchema(Schema):
-    condition = EnumField(enum=UserStatusEnum, by_value=True)
 
 
 _filter_fields = ['base_contest_id', 'location_id', 'end_date']

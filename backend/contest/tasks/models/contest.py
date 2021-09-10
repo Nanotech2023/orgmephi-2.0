@@ -65,7 +65,7 @@ class Stage(db.Model):
     this_stage_condition = db.Column(db.Text, nullable=False)
 
     contests = db.relationship('SimpleContest', secondary=contestsInStage, lazy='subquery',
-                               backref=db.backref('stage', lazy=True))
+                               backref=db.backref('stage', lazy=True, uselist=False))
 
 
 def add_stage(db_session, stage_name, condition, stage_num, this_stage_condition, olympiad_id=None):
