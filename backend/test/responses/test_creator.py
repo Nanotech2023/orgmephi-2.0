@@ -191,6 +191,10 @@ def test_mark_creator(client, create_one_task):
                        json={'mark': 12})
     assert resp.status_code == 200
 
+    resp = client.post(f'/contest/{contest_id}/task/{15}/user/{user_id}/mark',
+                       json={'mark': 12})
+    assert resp.status_code == 404
+
     from contest.responses.util import user_answer_get
     answer = user_answer_get(user_id, contest_id, task_id)
     assert answer.mark == 12
@@ -309,6 +313,12 @@ def test_auto_check(client, create_three_tasks):
     assert resp.status_code == 409
 
     contest = create_three_tasks[0]
+    from contest.tasks.models.olympiad import ContestHoldingTypeEnum
+    contest.holding_type = ContestHoldingTypeEnum.OfflineContest
+    resp = client.post(f'/contest/{contest_id}/check')
+    assert resp.status_code == 409
+    contest.holding_type = ContestHoldingTypeEnum.OnLineContest
+
     contest.end_date = datetime.utcnow() - timedelta(minutes=5)
     resp = client.post(f'/contest/{contest_id}/check')
     assert resp.status_code == 200
