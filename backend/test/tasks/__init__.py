@@ -20,8 +20,7 @@ def test_base_contests(test_olympiad_types):
                             winner_3_condition=(i % 10),
                             diploma_1_condition=(i % 10),
                             diploma_2_condition=(i % 10),
-                            diploma_3_condition=(i % 10),
-                            target_classes=[i % 4 + 8]) for i in range(8)]
+                            diploma_3_condition=(i % 10)) for i in range(8)]
     for i in range(len(contests)):
         olympiad_type = test_olympiad_types[i % len(test_olympiad_types)]
         olympiad_type.contests.extend(contests)
