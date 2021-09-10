@@ -366,3 +366,63 @@ def stages_all(id_olympiad):
     return {
                "stages_list": all_stages
            }, 200
+
+
+# Target classes
+
+
+@module.route('/target_class/all', methods=['GET'],
+              output_schema=AllTargetClassesRequestTaskUnauthorizedSchema)
+def target_classes_all():
+    """
+    Get all target classes
+    ---
+    get:
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: AllTargetClassesRequestTaskUnauthorizedSchema
+        '400':
+          description: Bad request
+        '409':
+          description: Target class already in use
+        '404':
+          description: Target class not found
+    """
+    target_classes = db_get_all(TargetClass)
+    return {
+               "target_classes": target_classes
+           }, 200
+
+
+@module.route('/target_class/<int:id_target_class>', methods=['GET'],
+              output_schema=TargetClassSchema)
+def get_target_class(id_target_class):
+    """
+    Get target class
+    ---
+    get:
+      parameters:
+        - in: path
+          description: Id of the location
+          name: id_target_class
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: TargetClassSchema
+        '400':
+          description: Bad request
+        '409':
+          description: Target class already in use
+        '404':
+          description: Target class not found
+    """
+    target_class = db_get_or_raise(TargetClass, "target_class_id", str(id_target_class))
+    return target_class, 200

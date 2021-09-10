@@ -4,12 +4,17 @@ from marshmallow_enum import EnumField
 from contest.tasks.model_schemas.contest import StageSchema
 from contest.tasks.model_schemas.location import OlympiadLocationSchema
 from contest.tasks.model_schemas.olympiad import OlympiadTypeSchema, ContestSchema, BaseContestSchema, \
-    SimpleContestSchema
+    SimpleContestSchema, TargetClassSchema
 from contest.tasks.models import TargetClassEnum
 
 
+# Olympiad type
+
 class AllOlympiadTypesResponseTaskUnauthorizedSchema(Schema):
     olympiad_types = fields.Nested(OlympiadTypeSchema, many=True, required=True)
+
+
+# Location
 
 
 class AllLocationResponseTaskUnauthorizedSchema(Schema):
@@ -26,23 +31,40 @@ class LocationResponseTaskUnauthorizedSchema(Schema):
     region_name = fields.String(required=False)
 
 
+# Olympiads
+
+
 class AllOlympiadsResponseTaskUnauthorizedSchema(Schema):
     contest_list = fields.Nested(ContestSchema, many=True, required=True)
+
+
+# Base contest
 
 
 class AllBaseContestResponseTaskUnauthorizedSchema(Schema):
     olympiad_list = fields.Nested(BaseContestSchema, many=True, required=True)
 
 
+# Stage
+
+
 class AllStagesResponseTaskUnauthorizedSchema(Schema):
     stages_list = fields.Nested(StageSchema, many=True, required=True)
+
+
+# Target classes
+
+
+class AllTargetClassesRequestTaskUnauthorizedSchema(Schema):
+    target_classes = fields.Nested(TargetClassSchema, many=True, required=True)
+
+
+# For filter query
 
 
 class FilterSimpleContestResponseSchema(Schema):
     contest_list = fields.Nested(nested=SimpleContestSchema, many=True)
     count = fields.Integer()
-
-# For filter query
 
 
 class FilterOlympiadAllRequestSchema(Schema):
