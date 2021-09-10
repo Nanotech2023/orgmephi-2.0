@@ -1,5 +1,5 @@
 from .. import *
-import datetime
+from datetime import datetime, timedelta
 
 
 @pytest.fixture
@@ -28,12 +28,12 @@ def create_base_contest(create_olympiad_type):
 def create_simple_contest(create_base_contest):
     from contest.tasks.models.olympiad import add_simple_contest, ContestHoldingTypeEnum
     simple_contest = add_simple_contest(db_session=test_app.db.session, visibility=True,
-                                        start_date=datetime.datetime.utcnow(),
-                                        end_date=datetime.datetime.utcnow() + datetime.timedelta(hours=1),
-                                        result_publication_date=datetime.datetime.utcnow() + datetime.timedelta(
+                                        start_date=datetime.utcnow(),
+                                        end_date=datetime.utcnow() + timedelta(hours=1),
+                                        result_publication_date=datetime.utcnow() + timedelta(
                                             hours=2),
                                         holding_type=ContestHoldingTypeEnum.OnLineContest,
-                                        contest_duration=datetime.timedelta(minutes=30),
+                                        contest_duration=timedelta(minutes=30),
                                         base_contest_id=create_base_contest.base_contest_id)
     test_app.db.session.commit()
     yield [simple_contest]
