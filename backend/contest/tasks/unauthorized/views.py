@@ -229,8 +229,7 @@ def olympiads_all():
           name: target_class
           required: false
           schema:
-            type: string
-            enum: ['5', '6', '7', '8', '9', '10', '11', 'student']
+            type: integer
         - in: query
           name: only_count
           required: false

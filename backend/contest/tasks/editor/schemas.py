@@ -2,7 +2,7 @@ from marshmallow import Schema, fields
 from marshmallow_enum import EnumField
 
 from common import fields as common_fields
-from contest.tasks.models import OlympiadSubjectEnum, TargetClassEnum, StageConditionEnum, ContestHoldingTypeEnum, \
+from contest.tasks.models import OlympiadSubjectEnum, StageConditionEnum, ContestHoldingTypeEnum, \
     UserStatusEnum
 
 

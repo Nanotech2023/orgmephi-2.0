@@ -100,6 +100,7 @@ class SimpleContestSchema(SQLAlchemySchema):
     end_of_enroll_date = auto_field(column_name='end_of_enroll_date', required=True)
     previous_contest_id = auto_field(column_name='previous_contest_id', allow_none=True)
     locations = fields.Nested(OlympiadLocationSchema, many=True, required=True)
+    target_classes = fields.Nested(TargetClassSchema, many=True, required=False)
     previous_participation_condition = EnumField(UserStatusEnum,
                                                  data_key='previous_participation_condition',
                                                  by_value=True, required=True)
