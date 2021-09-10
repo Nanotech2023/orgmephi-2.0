@@ -323,7 +323,9 @@ def test_auto_check_creator(client, create_three_tasks):
     resp = client.post(f'/contest/{contest_id}/check')
     assert resp.status_code == 200
 
-    from contest.responses.util import user_answer_get
+    from contest.responses.util import user_answer_get, get_user_in_contest_work
+    user_work = get_user_in_contest_work(user_id, contest_id)
+    assert user_work.status.value == 'Accepted'
     plain_answer = user_answer_get(user_id, contest_id, plain_id)
     assert plain_answer.mark == 0
     range_answer = user_answer_get(user_id, contest_id, range_id)
