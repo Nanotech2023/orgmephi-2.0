@@ -1,6 +1,5 @@
 from marshmallow import Schema, fields
 from marshmallow_enum import EnumField
-from marshmallow_sqlalchemy import auto_field
 
 from common import fields as common_fields
 from contest.tasks.models import OlympiadSubjectEnum, TargetClassEnum, StageConditionEnum, ContestHoldingTypeEnum, \
@@ -13,7 +12,12 @@ class UpdateBaseOlympiadRequestTaskEditorSchema(Schema):
     name = common_fields.CommonName(required=False)
     description = common_fields.Text(required=False)
     rules = common_fields.Text(required=False)
-    conditions = fields.List(fields.Int, required=False)
+    winner_1_condition = common_fields.FloatCondition(required=False)
+    winner_2_condition = common_fields.FloatCondition(required=False)
+    winner_3_condition = common_fields.FloatCondition(required=False)
+    diploma_1_condition = common_fields.FloatCondition(required=False)
+    diploma_2_condition = common_fields.FloatCondition(required=False)
+    diploma_3_condition = common_fields.FloatCondition(required=False)
     olympiad_type_id = fields.Int(required=False)
     subject = EnumField(OlympiadSubjectEnum, required=False, by_value=True)
     target_classes = fields.List(EnumField(TargetClassEnum, required=True, by_value=True), required=False)

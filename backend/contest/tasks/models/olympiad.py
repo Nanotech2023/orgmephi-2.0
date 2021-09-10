@@ -65,8 +65,17 @@ class OlympiadType(db.Model):
                                backref=db.backref('olympiad_type', lazy='joined'))
 
 
-def add_base_contest(db_session, name, conditions, description, rules, olympiad_type_id,
-                     subject, certificate_template):
+def add_base_contest(db_session, name,
+                     winner_1_condition,
+                     winner_2_condition,
+                     winner_3_condition,
+                     diploma_1_condition,
+                     diploma_2_condition,
+                     diploma_3_condition,
+                     description, rules,
+                     olympiad_type_id,
+                     subject,
+                     certificate_template):
     """
     Create new base content object
     """
@@ -75,7 +84,12 @@ def add_base_contest(db_session, name, conditions, description, rules, olympiad_
         name=name,
         certificate_template=certificate_template,
         rules=rules,
-        conditions=conditions,
+        winner_1_condition=winner_1_condition,
+        winner_2_condition=winner_2_condition,
+        winner_3_condition=winner_3_condition,
+        diploma_1_condition=diploma_1_condition,
+        diploma_2_condition=diploma_2_condition,
+        diploma_3_condition=diploma_3_condition,
         olympiad_type_id=olympiad_type_id,
         subject=subject
     )
@@ -113,7 +127,13 @@ class BaseContest(db.Model):
     olympiad_type_id = db.Column(db.Integer, db.ForeignKey('olympiad_type.olympiad_type_id'), nullable=False)
     subject = db.Column(db.Enum(OlympiadSubjectEnum), nullable=False)
     certificate_template = db.Column(db.Text, nullable=True)
-    conditions = db.Column(db.PickleType, nullable=False)
+
+    winner_1_condition = db.Column(db.Float, nullable=False)
+    winner_2_condition = db.Column(db.Float, nullable=False)
+    winner_3_condition = db.Column(db.Float, nullable=False)
+    diploma_1_condition = db.Column(db.Float, nullable=False)
+    diploma_2_condition = db.Column(db.Float, nullable=False)
+    diploma_3_condition = db.Column(db.Float, nullable=False)
 
     target_classes = db.Column(db.PickleType)
 

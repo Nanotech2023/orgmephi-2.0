@@ -41,8 +41,9 @@ location_validator = validate.Length(max=128)
 free_description_validator = validate.Length(max=256)
 grade_validator = validate.Range(min=1)
 message_validator = validate.Length(max=4096)
-news_validator = validate.Length(max=4*1024*1024)  # 4 MB
+news_validator = validate.Length(max=4 * 1024 * 1024)  # 4 MB
 user_answer_validator = validate.Length(max=2048)
+condition_validator = validate.Range(min=0.0, max=1.0)
 
 Email = _apply_validator(fields.Email, email_validator)
 Phone = _add_example(_apply_validator(fields.String, phone_validator), '8 (800) 555 35 35')
@@ -58,6 +59,7 @@ Grade = _apply_validator(fields.Integer, grade_validator)
 Message = _apply_validator(fields.String, message_validator)
 News = _apply_validator(fields.String, news_validator)
 UserAnswer = _apply_validator(fields.String, user_answer_validator)
+FloatCondition = _apply_validator(fields.Float, condition_validator)
 
 # For Tasks and Contest
 
