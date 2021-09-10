@@ -1,4 +1,4 @@
-from contest.tasks.models import SimpleContest
+from contest.tasks.models import SimpleContest, Contest
 from contest.tasks.unauthorized.schemas import FilterOlympiadAllRequestSchema
 
 _filter_fields = ['base_contest_id', 'end_date']
@@ -9,7 +9,7 @@ def filter_olympiad_query(args):
 
     filters = {v: marshmallow[v] for v in _filter_fields if v in marshmallow}
 
-    query = SimpleContest.query.filter_by(**filters)
+    query = Contest.query.filter_by(**filters)
 
     location_id = marshmallow.get('location_id', None)
 
