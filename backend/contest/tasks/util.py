@@ -1,8 +1,5 @@
 import secrets
 
-from marshmallow import Schema, fields
-from marshmallow_enum import EnumField
-
 from common import get_current_app
 from common.errors import FileTooLarge, DataConflict, InsufficientData, RequestError, NotFound
 from common.jwt_verify import jwt_get_id
@@ -10,36 +7,6 @@ from contest.tasks.models import *
 from user.models import UserTypeEnum
 
 app = get_current_app()
-
-
-class ContestContentAccessDenied(RequestError):
-    """
-    User has no access to contest
-    """
-
-    def init(self):
-        """
-        Create error object
-        """
-        super(ContestContentAccessDenied, self).__init__(403)
-
-    def get_msg(self) -> str:
-        return 'User has no access to this contest'
-
-
-class ContestIsStillOnReview(RequestError):
-    """
-    Contest is still on review
-    """
-
-    def init(self):
-        """
-        Create error object
-        """
-        super(ContestIsStillOnReview, self).__init__(403)
-
-    def get_msg(self) -> str:
-        return 'Contest is still on review'
 
 
 # Contest getters
@@ -76,7 +43,7 @@ def compare_conditions_weights(current_contest, prev_contest, user_id):
 def _get_passed(simple_contest, user_id):
     """
     Get passed
-    :param contest:
+    :param simple_contest:
     :return:
     """
     if simple_contest.previous_participation_condition is None:
@@ -506,51 +473,6 @@ def validate_contest_values(previous_contest_id, previous_participation_conditio
 # Schema
 
 
-class FilterOlympiadAllRequestSchema(Schema):
-    base_contest_id = fields.Integer()
-    location_id = fields.Integer()
-    target_classes = EnumField(enum=TargetClassEnum, by_value=True)
-    end_date = fields.DateTime()
-    only_count = fields.Boolean()
-    offset = fields.Integer()
-    limit = fields.Integer()
-
-
-_filter_fields = ['base_contest_id', 'location_id', 'end_date']
-
-
-# Olympiad filter
-
-
-def filter_olympiad_query(args):
-    marshmallow = FilterOlympiadAllRequestSchema().load(args)
-
-    filters = {v: marshmallow[v] for v in _filter_fields if v in marshmallow}
-
-    query = SimpleContest.query.filter_by(**filters)
-
-    offset = marshmallow.get('offset', None)
-    limit = marshmallow.get('limit', None)
-
-    # TODO Target classes filtering in next MR
-    # target_classes = marshmallow.get('target_classes', None)
-    # if target_classes is not None:
-    #    ..
-
-    query = query.order_by(SimpleContest.start_date)
-
-    if limit is not None:
-        query = query.limit(limit)
-
-    if offset is not None:
-        query = query.offset(offset)
-
-    if marshmallow.get('only_count', False):
-        return {'count': query.count()}, 200
-    else:
-        return {'contest_list': query.all(), 'count': query.count()}, 200
-
-
 def validate_file_size(binary_file):
     """
     Check size of binary file
@@ -572,11 +494,11 @@ def check_user_unfilled_for_enroll(current_user: User):
     if current_user.type == UserTypeEnum.university:
         if len(unfilled) > 0:
             raise InsufficientData('user.student_info', str(unfilled))
-        grade = TargetClassEnum("student")
+        grade = db_get_or_raise(TargetClass, "target_class", 'student')
     elif current_user.type == UserTypeEnum.school:
         if len(unfilled) > 0:
             raise InsufficientData('user.school_info', str(unfilled))
-        grade = TargetClassEnum(str(current_user.school_info.grade))
+        grade = db_get_or_raise(TargetClass, "target_class", str(current_user.school_info.grade))
     else:
         raise InsufficientData('type', "university or school")
     return grade
@@ -590,7 +512,7 @@ class ContestContentAccessDenied(RequestError):
     User has no access to contest
     """
 
-    def __init__(self):
+    def init(self):
         """
         Create error object
         """
@@ -605,7 +527,7 @@ class ContestIsStillOnReview(RequestError):
     Contest is still on review
     """
 
-    def __init__(self):
+    def init(self):
         """
         Create error object
         """

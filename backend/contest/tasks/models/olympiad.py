@@ -2,7 +2,6 @@ import enum
 from datetime import datetime
 
 from sqlalchemy.ext.associationproxy import association_proxy
-from reference import TargetClass
 
 from common import get_current_db
 

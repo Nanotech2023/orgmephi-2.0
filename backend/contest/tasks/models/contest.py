@@ -1,25 +1,8 @@
 import enum
+
 from common import get_current_db
-from olympiad import SimpleContest
 
 db = get_current_db()
-
-
-class TargetClassEnum(enum.Enum):
-    """
-    Enum for olympiad target classes
-    """
-    class_5 = "5"
-    class_6 = "6"
-    class_7 = "7"
-    class_8 = "8"
-    class_9 = "9"
-    class_10 = "10"
-    class_11 = "11"
-    student = "student"
-
-
-olympiad_target_class_dict = {target.value: target for target in TargetClassEnum}
 
 
 class StageConditionEnum(enum.Enum):
