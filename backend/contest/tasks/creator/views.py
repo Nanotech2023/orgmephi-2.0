@@ -47,8 +47,14 @@ def base_olympiad_create():
     description = values['description']
     rules = values['rules']
     olympiad_type_id = values['olympiad_type_id']
-    winning_condition = values['winning_condition']
-    laureate_condition = values['laureate_condition']
+
+    winner_1_condition = values['winner_1_condition']
+    winner_2_condition = values['winner_2_condition']
+    winner_3_condition = values['winner_3_condition']
+    diploma_1_condition = values['diploma_1_condition']
+    diploma_2_condition = values['diploma_2_condition']
+    diploma_3_condition = values['diploma_3_condition']
+
     subject = values['subject']
     target_classes = set(values['target_classes'])
 
@@ -57,8 +63,12 @@ def base_olympiad_create():
                                     description=description,
                                     name=name,
                                     certificate_template=None,
-                                    winning_condition=winning_condition,
-                                    laureate_condition=laureate_condition,
+                                    winner_1_condition=winner_1_condition,
+                                    winner_2_condition=winner_2_condition,
+                                    winner_3_condition=winner_3_condition,
+                                    diploma_1_condition=diploma_1_condition,
+                                    diploma_2_condition=diploma_2_condition,
+                                    diploma_3_condition=diploma_3_condition,
                                     rules=rules,
                                     olympiad_type_id=olympiad_type_id,
                                     subject=subject)
