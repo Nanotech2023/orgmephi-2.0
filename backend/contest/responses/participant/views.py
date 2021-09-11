@@ -443,6 +443,8 @@ def self_user_answer_task_mark(contest_id, task_id):
     check_time_publishing(contest_id)
     user_work = get_user_in_contest_work(self_user_id, contest_id)
     answer = get_answer_by_task_id_and_work_id(BaseAnswer, task_id, user_work.work_id)
+    if answer is None:
+        raise NotFound('task_id for user_id', f'{task_id, self_user_id}')
     return answer, 200
 
 
