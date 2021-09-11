@@ -4,7 +4,6 @@ from flask import request
 from flask import send_file
 
 from common import get_current_module
-from common.errors import InsufficientData
 from contest.tasks.creator.schemas import *
 from contest.tasks.util import *
 
@@ -56,7 +55,6 @@ def base_olympiad_create():
     diploma_3_condition = values['diploma_3_condition']
 
     subject = values['subject']
-    target_classes = set(values['target_classes'])
 
     db_get_or_raise(OlympiadType, "olympiad_type_id", values["olympiad_type_id"])
     base_contest = add_base_contest(db.session,
@@ -72,8 +70,6 @@ def base_olympiad_create():
                                     rules=rules,
                                     olympiad_type_id=olympiad_type_id,
                                     subject=subject)
-
-    base_contest.target_classes = target_classes
 
     db.session.commit()
 

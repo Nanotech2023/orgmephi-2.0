@@ -7,7 +7,7 @@ from common import fields as common_fields
 from contest.tasks.model_schemas.contest import StageSchema, VariantSchema
 from contest.tasks.model_schemas.olympiad import ContestSchema, BaseContestSchema
 from contest.tasks.model_schemas.tasks import TaskSchema
-from contest.tasks.models import OlympiadSubjectEnum, TargetClassEnum, StageConditionEnum, ContestHoldingTypeEnum, \
+from contest.tasks.models import OlympiadSubjectEnum, StageConditionEnum, ContestHoldingTypeEnum, \
     UserStatusEnum
 
 
@@ -25,7 +25,6 @@ class CreateBaseOlympiadRequestTaskCreatorSchema(Schema):
     diploma_3_condition = common_fields.FloatCondition(required=True)
     olympiad_type_id = fields.Int(required=True)
     subject = EnumField(OlympiadSubjectEnum, required=True, by_value=True)
-    target_classes = fields.List(EnumField(TargetClassEnum, required=True, by_value=True), required=True)
 
 
 class BaseOlympiadResponseTaskCreatorSchema(BaseContestSchema):

@@ -2,7 +2,7 @@ from marshmallow import Schema, fields
 from marshmallow_enum import EnumField
 
 from common import fields as common_fields
-from contest.tasks.models import OlympiadSubjectEnum, TargetClassEnum, StageConditionEnum, ContestHoldingTypeEnum, \
+from contest.tasks.models import OlympiadSubjectEnum, StageConditionEnum, ContestHoldingTypeEnum, \
     UserStatusEnum
 
 
@@ -20,7 +20,6 @@ class UpdateBaseOlympiadRequestTaskEditorSchema(Schema):
     diploma_3_condition = common_fields.FloatCondition(required=False)
     olympiad_type_id = fields.Int(required=False)
     subject = EnumField(OlympiadSubjectEnum, required=False, by_value=True)
-    target_classes = fields.List(EnumField(TargetClassEnum, required=True, by_value=True), required=False)
 
 
 # Contest
@@ -93,5 +92,14 @@ class UpdateMultipleRequestTaskEditorSchema(Schema):
     task_points = fields.Integer(required=False)
 
 
+# Location
+
 class UpdateLocationOfContestRequestTaskEditorSchema(Schema):
     locations = fields.List(fields.Int(), required=True)
+
+
+# Target classes
+
+
+class UpdateTargetClassesOfContestRequestTaskEditorSchema(Schema):
+    target_classes_ids = fields.List(fields.Int(), required=True)

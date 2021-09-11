@@ -3,7 +3,7 @@ import io
 from flask import send_file, request
 
 from common import get_current_module
-from common.errors import AlreadyExists, TimeOver, InsufficientData
+from common.errors import AlreadyExists, TimeOver
 from common.util import send_pdf
 from contest.responses.models import ResponseStatusEnum
 from contest.responses.util import get_user_in_contest_work
@@ -12,6 +12,7 @@ from contest.tasks.model_schemas.olympiad import ContestSchema
 from contest.tasks.participant.schemas import *
 from contest.tasks.unauthorized.schemas import AllOlympiadsResponseTaskUnauthorizedSchema, \
     FilterSimpleContestResponseSchema
+from contest.tasks.unauthorized.util import filter_olympiad_query
 from contest.tasks.util import *
 
 db = get_current_db()
@@ -483,8 +484,6 @@ def get_all_contests_self():
         '404':
           description: User not found
     """
-    # TODO IN NEXT MR
-    # TODO FILTER
     return filter_olympiad_query(request.args)
 
 

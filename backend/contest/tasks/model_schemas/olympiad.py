@@ -1,11 +1,28 @@
 from marshmallow import fields
 from marshmallow_enum import EnumField
 from marshmallow_oneofschema import OneOfSchema
-from marshmallow_sqlalchemy import SQLAlchemySchema, auto_field
+from marshmallow_sqlalchemy import SQLAlchemySchema, auto_field, fields
 
 from common.fields import text_validator, common_name_validator
+from contest.tasks.model_schemas.location import OlympiadLocationSchema
 from contest.tasks.models import *
+from contest.tasks.models.reference import TargetClass
 from user.models.auth import *
+
+"""
+Target class
+"""
+
+
+class TargetClassSchema(SQLAlchemySchema):
+    class Meta:
+        model = TargetClass
+        load_instance = True
+        sqla_session = db.session
+
+    target_class_id = auto_field(column_name='target_class_id', dump_only=True)
+    target_class = auto_field(column_name='target_class', validate=common_name_validator, required=True)
+
 
 """
 Olympiad types
@@ -47,8 +64,7 @@ class BaseContestSchema(SQLAlchemySchema):
 
     olympiad_type_id = auto_field(column_name='olympiad_type_id', required=True)
     subject = EnumField(OlympiadSubjectEnum, data_key='subject', by_value=True, required=True)
-    target_classes = fields.List(EnumField(TargetClassEnum, by_value=True, required=True), data_key='target_classes',
-                                 required=True)
+    target_classes = fields.Nested(TargetClassSchema, many=True, required=True)
 
 
 """
@@ -83,6 +99,8 @@ class SimpleContestSchema(SQLAlchemySchema):
     result_publication_date = auto_field(column_name='result_publication_date', required=True)
     end_of_enroll_date = auto_field(column_name='end_of_enroll_date', required=True)
     previous_contest_id = auto_field(column_name='previous_contest_id', allow_none=True)
+    locations = fields.Nested(OlympiadLocationSchema, many=True, required=True)
+    target_classes = fields.Nested(TargetClassSchema, many=True, required=False)
     previous_participation_condition = EnumField(UserStatusEnum,
                                                  data_key='previous_participation_condition',
                                                  by_value=True, required=True)

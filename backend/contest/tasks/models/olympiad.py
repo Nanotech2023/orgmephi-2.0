@@ -1,6 +1,8 @@
 import enum
 from datetime import datetime
 
+from sqlalchemy.ext.associationproxy import association_proxy
+
 from common import get_current_db
 
 db = get_current_db()
@@ -104,12 +106,21 @@ def add_base_contest(db_session, name,
 # Contest models
 
 
+targetClassInContest = db.Table('target_classes_in_contest',
+                                db.Column('base_contest_id', db.Integer,
+                                          db.ForeignKey('base_contest.base_contest_id'),
+                                          primary_key=True),
+                                db.Column('target_class_id', db.Integer,
+                                          db.ForeignKey('target_class.target_class_id'),
+                                          primary_key=True)
+                                )
+
+
 class BaseContest(db.Model):
     """
     Base Class describing a Contest model with meta information.
 
     base_contest_id: id of base contest
-
     name: name of base contest
     rules: rules of the contest
     description: description of the contest
@@ -139,9 +150,10 @@ class BaseContest(db.Model):
     diploma_2_condition = db.Column(db.Float, nullable=False)
     diploma_3_condition = db.Column(db.Float, nullable=False)
 
-    target_classes = db.Column(db.PickleType)
+    target_classes = db.relationship('TargetClass', secondary=targetClassInContest, lazy='subquery',
+                                     backref=db.backref('base_contest', lazy=True))
 
-    child_contests = db.relationship('Contest', lazy='select',
+    child_contests = db.relationship('Contest', lazy='dynamic',
                                      backref=db.backref('base_contest', lazy='joined'), cascade="all, delete-orphan")
 
 
@@ -256,6 +268,8 @@ class SimpleContest(Contest):
     end_of_enroll_date = db.Column(db.DateTime, nullable=True)
 
     contest_duration = db.Column(db.Interval, nullable=True)
+
+    target_classes = association_proxy('base_contest', 'target_classes')
 
     previous_contest_id = db.Column(db.Integer, db.ForeignKey('simple_contest.contest_id'), nullable=True)
     previous_participation_condition = db.Column(db.Enum(UserStatusEnum))
