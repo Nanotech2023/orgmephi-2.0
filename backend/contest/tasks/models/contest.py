@@ -1,5 +1,6 @@
 import enum
 from common import get_current_db
+from olympiad import SimpleContest
 
 db = get_current_db()
 

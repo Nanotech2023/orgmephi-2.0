@@ -2,9 +2,9 @@ import enum
 from datetime import datetime
 
 from sqlalchemy.ext.associationproxy import association_proxy
+from reference import TargetClass
 
 from common import get_current_db
-from contest.tasks.models.reference import TargetClass
 
 db = get_current_db()
 

@@ -3,7 +3,7 @@ import io
 from flask import send_file, request
 
 from common import get_current_module
-from common.errors import AlreadyExists, TimeOver, InsufficientData
+from common.errors import AlreadyExists, TimeOver
 from common.util import send_pdf
 from contest.responses.models import ResponseStatusEnum
 from contest.responses.util import get_user_in_contest_work

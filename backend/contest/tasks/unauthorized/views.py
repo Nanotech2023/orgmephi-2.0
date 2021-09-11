@@ -2,6 +2,7 @@ from flask import request
 
 from common import get_current_module
 from common.util import db_get_all
+from contest.tasks.models.reference import TargetClass
 from contest.tasks.unauthorized.schemas import *
 from contest.tasks.unauthorized.util import filter_olympiad_query
 from contest.tasks.util import *
