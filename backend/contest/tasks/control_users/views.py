@@ -50,6 +50,7 @@ def add_user_to_contest(id_contest):
     user_ids = values['users_id']
     show_results_to_user = values['show_results_to_user']
     location_id = values.get('location_id', None)
+    check_condition = values.get('check_condition', False)
 
     # Can't add without location
     if location_id is not None:
@@ -60,10 +61,13 @@ def add_user_to_contest(id_contest):
     target_classes = current_base_contest.target_classes
 
     for user_id in user_ids:
-
         # User is already enrolled
         if is_user_in_contest(user_id, current_contest):
             raise AlreadyExists('user_id', user_id)
+
+        if check_condition:
+            if not check_previous_contest_condition_if_possible(id_contest, user_id):
+                continue
 
         current_user: User = db_get_or_raise(User, "id", user_id)
         grade = check_user_unfilled_for_enroll(current_user)

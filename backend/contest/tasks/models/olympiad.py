@@ -21,7 +21,11 @@ class UserStatusEnum(enum.Enum):
     Participant = "Participant"
 
 
-user_status_dict = {status.value: status for status in UserStatusEnum}
+user_status_weights_dict = {
+    status[1].value: len(UserStatusEnum) - status[0]
+    for status
+    in enumerate(UserStatusEnum)
+}
 
 
 class OlympiadSubjectEnum(enum.Enum):
@@ -302,7 +306,7 @@ class CompositeContest(Contest):
 
     contest_id = db.Column(db.Integer, db.ForeignKey('contest.contest_id'), primary_key=True)
 
-    stages = db.relationship('Stage', lazy='select',
+    stages = db.relationship('Stage', lazy='dynamic',
                              backref=db.backref('composite_contest', lazy='joined'))
 
     __mapper_args__ = {
