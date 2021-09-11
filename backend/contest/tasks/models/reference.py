@@ -19,15 +19,14 @@ class TargetClass(db.Model):
 
 
 @app.db_prepare_action()
-def populate_country():
+def populate_target_classes():
     """
      pre-populate known target classes table with predefined values
     """
     from common.util import db_populate
-    file_name = db.get_app().config.get('ORGMEPHI_TARGET_CLASSES_FILE', None)
-    if file_name is not None:
-        target_classes = open(file_name, encoding='utf8').read().splitlines()
-        db_populate(db.session,
-                    TargetClass, [TargetClass(target_class=target_class) for target_class in target_classes],
-                    'target_class')
-        db.session.commit()
+    classes = [str(target_class) for target_class in range(8, 12)] + ['student']
+
+    db_populate(db.session,
+                TargetClass, [TargetClass(target_class=target_class) for target_class in classes],
+                'target_class')
+    db.session.commit()

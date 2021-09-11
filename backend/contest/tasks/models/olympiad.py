@@ -151,7 +151,7 @@ class BaseContest(db.Model):
     diploma_2_condition = db.Column(db.Float, nullable=False)
     diploma_3_condition = db.Column(db.Float, nullable=False)
 
-    target_classes = db.relationship(f'{TargetClass.__name__}', secondary=targetClassInContest, lazy='subquery',
+    target_classes = db.relationship('TargetClass', secondary=targetClassInContest, lazy='subquery',
                                      backref=db.backref('base_contest', lazy=True))
 
     child_contests = db.relationship('Contest', lazy='dynamic',
