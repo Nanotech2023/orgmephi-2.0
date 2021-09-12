@@ -171,6 +171,7 @@ def reset_db(app):
     Reset database before/after a test case
     :param app: Test application object
     """
+    app.db.session.remove()
     app.db.drop_all()
     app.db.create_all()
 
