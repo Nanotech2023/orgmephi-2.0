@@ -1,5 +1,5 @@
 import enum
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from sqlalchemy.ext.associationproxy import association_proxy
 
@@ -267,7 +267,7 @@ class SimpleContest(Contest):
     result_publication_date = db.Column(db.DateTime, nullable=True)
     end_of_enroll_date = db.Column(db.DateTime, nullable=True)
 
-    contest_duration = db.Column(db.Interval, nullable=True)
+    contest_duration = db.Column(db.Interval, default=timedelta(seconds=0),nullable=False)
 
     target_classes = association_proxy('base_contest', 'target_classes')
 

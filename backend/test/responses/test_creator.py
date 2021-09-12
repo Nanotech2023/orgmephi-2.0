@@ -251,22 +251,9 @@ def test_finish_contest_creator(client, create_one_task):
 
 
 # noinspection DuplicatedCode
-def test_all_answers_creator(client, create_three_tasks):
-    contest_id = get_contest_id(create_three_tasks, DEFAULT_INDEX)
-    user_id = get_user_id(create_three_tasks, DEFAULT_INDEX)
-    plain_id = get_plain_task_id(create_three_tasks, DEFAULT_INDEX)
-    range_id = get_range_task_id(create_three_tasks, DEFAULT_INDEX)
-    multiple_id = get_multiple_task_id(create_three_tasks, DEFAULT_INDEX)
-
-    resp = client.post(f'/contest/{contest_id}/task/{plain_id}/user/{user_id}/plain',
-                       json={'answer_text': 'answer'})
-    assert resp.status_code == 200
-    resp = client.post(f'/contest/{contest_id}/task/{range_id}/user/{user_id}/range',
-                       json={'answer': 0.6})
-    assert resp.status_code == 200
-    resp = client.post(f'/contest/{contest_id}/task/{multiple_id}/user/{user_id}/multiple',
-                       json={"answers": [{"answer": "1"}, {"answer": "3"}]})
-    assert resp.status_code == 200
+def test_all_answers_creator(client, create_user_with_answers):
+    contest_id = get_contest_id(create_user_with_answers, DEFAULT_INDEX)
+    user_id = get_user_id(create_user_with_answers, DEFAULT_INDEX)
 
     resp = client.get(f'/contest/{contest_id}/user/{user_id}/response')
     assert resp.status_code == 200
@@ -293,29 +280,20 @@ def test_get_contest_list_creator(client, create_one_task):
 
 
 # noinspection DuplicatedCode
-def test_auto_check_creator(client, create_three_tasks):
-    contest_id = get_contest_id(create_three_tasks, DEFAULT_INDEX)
-    user_id = get_user_id(create_three_tasks, DEFAULT_INDEX)
-    plain_id = get_plain_task_id(create_three_tasks, DEFAULT_INDEX)
-    range_id = get_range_task_id(create_three_tasks, DEFAULT_INDEX)
-    multiple_id = get_multiple_task_id(create_three_tasks, DEFAULT_INDEX)
+def test_auto_check_creator(client, create_user_with_answers):
+    contest_id = get_contest_id(create_user_with_answers, DEFAULT_INDEX)
+    user_id = get_user_id(create_user_with_answers, DEFAULT_INDEX)
+    plain_id = get_plain_task_id(create_user_with_answers, DEFAULT_INDEX)
+    range_id = get_range_task_id(create_user_with_answers, DEFAULT_INDEX)
+    multiple_id = get_multiple_task_id(create_user_with_answers, DEFAULT_INDEX)
 
-    resp = client.post(f'/contest/{contest_id}/task/{plain_id}/user/{user_id}/plain',
-                       json={'answer_text': 'answer'})
-    assert resp.status_code == 200
-    resp = client.post(f'/contest/{contest_id}/task/{range_id}/user/{user_id}/range',
-                       json={'answer': 0.6})
-    assert resp.status_code == 200
-    resp = client.post(f'/contest/{contest_id}/task/{multiple_id}/user/{user_id}/multiple',
-                       json={"answers": [{"answer": "1"}, {"answer": "2"}]})
-    assert resp.status_code == 200
     resp = client.post(f'/contest/{contest_id}/user/{user_id}/finish')
     assert resp.status_code == 200
 
     resp = client.post(f'/contest/{contest_id}/check')
     assert resp.status_code == 409
 
-    contest = create_three_tasks['contests'][DEFAULT_INDEX]
+    contest = create_user_with_answers['contests'][DEFAULT_INDEX]
     from contest.tasks.models.olympiad import ContestHoldingTypeEnum
     contest.holding_type = ContestHoldingTypeEnum.OfflineContest
     resp = client.post(f'/contest/{contest_id}/check')
@@ -350,4 +328,3 @@ def test_auto_check_creator(client, create_three_tasks):
             assert answer['mark'] == 5
         elif answer['answer_type'] == 'MultipleChoiceAnswer':
             assert answer['mark'] == 0
-

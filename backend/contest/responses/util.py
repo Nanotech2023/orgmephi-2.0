@@ -137,8 +137,6 @@ def check_contest_time_left(contest_id):
     if simple_contest is None:
         raise NotFound(field='contest_id', value=contest_id)
     duration = simple_contest.contest_duration
-    if duration is None:    # TODO Delete when default
-        duration = timedelta(seconds=0)
     if datetime.utcnow() + duration > simple_contest.end_date:
         raise OlympiadError("Olympiad is over")
 

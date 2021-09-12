@@ -177,6 +177,35 @@ def create_three_tasks(create_two_tasks):
     yield create_two_tasks
 
 
+@pytest.fixture
+def create_user_with_answers(create_three_tasks):
+    from contest.responses.models import PlainAnswerText, RangeAnswer, MultipleChoiceAnswer
+    plain_answers = ['answer', 'answer1', 'answer2']
+    range_answers = [0.6, 0.2, 0.9]
+    multiple_answers = [
+        ['1', '2'],
+        ['1', '3'],
+        ['2', '3']
+    ]
+    for i in range(8):
+        user_work_id = get_work_id(create_three_tasks, i)
+        plain_answer = PlainAnswerText(work_id=user_work_id,
+                                       task_id=get_plain_task_id(create_three_tasks, i),
+                                       answer_text=plain_answers[i % 3])
+        range_answer = RangeAnswer(work_id=user_work_id,
+                                   task_id=get_range_task_id(create_three_tasks, i),
+                                   answer=range_answers[i % 3])
+        multiple_answer = MultipleChoiceAnswer(work_id=user_work_id,
+                                               task_id=get_multiple_task_id(create_three_tasks, i),
+                                               answers=multiple_answers[i % 3])
+        test_app.db.session.add(plain_answer)
+        test_app.db.session.add(range_answer)
+        test_app.db.session.add(multiple_answer)
+
+    test_app.db.session.commit()
+    yield create_three_tasks
+
+
 def get_contest_id(array, index):
     return array['contests'][index].contest_id
 

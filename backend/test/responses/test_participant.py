@@ -271,22 +271,9 @@ def test_finish_contest_participant(client, create_one_task):
 
 
 # noinspection DuplicatedCode
-def test_all_answers_participant(client, create_three_tasks):
-    contest_id = get_contest_id(create_three_tasks, DEFAULT_INDEX)
-    user_id = get_user_id(create_three_tasks, DEFAULT_INDEX)
-    plain_id = get_plain_task_id(create_three_tasks, DEFAULT_INDEX)
-    range_id = get_range_task_id(create_three_tasks, DEFAULT_INDEX)
-    multiple_id = get_multiple_task_id(create_three_tasks, DEFAULT_INDEX)
-
-    resp = client.post(f'/contest/{contest_id}/task/{plain_id}/user/self/plain',
-                       json={'answer_text': 'answer'})
-    assert resp.status_code == 200
-    resp = client.post(f'/contest/{contest_id}/task/{range_id}/user/self/range',
-                       json={'answer': 0.6})
-    assert resp.status_code == 200
-    resp = client.post(f'/contest/{contest_id}/task/{multiple_id}/user/self/multiple',
-                       json={"answers": [{"answer": "1"}, {"answer": "3"}]})
-    assert resp.status_code == 200
+def test_all_answers_participant(client, create_user_with_answers):
+    contest_id = get_contest_id(create_user_with_answers, DEFAULT_INDEX)
+    user_id = get_user_id(create_user_with_answers, DEFAULT_INDEX)
 
     resp = client.get(f'/contest/{contest_id}/user/self/response')
     assert resp.status_code == 200
@@ -296,22 +283,14 @@ def test_all_answers_participant(client, create_three_tasks):
 
 
 # noinspection DuplicatedCode
-def test_auto_check_creator(client, create_three_tasks):
-    contest_id = get_contest_id(create_three_tasks, DEFAULT_INDEX)
-    user_id = get_user_id(create_three_tasks, DEFAULT_INDEX)
-    plain_id = get_plain_task_id(create_three_tasks, DEFAULT_INDEX)
-    range_id = get_range_task_id(create_three_tasks, DEFAULT_INDEX)
-    multiple_id = get_multiple_task_id(create_three_tasks, DEFAULT_INDEX)
+def test_auto_check_participant(client, create_user_with_answers):
+    index = 1
+    contest_id = get_contest_id(create_user_with_answers, index)
+    user_id = get_user_id(create_user_with_answers, index)
+    plain_id = get_plain_task_id(create_user_with_answers, index)
+    range_id = get_range_task_id(create_user_with_answers, index)
+    multiple_id = get_multiple_task_id(create_user_with_answers, index)
 
-    resp = client.post(f'/contest/{contest_id}/task/{plain_id}/user/self/plain',
-                       json={'answer_text': 'answer'})
-    assert resp.status_code == 200
-    resp = client.post(f'/contest/{contest_id}/task/{range_id}/user/self/range',
-                       json={'answer': 0.8})
-    assert resp.status_code == 200
-    resp = client.post(f'/contest/{contest_id}/task/{multiple_id}/user/self/multiple',
-                       json={"answers": [{"answer": "1"}, {"answer": "3"}]})
-    assert resp.status_code == 200
     resp = client.post(f'/contest/{contest_id}/user/self/finish')
     assert resp.status_code == 200
 
@@ -329,7 +308,7 @@ def test_auto_check_creator(client, create_three_tasks):
 
     resp = client.get(f'/contest/{contest_id}/user/self/mark')
     assert resp.status_code == 409
-    contest = create_three_tasks['contests'][DEFAULT_INDEX]
+    contest = create_user_with_answers['contests'][index]
     contest.result_publication_date = datetime.utcnow() - timedelta(minutes=5)
     test_app.db.session.commit()
 
