@@ -3,23 +3,41 @@ from datetime import datetime, timedelta
 
 
 @pytest.fixture
-def create_olympiad_type():
+def create_target_class():
+    from contest.tasks.models.reference import TargetClass
+    target_class = TargetClass(target_class='student')
+    test_app.db.session.add(target_class)
+    test_app.db.session.commit()
+    yield [target_class]
+
+
+@pytest.fixture
+def create_olympiad_type(create_target_class):
     from contest.tasks.models.olympiad import add_olympiad_type
     olympiad_type = add_olympiad_type("string")
     test_app.db.session.add(olympiad_type)
     test_app.db.session.commit()
-    yield olympiad_type
+    create_target_class.append(olympiad_type)
+    yield create_target_class
 
 
 @pytest.fixture
 def create_base_contest(create_olympiad_type):
     from contest.tasks.models.olympiad import add_base_contest, OlympiadSubjectEnum
-    from contest.tasks.models.contest import TargetClassEnum
-    base_contest = add_base_contest(test_app.db.session, name='name', laureate_condition=0.5,
-                                    winning_condition=0.75, description='description', rules='rules',
-                                    olympiad_type_id=create_olympiad_type.olympiad_type_id,
-                                    subject=OlympiadSubjectEnum.Physics, certificate_template='template')
-    base_contest.target_classes = TargetClassEnum.student
+    base_contest = add_base_contest(db_session=test_app.db.session,
+                                    name='name',
+                                    winner_1_condition=0.95,
+                                    winner_2_condition=0.9,
+                                    winner_3_condition=0.85,
+                                    diploma_1_condition=0.8,
+                                    diploma_2_condition=0.75,
+                                    diploma_3_condition=0.7,
+                                    olympiad_type_id=create_olympiad_type[1].olympiad_type_id,
+                                    subject=OlympiadSubjectEnum.Physics,
+                                    rules='rules',
+                                    certificate_template='template',
+                                    description='description')
+    base_contest.target_classes.append(create_olympiad_type[0])
     test_app.db.session.commit()
     yield base_contest
 
