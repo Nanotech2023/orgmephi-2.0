@@ -1,9 +1,9 @@
 import enum
-from marshmallow_sqlalchemy import SQLAlchemySchema, auto_field
+from marshmallow_sqlalchemy import SQLAlchemySchema
 from marshmallow_sqlalchemy.fields import Related, Nested
 from marshmallow_oneofschema import OneOfSchema
-from marshmallow import pre_load, validate, Schema
-from marshmallow import fields
+from marshmallow import pre_load, fields
+from marshmallow_enum import EnumField
 
 from common import fields as common_fields
 from common.marshmallow import check_related_existence
@@ -22,20 +22,14 @@ class StudentUniversityKnownSchema(SQLAlchemySchema):
         load_instance = True
         sqla_session = db.session
 
-    known_type = fields.String(validate=validate.OneOf([StudentUniversityType.known.value]), dump_only=True)
-    university = Related(column=['name'], data_key='university', required=True)
-    country = fields.String(dump_only=True)
+    known_type = EnumField(StudentUniversityType, by_value=True, dump_only=True)
+    university = Related(column=['name'], required=True)
+    country = common_fields.CommonName(dump_only=True)
 
     # noinspection PyUnusedLocal
     @pre_load()
     def check_university(self, data, many, **kwargs):
         return check_related_existence(data, 'university', 'name', University)
-
-    # noinspection PyUnusedLocal
-    @pre_load()
-    def pop_country(self, data, many, **kwargs):
-        data.pop('country', None)
-        return data
 
 
 class StudentUniversityCustomSchema(SQLAlchemySchema):
@@ -44,9 +38,9 @@ class StudentUniversityCustomSchema(SQLAlchemySchema):
         load_instance = True
         sqla_session = db.session
 
-    known_type = fields.String(validate=validate.OneOf([StudentUniversityType.custom.value]), dump_only=True)
-    university = auto_field(column_name='university_name', required=True)
-    country = Related(column=['name'], data_key='country', required=True)
+    known_type = EnumField(StudentUniversityType, by_value=True, dump_only=True)
+    university = common_fields.CommonName(attribute='university_name', data_key='university', required=True)
+    country = Related(column=['name'], required=True)
 
     # noinspection PyUnusedLocal
     @pre_load()
@@ -88,19 +82,6 @@ class StudentInfoSchema(SQLAlchemySchema):
         load_instance = True
         sqla_session = db.session
 
-    user_id = auto_field(column_name='user_id', dump_only=True)
-    university = Nested(nested=StudentUniversitySchema, allow_none=True, many=False)
-    grade = fields.Integer(allow_none=True)
-
-
-class StudentUniversityInputSchema(Schema):
-    university = common_fields.CommonName(required=True)
-    country = common_fields.CommonName(required=False, description='Omit this field if university is known by backend')
-
-
-class StudentInfoInputSchema(Schema):
-    university = fields.Nested(nested=StudentUniversityInputSchema, many=False)
-    grade = common_fields.Grade()
-    citizenship = common_fields.CommonName()
-    region = common_fields.CommonName()
-    city = common_fields.CommonName()
+    user_id = fields.Integer(dump_only=True)
+    university = Nested(nested=StudentUniversitySchema, many=False)
+    grade = fields.Integer()

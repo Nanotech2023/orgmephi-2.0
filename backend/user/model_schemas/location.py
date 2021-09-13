@@ -1,6 +1,6 @@
 import enum
-from marshmallow import pre_load, post_dump, fields, Schema, validate
-from marshmallow_sqlalchemy import SQLAlchemySchema, auto_field
+from marshmallow import pre_load, fields, validate
+from marshmallow_sqlalchemy import SQLAlchemySchema
 from marshmallow_sqlalchemy.fields import Related
 from marshmallow_oneofschema import OneOfSchema
 
@@ -14,15 +14,20 @@ from user.models.location import *
 native_country = app.config['ORGMEPHI_NATIVE_COUNTRY']
 
 
+class LocationTypeEnum(enum.Enum):
+    russian = 'Russian'
+    foreign = 'Foreign'
+
+
 class LocationRussiaSchema(SQLAlchemySchema):
     class Meta:
         model = LocationRussia
         load_instance = True
         sqla_session = db.session
 
-    rural = auto_field(column_name='rural')
-    russian = fields.String(dump_only=True)
-    country = fields.String(dump_only=True, required=True)
+    rural = fields.Boolean(column_name='rural')
+    russian = fields.Boolean(dump_only=True)
+    country = common_fields.CommonName(required=True, validate=validate.OneOf([native_country]))
     city = Related(column=['name', 'region_name'])
 
     # noinspection PyUnusedLocal
@@ -43,18 +48,6 @@ class LocationRussiaSchema(SQLAlchemySchema):
             raise NotFound('city(name, region_name)', f'({city_name}, {region_name})')
         return data
 
-    # noinspection PyUnusedLocal
-    @post_dump()
-    def fill_country(self, data, many, **kwargs):
-        data['country'] = native_country
-        return data
-
-    # noinspection PyUnusedLocal
-    @pre_load()
-    def pop_country(self, data, many, **kwargs):
-        data.pop('country', None)
-        return data
-
 
 class LocationOtherSchema(SQLAlchemySchema):
     class Meta:
@@ -62,20 +55,15 @@ class LocationOtherSchema(SQLAlchemySchema):
         load_instance = True
         sqla_session = db.session
 
-    rural = auto_field(column_name='rural')
-    russian = fields.String(dump_only=True)
-    country = Related(column=['name'], required=True)
-    location = auto_field(column_name='location')
+    rural = fields.Boolean(column_name='rural')
+    russian = fields.Boolean(dump_only=True)
+    country = Related(column=['name'], required=True, validate=validate.NoneOf([native_country]))
+    location = common_fields.FreeDescription(column_name='location')
 
     # noinspection PyUnusedLocal
     @pre_load()
     def check_country(self, data, many, **kwargs):
         return check_related_existence(data, 'country', 'name', Country)
-
-
-class LocationTypeEnum(enum.Enum):
-    russian = 'Russian'
-    foreign = 'Foreign'
 
 
 class LocationSchema(OneOfSchema):
@@ -94,39 +82,10 @@ class LocationSchema(OneOfSchema):
         return obj_type
 
     def get_data_type(self, data):
-        if data.get('country', native_country) == native_country:
-            return LocationTypeEnum.russian.value
-        else:
-            return LocationTypeEnum.foreign.value
-
-
-class LocationRussiaInputSchema(Schema):
-    rural = fields.Boolean(required=True)
-    country = common_fields.CommonName(required=True, validate=validate.OneOf([native_country]))
-    region = common_fields.CommonName(required=True)
-    city = common_fields.CommonName(required=True)
-
-
-class LocationOtherInputSchema(Schema):
-    rural = fields.Boolean(required=True)
-    country = common_fields.CommonName(required=True, validate=validate.NoneOf([native_country]))
-    location = common_fields.FreeDescription(required=True)
-
-
-class LocationInputSchema(OneOfSchema):
-    type_schemas = {LocationTypeEnum.russian.value: LocationRussiaInputSchema,
-                    LocationTypeEnum.foreign.value: LocationOtherInputSchema}
-    type_field = "russian"
-    type_field_remove = True
-
-    def get_obj_type(self, obj):
-        if getattr(obj, 'country', native_country) == native_country:
-            return LocationTypeEnum.russian.value
-        else:
-            return LocationTypeEnum.foreign.value
-
-    def get_data_type(self, data):
-        if data.get('country', native_country) == native_country:
+        if self.type_field in data and self.type_field_remove:
+            data.pop(self.type_field)
+        country_name = data.get('country')
+        if country_name == native_country:
             return LocationTypeEnum.russian.value
         else:
             return LocationTypeEnum.foreign.value

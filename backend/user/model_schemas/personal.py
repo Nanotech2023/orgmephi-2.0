@@ -1,4 +1,4 @@
-from marshmallow import pre_load, fields, Schema
+from marshmallow import pre_load, fields
 from marshmallow_sqlalchemy import SQLAlchemySchema, auto_field
 from marshmallow_sqlalchemy.fields import Nested
 from marshmallow_enum import EnumField
@@ -9,8 +9,8 @@ from common.errors import AlreadyExists
 
 from user.models.personal import *
 
-from .location import LocationSchema, LocationInputSchema
-from .document import DocumentSchema, DocumentInputSchema
+from .location import LocationSchema
+from .document import DocumentSchema
 
 
 class UserLimitationsSchema(SQLAlchemySchema):
@@ -31,18 +31,18 @@ class UserInfoSchema(SQLAlchemySchema):
         load_instance = True
         sqla_session = db.session
 
-    user_id = auto_field(column_name='user_id', dump_only=True)
-    email = auto_field(column_name='email', allow_none=True)
-    phone = auto_field(column_name='phone', allow_none=True)
-    first_name = auto_field(column_name='first_name', allow_none=True)
-    middle_name = auto_field(column_name='middle_name', allow_none=True)
-    second_name = auto_field(column_name='second_name', allow_none=True)
-    date_of_birth = auto_field(column_name='date_of_birth', allow_none=True)
-    place_of_birth = auto_field(column_name='place_of_birth', allow_none=True)
-    gender = EnumField(enum=GenderEnum, allow_none=True, by_value=True)
-    dwelling = Nested(nested=LocationSchema, allow_none=True, many=False)
-    document = Nested(nested=DocumentSchema, allow_none=True, many=False)
-    limitations = Nested(nested=UserLimitationsSchema, allow_none=True, many=False)
+    user_id = fields.Integer(dump_only=True)
+    email = common_fields.Email()
+    phone = common_fields.Phone()
+    first_name = common_fields.CommonName()
+    middle_name = common_fields.CommonName()
+    second_name = common_fields.CommonName()
+    date_of_birth = fields.Date()
+    place_of_birth = common_fields.FreeDescription()
+    gender = EnumField(enum=GenderEnum, by_value=True)
+    dwelling = Nested(nested=LocationSchema, many=False)
+    document = Nested(nested=DocumentSchema, many=False)
+    limitations = Nested(nested=UserLimitationsSchema, many=False)
 
     # noinspection PyUnusedLocal
     @pre_load()
@@ -55,23 +55,3 @@ class UserInfoSchema(SQLAlchemySchema):
                 if current_email != email:
                     raise AlreadyExists('user.email', email)
         return data
-
-
-class UserLimitationsInputSchema(Schema):
-    hearing = fields.Boolean()
-    sight = fields.Boolean()
-    movement = fields.Boolean()
-
-
-class UserInfoInputSchema(Schema):
-    email = common_fields.Email()
-    phone = common_fields.Phone()
-    first_name = common_fields.CommonName()
-    middle_name = common_fields.CommonName()
-    second_name = common_fields.CommonName()
-    date_of_birth = fields.Date()
-    place_of_birth = common_fields.FreeDescription()
-    gender = EnumField(enum=GenderEnum, by_value=True)
-    dwelling = fields.Nested(nested=LocationInputSchema, many=False)
-    document = fields.Nested(nested=DocumentInputSchema, many=False)
-    limitations = fields.Nested(nested=UserLimitationsInputSchema, many=False)

@@ -322,28 +322,28 @@ class OrgMephiModule:
 
     @staticmethod
     def _wrap_marshmallow_input(f: Callable, schema: Union[Type[Schema], Schema]):
-
-        if issubclass(schema, Schema):
+        import inspect
+        if inspect.isclass(schema) and issubclass(schema, Schema):
             # noinspection PyCallingNonCallable
             schema = schema()
 
         @wraps(f)
         def wrapper(*args, **kwargs):
             from flask import request
-            from marshmallow import RAISE
+            from marshmallow import EXCLUDE
             from marshmallow_sqlalchemy import SQLAlchemySchema
             if isinstance(schema, SQLAlchemySchema) and getattr(schema.Meta, 'load_instance', False):
                 raise TypeError('Trying to load instance with SQLAlchemySchema on request')
             else:
-                request.marshmallow = schema.load(data=request.json, unknown=RAISE)
+                request.marshmallow = schema.load(data=request.json, unknown=EXCLUDE)
             return f(*args, **kwargs)
 
         return wrapper
 
     @staticmethod
     def _wrap_marshmallow_output(f: Callable, schema: Union[Type[Schema], Schema]):
-
-        if issubclass(schema, Schema):
+        import inspect
+        if inspect.isclass(schema) and issubclass(schema, Schema):
             # noinspection PyCallingNonCallable
             schema = schema()
 
