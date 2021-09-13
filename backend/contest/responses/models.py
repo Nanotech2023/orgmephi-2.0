@@ -85,10 +85,6 @@ class Response(db.Model):
         else:
             return self.work_status
 
-    @status.setter
-    def status(self, value):
-        self.status = value
-
 
 class ResponseFiletypeEnum(enum.Enum):
     """
@@ -257,7 +253,3 @@ class MultipleChoiceAnswer(BaseAnswer):
     __mapper_args__ = {
         'polymorphic_identity': AnswerEnum.MultipleChoiceAnswer,
     }
-
-
-if __name__ == '__main__':
-    db.create_all()
