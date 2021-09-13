@@ -45,7 +45,6 @@ def test_online_location_create(client):
                        json={
                            'url': 'https://www.example.com',
                        })
-    print(resp.data)
     assert resp.status_code == 200
     test_location: OlympiadLocation = OlympiadLocation.query.filter_by(
         location_id=resp.json['location_id']).one_or_none()
@@ -59,7 +58,6 @@ def test_location_create_russia(client, test_city):
                            'region_name': f'{test_city.region_name}',
                            'address': 'Test 0',
                        })
-    print(resp.data)
     assert resp.status_code == 200
     test_location: OlympiadLocation = OlympiadLocation.query.filter_by(
         location_id=resp.json['location_id']).one_or_none()
@@ -72,7 +70,6 @@ def test_location_create_other(client, test_country_native):
                            'country_name': f'{test_country_native.name}',
                            'location': 'Test 0',
                        })
-    print(resp.data)
     assert resp.status_code == 200
     test_location: OlympiadLocation = OlympiadLocation.query.filter_by(
         location_id=resp.json['location_id']).one_or_none()

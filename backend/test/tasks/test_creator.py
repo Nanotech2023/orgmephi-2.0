@@ -1,12 +1,198 @@
+from contest.tasks.models import BaseContest, SimpleContest, CompositeContest, StageConditionEnum, \
+    ContestHoldingTypeEnum, Stage, Variant, PlainTask, RangeTask, MultipleChoiceTask
 from . import *
 
-"""
 
 @pytest.fixture
 def client(client_creator):
-    client_creator.set_prefix('contest/tasks/unauthorized')
+    client_creator.set_prefix('contest/tasks/creator')
     yield client_creator
 
+
+def test_base_olympiad_create(client, test_olympiad_types):
+    resp = client.post('/base_olympiad/create',
+                       json={
+                           'name': 'Test 0',
+                           'description': 'Test 0',
+                           'rules': 'Test 0',
+                           'winner_1_condition': '0.5',
+                           'winner_2_condition': '0.5',
+                           'winner_3_condition': '0.5',
+                           'diploma_1_condition': '0.5',
+                           'diploma_2_condition': '0.5',
+                           'diploma_3_condition': '0.5',
+                           'olympiad_type_id': f'{test_olympiad_types[0].olympiad_type_id}',
+                           'subject': 'Math',
+                       })
+    assert resp.status_code == 200
+
+    base_olympiad: BaseContest = BaseContest.query.filter_by(
+        base_contest_id=resp.json['base_contest_id']).one_or_none()
+    assert base_olympiad.base_contest_id == resp.json['base_contest_id']
+
+
+def test_olympiad_create_simple(client, test_base_contests):
+    resp = client.post(f'/base_olympiad/{test_base_contests[0].base_contest_id}/olympiad/create_simple',
+                       json={
+                           'start_date': f'{datetime.utcnow()}',
+                           'end_date': f'{datetime.utcnow() + timedelta(hours=4)}',
+                           'end_of_enroll_date': f'{datetime.utcnow() + timedelta(hours=1)}',
+                           'result_publication_date': f'{datetime.utcnow() + timedelta(hours=6)}',
+                           'visibility': 'false',
+                           'holding_type': f'{ContestHoldingTypeEnum.OfflineContest.value}',
+                       })
+    assert resp.status_code == 200
+
+    simple_contest: SimpleContest = SimpleContest.query.filter_by(
+        contest_id=resp.json['contest_id']).one_or_none()
+    assert simple_contest.contest_id == resp.json['contest_id']
+
+
+def test_olympiad_create_composite(client, test_base_contests):
+    resp = client.post(f'/base_olympiad/{test_base_contests[0].base_contest_id}/olympiad/create_composite',
+                       json={
+                           'visibility': 'false',
+                           'holding_type': 'OfflineContest',
+                       })
+    assert resp.status_code == 200
+
+    composite_contest: CompositeContest = CompositeContest.query.filter_by(
+        contest_id=resp.json['contest_id']).one_or_none()
+    assert composite_contest.contest_id == resp.json['contest_id']
+
+
+def test_stage_create(client, test_contests_composite):
+    resp = client.post(f'/olympiad/{test_contests_composite[0].contest_id}/stage/create',
+                       json={
+                           'stage_name': 'Test name',
+                           'stage_num': '0',
+                           'this_stage_condition': 'Test 0',
+                           'condition': f'{StageConditionEnum.And.value}',
+                       })
+    print(resp.data)
+    assert resp.status_code == 200
+
+    stage: Stage = Stage.query.filter_by(
+        stage_id=resp.json['stage_id']).one_or_none()
+    assert stage.stage_id == resp.json['stage_id']
+
+
+def contests_all(client, test_contests_composite, test_stages):
+    resp = client.get(f'/olympiad/{test_contests_composite[0].contest_id}/stage/{test_stages[0].stage_id}/contest/all')
+    assert resp.status_code == 200
+
+    assert len(test_contests_composite) == len(resp.data)
+
+
+def test_variant_create(client, test_simple_contest):
+    resp = client.post(f'/contest/{test_simple_contest[0].contest_id}/variant/create',
+                       json={
+                           'variant_description': 'Test',
+                       })
+    print(resp.data)
+    assert resp.status_code == 200
+
+    variant: Variant = Variant.query.filter_by(
+        variant_id=resp.json['variant_id']).one_or_none()
+    assert variant.variant_id == resp.json['variant_id']
+
+
+def test_variant_get(client, test_simple_contest, test_variant):
+    resp = client.get(f'/contest/{test_simple_contest[0].contest_id}/variant/{test_variant[0].variant_number}')
+    assert resp.status_code == 200
+    assert 1 == len(list(resp.response))
+
+
+def test_variant_all(client, test_simple_contest, test_variant):
+    resp = client.get(f'/contest/{test_simple_contest[0].contest_id}/variant/all')
+    assert resp.status_code == 200
+    assert len(test_simple_contest[0].variants.all()) == len(list(resp.json['variants_list']))
+
+
+def test_task_create_plain(client, test_simple_contest, test_variant):
+    resp = client.post(
+        f'/contest/{test_simple_contest[0].contest_id}/variant/{test_variant[0].variant_id}/task/create_plain',
+        json={
+            'num_of_task': '0',
+            'recommended_answer': 'Test',
+            'show_answer_after_contest': 'false',
+            'task_points': '10',
+        })
+    print(resp.data)
+    assert resp.status_code == 200
+
+    task: PlainTask = PlainTask.query.filter_by(
+        task_id=resp.json['task_id']).one_or_none()
+    assert task.task_id == resp.json['task_id']
+
+
+def test_task_create_range(client, test_simple_contest, test_variant):
+    resp = client.post(
+        f'/contest/{test_simple_contest[0].contest_id}/variant/{test_variant[0].variant_id}/task/create_range',
+        json={
+            'num_of_task': '0',
+            'start_value': '0.1',
+            'end_value': '0.8',
+            'show_answer_after_contest': 'false',
+            'task_points': '10',
+        })
+    print(resp.data)
+    assert resp.status_code == 200
+
+    task: RangeTask = RangeTask.query.filter_by(
+        task_id=resp.json['task_id']).one_or_none()
+    assert task.task_id == resp.json['task_id']
+
+
+def test_task_create_multiple(client, test_simple_contest, test_variant):
+    resp = client.post(
+        f'/contest/{test_simple_contest[0].contest_id}/variant/{test_variant[0].variant_id}/task/create_multiple',
+        json={
+            'num_of_task': '0',
+            'answers': [
+                {
+                    'answer': 'test',
+                    'is_right_answer': 'false'
+                }
+            ],
+            'show_answer_after_contest': 'false',
+            'task_points': '10',
+        })
+    print(resp.data)
+    assert resp.status_code == 200
+
+    task: MultipleChoiceTask = MultipleChoiceTask.query.filter_by(
+        task_id=resp.json['task_id']).one_or_none()
+    assert task.task_id == resp.json['task_id']
+
+
+def test_task_get(client, test_simple_contest, test_variant, create_plain_task):
+    resp = client.get(
+        f'/contest/{test_simple_contest[0].contest_id}/variant/{test_variant[0].variant_id}'
+        f'/task/{create_plain_task[0].task_id}')
+
+    assert resp.status_code == 200
+    assert 1 == len(list(resp.response))
+
+
+def test_task_image(client, test_simple_contest, test_variant, create_plain_task):
+    resp = client.get(
+        f'/contest/{test_simple_contest[0].contest_id}/variant/{test_variant[0].variant_id}'
+        f'/tasks/{create_plain_task[0].task_id}/image')
+
+    print(resp.data)
+    assert resp.status_code == 409
+
+
+def test_task_all(client, test_simple_contest, test_variant):
+    resp = client.get(
+        f'/contest/{test_simple_contest[0].contest_id}/variant/{test_variant[0].variant_id}'
+        f'/task/all')
+    assert resp.status_code == 200
+    assert len(test_variant[0].tasks) == len(list(resp.json['tasks_list']))
+
+
+"""
 
 @pytest.fixture
 def create_target_class():
@@ -15,56 +201,6 @@ def create_target_class():
     test_app.db.session.add(target_class)
     test_app.db.session.commit()
     yield [target_class]
-
-
-@pytest.fixture
-def create_simple_contest(test_base_contests):
-    from contest.tasks.models.olympiad import SimpleContest, ContestHoldingTypeEnum
-    holding_types = [ContestHoldingTypeEnum.OnLineContest, ContestHoldingTypeEnum.OfflineContest]
-    simple_contests = [SimpleContest(base_contest_id=test_base_contests[i],
-                                     visibility=True, start_date=datetime.utcnow(),
-                                     end_date=datetime.utcnow() + timedelta(hours=1),
-                                     holding_type=holding_types[i % 2],
-                                     contest_duration=timedelta(minutes=30),
-                                     result_publication_date=datetime.utcnow() + timedelta(hours=2),
-                                     end_of_enroll_date=datetime.utcnow() + timedelta(minutes=15))
-                       for i in range(8)]
-    for i in range(len(simple_contests)):
-        base_contest = test_base_contests[i % len(test_base_contests)]
-        base_contest.child_contests.extend(simple_contests)
-    test_app.db.session.add_all(simple_contests)
-    test_app.db.session.commit()
-    dict_ = {'contests': simple_contests}
-    yield dict_
-
-
-@pytest.fixture
-def create_olympiad_location(create_simple_contest):
-    from contest.tasks.models.location import add_russia_location
-    from user.models import Region, City
-    region = Region(name='test')
-    test_app.db.session.add(region)
-    city = City(name='test')
-    city.region = region
-    test_app.db.session.add(city)
-    location = add_russia_location(db_session=test_app.db.session, city_name='test',
-                                   region_name='test', address='address')
-    test_app.db.session.commit()
-    create_simple_contest['location'] = location
-    yield create_simple_contest
-
-
-@pytest.fixture
-def create_variant(create_olympiad_location):
-    from contest.tasks.models.contest import Variant
-    variants = [Variant(contest_id=create_olympiad_location.get('contests')[i].contest_id,
-                        variant_number=i,
-                        variant_description='description')
-                for i in range(8)]
-    test_app.db.session.add_all(variants)
-    test_app.db.session.commit()
-    create_olympiad_location['variants'] = variants
-    yield create_olympiad_location
 
 
 @pytest.fixture
@@ -83,92 +219,4 @@ def create_user_in_contest(create_variant, test_user_university):
     create_variant['users'] = users_in_contests
     yield create_variant
 
-
-# noinspection DuplicatedCode
-@pytest.fixture
-def create_plain_task(create_user_in_contest):
-    from contest.tasks.models.tasks import PlainTask
-    plain_tasks = [PlainTask(num_of_task=1,
-                             image_of_task=None,
-                             show_answer_after_contest=None,
-                             task_points=11,
-                             recommended_answer='answer')
-                   for i in range(8)]
-    test_app.db.session.add_all(plain_tasks)
-    for i in range(8):
-        create_user_in_contest.get('variants')[i].tasks.append(plain_tasks[i])
-    test_app.db.session.commit()
-    create_user_in_contest['plain_tasks'] = plain_tasks
-    yield create_user_in_contest
-
-
-
-# noinspection DuplicatedCode
-@pytest.fixture
-def create_one_task(create_user_response):
-    from contest.tasks.models.tasks import PlainTask
-    plain_tasks = [PlainTask(num_of_task=1,
-                             image_of_task=None,
-                             show_answer_after_contest=None,
-                             task_points=11,
-                             recommended_answer='answer')
-                   for i in range(8)]
-    test_app.db.session.add_all(plain_tasks)
-    for i in range(8):
-        create_user_response.get('variants')[i].tasks.append(plain_tasks[i])
-    test_app.db.session.commit()
-    create_user_response['plain_tasks'] = plain_tasks
-    yield create_user_response
-
-
-
-
-@pytest.fixture
-def create_two_tasks(create_one_task):
-    from contest.tasks.models.tasks import RangeTask
-    range_tasks = [RangeTask(num_of_task=2,
-                             image_of_task=None,
-                             show_answer_after_contest=False,
-                             task_points=5,
-                             start_value=0.5,
-                             end_value=0.7)
-                   for _ in range(8)]
-    test_app.db.session.add_all(range_tasks)
-    for i in range(8):
-        create_one_task.get('variants')[i].tasks.append(range_tasks[i])
-    test_app.db.session.commit()
-    create_one_task['range_tasks'] = range_tasks
-    yield create_one_task
-
-
-@pytest.fixture
-def create_three_tasks(create_two_tasks):
-    from contest.tasks.models.tasks import MultipleChoiceTask
-    multiple_tasks = [MultipleChoiceTask(num_of_task=3,
-                                         image_of_task=None,
-                                         show_answer_after_contest=False,
-                                         task_points=7)
-                      for _ in range(8)]
-    answers = [
-        {
-            "answer": "1",
-            "is_right_answer": True
-        },
-        {
-            "answer": "2",
-            "is_right_answer": False
-        },
-        {
-            "answer": "3",
-            "is_right_answer": True
-        }
-    ]
-    test_app.db.session.add_all(multiple_tasks)
-    for i in range(8):
-        multiple_tasks[i].answers = answers
-    for i in range(8):
-        create_two_tasks.get('variants')[i].tasks.append(multiple_tasks[i])
-    test_app.db.session.commit()
-    create_two_tasks['multiple_tasks'] = multiple_tasks
-    yield create_two_tasks
     """
