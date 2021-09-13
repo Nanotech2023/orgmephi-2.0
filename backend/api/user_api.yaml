@@ -13,6 +13,7 @@ components:
     City:
       properties:
         name:
+          maxLength: 32
           type: string
         region:
           type: string
@@ -23,48 +24,30 @@ components:
     Country:
       properties:
         name:
+          maxLength: 32
           type: string
       required:
       - name
       type: object
     Document:
+      discriminator:
+        mapping:
+          ForeignPassport: '#/components/schemas/DocumentForeignPassport'
+          OtherDocument: '#/components/schemas/DocumentOther'
+          RFInternationalPassport: '#/components/schemas/DocumentRFInternational'
+          RFPassport: '#/components/schemas/DocumentRF'
+        propertyName: document_type
+      oneOf:
+      - $ref: '#/components/schemas/DocumentRF'
+      - $ref: '#/components/schemas/DocumentRFInternational'
+      - $ref: '#/components/schemas/DocumentForeignPassport'
+      - $ref: '#/components/schemas/DocumentOther'
+    DocumentForeignPassport:
       properties:
-        code:
-          description: Only for russian passport
-          nullable: true
-          type: string
         document_name:
-          nullable: true
-          type: string
-        document_type:
-          enum:
-          - RFPassport
-          - RFInternationalPassport
-          - ForeignPassport
-          - OtherDocument
-          nullable: true
-          type: string
-        issue_date:
-          format: date
-          nullable: true
-          type: string
-        issuer:
-          nullable: true
-          type: string
-        number:
-          nullable: true
-          type: string
-        series:
-          nullable: true
-          type: string
-        user_id:
+          maxLength: 32
           readOnly: true
-          type: integer
-      required:
-      - user_id
-      type: object
-    DocumentForeignPassportInput:
-      properties:
+          type: string
         document_type:
           enum:
           - ForeignPassport
@@ -83,23 +66,13 @@ components:
           example: '12'
           pattern: ^[0-9]{1,16}$
           type: string
+        user_id:
+          readOnly: true
+          type: integer
       required:
       - document_type
       type: object
-    DocumentInput:
-      discriminator:
-        mapping:
-          ForeignPassport: '#/components/schemas/DocumentForeignPassportInput'
-          OtherDocument: '#/components/schemas/DocumentOtherInput'
-          RFInternationalPassport: '#/components/schemas/DocumentRFInternationalInput'
-          RFPassport: '#/components/schemas/DocumentRFInput'
-        propertyName: document_type
-      oneOf:
-      - $ref: '#/components/schemas/DocumentRFInput'
-      - $ref: '#/components/schemas/DocumentRFInternationalInput'
-      - $ref: '#/components/schemas/DocumentForeignPassportInput'
-      - $ref: '#/components/schemas/DocumentOtherInput'
-    DocumentOtherInput:
+    DocumentOther:
       properties:
         document_name:
           maxLength: 32
@@ -122,14 +95,21 @@ components:
           example: '12'
           pattern: ^[0-9]{1,16}$
           type: string
+        user_id:
+          readOnly: true
+          type: integer
       required:
       - document_type
       type: object
-    DocumentRFInput:
+    DocumentRF:
       properties:
         code:
           example: 123-456
           pattern: ^[0-9]{3}-[0-9]{3}$
+          type: string
+        document_name:
+          maxLength: 32
+          readOnly: true
           type: string
         document_type:
           enum:
@@ -149,11 +129,18 @@ components:
           example: '4520'
           pattern: ^[0-9]{4}$
           type: string
+        user_id:
+          readOnly: true
+          type: integer
       required:
       - document_type
       type: object
-    DocumentRFInternationalInput:
+    DocumentRFInternational:
       properties:
+        document_name:
+          maxLength: 32
+          readOnly: true
+          type: string
         document_type:
           enum:
           - RFInternationalPassport
@@ -172,18 +159,11 @@ components:
           example: '12'
           pattern: ^[0-9]{2}$
           type: string
+        user_id:
+          readOnly: true
+          type: integer
       required:
       - document_type
-      type: object
-    Field:
-      properties:
-        name:
-          type: string
-        region_name:
-          type: string
-      required:
-      - name
-      - region_name
       type: object
     Group:
       properties:
@@ -191,6 +171,7 @@ components:
           readOnly: true
           type: integer
         name:
+          maxLength: 32
           type: string
       required:
       - name
@@ -257,82 +238,45 @@ components:
       oneOf:
       - $ref: '#/components/schemas/LocationRussia'
       - $ref: '#/components/schemas/LocationOther'
-    LocationInput:
-      discriminator:
-        mapping:
-          Foreign: '#/components/schemas/LocationOtherInput'
-          Russian: '#/components/schemas/LocationRussiaInput'
-        propertyName: russian
-      oneOf:
-      - $ref: '#/components/schemas/LocationRussiaInput'
-      - $ref: '#/components/schemas/LocationOtherInput'
     LocationOther:
       properties:
         country:
-          type: string
-        location:
-          nullable: true
-          type: string
-        rural:
-          nullable: true
-          type: boolean
-        russian:
-          readOnly: true
-          type: string
-      required:
-      - country
-      type: object
-    LocationOtherInput:
-      properties:
-        country:
-          maxLength: 32
           type: string
         location:
           maxLength: 256
           type: string
         rural:
           type: boolean
+        russian:
+          readOnly: true
+          type: boolean
       required:
       - country
-      - location
-      - rural
       type: object
     LocationRussia:
       properties:
         city:
-          $ref: '#/components/schemas/Field'
-        country:
-          readOnly: true
-          type: string
-        rural:
-          nullable: true
-          type: boolean
-        russian:
-          readOnly: true
-          type: string
-      required:
-      - country
-      type: object
-    LocationRussiaInput:
-      properties:
-        city:
-          maxLength: 32
-          type: string
+          properties:
+            name:
+              type: string
+            region_name:
+              type: string
+          required:
+          - name
+          - region_name
+          type: object
         country:
           enum:
           - "\u0420\u043E\u0441\u0441\u0438\u044F"
           maxLength: 32
           type: string
-        region:
-          maxLength: 32
-          type: string
         rural:
           type: boolean
+        russian:
+          readOnly: true
+          type: boolean
       required:
-      - city
       - country
-      - region
-      - rural
       type: object
     LoginRequestUser:
       properties:
@@ -381,6 +325,7 @@ components:
     Region:
       properties:
         name:
+          maxLength: 32
           type: string
       required:
       - name
@@ -447,7 +392,7 @@ components:
     RegistrationStudentInfoUser:
       properties:
         dwelling:
-          $ref: '#/components/schemas/LocationInput'
+          $ref: '#/components/schemas/Location'
         grade:
           maximum: 5
           minimum: 1
@@ -456,7 +401,7 @@ components:
           example: 8 (800) 555 35 35
           type: string
         university:
-          $ref: '#/components/schemas/StudentUniversityInput'
+          $ref: '#/components/schemas/StudentUniversity'
       required:
       - dwelling
       - grade
@@ -488,15 +433,13 @@ components:
     SchoolInfo:
       properties:
         grade:
-          nullable: true
           type: integer
         location:
           $ref: '#/components/schemas/Location'
         name:
-          nullable: true
+          maxLength: 32
           type: string
         number:
-          nullable: true
           type: integer
         school_type:
           enum:
@@ -512,39 +455,10 @@ components:
           - University
           - Correctional
           - Other
-          nullable: true
           type: string
         user_id:
           readOnly: true
           type: integer
-      required:
-      - user_id
-      type: object
-    SchoolInfoInput:
-      properties:
-        grade:
-          type: integer
-        location:
-          $ref: '#/components/schemas/LocationInput'
-        name:
-          type: string
-        number:
-          type: integer
-        school_type:
-          enum:
-          - School
-          - Lyceum
-          - Gymnasium
-          - EducationCenter
-          - NightSchool
-          - Technical
-          - External
-          - Collage
-          - ProfTech
-          - University
-          - Correctional
-          - Other
-          type: string
       type: object
     SchoolRegistrationRequestUser:
       properties:
@@ -594,34 +508,12 @@ components:
     StudentInfo:
       properties:
         grade:
-          nullable: true
           type: integer
         university:
-          allOf:
-          - $ref: '#/components/schemas/StudentUniversity'
-          nullable: true
+          $ref: '#/components/schemas/StudentUniversity'
         user_id:
           readOnly: true
           type: integer
-      required:
-      - user_id
-      type: object
-    StudentInfoInput:
-      properties:
-        citizenship:
-          maxLength: 32
-          type: string
-        city:
-          maxLength: 32
-          type: string
-        grade:
-          minimum: 1
-          type: integer
-        region:
-          maxLength: 32
-          type: string
-        university:
-          $ref: '#/components/schemas/StudentUniversityInput'
       type: object
     StudentUniversity:
       discriminator:
@@ -638,36 +530,27 @@ components:
           type: string
         known_type:
           enum:
+          - Known
           - Custom
           readOnly: true
           type: string
         university:
-          nullable: true
+          maxLength: 32
           type: string
       required:
       - country
       - university
       type: object
-    StudentUniversityInput:
-      properties:
-        country:
-          description: Omit this field if university is known by backend
-          maxLength: 32
-          type: string
-        university:
-          maxLength: 32
-          type: string
-      required:
-      - university
-      type: object
     StudentUniversityKnown:
       properties:
         country:
+          maxLength: 32
           readOnly: true
           type: string
         known_type:
           enum:
           - Known
+          - Custom
           readOnly: true
           type: string
         university:
@@ -694,10 +577,10 @@ components:
         country:
           type: string
         name:
+          maxLength: 32
           type: string
       required:
       - country
-      - name
       type: object
     UniversityRegistrationRequestUser:
       properties:
@@ -743,8 +626,11 @@ components:
           - PreRegister
           type: string
         username:
+          maxLength: 32
           type: string
       required:
+      - role
+      - type
       - username
       type: object
     UserFull:
@@ -780,8 +666,11 @@ components:
         user_info:
           $ref: '#/components/schemas/UserInfo'
         username:
+          maxLength: 32
           type: string
       required:
+      - role
+      - type
       - username
       type: object
     UserFullListResponseUser:
@@ -797,59 +686,11 @@ components:
       properties:
         date_of_birth:
           format: date
-          nullable: true
           type: string
         document:
-          allOf:
-          - $ref: '#/components/schemas/Document'
-          nullable: true
+          $ref: '#/components/schemas/Document'
         dwelling:
-          allOf:
-          - $ref: '#/components/schemas/Location'
-          nullable: true
-        email:
-          nullable: true
-          type: string
-        first_name:
-          nullable: true
-          type: string
-        gender:
-          enum:
-          - Male
-          - Female
-          nullable: true
-          type: string
-        limitations:
-          allOf:
-          - $ref: '#/components/schemas/UserLimitations'
-          nullable: true
-        middle_name:
-          nullable: true
-          type: string
-        phone:
-          nullable: true
-          type: string
-        place_of_birth:
-          nullable: true
-          type: string
-        second_name:
-          nullable: true
-          type: string
-        user_id:
-          readOnly: true
-          type: integer
-      required:
-      - user_id
-      type: object
-    UserInfoInput:
-      properties:
-        date_of_birth:
-          format: date
-          type: string
-        document:
-          $ref: '#/components/schemas/DocumentInput'
-        dwelling:
-          $ref: '#/components/schemas/LocationInput'
+          $ref: '#/components/schemas/Location'
         email:
           format: email
           maxLength: 64
@@ -863,7 +704,7 @@ components:
           - Female
           type: string
         limitations:
-          $ref: '#/components/schemas/UserLimitationsInput'
+          $ref: '#/components/schemas/UserLimitations'
         middle_name:
           maxLength: 32
           type: string
@@ -876,26 +717,32 @@ components:
         second_name:
           maxLength: 32
           type: string
+        user_id:
+          readOnly: true
+          type: integer
       type: object
-    UserInfoRestrictedInput:
+    UserInfoRestricted:
       properties:
         document:
-          $ref: '#/components/schemas/DocumentInput'
+          $ref: '#/components/schemas/Document'
         dwelling:
-          $ref: '#/components/schemas/LocationInput'
+          $ref: '#/components/schemas/Location'
         gender:
           enum:
           - Male
           - Female
           type: string
         limitations:
-          $ref: '#/components/schemas/UserLimitationsInput'
+          $ref: '#/components/schemas/UserLimitations'
         phone:
           example: 8 (800) 555 35 35
           type: string
         place_of_birth:
           maxLength: 256
           type: string
+        user_id:
+          readOnly: true
+          type: integer
       type: object
     UserLimitations:
       properties:
@@ -913,15 +760,6 @@ components:
           type: integer
       required:
       - user_id
-      type: object
-    UserLimitationsInput:
-      properties:
-        hearing:
-          type: boolean
-        movement:
-          type: boolean
-        sight:
-          type: boolean
       type: object
     UserListResponseUser:
       properties:
@@ -959,9 +797,10 @@ paths:
       responses:
         '200':
           content:
-            application/png:
-              format: binary
-              type: string
+            image/png:
+              schema:
+                format: binary
+                type: string
           description: OK
   /user/registration/school:
     post:
@@ -1254,7 +1093,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/UserInfoRestrictedInput'
+              $ref: '#/components/schemas/UserInfoRestricted'
         required: true
       responses:
         '200':
@@ -1284,7 +1123,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/StudentInfoInput'
+              $ref: '#/components/schemas/StudentInfo'
         required: true
       responses:
         '200':
@@ -1314,7 +1153,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/SchoolInfoInput'
+              $ref: '#/components/schemas/SchoolInfo'
         required: true
       responses:
         '200':
@@ -1490,7 +1329,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/UserInfoInput'
+              $ref: '#/components/schemas/UserInfo'
         required: true
       responses:
         '200':
@@ -1515,7 +1354,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/StudentInfoInput'
+              $ref: '#/components/schemas/StudentInfo'
         required: true
       responses:
         '200':
@@ -1540,7 +1379,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/SchoolInfoInput'
+              $ref: '#/components/schemas/SchoolInfo'
         required: true
       responses:
         '200':
