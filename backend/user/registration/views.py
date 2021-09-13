@@ -156,7 +156,7 @@ def get_captcha():
         '200':
           description: OK
           content:
-            application/png:
+            image/png:
               type: string
               format: binary
     """
