@@ -21,6 +21,10 @@ components:
       properties:
         contest_id:
           type: integer
+        tasks_points:
+          items:
+            $ref: '#/components/schemas/TaskPoints'
+          type: array
         user_answers:
           items:
             $ref: '#/components/schemas/BaseAnswer'
@@ -31,6 +35,8 @@ components:
           type: integer
       required:
       - contest_id
+      - tasks_points
+      - user_answers
       - user_id
       - work_id
       type: object
@@ -60,6 +66,10 @@ components:
           - MultipleChoiceAnswer
           - BaseAnswer
           type: string
+        task_id:
+          nullable: true
+          readOnly: true
+          type: integer
       type: object
     BaseAnswer:
       properties:
@@ -78,6 +88,10 @@ components:
           nullable: true
           readOnly: true
           type: number
+        task_id:
+          nullable: true
+          readOnly: true
+          type: integer
       type: object
     ContestResultSheetResponse:
       properties:
@@ -157,6 +171,16 @@ components:
           type: number
       required:
       - answer
+      type: object
+    TaskPoints:
+      properties:
+        task_id:
+          type: integer
+        task_points:
+          type: number
+      required:
+      - task_id
+      - task_points
       type: object
     UserAnswerMarkResponse:
       properties:
@@ -553,7 +577,7 @@ paths:
         '404':
           description: User, contest or task not found
         '409':
-          description: Olympiad is over
+          description: Olympiad is over or wrong answers
       security:
       - JWTAccessToken: []
       - CSRFAccessToken: []
@@ -672,6 +696,8 @@ paths:
           description: OK
         '404':
           description: User or contest not found
+        '409':
+          description: Mark Error
       security:
       - JWTAccessToken: []
       - CSRFAccessToken: []

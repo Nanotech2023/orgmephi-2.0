@@ -12,11 +12,17 @@ class AllUserAnswersResponseSchema(Schema):
     user_answers = fields.Nested(nested=AnswerWithoutMarkSchema, many=True, required=False)
 
 
+class TaskPointsSchema(Schema):
+    task_id = fields.Int(required=True)
+    task_points = fields.Float(required=True)
+
+
 class AllUserMarksResponseSchema(Schema):
     user_id = fields.Int(required=True)
     work_id = fields.Int(required=True)
     contest_id = fields.Int(required=True)
-    user_answers = fields.Nested(nested=BaseAnswerSchema, many=True, required=False)
+    user_answers = fields.Nested(nested=BaseAnswerSchema, many=True, required=True)
+    tasks_points = fields.Nested(nested=TaskPointsSchema, many=True, required=True)
 
 
 class PlainAnswerRequestSchema(Schema):

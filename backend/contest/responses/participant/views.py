@@ -1,8 +1,7 @@
 import io
 from flask import request, send_file
-from common import get_current_app, get_current_module
+from common import get_current_module
 from common.jwt_verify import jwt_get_id
-from common.util import db_get_or_raise
 from contest.responses.model_schemas.schemas import AnswerSchema
 from contest.responses.util import *
 from contest.responses.creator.schemas import *
@@ -36,6 +35,7 @@ def create_user_self_response_for_contest(contest_id):
         '409':
           description: Olympiad error
     """
+    check_contest_type(contest_id)
     self_user_id = jwt_get_id()
     create_user_response(contest_id, self_user_id)
     return {}, 200
@@ -366,6 +366,7 @@ def self_user_answer_for_task_multiple(contest_id, task_id):
     check_task_type(task_id, answer_dict['MultipleChoiceAnswer'])
     values = request.marshmallow
     self_user_id = jwt_get_id()
+    check_user_multiple_answers(values['answers'], task_id)
     user_answer_post(self_user_id, contest_id, task_id, values, 'MultipleChoiceAnswer')
     return {}, 200
 

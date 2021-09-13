@@ -224,7 +224,11 @@ def is_task_in_contest(task_id, contest_id):
     task_variant = task.variant
     if task_variant is None:
         raise DataConflict("Task variant is missing")
-    return task_variant in current_contest.variants
+    contest_variants = current_contest.variants.all()
+    for var in task_variant:
+        if var in contest_variants:
+            return True
+    return False
 
 
 # Participant module

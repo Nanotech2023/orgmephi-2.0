@@ -1,7 +1,7 @@
 import io
 from flask import request, send_file
-from common import get_current_app, get_current_module
-from common.util import db_get_or_raise, db_get_list
+from common import get_current_module
+from common.util import db_get_list
 from contest.responses.util import *
 from contest.responses.model_schemas.schemas import AnswerSchema
 from .schemas import *
@@ -403,10 +403,11 @@ def user_answer_for_task_by_id_multiple(contest_id, task_id, user_id):
         '404':
           description: User, contest or task not found
         '409':
-          description: Olympiad is over
+          description: Olympiad is over or wrong answers
     """
     check_task_type(task_id, answer_dict['MultipleChoiceAnswer'])
     values = request.marshmallow
+    check_user_multiple_answers(values['answers'], task_id)
     user_answer_post(user_id, contest_id, task_id, values, 'MultipleChoiceAnswer')
     return {}, 200
 
@@ -567,8 +568,11 @@ def user_answer_task_mark_post(contest_id, user_id, task_id):
           description: OK
         '404':
           description: User or contest not found
+        '409':
+          description: Mark Error
     """
     values = request.marshmallow
+    check_mark_for_task(values['mark'], task_id)
     user_work = get_user_in_contest_work(user_id, contest_id)
     answer = get_answer_by_task_id_and_work_id(BaseAnswer, task_id, user_work.work_id)
     if answer is None:

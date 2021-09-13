@@ -3,6 +3,7 @@ from . import *
 DEFAULT_INDEX = 0
 ERROR_ID = 1500
 
+
 @pytest.fixture
 def client(client_university):
     client_university.set_prefix('contest/responses/participant')
@@ -29,10 +30,24 @@ def test_user_response_participant(client, create_plain_task):
 
 
 # noinspection DuplicatedCode
+def test_user_response_offline_contest_participant(client, create_plain_task):
+    index = 1
+    contest_id = get_contest_id(create_plain_task, index)
+
+    resp = client.post(f'/contest/{contest_id}/user/self/create')
+    assert resp.status_code == 409
+
+
+# noinspection DuplicatedCode
 def test_plain_task_text_participant(client, create_two_tasks):
     contest_id = get_contest_id(create_two_tasks, DEFAULT_INDEX)
     user_id = get_user_id(create_two_tasks, DEFAULT_INDEX)
     task_id = get_plain_task_id(create_two_tasks, DEFAULT_INDEX)
+    task_id_from_different_contest = get_plain_task_id(create_two_tasks, 2)
+
+    resp = client.post(f'/contest/{contest_id}/task/{task_id_from_different_contest}/user/self/plain',
+                       json={'answer_text': 'answer'})
+    assert resp.status_code == 404
 
     resp = client.post(f'/contest/{contest_id}/task/{task_id}/user/self/plain',
                        json={'answer_text': 'answer'})
@@ -67,6 +82,11 @@ def test_plain_task_file_participant(client, create_one_task):
     contest_id = get_contest_id(create_one_task, DEFAULT_INDEX)
     user_id = get_user_id(create_one_task, DEFAULT_INDEX)
     task_id = get_plain_task_id(create_one_task, DEFAULT_INDEX)
+    task_id_from_different_contest = get_plain_task_id(create_one_task, 2)
+
+    resp = client.post(f'/contest/{contest_id}/task/{task_id_from_different_contest}/user/self/png',
+                       data=b'Test')
+    assert resp.status_code == 404
 
     resp = client.post(f'/contest/{contest_id}/task/{task_id}/user/self/png', data=b'Test')
     assert resp.status_code == 200
@@ -147,6 +167,10 @@ def test_multiple_task_creator(client, create_three_tasks):
     task_id = get_multiple_task_id(create_three_tasks, DEFAULT_INDEX)
 
     resp = client.post(f'/contest/{contest_id}/task/{task_id}/user/self/multiple',
+                       json={"answers": [{"answer": "1"}, {"answer": "4"}]})
+    assert resp.status_code == 409
+
+    resp = client.post(f'/contest/{contest_id}/task/{task_id}/user/self/multiple',
                        json={"answers": [{"answer": "1"}, {"answer": "3"}]})
     assert resp.status_code == 200
 
@@ -181,7 +205,6 @@ def test_multiple_task_creator(client, create_three_tasks):
 
 def test_get_status_participant(client, create_one_task):
     contest_id = get_contest_id(create_one_task, DEFAULT_INDEX)
-    user_id = get_user_id(create_one_task, DEFAULT_INDEX)
 
     resp = client.get(f'/contest/{contest_id}/user/self/status')
     assert resp.status_code == 200
@@ -318,6 +341,8 @@ def test_auto_check_participant(client, create_user_with_answers):
     assert resp.json['user_id'] == user_id
     user_answers = resp.json['user_answers']
     assert len(user_answers) == 3
+    tasks_points = resp.json['tasks_points']
+    assert len(tasks_points) == 3
 
     for answer in user_answers:
         if answer['answer_type'] == 'PlainAnswerText':
@@ -326,6 +351,14 @@ def test_auto_check_participant(client, create_user_with_answers):
             assert answer['mark'] == 0
         elif answer['answer_type'] == 'MultipleChoiceAnswer':
             assert answer['mark'] == 7
+
+    for points in tasks_points:
+        if points['task_id'] == plain_id:
+            assert points['task_points'] == 11
+        elif points['task_id'] == range_id:
+            assert points['task_points'] == 5
+        elif points['task_id'] == multiple_id:
+            assert points['task_points'] == 7
 
 
 # noinspection DuplicatedCode
@@ -379,4 +412,3 @@ def test_time_left_error_participant(client, create_two_tasks):
     from contest.responses.util import get_user_in_contest_work
     user_work = get_user_in_contest_work(user_id, contest_id)
     assert user_work.status.value == 'NotChecked'
-

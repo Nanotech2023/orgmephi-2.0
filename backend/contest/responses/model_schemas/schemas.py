@@ -26,6 +26,7 @@ class BaseAnswerSchema(SQLAlchemySchema):
 
     answer_id = auto_field(column_name='answer_id', dump_only=True)
     answer_type = EnumField(AnswerEnum, data_key='answer_type', by_value=True)
+    task_id = auto_field(column_name='task_id', dump_only=True)
     mark = auto_field(column_name='mark', dump_only=True)
 
 
@@ -93,5 +94,3 @@ class AnswerSchema(OneOfSchema):
         if obj_type is None:
             raise TypeError(f'Unknown object type: {obj.__class__.__name__}')
         return obj_type.value
-
-

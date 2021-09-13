@@ -2,13 +2,13 @@ from common import get_current_db, get_current_app
 from .model_schemas.schemas import PlainAnswerTextSchema, RangeAnswerSchema
 from datetime import datetime, timedelta
 from common.errors import NotFound, RequestError, AlreadyExists
-from common.util import db_get_one_or_none, db_exists
+from common.util import db_get_one_or_none, db_exists, db_get_or_raise
 from contest.tasks.models import SimpleContest, RangeTask, MultipleChoiceTask, PlainTask, ContestHoldingTypeEnum, \
     UserInContest
 from .models import Response, PlainAnswerText, RangeAnswer, MultipleChoiceAnswer, PlainAnswerFile, BaseAnswer, \
     answer_dict, work_status, add_user_response, add_plain_answer_file, add_plain_answer_text, add_range_answer, \
     add_multiple_answer
-from ..tasks.util import validate_file_size
+from ..tasks.util import validate_file_size, is_task_in_contest
 
 db = get_current_db()
 app = get_current_app()
@@ -95,14 +95,28 @@ def user_answer_get(user_id, contest_id, task_id, answer_type=None):
     return user_answer
 
 
+def get_task_points(user_work: Response):
+    from contest.tasks.models.tasks import Task
+    result = []
+    for answer in user_work.answers:
+        task = db_get_one_or_none(Task, 'task_id', answer.task_id)
+        result.append({
+            'task_id': task.task_id,
+            'task_points': task.task_points
+        })
+    return result
+
+
 def get_all_user_answers(user_id, contest_id):
     user_work = get_user_in_contest_work(user_id, contest_id)
+    tasks_points = get_task_points(user_work)
     answers = user_work.answers
     return {
         "user_id": user_work.user_id,
         "work_id": user_work.work_id,
         "contest_id": user_work.contest_id,
-        "user_answers": answers
+        "user_answers": answers,
+        'tasks_points': tasks_points
     }
 
 
@@ -159,6 +173,29 @@ def is_contest_over(contest_id):
         raise OlympiadError("Olympiad is not over yet")
 
 
+def check_contest_type(contest_id):
+    from contest.tasks.models.olympiad import ContestHoldingTypeEnum
+    simple_contest: SimpleContest = db_get_or_raise(SimpleContest, 'contest_id', contest_id)
+    if simple_contest.holding_type == ContestHoldingTypeEnum.OfflineContest:
+        raise OlympiadError("Olympiad is offline type")
+
+
+def check_mark_for_task(mark, task_id):
+    from contest.tasks.models.tasks import Task
+    task: Task = db_get_or_raise(Task, 'task_id', task_id)
+    if mark > task.task_points:
+        raise OlympiadError(f"Incorrect mark, max points is - {task.task_points}")
+
+
+def check_user_multiple_answers(answers, task_id):
+    multiple_task: MultipleChoiceTask = db_get_one_or_none(MultipleChoiceTask, 'task_id', task_id)
+    user_answers = [elem['answer'] for elem in answers]
+    answers = [elem['answer'] for elem in multiple_task.answers]
+    for elem in user_answers:
+        if elem not in answers:
+            raise OlympiadError("Wrong answers for multiple type task")
+
+
 # Other funcs
 
 
@@ -184,6 +221,8 @@ def finish_contest(user_work: Response):
 
 
 def user_answer_post_file(answer_file, filetype, user_id, contest_id, task_id):
+    if not is_task_in_contest(task_id, contest_id):
+        raise NotFound('contest_id, task_id', f'{contest_id}, {task_id}')
     user_work: Response = get_user_in_contest_work(user_id, contest_id)
     user_work.finish_time = datetime.utcnow()
     check_contest_duration(user_work)
@@ -198,6 +237,8 @@ def user_answer_post_file(answer_file, filetype, user_id, contest_id, task_id):
 
 
 def user_answer_post(user_id, contest_id, task_id, values, answer_type):
+    if not is_task_in_contest(task_id, contest_id):
+        raise NotFound('contest_id, task_id', f'{contest_id}, {task_id}')
     user_work: Response = get_user_in_contest_work(user_id, contest_id)
     user_work.finish_time = datetime.utcnow()
     check_contest_duration(user_work)
