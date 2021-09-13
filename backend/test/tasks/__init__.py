@@ -1,4 +1,5 @@
 from .. import *
+from ..user import *  # Fixtures
 
 
 @pytest.fixture

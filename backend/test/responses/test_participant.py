@@ -3,6 +3,7 @@ from . import *
 DEFAULT_INDEX = 0
 ERROR_ID = 1500
 
+
 @pytest.fixture
 def client(client_university):
     client_university.set_prefix('contest/responses/participant')
@@ -379,4 +380,3 @@ def test_time_left_error_participant(client, create_two_tasks):
     from contest.responses.util import get_user_in_contest_work
     user_work = get_user_in_contest_work(user_id, contest_id)
     assert user_work.status.value == 'NotChecked'
-

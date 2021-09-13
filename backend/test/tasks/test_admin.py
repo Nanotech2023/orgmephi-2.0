@@ -8,7 +8,6 @@ def client(client_admin):
     yield client_admin
 
 
-@pytest.fixture
 def test_olympiad_type_remove(client, test_olympiad_types):
     test_type: OlympiadType = test_olympiad_types[0]
     resp = client.post(f'/olympiad_type/{test_type.olympiad_type_id}/remove')
@@ -19,7 +18,6 @@ def test_olympiad_type_remove(client, test_olympiad_types):
     ).scalar()
 
 
-@pytest.fixture
 def test_olympiad_type_create(client):
     resp = client.post('/olympiad_type/create',
                        json={
@@ -29,10 +27,9 @@ def test_olympiad_type_create(client):
 
     olympiad_type: OlympiadType = OlympiadType.query.filter_by(
         olympiad_type_id=resp.json['olympiad_type_id']).one_or_none()
-    assert olympiad_type.id == resp.json['olympiad_type_id']
+    assert olympiad_type.olympiad_type_id == resp.json['olympiad_type_id']
 
 
-@pytest.fixture
 def test_location_remove(client, test_olympiad_locations):
     test_location: OlympiadLocation = test_olympiad_locations[0]
     resp = client.post(f'/location/{test_location.location_id}/remove')
@@ -43,43 +40,40 @@ def test_location_remove(client, test_olympiad_locations):
     ).scalar()
 
 
-@pytest.fixture
 def test_online_location_create(client):
     resp = client.post('/location/create_online',
                        json={
-                           'url': 'Test 0',
+                           'url': 'https://www.example.com',
                        })
+    print(resp.data)
     assert resp.status_code == 200
-
     test_location: OlympiadLocation = OlympiadLocation.query.filter_by(
         location_id=resp.json['location_id']).one_or_none()
-    assert test_location.id == resp.json['location_id']
+    assert test_location.location_id == resp.json['location_id']
 
 
-@pytest.fixture
-def test_location_create_russia(client):
+def test_location_create_russia(client, test_city):
     resp = client.post('/location/create_russia',
                        json={
-                           'city_name': 'Тула',
-                           'region_name': 'Тульская обл.',
+                           'city_name': f'{test_city.name}',
+                           'region_name': f'{test_city.region_name}',
                            'address': 'Test 0',
                        })
+    print(resp.data)
     assert resp.status_code == 200
-
     test_location: OlympiadLocation = OlympiadLocation.query.filter_by(
         location_id=resp.json['location_id']).one_or_none()
-    assert test_location.id == resp.json['location_id']
+    assert test_location.location_id == resp.json['location_id']
 
 
-@pytest.fixture
-def test_location_create_other(client):
+def test_location_create_other(client, test_country_native):
     resp = client.post('/location/create_other',
                        json={
-                           'country_name': 'Россия',
+                           'country_name': f'{test_country_native.name}',
                            'location': 'Test 0',
                        })
+    print(resp.data)
     assert resp.status_code == 200
-
     test_location: OlympiadLocation = OlympiadLocation.query.filter_by(
         location_id=resp.json['location_id']).one_or_none()
-    assert test_location.id == resp.json['location_id']
+    assert test_location.location_id == resp.json['location_id']
