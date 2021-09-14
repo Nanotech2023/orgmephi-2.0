@@ -77,10 +77,10 @@ def test_stage_create(client, test_contests_composite):
     assert stage.stage_id == resp.json['stage_id']
 
 
-def contests_all(client, test_contests_composite, test_stages):
+def test_contests_all(client, test_contests_composite, test_stages, test_simple_contest_in_stage):
     resp = client.get(f'/olympiad/{test_contests_composite[0].contest_id}/stage/{test_stages[0].stage_id}/contest/all')
     assert resp.status_code == 200
-    assert len(test_contests_composite) == len(list(resp.json['olympiad_list']))
+    assert len(test_simple_contest_in_stage) == len(list(resp.json['olympiad_list']))
 
 
 def test_variant_create(client, test_simple_contest):
