@@ -155,6 +155,32 @@ def test_create_thread(client, test_thread_categories, create_user_response):
     assert thr.messages[0].message == 'Test'
 
 
+def test_create_thread_missing_contest(client, test_thread_categories, create_user_response):
+    work = create_user_response['responses'][0]
+    request = {
+        "category": test_thread_categories[0].name,
+        "message": "Test",
+        "related_work": work.work_id,
+        "thread_type": "Contest",
+        "topic": "string"
+    }
+    resp = client.post('/thread', json=request)
+    assert resp.status_code == 400
+
+
+def test_create_thread_missing_work(client, test_thread_categories, create_user_response):
+    work = create_user_response['responses'][0]
+    request = {
+        "category": test_thread_categories[0].name,
+        "message": "Test",
+        "related_contest": work.contest_id,
+        "thread_type": "Appeal",
+        "topic": "string"
+    }
+    resp = client.post('/thread', json=request)
+    assert resp.status_code == 400
+
+
 def test_create_thread_quota(client, test_thread_categories, create_user_response):
     work = create_user_response['responses'][0]
     request = {

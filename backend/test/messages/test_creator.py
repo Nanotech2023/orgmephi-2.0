@@ -32,6 +32,10 @@ def test_get_thread(client, test_threads, test_messages):
 def test_post_message(client, test_user_creator, test_threads, test_messages):
     from messages.models import Thread
     thread = next((v for v in test_threads if not v.resolved))
+    thread.messages[-1].employee_id = None
+    test_app.db.session.commit()
+    update_time = thread.update_time
+    assert not thread.answered
     request = {'message': 'Test'}
     resp = client.post(f'/message/{thread.id}', json=request)
     assert resp.status_code == 200
@@ -41,6 +45,8 @@ def test_post_message(client, test_user_creator, test_threads, test_messages):
     assert resp.json['post_time'] == msg.post_time.isoformat()
     assert resp.json['employee'] == msg.employee_id == test_user_creator.id
     assert resp.json['message'] == msg.message == 'Test'
+    assert thr.answered
+    assert thr.update_time > update_time
 
 
 # noinspection DuplicatedCode
