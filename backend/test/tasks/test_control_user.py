@@ -50,6 +50,19 @@ def test_add_user_to_contest(client, test_variant, test_simple_contest, test_oly
     assert resp.status_code == 200
 
 
+def test_add_user_to_contest_school(client, test_variant, test_simple_contest, test_olympiad_locations,
+                                    test_user_school):
+    resp = client.post(
+        f'/contest/{test_simple_contest[0].contest_id}/add_user',
+        json={
+            'users_id': [f'{test_user_school.id}'],
+            'location_id': f'{test_olympiad_locations[0].location_id}',
+            'show_results_to_user': 'true',
+            'check_condition': 'true'
+        })
+    assert resp.status_code == 409
+
+
 def test_change_user_location(client, test_simple_contest_with_users, test_olympiad_locations,
                               test_user_for_student_contest):
     resp = client.post(
@@ -92,7 +105,8 @@ def test_get_all_users_in_contest(client, test_simple_contest_with_users):
     assert len(test_simple_contest_with_users[0].users.all()) == len(list(resp.json['user_list']))
 
 
-def test_get_user_certificate_in_contest_unfilled(client, test_simple_contest_with_users, test_user_for_student_contest_none):
+def test_get_user_certificate_in_contest_unfilled(client, test_simple_contest_with_users,
+                                                  test_user_for_student_contest_none):
     resp = client.get(
         f'/contest/{test_simple_contest_with_users[0].contest_id}/user/{test_user_for_student_contest_none.id}'
         f'/certificate')
