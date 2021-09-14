@@ -80,8 +80,7 @@ def test_stage_create(client, test_contests_composite):
 def contests_all(client, test_contests_composite, test_stages):
     resp = client.get(f'/olympiad/{test_contests_composite[0].contest_id}/stage/{test_stages[0].stage_id}/contest/all')
     assert resp.status_code == 200
-
-    assert len(test_contests_composite) == len(resp.data)
+    assert len(test_contests_composite) == len(list(resp.json['olympiad_list']))
 
 
 def test_variant_create(client, test_simple_contest):
@@ -191,32 +190,3 @@ def test_task_all(client, test_simple_contest, test_variant):
     assert resp.status_code == 200
     assert len(test_variant[0].tasks) == len(list(resp.json['tasks_list']))
 
-
-"""
-
-@pytest.fixture
-def create_target_class():
-    from contest.tasks.models.reference import TargetClass
-    target_class = TargetClass(target_class='student')
-    test_app.db.session.add(target_class)
-    test_app.db.session.commit()
-    yield [target_class]
-
-
-@pytest.fixture
-def create_user_in_contest(create_variant, test_user_university):
-    from contest.tasks.models.user import UserInContest, UserStatusEnum
-    user_id = test_user_university.id
-    users_in_contests = [UserInContest(user_id=user_id,
-                                       contest_id=create_variant.get('contests')[i].contest_id,
-                                       show_results_to_user=False,
-                                       user_status=UserStatusEnum.Participant,
-                                       variant_id=get_variant_id(create_variant, i),
-                                       location_id=get_location_id(create_variant))
-                         for i in range(8)]
-    test_app.db.session.add_all(users_in_contests)
-    test_app.db.session.commit()
-    create_variant['users'] = users_in_contests
-    yield create_variant
-
-    """

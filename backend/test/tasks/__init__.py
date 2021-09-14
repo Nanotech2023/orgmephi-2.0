@@ -1,5 +1,8 @@
 from datetime import datetime, timedelta
 
+from contest.tasks.models.user import UserInContest, UserStatusEnum
+from user.models import StudentInfo, UserInfo, Location, GenderEnum, Document, UserLimitations, \
+    DocumentTypeEnum, StudentUniversityKnown, LocationRussia
 from ..user import *
 
 
@@ -69,7 +72,8 @@ def test_base_contests(test_olympiad_types):
 def test_base_contests_with_target(test_base_contests, test_target_class):
     for contest in test_base_contests:
         contest.target_classes.append(test_target_class[0])
-        contest.target_classes.append(test_target_class[1])
+        contest.target_classes.append(test_target_class[4])
+    test_app.db.session.commit()
     yield test_base_contests
 
 
@@ -104,10 +108,10 @@ def test_contests_composite(test_base_contests):
 
 
 @pytest.fixture
-def test_simple_contest(test_base_contests):
+def test_simple_contest(test_base_contests_with_target):
     from contest.tasks.models.olympiad import SimpleContest, ContestHoldingTypeEnum
     holding_types = [ContestHoldingTypeEnum.OnLineContest, ContestHoldingTypeEnum.OfflineContest]
-    simple_contests = [SimpleContest(base_contest_id=test_base_contests[i],
+    simple_contests = [SimpleContest(base_contest_id=test_base_contests_with_target[i],
                                      visibility=True, start_date=datetime.utcnow(),
                                      end_date=datetime.utcnow() + timedelta(hours=2),
                                      holding_type=holding_types[i % 2],
@@ -116,8 +120,7 @@ def test_simple_contest(test_base_contests):
                                      end_of_enroll_date=datetime.utcnow() + timedelta(minutes=15))
                        for i in range(8)]
     for i in range(len(simple_contests)):
-        base_contest = test_base_contests[i % len(test_base_contests)]
-        base_contest.child_contests.extend(simple_contests)
+        test_base_contests_with_target[0].child_contests.append(simple_contests[i])
     test_app.db.session.add_all(simple_contests)
     test_app.db.session.commit()
     yield simple_contests
@@ -167,8 +170,7 @@ def test_simple_contest_in_stage(test_base_contests, test_stages):
 @pytest.fixture
 def test_variant(test_simple_contest):
     from contest.tasks.models.contest import Variant
-    variants = [Variant(contest_id=test_simple_contest[i].contest_id,
-                        variant_number=i,
+    variants = [Variant(variant_number=i,
                         variant_description='description')
                 for i in range(8)]
     for i in range(len(variants)):
@@ -224,3 +226,53 @@ def create_multiple_task(test_variant):
         test_variant[0].tasks.append(multiple_tasks[i])
     test_app.db.session.commit()
     yield multiple_tasks
+
+
+@pytest.fixture
+def test_user_for_student_contest(test_city, test_university, test_user_university):
+    student_info = StudentInfo(admission_year=datetime.utcnow() + timedelta(hours=40))
+    student_info.university = StudentUniversityKnown(university=test_university)
+    location = Location()
+    user_info = UserInfo(
+        location_id=location.id,
+        email="11@gmail.com",
+        phone="89999999999",
+        first_name="test",
+        middle_name="test",
+        second_name="test",
+        date_of_birth=datetime.utcnow(),
+        place_of_birth="test",
+        gender=GenderEnum.male
+    )
+    user_info.dwelling = LocationRussia(city=test_city)
+    user_info.document = Document(
+        document_type=DocumentTypeEnum.rf_passport,
+        series="444",
+        number="444",
+        issuer="444",
+        issue_date=datetime.utcnow() + timedelta(hours=40),
+        rf_code="4444444")
+    user_info.limitations = UserLimitations(hearing=False,
+                                            sight=False,
+                                            movement=False)
+    test_app.db.session.add(student_info)
+    test_app.db.session.add(user_info)
+    test_user_university.student_info = student_info
+    test_user_university.user_info = user_info
+    test_app.db.session.commit()
+    yield test_user_university
+
+
+@pytest.fixture
+def test_simple_contest_with_users(test_simple_contest, test_variant, test_olympiad_locations,
+                                   test_user_for_student_contest):
+    user_id = test_user_for_student_contest.id
+    user_in_contest = UserInContest(user_id=user_id,
+                                    show_results_to_user=True,
+                                    user_status=UserStatusEnum.Participant.value,
+                                    variant_id=test_variant[0].variant_id,
+                                    location_id=test_olympiad_locations[0].location_id)
+    test_simple_contest[0].users.append(user_in_contest)
+    test_app.db.session.add(user_in_contest)
+    test_app.db.session.commit()
+    yield test_simple_contest
