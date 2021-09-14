@@ -1,5 +1,5 @@
 import { Component, OnInit, ViewChild } from '@angular/core'
-import { SchoolRegistrationRequestUser, User } from '@/auth/api/models'
+import { SchoolRegistrationRequestUser, User } from '@api/users/models'
 import { fixedHeight } from '@/shared/consts'
 import { AgGridAngular } from 'ag-grid-angular'
 import { ManageUsersStore } from '@/manage-users/manage-users.store'

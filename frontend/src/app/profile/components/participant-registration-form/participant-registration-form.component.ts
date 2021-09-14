@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core'
-import { AuthService } from '@/auth/api/auth.service'
-import { UserInfo, UserInfoRestrictedInput } from '@/auth/api/models'
+import { UsersService } from '@api/users/users.service'
+import { UserInfo, UserInfoRestrictedInput } from '@api/users/models'
 import { Store } from '@ngrx/store'
 import { AuthSelectors, AuthState } from '@/auth/store'
 import { Observable } from 'rxjs'
@@ -19,7 +19,7 @@ export class ParticipantRegistrationFormComponent implements OnInit
     totalStages = 2
     private x: Observable<UserInfo | null>
 
-    constructor( private authService: AuthService, private readonly store: Store<AuthState.State> )
+    constructor( private authService: UsersService, private readonly store: Store<AuthState.State> )
     {
         this.currentStage = 0
     }

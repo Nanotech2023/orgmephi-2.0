@@ -2,7 +2,7 @@ import { Component, HostListener, OnInit } from '@angular/core'
 import { Store } from '@ngrx/store'
 import { AuthActions, AuthSelectors, AuthState } from '@/auth/store'
 import { Observable } from 'rxjs'
-import { LoginRequestUser } from '@/auth/api/models'
+import { LoginRequestUser } from '@api/users/models'
 import { fixedHeight } from '@/shared/consts'
 
 

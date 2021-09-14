@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core'
 import { select, Store } from '@ngrx/store'
 import { AuthSelectors, AuthState } from '@/auth/store'
 import { Observable } from 'rxjs'
-import { User, UserInfo } from '@/auth/api/models'
+import { User, UserInfo } from '@api/users/models'
 
 
 @Component( {

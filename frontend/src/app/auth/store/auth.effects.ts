@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core'
 import { Actions, createEffect, ofType } from '@ngrx/effects'
-import { AuthService } from '@/auth/api/auth.service'
+import { UsersService } from '@api/users/users.service'
 import {
     getUserInfoRequest,
     getUserInfoSuccess, getUserSuccess,
@@ -12,14 +12,14 @@ import {
 import { catchError, concatMap, mergeMap, switchMap } from 'rxjs/operators'
 import { of } from 'rxjs'
 import { Router } from '@angular/router'
-import { CSRFPairUser, User, UserInfo } from '@/auth/api/models'
+import { CSRFPairUser, User, UserInfo } from '@api/users/models'
 
 
 // noinspection JSUnusedGlobalSymbols
 @Injectable()
 export class AuthEffects
 {
-    constructor( private actions$: Actions, private authService: AuthService, private router: Router )
+    constructor( private actions$: Actions, private authService: UsersService, private router: Router )
     {
     }
 

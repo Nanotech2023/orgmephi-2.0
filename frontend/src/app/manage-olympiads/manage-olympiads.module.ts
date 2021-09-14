@@ -3,9 +3,10 @@ import { ManageOlympiadsComponent } from '@/manage-olympiads/containers/manage-o
 import { SharedModule } from '@/shared/shared.module'
 import { AgGridModule } from 'ag-grid-angular'
 import { ManageOlympiadsRoutingModule } from '@/manage-olympiads/manage-olympiads.routing.module'
+import { AddContestModalComponent } from '@/manage-olympiads/components/add-olympiad-modal/add-contest-modal/add-contest-modal.component'
 
 
-const COMPONENTS = [ ManageOlympiadsComponent ]
+const COMPONENTS = [ ManageOlympiadsComponent, AddContestModalComponent ]
 
 
 @NgModule( {

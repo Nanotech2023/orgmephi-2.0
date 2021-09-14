@@ -1,9 +1,9 @@
 import { Component, OnInit } from '@angular/core'
 import { ManageOlympiadsStore } from '@/manage-olympiads/manage-olympiads.store'
-import { ContestsInStageContestsList } from '@/manage-olympiads/api/models'
 import { Observable } from 'rxjs'
 import { fixedHeight } from '@/shared/consts'
-import { User } from '@/auth/api/models'
+import { User } from '@api/users/models'
+import { Contest } from '@api/tasks/model'
 
 
 @Component( {
@@ -27,7 +27,7 @@ export class ManageOlympiadsComponent implements OnInit
         { field: 'visibility', sortable: true, filter: true, headerName: 'Видимость' }
     ]
 
-    olympiads$: Observable<ContestsInStageContestsList[]> = this.store.olympiads$
+    olympiads$: Observable<Contest[]> = this.store.contests
 
 
     constructor( private store: ManageOlympiadsStore ) {}

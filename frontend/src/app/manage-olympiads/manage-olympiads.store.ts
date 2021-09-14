@@ -1,15 +1,15 @@
 import { Injectable } from '@angular/core'
 import { ComponentStore, tapResponse } from '@ngrx/component-store'
-import { ContestsInStage, ContestsInStageContestsList } from '@/manage-olympiads/api/models'
 import { CallState, getError, LoadingState } from '@/shared/callState'
 import { EMPTY, Observable } from 'rxjs'
-import { catchError } from 'rxjs/operators'
-import { OlympiadsService } from '@/manage-olympiads/api/olympiads.service'
+import { catchError, concatMap } from 'rxjs/operators'
+import { AllOlympiadsResponseTaskUnauthorized, Contest, CreateBaseOlympiadRequestTaskCreator } from '@api/tasks/model'
+import { TasksService } from '@api/tasks/tasks.service'
 
 
 export interface ManageOlympiadsState
 {
-    olympiads: Array<ContestsInStageContestsList>
+    contests: Array<Contest>
     callState: CallState
 }
 
@@ -17,12 +17,12 @@ export interface ManageOlympiadsState
 @Injectable()
 export class ManageOlympiadsStore extends ComponentStore<ManageOlympiadsState>
 {
-    constructor( private olympiadsService: OlympiadsService )
+    constructor( private olympiadsService: TasksService )
     {
-        super( { olympiads: [], callState: LoadingState.INIT } )
+        super( { contests: [], callState: LoadingState.INIT } )
     }
 
-    readonly olympiads$: Observable<ContestsInStageContestsList[]> = this.select( state => state.olympiads )
+    readonly contests: Observable<Contest[]> = this.select( state => state.contests )
     private readonly loading$: Observable<boolean> = this.select( state => state.callState === LoadingState.LOADING )
     private readonly error$: Observable<string | null> = this.select( state => getError( state.callState ) )
 
@@ -46,22 +46,22 @@ export class ManageOlympiadsStore extends ComponentStore<ManageOlympiadsState>
             callState: LoadingState.LOADED
         } ) )
 
-    readonly updateUsers = this.updater( ( state: ManageOlympiadsState, olympiad: ContestsInStageContestsList ) =>
+    readonly updateContests = this.updater( ( state: ManageOlympiadsState, contests: AllOlympiadsResponseTaskUnauthorized ) =>
         ( {
             ...state,
             error: "",
-            olympiads: [ ...state.olympiads, olympiad ]
+            contests: [ ...state.contests, ...contests.contest_list ]
         } ) )
 
     // EFFECTS
     readonly reload = this.effect( () =>
     {
         this.setLoading()
-        return this.olympiadsService.olympiadAllGet().pipe(
+        return this.olympiadsService.tasksParticipantOlympiadAllGet().pipe(
             tapResponse(
-                ( response: ContestsInStage ) =>
+                ( response: AllOlympiadsResponseTaskUnauthorized ) =>
                     this.setState( {
-                        olympiads: response.contests_list ?? [],
+                        contests: response.contest_list ?? [],
                         callState: LoadingState.LOADED
                     } ),
                 ( error: string ) => this.updateError( error )
@@ -71,23 +71,22 @@ export class ManageOlympiadsStore extends ComponentStore<ManageOlympiadsState>
     } )
 
 
-    // readonly add = this.effect( ( xxx$: Observable<XXX> ) =>
-    //     xxx$.pipe(
-    //         concatMap( ( xxx: XXX ) =>
-    //         {
-    //             this.setLoading()
-    //             // TODO wait for new API
-    //             return this.olympiadsService.olympiadCreatePost().pipe(
-    //                 tapResponse(
-    //                     typeUserInfo =>
-    //                     {
-    //                         this.setLoaded()
-    //                         this.updateUsers()
-    //                     },
-    //                     ( error: string ) => this.updateError( error )
-    //                 ),
-    //                 catchError( () => EMPTY )
-    //             )
-    //         } )
-    //     ) )
+    readonly add = this.effect( ( olympiadRequestTaskCreatorObservable: Observable<CreateBaseOlympiadRequestTaskCreator> ) =>
+        olympiadRequestTaskCreatorObservable.pipe(
+            concatMap( ( xxx: CreateBaseOlympiadRequestTaskCreator ) =>
+            {
+                this.setLoading()
+                return this.olympiadsService.tasksCreatorBaseOlympiadCreatePost(xxx).pipe(
+                    tapResponse(
+                        () =>
+                        {
+                            this.setLoaded()
+                            this.reload()
+                        },
+                        ( error: string ) => this.updateError( error )
+                    ),
+                    catchError( () => EMPTY )
+                )
+            } )
+        ) )
 }

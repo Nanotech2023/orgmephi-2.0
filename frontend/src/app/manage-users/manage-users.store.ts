@@ -1,9 +1,9 @@
 import { Injectable } from '@angular/core'
 import { ComponentStore, tapResponse } from '@ngrx/component-store'
-import { SchoolRegistrationRequestUser, User, UserFull, UserFullListResponseUser } from '@/auth/api/models'
+import { SchoolRegistrationRequestUser, User, UserFull, UserFullListResponseUser } from '@api/users/models'
 import { EMPTY, Observable } from 'rxjs'
 import { catchError, concatMap } from 'rxjs/operators'
-import { AuthService } from '@/auth/api/auth.service'
+import { UsersService } from '@api/users/users.service'
 import { CallState, getError, LoadingState } from '@/shared/callState'
 
 
@@ -17,7 +17,7 @@ export interface ManageUsersState
 @Injectable()
 export class ManageUsersStore extends ComponentStore<ManageUsersState>
 {
-    constructor( private authService: AuthService )
+    constructor( private authService: UsersService )
     {
         super( { users: [], callState: LoadingState.INIT } )
     }

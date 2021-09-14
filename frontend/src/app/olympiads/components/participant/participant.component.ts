@@ -3,7 +3,7 @@ import { footerHeight } from '@/shared/consts'
 import { Observable } from 'rxjs'
 import { animate, query, stagger, state, style, transition, trigger } from '@angular/animations'
 import { ManageOlympiadsStore } from '@/manage-olympiads/manage-olympiads.store'
-import { ContestsInStageContestsList } from '@/manage-olympiads/api/models'
+import { Contest } from '@api/tasks/model'
 
 
 export const fadeAnimation = trigger( 'fadeAnimation', [
@@ -49,12 +49,12 @@ export const rotatedState = trigger( 'rotatedState', [
 export class ParticipantComponent implements OnInit
 {
     showOlympiadsList: boolean
-    olympiads$: Observable<ContestsInStageContestsList[]>
+    contests$: Observable<Contest[]>
 
     constructor( private store: ManageOlympiadsStore )
     {
         this.showOlympiadsList = false
-        this.olympiads$ = this.store.olympiads$
+        this.contests$ = this.store.contests
     }
 
     ngOnInit(): void

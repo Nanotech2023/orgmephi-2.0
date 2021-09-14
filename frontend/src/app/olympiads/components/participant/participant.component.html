@@ -29,10 +29,10 @@
         </div>
     </div>
     <div class="row" id="olympiads-list" *ngIf="showOlympiadsList">
-        <ul *ngIf="olympiads$ | async as olympiads" [@listAnimation]="olympiads.length">
-            <li *ngFor="let olympiad of olympiads">
-                <p>{{ olympiad.description }}</p>
-                <p>{{ olympiad.start_time }} - {{ olympiad.end_time }}</p>
+        <ul *ngIf="contests$ | async as contests" [@listAnimation]="contests.length">
+            <li *ngFor="let contest of contests">
+                <p>{{ contest.contest_id }}</p>
+                <p>{{ contest.holding_type }}</p>
             </li>
         </ul>
     </div>
