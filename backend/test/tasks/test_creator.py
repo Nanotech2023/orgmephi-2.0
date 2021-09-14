@@ -59,7 +59,6 @@ def test_olympiad_create_simple(client, test_base_contests, test_stages):
                            'visibility': 'false',
                            'holding_type': f'{ContestHoldingTypeEnum.OfflineContest.value}',
                        })
-    print(resp.data)
     assert resp.status_code == 200
 
 
@@ -84,7 +83,6 @@ def test_stage_create(client, test_contests_composite):
                            'this_stage_condition': 'Test 0',
                            'condition': f'{StageConditionEnum.And.value}',
                        })
-    print(resp.data)
     assert resp.status_code == 200
 
     stage: Stage = Stage.query.filter_by(
@@ -103,7 +101,6 @@ def test_variant_create(client, test_simple_contest):
                        json={
                            'variant_description': 'Test',
                        })
-    print(resp.data)
     assert resp.status_code == 200
 
     variant: Variant = Variant.query.filter_by(
@@ -132,7 +129,6 @@ def test_task_create_plain(client, test_simple_contest, test_variant):
             'show_answer_after_contest': 'false',
             'task_points': '10',
         })
-    print(resp.data)
     assert resp.status_code == 200
 
     task: PlainTask = PlainTask.query.filter_by(
@@ -150,7 +146,6 @@ def test_task_create_range(client, test_simple_contest, test_variant):
             'show_answer_after_contest': 'false',
             'task_points': '10',
         })
-    print(resp.data)
     assert resp.status_code == 200
 
     task: RangeTask = RangeTask.query.filter_by(
@@ -172,7 +167,6 @@ def test_task_create_multiple(client, test_simple_contest, test_variant):
             'show_answer_after_contest': 'false',
             'task_points': '10',
         })
-    print(resp.data)
     assert resp.status_code == 200
 
     task: MultipleChoiceTask = MultipleChoiceTask.query.filter_by(
@@ -194,7 +188,6 @@ def test_task_image(client, test_simple_contest, test_variant, create_plain_task
         f'/contest/{test_simple_contest[0].contest_id}/variant/{test_variant[0].variant_id}'
         f'/tasks/{create_plain_task[0].task_id}/image')
 
-    print(resp.data)
     assert resp.status_code == 409
 
     create_plain_task[0].image_of_task = b'Test'
@@ -202,7 +195,6 @@ def test_task_image(client, test_simple_contest, test_variant, create_plain_task
         f'/contest/{test_simple_contest[0].contest_id}/variant/{test_variant[0].variant_id}'
         f'/tasks/{create_plain_task[0].task_id}/image')
 
-    print(resp.data)
     assert resp.status_code == 200
 
 

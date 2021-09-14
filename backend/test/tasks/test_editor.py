@@ -116,7 +116,6 @@ def test_stage_patch(client, test_contests_composite, test_stages):
                             'this_stage_condition': 'Test 1',
                             'condition': f'{StageConditionEnum.And.value}',
                         })
-    print(resp.data)
     assert resp.status_code == 200
 
     stage: Stage = Stage.query.filter_by(

@@ -37,7 +37,6 @@ def test_enroll_in_contest(client, test_variant, test_simple_contest, test_user_
                        json={
                            'location_id': test_olympiad_locations[0].location_id
                        })
-    print(resp.data)
     assert resp.status_code == 400
 
 
@@ -48,7 +47,6 @@ def test_enroll_in_contest_ended(client, test_variant, test_simple_contest, test
                        json={
                            'location_id': test_olympiad_locations[0].location_id
                        })
-    print(resp.data)
     assert resp.status_code == 409
 
 
@@ -134,7 +132,6 @@ def test_get_user_certificate_self_error(client, test_simple_contest_with_users_
     test_simple_contest_with_users_ended[0].result_publication_date = datetime.utcnow() + timedelta(hours=150)
     resp = client.get(
         f'/contest/{test_simple_contest_with_users_ended[0].contest_id}/certificate/self')
-    print(resp.data)
     assert resp.status_code == 400
 
 
@@ -142,7 +139,6 @@ def test_get_user_certificate_self(client, test_simple_contest_with_users, test_
     test_simple_contest_with_users[0].result_publication_date = datetime.utcnow() - timedelta(hours=150)
     resp = client.get(
         f'/contest/{test_simple_contest_with_users[0].contest_id}/certificate/self')
-    print(resp.data)
     assert resp.status_code == 200
 
 
@@ -152,7 +148,6 @@ def test_get_all_contests_in_stage_self(client, test_contests_composite,
                                         test_stages, test_composite_contest_with_users):
     resp = client.get(f'/olympiad/{test_contests_composite[0].contest_id}'
                       f'/stage/{test_stages[0].stage_id}/contest/all')
-    print(resp.data)
     assert resp.status_code == 200
     assert 1 == len(list(resp.json['contest_list']))
 
@@ -161,7 +156,6 @@ def test_get_contest_in_stage_self(client, test_composite_contest_with_users, te
                                    test_contests_composite, test_stages):
     resp = client.get(f'/olympiad/{test_contests_composite[0].contest_id}'
                       f'/stage/{test_stages[0].stage_id}/contest/{test_simple_contest_in_stage[0].contest_id}')
-    print(resp.data)
     assert resp.status_code == 200
     assert test_simple_contest_in_stage[0].contest_id == resp.json['contest_id']
 
@@ -178,6 +172,5 @@ def test_olympiads_all(client, test_simple_contest, test_contests_composite):
 def test_get_contest_self(client, test_base_contests, test_simple_contest, test_simple_contest_with_users):
     resp = client.get(
         f'/olympiad/{test_simple_contest[0].contest_id}')
-    print(resp.data)
     assert resp.status_code == 200
     assert test_simple_contest[0].contest_id == resp.json['contest_id']
