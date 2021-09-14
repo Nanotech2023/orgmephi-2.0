@@ -1,0 +1,7 @@
+[run]
+omit = 
+    */app.py
+    example/*
+    */*config.py
+    dump_api.py
+    venv/*
