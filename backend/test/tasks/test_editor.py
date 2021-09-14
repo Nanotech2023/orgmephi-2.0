@@ -152,9 +152,9 @@ def test_stage_patch(client, test_contests_composite, test_stages):
 
 
 # noinspection DuplicatedCode
-def test_contest_remove(client, test_contests_composite, test_stages, test_simple_contest_in_stage):
+def test_contest_remove(client, test_contests_composite, test_stages, test_simple_contest_in_stage_1):
     from contest.tasks.models import SimpleContest
-    test_contest: SimpleContest = test_simple_contest_in_stage[1]
+    test_contest: SimpleContest = test_simple_contest_in_stage_1[1]
     resp = client.post(
         f'/olympiad/{test_contests_composite[0].contest_id}/stage/{test_stages[0].stage_id}'
         f'/contest/{test_contest.contest_id}/remove')
@@ -164,14 +164,25 @@ def test_contest_remove(client, test_contests_composite, test_stages, test_simpl
         SimpleContest.query.filter_by(contest_id=f'{test_contest.contest_id}').exists()
     ).scalar()
 
+    resp = client.post(
+        f'/olympiad/{test_contests_composite[1].contest_id}/stage/{test_stages[0].stage_id}'
+        f'/contest/{test_contest.contest_id}/remove')
+    assert resp.status_code == 409
+
+    resp = client.post(
+        f'/olympiad/{test_contests_composite[0].contest_id}/stage/{test_stages[0].stage_id}'
+        f'/contest/{test_simple_contest_in_stage_1[2].contest_id}/remove')
+    assert resp.status_code == 409
+
 
 # noinspection DuplicatedCode
-def test_contest_add_previous(client, test_contests_composite, test_stages, test_simple_contest_in_stage):
+def test_contest_add_previous(client, test_contests_composite, test_stages, test_simple_contest_in_stage_1):
+    from contest.tasks.models import UserStatusEnum
     resp = client.patch(
         f'/olympiad/{test_contests_composite[0].contest_id}/stage/{test_stages[0].stage_id}'
-        f'/contest/{test_simple_contest_in_stage[1].contest_id}/add_previous',
+        f'/contest/{test_simple_contest_in_stage_1[1].contest_id}/add_previous',
         json={
-            'previous_contest_id': f'{test_simple_contest_in_stage[0].contest_id}',
+            'previous_contest_id': f'{test_simple_contest_in_stage_1[0].contest_id}',
             'previous_participation_condition': f'{UserStatusEnum.Participant.value}',
         })
     assert resp.status_code == 200
