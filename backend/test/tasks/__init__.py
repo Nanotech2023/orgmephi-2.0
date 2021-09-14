@@ -1,6 +1,19 @@
 from datetime import datetime, timedelta
 
-from ..user import *  # Fixtures
+from ..user import *
+
+
+@pytest.fixture
+def test_target_class():
+    from contest.tasks.models.reference import TargetClass
+    target_classes = [TargetClass(target_class='8'),
+                      TargetClass(target_class='9'),
+                      TargetClass(target_class='10'),
+                      TargetClass(target_class='11'),
+                      TargetClass(target_class='student')]
+    test_app.db.session.add_all(target_classes)
+    test_app.db.session.commit()
+    yield target_classes
 
 
 @pytest.fixture
@@ -38,18 +51,26 @@ def test_base_contests(test_olympiad_types):
     from contest.tasks.models import BaseContest, OlympiadSubjectEnum
     contests = [BaseContest(name=f'Test {i}', rules=f'Test{i}', description=f'Test {i}',
                             subject=OlympiadSubjectEnum.Math,
-                            winner_1_condition=(i % 10),
-                            winner_2_condition=(i % 10),
-                            winner_3_condition=(i % 10),
-                            diploma_1_condition=(i % 10),
-                            diploma_2_condition=(i % 10),
-                            diploma_3_condition=(i % 10)) for i in range(8)]
+                            winner_1_condition=0.95,
+                            winner_2_condition=0.9,
+                            winner_3_condition=0.8,
+                            diploma_1_condition=0.7,
+                            diploma_2_condition=0.6,
+                            diploma_3_condition=0.5) for i in range(8)]
     for i in range(len(contests)):
         olympiad_type = test_olympiad_types[i % len(test_olympiad_types)]
         olympiad_type.contests.extend(contests)
     test_app.db.session.add_all(contests)
     test_app.db.session.commit()
     yield contests
+
+
+@pytest.fixture
+def test_base_contests_with_target(test_base_contests, test_target_class):
+    for contest in test_base_contests:
+        contest.target_classes.append(test_target_class[0])
+        contest.target_classes.append(test_target_class[1])
+    yield test_base_contests
 
 
 @pytest.fixture
@@ -76,8 +97,7 @@ def test_contests_composite(test_base_contests):
                          )
         for _ in range(8)]
     for i in range(len(contests)):
-        base_contest = test_base_contests[i % len(test_base_contests)]
-        base_contest.child_contests.extend(contests)
+        test_base_contests[0].child_contests.append(contests[i])
     test_app.db.session.add_all(contests)
     test_app.db.session.commit()
     yield contests
@@ -104,6 +124,14 @@ def test_simple_contest(test_base_contests):
 
 
 @pytest.fixture
+def test_simple_contest_with_location(test_simple_contest, test_olympiad_locations):
+    for contest in test_simple_contest:
+        contest.locations.append(test_olympiad_locations[0])
+        contest.locations.append(test_olympiad_locations[1])
+    yield test_simple_contest
+
+
+@pytest.fixture
 def test_stages(test_contests_composite, test_contests):
     from contest.tasks.models import Stage, StageConditionEnum
 
@@ -111,10 +139,29 @@ def test_stages(test_contests_composite, test_contests):
                     condition=StageConditionEnum.Or, this_stage_condition='Test')
               for i in range(8)]
     for i in range(len(stages)):
-        test_contests_composite.stages.append(stages[i])
+        test_contests_composite[0].stages.append(stages[i])
     test_app.db.session.add_all(stages)
     test_app.db.session.commit()
     yield stages
+
+
+@pytest.fixture
+def test_simple_contest_in_stage(test_base_contests, test_stages):
+    from contest.tasks.models.olympiad import SimpleContest, ContestHoldingTypeEnum
+    holding_types = [ContestHoldingTypeEnum.OnLineContest, ContestHoldingTypeEnum.OfflineContest]
+    simple_contests = [SimpleContest(visibility=True,
+                                     start_date=datetime.utcnow(),
+                                     end_date=datetime.utcnow() + timedelta(hours=4),
+                                     holding_type=holding_types[i % 2],
+                                     contest_duration=timedelta(minutes=30),
+                                     result_publication_date=datetime.utcnow() + timedelta(hours=6),
+                                     end_of_enroll_date=datetime.utcnow() + timedelta(minutes=15))
+                       for i in range(2)]
+    for i in range(len(simple_contests)):
+        test_stages[0].contests.append(simple_contests[i])
+    test_app.db.session.add_all(simple_contests)
+    test_app.db.session.commit()
+    yield simple_contests
 
 
 @pytest.fixture
@@ -136,7 +183,7 @@ def create_plain_task(test_variant):
     from contest.tasks.models.tasks import PlainTask
     plain_tasks = [PlainTask(num_of_task=i,
                              image_of_task=None,
-                             show_answer_after_contest=None,
+                             show_answer_after_contest=True,
                              task_points=10 + i,
                              recommended_answer='answer')
                    for i in range(8)]
@@ -145,3 +192,35 @@ def create_plain_task(test_variant):
         test_variant[0].tasks.append(plain_tasks[i])
     test_app.db.session.commit()
     yield plain_tasks
+
+
+@pytest.fixture
+def create_range_task(test_variant):
+    from contest.tasks.models.tasks import RangeTask
+    range_tasks = [RangeTask(num_of_task=i,
+                             image_of_task=None,
+                             start_value=0.1,
+                             end_value=0.5,
+                             task_points=10 + i,
+                             show_answer_after_contest=True, )
+                   for i in range(8)]
+    test_app.db.session.add_all(range_tasks)
+    for i in range(8):
+        test_variant[0].tasks.append(range_tasks[i])
+    test_app.db.session.commit()
+    yield range_tasks
+
+
+@pytest.fixture
+def create_multiple_task(test_variant):
+    from contest.tasks.models.tasks import MultipleChoiceTask
+    multiple_tasks = [MultipleChoiceTask(num_of_task=i,
+                                         image_of_task=None,
+                                         task_points=10 + i,
+                                         show_answer_after_contest=True, )
+                      for i in range(8)]
+    test_app.db.session.add_all(multiple_tasks)
+    for i in range(8):
+        test_variant[0].tasks.append(multiple_tasks[i])
+    test_app.db.session.commit()
+    yield multiple_tasks
