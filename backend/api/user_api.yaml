@@ -727,29 +727,6 @@ components:
           readOnly: true
           type: integer
       type: object
-    UserInfoRestricted:
-      properties:
-        document:
-          $ref: '#/components/schemas/Document'
-        dwelling:
-          $ref: '#/components/schemas/Location'
-        gender:
-          enum:
-          - Male
-          - Female
-          type: string
-        limitations:
-          $ref: '#/components/schemas/UserLimitations'
-        phone:
-          example: 8 (800) 555 35 35
-          type: string
-        place_of_birth:
-          maxLength: 256
-          type: string
-        user_id:
-          readOnly: true
-          type: integer
-      type: object
     UserLimitations:
       properties:
         hearing:
@@ -1099,7 +1076,9 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/UserInfoRestricted'
+              $ref: '#/components/schemas/UserInfo'
+        description: Will not set 'email', 'first_name', 'middle_name', 'second_name'
+          and 'date_of_birth'
         required: true
       responses:
         '200':

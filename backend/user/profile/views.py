@@ -10,7 +10,7 @@ from user.model_schemas.personal import UserInfoSchema
 from user.model_schemas.school import SchoolInfoSchema
 from user.model_schemas.university import StudentInfoSchema
 from user.models import User, UserInfo, StudentInfo, SchoolInfo, UserTypeEnum
-from .schemas import SelfPasswordRequestUserSchema, SelfGroupsResponseUserSchema, UserInfoRestrictedSchema
+from .schemas import SelfPasswordRequestUserSchema, SelfGroupsResponseUserSchema
 
 db = get_current_db()
 module = get_current_module()
@@ -100,10 +100,11 @@ def set_user_info_self():
         - JWTAccessToken: [ ]
         - CSRFAccessToken: [ ]
       requestBody:
+        description: Will not set 'email', 'first_name', 'middle_name', 'second_name' and 'date_of_birth'
         required: true
         content:
           application/json:
-            schema: UserInfoRestrictedSchema
+            schema: UserInfoSchema
       responses:
         '200':
           description: OK
@@ -115,8 +116,8 @@ def set_user_info_self():
     user = db_get_or_raise(User, "id", jwt_get_id())
     if user.user_info is None:
         user.user_info = UserInfo()
-    UserInfoRestrictedSchema(load_instance=True).load(request.json, instance=user.user_info, session=db.session,
-                                                      partial=False, unknown=EXCLUDE)
+    UserInfoSchema(load_instance=True, exclude=['email', 'first_name', 'middle_name', 'second_name', 'date_of_birth'])\
+        .load(request.json, instance=user.user_info, session=db.session, partial=False, unknown=EXCLUDE)
     db.session.commit()
     return {}, 200
 
