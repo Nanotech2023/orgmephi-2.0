@@ -1,4 +1,3 @@
-from contest.tasks.models import OlympiadType, OlympiadLocation
 from . import *
 
 
@@ -9,6 +8,7 @@ def client(client_admin):
 
 
 def test_olympiad_type_remove(client, test_olympiad_types):
+    from contest.tasks.models import OlympiadType
     test_type: OlympiadType = test_olympiad_types[0]
     resp = client.post(f'/olympiad_type/{test_type.olympiad_type_id}/remove')
     assert resp.status_code == 200
@@ -19,6 +19,7 @@ def test_olympiad_type_remove(client, test_olympiad_types):
 
 
 def test_olympiad_type_create(client):
+    from contest.tasks.models import OlympiadType
     resp = client.post('/olympiad_type/create',
                        json={
                            'olympiad_type': 'Test 0',
@@ -31,6 +32,7 @@ def test_olympiad_type_create(client):
 
 
 def test_location_remove(client, test_olympiad_locations):
+    from contest.tasks.models import OlympiadLocation
     test_location: OlympiadLocation = test_olympiad_locations[0]
     resp = client.post(f'/location/{test_location.location_id}/remove')
     assert resp.status_code == 200
@@ -41,6 +43,7 @@ def test_location_remove(client, test_olympiad_locations):
 
 
 def test_online_location_create(client):
+    from contest.tasks.models import OlympiadLocation
     resp = client.post('/location/create_online',
                        json={
                            'url': 'https://www.example.com',
@@ -52,6 +55,7 @@ def test_online_location_create(client):
 
 
 def test_location_create_russia(client, test_city):
+    from contest.tasks.models import OlympiadLocation
     resp = client.post('/location/create_russia',
                        json={
                            'city_name': f'{test_city.name}',
@@ -65,6 +69,7 @@ def test_location_create_russia(client, test_city):
 
 
 def test_location_create_other(client, test_country_native):
+    from contest.tasks.models import OlympiadLocation
     resp = client.post('/location/create_other',
                        json={
                            'country_name': f'{test_country_native.name}',

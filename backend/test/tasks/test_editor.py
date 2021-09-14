@@ -1,6 +1,3 @@
-from contest.tasks.models import BaseContest, SimpleContest, StageConditionEnum, \
-    ContestHoldingTypeEnum, Stage, Variant, PlainTask, RangeTask, MultipleChoiceTask, Contest, Task, CompositeContest, \
-    OlympiadSubjectEnum
 from . import *
 
 
@@ -20,6 +17,7 @@ def test_base_olympiad_upload(client, test_base_contests):
 
 
 def test_base_olympiad_remove(client, test_base_contests):
+    from contest.tasks.models import BaseContest
     test_base_contests: BaseContest = test_base_contests[1]
     resp = client.post(f'/base_olympiad/{test_base_contests.base_contest_id}/remove')
     assert resp.status_code == 200
@@ -30,6 +28,7 @@ def test_base_olympiad_remove(client, test_base_contests):
 
 
 def test_base_olympiad_patch(client, test_base_contests, test_olympiad_types):
+    from contest.tasks.models import BaseContest, OlympiadSubjectEnum
     resp = client.patch(f'/base_olympiad/{test_base_contests[0].base_contest_id}',
                         json={
                             'name': 'Test 0',
@@ -63,6 +62,7 @@ def test_base_olympiad_patch(client, test_base_contests, test_olympiad_types):
 
 # noinspection DuplicatedCode
 def test_olympiad_remove(client, test_base_contests, test_contests):
+    from contest.tasks.models import Contest
     test_contests: Contest = test_contests[1]
     resp = client.post(
         f'/base_olympiad/{test_base_contests[0].base_contest_id}/olympiad/{test_contests.contest_id}/remove')
@@ -75,6 +75,7 @@ def test_olympiad_remove(client, test_base_contests, test_contests):
 
 # noinspection DuplicatedCode
 def test_olympiad_patch(client, test_base_contests, test_simple_contest, test_contests_composite):
+    from contest.tasks.models import SimpleContest, ContestHoldingTypeEnum, CompositeContest
     new_start_date = datetime.utcnow()
     new_end_date = datetime.utcnow() + timedelta(hours=4)
     new_end_of_enroll_date = datetime.utcnow() + timedelta(hours=1)
@@ -117,6 +118,7 @@ def test_olympiad_patch(client, test_base_contests, test_simple_contest, test_co
 
 # noinspection DuplicatedCode
 def test_stage_remove(client, test_contests_composite, test_stages):
+    from contest.tasks.models import Stage
     test_stages: Stage = test_stages[1]
     resp = client.post(f'/olympiad/{test_contests_composite[0].contest_id}/stage/{test_stages.stage_id}/remove')
     assert resp.status_code == 200
@@ -127,6 +129,8 @@ def test_stage_remove(client, test_contests_composite, test_stages):
 
 
 def test_stage_patch(client, test_contests_composite, test_stages):
+    from contest.tasks.models import StageConditionEnum, \
+        Stage
     resp = client.patch(f'/olympiad/{test_contests_composite[0].contest_id}/stage/{test_stages[0].stage_id}',
                         json={
                             'stage_name': 'Test name2',
@@ -149,6 +153,7 @@ def test_stage_patch(client, test_contests_composite, test_stages):
 
 # noinspection DuplicatedCode
 def test_contest_remove(client, test_contests_composite, test_stages, test_simple_contest_in_stage):
+    from contest.tasks.models import SimpleContest
     test_contest: SimpleContest = test_simple_contest_in_stage[1]
     resp = client.post(
         f'/olympiad/{test_contests_composite[0].contest_id}/stage/{test_stages[0].stage_id}'
@@ -177,6 +182,7 @@ def test_contest_add_previous(client, test_contests_composite, test_stages, test
 
 # noinspection DuplicatedCode
 def test_variant_remove(client, test_simple_contest, test_variant):
+    from contest.tasks.models import Variant
     variant: Variant = test_variant[1]
     resp = client.post(
         f'/contest/{test_simple_contest[0].contest_id}/variant/{variant.variant_id}/remove')
@@ -188,6 +194,7 @@ def test_variant_remove(client, test_simple_contest, test_variant):
 
 
 def test_variant_patch(client, test_simple_contest, test_variant):
+    from contest.tasks.models import Variant
     resp = client.patch(f'/contest/{test_simple_contest[0].contest_id}'
                         f'/variant/{test_variant[0].variant_number}',
                         json={
@@ -214,6 +221,7 @@ def test_task_image_upload(client, test_simple_contest, test_variant, create_pla
 
 
 def test_task_remove(client, test_simple_contest, test_variant, create_plain_task):
+    from contest.tasks.models import Task
     task: Task = create_plain_task[1]
     resp = client.post(f'/contest/{test_simple_contest[0].contest_id}/variant'
                        f'/{test_variant[0].variant_id}/task/{task.task_id}/remove')
@@ -225,6 +233,7 @@ def test_task_remove(client, test_simple_contest, test_variant, create_plain_tas
 
 
 def test_task_patch_plain(client, test_simple_contest, test_variant, create_plain_task):
+    from contest.tasks.models import PlainTask
     resp = client.patch(
         f'/contest/{test_simple_contest[0].contest_id}/variant/{test_variant[0].variant_id}'
         f'/task/{create_plain_task[0].task_id}/plain',
@@ -245,6 +254,7 @@ def test_task_patch_plain(client, test_simple_contest, test_variant, create_plai
 
 
 def test_task_patch_range(client, test_simple_contest, test_variant, create_range_task):
+    from contest.tasks.models import RangeTask
     resp = client.patch(
         f'/contest/{test_simple_contest[0].contest_id}/variant/{test_variant[0].variant_id}'
         f'/task/{create_range_task[0].task_id}/range',
@@ -267,6 +277,7 @@ def test_task_patch_range(client, test_simple_contest, test_variant, create_rang
 
 
 def test_task_patch_multiple(client, test_simple_contest, test_variant, create_multiple_task):
+    from contest.tasks.models import MultipleChoiceTask
     resp = client.patch(
         f'/contest/{test_simple_contest[0].contest_id}/variant/{test_variant[0].variant_id}'
         f'/task/{create_multiple_task[0].task_id}/multiple',

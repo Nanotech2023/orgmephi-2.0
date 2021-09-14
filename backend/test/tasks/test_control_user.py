@@ -1,5 +1,3 @@
-from contest.tasks.models import BaseContest, SimpleContest, StageConditionEnum, \
-    ContestHoldingTypeEnum, Stage, Variant, PlainTask, RangeTask, MultipleChoiceTask, Contest, UserStatusEnum, Task
 from . import *
 
 

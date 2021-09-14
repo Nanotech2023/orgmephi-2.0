@@ -1,5 +1,3 @@
-from contest.tasks.models import BaseContest, SimpleContest, CompositeContest, StageConditionEnum, \
-    ContestHoldingTypeEnum, Stage, Variant, PlainTask, RangeTask, MultipleChoiceTask
 from . import *
 
 
@@ -10,6 +8,7 @@ def client(client_creator):
 
 
 def test_base_olympiad_create(client, test_olympiad_types):
+    from contest.tasks.models import BaseContest
     resp = client.post('/base_olympiad/create',
                        json={
                            'name': 'Test 0',
@@ -32,6 +31,7 @@ def test_base_olympiad_create(client, test_olympiad_types):
 
 
 def test_olympiad_create_simple(client, test_base_contests, test_stages):
+    from contest.tasks.models import SimpleContest, ContestHoldingTypeEnum
     resp = client.post(f'/base_olympiad/{test_base_contests[0].base_contest_id}/olympiad/create_simple',
                        json={
                            'start_date': f'{datetime.utcnow()}',
@@ -63,6 +63,7 @@ def test_olympiad_create_simple(client, test_base_contests, test_stages):
 
 
 def test_olympiad_create_composite(client, test_base_contests):
+    from contest.tasks.models import CompositeContest
     resp = client.post(f'/base_olympiad/{test_base_contests[0].base_contest_id}/olympiad/create_composite',
                        json={
                            'visibility': 'false',
@@ -76,6 +77,8 @@ def test_olympiad_create_composite(client, test_base_contests):
 
 
 def test_stage_create(client, test_contests_composite):
+    from contest.tasks.models import StageConditionEnum, \
+        Stage
     resp = client.post(f'/olympiad/{test_contests_composite[0].contest_id}/stage/create',
                        json={
                            'stage_name': 'Test name',
@@ -97,6 +100,7 @@ def test_contests_all(client, test_contests_composite, test_stages, test_simple_
 
 
 def test_variant_create(client, test_simple_contest):
+    from contest.tasks.models import Variant
     resp = client.post(f'/contest/{test_simple_contest[0].contest_id}/variant/create',
                        json={
                            'variant_description': 'Test',
@@ -121,6 +125,7 @@ def test_variant_all(client, test_simple_contest, test_variant):
 
 
 def test_task_create_plain(client, test_simple_contest, test_variant):
+    from contest.tasks.models import PlainTask
     resp = client.post(
         f'/contest/{test_simple_contest[0].contest_id}/variant/{test_variant[0].variant_id}/task/create_plain',
         json={
@@ -137,6 +142,7 @@ def test_task_create_plain(client, test_simple_contest, test_variant):
 
 
 def test_task_create_range(client, test_simple_contest, test_variant):
+    from contest.tasks.models import RangeTask
     resp = client.post(
         f'/contest/{test_simple_contest[0].contest_id}/variant/{test_variant[0].variant_id}/task/create_range',
         json={
@@ -154,6 +160,7 @@ def test_task_create_range(client, test_simple_contest, test_variant):
 
 
 def test_task_create_multiple(client, test_simple_contest, test_variant):
+    from contest.tasks.models import MultipleChoiceTask
     resp = client.post(
         f'/contest/{test_simple_contest[0].contest_id}/variant/{test_variant[0].variant_id}/task/create_multiple',
         json={
