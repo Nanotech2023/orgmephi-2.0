@@ -15,12 +15,12 @@ def test_base_contests(test_olympiad_types):
     from contest.tasks.models import BaseContest, OlympiadSubjectEnum
     contests = [BaseContest(name=f'Test {i}', rules=f'Test{i}', description=f'Test {i}',
                             subject=OlympiadSubjectEnum.Math,
-                            winner_1_condition=(i % 10),
-                            winner_2_condition=(i % 10),
-                            winner_3_condition=(i % 10),
-                            diploma_1_condition=(i % 10),
-                            diploma_2_condition=(i % 10),
-                            diploma_3_condition=(i % 10)) for i in range(8)]
+                            winner_1_condition=0.95,
+                            winner_2_condition=0.9,
+                            winner_3_condition=0.8,
+                            diploma_1_condition=0.7,
+                            diploma_2_condition=0.6,
+                            diploma_3_condition=0.5) for i in range(8)]
     for i in range(len(contests)):
         olympiad_type = test_olympiad_types[i % len(test_olympiad_types)]
         olympiad_type.contests.extend(contests)

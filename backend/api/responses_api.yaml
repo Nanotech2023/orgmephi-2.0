@@ -830,6 +830,25 @@ paths:
       security:
       - JWTAccessToken: []
       - CSRFAccessToken: []
+  /responses/creator/contest/{contest_id}/winning:
+    post:
+      parameters:
+      - description: Id of the contest
+        in: path
+        name: contest_id
+        required: true
+        schema:
+          type: integer
+      responses:
+        '200':
+          description: OK
+        '404':
+          description: Contest not found
+        '409':
+          description: Contest error
+      security:
+      - JWTAccessToken: []
+      - CSRFAccessToken: []
   /responses/participant/contest/{contest_id}/user/self/create:
     post:
       parameters:

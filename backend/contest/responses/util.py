@@ -2,7 +2,7 @@ from common import get_current_db, get_current_app
 from .model_schemas.schemas import PlainAnswerTextSchema, RangeAnswerSchema
 from datetime import datetime, timedelta
 from common.errors import NotFound, RequestError, AlreadyExists
-from common.util import db_get_one_or_none, db_exists, db_get_or_raise
+from common.util import db_get_one_or_none, db_exists, db_get_or_raise, db_get_list
 from contest.tasks.models import SimpleContest, RangeTask, MultipleChoiceTask, PlainTask, ContestHoldingTypeEnum, \
     UserInContest
 from .models import Response, PlainAnswerText, RangeAnswer, MultipleChoiceAnswer, PlainAnswerFile, BaseAnswer, \
@@ -12,6 +12,8 @@ from ..tasks.util import validate_file_size, is_task_in_contest
 
 db = get_current_db()
 app = get_current_app()
+
+
 # Errors
 
 
@@ -173,6 +175,16 @@ def is_contest_over(contest_id):
         raise OlympiadError("Olympiad is not over yet")
 
 
+def is_all_checked(contest_id):
+    from contest.responses.models import ResponseStatusEnum
+    user_works_not_checked = Response.query.filter_by(contest_id=contest_id,
+                                                      work_status=ResponseStatusEnum.not_checked).all()
+    user_works_in_progress = Response.query.filter_by(contest_id=contest_id,
+                                                      work_status=ResponseStatusEnum.in_progress).all()
+    if len(user_works_in_progress) != 0 or len(user_works_not_checked) != 0:
+        raise OlympiadError("Not all user responses checked")
+
+
 def check_contest_type(contest_id):
     from contest.tasks.models.olympiad import ContestHoldingTypeEnum
     simple_contest: SimpleContest = db_get_or_raise(SimpleContest, 'contest_id', contest_id)
@@ -297,10 +309,50 @@ def multiple_answer_check(answer: BaseAnswer):
 
 
 def check_user_work(user_work: Response):
+    plain_count = 0
     for answer in user_work.answers:
         if answer.answer_type == answer_dict['RangeAnswer']:
             range_answer_check(answer)
         elif answer.answer_type == answer_dict['MultipleChoiceAnswer']:
             multiple_answer_check(answer)
-    user_work.work_status = work_status['Accepted']
+        elif answer.answer_type == answer_dict['PlainAnswerText'] or \
+                answer.answer_type == answer_dict['PlainAnswerFile']:
+            plain_count += 1
+    if plain_count == 0:
+        user_work.work_status = work_status['Accepted']
+    db.session.commit()
+
+
+def choose_status(percent, base_contest):
+    from contest.tasks.models.olympiad import UserStatusEnum
+    if percent >= base_contest.winner_1_condition:
+        return UserStatusEnum.Winner_1
+    elif percent >= base_contest.winner_2_condition:
+        return UserStatusEnum.Winner_2
+    elif percent >= base_contest.winner_3_condition:
+        return UserStatusEnum.Winner_3
+    elif percent >= base_contest.diploma_1_condition:
+        return UserStatusEnum.Diploma_1
+    elif percent >= base_contest.diploma_2_condition:
+        return UserStatusEnum.Diploma_2
+    elif percent >= base_contest.diploma_3_condition:
+        return UserStatusEnum.Diploma_3
+    else:
+        return UserStatusEnum.Participant
+
+
+def set_user_statuses(contest_id):
+    from contest.tasks.models.contest import Variant
+    user_responses = db_get_list(Response, 'contest_id', contest_id)
+    contest: SimpleContest = db_get_or_raise(SimpleContest, 'contest_id', contest_id)
+    base_contest = contest.base_contest
+    for user_work in user_responses:
+        user_in_contest: UserInContest = UserInContest.query.filter_by(contest_id=contest_id,
+                                                                       user_id=user_work.user_id).one_or_none()
+        variant: Variant = db_get_or_raise(Variant, 'variant_id', user_in_contest.variant_id)
+        all_points = 0
+        for task in variant.tasks:
+            all_points += task.task_points
+        percent = user_work.mark / all_points
+        user_in_contest.user_status = choose_status(percent, base_contest)
     db.session.commit()

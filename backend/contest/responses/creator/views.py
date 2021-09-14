@@ -769,3 +769,33 @@ def auto_check_users_answers(contest_id):
         if user_work.status == work_status['InProgress'] or user_work.status == work_status['NotChecked']:
             check_user_work(user_work)
     return {}, 200
+
+
+@module.route('/contest/<int:contest_id>/winning', methods=['POST'])
+def set_status_by_result(contest_id):
+    """
+    Set new statuses to user in contest
+    ---
+    post:
+      security:
+        - JWTAccessToken: []
+        - CSRFAccessToken: []
+      parameters:
+        - in: path
+          description: Id of the contest
+          name: contest_id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: OK
+        '404':
+          description: Contest not found
+        '409':
+          description: Contest error
+    """
+    is_contest_over(contest_id)
+    is_all_checked(contest_id)
+    set_user_statuses(contest_id)
+    return {}, 200
