@@ -1,4 +1,6 @@
-from marshmallow_sqlalchemy import SQLAlchemySchema, auto_field, fields
+from marshmallow_sqlalchemy import SQLAlchemySchema
+from marshmallow_sqlalchemy.fields import Related
+from common import fields as common_fields
 
 from user.models.reference import *
 
@@ -9,8 +11,8 @@ class UniversitySchema(SQLAlchemySchema):
         load_instance = False
         sqla_session = db.session
 
-    name = auto_field(column_name='name')
-    country = fields.Related(column=['name'], required=True)
+    name = common_fields.CommonName()
+    country = Related(column=['name'], required=True)
 
 
 class CountrySchema(SQLAlchemySchema):
@@ -19,7 +21,7 @@ class CountrySchema(SQLAlchemySchema):
         load_instance = False
         sqla_session = db.session
 
-    name = auto_field(column_name='name')
+    name = common_fields.CommonName(required=True)
 
 
 class RegionSchema(SQLAlchemySchema):
@@ -28,7 +30,7 @@ class RegionSchema(SQLAlchemySchema):
         load_instance = False
         sqla_session = db.session
 
-    name = auto_field(column_name='name', required=True)
+    name = common_fields.CommonName(required=True)
 
 
 class CitySchema(SQLAlchemySchema):
@@ -37,5 +39,5 @@ class CitySchema(SQLAlchemySchema):
         load_instance = False
         sqla_session = db.session
 
-    name = auto_field(column_name='name', required=True)
-    region = fields.Related(column=['name'], required=True)
+    name = common_fields.CommonName(required=True)
+    region = Related(column=['name'], required=True)

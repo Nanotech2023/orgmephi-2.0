@@ -1,9 +1,12 @@
+from sqlalchemy.ext.hybrid import hybrid_property
 from common import get_current_db, get_current_app
 from .reference import City, Country
 from user.util import get_unfilled
 
 db = get_current_db()
 app = get_current_app()
+
+native_country = app.config['ORGMEPHI_NATIVE_COUNTRY']
 
 
 class Location(db.Model):
@@ -37,6 +40,15 @@ class LocationRussia(Location):
 
     def unfilled(self):
         return get_unfilled(self, self._required_fields, []) + super().unfilled()
+
+    @hybrid_property
+    def country(self):
+        return native_country
+
+    @country.setter
+    def country(self, value):
+        if value != native_country:
+            raise ValueError('Wrong country for native location')
 
 
 db.ForeignKeyConstraint((LocationRussia.city_name, LocationRussia.region_name), (City.name, City.region_name))
