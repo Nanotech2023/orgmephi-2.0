@@ -1,5 +1,6 @@
 from contest.tasks.models import BaseContest, SimpleContest, StageConditionEnum, \
-    ContestHoldingTypeEnum, Stage, Variant, PlainTask, RangeTask, MultipleChoiceTask, Contest, Task, CompositeContest
+    ContestHoldingTypeEnum, Stage, Variant, PlainTask, RangeTask, MultipleChoiceTask, Contest, Task, CompositeContest, \
+    OlympiadSubjectEnum
 from . import *
 
 
@@ -33,13 +34,13 @@ def test_base_olympiad_patch(client, test_base_contests, test_olympiad_types):
                         json={
                             'name': 'Test 0',
                             'description': 'Test 0',
-                            'rules': 'Test 0',
-                            'winner_1_condition': '0.5',
-                            'winner_2_condition': '0.5',
-                            'winner_3_condition': '0.5',
-                            'diploma_1_condition': '0.5',
-                            'diploma_2_condition': '0.5',
-                            'diploma_3_condition': '0.5',
+                            'rules': 'Test 8',
+                            'winner_1_condition': '0.8',
+                            'winner_2_condition': '0.8',
+                            'winner_3_condition': '0.8',
+                            'diploma_1_condition': '0.8',
+                            'diploma_2_condition': '0.8',
+                            'diploma_3_condition': '0.8',
                             'olympiad_type_id': f'{test_olympiad_types[0].olympiad_type_id}',
                             'subject': 'Physics',
                         })
@@ -48,6 +49,14 @@ def test_base_olympiad_patch(client, test_base_contests, test_olympiad_types):
     base_olympiad: BaseContest = BaseContest.query.filter_by(
         base_contest_id=resp.json['base_contest_id']).one_or_none()
     assert base_olympiad.base_contest_id == resp.json['base_contest_id']
+    assert base_olympiad.winner_1_condition == 0.8
+    assert base_olympiad.winner_2_condition == 0.8
+    assert base_olympiad.winner_3_condition == 0.8
+    assert base_olympiad.diploma_1_condition == 0.8
+    assert base_olympiad.diploma_2_condition == 0.8
+    assert base_olympiad.diploma_3_condition == 0.8
+    assert base_olympiad.rules == "Test 8"
+    assert base_olympiad.subject == OlympiadSubjectEnum.Physics
 
 
 # Olympiad
@@ -66,13 +75,17 @@ def test_olympiad_remove(client, test_base_contests, test_contests):
 
 # noinspection DuplicatedCode
 def test_olympiad_patch(client, test_base_contests, test_simple_contest, test_contests_composite):
+    new_start_date = datetime.utcnow()
+    new_end_date = datetime.utcnow() + timedelta(hours=4)
+    new_end_of_enroll_date = datetime.utcnow() + timedelta(hours=1)
+    new_result_publication_date = datetime.utcnow() + timedelta(hours=6)
     resp = client.patch(
         f'/base_olympiad/{test_base_contests[0].base_contest_id}/olympiad/{test_simple_contest[0].contest_id}',
         json={
-            'start_date': f'{datetime.utcnow()}',
-            'end_date': f'{datetime.utcnow() + timedelta(hours=4)}',
-            'end_of_enroll_date': f'{datetime.utcnow() + timedelta(hours=1)}',
-            'result_publication_date': f'{datetime.utcnow() + timedelta(hours=6)}',
+            'start_date': f'{new_start_date}',
+            'end_date': f'{new_end_date}',
+            'end_of_enroll_date': f'{new_end_of_enroll_date}',
+            'result_publication_date': f'{new_result_publication_date}',
             'visibility': 'true',
             'holding_type': f'{ContestHoldingTypeEnum.OfflineContest.value}',
         })
@@ -81,6 +94,11 @@ def test_olympiad_patch(client, test_base_contests, test_simple_contest, test_co
     simple_contest: SimpleContest = SimpleContest.query.filter_by(
         contest_id=resp.json['contest_id']).one_or_none()
     assert simple_contest.contest_id == resp.json['contest_id']
+
+    assert simple_contest.start_date == new_start_date
+    assert simple_contest.end_date == new_end_date
+    assert simple_contest.end_of_enroll_date == new_end_of_enroll_date
+    assert simple_contest.result_publication_date == new_result_publication_date
 
     resp = client.patch(
         f'/base_olympiad/{test_base_contests[0].base_contest_id}/olympiad/{test_contests_composite[0].contest_id}',
@@ -111,9 +129,9 @@ def test_stage_remove(client, test_contests_composite, test_stages):
 def test_stage_patch(client, test_contests_composite, test_stages):
     resp = client.patch(f'/olympiad/{test_contests_composite[0].contest_id}/stage/{test_stages[0].stage_id}',
                         json={
-                            'stage_name': 'Test name',
-                            'stage_num': '0',
-                            'this_stage_condition': 'Test 1',
+                            'stage_name': 'Test name2',
+                            'stage_num': '42',
+                            'this_stage_condition': 'Test 2',
                             'condition': f'{StageConditionEnum.And.value}',
                         })
     assert resp.status_code == 200
@@ -121,6 +139,9 @@ def test_stage_patch(client, test_contests_composite, test_stages):
     stage: Stage = Stage.query.filter_by(
         stage_id=resp.json['stage_id']).one_or_none()
     assert stage.stage_id == resp.json['stage_id']
+    assert stage.stage_num == 42
+    assert stage.stage_name == 'Test name2'
+    assert stage.this_stage_condition == 'Test 2'
 
 
 # Inner contest
@@ -170,7 +191,7 @@ def test_variant_patch(client, test_simple_contest, test_variant):
     resp = client.patch(f'/contest/{test_simple_contest[0].contest_id}'
                         f'/variant/{test_variant[0].variant_number}',
                         json={
-                            'variant_description': 'Test',
+                            'variant_description': 'Test2',
                             'variant_number': '5',
                         })
     assert resp.status_code == 200
@@ -178,6 +199,8 @@ def test_variant_patch(client, test_simple_contest, test_variant):
     variant: Variant = Variant.query.filter_by(
         variant_id=resp.json['variant_id']).one_or_none()
     assert variant.variant_id == resp.json['variant_id']
+    assert variant.variant_number == 5
+    assert variant.variant_description == 'Test2'
 
 
 # Task
@@ -207,15 +230,18 @@ def test_task_patch_plain(client, test_simple_contest, test_variant, create_plai
         f'/task/{create_plain_task[0].task_id}/plain',
         json={
             'num_of_task': '0',
-            'recommended_answer': 'Test',
-            'show_answer_after_contest': 'false',
-            'task_points': '10',
+            'recommended_answer': 'TestTest',
+            'show_answer_after_contest': 'true',
+            'task_points': '15',
         })
     assert resp.status_code == 200
 
     task: PlainTask = PlainTask.query.filter_by(
         task_id=resp.json['task_id']).one_or_none()
     assert task.task_id == resp.json['task_id']
+    assert task.task_points == 15
+    assert task.show_answer_after_contest is True
+    assert task.recommended_answer == "TestTest"
 
 
 def test_task_patch_range(client, test_simple_contest, test_variant, create_range_task):
@@ -224,16 +250,20 @@ def test_task_patch_range(client, test_simple_contest, test_variant, create_rang
         f'/task/{create_range_task[0].task_id}/range',
         json={
             'num_of_task': '0',
-            'start_value': '0.1',
-            'end_value': '0.8',
-            'show_answer_after_contest': 'false',
-            'task_points': '10',
+            'start_value': '0.2',
+            'end_value': '0.9',
+            'show_answer_after_contest': 'true',
+            'task_points': '15',
         })
     assert resp.status_code == 200
 
     task: RangeTask = RangeTask.query.filter_by(
         task_id=resp.json['task_id']).one_or_none()
     assert task.task_id == resp.json['task_id']
+    assert task.task_points == 15
+    assert task.show_answer_after_contest is True
+    assert task.start_value == 0.2
+    assert task.end_value == 0.9
 
 
 def test_task_patch_multiple(client, test_simple_contest, test_variant, create_multiple_task):
@@ -246,16 +276,23 @@ def test_task_patch_multiple(client, test_simple_contest, test_variant, create_m
                 {
                     'answer': 'test',
                     'is_right_answer': 'false'
+                },
+                {
+                    'answer': 'test2',
+                    'is_right_answer': 'false'
                 }
             ],
-            'show_answer_after_contest': 'false',
-            'task_points': '10',
+            'show_answer_after_contest': 'true',
+            'task_points': '15',
         })
     assert resp.status_code == 200
 
     task: MultipleChoiceTask = MultipleChoiceTask.query.filter_by(
         task_id=resp.json['task_id']).one_or_none()
     assert task.task_id == resp.json['task_id']
+    assert task.task_points == 15
+    assert task.show_answer_after_contest is True
+    assert len(task.answers) == 2
 
 
 # Location
@@ -270,6 +307,7 @@ def test_add_locations_to_contest(client, test_simple_contest, test_olympiad_loc
                           f'{test_olympiad_locations[1].location_id}']
         })
     assert resp.status_code == 200
+    assert len(test_simple_contest[0].locations) == 2
 
 
 def test_remove_locations_from_contest(client, test_simple_contest_with_location, test_olympiad_locations):
@@ -299,6 +337,7 @@ def test_add_target_classes_to_contest(client, test_base_contests, test_target_c
                                    f'{test_target_class[1].target_class_id}']
         })
     assert resp.status_code == 200
+    assert len(test_base_contests[0].target_classes) == 2
 
 
 def test_remove_target_classes_from_contest(client, test_base_contests_with_target, test_target_class):
