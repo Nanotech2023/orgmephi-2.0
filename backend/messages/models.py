@@ -80,7 +80,7 @@ class Thread(db.Model):
     def answered(self):
         if not self.messages:
             return False
-        return self.messages[-1].employee_id is None
+        return self.messages[-1].employee_id is not None
 
     # noinspection PyMethodParameters
     @answered.expression

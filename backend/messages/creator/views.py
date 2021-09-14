@@ -127,7 +127,7 @@ def update_thread_status(thread_id):
     return thread, 200
 
 
-@module.route('/filter_threads', methods=['GET'], output_schema=FilterThreadsMessagesResponseSchema)
+@module.route('/threads', methods=['GET'], output_schema=FilterThreadsMessagesResponseSchema)
 def filter_threads():
     """
     Get threads based on a filter
