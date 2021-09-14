@@ -86,6 +86,9 @@ def test_stage_get(client, test_contests_composite, test_stages):
                       f'/stage/{test_stages[0].stage_id}')
     assert resp.status_code == 200
     assert test_stages[0].stage_id == resp.json['stage_id']
+    resp = client.get(f'/olympiad/{test_contests_composite[1].contest_id}'
+                      f'/stage/{test_stages[0].stage_id}')
+    assert resp.status_code == 409
 
 
 # Target classes

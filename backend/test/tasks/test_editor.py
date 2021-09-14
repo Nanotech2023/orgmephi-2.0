@@ -1,5 +1,5 @@
 from contest.tasks.models import BaseContest, SimpleContest, StageConditionEnum, \
-    ContestHoldingTypeEnum, Stage, Variant, PlainTask, RangeTask, MultipleChoiceTask, Contest, UserStatusEnum, Task
+    ContestHoldingTypeEnum, Stage, Variant, PlainTask, RangeTask, MultipleChoiceTask, Contest, Task, CompositeContest
 from . import *
 
 
@@ -65,7 +65,7 @@ def test_olympiad_remove(client, test_base_contests, test_contests):
 
 
 # noinspection DuplicatedCode
-def test_olympiad_patch(client, test_base_contests, test_simple_contest):
+def test_olympiad_patch(client, test_base_contests, test_simple_contest, test_contests_composite):
     resp = client.patch(
         f'/base_olympiad/{test_base_contests[0].base_contest_id}/olympiad/{test_simple_contest[0].contest_id}',
         json={
@@ -81,6 +81,18 @@ def test_olympiad_patch(client, test_base_contests, test_simple_contest):
     simple_contest: SimpleContest = SimpleContest.query.filter_by(
         contest_id=resp.json['contest_id']).one_or_none()
     assert simple_contest.contest_id == resp.json['contest_id']
+
+    resp = client.patch(
+        f'/base_olympiad/{test_base_contests[0].base_contest_id}/olympiad/{test_contests_composite[0].contest_id}',
+        json={
+            'visibility': 'true',
+            'holding_type': 'OfflineContest',
+        })
+    assert resp.status_code == 200
+
+    composite_contest: CompositeContest = CompositeContest.query.filter_by(
+        contest_id=resp.json['contest_id']).one_or_none()
+    assert composite_contest.contest_id == resp.json['contest_id']
 
 
 # Stage
@@ -269,6 +281,13 @@ def test_remove_locations_from_contest(client, test_simple_contest_with_location
         })
     assert resp.status_code == 200
 
+    resp = client.post(
+        f'/contest/{test_simple_contest_with_location[0].contest_id}/remove_location',
+        json={
+            'locations': [f'{test_olympiad_locations[0].location_id}']
+        })
+    assert resp.status_code == 404
+
 
 # Target classes
 
@@ -290,3 +309,9 @@ def test_remove_target_classes_from_contest(client, test_base_contests_with_targ
             'target_classes_ids': [f'{test_target_class[0].target_class_id}']
         })
     assert resp.status_code == 200
+    resp = client.post(
+        f'/base_olympiad/{test_base_contests_with_target[0].base_contest_id}/remove_target_classes',
+        json={
+            'target_classes_ids': [f'{test_target_class[0].target_class_id}']
+        })
+    assert resp.status_code == 404

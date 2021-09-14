@@ -54,16 +54,12 @@ def get_variant_self(id_contest):
           description: User not found
     """
 
-    current_user = db_get_or_raise(UserInContest, "user_id", str(jwt_get_id()))
+    db_get_or_raise(UserInContest, "user_id", str(jwt_get_id()))
     current_response = get_user_in_contest_work(str(jwt_get_id()), id_contest)
 
-    # Contest not started
+    # Contest not in progress
     if current_response.status != ResponseStatusEnum.in_progress:
         raise ContestContentAccessDenied()
-
-    # Contest ended
-    if current_user.completed_the_contest:
-        raise TimeOver("olympiad")
 
     variant = get_user_variant_if_possible(id_contest)
     return variant, 200
@@ -238,16 +234,12 @@ def get_all_tasks_self(id_contest):
           description: User not found
     """
 
-    current_user = db_get_or_raise(UserInContest, "user_id", str(jwt_get_id()))
+    db_get_or_raise(UserInContest, "user_id", str(jwt_get_id()))
     current_response = get_user_in_contest_work(str(jwt_get_id()), id_contest)
 
-    # Contest not started
+    # Contest not in progress
     if current_response.status != ResponseStatusEnum.in_progress:
         raise ContestContentAccessDenied()
-
-    # Contest ended
-    if current_user.completed_the_contest:
-        raise TimeOver("olympiad")
 
     tasks_list = get_user_tasks_if_possible(id_contest)
     return {
@@ -293,17 +285,12 @@ def get_task_image_self(id_contest, id_task):
           description: Olympiad type already in use
     """
 
-    current_user = db_get_or_raise(UserInContest, "user_id", str(jwt_get_id()))
+    db_get_or_raise(UserInContest, "user_id", str(jwt_get_id()))
     current_response = get_user_in_contest_work(str(jwt_get_id()), id_contest)
 
-    # Contest not started
+    # Contest not in progress
     if current_response.status != ResponseStatusEnum.in_progress:
         raise ContestContentAccessDenied()
-
-    # Contest ended
-    if current_user.completed_the_contest:
-        raise TimeOver("olympiad")
-
     task = get_user_task_if_possible(id_contest, id_task)
 
     if task.image_of_task is None:
@@ -366,7 +353,7 @@ def get_user_certificate_self(id_contest):
     mark = get_user_in_contest_work(jwt_get_id(), id_contest).mark
     user_status = db_get_or_raise(UserInContest, 'user_id', jwt_get_id()).user_status
 
-    return send_pdf('user_certificate.html', u=user, mark=mark, user_status=user_status,
+    return send_pdf('user_certificate.html', u=current_user, mark=mark, user_status=user_status,
                     back=current_contest)
 
 

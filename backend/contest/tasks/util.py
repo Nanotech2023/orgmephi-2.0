@@ -61,6 +61,8 @@ def check_stage_condition(prev_contest, user_id, current_step_condition):
     :return:
     """
     prev_stage = prev_contest.stage
+    if prev_stage is None:
+        return current_step_condition
     condition = prev_stage.condition
 
     passed_list = (_get_passed(simple_contest, user_id) for simple_contest in prev_stage.contests)

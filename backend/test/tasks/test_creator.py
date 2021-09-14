@@ -31,7 +31,7 @@ def test_base_olympiad_create(client, test_olympiad_types):
     assert base_olympiad.base_contest_id == resp.json['base_contest_id']
 
 
-def test_olympiad_create_simple(client, test_base_contests):
+def test_olympiad_create_simple(client, test_base_contests, test_stages):
     resp = client.post(f'/base_olympiad/{test_base_contests[0].base_contest_id}/olympiad/create_simple',
                        json={
                            'start_date': f'{datetime.utcnow()}',
@@ -46,6 +46,21 @@ def test_olympiad_create_simple(client, test_base_contests):
     simple_contest: SimpleContest = SimpleContest.query.filter_by(
         contest_id=resp.json['contest_id']).one_or_none()
     assert simple_contest.contest_id == resp.json['contest_id']
+
+    resp = client.post(f'/base_olympiad/{test_base_contests[0].base_contest_id}/olympiad/create_simple',
+                       json={
+                           'start_date': f'{datetime.utcnow()}',
+                           'end_date': f'{datetime.utcnow() + timedelta(hours=4)}',
+                           'end_of_enroll_date': f'{datetime.utcnow() + timedelta(hours=1)}',
+                           'result_publication_date': f'{datetime.utcnow() + timedelta(hours=6)}',
+                           'previous_contest_id': f'{simple_contest.contest_id}',
+                           'previous_participation_condition': f'{UserStatusEnum.Winner_1.value}',
+                           'stage_id': '2',
+                           'visibility': 'false',
+                           'holding_type': f'{ContestHoldingTypeEnum.OfflineContest.value}',
+                       })
+    print(resp.data)
+    assert resp.status_code == 200
 
 
 def test_olympiad_create_composite(client, test_base_contests):
@@ -182,6 +197,14 @@ def test_task_image(client, test_simple_contest, test_variant, create_plain_task
     print(resp.data)
     assert resp.status_code == 409
 
+    create_plain_task[0].image_of_task = b'Test'
+    resp = client.get(
+        f'/contest/{test_simple_contest[0].contest_id}/variant/{test_variant[0].variant_id}'
+        f'/tasks/{create_plain_task[0].task_id}/image')
+
+    print(resp.data)
+    assert resp.status_code == 200
+
 
 def test_task_all(client, test_simple_contest, test_variant):
     resp = client.get(
@@ -189,4 +212,3 @@ def test_task_all(client, test_simple_contest, test_variant):
         f'/task/all')
     assert resp.status_code == 200
     assert len(test_variant[0].tasks) == len(list(resp.json['tasks_list']))
-

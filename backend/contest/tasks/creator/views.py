@@ -691,13 +691,6 @@ def task_get(id_contest, id_variant, id_task):
     return task, 200
 
 
-def check_existence(id_olympiad, id_stage, id_contest, id_variant):
-    db_get_or_raise(Contest, "contest_id", str(id_olympiad))
-    db_get_or_raise(Stage, "stage_id", str(id_stage))
-    db_get_or_raise(Contest, "contest_id", str(id_contest))
-    db_get_or_raise(Variant, "variant_id", str(id_variant))
-
-
 @module.route(
     '/contest/<int:id_contest>/variant/<int:id_variant>/task/all',
     methods=['GET'],
