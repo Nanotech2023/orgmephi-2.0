@@ -3,6 +3,7 @@ from marshmallow import pre_load, fields, validate
 from marshmallow_sqlalchemy import SQLAlchemySchema
 from marshmallow_sqlalchemy.fields import Related
 from marshmallow_oneofschema import OneOfSchema
+from marshmallow_enum import EnumField
 
 from common import fields as common_fields
 from common.errors import NotFound
@@ -26,7 +27,7 @@ class LocationRussiaSchema(SQLAlchemySchema):
         sqla_session = db.session
 
     rural = fields.Boolean(column_name='rural')
-    russian = fields.Boolean(dump_only=True)
+    location_type = EnumField(LocationTypeEnum, by_value=True, dump_only=True)
     country = common_fields.CommonName(required=True, validate=validate.OneOf([native_country]))
     city = Related(column=['name', 'region_name'])
 
@@ -56,7 +57,7 @@ class LocationOtherSchema(SQLAlchemySchema):
         sqla_session = db.session
 
     rural = fields.Boolean(column_name='rural')
-    russian = fields.Boolean(dump_only=True)
+    location_type = EnumField(LocationTypeEnum, by_value=True, dump_only=True)
     country = Related(column=['name'], required=True, validate=validate.NoneOf([native_country]))
     location = common_fields.FreeDescription(column_name='location')
 
@@ -69,7 +70,7 @@ class LocationOtherSchema(SQLAlchemySchema):
 class LocationSchema(OneOfSchema):
     type_schemas = {LocationTypeEnum.russian.value: LocationRussiaSchema,
                     LocationTypeEnum.foreign.value: LocationOtherSchema}
-    type_field = "russian"
+    type_field = "location_type"
     type_field_remove = True
 
     class_types = {LocationRussia: LocationTypeEnum.russian.value,

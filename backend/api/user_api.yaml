@@ -234,7 +234,7 @@ components:
         mapping:
           Foreign: '#/components/schemas/LocationOther'
           Russian: '#/components/schemas/LocationRussia'
-        propertyName: russian
+        propertyName: location_type
       oneOf:
       - $ref: '#/components/schemas/LocationRussia'
       - $ref: '#/components/schemas/LocationOther'
@@ -245,10 +245,13 @@ components:
         location:
           maxLength: 256
           type: string
-        rural:
-          type: boolean
-        russian:
+        location_type:
+          enum:
+          - Russian
+          - Foreign
           readOnly: true
+          type: string
+        rural:
           type: boolean
       required:
       - country
@@ -270,10 +273,13 @@ components:
           - "\u0420\u043E\u0441\u0441\u0438\u044F"
           maxLength: 32
           type: string
-        rural:
-          type: boolean
-        russian:
+        location_type:
+          enum:
+          - Russian
+          - Foreign
           readOnly: true
+          type: string
+        rural:
           type: boolean
       required:
       - country
