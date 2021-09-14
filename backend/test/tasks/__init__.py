@@ -1,5 +1,6 @@
 from datetime import datetime, timedelta
 
+from contest.responses.models import add_user_response, ResponseStatusEnum
 from contest.tasks.models.user import UserInContest, UserStatusEnum
 from user.models import StudentInfo, UserInfo, Location, GenderEnum, Document, UserLimitations, \
     DocumentTypeEnum, StudentUniversityKnown, LocationRussia
@@ -273,6 +274,52 @@ def test_simple_contest_with_users(test_simple_contest, test_variant, test_olymp
                                     variant_id=test_variant[0].variant_id,
                                     location_id=test_olympiad_locations[0].location_id)
     test_simple_contest[0].users.append(user_in_contest)
+
+    user_work = add_user_response(test_app.db.session, user_id, test_simple_contest[0].contest_id)
+    user_work.work_status = ResponseStatusEnum.in_progress
     test_app.db.session.add(user_in_contest)
+    test_app.db.session.add(user_work)
+
     test_app.db.session.commit()
     yield test_simple_contest
+
+
+@pytest.fixture
+def test_simple_contest_with_users_ended(test_simple_contest, test_variant, test_olympiad_locations,
+                                         test_user_for_student_contest):
+    user_id = test_user_for_student_contest.id
+    user_in_contest = UserInContest(user_id=user_id,
+                                    show_results_to_user=True,
+                                    user_status=UserStatusEnum.Participant.value,
+                                    variant_id=test_variant[0].variant_id,
+                                    location_id=test_olympiad_locations[0].location_id)
+    test_simple_contest[0].users.append(user_in_contest)
+
+    user_work = add_user_response(test_app.db.session, user_id, test_simple_contest[0].contest_id)
+    user_work.work_status = ResponseStatusEnum.in_progress
+    test_simple_contest[0].result_publication_date = datetime.utcnow()
+    test_app.db.session.add(user_in_contest)
+    test_app.db.session.add(user_work)
+
+    test_app.db.session.commit()
+    yield test_simple_contest
+
+
+@pytest.fixture
+def test_composite_contest_with_users(test_simple_contest_in_stage, test_variant, test_olympiad_locations,
+                                      test_user_for_student_contest):
+    user_id = test_user_for_student_contest.id
+    user_in_contest = UserInContest(user_id=user_id,
+                                    show_results_to_user=True,
+                                    user_status=UserStatusEnum.Participant.value,
+                                    variant_id=test_variant[0].variant_id,
+                                    location_id=test_olympiad_locations[0].location_id)
+    test_simple_contest_in_stage[0].users.append(user_in_contest)
+
+    user_work = add_user_response(test_app.db.session, user_id, test_simple_contest_in_stage[0].contest_id)
+    user_work.work_status = ResponseStatusEnum.in_progress
+    test_app.db.session.add(user_in_contest)
+    test_app.db.session.add(user_work)
+
+    test_app.db.session.commit()
+    yield test_simple_contest_in_stage

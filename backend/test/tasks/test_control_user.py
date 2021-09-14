@@ -59,5 +59,4 @@ def test_get_user_certificate_in_contest(client, test_simple_contest_with_users,
         f'/contest/{test_simple_contest_with_users[0].contest_id}/user/{test_user_for_student_contest.id}/certificate')
 
     print(resp.data)
-    assert resp.status_code == 404
-    # TODO Add certificate
+    assert resp.status_code == 200

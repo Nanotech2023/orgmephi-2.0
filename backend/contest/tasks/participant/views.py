@@ -150,7 +150,7 @@ def enroll_in_contest(id_contest):
               input_schema=EnrollRequestTaskParticipantSchema)
 def change_user_location_in_contest(id_contest):
     """
-    EChange user location
+    Change user location
     ---
     post:
       requestBody:
@@ -185,7 +185,7 @@ def change_user_location_in_contest(id_contest):
     current_contest: SimpleContest = get_contest_if_possible(id_contest)
 
     # Can't enroll after deadline
-    if datetime.utcnow().date() > current_contest.end_of_enroll_date:
+    if datetime.utcnow() > current_contest.end_of_enroll_date:
         raise TimeOver("Time for enrolling is over")
 
     if location_id is not None:
@@ -354,7 +354,7 @@ def get_user_certificate_self(id_contest):
     current_contest: SimpleContest = get_contest_if_possible(id_contest)
 
     # Try to see the results before contest
-    if datetime.utcnow().date() < current_contest.result_publication_date:
+    if datetime.utcnow() < current_contest.result_publication_date:
         raise ContestIsStillOnReview()
 
     current_contest = get_contest_if_possible(id_contest)
