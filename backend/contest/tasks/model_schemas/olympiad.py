@@ -107,13 +107,13 @@ class StageSchema(SQLAlchemySchema):
         sqla_session = db.session
 
     stage_id = auto_field(column_name='stage_id', dump_only=True)
-    olympiad_id = auto_field(column_name='olympiad_id', required=False)
-    stage_name = auto_field(column_name='stage_name', validate=common_name_validator, required=True)
-    condition = EnumField(StageConditionEnum, data_key='condition', required=True, by_value=True)
-    this_stage_condition = auto_field(column_name='this_stage_condition', validate=text_validator, required=True)
-    stage_num = auto_field(column_name='stage_num', required=True)
+    olympiad_id = auto_field(column_name='olympiad_id')
+    stage_name = auto_field(column_name='stage_name', validate=common_name_validator)
+    condition = EnumField(StageConditionEnum, data_key='condition', by_value=True)
+    this_stage_condition = auto_field(column_name='this_stage_condition', validate=text_validator)
+    stage_num = auto_field(column_name='stage_num')
 
-    contests = fields.Nested(SimpleContestSchema, many=True, required=True)
+    contests = fields.Nested(SimpleContestSchema, many=True)
 
 
 class CompositeContestSchema(SQLAlchemySchema):
