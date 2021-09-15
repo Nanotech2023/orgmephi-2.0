@@ -54,6 +54,15 @@ components:
       required:
       - stages_list
       type: object
+    AllTargetClassesRequestTaskUnauthorized:
+      properties:
+        target_classes:
+          items:
+            $ref: '#/components/schemas/TargetClass'
+          type: array
+      required:
+      - target_classes
+      type: object
     AllTaskResponseTaskParticipant:
       properties:
         tasks_list:
@@ -119,7 +128,11 @@ components:
         description:
           maxLength: 1024
           type: string
-        laureate_condition:
+        diploma_1_condition:
+          type: number
+        diploma_2_condition:
+          type: number
+        diploma_3_condition:
           type: number
         name:
           type: string
@@ -136,28 +149,21 @@ components:
           type: string
         target_classes:
           items:
-            enum:
-            - '5'
-            - '6'
-            - '7'
-            - '8'
-            - '9'
-            - '10'
-            - '11'
-            - student
-            type: string
+            $ref: '#/components/schemas/TargetClass'
           type: array
-        winning_condition:
+        winner_1_condition:
+          type: number
+        winner_2_condition:
+          type: number
+        winner_3_condition:
           type: number
       required:
       - description
-      - laureate_condition
       - name
       - olympiad_type_id
       - rules
       - subject
       - target_classes
-      - winning_condition
       type: object
     BaseOlympiadIdResponseTaskCreator:
       properties:
@@ -174,7 +180,11 @@ components:
         description:
           maxLength: 1024
           type: string
-        laureate_condition:
+        diploma_1_condition:
+          type: number
+        diploma_2_condition:
+          type: number
+        diploma_3_condition:
           type: number
         name:
           type: string
@@ -191,28 +201,21 @@ components:
           type: string
         target_classes:
           items:
-            enum:
-            - '5'
-            - '6'
-            - '7'
-            - '8'
-            - '9'
-            - '10'
-            - '11'
-            - student
-            type: string
+            $ref: '#/components/schemas/TargetClass'
           type: array
-        winning_condition:
+        winner_1_condition:
+          type: number
+        winner_2_condition:
+          type: number
+        winner_3_condition:
           type: number
       required:
       - description
-      - laureate_condition
       - name
       - olympiad_type_id
       - rules
       - subject
       - target_classes
-      - winning_condition
       type: object
     ChangeUsersLocationInContestRequestTaskControlUsers:
       properties:
@@ -227,6 +230,10 @@ components:
       type: object
     CompositeContest:
       properties:
+        base_contest:
+          allOf:
+          - $ref: '#/components/schemas/BaseContest'
+          readOnly: true
         contest_id:
           readOnly: true
           type: integer
@@ -235,11 +242,18 @@ components:
           - OfflineContest
           - OnLineContest
           type: string
+        stages:
+          items:
+            $ref: '#/components/schemas/Stage'
+          readOnly: true
+          type: array
         visibility:
           type: boolean
       required:
+      - base_contest
       - contest_id
       - holding_type
+      - stages
       - visibility
       type: object
     Contest:
@@ -308,7 +322,17 @@ components:
         description:
           maxLength: 1024
           type: string
-        laureate_condition:
+        diploma_1_condition:
+          maximum: 1.0
+          minimum: 0.0
+          type: number
+        diploma_2_condition:
+          maximum: 1.0
+          minimum: 0.0
+          type: number
+        diploma_3_condition:
+          maximum: 1.0
+          minimum: 0.0
           type: number
         name:
           maxLength: 32
@@ -324,30 +348,30 @@ components:
           - Physics
           - Informatics
           type: string
-        target_classes:
-          items:
-            enum:
-            - '5'
-            - '6'
-            - '7'
-            - '8'
-            - '9'
-            - '10'
-            - '11'
-            - student
-            type: string
-          type: array
-        winning_condition:
+        winner_1_condition:
+          maximum: 1.0
+          minimum: 0.0
+          type: number
+        winner_2_condition:
+          maximum: 1.0
+          minimum: 0.0
+          type: number
+        winner_3_condition:
+          maximum: 1.0
+          minimum: 0.0
           type: number
       required:
       - description
-      - laureate_condition
+      - diploma_1_condition
+      - diploma_2_condition
+      - diploma_3_condition
       - name
       - olympiad_type_id
       - rules
       - subject
-      - target_classes
-      - winning_condition
+      - winner_1_condition
+      - winner_2_condition
+      - winner_3_condition
       type: object
     CreateCompositeContestRequestTaskCreator:
       properties:
@@ -535,16 +559,6 @@ components:
         location_id:
           type: integer
       type: object
-    Field:
-      properties:
-        name:
-          type: string
-        region_name:
-          type: string
-      required:
-      - name
-      - region_name
-      type: object
     FilterSimpleContestResponse:
       properties:
         contest_list:
@@ -687,7 +701,15 @@ components:
           nullable: true
           type: string
         city:
-          $ref: '#/components/schemas/Field'
+          properties:
+            name:
+              type: string
+            region_name:
+              type: string
+          required:
+          - name
+          - region_name
+          type: object
         city_name:
           nullable: true
           type: string
@@ -704,8 +726,11 @@ components:
       type: object
     SimpleContest:
       properties:
+        base_contest:
+          allOf:
+          - $ref: '#/components/schemas/BaseContest'
+          readOnly: true
         contest_duration:
-          nullable: true
           type: integer
           x-unit: seconds
         contest_id:
@@ -724,6 +749,10 @@ components:
           - OfflineContest
           - OnLineContest
           type: string
+        locations:
+          items:
+            $ref: '#/components/schemas/OlympiadLocation'
+          type: array
         previous_contest_id:
           nullable: true
           type: integer
@@ -745,14 +774,20 @@ components:
           format: date-time
           nullable: true
           type: string
+        target_classes:
+          items:
+            $ref: '#/components/schemas/TargetClass'
+          type: array
         visibility:
           type: boolean
       required:
+      - base_contest
       - contest_duration
       - contest_id
       - end_date
       - end_of_enroll_date
       - holding_type
+      - locations
       - previous_participation_condition
       - result_publication_date
       - start_date
@@ -818,6 +853,17 @@ components:
       - stage_num
       - this_stage_condition
       type: object
+    TargetClass:
+      properties:
+        target_class:
+          maxLength: 32
+          type: string
+        target_class_id:
+          readOnly: true
+          type: integer
+      required:
+      - target_class
+      type: object
     Task:
       discriminator:
         mapping:
@@ -877,7 +923,17 @@ components:
         description:
           maxLength: 1024
           type: string
-        laureate_condition:
+        diploma_1_condition:
+          maximum: 1.0
+          minimum: 0.0
+          type: number
+        diploma_2_condition:
+          maximum: 1.0
+          minimum: 0.0
+          type: number
+        diploma_3_condition:
+          maximum: 1.0
+          minimum: 0.0
           type: number
         name:
           maxLength: 32
@@ -893,20 +949,17 @@ components:
           - Physics
           - Informatics
           type: string
-        target_classes:
-          items:
-            enum:
-            - '5'
-            - '6'
-            - '7'
-            - '8'
-            - '9'
-            - '10'
-            - '11'
-            - student
-            type: string
-          type: array
-        winning_condition:
+        winner_1_condition:
+          maximum: 1.0
+          minimum: 0.0
+          type: number
+        winner_2_condition:
+          maximum: 1.0
+          minimum: 0.0
+          type: number
+        winner_3_condition:
+          maximum: 1.0
+          minimum: 0.0
           type: number
       type: object
     UpdateContestRequestTaskEditor:
@@ -1027,6 +1080,15 @@ components:
         this_stage_condition:
           maxLength: 1024
           type: string
+      type: object
+    UpdateTargetClassesOfContestRequestTaskEditor:
+      properties:
+        target_classes_ids:
+          items:
+            type: integer
+          type: array
+      required:
+      - target_classes_ids
       type: object
     UpdateUserInContestRequestTaskControlUsers:
       properties:
@@ -2117,12 +2179,12 @@ paths:
       security:
       - JWTAccessToken: []
       - CSRFAccessToken: []
-  /tasks/editor/contest/{id_location}/remove_location:
+  /tasks/editor/contest/{id_contest}/remove_location:
     post:
       parameters:
-      - description: ID of the location
+      - description: ID of the contest
         in: path
-        name: id_location
+        name: id_contest
         required: true
         schema:
           type: integer
@@ -2131,6 +2193,56 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/UpdateLocationOfContestRequestTaskEditor'
+        required: true
+      responses:
+        '200':
+          description: OK
+        '400':
+          description: Bad request
+        '409':
+          description: Location already in use
+      security:
+      - JWTAccessToken: []
+      - CSRFAccessToken: []
+  /tasks/editor/base_olympiad/{id_base_olympiad}/add_target_classes:
+    post:
+      parameters:
+      - description: ID of the contest
+        in: path
+        name: id_base_olympiad
+        required: true
+        schema:
+          type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateTargetClassesOfContestRequestTaskEditor'
+        required: true
+      responses:
+        '200':
+          description: OK
+        '400':
+          description: Bad request
+        '409':
+          description: Olympiad type already in use
+      security:
+      - JWTAccessToken: []
+      - CSRFAccessToken: []
+  /tasks/editor/base_olympiad/{id_base_olympiad}/remove_target_classes:
+    post:
+      parameters:
+      - description: ID of the target class
+        in: path
+        name: id_base_olympiad
+        required: true
+        schema:
+          type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateTargetClassesOfContestRequestTaskEditor'
         required: true
       responses:
         '200':
@@ -2726,19 +2838,10 @@ paths:
           format: date-time
           type: string
       - in: query
-        name: target_classes
+        name: target_class
         required: false
         schema:
-          enum:
-          - '5'
-          - '6'
-          - '7'
-          - '8'
-          - '9'
-          - '10'
-          - '11'
-          - student
-          type: string
+          type: integer
       - in: query
         name: only_count
         required: false
@@ -2835,6 +2938,43 @@ paths:
           description: Olympiad type already in use
         '404':
           description: Olympiad type not found
+  /tasks/unauthorized/target_class/all:
+    get:
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AllTargetClassesRequestTaskUnauthorized'
+          description: OK
+        '400':
+          description: Bad request
+        '409':
+          description: Target class already in use
+        '404':
+          description: Target class not found
+  /tasks/unauthorized/target_class/{id_target_class}:
+    get:
+      parameters:
+      - description: Id of the location
+        in: path
+        name: id_target_class
+        required: true
+        schema:
+          type: integer
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TargetClass'
+          description: OK
+        '400':
+          description: Bad request
+        '409':
+          description: Target class already in use
+        '404':
+          description: Target class not found
   /tasks/control_users/contest/{id_contest}/add_user:
     post:
       parameters:
