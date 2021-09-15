@@ -39,7 +39,7 @@ def create_user_response_for_contest(contest_id, user_id):
         '404':
           description: User or contest not found
         '409':
-          description: Olympiad error
+          description: Timing error
     """
     create_user_response(contest_id, user_id)
     return {}, 200
@@ -257,7 +257,7 @@ def user_answer_for_task_by_id_post_plain_file(contest_id, task_id, user_id, fil
         '404':
           description: User, contest or task not found
         '409':
-          description: Olympiad is over or file is too large
+          description: Timing error or file is too large
     """
     check_task_type(task_id, answer_dict['PlainAnswerFile'])
     user_answer_post_file(request.data, filetype, user_id, contest_id, task_id)
@@ -305,7 +305,7 @@ def user_answer_for_task_by_id_post_plain_text(contest_id, task_id, user_id):
         '404':
           description: User, contest or task not found
         '409':
-          description: Olympiad is over
+          description: Timing error
     """
     check_task_type(task_id, answer_dict['PlainAnswerText'])
     values = request.marshmallow
@@ -354,7 +354,7 @@ def user_answer_for_task_by_id_range(contest_id, task_id, user_id):
         '404':
           description: User, contest or task not found
         '409':
-          description: Olympiad is over
+          description: Timing error
     """
     check_task_type(task_id, answer_dict['RangeAnswer'])
     values = request.marshmallow
@@ -403,7 +403,7 @@ def user_answer_for_task_by_id_multiple(contest_id, task_id, user_id):
         '404':
           description: User, contest or task not found
         '409':
-          description: Olympiad is over or wrong answers
+          description: Timing error or wrong answers
     """
     check_task_type(task_id, answer_dict['MultipleChoiceAnswer'])
     values = request.marshmallow
@@ -761,7 +761,7 @@ def auto_check_users_answers(contest_id):
         '404':
           description: Contest not found
         '409':
-          description: Contest error
+          description: Olympiad error
     """
     is_contest_over(contest_id)
     users_in_contest = db_get_list(Response, 'contest_id', contest_id)
@@ -793,7 +793,7 @@ def set_status_by_result(contest_id):
         '404':
           description: Contest not found
         '409':
-          description: Contest error
+          description: Olympiad error
     """
     is_contest_over(contest_id)
     is_all_checked(contest_id)

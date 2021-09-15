@@ -17,9 +17,25 @@ app = get_current_app()
 # Errors
 
 
-class OlympiadError(RequestError):
+class TimingError(RequestError):
     """
     Olympiad bad timing
+    """
+
+    def __init__(self, message):
+        """
+        Create error object
+        """
+        super(TimingError, self).__init__(409)
+        self.message = message
+
+    def get_msg(self) -> str:
+        return self.message
+
+
+class OlympiadError(RequestError):
+    """
+    Olympiad error
     """
 
     def __init__(self, message):
@@ -145,7 +161,7 @@ def check_task_type(task_id, task_type):
 def check_time_publishing(contest_id):
     simple_contest: SimpleContest = db_get_one_or_none(SimpleContest, 'contest_id', contest_id)
     if datetime.utcnow() < simple_contest.result_publication_date:
-        raise OlympiadError("The results have not yet been published")
+        raise TimingError("The results have not yet been published")
 
 
 def check_contest_time_left(contest_id):
@@ -154,7 +170,7 @@ def check_contest_time_left(contest_id):
         raise NotFound(field='contest_id', value=contest_id)
     duration = simple_contest.contest_duration
     if datetime.utcnow() + duration > simple_contest.end_date:
-        raise OlympiadError("Olympiad is over")
+        raise TimingError("Olympiad is over")
 
 
 def check_contest_duration(user_work: Response):
@@ -163,7 +179,7 @@ def check_contest_duration(user_work: Response):
     if user_work.work_status != work_status['InProgress'] or \
             time_spent + app.config['RESPONSE_EXTRA_MINUTES'] > contest_duration:
         finish_contest(user_work)
-        raise OlympiadError("Olympiad is over for current user")
+        raise TimingError("Olympiad is over for current user")
 
 
 def is_contest_over(contest_id):
@@ -172,7 +188,7 @@ def is_contest_over(contest_id):
     if simple_contest.holding_type == ContestHoldingTypeEnum.OfflineContest:
         raise OlympiadError("Olympiad is offline type")
     if datetime.utcnow() < time:
-        raise OlympiadError("Olympiad is not over yet")
+        raise TimingError("Olympiad is not over yet")
 
 
 def is_all_checked(contest_id):

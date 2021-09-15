@@ -33,7 +33,7 @@ def create_user_self_response_for_contest(contest_id):
         '404':
           description: User or contest not found
         '409':
-          description: Olympiad error
+          description: Timing error
     """
     check_contest_type(contest_id)
     self_user_id = jwt_get_id()
@@ -230,7 +230,7 @@ def self_user_answer_for_task_post_plain_file(contest_id, task_id, filetype):
         '404':
           description: User, contest or task not found
         '409':
-          description: Olympiad is over or file is too large
+          description: Timing error or file is too large
     """
     check_task_type(task_id, answer_dict['PlainAnswerFile'])
     self_user_id = jwt_get_id()
@@ -273,7 +273,7 @@ def self_user_answer_for_task_post_plain_text(contest_id, task_id):
         '404':
           description: User, contest or task not found
         '409':
-          description: Olympiad is over
+          description: Timing error
     """
     check_task_type(task_id, answer_dict['PlainAnswerText'])
     values = request.marshmallow
@@ -317,7 +317,7 @@ def self_user_answer_for_task_range(contest_id, task_id):
         '404':
           description: User, contest or task not found
         '409':
-          description: Olympiad is over
+          description: Timing error
     """
     check_task_type(task_id, answer_dict['RangeAnswer'])
     values = request.marshmallow
@@ -361,7 +361,7 @@ def self_user_answer_for_task_multiple(contest_id, task_id):
         '404':
           description: User, contest or task not found
         '409':
-          description: Olympiad is over
+          description: Timing error
     """
     check_task_type(task_id, answer_dict['MultipleChoiceAnswer'])
     values = request.marshmallow
