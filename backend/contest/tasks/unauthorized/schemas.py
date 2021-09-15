@@ -1,9 +1,8 @@
 from marshmallow import Schema, fields
 
-from contest.tasks.model_schemas.contest import StageSchema
 from contest.tasks.model_schemas.location import OlympiadLocationSchema
 from contest.tasks.model_schemas.olympiad import OlympiadTypeSchema, ContestSchema, BaseContestSchema, \
-    SimpleContestSchema, TargetClassSchema
+    SimpleContestSchema, TargetClassSchema, StageSchema
 
 
 # Olympiad type

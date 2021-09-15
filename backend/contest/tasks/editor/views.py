@@ -2,12 +2,12 @@ from flask import request
 from marshmallow import EXCLUDE
 
 from common import get_current_module
-from common.errors import NotFound
 from contest.tasks.creator.schemas import BaseOlympiadResponseTaskCreatorSchema, StageResponseTaskCreatorSchema, \
     ContestResponseTaskCreatorSchema, TaskResponseTaskCreatorSchema, VariantResponseTaskCreatorSchema
 from contest.tasks.editor.schemas import *
-from contest.tasks.model_schemas.contest import StageSchema, VariantSchema
-from contest.tasks.model_schemas.olympiad import BaseContestSchema, SimpleContestSchema, CompositeContestSchema
+from contest.tasks.model_schemas.contest import VariantSchema
+from contest.tasks.model_schemas.olympiad import BaseContestSchema, SimpleContestSchema, CompositeContestSchema, \
+    StageSchema
 from contest.tasks.model_schemas.tasks import PlainTaskSchema, RangeTaskSchema, MultipleChoiceTaskSchema
 from contest.tasks.util import *
 

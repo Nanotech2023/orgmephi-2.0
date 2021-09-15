@@ -801,6 +801,10 @@ components:
           - And
           - Or
           type: string
+        contests:
+          items:
+            $ref: '#/components/schemas/SimpleContest'
+          type: array
         olympiad_id:
           nullable: true
           type: integer
@@ -817,6 +821,7 @@ components:
           type: string
       required:
       - condition
+      - contests
       - stage_name
       - stage_num
       - this_stage_condition
@@ -836,6 +841,10 @@ components:
           - And
           - Or
           type: string
+        contests:
+          items:
+            $ref: '#/components/schemas/SimpleContest'
+          type: array
         stage_id:
           readOnly: true
           type: integer
@@ -849,6 +858,7 @@ components:
           type: string
       required:
       - condition
+      - contests
       - stage_name
       - stage_num
       - this_stage_condition
