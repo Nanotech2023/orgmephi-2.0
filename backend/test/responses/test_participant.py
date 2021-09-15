@@ -39,6 +39,25 @@ def test_user_response_participant(client, create_plain_task):
     assert response.work_status.value == 'InProgress'
 
 
+def test_contest_zero_duration(client, create_one_task):
+    contest_id = get_contest_id(create_one_task, DEFAULT_INDEX)
+    user_id = get_user_id(create_one_task, DEFAULT_INDEX)
+    task_id = get_plain_task_id(create_one_task, DEFAULT_INDEX)
+
+    contest = create_one_task['contests'][DEFAULT_INDEX]
+    contest.contest_duration = timedelta(seconds=0)
+    contest.end_date = datetime.utcnow() - timedelta(minutes=5)
+    test_app.db.session.commit()
+
+    resp = client.post(f'/contest/{contest_id}/task/{task_id}/user/self/plain',
+                       json={'answer_text': 'answer'})
+    assert resp.status_code == 409
+
+    from contest.responses.util import get_user_in_contest_work
+    response = get_user_in_contest_work(user_id, contest_id)
+    assert response.work_status.value == 'NotChecked'
+
+
 # noinspection DuplicatedCode
 def test_user_response_offline_contest_participant(client, create_plain_task):
     index = 1
@@ -274,6 +293,16 @@ def test_time_left_participant(client, create_one_task):
     resp = client.get(f'/contest/{contest_id}/user/self/time')
     assert resp.status_code == 200
     assert resp.json['time'] == 0
+
+    contest = create_one_task['contests'][DEFAULT_INDEX]
+    contest.contest_duration = timedelta(seconds=0)
+    contest.start_date = datetime.utcnow() - timedelta(minutes=5)
+    user_work.start_time = datetime.utcnow()
+    contest.end_date = datetime.utcnow() + timedelta(minutes=5)
+    resp = client.get(f'/contest/{contest_id}/user/self/time')
+    assert resp.status_code == 200
+    assert resp.json['time'] > 250
+    assert resp.json['time'] < 310
 
 
 # noinspection DuplicatedCode

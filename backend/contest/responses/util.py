@@ -182,7 +182,8 @@ def check_contest_duration(user_work: Response):
         contest_duration = contest.end_date - contest.start_date
     time_spent = datetime.utcnow() - user_work.start_time
     if user_work.work_status != work_status['InProgress'] or \
-            time_spent + app.config['RESPONSE_EXTRA_MINUTES'] > contest_duration:
+            time_spent + app.config['RESPONSE_EXTRA_MINUTES'] > contest_duration or \
+            datetime.utcnow() > contest.end_date:
         finish_contest(user_work)
         raise TimingError("Olympiad is over for current user")
 
@@ -292,11 +293,15 @@ def update_multiple_answers(answers, answer):
 
 
 def calculate_time_left(user_work: Response):
-    contest_duration = db_get_one_or_none(SimpleContest, "contest_id", user_work.contest_id).contest_duration
+    contest: SimpleContest = db_get_one_or_none(SimpleContest, "contest_id", user_work.contest_id)
+    contest_duration = contest.contest_duration
     if user_work.work_status != work_status['InProgress']:
         return timedelta(seconds=0)
     time_spent = datetime.utcnow() - user_work.start_time
-    time_left = contest_duration + user_work.time_extension - time_spent
+    if contest_duration == timedelta(seconds=0):
+        time_left = contest.end_date - datetime.utcnow()
+    else:
+        time_left = contest_duration + user_work.time_extension - time_spent
     if time_left < timedelta(seconds=0):
         time_left = timedelta(seconds=0)
     return time_left
