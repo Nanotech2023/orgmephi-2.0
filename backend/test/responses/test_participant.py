@@ -341,24 +341,20 @@ def test_auto_check_participant(client, create_user_with_answers):
     assert resp.json['user_id'] == user_id
     user_answers = resp.json['user_answers']
     assert len(user_answers) == 3
-    tasks_points = resp.json['tasks_points']
-    assert len(tasks_points) == 3
 
     for answer in user_answers:
         if answer['answer_type'] == 'PlainAnswerText':
             assert answer['mark'] == 0
+            assert answer['task_points'] == 11
+            assert answer['task_id'] == plain_id
         elif answer['answer_type'] == 'RangeAnswer':
             assert answer['mark'] == 0
+            assert answer['task_points'] == 5
+            assert answer['task_id'] == range_id
         elif answer['answer_type'] == 'MultipleChoiceAnswer':
             assert answer['mark'] == 7
-
-    for points in tasks_points:
-        if points['task_id'] == plain_id:
-            assert points['task_points'] == 11
-        elif points['task_id'] == range_id:
-            assert points['task_points'] == 5
-        elif points['task_id'] == multiple_id:
-            assert points['task_points'] == 7
+            assert answer['task_points'] == 7
+            assert answer['task_id'] == multiple_id
 
 
 # noinspection DuplicatedCode

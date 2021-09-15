@@ -178,10 +178,10 @@ def is_contest_over(contest_id):
 def is_all_checked(contest_id):
     from contest.responses.models import ResponseStatusEnum
     user_works_not_checked = Response.query.filter_by(contest_id=contest_id,
-                                                      work_status=ResponseStatusEnum.not_checked).all()
+                                                      work_status=ResponseStatusEnum.not_checked).count()
     user_works_in_progress = Response.query.filter_by(contest_id=contest_id,
-                                                      work_status=ResponseStatusEnum.in_progress).all()
-    if len(user_works_in_progress) != 0 or len(user_works_not_checked) != 0:
+                                                      work_status=ResponseStatusEnum.in_progress).count()
+    if user_works_in_progress != 0 or user_works_not_checked != 0:
         raise OlympiadError("Not all user responses checked")
 
 
@@ -202,7 +202,7 @@ def check_mark_for_task(mark, task_id):
 def check_user_multiple_answers(answers, task_id):
     multiple_task: MultipleChoiceTask = db_get_one_or_none(MultipleChoiceTask, 'task_id', task_id)
     user_answers = [elem['answer'] for elem in answers]
-    answers = [elem['answer'] for elem in multiple_task.answers]
+    answers = set(elem['answer'] for elem in multiple_task.answers)
     for elem in user_answers:
         if elem not in answers:
             raise OlympiadError("Wrong answers for multiple type task")

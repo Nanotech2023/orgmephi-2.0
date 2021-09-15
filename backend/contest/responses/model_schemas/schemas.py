@@ -1,5 +1,5 @@
 from marshmallow_oneofschema import OneOfSchema
-from marshmallow_sqlalchemy import SQLAlchemySchema, auto_field
+from marshmallow_sqlalchemy import SQLAlchemySchema, auto_field, fields
 from marshmallow_enum import EnumField
 
 from contest.responses.models import *
@@ -28,11 +28,12 @@ class BaseAnswerSchema(SQLAlchemySchema):
     answer_type = EnumField(AnswerEnum, data_key='answer_type', by_value=True)
     task_id = auto_field(column_name='task_id', dump_only=True)
     mark = auto_field(column_name='mark', dump_only=True)
+    task_points = fields.Related(data_key='task_points', column=['task_points'], required=True)
 
 
 class AnswerWithoutMarkSchema(BaseAnswerSchema):
     class Meta(BaseAnswerSchema.Meta):
-        exclude = ['mark']
+        exclude = ['mark', 'task_points']
 
 
 class RangeAnswerSchema(SQLAlchemySchema):
