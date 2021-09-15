@@ -168,13 +168,18 @@ def check_contest_time_left(contest_id):
     simple_contest: SimpleContest = db_get_one_or_none(SimpleContest, 'contest_id', contest_id)
     if simple_contest is None:
         raise NotFound(field='contest_id', value=contest_id)
+    if datetime.utcnow() < simple_contest.start_date:
+        raise TimingError("Olympiad haven't started yet")
     duration = simple_contest.contest_duration
     if datetime.utcnow() + duration > simple_contest.end_date:
         raise TimingError("Olympiad is over")
 
 
 def check_contest_duration(user_work: Response):
-    contest_duration = db_get_one_or_none(SimpleContest, "contest_id", user_work.contest_id).contest_duration
+    contest: SimpleContest = db_get_one_or_none(SimpleContest, "contest_id", user_work.contest_id)
+    contest_duration = contest.contest_duration
+    if contest_duration == timedelta(seconds=0):
+        contest_duration = contest.end_date - contest.start_date
     time_spent = datetime.utcnow() - user_work.start_time
     if user_work.work_status != work_status['InProgress'] or \
             time_spent + app.config['RESPONSE_EXTRA_MINUTES'] > contest_duration:

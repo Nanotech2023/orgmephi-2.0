@@ -15,8 +15,18 @@ def test_user_response_participant(client, create_plain_task):
     contest_id = get_contest_id(create_plain_task, DEFAULT_INDEX)
     user_id = get_user_id(create_plain_task, DEFAULT_INDEX)
 
+    contest = create_plain_task['contests'][DEFAULT_INDEX]
+    contest.start_date = datetime.utcnow() + timedelta(minutes=5)
+    test_app.db.session.commit()
+
+    resp = client.post(f'/contest/{contest_id}/user/self/create')
+    assert resp.status_code == 409
+
     resp = client.post(f'/contest/{ERROR_ID}/user/self/create')
     assert resp.status_code == 404
+
+    contest.start_date = datetime.utcnow() - timedelta(minutes=5)
+    test_app.db.session.commit()
 
     resp = client.post(f'/contest/{contest_id}/user/self/create')
     assert resp.status_code == 200
@@ -399,6 +409,13 @@ def test_time_left_error_participant(client, create_two_tasks):
 
     contest = create_two_tasks['contests'][DEFAULT_INDEX]
     contest.contest_duration = timedelta(seconds=0)
+    test_app.db.session.commit()
+
+    resp = client.post(f'/contest/{contest_id}/task/{plain_id}/user/self/plain',
+                       json={'answer_text': "answer"})
+    assert resp.status_code == 200
+
+    contest.end_date = datetime.utcnow() - timedelta(minutes=5)
     test_app.db.session.commit()
 
     resp = client.post(f'/contest/{contest_id}/task/{plain_id}/user/self/plain',
