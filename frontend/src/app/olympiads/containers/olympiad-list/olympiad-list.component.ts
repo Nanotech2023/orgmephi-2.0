@@ -6,10 +6,10 @@ import { Observable } from 'rxjs'
 
 @Component( {
     selector: 'app-home',
-    templateUrl: './home.component.html',
-    styleUrls: [ './home.component.scss' ]
+    templateUrl: './olympiad-list.component.html',
+    styleUrls: [ './olympiad-list.component.scss' ]
 } )
-export class HomeComponent implements OnInit
+export class OlympiadListComponent implements OnInit
 {
     isParticipant$!: Observable<boolean>
 

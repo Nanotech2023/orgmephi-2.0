@@ -1,11 +1,12 @@
 import { NgModule } from '@angular/core'
 import { SharedModule } from '@/shared/shared.module'
 import { OlympiadsRoutingModule } from '@/olympiads/olympiads.routing.module'
-import { HomeComponent } from '@/olympiads/containers/home/home.component'
+import { OlympiadListComponent } from '@/olympiads/containers/olympiad-list/olympiad-list.component'
 import { ParticipantComponent } from '@/olympiads/components/participant/participant.component'
+import { OlympiadDetailsComponent } from '@/olympiads/containers/olympiad-details/olympiad-details.component'
 
 
-const COMPONENTS = [ HomeComponent, ParticipantComponent ]
+const COMPONENTS = [ OlympiadListComponent, ParticipantComponent, OlympiadDetailsComponent ]
 
 
 @NgModule( {
