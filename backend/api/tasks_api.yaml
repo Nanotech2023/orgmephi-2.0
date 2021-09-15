@@ -157,13 +157,6 @@ components:
           type: number
         winner_3_condition:
           type: number
-      required:
-      - description
-      - name
-      - olympiad_type_id
-      - rules
-      - subject
-      - target_classes
       type: object
     BaseOlympiadIdResponseTaskCreator:
       properties:
@@ -209,13 +202,6 @@ components:
           type: number
         winner_3_condition:
           type: number
-      required:
-      - description
-      - name
-      - olympiad_type_id
-      - rules
-      - subject
-      - target_classes
       type: object
     ChangeUsersLocationInContestRequestTaskControlUsers:
       properties:
@@ -820,8 +806,6 @@ components:
           maxLength: 1024
           type: string
       required:
-      - condition
-      - contests
       - stage_name
       - stage_num
       - this_stage_condition
@@ -857,8 +841,6 @@ components:
           maxLength: 1024
           type: string
       required:
-      - condition
-      - contests
       - stage_name
       - stage_num
       - this_stage_condition

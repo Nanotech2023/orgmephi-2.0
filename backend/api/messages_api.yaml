@@ -473,7 +473,7 @@ paths:
       security:
       - JWTAccessToken: []
       - CSRFAccessToken: []
-  /messages/creator/filter_threads:
+  /messages/creator/threads:
     get:
       parameters:
       - in: query
