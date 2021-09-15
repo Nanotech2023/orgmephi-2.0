@@ -1,8 +1,5 @@
 from . import *
 
-DEFAULT_INDEX = 0
-ERROR_ID = 1500
-
 
 @pytest.fixture
 def client(client_university):
@@ -97,7 +94,7 @@ def test_get_variant_self(client, test_simple_contest_with_users,
 
 
 def test_get_variant_self_no_variant(client, test_simple_contest_with_users_no_variant,
-                          test_variant):
+                                     test_variant):
     resp = client.get(f'/contest/{test_simple_contest_with_users_no_variant[1].contest_id}/variant/self')
     assert resp.status_code == 404
 
@@ -242,6 +239,12 @@ def test_get_contest_self(client, test_base_contests, test_simple_contest, test_
         f'/olympiad/{test_simple_contest[0].contest_id}')
     assert resp.status_code == 200
     assert test_simple_contest[0].contest_id == resp.json['contest_id']
+
+
+def test_get_contest_sel_composite(client, test_base_contests, test_contests_composite, test_simple_contest_with_users):
+    resp = client.get(
+        f'/olympiad/{test_contests_composite[0].contest_id}')
+    assert resp.status_code == 409
 
 
 def test_get_contest_self_not_reg(client, test_base_contests, test_simple_contest):

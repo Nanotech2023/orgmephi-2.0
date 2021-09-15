@@ -1,8 +1,5 @@
 from . import *
 
-DEFAULT_INDEX = 0
-ERROR_ID = 1500
-
 
 @pytest.fixture
 def client(client_visitor):

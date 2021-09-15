@@ -50,6 +50,33 @@ def test_add_user_to_contest(client, test_variant, test_simple_contest, test_oly
     assert resp.status_code == 200
 
 
+def test_add_user_to_contest_and_cond(client, test_variant, test_simple_contest_in_stage_and, test_olympiad_locations,
+                                      test_user_for_student_contest):
+    resp = client.post(
+        f'/contest/{test_simple_contest_in_stage_and[0].contest_id}/add_user',
+        json={
+            'users_id': [f'{test_user_for_student_contest.id}'],
+            'location_id': f'{test_olympiad_locations[0].location_id}',
+            'show_results_to_user': 'true',
+            'check_condition': 'true'
+        })
+    assert resp.status_code == 409
+
+
+def test_add_user_to_contest_and_2_contest(client, test_variant, test_simple_contest_in_stage_2_contest_in_stage,
+                                           test_olympiad_locations,
+                                           test_user_for_student_contest):
+    resp = client.post(
+        f'/contest/{test_simple_contest_in_stage_2_contest_in_stage[0].contest_id}/add_user',
+        json={
+            'users_id': [f'{test_user_for_student_contest.id}'],
+            'location_id': f'{test_olympiad_locations[0].location_id}',
+            'show_results_to_user': 'true',
+            'check_condition': 'true'
+        })
+    assert resp.status_code == 409
+
+
 def test_add_user_to_contest_school(client, test_variant, test_simple_contest, test_olympiad_locations,
                                     test_user_school):
     resp = client.post(

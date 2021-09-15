@@ -1,4 +1,5 @@
 from datetime import datetime, timedelta
+
 from ..user import *
 
 
@@ -132,6 +133,7 @@ def test_simple_contest_with_location(test_simple_contest, test_olympiad_locatio
     yield test_simple_contest
 
 
+# noinspection DuplicatedCode
 @pytest.fixture
 def test_stages(test_contests_composite, test_contests):
     from contest.tasks.models import Stage, StageConditionEnum
@@ -146,6 +148,22 @@ def test_stages(test_contests_composite, test_contests):
     yield stages
 
 
+# noinspection DuplicatedCode
+@pytest.fixture
+def test_stages_and(test_contests_composite, test_contests):
+    from contest.tasks.models import Stage, StageConditionEnum
+
+    stages = [Stage(stage_name=f'Test {i}', stage_num=i,
+                    condition=StageConditionEnum.And, this_stage_condition='Test')
+              for i in range(8)]
+    for i in range(len(stages)):
+        test_contests_composite[0].stages.append(stages[i])
+    test_app.db.session.add_all(stages)
+    test_app.db.session.commit()
+    yield stages
+
+
+# noinspection DuplicatedCode
 @pytest.fixture
 def test_simple_contest_in_stage_1(test_base_contests_with_target, test_stages):
     from contest.tasks.models import Variant
@@ -196,6 +214,121 @@ def test_simple_contest_in_stage_1(test_base_contests_with_target, test_stages):
     yield simple_contests
 
 
+# noinspection DuplicatedCode
+@pytest.fixture
+def test_simple_contest_in_stage_2_contest_in_stage(test_base_contests_with_target, test_stages):
+    from contest.tasks.models import Variant
+    from contest.tasks.models.user import UserStatusEnum
+    from contest.tasks.models.olympiad import SimpleContest, ContestHoldingTypeEnum
+    from contest.tasks.models import UserInContest
+    holding_types = [ContestHoldingTypeEnum.OnLineContest, ContestHoldingTypeEnum.OfflineContest]
+    simple_contests = [SimpleContest(visibility=True,
+                                     start_date=datetime.utcnow(),
+                                     end_date=datetime.utcnow() + timedelta(hours=4),
+                                     holding_type=holding_types[i % 2],
+                                     contest_duration=timedelta(minutes=30),
+                                     result_publication_date=datetime.utcnow() + timedelta(hours=6),
+                                     end_of_enroll_date=datetime.utcnow() + timedelta(minutes=15))
+                       for i in range(2)]
+
+    contest_in_other_stage_1 = SimpleContest(contest_id=999,
+                                             visibility=True,
+                                             start_date=datetime.utcnow(),
+                                             end_date=datetime.utcnow() + timedelta(hours=4),
+                                             holding_type=holding_types[0],
+                                             contest_duration=timedelta(minutes=30),
+                                             result_publication_date=datetime.utcnow() + timedelta(hours=6),
+                                             end_of_enroll_date=datetime.utcnow() + timedelta(minutes=15))
+
+    contest_in_other_stage_2 = SimpleContest(contest_id=1000,
+                                             visibility=True,
+                                             start_date=datetime.utcnow(),
+                                             end_date=datetime.utcnow() + timedelta(hours=4),
+                                             holding_type=holding_types[0],
+                                             contest_duration=timedelta(minutes=30),
+                                             result_publication_date=datetime.utcnow() + timedelta(hours=6),
+                                             end_of_enroll_date=datetime.utcnow() + timedelta(minutes=15),
+                                             previous_contest_id=999,
+                                             previous_participation_condition=UserStatusEnum.Participant)
+
+    test_app.db.session.add(contest_in_other_stage_1)
+    test_app.db.session.add(contest_in_other_stage_2)
+
+    simple_contests[1].previous_contest_id = contest_in_other_stage_2.contest_id
+    simple_contests[1].previous_participation_condition = UserStatusEnum.Participant
+
+    simple_contests[1].variants.append(Variant(variant_number=1, variant_description="3"))
+
+    uic = UserInContest(user_id=1,
+                        show_results_to_user=True,
+                        location_id=1,
+                        variant_id=1,
+                        user_status=UserStatusEnum.Participant)
+    test_app.db.session.add(uic)
+    contest_in_other_stage_2.users.append(uic)
+
+    for i in range(len(simple_contests)):
+        test_stages[0].contests.append(simple_contests[i])
+
+    test_stages[1].contests.append(contest_in_other_stage_2)
+    test_app.db.session.add_all(simple_contests)
+    simple_contests.append(contest_in_other_stage_2)
+    test_app.db.session.commit()
+    yield simple_contests
+
+
+# noinspection DuplicatedCode
+@pytest.fixture
+def test_simple_contest_in_stage_and(test_base_contests_with_target, test_stages_and):
+    from contest.tasks.models import Variant
+    from contest.tasks.models.user import UserStatusEnum
+    from contest.tasks.models.olympiad import SimpleContest, ContestHoldingTypeEnum
+    from contest.tasks.models import UserInContest
+    holding_types = [ContestHoldingTypeEnum.OnLineContest, ContestHoldingTypeEnum.OfflineContest]
+    simple_contests = [SimpleContest(visibility=True,
+                                     start_date=datetime.utcnow(),
+                                     end_date=datetime.utcnow() + timedelta(hours=4),
+                                     holding_type=holding_types[i % 2],
+                                     contest_duration=timedelta(minutes=30),
+                                     result_publication_date=datetime.utcnow() + timedelta(hours=6),
+                                     end_of_enroll_date=datetime.utcnow() + timedelta(minutes=15))
+                       for i in range(2)]
+
+    other_stage = SimpleContest(visibility=True,
+                                start_date=datetime.utcnow(),
+                                end_date=datetime.utcnow() + timedelta(hours=4),
+                                holding_type=holding_types[0],
+                                contest_duration=timedelta(minutes=30),
+                                result_publication_date=datetime.utcnow() + timedelta(hours=6),
+                                end_of_enroll_date=datetime.utcnow() + timedelta(minutes=15))
+    test_app.db.session.add(other_stage)
+
+    test_app.db.session.flush()
+
+    simple_contests[1].previous_contest_id = other_stage.contest_id
+    simple_contests[1].previous_participation_condition = UserStatusEnum.Participant
+
+    simple_contests[1].variants.append(Variant(variant_number=1, variant_description="3"))
+
+    uic = UserInContest(user_id=1,
+                        show_results_to_user=True,
+                        location_id=1,
+                        variant_id=1,
+                        user_status=UserStatusEnum.Participant)
+    test_app.db.session.add(uic)
+    other_stage.users.append(uic)
+
+    for i in range(len(simple_contests)):
+        test_stages_and[0].contests.append(simple_contests[i])
+
+    test_stages_and[1].contests.append(other_stage)
+    test_app.db.session.add_all(simple_contests)
+    simple_contests.append(other_stage)
+    test_app.db.session.commit()
+    yield simple_contests
+
+
+# noinspection DuplicatedCode
 @pytest.fixture
 def test_simple_contest_in_stage_2(test_base_contests_with_target, test_stages):
     from contest.tasks.models import Variant
@@ -251,6 +384,7 @@ def test_simple_contest_in_stage_2(test_base_contests_with_target, test_stages):
     yield simple_contests
 
 
+# noinspection DuplicatedCode
 @pytest.fixture
 def test_simple_contest_in_stage_3(test_base_contests_with_target, test_stages):
     from contest.tasks.models import Variant
@@ -420,6 +554,7 @@ def test_user_for_student_contest_none(test_city, test_university, test_user_uni
     yield test_user_university
 
 
+# noinspection DuplicatedCode
 @pytest.fixture
 def test_simple_contest_with_users(test_simple_contest, test_variant, test_olympiad_locations,
                                    test_user_for_student_contest):
@@ -442,6 +577,7 @@ def test_simple_contest_with_users(test_simple_contest, test_variant, test_olymp
     yield test_simple_contest
 
 
+# noinspection DuplicatedCode
 @pytest.fixture
 def test_simple_contest_with_users_no_variant(test_simple_contest, test_variant, test_olympiad_locations,
                                               test_user_for_student_contest):
@@ -464,6 +600,7 @@ def test_simple_contest_with_users_no_variant(test_simple_contest, test_variant,
     yield test_simple_contest
 
 
+# noinspection DuplicatedCode
 @pytest.fixture
 def test_simple_contest_with_users_not_in_progress(test_simple_contest, test_variant, test_olympiad_locations,
                                                    test_user_for_student_contest):
@@ -486,6 +623,7 @@ def test_simple_contest_with_users_not_in_progress(test_simple_contest, test_var
     yield test_simple_contest
 
 
+# noinspection DuplicatedCode
 @pytest.fixture
 def test_simple_contest_with_users_ended(test_simple_contest, test_variant, test_olympiad_locations,
                                          test_user_for_student_contest):
@@ -510,6 +648,7 @@ def test_simple_contest_with_users_ended(test_simple_contest, test_variant, test
     yield test_simple_contest
 
 
+# noinspection DuplicatedCode
 @pytest.fixture
 def test_composite_contest_with_users(test_simple_contest_in_stage_1, test_variant, test_olympiad_locations,
                                       test_user_for_student_contest):

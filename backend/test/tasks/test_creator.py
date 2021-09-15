@@ -106,6 +106,19 @@ def test_stage_create(client, test_contests_composite):
     assert stage.stage_id == resp.json['stage_id']
 
 
+def test_stage_create_in_simple(client, test_simple_contest):
+    from contest.tasks.models import StageConditionEnum, \
+        Stage
+    resp = client.post(f'/olympiad/{test_simple_contest[0].contest_id}/stage/create',
+                       json={
+                           'stage_name': 'Test name',
+                           'stage_num': '0',
+                           'this_stage_condition': 'Test 0',
+                           'condition': f'{StageConditionEnum.And.value}',
+                       })
+    assert resp.status_code == 409
+
+
 def test_contests_all(client, test_contests_composite, test_stages, test_simple_contest_in_stage_1):
     resp = client.get(f'/olympiad/{test_contests_composite[0].contest_id}/stage/{test_stages[0].stage_id}/contest/all')
     assert resp.status_code == 200
