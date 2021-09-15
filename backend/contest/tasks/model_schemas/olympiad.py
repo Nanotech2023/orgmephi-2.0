@@ -1,4 +1,3 @@
-from marshmallow import fields
 from marshmallow_enum import EnumField
 from marshmallow_oneofschema import OneOfSchema
 from marshmallow_sqlalchemy import SQLAlchemySchema, auto_field, fields
@@ -71,18 +70,9 @@ class BaseContestSchema(SQLAlchemySchema):
 Contest
 """
 
-
-class CompositeContestSchema(SQLAlchemySchema):
-    class Meta:
-        model = CompositeContest
-        load_instance = True
-        sqla_session = db.session
-
-    contest_id = auto_field(column_name='contest_id', dump_only=True)
-    visibility = auto_field(column_name='visibility', required=True)
-    holding_type = EnumField(ContestHoldingTypeEnum,
-                             data_key='holding_type',
-                             by_value=True, required=True)
+"""
+Stage
+"""
 
 
 class SimpleContestSchema(SQLAlchemySchema):
@@ -107,6 +97,38 @@ class SimpleContestSchema(SQLAlchemySchema):
     holding_type = EnumField(ContestHoldingTypeEnum,
                              data_key='holding_type',
                              by_value=True, required=True)
+    base_contest = fields.Nested(BaseContestSchema, required=True, dump_only=True)
+
+
+class StageSchema(SQLAlchemySchema):
+    class Meta:
+        model = Stage
+        load_instance = True
+        sqla_session = db.session
+
+    stage_id = auto_field(column_name='stage_id', dump_only=True)
+    olympiad_id = auto_field(column_name='olympiad_id', required=False)
+    stage_name = auto_field(column_name='stage_name', validate=common_name_validator, required=True)
+    condition = EnumField(StageConditionEnum, data_key='condition', required=True, by_value=True)
+    this_stage_condition = auto_field(column_name='this_stage_condition', validate=text_validator, required=True)
+    stage_num = auto_field(column_name='stage_num', required=True)
+
+    contests = fields.Nested(SimpleContestSchema, many=True, required=True)
+
+
+class CompositeContestSchema(SQLAlchemySchema):
+    class Meta:
+        model = CompositeContest
+        load_instance = True
+        sqla_session = db.session
+
+    contest_id = auto_field(column_name='contest_id', dump_only=True)
+    visibility = auto_field(column_name='visibility', required=True)
+    holding_type = EnumField(ContestHoldingTypeEnum,
+                             data_key='holding_type',
+                             by_value=True, required=True)
+    stages = fields.Nested(StageSchema, many=True, required=True, dump_only=True)
+    base_contest = fields.Nested(BaseContestSchema, required=True, dump_only=True)
 
 
 class ContestSchema(OneOfSchema):

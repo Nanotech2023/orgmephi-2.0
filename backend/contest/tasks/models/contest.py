@@ -42,7 +42,7 @@ class Stage(db.Model):
     __tablename__ = 'stage'
 
     stage_id = db.Column(db.Integer, autoincrement=True, primary_key=True)
-    olympiad_id = db.Column(db.Integer, db.ForeignKey('contest.contest_id'))
+    olympiad_id = db.Column(db.Integer, db.ForeignKey('composite_contest.contest_id'))
     stage_name = db.Column(db.Text, index=True, nullable=False)
     stage_num = db.Column(db.Integer, nullable=False)
     condition = db.Column(db.Enum(StageConditionEnum), nullable=True)
@@ -109,7 +109,7 @@ class Variant(db.Model):
     __tablename__ = 'variant'
 
     variant_id = db.Column(db.Integer, autoincrement=True, primary_key=True)
-    contest_id = db.Column(db.Integer, db.ForeignKey('contest.contest_id'))
+    contest_id = db.Column(db.Integer, db.ForeignKey('simple_contest.contest_id'))
     variant_number = db.Column(db.Integer)
     variant_description = db.Column(db.Text)
 

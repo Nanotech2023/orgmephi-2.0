@@ -4,8 +4,8 @@ from marshmallow import Schema, fields
 from marshmallow_enum import EnumField
 
 from common import fields as common_fields
-from contest.tasks.model_schemas.contest import StageSchema, VariantSchema
-from contest.tasks.model_schemas.olympiad import ContestSchema, BaseContestSchema
+from contest.tasks.model_schemas.contest import VariantSchema
+from contest.tasks.model_schemas.olympiad import ContestSchema, BaseContestSchema, StageSchema
 from contest.tasks.model_schemas.tasks import TaskSchema
 from contest.tasks.models import OlympiadSubjectEnum, StageConditionEnum, ContestHoldingTypeEnum, \
     UserStatusEnum
