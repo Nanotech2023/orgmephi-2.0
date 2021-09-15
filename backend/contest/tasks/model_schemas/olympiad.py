@@ -1,9 +1,9 @@
-from marshmallow import fields
 from marshmallow_enum import EnumField
 from marshmallow_oneofschema import OneOfSchema
 from marshmallow_sqlalchemy import SQLAlchemySchema, auto_field, fields
 
 from common.fields import text_validator, common_name_validator
+from contest.tasks.model_schemas.contest import StageSchema
 from contest.tasks.model_schemas.location import OlympiadLocationSchema
 from contest.tasks.models import *
 from contest.tasks.models.reference import TargetClass
@@ -83,6 +83,8 @@ class CompositeContestSchema(SQLAlchemySchema):
     holding_type = EnumField(ContestHoldingTypeEnum,
                              data_key='holding_type',
                              by_value=True, required=True)
+    stages = fields.Nested(StageSchema, many=True, required=True, dump_only=True)
+    base_contest = fields.Nested(BaseContestSchema, required=True, dump_only=True)
 
 
 class SimpleContestSchema(SQLAlchemySchema):
@@ -107,6 +109,7 @@ class SimpleContestSchema(SQLAlchemySchema):
     holding_type = EnumField(ContestHoldingTypeEnum,
                              data_key='holding_type',
                              by_value=True, required=True)
+    base_contest = fields.Nested(BaseContestSchema, required=True, dump_only=True)
 
 
 class ContestSchema(OneOfSchema):
