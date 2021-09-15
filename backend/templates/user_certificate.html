@@ -1,4 +1,7 @@
-<html lang="en"><head>
+<!-- This is a draft to test the service during development, do not use for production -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
     <meta charset="UTF-8">
     <title>Title</title>
     <style>
@@ -44,24 +47,24 @@ style="background-image: url('http://back');"
                 </tr>
                 <tr style="height: 18px;">
                     <td style="width: 50%; height: 18px;">Фамилия</td>
-                    <td style="width: 50%; height: 18px;">{{ <a href="http://u.user_info.second_name">u.user_info.second_name</a> }}</td>
+                    <td style="width: 50%; height: 18px;">{{ u.user_info.second_name}}</td>
                 </tr>
                 <tr style="height: 18px;">
                     <td style="width: 50%; height: 18px;">Имя</td>
-                    <td style="width: 50%; height: 18px;">{{ <a href="http://u.user_info.first_name">u.user_info.first_name</a> }}</td>
+                    <td style="width: 50%; height: 18px;">{{ u.user_info.first_name }}</td>
                 </tr>
                 <tr style="height: 18px;">
                     <td style="width: 50%; height: 18px;">Отчество</td>
-                    <td style="width: 50%; height: 18px;">{{ <a href="http://u.user_info.middle_name">u.user_info.middle_name</a> }}</td>
+                    <td style="width: 50%; height: 18px;">{{ u.user_info.middle_name }}</td>
                 </tr>
                 <tr style="height: 18px;">
                     <td style="width: 50%; height: 18px;">Степень</td>
-                    <td style="width: 50%; height: 18px;">{{ <a href="http://user_status">user_status</a> }}
+                    <td style="width: 50%; height: 18px;">{{ status_types[user_status] }}
                     </td>
                 </tr>
                 <tr style="height: 18px;">
                     <td style="width: 50%; height: 18px;">Баллы</td>
-                    <td style="width: 50%; height: 18px;">{{ <a href="http://mark">mark</a> }}
+                    <td style="width: 50%; height: 18px;">{{ mark }}
                     </td>
                 </tr>
                 </tbody>

@@ -25,6 +25,7 @@ class OrgMephiModule:
     """
     Application module
     """
+
     def __init__(self, name: str, package: str, access_level: Optional[OrgMephiAccessLevel], area: OrgMephiArea,
                  api_file: Optional[str] = None, marshmallow_api: bool = False):
         """
@@ -113,6 +114,7 @@ class OrgMephiModule:
         :param options: flask.Flask.route options
         :return: decorator
         """
+
         def decorator(f: Callable) -> Callable:
             """
             Decorator to initialize a new route for self (see flask.Flask.route)
@@ -145,6 +147,7 @@ class OrgMephiModule:
 
             self._blueprint.route(rule, **options)(func_wrapped)
             return f
+
         return decorator
 
     def add_module(self, module):

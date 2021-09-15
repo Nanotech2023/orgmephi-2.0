@@ -235,6 +235,9 @@ def olympiad_patch(id_base_olympiad, id_olympiad):
     return current_contest, 200
 
 
+# Stage
+
+
 @module.route('/olympiad/<int:id_olympiad>/stage/<int:id_stage>/remove',
               methods=['POST'])
 def stage_remove(id_olympiad, id_stage):
@@ -628,13 +631,6 @@ def task_remove(id_contest, id_variant, id_task):
     db.session.commit()
 
     return {}, 200
-
-
-def check_existence(id_olympiad, id_stage, id_contest, id_variant):
-    db_get_or_raise(Contest, "contest_id", str(id_olympiad))
-    db_get_or_raise(Stage, "stage_id", str(id_stage))
-    db_get_or_raise(Contest, "contest_id", str(id_contest))
-    db_get_or_raise(Variant, "variant_id", str(id_variant))
 
 
 @module.route(

@@ -287,5 +287,5 @@ def get_user_certificate_in_contest(id_contest, id_user):
     ).one_or_none()
     user_status = user_in_contest.user_status
 
-    return send_pdf('user_certificate.html', u=user, mark=mark, user_status=user_status,
+    return send_pdf('user_certificate.html', u=current_user, mark=mark, user_status=user_status,
                     back=current_contest)

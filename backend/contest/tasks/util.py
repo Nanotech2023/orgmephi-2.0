@@ -1,6 +1,5 @@
 import secrets
 
-from common import get_current_app
 from common.errors import FileTooLarge, DataConflict, InsufficientData, RequestError, NotFound
 from common.jwt_verify import jwt_get_id
 from contest.tasks.models import *
@@ -61,6 +60,8 @@ def check_stage_condition(prev_contest, user_id, current_step_condition):
     :return:
     """
     prev_stage = prev_contest.stage
+    if prev_stage is None:
+        return current_step_condition
     condition = prev_stage.condition
 
     passed_list = (_get_passed(simple_contest, user_id) for simple_contest in prev_stage.contests)
@@ -190,16 +191,6 @@ def is_user_in_contest(user_id, current_contest):
 
 # Contest content module
 
-def is_variant_in_contest(variant_id, current_contest):
-    """
-    Check if variant in contest
-    :param variant_id: variant id
-    :param current_contest: current contest
-    :return: boolean value if variant in contest
-    """
-    return current_contest.variants.filter_by(variant_id=str(variant_id)).one_or_none() is not None
-
-
 def is_task_in_variant(task_id, variant):
     """
     Check if task in current variant
@@ -295,7 +286,6 @@ def get_user_in_contest_by_id_if_possible(contest_id, user_id) -> UserInContest:
                                               "contest_id": contest_id}).one_or_none()
 
 
-# TODO
 def get_user_variant_if_possible(contest_id):
     """
     Get user variant if possible
@@ -310,10 +300,6 @@ def get_user_variant_if_possible(contest_id):
     # no variant in user profile
     if variant is None:
         raise DataConflict('User isn\'t linked with any variant')
-
-    # variant is not in contest
-    if not is_variant_in_contest(variant.variant_id, current_contest):
-        raise DataConflict('Variant is not in current contests')
 
     return variant
 
@@ -352,8 +338,6 @@ def get_user_task_if_possible(contest_id, task_id):
         raise DataConflict('Task is not in current variant')
 
 
-# Functions for tasks/contest
-
 def get_contest_if_possible_from_stage(olympiad_id, stage_id, contest_id):
     """
     Get contest if possible (from stage)
@@ -389,7 +373,7 @@ def get_base_contest(current_contest):
     if current_contest.base_contest is not None:
         return current_contest.base_contest
 
-    stage = current_contest.stage[0]
+    stage = current_contest.stage
     current_olympiad = db_get_or_raise(Contest, "contest_id", str(stage.olympiad_id))
 
     return current_olympiad.base_contest
@@ -405,9 +389,6 @@ def get_variant_if_possible(contest_id, variant_id):
     current_contest = get_simple_contest_if_possible(contest_id)
 
     variant = current_contest.variants.filter_by(variant_id=str(variant_id)).one_or_none()
-
-    if not is_variant_in_contest(variant.variant_id, current_contest):
-        raise DataConflict('Variant is not in current stage')
 
     return variant
 
@@ -425,9 +406,6 @@ def get_variant_if_possible_by_number(contest_id, variant_num):
 
     if variant is None:
         raise DataConflict('No variants in this contest')
-
-    if not is_variant_in_contest(variant.variant_id, current_contest):
-        raise DataConflict('Variant with is number is not in current contest')
 
     return variant
 
@@ -516,7 +494,7 @@ class ContestContentAccessDenied(RequestError):
     User has no access to contest
     """
 
-    def init(self):
+    def __init__(self):
         """
         Create error object
         """
@@ -531,7 +509,7 @@ class ContestIsStillOnReview(RequestError):
     Contest is still on review
     """
 
-    def init(self):
+    def __init__(self):
         """
         Create error object
         """

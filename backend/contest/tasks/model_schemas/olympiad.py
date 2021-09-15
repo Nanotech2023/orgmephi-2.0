@@ -50,9 +50,9 @@ class BaseContestSchema(SQLAlchemySchema):
         sqla_session = db.session
 
     base_contest_id = auto_field(column_name='base_contest_id', dump_only=True)
-    name = auto_field(column_name='name', required=True)
-    description = auto_field(column_name='description', validate=text_validator, required=True)
-    rules = auto_field(column_name='rules', validate=text_validator, required=True)
+    name = auto_field(column_name='name', required=False)
+    description = auto_field(column_name='description', validate=text_validator, required=False)
+    rules = auto_field(column_name='rules', validate=text_validator, required=False)
 
     winner_1_condition = auto_field(column_name='winner_1_condition', required=False)
     winner_2_condition = auto_field(column_name='winner_2_condition', required=False)
@@ -61,9 +61,9 @@ class BaseContestSchema(SQLAlchemySchema):
     diploma_2_condition = auto_field(column_name='diploma_2_condition', required=False)
     diploma_3_condition = auto_field(column_name='diploma_3_condition', required=False)
 
-    olympiad_type_id = auto_field(column_name='olympiad_type_id', required=True)
-    subject = EnumField(OlympiadSubjectEnum, data_key='subject', by_value=True, required=True)
-    target_classes = fields.Nested(TargetClassSchema, many=True, required=True)
+    olympiad_type_id = auto_field(column_name='olympiad_type_id', required=False)
+    subject = EnumField(OlympiadSubjectEnum, data_key='subject', by_value=True, required=False)
+    target_classes = fields.Nested(TargetClassSchema, many=True, required=False)
 
 
 """
