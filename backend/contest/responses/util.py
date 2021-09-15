@@ -2,22 +2,40 @@ from common import get_current_db, get_current_app
 from .model_schemas.schemas import PlainAnswerTextSchema, RangeAnswerSchema
 from datetime import datetime, timedelta
 from common.errors import NotFound, RequestError, AlreadyExists
-from common.util import db_get_one_or_none, db_exists
+from common.util import db_get_one_or_none, db_exists, db_get_or_raise, db_get_list
 from contest.tasks.models import SimpleContest, RangeTask, MultipleChoiceTask, PlainTask, ContestHoldingTypeEnum, \
     UserInContest
 from .models import Response, PlainAnswerText, RangeAnswer, MultipleChoiceAnswer, PlainAnswerFile, BaseAnswer, \
     answer_dict, work_status, add_user_response, add_plain_answer_file, add_plain_answer_text, add_range_answer, \
     add_multiple_answer
-from ..tasks.util import validate_file_size
+from ..tasks.util import validate_file_size, is_task_in_contest
 
 db = get_current_db()
 app = get_current_app()
+
+
 # Errors
+
+
+class TimingError(RequestError):
+    """
+    Olympiad bad timing
+    """
+
+    def __init__(self, message):
+        """
+        Create error object
+        """
+        super(TimingError, self).__init__(409)
+        self.message = message
+
+    def get_msg(self) -> str:
+        return self.message
 
 
 class OlympiadError(RequestError):
     """
-    Olympiad bad timing
+    Olympiad error
     """
 
     def __init__(self, message):
@@ -95,14 +113,28 @@ def user_answer_get(user_id, contest_id, task_id, answer_type=None):
     return user_answer
 
 
+def get_task_points(user_work: Response):
+    from contest.tasks.models.tasks import Task
+    result = []
+    for answer in user_work.answers:
+        task = db_get_one_or_none(Task, 'task_id', answer.task_id)
+        result.append({
+            'task_id': task.task_id,
+            'task_points': task.task_points
+        })
+    return result
+
+
 def get_all_user_answers(user_id, contest_id):
     user_work = get_user_in_contest_work(user_id, contest_id)
+    tasks_points = get_task_points(user_work)
     answers = user_work.answers
     return {
         "user_id": user_work.user_id,
         "work_id": user_work.work_id,
         "contest_id": user_work.contest_id,
-        "user_answers": answers
+        "user_answers": answers,
+        'tasks_points': tasks_points
     }
 
 
@@ -129,25 +161,31 @@ def check_task_type(task_id, task_type):
 def check_time_publishing(contest_id):
     simple_contest: SimpleContest = db_get_one_or_none(SimpleContest, 'contest_id', contest_id)
     if datetime.utcnow() < simple_contest.result_publication_date:
-        raise OlympiadError("The results have not yet been published")
+        raise TimingError("The results have not yet been published")
 
 
 def check_contest_time_left(contest_id):
     simple_contest: SimpleContest = db_get_one_or_none(SimpleContest, 'contest_id', contest_id)
     if simple_contest is None:
         raise NotFound(field='contest_id', value=contest_id)
+    if datetime.utcnow() < simple_contest.start_date:
+        raise TimingError("Olympiad haven't started yet")
     duration = simple_contest.contest_duration
     if datetime.utcnow() + duration > simple_contest.end_date:
-        raise OlympiadError("Olympiad is over")
+        raise TimingError("Olympiad is over")
 
 
 def check_contest_duration(user_work: Response):
-    contest_duration = db_get_one_or_none(SimpleContest, "contest_id", user_work.contest_id).contest_duration
+    contest: SimpleContest = db_get_one_or_none(SimpleContest, "contest_id", user_work.contest_id)
+    contest_duration = contest.contest_duration
+    if contest_duration == timedelta(seconds=0):
+        contest_duration = contest.end_date - contest.start_date
     time_spent = datetime.utcnow() - user_work.start_time
     if user_work.work_status != work_status['InProgress'] or \
-            time_spent + app.config['RESPONSE_EXTRA_MINUTES'] > contest_duration:
+            time_spent + app.config['RESPONSE_EXTRA_MINUTES'] > contest_duration or \
+            datetime.utcnow() > contest.end_date:
         finish_contest(user_work)
-        raise OlympiadError("Olympiad is over for current user")
+        raise TimingError("Olympiad is over for current user")
 
 
 def is_contest_over(contest_id):
@@ -156,7 +194,40 @@ def is_contest_over(contest_id):
     if simple_contest.holding_type == ContestHoldingTypeEnum.OfflineContest:
         raise OlympiadError("Olympiad is offline type")
     if datetime.utcnow() < time:
-        raise OlympiadError("Olympiad is not over yet")
+        raise TimingError("Olympiad is not over yet")
+
+
+def is_all_checked(contest_id):
+    from contest.responses.models import ResponseStatusEnum
+    user_works_not_checked = Response.query.filter_by(contest_id=contest_id,
+                                                      work_status=ResponseStatusEnum.not_checked).count()
+    user_works_in_progress = Response.query.filter_by(contest_id=contest_id,
+                                                      work_status=ResponseStatusEnum.in_progress).count()
+    if user_works_in_progress != 0 or user_works_not_checked != 0:
+        raise OlympiadError("Not all user responses checked")
+
+
+def check_contest_type(contest_id):
+    from contest.tasks.models.olympiad import ContestHoldingTypeEnum
+    simple_contest: SimpleContest = db_get_or_raise(SimpleContest, 'contest_id', contest_id)
+    if simple_contest.holding_type == ContestHoldingTypeEnum.OfflineContest:
+        raise OlympiadError("Olympiad is offline type")
+
+
+def check_mark_for_task(mark, task_id):
+    from contest.tasks.models.tasks import Task
+    task: Task = db_get_or_raise(Task, 'task_id', task_id)
+    if mark > task.task_points:
+        raise OlympiadError(f"Incorrect mark, max points is - {task.task_points}")
+
+
+def check_user_multiple_answers(answers, task_id):
+    multiple_task: MultipleChoiceTask = db_get_one_or_none(MultipleChoiceTask, 'task_id', task_id)
+    user_answers = [elem['answer'] for elem in answers]
+    answers = set(elem['answer'] for elem in multiple_task.answers)
+    for elem in user_answers:
+        if elem not in answers:
+            raise OlympiadError("Wrong answers for multiple type task")
 
 
 # Other funcs
@@ -184,6 +255,8 @@ def finish_contest(user_work: Response):
 
 
 def user_answer_post_file(answer_file, filetype, user_id, contest_id, task_id):
+    if not is_task_in_contest(task_id, contest_id):
+        raise NotFound('contest_id, task_id', f'{contest_id}, {task_id}')
     user_work: Response = get_user_in_contest_work(user_id, contest_id)
     user_work.finish_time = datetime.utcnow()
     check_contest_duration(user_work)
@@ -198,6 +271,8 @@ def user_answer_post_file(answer_file, filetype, user_id, contest_id, task_id):
 
 
 def user_answer_post(user_id, contest_id, task_id, values, answer_type):
+    if not is_task_in_contest(task_id, contest_id):
+        raise NotFound('contest_id, task_id', f'{contest_id}, {task_id}')
     user_work: Response = get_user_in_contest_work(user_id, contest_id)
     user_work.finish_time = datetime.utcnow()
     check_contest_duration(user_work)
@@ -218,11 +293,15 @@ def update_multiple_answers(answers, answer):
 
 
 def calculate_time_left(user_work: Response):
-    contest_duration = db_get_one_or_none(SimpleContest, "contest_id", user_work.contest_id).contest_duration
+    contest: SimpleContest = db_get_one_or_none(SimpleContest, "contest_id", user_work.contest_id)
+    contest_duration = contest.contest_duration
     if user_work.work_status != work_status['InProgress']:
         return timedelta(seconds=0)
     time_spent = datetime.utcnow() - user_work.start_time
-    time_left = contest_duration + user_work.time_extension - time_spent
+    if contest_duration == timedelta(seconds=0):
+        time_left = contest.end_date - datetime.utcnow()
+    else:
+        time_left = contest_duration + user_work.time_extension - time_spent
     if time_left < timedelta(seconds=0):
         time_left = timedelta(seconds=0)
     return time_left
@@ -256,10 +335,50 @@ def multiple_answer_check(answer: BaseAnswer):
 
 
 def check_user_work(user_work: Response):
+    plain_count = 0
     for answer in user_work.answers:
         if answer.answer_type == answer_dict['RangeAnswer']:
             range_answer_check(answer)
         elif answer.answer_type == answer_dict['MultipleChoiceAnswer']:
             multiple_answer_check(answer)
-    user_work.work_status = work_status['Accepted']
+        elif answer.answer_type == answer_dict['PlainAnswerText'] or \
+                answer.answer_type == answer_dict['PlainAnswerFile']:
+            plain_count += 1
+    if plain_count == 0:
+        user_work.work_status = work_status['Accepted']
+    db.session.commit()
+
+
+def choose_status(percent, base_contest):
+    from contest.tasks.models.olympiad import UserStatusEnum
+    if percent >= base_contest.winner_1_condition:
+        return UserStatusEnum.Winner_1
+    elif percent >= base_contest.winner_2_condition:
+        return UserStatusEnum.Winner_2
+    elif percent >= base_contest.winner_3_condition:
+        return UserStatusEnum.Winner_3
+    elif percent >= base_contest.diploma_1_condition:
+        return UserStatusEnum.Diploma_1
+    elif percent >= base_contest.diploma_2_condition:
+        return UserStatusEnum.Diploma_2
+    elif percent >= base_contest.diploma_3_condition:
+        return UserStatusEnum.Diploma_3
+    else:
+        return UserStatusEnum.Participant
+
+
+def set_user_statuses(contest_id):
+    from contest.tasks.models.contest import Variant
+    user_responses = db_get_list(Response, 'contest_id', contest_id)
+    contest: SimpleContest = db_get_or_raise(SimpleContest, 'contest_id', contest_id)
+    base_contest = contest.base_contest
+    for user_work in user_responses:
+        user_in_contest: UserInContest = UserInContest.query.filter_by(contest_id=contest_id,
+                                                                       user_id=user_work.user_id).one_or_none()
+        variant: Variant = db_get_or_raise(Variant, 'variant_id', user_in_contest.variant_id)
+        all_points = 0
+        for task in variant.tasks:
+            all_points += task.task_points
+        percent = user_work.mark / all_points
+        user_in_contest.user_status = choose_status(percent, base_contest)
     db.session.commit()

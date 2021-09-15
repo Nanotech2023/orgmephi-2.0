@@ -31,6 +31,7 @@ components:
           type: integer
       required:
       - contest_id
+      - user_answers
       - user_id
       - work_id
       type: object
@@ -60,6 +61,10 @@ components:
           - MultipleChoiceAnswer
           - BaseAnswer
           type: string
+        task_id:
+          nullable: true
+          readOnly: true
+          type: integer
       type: object
     BaseAnswer:
       properties:
@@ -78,6 +83,14 @@ components:
           nullable: true
           readOnly: true
           type: number
+        task_id:
+          nullable: true
+          readOnly: true
+          type: integer
+        task_points:
+          type: integer
+      required:
+      - task_points
       type: object
     ContestResultSheetResponse:
       properties:
@@ -241,7 +254,7 @@ paths:
         '404':
           description: User or contest not found
         '409':
-          description: Olympiad error
+          description: Timing error
       security:
       - JWTAccessToken: []
       - CSRFAccessToken: []
@@ -439,7 +452,7 @@ paths:
         '404':
           description: User, contest or task not found
         '409':
-          description: Olympiad is over or file is too large
+          description: Timing error or file is too large
       security:
       - JWTAccessToken: []
       - CSRFAccessToken: []
@@ -477,7 +490,7 @@ paths:
         '404':
           description: User, contest or task not found
         '409':
-          description: Olympiad is over
+          description: Timing error
       security:
       - JWTAccessToken: []
       - CSRFAccessToken: []
@@ -515,7 +528,7 @@ paths:
         '404':
           description: User, contest or task not found
         '409':
-          description: Olympiad is over
+          description: Timing error
       security:
       - JWTAccessToken: []
       - CSRFAccessToken: []
@@ -553,7 +566,7 @@ paths:
         '404':
           description: User, contest or task not found
         '409':
-          description: Olympiad is over
+          description: Timing error or wrong answers
       security:
       - JWTAccessToken: []
       - CSRFAccessToken: []
@@ -672,6 +685,8 @@ paths:
           description: OK
         '404':
           description: User or contest not found
+        '409':
+          description: Mark Error
       security:
       - JWTAccessToken: []
       - CSRFAccessToken: []
@@ -800,7 +815,26 @@ paths:
         '404':
           description: Contest not found
         '409':
-          description: Contest error
+          description: Olympiad error
+      security:
+      - JWTAccessToken: []
+      - CSRFAccessToken: []
+  /responses/creator/contest/{contest_id}/winning:
+    post:
+      parameters:
+      - description: Id of the contest
+        in: path
+        name: contest_id
+        required: true
+        schema:
+          type: integer
+      responses:
+        '200':
+          description: OK
+        '404':
+          description: Contest not found
+        '409':
+          description: Olympiad error
       security:
       - JWTAccessToken: []
       - CSRFAccessToken: []
@@ -819,7 +853,7 @@ paths:
         '404':
           description: User or contest not found
         '409':
-          description: Olympiad error
+          description: Timing error
       security:
       - JWTAccessToken: []
       - CSRFAccessToken: []
@@ -989,7 +1023,7 @@ paths:
         '404':
           description: User, contest or task not found
         '409':
-          description: Olympiad is over or file is too large
+          description: Timing error or file is too large
       security:
       - JWTAccessToken: []
       - CSRFAccessToken: []
@@ -1021,7 +1055,7 @@ paths:
         '404':
           description: User, contest or task not found
         '409':
-          description: Olympiad is over
+          description: Timing error
       security:
       - JWTAccessToken: []
       - CSRFAccessToken: []
@@ -1053,7 +1087,7 @@ paths:
         '404':
           description: User, contest or task not found
         '409':
-          description: Olympiad is over
+          description: Timing error
       security:
       - JWTAccessToken: []
       - CSRFAccessToken: []
@@ -1085,7 +1119,7 @@ paths:
         '404':
           description: User, contest or task not found
         '409':
-          description: Olympiad is over
+          description: Timing error
       security:
       - JWTAccessToken: []
       - CSRFAccessToken: []

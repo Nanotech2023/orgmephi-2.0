@@ -1,7 +1,7 @@
 import io
 from flask import request, send_file
-from common import get_current_app, get_current_module
-from common.util import db_get_or_raise, db_get_list
+from common import get_current_module
+from common.util import db_get_list
 from contest.responses.util import *
 from contest.responses.model_schemas.schemas import AnswerSchema
 from .schemas import *
@@ -39,7 +39,7 @@ def create_user_response_for_contest(contest_id, user_id):
         '404':
           description: User or contest not found
         '409':
-          description: Olympiad error
+          description: Timing error
     """
     create_user_response(contest_id, user_id)
     return {}, 200
@@ -257,7 +257,7 @@ def user_answer_for_task_by_id_post_plain_file(contest_id, task_id, user_id, fil
         '404':
           description: User, contest or task not found
         '409':
-          description: Olympiad is over or file is too large
+          description: Timing error or file is too large
     """
     check_task_type(task_id, answer_dict['PlainAnswerFile'])
     user_answer_post_file(request.data, filetype, user_id, contest_id, task_id)
@@ -305,7 +305,7 @@ def user_answer_for_task_by_id_post_plain_text(contest_id, task_id, user_id):
         '404':
           description: User, contest or task not found
         '409':
-          description: Olympiad is over
+          description: Timing error
     """
     check_task_type(task_id, answer_dict['PlainAnswerText'])
     values = request.marshmallow
@@ -354,7 +354,7 @@ def user_answer_for_task_by_id_range(contest_id, task_id, user_id):
         '404':
           description: User, contest or task not found
         '409':
-          description: Olympiad is over
+          description: Timing error
     """
     check_task_type(task_id, answer_dict['RangeAnswer'])
     values = request.marshmallow
@@ -403,10 +403,11 @@ def user_answer_for_task_by_id_multiple(contest_id, task_id, user_id):
         '404':
           description: User, contest or task not found
         '409':
-          description: Olympiad is over
+          description: Timing error or wrong answers
     """
     check_task_type(task_id, answer_dict['MultipleChoiceAnswer'])
     values = request.marshmallow
+    check_user_multiple_answers(values['answers'], task_id)
     user_answer_post(user_id, contest_id, task_id, values, 'MultipleChoiceAnswer')
     return {}, 200
 
@@ -567,8 +568,11 @@ def user_answer_task_mark_post(contest_id, user_id, task_id):
           description: OK
         '404':
           description: User or contest not found
+        '409':
+          description: Mark Error
     """
     values = request.marshmallow
+    check_mark_for_task(values['mark'], task_id)
     user_work = get_user_in_contest_work(user_id, contest_id)
     answer = get_answer_by_task_id_and_work_id(BaseAnswer, task_id, user_work.work_id)
     if answer is None:
@@ -757,11 +761,41 @@ def auto_check_users_answers(contest_id):
         '404':
           description: Contest not found
         '409':
-          description: Contest error
+          description: Olympiad error
     """
     is_contest_over(contest_id)
     users_in_contest = db_get_list(Response, 'contest_id', contest_id)
     for user_work in users_in_contest:
         if user_work.status == work_status['InProgress'] or user_work.status == work_status['NotChecked']:
             check_user_work(user_work)
+    return {}, 200
+
+
+@module.route('/contest/<int:contest_id>/winning', methods=['POST'])
+def set_status_by_result(contest_id):
+    """
+    Set new statuses to user in contest
+    ---
+    post:
+      security:
+        - JWTAccessToken: []
+        - CSRFAccessToken: []
+      parameters:
+        - in: path
+          description: Id of the contest
+          name: contest_id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: OK
+        '404':
+          description: Contest not found
+        '409':
+          description: Olympiad error
+    """
+    is_contest_over(contest_id)
+    is_all_checked(contest_id)
+    set_user_statuses(contest_id)
     return {}, 200

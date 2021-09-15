@@ -3,6 +3,7 @@ from . import *
 DEFAULT_INDEX = 0
 ERROR_ID = 1500
 
+
 @pytest.fixture
 def client(client_university):
     client_university.set_prefix('contest/responses/participant')
@@ -14,8 +15,18 @@ def test_user_response_participant(client, create_plain_task):
     contest_id = get_contest_id(create_plain_task, DEFAULT_INDEX)
     user_id = get_user_id(create_plain_task, DEFAULT_INDEX)
 
+    contest = create_plain_task['contests'][DEFAULT_INDEX]
+    contest.start_date = datetime.utcnow() + timedelta(minutes=5)
+    test_app.db.session.commit()
+
+    resp = client.post(f'/contest/{contest_id}/user/self/create')
+    assert resp.status_code == 409
+
     resp = client.post(f'/contest/{ERROR_ID}/user/self/create')
     assert resp.status_code == 404
+
+    contest.start_date = datetime.utcnow() - timedelta(minutes=5)
+    test_app.db.session.commit()
 
     resp = client.post(f'/contest/{contest_id}/user/self/create')
     assert resp.status_code == 200
@@ -28,11 +39,44 @@ def test_user_response_participant(client, create_plain_task):
     assert response.work_status.value == 'InProgress'
 
 
+def test_contest_zero_duration(client, create_one_task):
+    contest_id = get_contest_id(create_one_task, DEFAULT_INDEX)
+    user_id = get_user_id(create_one_task, DEFAULT_INDEX)
+    task_id = get_plain_task_id(create_one_task, DEFAULT_INDEX)
+
+    contest = create_one_task['contests'][DEFAULT_INDEX]
+    contest.contest_duration = timedelta(seconds=0)
+    contest.end_date = datetime.utcnow() - timedelta(minutes=5)
+    test_app.db.session.commit()
+
+    resp = client.post(f'/contest/{contest_id}/task/{task_id}/user/self/plain',
+                       json={'answer_text': 'answer'})
+    assert resp.status_code == 409
+
+    from contest.responses.util import get_user_in_contest_work
+    response = get_user_in_contest_work(user_id, contest_id)
+    assert response.work_status.value == 'NotChecked'
+
+
+# noinspection DuplicatedCode
+def test_user_response_offline_contest_participant(client, create_plain_task):
+    index = 1
+    contest_id = get_contest_id(create_plain_task, index)
+
+    resp = client.post(f'/contest/{contest_id}/user/self/create')
+    assert resp.status_code == 409
+
+
 # noinspection DuplicatedCode
 def test_plain_task_text_participant(client, create_two_tasks):
     contest_id = get_contest_id(create_two_tasks, DEFAULT_INDEX)
     user_id = get_user_id(create_two_tasks, DEFAULT_INDEX)
     task_id = get_plain_task_id(create_two_tasks, DEFAULT_INDEX)
+    task_id_from_different_contest = get_plain_task_id(create_two_tasks, 2)
+
+    resp = client.post(f'/contest/{contest_id}/task/{task_id_from_different_contest}/user/self/plain',
+                       json={'answer_text': 'answer'})
+    assert resp.status_code == 404
 
     resp = client.post(f'/contest/{contest_id}/task/{task_id}/user/self/plain',
                        json={'answer_text': 'answer'})
@@ -67,6 +111,11 @@ def test_plain_task_file_participant(client, create_one_task):
     contest_id = get_contest_id(create_one_task, DEFAULT_INDEX)
     user_id = get_user_id(create_one_task, DEFAULT_INDEX)
     task_id = get_plain_task_id(create_one_task, DEFAULT_INDEX)
+    task_id_from_different_contest = get_plain_task_id(create_one_task, 2)
+
+    resp = client.post(f'/contest/{contest_id}/task/{task_id_from_different_contest}/user/self/png',
+                       data=b'Test')
+    assert resp.status_code == 404
 
     resp = client.post(f'/contest/{contest_id}/task/{task_id}/user/self/png', data=b'Test')
     assert resp.status_code == 200
@@ -147,6 +196,10 @@ def test_multiple_task_creator(client, create_three_tasks):
     task_id = get_multiple_task_id(create_three_tasks, DEFAULT_INDEX)
 
     resp = client.post(f'/contest/{contest_id}/task/{task_id}/user/self/multiple',
+                       json={"answers": [{"answer": "1"}, {"answer": "4"}]})
+    assert resp.status_code == 409
+
+    resp = client.post(f'/contest/{contest_id}/task/{task_id}/user/self/multiple',
                        json={"answers": [{"answer": "1"}, {"answer": "3"}]})
     assert resp.status_code == 200
 
@@ -181,7 +234,6 @@ def test_multiple_task_creator(client, create_three_tasks):
 
 def test_get_status_participant(client, create_one_task):
     contest_id = get_contest_id(create_one_task, DEFAULT_INDEX)
-    user_id = get_user_id(create_one_task, DEFAULT_INDEX)
 
     resp = client.get(f'/contest/{contest_id}/user/self/status')
     assert resp.status_code == 200
@@ -241,6 +293,16 @@ def test_time_left_participant(client, create_one_task):
     resp = client.get(f'/contest/{contest_id}/user/self/time')
     assert resp.status_code == 200
     assert resp.json['time'] == 0
+
+    contest = create_one_task['contests'][DEFAULT_INDEX]
+    contest.contest_duration = timedelta(seconds=0)
+    contest.start_date = datetime.utcnow() - timedelta(minutes=5)
+    user_work.start_time = datetime.utcnow()
+    contest.end_date = datetime.utcnow() + timedelta(minutes=5)
+    resp = client.get(f'/contest/{contest_id}/user/self/time')
+    assert resp.status_code == 200
+    assert resp.json['time'] > 250
+    assert resp.json['time'] < 310
 
 
 # noinspection DuplicatedCode
@@ -322,10 +384,16 @@ def test_auto_check_participant(client, create_user_with_answers):
     for answer in user_answers:
         if answer['answer_type'] == 'PlainAnswerText':
             assert answer['mark'] == 0
+            assert answer['task_points'] == 11
+            assert answer['task_id'] == plain_id
         elif answer['answer_type'] == 'RangeAnswer':
             assert answer['mark'] == 0
+            assert answer['task_points'] == 5
+            assert answer['task_id'] == range_id
         elif answer['answer_type'] == 'MultipleChoiceAnswer':
             assert answer['mark'] == 7
+            assert answer['task_points'] == 7
+            assert answer['task_id'] == multiple_id
 
 
 # noinspection DuplicatedCode
@@ -374,9 +442,15 @@ def test_time_left_error_participant(client, create_two_tasks):
 
     resp = client.post(f'/contest/{contest_id}/task/{plain_id}/user/self/plain',
                        json={'answer_text': "answer"})
+    assert resp.status_code == 200
+
+    contest.end_date = datetime.utcnow() - timedelta(minutes=5)
+    test_app.db.session.commit()
+
+    resp = client.post(f'/contest/{contest_id}/task/{plain_id}/user/self/plain',
+                       json={'answer_text': "answer"})
     assert resp.status_code == 409
 
     from contest.responses.util import get_user_in_contest_work
     user_work = get_user_in_contest_work(user_id, contest_id)
     assert user_work.status.value == 'NotChecked'
-

@@ -139,6 +139,8 @@ class BaseAnswer(db.Model):
     answer_type = db.Column(db.Enum(AnswerEnum), nullable=False)
     mark = db.Column(db.Float, default=0)
 
+    task_points = db.relationship(Task, uselist=False)
+
     __mapper_args__ = {
         'polymorphic_identity': AnswerEnum.BaseAnswer,
         'polymorphic_on': answer_type
@@ -233,7 +235,7 @@ def add_multiple_answer(work_id, task_id, values):
     answer = MultipleChoiceAnswer(
         work_id=work_id,
         task_id=task_id,
-        answers=[elem['answer'] for elem in values['answers']]
+        answers=set(elem['answer'] for elem in values['answers'])
     )
     db.session.add(answer)
 
