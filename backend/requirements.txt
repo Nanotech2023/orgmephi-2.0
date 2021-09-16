@@ -25,3 +25,4 @@ captcha~=0.3
 pytest~=6.2.4
 pytest-cov~=2.12.1
 flask-mail~=0.9.1
+pytest-steps~=1.7.3
