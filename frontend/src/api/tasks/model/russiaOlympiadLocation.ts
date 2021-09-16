@@ -9,12 +9,12 @@
  * https://openapi-generator.tech
  * Do not edit the class manually.
  */
-import { Field } from './field';
+import { RussiaOlympiadLocationCity } from './russiaOlympiadLocationCity';
 
 
 export interface RussiaOlympiadLocation { 
     address: string | null;
-    city?: Field;
+    city?: RussiaOlympiadLocationCity;
     city_name: string | null;
     readonly location_id?: number;
     region_name: string | null;

@@ -18,10 +18,10 @@ import { UserInfo } from './userInfo';
 export interface UserFull { 
     groups?: Array<Group>;
     readonly id?: number;
-    role?: UserFull.RoleEnum;
+    role: UserFull.RoleEnum;
     school_info?: SchoolInfo;
     student_info?: StudentInfo;
-    type?: UserFull.TypeEnum;
+    type: UserFull.TypeEnum;
     user_info?: UserInfo;
     username: string;
 }

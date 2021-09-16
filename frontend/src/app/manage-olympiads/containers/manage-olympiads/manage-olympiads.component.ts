@@ -2,8 +2,7 @@ import { Component, OnInit } from '@angular/core'
 import { ManageOlympiadsStore } from '@/manage-olympiads/manage-olympiads.store'
 import { Observable } from 'rxjs'
 import { fixedHeight } from '@/shared/consts'
-import { User } from '@api/users/models'
-import { Contest } from '@api/tasks/model'
+import { Contest, CreateBaseOlympiadRequestTaskCreator } from '@api/tasks/model'
 
 
 @Component( {
@@ -28,7 +27,7 @@ export class ManageOlympiadsComponent implements OnInit
     ]
 
     olympiads$: Observable<Contest[]> = this.store.contests
-
+    addVisible: boolean = false
 
     constructor( private store: ManageOlympiadsStore ) {}
 
@@ -37,8 +36,13 @@ export class ManageOlympiadsComponent implements OnInit
         this.store.reload()
     }
 
-    getRowNodeId( data: User ): number | undefined
+    getRowNodeId( data: Contest ): number | undefined
     {
-        return data.id
+        return data.contest_id
+    }
+
+    onAdd( createBaseOlympiadRequestTaskCreator: CreateBaseOlympiadRequestTaskCreator )
+    {
+        this.store.add( createBaseOlympiadRequestTaskCreator )
     }
 }

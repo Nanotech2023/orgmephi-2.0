@@ -13,8 +13,8 @@
 
 export interface User { 
     readonly id?: number;
-    role?: User.RoleEnum;
-    type?: User.TypeEnum;
+    role: User.RoleEnum;
+    type: User.TypeEnum;
     username: string;
 }
 export namespace User {

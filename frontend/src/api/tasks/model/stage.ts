@@ -9,10 +9,12 @@
  * https://openapi-generator.tech
  * Do not edit the class manually.
  */
+import { SimpleContest } from './simpleContest';
 
 
 export interface Stage { 
-    condition: Stage.ConditionEnum;
+    condition?: Stage.ConditionEnum;
+    contests?: Array<SimpleContest>;
     olympiad_id?: number | null;
     readonly stage_id?: number;
     stage_name: string;

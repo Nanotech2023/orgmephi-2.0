@@ -9,10 +9,12 @@
  * https://openapi-generator.tech
  * Do not edit the class manually.
  */
+import { SimpleContest } from './simpleContest';
 
 
 export interface StageResponseTaskCreator { 
-    condition: StageResponseTaskCreator.ConditionEnum;
+    condition?: StageResponseTaskCreator.ConditionEnum;
+    contests?: Array<SimpleContest>;
     readonly stage_id?: number;
     stage_name: string;
     stage_num: number;

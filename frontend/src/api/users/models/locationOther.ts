@@ -13,8 +13,16 @@
 
 export interface LocationOther { 
     country: string;
-    location?: string | null;
-    rural?: boolean | null;
-    readonly russian?: string;
+    location?: string;
+    readonly location_type?: LocationOther.LocationTypeEnum;
+    rural?: boolean;
 }
+export namespace LocationOther {
+    export type LocationTypeEnum = 'Russian' | 'Foreign';
+    export const LocationTypeEnum = {
+        Russian: 'Russian' as LocationTypeEnum,
+        Foreign: 'Foreign' as LocationTypeEnum
+    };
+}
+
 

@@ -11,8 +11,7 @@
  */
 
 
-export interface Field { 
-    name: string;
-    region_name: string;
+export interface UpdateTargetClassesOfContestRequestTaskEditor { 
+    target_classes_ids: Array<number>;
 }
 

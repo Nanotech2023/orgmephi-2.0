@@ -17,9 +17,10 @@ export interface StudentUniversityKnown {
     university: string;
 }
 export namespace StudentUniversityKnown {
-    export type KnownTypeEnum = 'Known';
+    export type KnownTypeEnum = 'Known' | 'Custom';
     export const KnownTypeEnum = {
-        Known: 'Known' as KnownTypeEnum
+        Known: 'Known' as KnownTypeEnum,
+        Custom: 'Custom' as KnownTypeEnum
     };
 }
 

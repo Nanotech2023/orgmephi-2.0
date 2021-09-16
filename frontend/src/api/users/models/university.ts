@@ -13,6 +13,6 @@
 
 export interface University { 
     country: string;
-    name: string;
+    name?: string;
 }
 

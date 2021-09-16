@@ -13,13 +13,16 @@
 
 export interface UpdateBaseOlympiadRequestTaskEditor { 
     description?: string;
-    laureate_condition?: number;
+    diploma_1_condition?: number;
+    diploma_2_condition?: number;
+    diploma_3_condition?: number;
     name?: string;
     olympiad_type_id?: number;
     rules?: string;
     subject?: UpdateBaseOlympiadRequestTaskEditor.SubjectEnum;
-    target_classes?: Array<UpdateBaseOlympiadRequestTaskEditor.TargetClassesEnum>;
-    winning_condition?: number;
+    winner_1_condition?: number;
+    winner_2_condition?: number;
+    winner_3_condition?: number;
 }
 export namespace UpdateBaseOlympiadRequestTaskEditor {
     export type SubjectEnum = 'Math' | 'Physics' | 'Informatics';
@@ -27,17 +30,6 @@ export namespace UpdateBaseOlympiadRequestTaskEditor {
         Math: 'Math' as SubjectEnum,
         Physics: 'Physics' as SubjectEnum,
         Informatics: 'Informatics' as SubjectEnum
-    };
-    export type TargetClassesEnum = '5' | '6' | '7' | '8' | '9' | '10' | '11' | 'student';
-    export const TargetClassesEnum = {
-        _5: '5' as TargetClassesEnum,
-        _6: '6' as TargetClassesEnum,
-        _7: '7' as TargetClassesEnum,
-        _8: '8' as TargetClassesEnum,
-        _9: '9' as TargetClassesEnum,
-        _10: '10' as TargetClassesEnum,
-        _11: '11' as TargetClassesEnum,
-        Student: 'student' as TargetClassesEnum
     };
 }
 

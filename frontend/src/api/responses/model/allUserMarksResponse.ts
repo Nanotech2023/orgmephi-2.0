@@ -14,7 +14,7 @@ import { BaseAnswer } from './baseAnswer';
 
 export interface AllUserMarksResponse { 
     contest_id: number;
-    user_answers?: Array<BaseAnswer>;
+    user_answers: Array<BaseAnswer>;
     user_id: number;
     work_id: number;
 }

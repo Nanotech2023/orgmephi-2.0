@@ -14,6 +14,7 @@
 import { Inject, Injectable, Optional } from '@angular/core'
 import {
     HttpClient,
+
     HttpContext,
     HttpEvent,
     HttpHeaders,
@@ -27,13 +28,10 @@ import { BASE_PATH } from '@api/variables'
 import { Configuration } from '@api/configuration'
 import {
     CSRFPairUser,
-    Group,
-    GroupAddRequestUser,
+    Group, GroupAddRequestUser,
     GroupListResponseUser,
     InfoCitiesResponseUser,
-    InfoCountriesResponseUser,
-    InfoRegionsResponseUser,
-    InfoUniversitiesResponseUser,
+    InfoCountriesResponseUser, InfoRegionsResponseUser, InfoUniversitiesResponseUser,
     LoginRequestUser,
     MembershipRequestUser,
     PasswordRequestUser,
@@ -42,19 +40,15 @@ import {
     ResetPasswordUser,
     RoleRequestUser,
     SchoolInfo,
-    SchoolInfoInput,
     SchoolRegistrationRequestUser,
     SelfGroupsResponseUser,
     SelfPasswordRequestUser,
     StudentInfo,
-    StudentInfoInput,
     TypeRequestUser,
     UniversityRegistrationRequestUser,
     User,
     UserFullListResponseUser,
     UserInfo,
-    UserInfoInput,
-    UserInfoRestrictedInput,
     UserListResponseUser
 } from '@api/users/models'
 
@@ -83,62 +77,6 @@ export class UsersService
         }
         this.configuration.withCredentials = true
         this.encoder = this.configuration.encoder || new CustomHttpParameterCodec()
-    }
-
-
-    private addToHttpParams( httpParams: HttpParams, value: any, key?: string ): HttpParams
-    {
-        if ( typeof value === "object" && value instanceof Date === false )
-        {
-            httpParams = this.addToHttpParamsRecursive( httpParams, value )
-        }
-        else
-        {
-            httpParams = this.addToHttpParamsRecursive( httpParams, value, key )
-        }
-        return httpParams
-    }
-
-    private addToHttpParamsRecursive( httpParams: HttpParams, value?: any, key?: string ): HttpParams
-    {
-        if ( value == null )
-        {
-            return httpParams
-        }
-
-        if ( typeof value === "object" )
-        {
-            if ( Array.isArray( value ) )
-            {
-                ( value as any[] ).forEach( elem => httpParams = this.addToHttpParamsRecursive( httpParams, elem, key ) )
-            }
-            else if ( value instanceof Date )
-            {
-                if ( key != null )
-                {
-                    httpParams = httpParams.append( key,
-                        ( value as Date ).toISOString().substr( 0, 10 ) )
-                }
-                else
-                {
-                    throw Error( "key may not be null if value is Date" )
-                }
-            }
-            else
-            {
-                Object.keys( value ).forEach( k => httpParams = this.addToHttpParamsRecursive(
-                    httpParams, value[ k ], key != null ? `${ key }.${ k }` : k ) )
-            }
-        }
-        else if ( key != null )
-        {
-            httpParams = httpParams.append( key, value )
-        }
-        else
-        {
-            throw Error( "key may not be null if value is not object or array" )
-        }
-        return httpParams
     }
 
     /**
@@ -473,22 +411,22 @@ export class UsersService
 
     /**
      * @param userId Id of the user
-     * @param userInfoInput
+     * @param userInfo
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
      * @param reportProgress flag to report request and response progress.
      */
-    public userAdminPersonalUserIdPatch( userId: number, userInfoInput: UserInfoInput, observe?: 'body', reportProgress?: boolean, options?: { httpHeaderAccept?: undefined, context?: HttpContext } ): Observable<any>;
-    public userAdminPersonalUserIdPatch( userId: number, userInfoInput: UserInfoInput, observe?: 'response', reportProgress?: boolean, options?: { httpHeaderAccept?: undefined, context?: HttpContext } ): Observable<HttpResponse<any>>;
-    public userAdminPersonalUserIdPatch( userId: number, userInfoInput: UserInfoInput, observe?: 'events', reportProgress?: boolean, options?: { httpHeaderAccept?: undefined, context?: HttpContext } ): Observable<HttpEvent<any>>;
-    public userAdminPersonalUserIdPatch( userId: number, userInfoInput: UserInfoInput, observe: any = 'body', reportProgress: boolean = false, options?: { httpHeaderAccept?: undefined, context?: HttpContext } ): Observable<any>
+    public userAdminPersonalUserIdPatch( userId: number, userInfo: UserInfo, observe?: 'body', reportProgress?: boolean, options?: { httpHeaderAccept?: undefined, context?: HttpContext } ): Observable<any>;
+    public userAdminPersonalUserIdPatch( userId: number, userInfo: UserInfo, observe?: 'response', reportProgress?: boolean, options?: { httpHeaderAccept?: undefined, context?: HttpContext } ): Observable<HttpResponse<any>>;
+    public userAdminPersonalUserIdPatch( userId: number, userInfo: UserInfo, observe?: 'events', reportProgress?: boolean, options?: { httpHeaderAccept?: undefined, context?: HttpContext } ): Observable<HttpEvent<any>>;
+    public userAdminPersonalUserIdPatch( userId: number, userInfo: UserInfo, observe: any = 'body', reportProgress: boolean = false, options?: { httpHeaderAccept?: undefined, context?: HttpContext } ): Observable<any>
     {
         if ( userId === null || userId === undefined )
         {
             throw new Error( 'Required parameter userId was null or undefined when calling userAdminPersonalUserIdPatch.' )
         }
-        if ( userInfoInput === null || userInfoInput === undefined )
+        if ( userInfo === null || userInfo === undefined )
         {
-            throw new Error( 'Required parameter userInfoInput was null or undefined when calling userAdminPersonalUserIdPatch.' )
+            throw new Error( 'Required parameter userInfo was null or undefined when calling userAdminPersonalUserIdPatch.' )
         }
 
         let localVarHeaders = this.defaultHeaders
@@ -543,7 +481,7 @@ export class UsersService
         }
 
         return this.httpClient.patch<any>( `${ this.configuration.basePath }/user/admin/personal/${ encodeURIComponent( String( userId ) ) }`,
-            userInfoInput,
+            userInfo,
             {
                 context: localVarHttpContext,
                 responseType: <any> responseType_,
@@ -860,22 +798,22 @@ export class UsersService
 
     /**
      * @param userId Id of the user
-     * @param schoolInfoInput
+     * @param schoolInfo
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
      * @param reportProgress flag to report request and response progress.
      */
-    public userAdminSchoolUserIdPatch( userId: number, schoolInfoInput: SchoolInfoInput, observe?: 'body', reportProgress?: boolean, options?: { httpHeaderAccept?: undefined, context?: HttpContext } ): Observable<any>;
-    public userAdminSchoolUserIdPatch( userId: number, schoolInfoInput: SchoolInfoInput, observe?: 'response', reportProgress?: boolean, options?: { httpHeaderAccept?: undefined, context?: HttpContext } ): Observable<HttpResponse<any>>;
-    public userAdminSchoolUserIdPatch( userId: number, schoolInfoInput: SchoolInfoInput, observe?: 'events', reportProgress?: boolean, options?: { httpHeaderAccept?: undefined, context?: HttpContext } ): Observable<HttpEvent<any>>;
-    public userAdminSchoolUserIdPatch( userId: number, schoolInfoInput: SchoolInfoInput, observe: any = 'body', reportProgress: boolean = false, options?: { httpHeaderAccept?: undefined, context?: HttpContext } ): Observable<any>
+    public userAdminSchoolUserIdPatch( userId: number, schoolInfo: SchoolInfo, observe?: 'body', reportProgress?: boolean, options?: { httpHeaderAccept?: undefined, context?: HttpContext } ): Observable<any>;
+    public userAdminSchoolUserIdPatch( userId: number, schoolInfo: SchoolInfo, observe?: 'response', reportProgress?: boolean, options?: { httpHeaderAccept?: undefined, context?: HttpContext } ): Observable<HttpResponse<any>>;
+    public userAdminSchoolUserIdPatch( userId: number, schoolInfo: SchoolInfo, observe?: 'events', reportProgress?: boolean, options?: { httpHeaderAccept?: undefined, context?: HttpContext } ): Observable<HttpEvent<any>>;
+    public userAdminSchoolUserIdPatch( userId: number, schoolInfo: SchoolInfo, observe: any = 'body', reportProgress: boolean = false, options?: { httpHeaderAccept?: undefined, context?: HttpContext } ): Observable<any>
     {
         if ( userId === null || userId === undefined )
         {
             throw new Error( 'Required parameter userId was null or undefined when calling userAdminSchoolUserIdPatch.' )
         }
-        if ( schoolInfoInput === null || schoolInfoInput === undefined )
+        if ( schoolInfo === null || schoolInfo === undefined )
         {
-            throw new Error( 'Required parameter schoolInfoInput was null or undefined when calling userAdminSchoolUserIdPatch.' )
+            throw new Error( 'Required parameter schoolInfo was null or undefined when calling userAdminSchoolUserIdPatch.' )
         }
 
         let localVarHeaders = this.defaultHeaders
@@ -930,7 +868,7 @@ export class UsersService
         }
 
         return this.httpClient.patch<any>( `${ this.configuration.basePath }/user/admin/school/${ encodeURIComponent( String( userId ) ) }`,
-            schoolInfoInput,
+            schoolInfo,
             {
                 context: localVarHttpContext,
                 responseType: <any> responseType_,
@@ -1028,22 +966,22 @@ export class UsersService
 
     /**
      * @param userId Id of the user
-     * @param studentInfoInput
+     * @param studentInfo
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
      * @param reportProgress flag to report request and response progress.
      */
-    public userAdminUniversityUserIdPatch( userId: number, studentInfoInput: StudentInfoInput, observe?: 'body', reportProgress?: boolean, options?: { httpHeaderAccept?: undefined, context?: HttpContext } ): Observable<any>;
-    public userAdminUniversityUserIdPatch( userId: number, studentInfoInput: StudentInfoInput, observe?: 'response', reportProgress?: boolean, options?: { httpHeaderAccept?: undefined, context?: HttpContext } ): Observable<HttpResponse<any>>;
-    public userAdminUniversityUserIdPatch( userId: number, studentInfoInput: StudentInfoInput, observe?: 'events', reportProgress?: boolean, options?: { httpHeaderAccept?: undefined, context?: HttpContext } ): Observable<HttpEvent<any>>;
-    public userAdminUniversityUserIdPatch( userId: number, studentInfoInput: StudentInfoInput, observe: any = 'body', reportProgress: boolean = false, options?: { httpHeaderAccept?: undefined, context?: HttpContext } ): Observable<any>
+    public userAdminUniversityUserIdPatch( userId: number, studentInfo: StudentInfo, observe?: 'body', reportProgress?: boolean, options?: { httpHeaderAccept?: undefined, context?: HttpContext } ): Observable<any>;
+    public userAdminUniversityUserIdPatch( userId: number, studentInfo: StudentInfo, observe?: 'response', reportProgress?: boolean, options?: { httpHeaderAccept?: undefined, context?: HttpContext } ): Observable<HttpResponse<any>>;
+    public userAdminUniversityUserIdPatch( userId: number, studentInfo: StudentInfo, observe?: 'events', reportProgress?: boolean, options?: { httpHeaderAccept?: undefined, context?: HttpContext } ): Observable<HttpEvent<any>>;
+    public userAdminUniversityUserIdPatch( userId: number, studentInfo: StudentInfo, observe: any = 'body', reportProgress: boolean = false, options?: { httpHeaderAccept?: undefined, context?: HttpContext } ): Observable<any>
     {
         if ( userId === null || userId === undefined )
         {
             throw new Error( 'Required parameter userId was null or undefined when calling userAdminUniversityUserIdPatch.' )
         }
-        if ( studentInfoInput === null || studentInfoInput === undefined )
+        if ( studentInfo === null || studentInfo === undefined )
         {
-            throw new Error( 'Required parameter studentInfoInput was null or undefined when calling userAdminUniversityUserIdPatch.' )
+            throw new Error( 'Required parameter studentInfo was null or undefined when calling userAdminUniversityUserIdPatch.' )
         }
 
         let localVarHeaders = this.defaultHeaders
@@ -1098,7 +1036,7 @@ export class UsersService
         }
 
         return this.httpClient.patch<any>( `${ this.configuration.basePath }/user/admin/university/${ encodeURIComponent( String( userId ) ) }`,
-            studentInfoInput,
+            studentInfo,
             {
                 context: localVarHttpContext,
                 responseType: <any> responseType_,
@@ -2307,18 +2245,18 @@ export class UsersService
     }
 
     /**
-     * @param userInfoRestrictedInput
+     * @param userInfo Will not set \&#39;email\&#39;, \&#39;first_name\&#39;, \&#39;middle_name\&#39;, \&#39;second_name\&#39; and \&#39;date_of_birth\&#39;
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
      * @param reportProgress flag to report request and response progress.
      */
-    public userProfilePersonalPatch( userInfoRestrictedInput: UserInfoRestrictedInput, observe?: 'body', reportProgress?: boolean, options?: { httpHeaderAccept?: undefined, context?: HttpContext } ): Observable<any>;
-    public userProfilePersonalPatch( userInfoRestrictedInput: UserInfoRestrictedInput, observe?: 'response', reportProgress?: boolean, options?: { httpHeaderAccept?: undefined, context?: HttpContext } ): Observable<HttpResponse<any>>;
-    public userProfilePersonalPatch( userInfoRestrictedInput: UserInfoRestrictedInput, observe?: 'events', reportProgress?: boolean, options?: { httpHeaderAccept?: undefined, context?: HttpContext } ): Observable<HttpEvent<any>>;
-    public userProfilePersonalPatch( userInfoRestrictedInput: UserInfoRestrictedInput, observe: any = 'body', reportProgress: boolean = false, options?: { httpHeaderAccept?: undefined, context?: HttpContext } ): Observable<any>
+    public userProfilePersonalPatch( userInfo: UserInfo, observe?: 'body', reportProgress?: boolean, options?: { httpHeaderAccept?: undefined, context?: HttpContext } ): Observable<any>;
+    public userProfilePersonalPatch( userInfo: UserInfo, observe?: 'response', reportProgress?: boolean, options?: { httpHeaderAccept?: undefined, context?: HttpContext } ): Observable<HttpResponse<any>>;
+    public userProfilePersonalPatch( userInfo: UserInfo, observe?: 'events', reportProgress?: boolean, options?: { httpHeaderAccept?: undefined, context?: HttpContext } ): Observable<HttpEvent<any>>;
+    public userProfilePersonalPatch( userInfo: UserInfo, observe: any = 'body', reportProgress: boolean = false, options?: { httpHeaderAccept?: undefined, context?: HttpContext } ): Observable<any>
     {
-        if ( userInfoRestrictedInput === null || userInfoRestrictedInput === undefined )
+        if ( userInfo === null || userInfo === undefined )
         {
-            throw new Error( 'Required parameter userInfoRestrictedInput was null or undefined when calling userProfilePersonalPatch.' )
+            throw new Error( 'Required parameter userInfo was null or undefined when calling userProfilePersonalPatch.' )
         }
 
         let localVarHeaders = this.defaultHeaders
@@ -2373,7 +2311,7 @@ export class UsersService
         }
 
         return this.httpClient.patch<any>( `${ this.configuration.basePath }/user/profile/personal`,
-            userInfoRestrictedInput,
+            userInfo,
             {
                 context: localVarHttpContext,
                 responseType: <any> responseType_,
@@ -2444,18 +2382,18 @@ export class UsersService
     }
 
     /**
-     * @param schoolInfoInput
+     * @param schoolInfo
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
      * @param reportProgress flag to report request and response progress.
      */
-    public userProfileSchoolPatch( schoolInfoInput: SchoolInfoInput, observe?: 'body', reportProgress?: boolean, options?: { httpHeaderAccept?: undefined, context?: HttpContext } ): Observable<any>;
-    public userProfileSchoolPatch( schoolInfoInput: SchoolInfoInput, observe?: 'response', reportProgress?: boolean, options?: { httpHeaderAccept?: undefined, context?: HttpContext } ): Observable<HttpResponse<any>>;
-    public userProfileSchoolPatch( schoolInfoInput: SchoolInfoInput, observe?: 'events', reportProgress?: boolean, options?: { httpHeaderAccept?: undefined, context?: HttpContext } ): Observable<HttpEvent<any>>;
-    public userProfileSchoolPatch( schoolInfoInput: SchoolInfoInput, observe: any = 'body', reportProgress: boolean = false, options?: { httpHeaderAccept?: undefined, context?: HttpContext } ): Observable<any>
+    public userProfileSchoolPatch( schoolInfo: SchoolInfo, observe?: 'body', reportProgress?: boolean, options?: { httpHeaderAccept?: undefined, context?: HttpContext } ): Observable<any>;
+    public userProfileSchoolPatch( schoolInfo: SchoolInfo, observe?: 'response', reportProgress?: boolean, options?: { httpHeaderAccept?: undefined, context?: HttpContext } ): Observable<HttpResponse<any>>;
+    public userProfileSchoolPatch( schoolInfo: SchoolInfo, observe?: 'events', reportProgress?: boolean, options?: { httpHeaderAccept?: undefined, context?: HttpContext } ): Observable<HttpEvent<any>>;
+    public userProfileSchoolPatch( schoolInfo: SchoolInfo, observe: any = 'body', reportProgress: boolean = false, options?: { httpHeaderAccept?: undefined, context?: HttpContext } ): Observable<any>
     {
-        if ( schoolInfoInput === null || schoolInfoInput === undefined )
+        if ( schoolInfo === null || schoolInfo === undefined )
         {
-            throw new Error( 'Required parameter schoolInfoInput was null or undefined when calling userProfileSchoolPatch.' )
+            throw new Error( 'Required parameter schoolInfo was null or undefined when calling userProfileSchoolPatch.' )
         }
 
         let localVarHeaders = this.defaultHeaders
@@ -2510,7 +2448,7 @@ export class UsersService
         }
 
         return this.httpClient.patch<any>( `${ this.configuration.basePath }/user/profile/school`,
-            schoolInfoInput,
+            schoolInfo,
             {
                 context: localVarHttpContext,
                 responseType: <any> responseType_,
@@ -2637,18 +2575,18 @@ export class UsersService
     }
 
     /**
-     * @param studentInfoInput
+     * @param studentInfo
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
      * @param reportProgress flag to report request and response progress.
      */
-    public userProfileUniversityPatch( studentInfoInput: StudentInfoInput, observe?: 'body', reportProgress?: boolean, options?: { httpHeaderAccept?: undefined, context?: HttpContext } ): Observable<any>;
-    public userProfileUniversityPatch( studentInfoInput: StudentInfoInput, observe?: 'response', reportProgress?: boolean, options?: { httpHeaderAccept?: undefined, context?: HttpContext } ): Observable<HttpResponse<any>>;
-    public userProfileUniversityPatch( studentInfoInput: StudentInfoInput, observe?: 'events', reportProgress?: boolean, options?: { httpHeaderAccept?: undefined, context?: HttpContext } ): Observable<HttpEvent<any>>;
-    public userProfileUniversityPatch( studentInfoInput: StudentInfoInput, observe: any = 'body', reportProgress: boolean = false, options?: { httpHeaderAccept?: undefined, context?: HttpContext } ): Observable<any>
+    public userProfileUniversityPatch( studentInfo: StudentInfo, observe?: 'body', reportProgress?: boolean, options?: { httpHeaderAccept?: undefined, context?: HttpContext } ): Observable<any>;
+    public userProfileUniversityPatch( studentInfo: StudentInfo, observe?: 'response', reportProgress?: boolean, options?: { httpHeaderAccept?: undefined, context?: HttpContext } ): Observable<HttpResponse<any>>;
+    public userProfileUniversityPatch( studentInfo: StudentInfo, observe?: 'events', reportProgress?: boolean, options?: { httpHeaderAccept?: undefined, context?: HttpContext } ): Observable<HttpEvent<any>>;
+    public userProfileUniversityPatch( studentInfo: StudentInfo, observe: any = 'body', reportProgress: boolean = false, options?: { httpHeaderAccept?: undefined, context?: HttpContext } ): Observable<any>
     {
-        if ( studentInfoInput === null || studentInfoInput === undefined )
+        if ( studentInfo === null || studentInfo === undefined )
         {
-            throw new Error( 'Required parameter studentInfoInput was null or undefined when calling userProfileUniversityPatch.' )
+            throw new Error( 'Required parameter studentInfo was null or undefined when calling userProfileUniversityPatch.' )
         }
 
         let localVarHeaders = this.defaultHeaders
@@ -2703,7 +2641,7 @@ export class UsersService
         }
 
         return this.httpClient.patch<any>( `${ this.configuration.basePath }/user/profile/university`,
-            studentInfoInput,
+            studentInfo,
             {
                 context: localVarHttpContext,
                 responseType: <any> responseType_,
@@ -2765,6 +2703,51 @@ export class UsersService
             {
                 context: localVarHttpContext,
                 responseType: <any> responseType_,
+                withCredentials: this.configuration.withCredentials,
+                headers: localVarHeaders,
+                observe: observe,
+                reportProgress: reportProgress
+            }
+        )
+    }
+
+    /**
+     * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
+     * @param reportProgress flag to report request and response progress.
+     */
+    public userRegistrationCaptchaGet( observe?: 'body', reportProgress?: boolean, options?: { httpHeaderAccept?: 'image/png', context?: HttpContext } ): Observable<Blob>;
+    public userRegistrationCaptchaGet( observe?: 'response', reportProgress?: boolean, options?: { httpHeaderAccept?: 'image/png', context?: HttpContext } ): Observable<HttpResponse<Blob>>;
+    public userRegistrationCaptchaGet( observe?: 'events', reportProgress?: boolean, options?: { httpHeaderAccept?: 'image/png', context?: HttpContext } ): Observable<HttpEvent<Blob>>;
+    public userRegistrationCaptchaGet( observe: any = 'body', reportProgress: boolean = false, options?: { httpHeaderAccept?: 'image/png', context?: HttpContext } ): Observable<any>
+    {
+
+        let localVarHeaders = this.defaultHeaders
+
+        let localVarHttpHeaderAcceptSelected: string | undefined = options && options.httpHeaderAccept
+        if ( localVarHttpHeaderAcceptSelected === undefined )
+        {
+            // to determine the Accept header
+            const httpHeaderAccepts: string[] = [
+                'image/png'
+            ]
+            localVarHttpHeaderAcceptSelected = this.configuration.selectHeaderAccept( httpHeaderAccepts )
+        }
+        if ( localVarHttpHeaderAcceptSelected !== undefined )
+        {
+            localVarHeaders = localVarHeaders.set( 'Accept', localVarHttpHeaderAcceptSelected )
+        }
+
+        let localVarHttpContext: HttpContext | undefined = options && options.context
+        if ( localVarHttpContext === undefined )
+        {
+            localVarHttpContext = new HttpContext()
+        }
+
+
+        return this.httpClient.get( `${ this.configuration.basePath }/user/registration/captcha`,
+            {
+                context: localVarHttpContext,
+                responseType: "blob",
                 withCredentials: this.configuration.withCredentials,
                 headers: localVarHeaders,
                 observe: observe,

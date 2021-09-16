@@ -9,11 +9,15 @@
  * https://openapi-generator.tech
  * Do not edit the class manually.
  */
+import { Stage } from './stage';
+import { BaseContest } from './baseContest';
 
 
 export interface CompositeContest { 
+    readonly base_contest: BaseContest;
     readonly contest_id: number;
     holding_type: CompositeContest.HoldingTypeEnum;
+    readonly stages: Array<Stage>;
     visibility: boolean;
 }
 export namespace CompositeContest {

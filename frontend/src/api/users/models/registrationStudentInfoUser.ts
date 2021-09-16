@@ -9,14 +9,14 @@
  * https://openapi-generator.tech
  * Do not edit the class manually.
  */
-import { LocationInput } from './locationInput';
-import { StudentUniversityInput } from './studentUniversityInput';
+import { StudentUniversity } from './studentUniversity';
+import { Location } from './location';
 
 
 export interface RegistrationStudentInfoUser { 
-    dwelling: LocationInput;
+    dwelling: Location;
     grade: number;
     phone: string;
-    university: StudentUniversityInput;
+    university: StudentUniversity;
 }
 

@@ -14,11 +14,12 @@
 export interface StudentUniversityCustom { 
     country: string;
     readonly known_type?: StudentUniversityCustom.KnownTypeEnum;
-    university: string | null;
+    university: string;
 }
 export namespace StudentUniversityCustom {
-    export type KnownTypeEnum = 'Custom';
+    export type KnownTypeEnum = 'Known' | 'Custom';
     export const KnownTypeEnum = {
+        Known: 'Known' as KnownTypeEnum,
         Custom: 'Custom' as KnownTypeEnum
     };
 }

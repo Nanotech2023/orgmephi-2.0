@@ -13,12 +13,12 @@ import { Location } from './location';
 
 
 export interface SchoolInfo { 
-    grade?: number | null;
+    grade?: number;
     location?: Location;
-    name?: string | null;
-    number?: number | null;
-    school_type?: SchoolInfo.SchoolTypeEnum | null;
-    readonly user_id: number;
+    name?: string;
+    number?: number;
+    school_type?: SchoolInfo.SchoolTypeEnum;
+    readonly user_id?: number;
 }
 export namespace SchoolInfo {
     export type SchoolTypeEnum = 'School' | 'Lyceum' | 'Gymnasium' | 'EducationCenter' | 'NightSchool' | 'Technical' | 'External' | 'Collage' | 'ProfTech' | 'University' | 'Correctional' | 'Other';

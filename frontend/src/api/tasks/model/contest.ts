@@ -10,7 +10,11 @@
  * Do not edit the class manually.
  */
 import { CompositeContest } from './compositeContest';
+import { OlympiadLocation } from './olympiadLocation';
+import { Stage } from './stage';
 import { SimpleContest } from './simpleContest';
+import { TargetClass } from './targetClass';
+import { BaseContest } from './baseContest';
 
 
 /**

@@ -9,18 +9,24 @@
  * https://openapi-generator.tech
  * Do not edit the class manually.
  */
+import { OlympiadLocation } from './olympiadLocation';
+import { TargetClass } from './targetClass';
+import { BaseContest } from './baseContest';
 
 
 export interface SimpleContest { 
-    contest_duration: number | null;
+    readonly base_contest: BaseContest;
+    contest_duration: number;
     readonly contest_id: number;
     end_date: string | null;
     end_of_enroll_date: string | null;
     holding_type: SimpleContest.HoldingTypeEnum;
+    locations: Array<OlympiadLocation>;
     previous_contest_id?: number | null;
     previous_participation_condition: SimpleContest.PreviousParticipationConditionEnum;
     result_publication_date: string | null;
     start_date: string | null;
+    target_classes?: Array<TargetClass>;
     visibility: boolean;
 }
 export namespace SimpleContest {

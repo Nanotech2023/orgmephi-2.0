@@ -32,6 +32,7 @@ import {
     AllOlympiadsResponseTaskUnauthorized,
     AllOlympiadTypesResponseTaskUnauthorized,
     AllStagesResponseTaskUnauthorized,
+    AllTargetClassesRequestTaskUnauthorized,
     AllTaskResponseTaskParticipant,
     AllTasksResponseTaskCreator,
     AllVariantsResponseTaskCreator,
@@ -63,6 +64,7 @@ import {
     Stage,
     StageIdResponseTaskCreator,
     StageResponseTaskCreator,
+    TargetClass,
     TaskIdResponseTaskCreator,
     TaskResponseTaskCreator,
     UpdateBaseOlympiadRequestTaskEditor,
@@ -73,6 +75,7 @@ import {
     UpdatePreviousContestRequestTaskEditor,
     UpdateRangeRequestTaskEditor,
     UpdateStageRequestTaskEditor,
+    UpdateTargetClassesOfContestRequestTaskEditor,
     UpdateUserInContestRequestTaskControlUsers,
     UpdateVariantRequestTaskEditor,
     UsersResponseTaskControlUsers,
@@ -109,7 +112,6 @@ export class TasksService
         this.configuration.withCredentials = true
         this.encoder = this.configuration.encoder || new CustomHttpParameterCodec()
     }
-
 
     private addToHttpParams( httpParams: HttpParams, value: any, key?: string ): HttpParams
     {
@@ -2167,6 +2169,90 @@ export class TasksService
     }
 
     /**
+     * @param idBaseOlympiad ID of the contest
+     * @param updateTargetClassesOfContestRequestTaskEditor
+     * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
+     * @param reportProgress flag to report request and response progress.
+     */
+    public tasksEditorBaseOlympiadIdBaseOlympiadAddTargetClassesPost( idBaseOlympiad: number, updateTargetClassesOfContestRequestTaskEditor: UpdateTargetClassesOfContestRequestTaskEditor, observe?: 'body', reportProgress?: boolean, options?: { httpHeaderAccept?: undefined, context?: HttpContext } ): Observable<any>;
+    public tasksEditorBaseOlympiadIdBaseOlympiadAddTargetClassesPost( idBaseOlympiad: number, updateTargetClassesOfContestRequestTaskEditor: UpdateTargetClassesOfContestRequestTaskEditor, observe?: 'response', reportProgress?: boolean, options?: { httpHeaderAccept?: undefined, context?: HttpContext } ): Observable<HttpResponse<any>>;
+    public tasksEditorBaseOlympiadIdBaseOlympiadAddTargetClassesPost( idBaseOlympiad: number, updateTargetClassesOfContestRequestTaskEditor: UpdateTargetClassesOfContestRequestTaskEditor, observe?: 'events', reportProgress?: boolean, options?: { httpHeaderAccept?: undefined, context?: HttpContext } ): Observable<HttpEvent<any>>;
+    public tasksEditorBaseOlympiadIdBaseOlympiadAddTargetClassesPost( idBaseOlympiad: number, updateTargetClassesOfContestRequestTaskEditor: UpdateTargetClassesOfContestRequestTaskEditor, observe: any = 'body', reportProgress: boolean = false, options?: { httpHeaderAccept?: undefined, context?: HttpContext } ): Observable<any>
+    {
+        if ( idBaseOlympiad === null || idBaseOlympiad === undefined )
+        {
+            throw new Error( 'Required parameter idBaseOlympiad was null or undefined when calling tasksEditorBaseOlympiadIdBaseOlympiadAddTargetClassesPost.' )
+        }
+        if ( updateTargetClassesOfContestRequestTaskEditor === null || updateTargetClassesOfContestRequestTaskEditor === undefined )
+        {
+            throw new Error( 'Required parameter updateTargetClassesOfContestRequestTaskEditor was null or undefined when calling tasksEditorBaseOlympiadIdBaseOlympiadAddTargetClassesPost.' )
+        }
+
+        let localVarHeaders = this.defaultHeaders
+
+        let localVarCredential: string | undefined
+        // authentication (CSRFAccessToken) required
+        localVarCredential = this.configuration.lookupCredential( 'CSRFAccessToken' )
+        if ( localVarCredential )
+        {
+            localVarHeaders = localVarHeaders.set( 'X-CSRF-TOKEN', localVarCredential )
+        }
+
+        // authentication (JWTAccessToken) required
+        localVarCredential = this.configuration.lookupCredential( 'JWTAccessToken' )
+        if ( localVarCredential )
+        {
+        }
+
+        let localVarHttpHeaderAcceptSelected: string | undefined = options && options.httpHeaderAccept
+        if ( localVarHttpHeaderAcceptSelected === undefined )
+        {
+            // to determine the Accept header
+            const httpHeaderAccepts: string[] = []
+            localVarHttpHeaderAcceptSelected = this.configuration.selectHeaderAccept( httpHeaderAccepts )
+        }
+        if ( localVarHttpHeaderAcceptSelected !== undefined )
+        {
+            localVarHeaders = localVarHeaders.set( 'Accept', localVarHttpHeaderAcceptSelected )
+        }
+
+        let localVarHttpContext: HttpContext | undefined = options && options.context
+        if ( localVarHttpContext === undefined )
+        {
+            localVarHttpContext = new HttpContext()
+        }
+
+
+        // to determine the Content-Type header
+        const consumes: string[] = [
+            'application/json'
+        ]
+        const httpContentTypeSelected: string | undefined = this.configuration.selectHeaderContentType( consumes )
+        if ( httpContentTypeSelected !== undefined )
+        {
+            localVarHeaders = localVarHeaders.set( 'Content-Type', httpContentTypeSelected )
+        }
+
+        let responseType_: 'text' | 'json' = 'json'
+        if ( localVarHttpHeaderAcceptSelected && localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+        {
+            responseType_ = 'text'
+        }
+
+        return this.httpClient.post<any>( `${ this.configuration.basePath }/tasks/editor/base_olympiad/${ encodeURIComponent( String( idBaseOlympiad ) ) }/add_target_classes`,
+            updateTargetClassesOfContestRequestTaskEditor,
+            {
+                context: localVarHttpContext,
+                responseType: <any> responseType_,
+                withCredentials: this.configuration.withCredentials,
+                headers: localVarHeaders,
+                observe: observe,
+                reportProgress: reportProgress
+            }
+        )
+    }
+
+    /**
      * @param idBaseOlympiad ID of the base olympiad
      * @param idOlympiad ID of the olympiad
      * @param updateContestRequestTaskEditor
@@ -2487,6 +2573,90 @@ export class TasksService
     }
 
     /**
+     * @param idBaseOlympiad ID of the target class
+     * @param updateTargetClassesOfContestRequestTaskEditor
+     * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
+     * @param reportProgress flag to report request and response progress.
+     */
+    public tasksEditorBaseOlympiadIdBaseOlympiadRemoveTargetClassesPost( idBaseOlympiad: number, updateTargetClassesOfContestRequestTaskEditor: UpdateTargetClassesOfContestRequestTaskEditor, observe?: 'body', reportProgress?: boolean, options?: { httpHeaderAccept?: undefined, context?: HttpContext } ): Observable<any>;
+    public tasksEditorBaseOlympiadIdBaseOlympiadRemoveTargetClassesPost( idBaseOlympiad: number, updateTargetClassesOfContestRequestTaskEditor: UpdateTargetClassesOfContestRequestTaskEditor, observe?: 'response', reportProgress?: boolean, options?: { httpHeaderAccept?: undefined, context?: HttpContext } ): Observable<HttpResponse<any>>;
+    public tasksEditorBaseOlympiadIdBaseOlympiadRemoveTargetClassesPost( idBaseOlympiad: number, updateTargetClassesOfContestRequestTaskEditor: UpdateTargetClassesOfContestRequestTaskEditor, observe?: 'events', reportProgress?: boolean, options?: { httpHeaderAccept?: undefined, context?: HttpContext } ): Observable<HttpEvent<any>>;
+    public tasksEditorBaseOlympiadIdBaseOlympiadRemoveTargetClassesPost( idBaseOlympiad: number, updateTargetClassesOfContestRequestTaskEditor: UpdateTargetClassesOfContestRequestTaskEditor, observe: any = 'body', reportProgress: boolean = false, options?: { httpHeaderAccept?: undefined, context?: HttpContext } ): Observable<any>
+    {
+        if ( idBaseOlympiad === null || idBaseOlympiad === undefined )
+        {
+            throw new Error( 'Required parameter idBaseOlympiad was null or undefined when calling tasksEditorBaseOlympiadIdBaseOlympiadRemoveTargetClassesPost.' )
+        }
+        if ( updateTargetClassesOfContestRequestTaskEditor === null || updateTargetClassesOfContestRequestTaskEditor === undefined )
+        {
+            throw new Error( 'Required parameter updateTargetClassesOfContestRequestTaskEditor was null or undefined when calling tasksEditorBaseOlympiadIdBaseOlympiadRemoveTargetClassesPost.' )
+        }
+
+        let localVarHeaders = this.defaultHeaders
+
+        let localVarCredential: string | undefined
+        // authentication (CSRFAccessToken) required
+        localVarCredential = this.configuration.lookupCredential( 'CSRFAccessToken' )
+        if ( localVarCredential )
+        {
+            localVarHeaders = localVarHeaders.set( 'X-CSRF-TOKEN', localVarCredential )
+        }
+
+        // authentication (JWTAccessToken) required
+        localVarCredential = this.configuration.lookupCredential( 'JWTAccessToken' )
+        if ( localVarCredential )
+        {
+        }
+
+        let localVarHttpHeaderAcceptSelected: string | undefined = options && options.httpHeaderAccept
+        if ( localVarHttpHeaderAcceptSelected === undefined )
+        {
+            // to determine the Accept header
+            const httpHeaderAccepts: string[] = []
+            localVarHttpHeaderAcceptSelected = this.configuration.selectHeaderAccept( httpHeaderAccepts )
+        }
+        if ( localVarHttpHeaderAcceptSelected !== undefined )
+        {
+            localVarHeaders = localVarHeaders.set( 'Accept', localVarHttpHeaderAcceptSelected )
+        }
+
+        let localVarHttpContext: HttpContext | undefined = options && options.context
+        if ( localVarHttpContext === undefined )
+        {
+            localVarHttpContext = new HttpContext()
+        }
+
+
+        // to determine the Content-Type header
+        const consumes: string[] = [
+            'application/json'
+        ]
+        const httpContentTypeSelected: string | undefined = this.configuration.selectHeaderContentType( consumes )
+        if ( httpContentTypeSelected !== undefined )
+        {
+            localVarHeaders = localVarHeaders.set( 'Content-Type', httpContentTypeSelected )
+        }
+
+        let responseType_: 'text' | 'json' = 'json'
+        if ( localVarHttpHeaderAcceptSelected && localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+        {
+            responseType_ = 'text'
+        }
+
+        return this.httpClient.post<any>( `${ this.configuration.basePath }/tasks/editor/base_olympiad/${ encodeURIComponent( String( idBaseOlympiad ) ) }/remove_target_classes`,
+            updateTargetClassesOfContestRequestTaskEditor,
+            {
+                context: localVarHttpContext,
+                responseType: <any> responseType_,
+                withCredentials: this.configuration.withCredentials,
+                headers: localVarHeaders,
+                observe: observe,
+                reportProgress: reportProgress
+            }
+        )
+    }
+
+    /**
      * @param idBaseOlympiad Id of the olympiad
      * @param body
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
@@ -2642,6 +2812,90 @@ export class TasksService
         }
 
         return this.httpClient.post<any>( `${ this.configuration.basePath }/tasks/editor/contest/${ encodeURIComponent( String( idContest ) ) }/add_location`,
+            updateLocationOfContestRequestTaskEditor,
+            {
+                context: localVarHttpContext,
+                responseType: <any> responseType_,
+                withCredentials: this.configuration.withCredentials,
+                headers: localVarHeaders,
+                observe: observe,
+                reportProgress: reportProgress
+            }
+        )
+    }
+
+    /**
+     * @param idContest ID of the contest
+     * @param updateLocationOfContestRequestTaskEditor
+     * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
+     * @param reportProgress flag to report request and response progress.
+     */
+    public tasksEditorContestIdContestRemoveLocationPost( idContest: number, updateLocationOfContestRequestTaskEditor: UpdateLocationOfContestRequestTaskEditor, observe?: 'body', reportProgress?: boolean, options?: { httpHeaderAccept?: undefined, context?: HttpContext } ): Observable<any>;
+    public tasksEditorContestIdContestRemoveLocationPost( idContest: number, updateLocationOfContestRequestTaskEditor: UpdateLocationOfContestRequestTaskEditor, observe?: 'response', reportProgress?: boolean, options?: { httpHeaderAccept?: undefined, context?: HttpContext } ): Observable<HttpResponse<any>>;
+    public tasksEditorContestIdContestRemoveLocationPost( idContest: number, updateLocationOfContestRequestTaskEditor: UpdateLocationOfContestRequestTaskEditor, observe?: 'events', reportProgress?: boolean, options?: { httpHeaderAccept?: undefined, context?: HttpContext } ): Observable<HttpEvent<any>>;
+    public tasksEditorContestIdContestRemoveLocationPost( idContest: number, updateLocationOfContestRequestTaskEditor: UpdateLocationOfContestRequestTaskEditor, observe: any = 'body', reportProgress: boolean = false, options?: { httpHeaderAccept?: undefined, context?: HttpContext } ): Observable<any>
+    {
+        if ( idContest === null || idContest === undefined )
+        {
+            throw new Error( 'Required parameter idContest was null or undefined when calling tasksEditorContestIdContestRemoveLocationPost.' )
+        }
+        if ( updateLocationOfContestRequestTaskEditor === null || updateLocationOfContestRequestTaskEditor === undefined )
+        {
+            throw new Error( 'Required parameter updateLocationOfContestRequestTaskEditor was null or undefined when calling tasksEditorContestIdContestRemoveLocationPost.' )
+        }
+
+        let localVarHeaders = this.defaultHeaders
+
+        let localVarCredential: string | undefined
+        // authentication (CSRFAccessToken) required
+        localVarCredential = this.configuration.lookupCredential( 'CSRFAccessToken' )
+        if ( localVarCredential )
+        {
+            localVarHeaders = localVarHeaders.set( 'X-CSRF-TOKEN', localVarCredential )
+        }
+
+        // authentication (JWTAccessToken) required
+        localVarCredential = this.configuration.lookupCredential( 'JWTAccessToken' )
+        if ( localVarCredential )
+        {
+        }
+
+        let localVarHttpHeaderAcceptSelected: string | undefined = options && options.httpHeaderAccept
+        if ( localVarHttpHeaderAcceptSelected === undefined )
+        {
+            // to determine the Accept header
+            const httpHeaderAccepts: string[] = []
+            localVarHttpHeaderAcceptSelected = this.configuration.selectHeaderAccept( httpHeaderAccepts )
+        }
+        if ( localVarHttpHeaderAcceptSelected !== undefined )
+        {
+            localVarHeaders = localVarHeaders.set( 'Accept', localVarHttpHeaderAcceptSelected )
+        }
+
+        let localVarHttpContext: HttpContext | undefined = options && options.context
+        if ( localVarHttpContext === undefined )
+        {
+            localVarHttpContext = new HttpContext()
+        }
+
+
+        // to determine the Content-Type header
+        const consumes: string[] = [
+            'application/json'
+        ]
+        const httpContentTypeSelected: string | undefined = this.configuration.selectHeaderContentType( consumes )
+        if ( httpContentTypeSelected !== undefined )
+        {
+            localVarHeaders = localVarHeaders.set( 'Content-Type', httpContentTypeSelected )
+        }
+
+        let responseType_: 'text' | 'json' = 'json'
+        if ( localVarHttpHeaderAcceptSelected && localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+        {
+            responseType_ = 'text'
+        }
+
+        return this.httpClient.post<any>( `${ this.configuration.basePath }/tasks/editor/contest/${ encodeURIComponent( String( idContest ) ) }/remove_location`,
             updateLocationOfContestRequestTaskEditor,
             {
                 context: localVarHttpContext,
@@ -3269,90 +3523,6 @@ export class TasksService
 
         return this.httpClient.patch<VariantResponseTaskCreator>( `${ this.configuration.basePath }/tasks/editor/contest/${ encodeURIComponent( String( idContest ) ) }/variant/${ encodeURIComponent( String( variantNum ) ) }`,
             updateVariantRequestTaskEditor,
-            {
-                context: localVarHttpContext,
-                responseType: <any> responseType_,
-                withCredentials: this.configuration.withCredentials,
-                headers: localVarHeaders,
-                observe: observe,
-                reportProgress: reportProgress
-            }
-        )
-    }
-
-    /**
-     * @param idLocation ID of the location
-     * @param updateLocationOfContestRequestTaskEditor
-     * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
-     * @param reportProgress flag to report request and response progress.
-     */
-    public tasksEditorContestIdLocationRemoveLocationPost( idLocation: number, updateLocationOfContestRequestTaskEditor: UpdateLocationOfContestRequestTaskEditor, observe?: 'body', reportProgress?: boolean, options?: { httpHeaderAccept?: undefined, context?: HttpContext } ): Observable<any>;
-    public tasksEditorContestIdLocationRemoveLocationPost( idLocation: number, updateLocationOfContestRequestTaskEditor: UpdateLocationOfContestRequestTaskEditor, observe?: 'response', reportProgress?: boolean, options?: { httpHeaderAccept?: undefined, context?: HttpContext } ): Observable<HttpResponse<any>>;
-    public tasksEditorContestIdLocationRemoveLocationPost( idLocation: number, updateLocationOfContestRequestTaskEditor: UpdateLocationOfContestRequestTaskEditor, observe?: 'events', reportProgress?: boolean, options?: { httpHeaderAccept?: undefined, context?: HttpContext } ): Observable<HttpEvent<any>>;
-    public tasksEditorContestIdLocationRemoveLocationPost( idLocation: number, updateLocationOfContestRequestTaskEditor: UpdateLocationOfContestRequestTaskEditor, observe: any = 'body', reportProgress: boolean = false, options?: { httpHeaderAccept?: undefined, context?: HttpContext } ): Observable<any>
-    {
-        if ( idLocation === null || idLocation === undefined )
-        {
-            throw new Error( 'Required parameter idLocation was null or undefined when calling tasksEditorContestIdLocationRemoveLocationPost.' )
-        }
-        if ( updateLocationOfContestRequestTaskEditor === null || updateLocationOfContestRequestTaskEditor === undefined )
-        {
-            throw new Error( 'Required parameter updateLocationOfContestRequestTaskEditor was null or undefined when calling tasksEditorContestIdLocationRemoveLocationPost.' )
-        }
-
-        let localVarHeaders = this.defaultHeaders
-
-        let localVarCredential: string | undefined
-        // authentication (CSRFAccessToken) required
-        localVarCredential = this.configuration.lookupCredential( 'CSRFAccessToken' )
-        if ( localVarCredential )
-        {
-            localVarHeaders = localVarHeaders.set( 'X-CSRF-TOKEN', localVarCredential )
-        }
-
-        // authentication (JWTAccessToken) required
-        localVarCredential = this.configuration.lookupCredential( 'JWTAccessToken' )
-        if ( localVarCredential )
-        {
-        }
-
-        let localVarHttpHeaderAcceptSelected: string | undefined = options && options.httpHeaderAccept
-        if ( localVarHttpHeaderAcceptSelected === undefined )
-        {
-            // to determine the Accept header
-            const httpHeaderAccepts: string[] = []
-            localVarHttpHeaderAcceptSelected = this.configuration.selectHeaderAccept( httpHeaderAccepts )
-        }
-        if ( localVarHttpHeaderAcceptSelected !== undefined )
-        {
-            localVarHeaders = localVarHeaders.set( 'Accept', localVarHttpHeaderAcceptSelected )
-        }
-
-        let localVarHttpContext: HttpContext | undefined = options && options.context
-        if ( localVarHttpContext === undefined )
-        {
-            localVarHttpContext = new HttpContext()
-        }
-
-
-        // to determine the Content-Type header
-        const consumes: string[] = [
-            'application/json'
-        ]
-        const httpContentTypeSelected: string | undefined = this.configuration.selectHeaderContentType( consumes )
-        if ( httpContentTypeSelected !== undefined )
-        {
-            localVarHeaders = localVarHeaders.set( 'Content-Type', httpContentTypeSelected )
-        }
-
-        let responseType_: 'text' | 'json' = 'json'
-        if ( localVarHttpHeaderAcceptSelected && localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
-        {
-            responseType_ = 'text'
-        }
-
-        return this.httpClient.post<any>( `${ this.configuration.basePath }/tasks/editor/contest/${ encodeURIComponent( String( idLocation ) ) }/remove_location`,
-            updateLocationOfContestRequestTaskEditor,
             {
                 context: localVarHttpContext,
                 responseType: <any> responseType_,
@@ -4759,15 +4929,15 @@ export class TasksService
      * @param baseContestId
      * @param locationId
      * @param endDate
-     * @param targetClasses
+     * @param targetClass
      * @param onlyCount
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
      * @param reportProgress flag to report request and response progress.
      */
-    public tasksUnauthorizedOlympiadAllGet( offset?: number, limit?: number, baseContestId?: number, locationId?: number, endDate?: string, targetClasses?: '5' | '6' | '7' | '8' | '9' | '10' | '11' | 'student', onlyCount?: boolean, observe?: 'body', reportProgress?: boolean, options?: { httpHeaderAccept?: 'application/json', context?: HttpContext } ): Observable<FilterSimpleContestResponse>;
-    public tasksUnauthorizedOlympiadAllGet( offset?: number, limit?: number, baseContestId?: number, locationId?: number, endDate?: string, targetClasses?: '5' | '6' | '7' | '8' | '9' | '10' | '11' | 'student', onlyCount?: boolean, observe?: 'response', reportProgress?: boolean, options?: { httpHeaderAccept?: 'application/json', context?: HttpContext } ): Observable<HttpResponse<FilterSimpleContestResponse>>;
-    public tasksUnauthorizedOlympiadAllGet( offset?: number, limit?: number, baseContestId?: number, locationId?: number, endDate?: string, targetClasses?: '5' | '6' | '7' | '8' | '9' | '10' | '11' | 'student', onlyCount?: boolean, observe?: 'events', reportProgress?: boolean, options?: { httpHeaderAccept?: 'application/json', context?: HttpContext } ): Observable<HttpEvent<FilterSimpleContestResponse>>;
-    public tasksUnauthorizedOlympiadAllGet( offset?: number, limit?: number, baseContestId?: number, locationId?: number, endDate?: string, targetClasses?: '5' | '6' | '7' | '8' | '9' | '10' | '11' | 'student', onlyCount?: boolean, observe: any = 'body', reportProgress: boolean = false, options?: { httpHeaderAccept?: 'application/json', context?: HttpContext } ): Observable<any>
+    public tasksUnauthorizedOlympiadAllGet( offset?: number, limit?: number, baseContestId?: number, locationId?: number, endDate?: string, targetClass?: number, onlyCount?: boolean, observe?: 'body', reportProgress?: boolean, options?: { httpHeaderAccept?: 'application/json', context?: HttpContext } ): Observable<FilterSimpleContestResponse>;
+    public tasksUnauthorizedOlympiadAllGet( offset?: number, limit?: number, baseContestId?: number, locationId?: number, endDate?: string, targetClass?: number, onlyCount?: boolean, observe?: 'response', reportProgress?: boolean, options?: { httpHeaderAccept?: 'application/json', context?: HttpContext } ): Observable<HttpResponse<FilterSimpleContestResponse>>;
+    public tasksUnauthorizedOlympiadAllGet( offset?: number, limit?: number, baseContestId?: number, locationId?: number, endDate?: string, targetClass?: number, onlyCount?: boolean, observe?: 'events', reportProgress?: boolean, options?: { httpHeaderAccept?: 'application/json', context?: HttpContext } ): Observable<HttpEvent<FilterSimpleContestResponse>>;
+    public tasksUnauthorizedOlympiadAllGet( offset?: number, limit?: number, baseContestId?: number, locationId?: number, endDate?: string, targetClass?: number, onlyCount?: boolean, observe: any = 'body', reportProgress: boolean = false, options?: { httpHeaderAccept?: 'application/json', context?: HttpContext } ): Observable<any>
     {
 
         let localVarQueryParameters = new HttpParams( { encoder: this.encoder } )
@@ -4796,10 +4966,10 @@ export class TasksService
             localVarQueryParameters = this.addToHttpParams( localVarQueryParameters,
                 <any> endDate, 'end_date' )
         }
-        if ( targetClasses !== undefined && targetClasses !== null )
+        if ( targetClass !== undefined && targetClass !== null )
         {
             localVarQueryParameters = this.addToHttpParams( localVarQueryParameters,
-                <any> targetClasses, 'target_classes' )
+                <any> targetClass, 'target_class' )
         }
         if ( onlyCount !== undefined && onlyCount !== null )
         {
@@ -5062,6 +5232,113 @@ export class TasksService
         }
 
         return this.httpClient.get<OlympiadType>( `${ this.configuration.basePath }/tasks/unauthorized/olympiad_type/${ encodeURIComponent( String( idOlympiadType ) ) }`,
+            {
+                context: localVarHttpContext,
+                responseType: <any> responseType_,
+                withCredentials: this.configuration.withCredentials,
+                headers: localVarHeaders,
+                observe: observe,
+                reportProgress: reportProgress
+            }
+        )
+    }
+
+    /**
+     * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
+     * @param reportProgress flag to report request and response progress.
+     */
+    public tasksUnauthorizedTargetClassAllGet( observe?: 'body', reportProgress?: boolean, options?: { httpHeaderAccept?: 'application/json', context?: HttpContext } ): Observable<AllTargetClassesRequestTaskUnauthorized>;
+    public tasksUnauthorizedTargetClassAllGet( observe?: 'response', reportProgress?: boolean, options?: { httpHeaderAccept?: 'application/json', context?: HttpContext } ): Observable<HttpResponse<AllTargetClassesRequestTaskUnauthorized>>;
+    public tasksUnauthorizedTargetClassAllGet( observe?: 'events', reportProgress?: boolean, options?: { httpHeaderAccept?: 'application/json', context?: HttpContext } ): Observable<HttpEvent<AllTargetClassesRequestTaskUnauthorized>>;
+    public tasksUnauthorizedTargetClassAllGet( observe: any = 'body', reportProgress: boolean = false, options?: { httpHeaderAccept?: 'application/json', context?: HttpContext } ): Observable<any>
+    {
+
+        let localVarHeaders = this.defaultHeaders
+
+        let localVarHttpHeaderAcceptSelected: string | undefined = options && options.httpHeaderAccept
+        if ( localVarHttpHeaderAcceptSelected === undefined )
+        {
+            // to determine the Accept header
+            const httpHeaderAccepts: string[] = [
+                'application/json'
+            ]
+            localVarHttpHeaderAcceptSelected = this.configuration.selectHeaderAccept( httpHeaderAccepts )
+        }
+        if ( localVarHttpHeaderAcceptSelected !== undefined )
+        {
+            localVarHeaders = localVarHeaders.set( 'Accept', localVarHttpHeaderAcceptSelected )
+        }
+
+        let localVarHttpContext: HttpContext | undefined = options && options.context
+        if ( localVarHttpContext === undefined )
+        {
+            localVarHttpContext = new HttpContext()
+        }
+
+
+        let responseType_: 'text' | 'json' = 'json'
+        if ( localVarHttpHeaderAcceptSelected && localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+        {
+            responseType_ = 'text'
+        }
+
+        return this.httpClient.get<AllTargetClassesRequestTaskUnauthorized>( `${ this.configuration.basePath }/tasks/unauthorized/target_class/all`,
+            {
+                context: localVarHttpContext,
+                responseType: <any> responseType_,
+                withCredentials: this.configuration.withCredentials,
+                headers: localVarHeaders,
+                observe: observe,
+                reportProgress: reportProgress
+            }
+        )
+    }
+
+    /**
+     * @param idTargetClass Id of the location
+     * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
+     * @param reportProgress flag to report request and response progress.
+     */
+    public tasksUnauthorizedTargetClassIdTargetClassGet( idTargetClass: number, observe?: 'body', reportProgress?: boolean, options?: { httpHeaderAccept?: 'application/json', context?: HttpContext } ): Observable<TargetClass>;
+    public tasksUnauthorizedTargetClassIdTargetClassGet( idTargetClass: number, observe?: 'response', reportProgress?: boolean, options?: { httpHeaderAccept?: 'application/json', context?: HttpContext } ): Observable<HttpResponse<TargetClass>>;
+    public tasksUnauthorizedTargetClassIdTargetClassGet( idTargetClass: number, observe?: 'events', reportProgress?: boolean, options?: { httpHeaderAccept?: 'application/json', context?: HttpContext } ): Observable<HttpEvent<TargetClass>>;
+    public tasksUnauthorizedTargetClassIdTargetClassGet( idTargetClass: number, observe: any = 'body', reportProgress: boolean = false, options?: { httpHeaderAccept?: 'application/json', context?: HttpContext } ): Observable<any>
+    {
+        if ( idTargetClass === null || idTargetClass === undefined )
+        {
+            throw new Error( 'Required parameter idTargetClass was null or undefined when calling tasksUnauthorizedTargetClassIdTargetClassGet.' )
+        }
+
+        let localVarHeaders = this.defaultHeaders
+
+        let localVarHttpHeaderAcceptSelected: string | undefined = options && options.httpHeaderAccept
+        if ( localVarHttpHeaderAcceptSelected === undefined )
+        {
+            // to determine the Accept header
+            const httpHeaderAccepts: string[] = [
+                'application/json'
+            ]
+            localVarHttpHeaderAcceptSelected = this.configuration.selectHeaderAccept( httpHeaderAccepts )
+        }
+        if ( localVarHttpHeaderAcceptSelected !== undefined )
+        {
+            localVarHeaders = localVarHeaders.set( 'Accept', localVarHttpHeaderAcceptSelected )
+        }
+
+        let localVarHttpContext: HttpContext | undefined = options && options.context
+        if ( localVarHttpContext === undefined )
+        {
+            localVarHttpContext = new HttpContext()
+        }
+
+
+        let responseType_: 'text' | 'json' = 'json'
+        if ( localVarHttpHeaderAcceptSelected && localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+        {
+            responseType_ = 'text'
+        }
+
+        return this.httpClient.get<TargetClass>( `${ this.configuration.basePath }/tasks/unauthorized/target_class/${ encodeURIComponent( String( idTargetClass ) ) }`,
             {
                 context: localVarHttpContext,
                 responseType: <any> responseType_,

@@ -9,13 +9,25 @@
  * https://openapi-generator.tech
  * Do not edit the class manually.
  */
-import { Field } from './field';
+import { LocationRussiaCity } from './locationRussiaCity';
 
 
 export interface LocationRussia { 
-    city?: Field;
-    readonly country: string;
-    rural?: boolean | null;
-    readonly russian?: string;
+    city?: LocationRussiaCity;
+    country: LocationRussia.CountryEnum;
+    readonly location_type?: LocationRussia.LocationTypeEnum;
+    rural?: boolean;
 }
+export namespace LocationRussia {
+    export type CountryEnum = 'Россия';
+    export const CountryEnum = {
+        : 'Россия' as CountryEnum
+    };
+    export type LocationTypeEnum = 'Russian' | 'Foreign';
+    export const LocationTypeEnum = {
+        Russian: 'Russian' as LocationTypeEnum,
+        Foreign: 'Foreign' as LocationTypeEnum
+    };
+}
+
 

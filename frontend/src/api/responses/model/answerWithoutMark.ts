@@ -14,6 +14,7 @@
 export interface AnswerWithoutMark { 
     readonly answer_id?: number;
     answer_type?: AnswerWithoutMark.AnswerTypeEnum;
+    readonly task_id?: number | null;
 }
 export namespace AnswerWithoutMark {
     export type AnswerTypeEnum = 'PlainAnswerText' | 'PlainAnswerFile' | 'RangeAnswer' | 'MultipleChoiceAnswer' | 'BaseAnswer';

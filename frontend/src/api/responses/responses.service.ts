@@ -12,15 +12,7 @@
 /* tslint:disable:no-unused-variable member-ordering */
 
 import { Inject, Injectable, Optional } from '@angular/core'
-import {
-    HttpClient,
-    HttpContext,
-    HttpEvent,
-    HttpHeaders,
-    HttpParameterCodec,
-    HttpParams,
-    HttpResponse
-} from '@angular/common/http'
+import { HttpClient, HttpContext, HttpEvent, HttpHeaders, HttpParameterCodec, HttpResponse } from '@angular/common/http'
 import { Observable } from 'rxjs'
 import { CustomHttpParameterCodec } from '@api/encoder'
 import { BASE_PATH } from '@api/variables'
@@ -65,62 +57,6 @@ export class ResponsesService
         }
         this.configuration.withCredentials = true
         this.encoder = this.configuration.encoder || new CustomHttpParameterCodec()
-    }
-
-
-    private addToHttpParams( httpParams: HttpParams, value: any, key?: string ): HttpParams
-    {
-        if ( typeof value === "object" && value instanceof Date === false )
-        {
-            httpParams = this.addToHttpParamsRecursive( httpParams, value )
-        }
-        else
-        {
-            httpParams = this.addToHttpParamsRecursive( httpParams, value, key )
-        }
-        return httpParams
-    }
-
-    private addToHttpParamsRecursive( httpParams: HttpParams, value?: any, key?: string ): HttpParams
-    {
-        if ( value == null )
-        {
-            return httpParams
-        }
-
-        if ( typeof value === "object" )
-        {
-            if ( Array.isArray( value ) )
-            {
-                ( value as any[] ).forEach( elem => httpParams = this.addToHttpParamsRecursive( httpParams, elem, key ) )
-            }
-            else if ( value instanceof Date )
-            {
-                if ( key != null )
-                {
-                    httpParams = httpParams.append( key,
-                        ( value as Date ).toISOString().substr( 0, 10 ) )
-                }
-                else
-                {
-                    throw Error( "key may not be null if value is Date" )
-                }
-            }
-            else
-            {
-                Object.keys( value ).forEach( k => httpParams = this.addToHttpParamsRecursive(
-                    httpParams, value[ k ], key != null ? `${ key }.${ k }` : k ) )
-            }
-        }
-        else if ( key != null )
-        {
-            httpParams = httpParams.append( key, value )
-        }
-        else
-        {
-            throw Error( "key may not be null if value is not object or array" )
-        }
-        return httpParams
     }
 
     /**
@@ -1542,6 +1478,75 @@ export class ResponsesService
 
         return this.httpClient.post<any>( `${ this.configuration.basePath }/responses/creator/contest/${ encodeURIComponent( String( contestId ) ) }/user/${ encodeURIComponent( String( userId ) ) }/time`,
             userTimeResponseRequest,
+            {
+                context: localVarHttpContext,
+                responseType: <any> responseType_,
+                withCredentials: this.configuration.withCredentials,
+                headers: localVarHeaders,
+                observe: observe,
+                reportProgress: reportProgress
+            }
+        )
+    }
+
+    /**
+     * @param contestId Id of the contest
+     * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
+     * @param reportProgress flag to report request and response progress.
+     */
+    public responsesCreatorContestContestIdWinningPost( contestId: number, observe?: 'body', reportProgress?: boolean, options?: { httpHeaderAccept?: undefined, context?: HttpContext } ): Observable<any>;
+    public responsesCreatorContestContestIdWinningPost( contestId: number, observe?: 'response', reportProgress?: boolean, options?: { httpHeaderAccept?: undefined, context?: HttpContext } ): Observable<HttpResponse<any>>;
+    public responsesCreatorContestContestIdWinningPost( contestId: number, observe?: 'events', reportProgress?: boolean, options?: { httpHeaderAccept?: undefined, context?: HttpContext } ): Observable<HttpEvent<any>>;
+    public responsesCreatorContestContestIdWinningPost( contestId: number, observe: any = 'body', reportProgress: boolean = false, options?: { httpHeaderAccept?: undefined, context?: HttpContext } ): Observable<any>
+    {
+        if ( contestId === null || contestId === undefined )
+        {
+            throw new Error( 'Required parameter contestId was null or undefined when calling responsesCreatorContestContestIdWinningPost.' )
+        }
+
+        let localVarHeaders = this.defaultHeaders
+
+        let localVarCredential: string | undefined
+        // authentication (CSRFAccessToken) required
+        localVarCredential = this.configuration.lookupCredential( 'CSRFAccessToken' )
+        if ( localVarCredential )
+        {
+            localVarHeaders = localVarHeaders.set( 'X-CSRF-TOKEN', localVarCredential )
+        }
+
+        // authentication (JWTAccessToken) required
+        localVarCredential = this.configuration.lookupCredential( 'JWTAccessToken' )
+        if ( localVarCredential )
+        {
+        }
+
+        let localVarHttpHeaderAcceptSelected: string | undefined = options && options.httpHeaderAccept
+        if ( localVarHttpHeaderAcceptSelected === undefined )
+        {
+            // to determine the Accept header
+            const httpHeaderAccepts: string[] = []
+            localVarHttpHeaderAcceptSelected = this.configuration.selectHeaderAccept( httpHeaderAccepts )
+        }
+        if ( localVarHttpHeaderAcceptSelected !== undefined )
+        {
+            localVarHeaders = localVarHeaders.set( 'Accept', localVarHttpHeaderAcceptSelected )
+        }
+
+        let localVarHttpContext: HttpContext | undefined = options && options.context
+        if ( localVarHttpContext === undefined )
+        {
+            localVarHttpContext = new HttpContext()
+        }
+
+
+        let responseType_: 'text' | 'json' = 'json'
+        if ( localVarHttpHeaderAcceptSelected && localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+        {
+            responseType_ = 'text'
+        }
+
+        return this.httpClient.post<any>( `${ this.configuration.basePath }/responses/creator/contest/${ encodeURIComponent( String( contestId ) ) }/winning`,
+            null,
             {
                 context: localVarHttpContext,
                 responseType: <any> responseType_,

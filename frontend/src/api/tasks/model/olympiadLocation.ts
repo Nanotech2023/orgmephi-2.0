@@ -9,9 +9,9 @@
  * https://openapi-generator.tech
  * Do not edit the class manually.
  */
-import { Field } from './field';
 import { RussiaOlympiadLocation } from './russiaOlympiadLocation';
 import { OtherOlympiadLocation } from './otherOlympiadLocation';
+import { RussiaOlympiadLocationCity } from './russiaOlympiadLocationCity';
 import { OnlineOlympiadLocation } from './onlineOlympiadLocation';
 
 

@@ -13,8 +13,8 @@ import { StudentUniversity } from './studentUniversity';
 
 
 export interface StudentInfo { 
-    grade?: number | null;
-    university?: StudentUniversity | null;
-    readonly user_id: number;
+    grade?: number;
+    university?: StudentUniversity;
+    readonly user_id?: number;
 }
 
