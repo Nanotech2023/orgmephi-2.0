@@ -7,57 +7,63 @@ import { AllOlympiadsResponseTaskUnauthorized, Contest, CreateBaseOlympiadReques
 import { TasksService } from '@api/tasks/tasks.service'
 
 
-export interface ManageOlympiadsState
+export interface ManageContestsState
 {
     contests: Array<Contest>
     callState: CallState
 }
 
 
+const initialState = {
+    callState: LoadingState.INIT,
+    contests: []
+}
+
+
 @Injectable()
-export class ManageOlympiadsStore extends ComponentStore<ManageOlympiadsState>
+export class ManageContestsStore extends ComponentStore<ManageContestsState>
 {
-    constructor( private olympiadsService: TasksService )
+    constructor( private tasksService: TasksService )
     {
-        super( { contests: [], callState: LoadingState.INIT } )
+        super( initialState )
     }
 
-    readonly contests: Observable<Contest[]> = this.select( state => state.contests )
+    readonly contests$: Observable<Contest[]> = this.select( state => state.contests )
     private readonly loading$: Observable<boolean> = this.select( state => state.callState === LoadingState.LOADING )
     private readonly error$: Observable<string | null> = this.select( state => getError( state.callState ) )
 
 
     // UPDATERS
-    readonly updateError = this.updater( ( state: ManageOlympiadsState, error: string ) =>
+    readonly updateError = this.updater( ( state: ManageContestsState, error: string ) =>
         ( {
             ...state,
             callState: { errorMessage: error }
         } ) )
 
-    readonly setLoading = this.updater( ( state: ManageOlympiadsState ) =>
+    readonly setLoading = this.updater( ( state: ManageContestsState ) =>
         ( {
             ...state,
             callState: LoadingState.LOADING
         } ) )
 
-    readonly setLoaded = this.updater( ( state: ManageOlympiadsState ) =>
+    readonly setLoaded = this.updater( ( state: ManageContestsState ) =>
         ( {
             ...state,
             callState: LoadingState.LOADED
         } ) )
 
-    readonly updateContests = this.updater( ( state: ManageOlympiadsState, contests: AllOlympiadsResponseTaskUnauthorized ) =>
+    readonly updateContests = this.updater( ( state: ManageContestsState, response: AllOlympiadsResponseTaskUnauthorized ) =>
         ( {
             ...state,
             error: "",
-            contests: [ ...state.contests, ...contests.contest_list ]
+            contests: [ ...state.contests, ...response.contest_list ]
         } ) )
 
     // EFFECTS
     readonly reload = this.effect( () =>
     {
         this.setLoading()
-        return this.olympiadsService.tasksParticipantOlympiadAllGet().pipe(
+        return this.tasksService.tasksParticipantOlympiadAllGet().pipe(
             tapResponse(
                 ( response: AllOlympiadsResponseTaskUnauthorized ) =>
                     this.setState( {
@@ -73,10 +79,10 @@ export class ManageOlympiadsStore extends ComponentStore<ManageOlympiadsState>
 
     readonly add = this.effect( ( olympiadRequestTaskCreatorObservable: Observable<CreateBaseOlympiadRequestTaskCreator> ) =>
         olympiadRequestTaskCreatorObservable.pipe(
-            concatMap( ( xxx: CreateBaseOlympiadRequestTaskCreator ) =>
+            concatMap( ( createBaseOlympiadRequestTask: CreateBaseOlympiadRequestTaskCreator ) =>
             {
                 this.setLoading()
-                return this.olympiadsService.tasksCreatorBaseOlympiadCreatePost(xxx).pipe(
+                return this.tasksService.tasksCreatorBaseOlympiadCreatePost( createBaseOlympiadRequestTask ).pipe(
                     tapResponse(
                         () =>
                         {

@@ -1,5 +1,5 @@
 import { RouterModule, Routes } from '@angular/router'
-import { ManageOlympiadsComponent } from '@/manage-olympiads/containers/manage-olympiads/manage-olympiads.component'
+import { ManageContestsComponent } from '@/manage-contests/containers/manage-contests/manage-contests.component'
 import { NgModule } from '@angular/core'
 
 
@@ -8,7 +8,7 @@ const routes: Routes = [
         path: '',
         children: [
             {
-                path: 'manage/olympiads', component: ManageOlympiadsComponent
+                path: 'manage/contests', component: ManageContestsComponent
             }
         ]
     }
@@ -19,4 +19,4 @@ const routes: Routes = [
     imports: [ RouterModule.forChild( routes ) ],
     exports: [ RouterModule ]
 } )
-export class ManageOlympiadsRoutingModule {}
+export class ManageContestsRoutingModule {}

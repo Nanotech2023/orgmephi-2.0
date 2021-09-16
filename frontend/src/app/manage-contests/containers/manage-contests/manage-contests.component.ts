@@ -1,17 +1,19 @@
-import { Component, OnInit } from '@angular/core'
-import { ManageOlympiadsStore } from '@/manage-olympiads/manage-olympiads.store'
+import { Component, OnInit, ViewChild } from '@angular/core'
+import { ManageContestsStore } from '@/manage-contests/manage-contests.store'
 import { Observable } from 'rxjs'
 import { fixedHeight } from '@/shared/consts'
-import { Contest, CreateBaseOlympiadRequestTaskCreator } from '@api/tasks/model'
+import { User } from '@api/users/models'
+import { Contest } from '@api/tasks/model'
+import { AgGridAngular } from 'ag-grid-angular'
 
 
 @Component( {
     selector: 'app-manage-olympiads',
-    templateUrl: './manage-olympiads.component.html',
-    styleUrls: [ './manage-olympiads.component.scss' ],
-    providers: [ ManageOlympiadsStore ]
+    templateUrl: './manage-contests.component.html',
+    styleUrls: [ './manage-contests.component.scss' ],
+    providers: [ ManageContestsStore ]
 } )
-export class ManageOlympiadsComponent implements OnInit
+export class ManageContestsComponent implements OnInit
 {
     minContainerHeight: number = fixedHeight
     columnDefs = [
@@ -26,23 +28,21 @@ export class ManageOlympiadsComponent implements OnInit
         { field: 'visibility', sortable: true, filter: true, headerName: 'Видимость' }
     ]
 
-    olympiads$: Observable<Contest[]> = this.store.contests
-    addVisible: boolean = false
-
-    constructor( private store: ManageOlympiadsStore ) {}
+    contests$: Observable<Contest[]> = this.store.contests$
+    addModalVisible: boolean = false
+    editModalVisible: boolean = false
+    editing: any = null
+    @ViewChild( 'table_users' ) agGrid!: AgGridAngular
+    
+    constructor( private store: ManageContestsStore ) {}
 
     ngOnInit(): void
     {
         this.store.reload()
     }
 
-    getRowNodeId( data: Contest ): number | undefined
+    getRowNodeId( data: User ): number | undefined
     {
-        return data.contest_id
-    }
-
-    onAdd( createBaseOlympiadRequestTaskCreator: CreateBaseOlympiadRequestTaskCreator )
-    {
-        this.store.add( createBaseOlympiadRequestTaskCreator )
+        return data.id
     }
 }

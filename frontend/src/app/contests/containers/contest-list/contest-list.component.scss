@@ -6,12 +6,12 @@
   margin: auto;
 }
 
-#olympiads, #results, #application, #services, #olympiads-list {
+#contests, #results, #application, #services, #contests-list {
   width: 100%;
   min-height: 276px;
 }
 
-#olympiads {
+#contests {
   background-color: $blue;
 
   .title_container, .collapsible_container {
@@ -328,7 +328,7 @@
 
 }
 
-#olympiads-list {
+#contests-list {
   ul {
     list-style: none;
     padding-top: 5%;

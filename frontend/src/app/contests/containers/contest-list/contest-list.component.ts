@@ -1,9 +1,11 @@
 import { Component, OnInit } from '@angular/core'
-import { footerHeight } from '@/shared/consts'
+import { select, Store } from '@ngrx/store'
+import { AuthSelectors, AuthState } from '@/auth/store'
 import { Observable } from 'rxjs'
-import { animate, query, stagger, state, style, transition, trigger } from '@angular/animations'
-import { ManageOlympiadsStore } from '@/manage-olympiads/manage-olympiads.store'
 import { Contest } from '@api/tasks/model'
+import { ContestsStore } from '@/contests/contests.store'
+import { footerHeight } from '@/shared/consts'
+import { animate, query, stagger, state, style, transition, trigger } from '@angular/animations'
 
 
 export const fadeAnimation = trigger( 'fadeAnimation', [
@@ -38,28 +40,31 @@ export const rotatedState = trigger( 'rotatedState', [
 
 
 @Component( {
-    selector: 'app-participant',
-    templateUrl: './participant.component.html',
-    styleUrls: [ './participant.component.scss' ],
+    selector: 'app-contest-list',
+    templateUrl: './contest-list.component.html',
+    styleUrls: [ './contest-list.component.scss' ],
     animations: [
         fadeAnimation, listAnimation, rotatedState
-    ],
-    providers: [ ManageOlympiadsStore ]
+    ]
 } )
-export class ParticipantComponent implements OnInit
+export class ContestListComponent implements OnInit
 {
-    showOlympiadsList: boolean
+    isParticipant$!: Observable<boolean>
+
+    showContestsList: boolean
     contests$: Observable<Contest[]>
 
-    constructor( private store: ManageOlympiadsStore )
+    constructor( private authStore: Store<AuthState.State>, private contestsStore: ContestsStore )
     {
-        this.showOlympiadsList = false
-        this.contests$ = this.store.contests
+        this.showContestsList = false
+        this.contests$ = this.contestsStore.contests
     }
+
 
     ngOnInit(): void
     {
-        this.store.reload()
+        this.isParticipant$ = this.authStore.pipe( select( AuthSelectors.selectIsParticipant ) )
+        this.contestsStore.reload()
     }
 
     calculateHeight(): number
@@ -67,8 +72,9 @@ export class ParticipantComponent implements OnInit
         return footerHeight
     }
 
-    collapseOlympiadsList(): void
+    collapseContestsList(): void
     {
-        this.showOlympiadsList = !this.showOlympiadsList
+        this.showContestsList = !this.showContestsList
     }
+
 }

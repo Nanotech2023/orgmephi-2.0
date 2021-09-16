@@ -15,7 +15,7 @@ export class AddContestModalComponent
 {
     @Input() modalVisible!: boolean
     @Output() modalVisibleChange: EventEmitter<boolean> = new EventEmitter<boolean>()
-    @Output() addOlympiad: EventEmitter<CreateBaseOlympiadRequestTaskCreator> = new EventEmitter<CreateBaseOlympiadRequestTaskCreator>()
+    @Output() addClick: EventEmitter<CreateBaseOlympiadRequestTaskCreator> = new EventEmitter<CreateBaseOlympiadRequestTaskCreator>()
     @ViewChild( 'modal' ) modal!: ElementRef
 
     createBaseOlympiadRequestTaskCreator: CreateBaseOlympiadRequestTaskCreator
@@ -39,7 +39,7 @@ export class AddContestModalComponent
     create(): void
     {
         this.isCreated = true
-        this.addOlympiad.emit( this.createBaseOlympiadRequestTaskCreator )
+        this.addClick.emit( this.createBaseOlympiadRequestTaskCreator )
     }
 
     isValid(): boolean

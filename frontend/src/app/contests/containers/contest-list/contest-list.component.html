@@ -1,5 +1,5 @@
 <div class="container_main" [style.padding-bottom.px]="calculateHeight()">
-    <div class="row" id="olympiads">
+    <div class="row" id="contests">
         <div class="col-md-6 title_container">
             <svg width="283" height="283" viewBox="0 0 283 283" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <g style="mix-blend-mode:soft-light" opacity="0.5">
@@ -20,15 +20,15 @@
                     fill="#0038D2"/>
             </svg>
             <div class="divider"></div>
-            <button id="button_collapse" class="button-round" (click)="collapseOlympiadsList()">
+            <button id="button_collapse" class="button-round" (click)="collapseContestsList()">
                 <svg width="14" height="9" viewBox="0 0 14 9" fill="none" xmlns="http://www.w3.org/2000/svg"
-                     [@rotatedState]="!showOlympiadsList">
+                     [@rotatedState]="!showContestsList">
                     <path d="M1.645 0L7 5.34333L12.355 0L14 1.645L7 8.645L0 1.645L1.645 0Z" fill="#001E94"/>
                 </svg>
             </button>
         </div>
     </div>
-    <div class="row" id="olympiads-list" *ngIf="showOlympiadsList">
+    <div class="row" id="contests-list" *ngIf="showContestsList">
         <ul *ngIf="contests$ | async as contests" [@listAnimation]="contests.length">
             <li *ngFor="let contest of contests">
                 <p>{{ contest.contest_id }}</p>
