@@ -1,5 +1,7 @@
 from marshmallow_oneofschema import OneOfSchema
 from marshmallow_sqlalchemy import SQLAlchemySchema, auto_field, fields
+from marshmallow import fields as m_f
+from marshmallow import Schema, ValidationError
 from marshmallow_enum import EnumField
 
 from contest.responses.models import *
@@ -18,6 +20,45 @@ class ResponseSchema(SQLAlchemySchema):
     status = EnumField(ResponseStatusEnum, data_key='status', by_value=True)
 
 
+class PlainRightAnswerSchema(Schema):
+    answer = m_f.String(required=True)
+
+
+class RangeRightAnswerSchema(Schema):
+    start_value = m_f.Float(required=True)
+    end_value = m_f.Float(required=True)
+
+
+class MultipleRightAnswerSchema(Schema):
+    answers = m_f.List(cls_or_instance=m_f.String, required=True)
+
+
+class RightAnswerSchema(OneOfSchema):
+    type_schemas = {
+        'Plain': PlainRightAnswerSchema,
+        'Range': RangeRightAnswerSchema,
+        'Multiple': MultipleRightAnswerSchema,
+    }
+
+    type_field_remove = True
+    type_field = 'type'
+
+    def get_obj_type(self, obj):
+        if obj.get('answer', None) is not None:
+            return 'Plain'
+        elif obj.get('start_value', None) is not None:
+            return 'Range'
+        elif obj.get('answers', None) is not None:
+            return 'Multiple'
+        else:
+            raise Exception("Unknown object type: {}".format(obj.__class__.__name__))
+
+    def dump(self, obj, *, many=None, **kwargs):
+        result = self._dump(obj, **kwargs)
+        result.pop(self.type_field)
+        return result
+
+
 class BaseAnswerSchema(SQLAlchemySchema):
     class Meta:
         model = BaseAnswer
@@ -29,11 +70,12 @@ class BaseAnswerSchema(SQLAlchemySchema):
     task_id = auto_field(column_name='task_id', dump_only=True)
     mark = auto_field(column_name='mark', dump_only=True)
     task_points = fields.Related(data_key='task_points', column=['task_points'], required=True)
+    right_answer = fields.Nested(nested=RightAnswerSchema, required=True)
 
 
 class AnswerWithoutMarkSchema(BaseAnswerSchema):
     class Meta(BaseAnswerSchema.Meta):
-        exclude = ['mark', 'task_points']
+        exclude = ['mark', 'task_points', 'right_answer']
 
 
 class RangeAnswerSchema(SQLAlchemySchema):
