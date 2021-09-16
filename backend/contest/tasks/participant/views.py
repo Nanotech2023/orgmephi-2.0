@@ -10,9 +10,8 @@ from contest.responses.util import get_user_in_contest_work
 from contest.tasks.model_schemas.contest import VariantSchema
 from contest.tasks.model_schemas.olympiad import ContestSchema
 from contest.tasks.participant.schemas import *
-from contest.tasks.unauthorized.schemas import AllOlympiadsResponseTaskUnauthorizedSchema, \
-    FilterSimpleContestResponseSchema
-from contest.tasks.unauthorized.util import filter_olympiad_query
+from contest.tasks.participant.util import filter_olympiad_query_with_enrolled_flag
+from contest.tasks.unauthorized.schemas import AllOlympiadsResponseTaskUnauthorizedSchema
 from contest.tasks.util import *
 
 db = get_current_db()
@@ -411,7 +410,7 @@ def get_all_contests_in_stage_self(id_olympiad, id_stage):
 
 @module.route(
     '/olympiad/all',
-    methods=['GET'], output_schema=FilterSimpleContestResponseSchema)
+    methods=['GET'], output_schema=FilterSimpleContestResponseTaskParticipantSchema)
 def get_all_contests_self():
     """
     Get all contests for user
@@ -471,7 +470,7 @@ def get_all_contests_self():
         '404':
           description: User not found
     """
-    return filter_olympiad_query(request.args)
+    return filter_olympiad_query_with_enrolled_flag(request.args)
 
 
 @module.route(
