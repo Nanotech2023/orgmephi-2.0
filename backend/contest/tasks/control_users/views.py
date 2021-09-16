@@ -1,7 +1,7 @@
 from flask import request
 
 from common import get_current_module
-from common.errors import AlreadyExists, InsufficientData
+from common.errors import AlreadyExists
 from common.util import send_pdf
 from contest.responses.util import get_user_in_contest_work
 from contest.tasks.control_users.schemas import *
@@ -50,6 +50,7 @@ def add_user_to_contest(id_contest):
     user_ids = values['users_id']
     show_results_to_user = values['show_results_to_user']
     location_id = values.get('location_id', None)
+    check_condition = values.get('check_condition', False)
 
     # Can't add without location
     if location_id is not None:
@@ -60,10 +61,13 @@ def add_user_to_contest(id_contest):
     target_classes = current_base_contest.target_classes
 
     for user_id in user_ids:
-
         # User is already enrolled
         if is_user_in_contest(user_id, current_contest):
             raise AlreadyExists('user_id', user_id)
+
+        if check_condition:
+            if not check_previous_contest_condition_if_possible(id_contest, user_id):
+                continue
 
         current_user: User = db_get_or_raise(User, "id", user_id)
         grade = check_user_unfilled_for_enroll(current_user)
@@ -283,5 +287,5 @@ def get_user_certificate_in_contest(id_contest, id_user):
     ).one_or_none()
     user_status = user_in_contest.user_status
 
-    return send_pdf('user_certificate.html', u=user, mark=mark, user_status=user_status,
+    return send_pdf('user_certificate.html', u=current_user, mark=mark, user_status=user_status,
                     back=current_contest)

@@ -16,7 +16,7 @@ class AllUserMarksResponseSchema(Schema):
     user_id = fields.Int(required=True)
     work_id = fields.Int(required=True)
     contest_id = fields.Int(required=True)
-    user_answers = fields.Nested(nested=BaseAnswerSchema, many=True, required=False)
+    user_answers = fields.Nested(nested=BaseAnswerSchema, many=True, required=True)
 
 
 class PlainAnswerRequestSchema(Schema):

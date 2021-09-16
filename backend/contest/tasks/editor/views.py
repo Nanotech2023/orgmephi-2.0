@@ -2,12 +2,12 @@ from flask import request
 from marshmallow import EXCLUDE
 
 from common import get_current_module
-from common.errors import NotFound
 from contest.tasks.creator.schemas import BaseOlympiadResponseTaskCreatorSchema, StageResponseTaskCreatorSchema, \
     ContestResponseTaskCreatorSchema, TaskResponseTaskCreatorSchema, VariantResponseTaskCreatorSchema
 from contest.tasks.editor.schemas import *
-from contest.tasks.model_schemas.contest import StageSchema, VariantSchema
-from contest.tasks.model_schemas.olympiad import BaseContestSchema, SimpleContestSchema, CompositeContestSchema
+from contest.tasks.model_schemas.contest import VariantSchema
+from contest.tasks.model_schemas.olympiad import BaseContestSchema, SimpleContestSchema, CompositeContestSchema, \
+    StageSchema
 from contest.tasks.model_schemas.tasks import PlainTaskSchema, RangeTaskSchema, MultipleChoiceTaskSchema
 from contest.tasks.util import *
 
@@ -131,14 +131,8 @@ def base_olympiad_patch(id_base_olympiad):
     base_contest = db_get_or_raise(BaseContest, "base_contest_id", id_base_olympiad)
     db_get_or_raise(OlympiadType, "olympiad_type_id", values["olympiad_type_id"])
 
-    target_classes = set(values['target_classes'])
-    del values["target_classes"]
-
     BaseContestSchema(load_instance=True).load(request.json, instance=base_contest, session=db.session,
                                                partial=False, unknown=EXCLUDE)
-
-    if target_classes is not None:
-        base_contest.target_classes = target_classes
 
     db.session.commit()
 
@@ -239,6 +233,9 @@ def olympiad_patch(id_base_olympiad, id_olympiad):
 
     db.session.commit()
     return current_contest, 200
+
+
+# Stage
 
 
 @module.route('/olympiad/<int:id_olympiad>/stage/<int:id_stage>/remove',
@@ -636,13 +633,6 @@ def task_remove(id_contest, id_variant, id_task):
     return {}, 200
 
 
-def check_existence(id_olympiad, id_stage, id_contest, id_variant):
-    db_get_or_raise(Contest, "contest_id", str(id_olympiad))
-    db_get_or_raise(Stage, "stage_id", str(id_stage))
-    db_get_or_raise(Contest, "contest_id", str(id_contest))
-    db_get_or_raise(Variant, "variant_id", str(id_variant))
-
-
 @module.route(
     '/contest/<int:id_contest>/variant/<int:id_variant>/task/<int:id_task>/plain',
     methods=['PATCH'],
@@ -827,9 +817,9 @@ def task_patch_multiple(id_contest, id_variant, id_task):
 
 @module.route('/contest/<int:id_contest>/add_location', methods=['POST'],
               input_schema=UpdateLocationOfContestRequestTaskEditorSchema)
-def add_location_to_contest(id_contest):
+def add_locations_to_contest(id_contest):
     """
-    Add location to contest
+    Add locations to contest
     ---
     post:
       parameters:
@@ -862,25 +852,25 @@ def add_location_to_contest(id_contest):
     current_contest = get_contest_if_possible(id_contest)
 
     for location_id in locations:
-        location = db_get_or_raise(OlympiadLocation, "location_id", str(location_id))
+        current_location = db_get_or_raise(OlympiadLocation, "location_id", str(location_id))
 
-        current_contest.locations.append(location)
+        current_contest.locations.append(current_location)
 
     db.session.commit()
     return {}, 200
 
 
-@module.route('/contest/<int:id_location>/remove_location', methods=['POST'],
+@module.route('/contest/<int:id_contest>/remove_location', methods=['POST'],
               input_schema=UpdateLocationOfContestRequestTaskEditorSchema)
-def remove_location_from_contest(id_location):
+def remove_locations_from_contest(id_contest):
     """
     Remove location from contest
     ---
     post:
       parameters:
         - in: path
-          description: ID of the location
-          name: id_location
+          description: ID of the contest
+          name: id_contest
           required: true
           schema:
             type: integer
@@ -905,14 +895,108 @@ def remove_location_from_contest(id_location):
 
     locations = values['locations']
 
-    current_contest = get_contest_if_possible(id_location)
+    current_contest = get_contest_if_possible(id_contest)
 
     for location_id in locations:
-        location = db_get_or_raise(OlympiadLocation, "location_id", str(location_id))
-        if location in current_contest.locations:
-            current_contest.locations.remove(location)
+        current_location = db_get_or_raise(OlympiadLocation, "location_id", str(location_id))
+        if current_location in current_contest.locations:
+            current_contest.locations.remove(current_location)
         else:
             raise NotFound("contest.locations", str(location_id))
+
+    db.session.commit()
+    return {}, 200
+
+
+# Target classes
+
+
+@module.route('/base_olympiad/<int:id_base_olympiad>/add_target_classes', methods=['POST'],
+              input_schema=UpdateTargetClassesOfContestRequestTaskEditorSchema)
+def add_target_classes_to_contest(id_base_olympiad):
+    """
+    Add target classes to contest
+    ---
+    post:
+      parameters:
+        - in: path
+          description: ID of the contest
+          name: id_base_olympiad
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: UpdateTargetClassesOfContestRequestTaskEditorSchema
+      security:
+        - JWTAccessToken: [ ]
+        - CSRFAccessToken: [ ]
+      responses:
+        '200':
+          description: OK
+        '400':
+          description: Bad request
+        '409':
+          description: Olympiad type already in use
+    """
+
+    values = request.marshmallow
+    target_classes = values['target_classes_ids']
+
+    current_base_contest = db_get_or_raise(BaseContest, "base_contest_id", str(id_base_olympiad))
+
+    for target_class_id in target_classes:
+        target_class = db_get_or_raise(TargetClass, "target_class_id", str(target_class_id))
+        current_base_contest.target_classes.append(target_class)
+
+    db.session.commit()
+    return {}, 200
+
+
+@module.route('/base_olympiad/<int:id_base_olympiad>/remove_target_classes', methods=['POST'],
+              input_schema=UpdateTargetClassesOfContestRequestTaskEditorSchema)
+def remove_target_classes_from_contest(id_base_olympiad):
+    """
+    Remove target class from contest
+    ---
+    post:
+      parameters:
+        - in: path
+          description: ID of the target class
+          name: id_base_olympiad
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: UpdateTargetClassesOfContestRequestTaskEditorSchema
+      security:
+        - JWTAccessToken: [ ]
+        - CSRFAccessToken: [ ]
+      responses:
+        '200':
+          description: OK
+        '400':
+          description: Bad request
+        '409':
+          description: Location already in use
+    """
+    values = request.marshmallow
+
+    target_classes = values['target_classes_ids']
+
+    current_base_contest = db_get_or_raise(BaseContest, "base_contest_id", str(id_base_olympiad))
+
+    for target_class_id in target_classes:
+        target_class = db_get_or_raise(TargetClass, "target_class_id", str(target_class_id))
+        if target_class in current_base_contest.target_classes:
+            current_base_contest.target_classes.remove(target_class)
+        else:
+            raise NotFound("current_base_contest.target_classes", str(target_class_id))
 
     db.session.commit()
     return {}, 200

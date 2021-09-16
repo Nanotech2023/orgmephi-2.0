@@ -2,7 +2,7 @@ from marshmallow import Schema, fields
 from marshmallow_enum import EnumField
 
 from common import fields as common_fields
-from contest.tasks.models import OlympiadSubjectEnum, TargetClassEnum, StageConditionEnum, ContestHoldingTypeEnum, \
+from contest.tasks.models import OlympiadSubjectEnum, StageConditionEnum, ContestHoldingTypeEnum, \
     UserStatusEnum
 
 
@@ -12,11 +12,14 @@ class UpdateBaseOlympiadRequestTaskEditorSchema(Schema):
     name = common_fields.CommonName(required=False)
     description = common_fields.Text(required=False)
     rules = common_fields.Text(required=False)
-    winning_condition = fields.Float(required=False)
-    laureate_condition = fields.Float(required=False)
+    winner_1_condition = common_fields.FloatCondition(required=False)
+    winner_2_condition = common_fields.FloatCondition(required=False)
+    winner_3_condition = common_fields.FloatCondition(required=False)
+    diploma_1_condition = common_fields.FloatCondition(required=False)
+    diploma_2_condition = common_fields.FloatCondition(required=False)
+    diploma_3_condition = common_fields.FloatCondition(required=False)
     olympiad_type_id = fields.Int(required=False)
     subject = EnumField(OlympiadSubjectEnum, required=False, by_value=True)
-    target_classes = fields.List(EnumField(TargetClassEnum, required=True, by_value=True), required=False)
 
 
 # Contest
@@ -89,5 +92,14 @@ class UpdateMultipleRequestTaskEditorSchema(Schema):
     task_points = fields.Integer(required=False)
 
 
+# Location
+
 class UpdateLocationOfContestRequestTaskEditorSchema(Schema):
     locations = fields.List(fields.Int(), required=True)
+
+
+# Target classes
+
+
+class UpdateTargetClassesOfContestRequestTaskEditorSchema(Schema):
+    target_classes_ids = fields.List(fields.Int(), required=True)

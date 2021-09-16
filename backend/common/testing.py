@@ -171,6 +171,7 @@ def reset_db(app):
     Reset database before/after a test case
     :param app: Test application object
     """
+    app.db.session.remove()
     app.db.drop_all()
     app.db.create_all()
 
@@ -223,3 +224,4 @@ class DefaultTestConfiguration:
     ORGMEPHI_CAPTCHA_ENABLE = False
     ORGMEPHI_CAPTCHA_LENGTH = 6
     ORGMEPHI_CAPTCHA_EXPIRATION = timedelta(minutes=5)
+    RESPONSE_EXTRA_MINUTES = timedelta(seconds=300)

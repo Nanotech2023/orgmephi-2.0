@@ -85,10 +85,6 @@ class Response(db.Model):
         else:
             return self.work_status
 
-    @status.setter
-    def status(self, value):
-        self.status = value
-
 
 class ResponseFiletypeEnum(enum.Enum):
     """
@@ -142,6 +138,8 @@ class BaseAnswer(db.Model):
     task_id = db.Column(db.Integer, db.ForeignKey(f'{Task.__tablename__}.task_id'))
     answer_type = db.Column(db.Enum(AnswerEnum), nullable=False)
     mark = db.Column(db.Float, default=0)
+
+    task_points = db.relationship(Task, uselist=False)
 
     __mapper_args__ = {
         'polymorphic_identity': AnswerEnum.BaseAnswer,
@@ -237,7 +235,7 @@ def add_multiple_answer(work_id, task_id, values):
     answer = MultipleChoiceAnswer(
         work_id=work_id,
         task_id=task_id,
-        answers=[elem['answer'] for elem in values['answers']]
+        answers=set(elem['answer'] for elem in values['answers'])
     )
     db.session.add(answer)
 
@@ -257,7 +255,3 @@ class MultipleChoiceAnswer(BaseAnswer):
     __mapper_args__ = {
         'polymorphic_identity': AnswerEnum.MultipleChoiceAnswer,
     }
-
-
-if __name__ == '__main__':
-    db.create_all()
