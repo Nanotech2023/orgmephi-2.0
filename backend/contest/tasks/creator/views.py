@@ -4,7 +4,6 @@ from flask import request
 from flask import send_file
 
 from common import get_current_module
-from common.errors import InsufficientData
 from contest.tasks.creator.schemas import *
 from contest.tasks.util import *
 
@@ -47,23 +46,30 @@ def base_olympiad_create():
     description = values['description']
     rules = values['rules']
     olympiad_type_id = values['olympiad_type_id']
-    winning_condition = values['winning_condition']
-    laureate_condition = values['laureate_condition']
+
+    winner_1_condition = values['winner_1_condition']
+    winner_2_condition = values['winner_2_condition']
+    winner_3_condition = values['winner_3_condition']
+    diploma_1_condition = values['diploma_1_condition']
+    diploma_2_condition = values['diploma_2_condition']
+    diploma_3_condition = values['diploma_3_condition']
+
     subject = values['subject']
-    target_classes = set(values['target_classes'])
 
     db_get_or_raise(OlympiadType, "olympiad_type_id", values["olympiad_type_id"])
     base_contest = add_base_contest(db.session,
                                     description=description,
                                     name=name,
                                     certificate_template=None,
-                                    winning_condition=winning_condition,
-                                    laureate_condition=laureate_condition,
+                                    winner_1_condition=winner_1_condition,
+                                    winner_2_condition=winner_2_condition,
+                                    winner_3_condition=winner_3_condition,
+                                    diploma_1_condition=diploma_1_condition,
+                                    diploma_2_condition=diploma_2_condition,
+                                    diploma_3_condition=diploma_3_condition,
                                     rules=rules,
                                     olympiad_type_id=olympiad_type_id,
                                     subject=subject)
-
-    base_contest.target_classes = target_classes
 
     db.session.commit()
 
@@ -683,13 +689,6 @@ def task_get(id_contest, id_variant, id_task):
     """
     task = get_task_if_possible(id_contest, id_variant, id_task)
     return task, 200
-
-
-def check_existence(id_olympiad, id_stage, id_contest, id_variant):
-    db_get_or_raise(Contest, "contest_id", str(id_olympiad))
-    db_get_or_raise(Stage, "stage_id", str(id_stage))
-    db_get_or_raise(Contest, "contest_id", str(id_contest))
-    db_get_or_raise(Variant, "variant_id", str(id_variant))
 
 
 @module.route(

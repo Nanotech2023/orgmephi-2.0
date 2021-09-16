@@ -4,10 +4,10 @@ from marshmallow import Schema, fields
 from marshmallow_enum import EnumField
 
 from common import fields as common_fields
-from contest.tasks.model_schemas.contest import StageSchema, VariantSchema
-from contest.tasks.model_schemas.olympiad import ContestSchema, BaseContestSchema
+from contest.tasks.model_schemas.contest import VariantSchema
+from contest.tasks.model_schemas.olympiad import ContestSchema, BaseContestSchema, StageSchema
 from contest.tasks.model_schemas.tasks import TaskSchema
-from contest.tasks.models import OlympiadSubjectEnum, TargetClassEnum, StageConditionEnum, ContestHoldingTypeEnum, \
+from contest.tasks.models import OlympiadSubjectEnum, StageConditionEnum, ContestHoldingTypeEnum, \
     UserStatusEnum
 
 
@@ -17,11 +17,14 @@ class CreateBaseOlympiadRequestTaskCreatorSchema(Schema):
     name = common_fields.CommonName(required=True)
     description = common_fields.Text(required=True)
     rules = common_fields.Text(required=True)
-    winning_condition = fields.Float(required=True)
-    laureate_condition = fields.Float(required=True)
+    winner_1_condition = common_fields.FloatCondition(required=True)
+    winner_2_condition = common_fields.FloatCondition(required=True)
+    winner_3_condition = common_fields.FloatCondition(required=True)
+    diploma_1_condition = common_fields.FloatCondition(required=True)
+    diploma_2_condition = common_fields.FloatCondition(required=True)
+    diploma_3_condition = common_fields.FloatCondition(required=True)
     olympiad_type_id = fields.Int(required=True)
     subject = EnumField(OlympiadSubjectEnum, required=True, by_value=True)
-    target_classes = fields.List(EnumField(TargetClassEnum, required=True, by_value=True), required=True)
 
 
 class BaseOlympiadResponseTaskCreatorSchema(BaseContestSchema):

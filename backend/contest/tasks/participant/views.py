@@ -3,7 +3,7 @@ import io
 from flask import send_file, request
 
 from common import get_current_module
-from common.errors import AlreadyExists, TimeOver, InsufficientData
+from common.errors import AlreadyExists, TimeOver
 from common.util import send_pdf
 from contest.responses.models import ResponseStatusEnum
 from contest.responses.util import get_user_in_contest_work
@@ -12,6 +12,7 @@ from contest.tasks.model_schemas.olympiad import ContestSchema
 from contest.tasks.participant.schemas import *
 from contest.tasks.unauthorized.schemas import AllOlympiadsResponseTaskUnauthorizedSchema, \
     FilterSimpleContestResponseSchema
+from contest.tasks.unauthorized.util import filter_olympiad_query
 from contest.tasks.util import *
 
 db = get_current_db()
@@ -53,16 +54,12 @@ def get_variant_self(id_contest):
           description: User not found
     """
 
-    current_user = db_get_or_raise(UserInContest, "user_id", str(jwt_get_id()))
+    db_get_or_raise(UserInContest, "user_id", str(jwt_get_id()))
     current_response = get_user_in_contest_work(str(jwt_get_id()), id_contest)
 
-    # Contest not started
+    # Contest not in progress
     if current_response.status != ResponseStatusEnum.in_progress:
         raise ContestContentAccessDenied()
-
-    # Contest ended
-    if current_user.completed_the_contest:
-        raise TimeOver("olympiad")
 
     variant = get_user_variant_if_possible(id_contest)
     return variant, 200
@@ -104,15 +101,18 @@ def enroll_in_contest(id_contest):
 
     values = request.marshmallow
 
-    location_id = values.get('location_id', None)
-
     user_id = jwt_get_id()
     current_contest: SimpleContest = get_contest_if_possible(id_contest)
-    current_base_contest = get_base_contest(current_contest)
+
+    # Id user doesn't win previous contest
+    if not check_previous_contest_condition_if_possible(id_contest, user_id):
+        raise ContestContentAccessDenied()
 
     # Can't enroll after deadline
-    if datetime.utcnow().date() > current_contest.end_of_enroll_date:
+    if datetime.utcnow() > current_contest.end_of_enroll_date:
         raise TimeOver("Time for enrolling is over")
+
+    location_id = values.get('location_id', None)
 
     # Can't add without location
     if location_id is not None:
@@ -121,6 +121,8 @@ def enroll_in_contest(id_contest):
     # User is already enrolled
     if is_user_in_contest(user_id, current_contest):
         raise AlreadyExists('user_id', str(user_id))
+
+    current_base_contest = get_base_contest(current_contest)
 
     target_classes = current_base_contest.target_classes
     current_user = db_get_or_raise(User, "id", user_id)
@@ -144,7 +146,7 @@ def enroll_in_contest(id_contest):
               input_schema=EnrollRequestTaskParticipantSchema)
 def change_user_location_in_contest(id_contest):
     """
-    EChange user location
+    Change user location
     ---
     post:
       requestBody:
@@ -179,7 +181,7 @@ def change_user_location_in_contest(id_contest):
     current_contest: SimpleContest = get_contest_if_possible(id_contest)
 
     # Can't enroll after deadline
-    if datetime.utcnow().date() > current_contest.end_of_enroll_date:
+    if datetime.utcnow() > current_contest.end_of_enroll_date:
         raise TimeOver("Time for enrolling is over")
 
     if location_id is not None:
@@ -232,16 +234,12 @@ def get_all_tasks_self(id_contest):
           description: User not found
     """
 
-    current_user = db_get_or_raise(UserInContest, "user_id", str(jwt_get_id()))
+    db_get_or_raise(UserInContest, "user_id", str(jwt_get_id()))
     current_response = get_user_in_contest_work(str(jwt_get_id()), id_contest)
 
-    # Contest not started
+    # Contest not in progress
     if current_response.status != ResponseStatusEnum.in_progress:
         raise ContestContentAccessDenied()
-
-    # Contest ended
-    if current_user.completed_the_contest:
-        raise TimeOver("olympiad")
 
     tasks_list = get_user_tasks_if_possible(id_contest)
     return {
@@ -287,17 +285,12 @@ def get_task_image_self(id_contest, id_task):
           description: Olympiad type already in use
     """
 
-    current_user = db_get_or_raise(UserInContest, "user_id", str(jwt_get_id()))
+    db_get_or_raise(UserInContest, "user_id", str(jwt_get_id()))
     current_response = get_user_in_contest_work(str(jwt_get_id()), id_contest)
 
-    # Contest not started
+    # Contest not in progress
     if current_response.status != ResponseStatusEnum.in_progress:
         raise ContestContentAccessDenied()
-
-    # Contest ended
-    if current_user.completed_the_contest:
-        raise TimeOver("olympiad")
-
     task = get_user_task_if_possible(id_contest, id_task)
 
     if task.image_of_task is None:
@@ -348,7 +341,7 @@ def get_user_certificate_self(id_contest):
     current_contest: SimpleContest = get_contest_if_possible(id_contest)
 
     # Try to see the results before contest
-    if datetime.utcnow().date() < current_contest.result_publication_date:
+    if datetime.utcnow() < current_contest.result_publication_date:
         raise ContestIsStillOnReview()
 
     current_contest = get_contest_if_possible(id_contest)
@@ -360,7 +353,7 @@ def get_user_certificate_self(id_contest):
     mark = get_user_in_contest_work(jwt_get_id(), id_contest).mark
     user_status = db_get_or_raise(UserInContest, 'user_id', jwt_get_id()).user_status
 
-    return send_pdf('user_certificate.html', u=user, mark=mark, user_status=user_status,
+    return send_pdf('user_certificate.html', u=current_user, mark=mark, user_status=user_status,
                     back=current_contest)
 
 
@@ -478,8 +471,6 @@ def get_all_contests_self():
         '404':
           description: User not found
     """
-    # TODO IN NEXT MR
-    # TODO FILTER
     return filter_olympiad_query(request.args)
 
 

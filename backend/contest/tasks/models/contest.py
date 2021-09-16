@@ -1,24 +1,8 @@
 import enum
+
 from common import get_current_db
 
 db = get_current_db()
-
-
-class TargetClassEnum(enum.Enum):
-    """
-    Enum for olympiad target classes
-    """
-    class_5 = "5"
-    class_6 = "6"
-    class_7 = "7"
-    class_8 = "8"
-    class_9 = "9"
-    class_10 = "10"
-    class_11 = "11"
-    student = "student"
-
-
-olympiad_target_class_dict = {target.value: target for target in TargetClassEnum}
 
 
 class StageConditionEnum(enum.Enum):
@@ -58,14 +42,14 @@ class Stage(db.Model):
     __tablename__ = 'stage'
 
     stage_id = db.Column(db.Integer, autoincrement=True, primary_key=True)
-    olympiad_id = db.Column(db.Integer, db.ForeignKey('contest.contest_id'))
+    olympiad_id = db.Column(db.Integer, db.ForeignKey('composite_contest.contest_id'))
     stage_name = db.Column(db.Text, index=True, nullable=False)
     stage_num = db.Column(db.Integer, nullable=False)
     condition = db.Column(db.Enum(StageConditionEnum), nullable=True)
     this_stage_condition = db.Column(db.Text, nullable=False)
 
-    contests = db.relationship('Contest', secondary=contestsInStage, lazy='subquery',
-                               backref=db.backref('stage', lazy=True))
+    contests = db.relationship('SimpleContest', secondary=contestsInStage, lazy='subquery',
+                               backref=db.backref('stage', lazy=True, uselist=False))
 
 
 def add_stage(db_session, stage_name, condition, stage_num, this_stage_condition, olympiad_id=None):
@@ -125,7 +109,7 @@ class Variant(db.Model):
     __tablename__ = 'variant'
 
     variant_id = db.Column(db.Integer, autoincrement=True, primary_key=True)
-    contest_id = db.Column(db.Integer, db.ForeignKey('contest.contest_id'))
+    contest_id = db.Column(db.Integer, db.ForeignKey('simple_contest.contest_id'))
     variant_number = db.Column(db.Integer)
     variant_description = db.Column(db.Text)
 

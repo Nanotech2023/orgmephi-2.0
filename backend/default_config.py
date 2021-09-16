@@ -8,6 +8,7 @@ class DefaultConfiguration:
     JWT_ALGORITHM = 'RS256'
     ORGMEPHI_PUBLIC_KEY = 'id_rsa.pub'
     ORGMEPHI_PRIVATE_KEY = 'id_rsa'
+    ORGMEPHI_TARGET_CLASSES_FILE = 'contest/tasks/target_classes.txt'
     ORGMEPHI_UNIVERSITY_FILE = 'user/universities.txt'
     ORGMEPHI_COUNTRY_FILE = 'user/countries.txt'
     ORGMEPHI_REGION_FILE = 'user/regions.txt'

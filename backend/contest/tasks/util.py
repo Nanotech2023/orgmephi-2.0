@@ -1,10 +1,6 @@
 import secrets
 
-from marshmallow import Schema, fields
-from marshmallow_enum import EnumField
-
-from common import get_current_app
-from common.errors import InsufficientData, FileTooLarge, DataConflict, RequestError
+from common.errors import FileTooLarge, DataConflict, InsufficientData, RequestError, NotFound
 from common.jwt_verify import jwt_get_id
 from contest.tasks.models import *
 from user.models import UserTypeEnum
@@ -12,37 +8,95 @@ from user.models import UserTypeEnum
 app = get_current_app()
 
 
-class ContestContentAccessDenied(RequestError):
-    """
-    User has no access to contest
-    """
-
-    def init(self):
-        """
-        Create error object
-        """
-        super(ContestContentAccessDenied, self).init(403)
-
-    def get_msg(self) -> str:
-        return 'User has no access to this contest'
-
-
-class ContestIsStillOnReview(RequestError):
-    """
-    Contest is still on review
-    """
-
-    def init(self):
-        """
-        Create error object
-        """
-        super(ContestIsStillOnReview, self).init(403)
-
-    def get_msg(self) -> str:
-        return 'Contest is still on review'
-
-
 # Contest getters
+
+
+def get_previous_contest_if_possible(current_contest):
+    """
+    Get contest
+    :param current_contest: current contest
+    :return: contest
+    """
+    if current_contest.previous_contest_id is not None:
+        return db_get_or_raise(Contest, "contest_id", str(current_contest.previous_contest_id))
+    else:
+        return None
+
+
+def compare_conditions_weights(current_contest, prev_contest, user_id):
+    """
+    Compare conditions weights
+    :param current_contest: current contest
+    :param prev_contest: prev contest
+    :param user_id: user id
+    :return:
+    """
+    participation_condition_weight = user_status_weights_dict[
+        current_contest.previous_participation_condition.value]
+    user_in_contest_status_weight = user_status_weights_dict[
+        get_user_in_contest_by_id_if_possible(prev_contest.contest_id, user_id).user_status.value]
+
+    return user_in_contest_status_weight >= participation_condition_weight
+
+
+def _get_passed(simple_contest, user_id):
+    """
+    Get passed
+    :param simple_contest:
+    :return:
+    """
+    if simple_contest.previous_participation_condition is None:
+        return True
+    prev_contest: SimpleContest = get_previous_contest_if_possible(simple_contest)
+    return compare_conditions_weights(simple_contest, prev_contest, user_id)
+
+
+def check_stage_condition(prev_contest, user_id, current_step_condition):
+    """
+    Check enrollment to the next stage condition
+    :param prev_contest: prev contest
+    :param user_id: user if
+    :param current_step_condition: current step condition
+    :return:
+    """
+    prev_stage = prev_contest.stage
+    if prev_stage is None:
+        return current_step_condition
+    condition = prev_stage.condition
+
+    passed_list = (_get_passed(simple_contest, user_id) for simple_contest in prev_stage.contests)
+    if condition == StageConditionEnum.And:
+        return all(passed_list)
+    elif condition == StageConditionEnum.Or:
+        return any(passed_list)
+
+    return current_step_condition
+
+
+def check_previous_contest_condition_if_possible(contest_id, user_id):
+    """
+    Check contest condition
+    :param user_id: user id
+    :param contest_id: contest id
+    :return: contest
+    """
+    current_contest = db_get_or_raise(Contest, "contest_id", str(contest_id))
+    prev_contest = get_previous_contest_if_possible(current_contest)
+    if prev_contest is None:
+        return True
+
+    current_step_condition = compare_conditions_weights(current_contest, prev_contest, user_id)
+    current_stage_step_condition = check_stage_condition(prev_contest, user_id, current_step_condition)
+
+    if current_contest.stage is not None and prev_contest.stage is not None:
+        if current_contest.stage.stage_num == prev_contest.stage.stage_num:
+            return current_step_condition
+        else:
+            return current_stage_step_condition
+    elif prev_contest.stage is not None:
+        return current_stage_step_condition
+    else:
+        return current_step_condition
 
 
 def get_contest_if_possible(contest_id):
@@ -77,6 +131,8 @@ def get_composite_contest_if_possible(contest_id):
     if current_contest.composite_type == ContestTypeEnum.SimpleContest:
         raise DataConflict('Current contest type is not composite one')
     return current_contest
+
+
 # Constants
 
 
@@ -135,16 +191,6 @@ def is_user_in_contest(user_id, current_contest):
 
 # Contest content module
 
-def is_variant_in_contest(variant_id, current_contest):
-    """
-    Check if variant in contest
-    :param variant_id: variant id
-    :param current_contest: current contest
-    :return: boolean value if variant in contest
-    """
-    return current_contest.variants.filter_by(variant_id=str(variant_id)).one_or_none() is not None
-
-
 def is_task_in_variant(task_id, variant):
     """
     Check if task in current variant
@@ -169,7 +215,11 @@ def is_task_in_contest(task_id, contest_id):
     task_variant = task.variant
     if task_variant is None:
         raise DataConflict("Task variant is missing")
-    return task_variant in current_contest.variants
+    contest_variants = current_contest.variants.all()
+    for var in task_variant:
+        if var in contest_variants:
+            return True
+    return False
 
 
 # Participant module
@@ -219,6 +269,23 @@ def get_user_simple_contest_if_possible(olympiad_id):
     return current_olympiad
 
 
+def get_user_in_contest_by_id_if_possible(contest_id, user_id) -> UserInContest:
+    """
+    Get contest for user or raise exception
+    :param user_id: user id
+    :param contest_id: contest id
+    :return: user contest
+    """
+    current_contest = get_simple_contest_if_possible(contest_id)
+
+    # user is not registered
+    if not is_user_in_contest(user_id, current_contest):
+        raise NotFound("user_id", str(user_id))
+
+    return current_contest.users.filter_by(**{"user_id": user_id,
+                                              "contest_id": contest_id}).one_or_none()
+
+
 def get_user_variant_if_possible(contest_id):
     """
     Get user variant if possible
@@ -227,16 +294,12 @@ def get_user_variant_if_possible(contest_id):
     """
     current_contest = get_simple_contest_if_possible(contest_id)
 
-    current_user = db_get_or_raise(UserInContest, "user_id", jwt_get_id())
+    current_user = get_user_in_contest_by_id_if_possible(contest_id, jwt_get_id())
     variant = current_contest.variants.filter_by(variant_id=str(current_user.variant_id)).one_or_none()
 
     # no variant in user profile
     if variant is None:
         raise DataConflict('User isn\'t linked with any variant')
-
-    # variant is not in contest
-    if not is_variant_in_contest(variant.variant_id, current_contest):
-        raise DataConflict('Variant is not in current contests')
 
     return variant
 
@@ -275,8 +338,6 @@ def get_user_task_if_possible(contest_id, task_id):
         raise DataConflict('Task is not in current variant')
 
 
-# Functions for tasks/contest
-
 def get_contest_if_possible_from_stage(olympiad_id, stage_id, contest_id):
     """
     Get contest if possible (from stage)
@@ -312,7 +373,7 @@ def get_base_contest(current_contest):
     if current_contest.base_contest is not None:
         return current_contest.base_contest
 
-    stage = current_contest.stage[0]
+    stage = current_contest.stage
     current_olympiad = db_get_or_raise(Contest, "contest_id", str(stage.olympiad_id))
 
     return current_olympiad.base_contest
@@ -328,9 +389,6 @@ def get_variant_if_possible(contest_id, variant_id):
     current_contest = get_simple_contest_if_possible(contest_id)
 
     variant = current_contest.variants.filter_by(variant_id=str(variant_id)).one_or_none()
-
-    if not is_variant_in_contest(variant.variant_id, current_contest):
-        raise DataConflict('Variant is not in current stage')
 
     return variant
 
@@ -348,9 +406,6 @@ def get_variant_if_possible_by_number(contest_id, variant_num):
 
     if variant is None:
         raise DataConflict('No variants in this contest')
-
-    if not is_variant_in_contest(variant.variant_id, current_contest):
-        raise DataConflict('Variant with is number is not in current contest')
 
     return variant
 
@@ -384,7 +439,6 @@ def get_task_if_possible(contest_id, variant_id, task_id):
 
 # Validators
 
-# TODO Refactor in next MR
 def validate_contest_values(previous_contest_id, previous_participation_condition):
     """
     Check previous contest conditions
@@ -401,66 +455,65 @@ def validate_contest_values(previous_contest_id, previous_participation_conditio
 # Schema
 
 
-class FilterOlympiadAllRequestSchema(Schema):
-    base_contest_id = fields.Integer()
-    location_id = fields.Integer()
-    target_classes = EnumField(enum=TargetClassEnum, by_value=True)
-    end_date = fields.DateTime()
-    only_count = fields.Boolean()
-    offset = fields.Integer()
-    limit = fields.Integer()
-
-
-_filter_fields = ['base_contest_id', 'location_id', 'end_date']
-
-
-# Olympiad filter
-
-def filter_olympiad_query(args):
-    marshmallow = FilterOlympiadAllRequestSchema().load(args)
-
-    filters = {v: marshmallow[v] for v in _filter_fields if v in marshmallow}
-
-    query = SimpleContest.query.filter_by(**filters)
-
-    offset = marshmallow.get('offset', None)
-    limit = marshmallow.get('limit', None)
-
-    # TODO Target classes filtering in next MR
-    # target_classes = marshmallow.get('target_classes', None)
-    # if target_classes is not None:
-    #    ..
-
-    query = query.order_by(SimpleContest.start_date)
-
-    if limit is not None:
-        query = query.limit(limit)
-
-    if offset is not None:
-        query = query.offset(offset)
-
-    if marshmallow.get('only_count', False):
-        return {'count': query.count()}, 200
-    else:
-        return {'contest_list': query.all(), 'count': query.count()}, 200
-
-
 def validate_file_size(binary_file):
+    """
+    Check size of binary file
+    :param binary_file:  file
+    :return: size
+    """
     if len(binary_file) > app.config['ORGMEPHI_MAX_FILE_SIZE']:
         raise FileTooLarge()
 
 
 def check_user_unfilled_for_enroll(current_user: User):
+    """
+    Check user unfilled for enroll
+    :param current_user:
+    :return: grade
+    """
     unfilled = current_user.unfilled()
 
     if current_user.type == UserTypeEnum.university:
         if len(unfilled) > 0:
             raise InsufficientData('user.student_info', str(unfilled))
-        grade = TargetClassEnum("student")
+        grade = db_get_or_raise(TargetClass, "target_class", 'student')
     elif current_user.type == UserTypeEnum.school:
         if len(unfilled) > 0:
             raise InsufficientData('user.school_info', str(unfilled))
-        grade = TargetClassEnum(str(current_user.school_info.grade))
+        grade = db_get_or_raise(TargetClass, "target_class", str(current_user.school_info.grade))
     else:
         raise InsufficientData('type', "university or school")
     return grade
+
+
+# Exceptions
+
+
+class ContestContentAccessDenied(RequestError):
+    """
+    User has no access to contest
+    """
+
+    def __init__(self):
+        """
+        Create error object
+        """
+        super(ContestContentAccessDenied, self).__init__(403)
+
+    def get_msg(self) -> str:
+        return 'User has no access to this contest'
+
+
+class ContestIsStillOnReview(RequestError):
+    """
+    Contest is still on review
+    """
+
+    def __init__(self):
+        """
+        Create error object
+        """
+        super(ContestIsStillOnReview, self).__init__(403)
+
+    def get_msg(self) -> str:
+        return 'Contest is still on review'

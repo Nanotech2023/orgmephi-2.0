@@ -35,7 +35,11 @@ def _enum2properties(self, field, **kwargs):
 def _related2properties(self, field, **kwargs):
     from marshmallow_sqlalchemy.fields import Related
     if isinstance(field, Related):
-        return self.field2property(related_to_nested(field))
+        nested = related_to_nested(field)
+        if isinstance(nested, Nested):
+            return self.schema2jsonschema(nested.schema)
+        else:
+            return self.field2property(nested)
     return {}
 
 

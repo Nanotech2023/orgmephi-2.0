@@ -25,6 +25,7 @@ class OrgMephiModule:
     """
     Application module
     """
+
     def __init__(self, name: str, package: str, access_level: Optional[OrgMephiAccessLevel], area: OrgMephiArea,
                  api_file: Optional[str] = None, marshmallow_api: bool = False):
         """
@@ -113,6 +114,7 @@ class OrgMephiModule:
         :param options: flask.Flask.route options
         :return: decorator
         """
+
         def decorator(f: Callable) -> Callable:
             """
             Decorator to initialize a new route for self (see flask.Flask.route)
@@ -145,6 +147,7 @@ class OrgMephiModule:
 
             self._blueprint.route(rule, **options)(func_wrapped)
             return f
+
         return decorator
 
     def add_module(self, module):
@@ -322,28 +325,28 @@ class OrgMephiModule:
 
     @staticmethod
     def _wrap_marshmallow_input(f: Callable, schema: Union[Type[Schema], Schema]):
-
-        if issubclass(schema, Schema):
+        import inspect
+        if inspect.isclass(schema) and issubclass(schema, Schema):
             # noinspection PyCallingNonCallable
             schema = schema()
 
         @wraps(f)
         def wrapper(*args, **kwargs):
             from flask import request
-            from marshmallow import RAISE
+            from marshmallow import EXCLUDE
             from marshmallow_sqlalchemy import SQLAlchemySchema
             if isinstance(schema, SQLAlchemySchema) and getattr(schema.Meta, 'load_instance', False):
                 raise TypeError('Trying to load instance with SQLAlchemySchema on request')
             else:
-                request.marshmallow = schema.load(data=request.json, unknown=RAISE)
+                request.marshmallow = schema.load(data=request.json, unknown=EXCLUDE)
             return f(*args, **kwargs)
 
         return wrapper
 
     @staticmethod
     def _wrap_marshmallow_output(f: Callable, schema: Union[Type[Schema], Schema]):
-
-        if issubclass(schema, Schema):
+        import inspect
+        if inspect.isclass(schema) and issubclass(schema, Schema):
             # noinspection PyCallingNonCallable
             schema = schema()
 

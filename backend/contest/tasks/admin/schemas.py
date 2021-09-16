@@ -1,4 +1,5 @@
 from marshmallow import Schema, fields
+
 from common import fields as common_fields
 
 
@@ -23,6 +24,9 @@ class CreateRussiaLocationRequestTaskAdminSchema(Schema):
     city_name = common_fields.CommonName(required=True)
     region_name = common_fields.CommonName(required=True)
     address = common_fields.FreeDescription(required=True)
+
+
+# Location
 
 
 class LocationResponseTaskAdminSchema(Schema):

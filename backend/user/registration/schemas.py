@@ -1,10 +1,11 @@
-from marshmallow import Schema, fields, validate
+from marshmallow import Schema, fields, validate, pre_load
 from marshmallow_enum import EnumField
 from common import fields as common_fields
 from user.models.auth import UserTypeEnum
 from user.model_schemas.reference import UniversitySchema, CountrySchema, RegionSchema, CitySchema
-from user.model_schemas.university import StudentUniversityInputSchema
-from user.model_schemas.location import LocationInputSchema
+from user.model_schemas.university import StudentUniversitySchema
+from user.model_schemas.location import LocationSchema
+from common.marshmallow import require_fields
 
 
 class RegistrationInfoUserSchema(Schema):
@@ -27,8 +28,8 @@ class RegisterConfirmUserSchema(Schema):
 class RegistrationStudentInfoUserSchema(Schema):
     phone = common_fields.Phone(required=True)
     grade = common_fields.Grade(required=True, validate=validate.Range(max=5))
-    dwelling = fields.Nested(nested=LocationInputSchema, required=True)
-    university = fields.Nested(nested=StudentUniversityInputSchema, required=True)
+    dwelling = fields.Nested(nested=LocationSchema, required=True)
+    university = fields.Nested(nested=StudentUniversitySchema, required=True)
 
 
 class SchoolRegistrationRequestUserSchema(Schema):
@@ -49,6 +50,12 @@ class UniversityRegistrationRequestUserSchema(Schema):
                               validate=validate.OneOf([UserTypeEnum.university]))
     student_info = fields.Nested(nested=RegistrationStudentInfoUserSchema, required=True)
     captcha = common_fields.CommonName()
+
+    # noinspection PyUnusedLocal
+    @pre_load
+    def require_student(self, data, many, **kwargs):
+        require_fields(data, ['student_info'])
+        return data
 
 
 class ResetPasswordUserSchema(Schema):

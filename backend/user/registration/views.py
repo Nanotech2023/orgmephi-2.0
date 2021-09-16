@@ -87,9 +87,7 @@ def check_captcha(answer):
     db.session.commit()
 
 
-def register():
-    values = request.marshmallow
-
+def register(values):
     if app.config['ORGMEPHI_CAPTCHA_ENABLE']:
         answer = values.get('captcha', '')
         check_captcha(answer)
@@ -125,13 +123,14 @@ def register():
         user = init_user(username, password_hash, default_role, reg_type)
         db.session.add(user)
 
-    UserInfoSchema(load_instance=True).load(request.json['personal_info'], instance=user.user_info,
-                                            session=db.session, partial=False, unknown=EXCLUDE)
+    UserInfoSchema(load_instance=True).load(request.json['personal_info'], instance=user.user_info, session=db.session,
+                                            partial=False, unknown=EXCLUDE)
     user.user_info.email = username
 
     if reg_type == UserTypeEnum.university:
-        StudentInfoSchema(load_instance=True).load(request.json['student_info'], instance=user.student_info,
-                                                   session=db.session, partial=False, unknown=EXCLUDE)
+        StudentInfoSchema(load_instance=True, only=['grade', 'university'])\
+            .load(request.json['student_info'], instance=user.student_info, session=db.session, partial=False,
+                  unknown=EXCLUDE)
         UserInfoSchema(only=['dwelling', 'phone'], load_instance=True).load(request.json['student_info'],
                                                                             instance=user.user_info,
                                                                             session=db.session,
@@ -156,9 +155,10 @@ def get_captcha():
         '200':
           description: OK
           content:
-            application/png:
-              type: string
-              format: binary
+            image/png:
+              schema:
+                type: string
+                format: binary
     """
     captcha = generate_captcha(280, 90)
     return send_file(captcha, mimetype='image/png')
@@ -188,11 +188,11 @@ def register_school():
         '409':
           description: Username already in use
     """
-    return register(), 200
+    return register(request.marshmallow), 200
 
 
-@module.route('/university', methods=['POST'],
-              input_schema=UniversityRegistrationRequestUserSchema, output_schema=UserSchema)
+@module.route('/university', methods=['POST'], output_schema=UserSchema,
+              input_schema=UniversityRegistrationRequestUserSchema(exclude=['student_info']))
 def register_university():
     """
     Register a university student
@@ -214,7 +214,7 @@ def register_university():
         '409':
           description: Username already in use
     """
-    return register(), 200
+    return register(request.marshmallow), 200
 
 
 @module.route('/confirm/<string:token>', methods=['POST'])
