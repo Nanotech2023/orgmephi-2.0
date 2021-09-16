@@ -15,9 +15,10 @@ def step_init_admin(client, state):
     user.password_changed = datetime.datetime.utcnow() - datetime.timedelta(minutes=5)
     test_app.db.session.add(user)
     test_app.db.session.commit()
-    state.admin_id = user.id
-    state.admin_username = user.username
-    state.admin_password = 'test-password'
+    state.admin = dict()
+    state.admin['id'] = user.id
+    state.admin['username'] = user.username
+    state.admin['password'] = 'test-password'
 
 
 steps_init = [step_init_client, step_init_admin]
