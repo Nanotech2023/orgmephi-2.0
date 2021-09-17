@@ -53,11 +53,6 @@ class RightAnswerSchema(OneOfSchema):
         else:
             raise Exception("Unknown object type: {}".format(obj.__class__.__name__))
 
-    def dump(self, obj, *, many=None, **kwargs):
-        result = self._dump(obj, **kwargs)
-        result.pop(self.type_field)
-        return result
-
 
 class BaseAnswerSchema(SQLAlchemySchema):
     class Meta:
