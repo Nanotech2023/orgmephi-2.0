@@ -1,18 +1,6 @@
 import { createFeatureSelector, createSelector, MemoizedSelector } from '@ngrx/store'
 import { featureKey, State } from '@/auth/store/auth.reducer'
-import {
-    CSRFPairUser,
-    Document,
-    DocumentInput, DocumentTypeEnum,
-    GenderEnum,
-    Location,
-    LocationInput,
-    User,
-    UserInfo,
-    UserInfoRestrictedInput,
-    UserLimitations,
-    UserLimitationsInput
-} from '@api/users/models'
+import { CSRFPairUser, User, UserInfo } from '@api/users/models'
 
 
 export const selectFeature: MemoizedSelector<object, State> = createFeatureSelector<State>( featureKey )
@@ -52,49 +40,11 @@ export const selectAccessToManagePages: MemoizedSelector<State, boolean> = creat
         state.user?.role === User.RoleEnum.Creator || state.user?.role === User.RoleEnum.Admin || state.user?.role === User.RoleEnum.System
 )
 
-export const copy: MemoizedSelector<State, UserInfoRestrictedInput> = createSelector(
+export const copy: MemoizedSelector<State, UserInfo> = createSelector(
     selectFeature,
     ( state: State ) =>
     {
-        const userInfo: UserInfo = state.userInfo!
-
-        const document: Document | null = userInfo.document!
-        const documentInput: DocumentInput = ( {
-            code: document.code || undefined,
-            document_type: userInfo.document!.document_type || DocumentTypeEnum.RfPassport,
-            issue_date: userInfo.document!.issue_date || undefined,
-            issuer: userInfo.document!.issuer || undefined,
-            number: userInfo.document!.number || undefined,
-            series: userInfo.document!.series || undefined,
-            document_name: userInfo.document!.document_name || undefined
-        } )
-        const dwelling: Location = userInfo.dwelling!
-        const dwellingInput: LocationInput = {
-            country: dwelling.country,
-            location: dwelling.russian ?? "",
-            rural: dwelling.rural ?? false
-        }
-
-        const genderInput: GenderEnum | undefined = userInfo.gender || undefined
-
-        const limitations: UserLimitations | undefined = userInfo?.limitations || undefined
-        const limitationInput: UserLimitationsInput = {
-            hearing: limitations?.hearing || undefined,
-            movement: limitations?.movement || undefined,
-            sight: limitations?.sight || undefined
-        }
-
-        const placeOfBirthInput: string | undefined = userInfo?.place_of_birth || undefined
-        const phoneInput: string | undefined = userInfo?.phone || undefined
-
-        const result: UserInfoRestrictedInput = {
-            document: documentInput,
-            dwelling: dwellingInput,
-            gender: genderInput,
-            limitations: limitationInput,
-            place_of_birth: placeOfBirthInput,
-            phone: phoneInput
-        }
+        const result: UserInfo = { ...state.userInfo }
         return result
     }
 )

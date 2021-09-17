@@ -1,1 +1,8 @@
-<p>{{ contestId }}</p>
+<ng-container *ngIf="contest$ | async as contest ">
+    <p>{{ contest.base_contest.base_contest_id }}</p>
+    <p>{{ contest.base_contest.name }}</p>
+    <p>{{ contest.base_contest.description }}</p>
+    <p>{{ contest.base_contest.diploma_1_condition }}</p>
+    <p>{{ contest.base_contest.diploma_2_condition }}</p>
+    <p>{{ contest.base_contest.diploma_3_condition }}</p>
+</ng-container>

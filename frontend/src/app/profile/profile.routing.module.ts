@@ -10,10 +10,10 @@ const routes: Routes = [
         path: '',
         children: [
             {
-                path: 'user/olymp', component: ParticipantRegistrationFormComponent, canActivate: [ AuthGuardService ]
+                path: 'profile', component: ParticipantCabinetComponent, canActivate: [ AuthGuardService ]
             },
             {
-                path: 'user/cabinet', component: ParticipantCabinetComponent, canActivate: [ AuthGuardService ]
+                path: 'profile/edit', component: ParticipantRegistrationFormComponent, canActivate: [ AuthGuardService ]
             }
         ]
     }

@@ -1,6 +1,7 @@
-import { Component, OnDestroy } from '@angular/core'
-import { ActivatedRoute } from '@angular/router'
-import { Subscription } from 'rxjs'
+import { Component } from '@angular/core'
+import { Observable } from 'rxjs'
+import { ContestsStore } from '@/contests/contests.store'
+import { Contest } from '@api/tasks/model'
 
 
 @Component( {
@@ -8,18 +9,12 @@ import { Subscription } from 'rxjs'
     templateUrl: './contest-details.component.html',
     styleUrls: [ './contest-details.component.scss' ]
 } )
-export class ContestDetailsComponent implements OnDestroy
+export class ContestDetailsComponent
 {
-    contestId!: number
-    private subscription: Subscription
+    contest$: Observable<Contest | undefined>
 
-    constructor( private activateRoute: ActivatedRoute )
+    constructor( private contestsStore: ContestsStore )
     {
-        this.subscription = activateRoute.params.subscribe( params => this.contestId = params[ 'id' ] )
-    }
-
-    ngOnDestroy(): void
-    {
-        this.subscription?.unsubscribe()
+        this.contest$ = this.contestsStore.selectedContest
     }
 }

@@ -3,24 +3,30 @@ import { ComponentStore, tapResponse } from '@ngrx/component-store'
 import { TasksService } from '@api/tasks/tasks.service'
 import { CallState, getError, LoadingState } from '@/shared/callState'
 import { EMPTY, Observable } from 'rxjs'
-import { AllOlympiadsResponseTaskUnauthorized, Contest } from '@api/tasks/model'
-import { catchError } from 'rxjs/operators'
+import {
+    AllLocationResponseTaskUnauthorized,
+    AllOlympiadsResponseTaskUnauthorized,
+    Contest,
+    EnrollRequestTaskParticipant,
+    OlympiadLocation
+} from '@api/tasks/model'
+import { catchError, switchMap, tap } from 'rxjs/operators'
 
 
 export interface ContestsState
 {
     contests: Array<Contest>
+    locations: Array<OlympiadLocation>
+    selectedContest?: Contest
     callState: CallState
-    selectedId: number | null
-    selectedEntity?: Contest
 }
 
 
 const initialState: ContestsState = {
-    callState: LoadingState.INIT,
     contests: [],
-    selectedId: null,
-    selectedEntity: undefined
+    locations: [],
+    selectedContest: undefined,
+    callState: LoadingState.INIT
 }
 
 
@@ -33,6 +39,8 @@ export class ContestsStore extends ComponentStore<ContestsState>
     }
 
     readonly contests: Observable<Contest[]> = this.select( state => state.contests )
+    readonly selectedContest: Observable<Contest | undefined> = this.select( state => state.selectedContest )
+    readonly locations: Observable<Contest | undefined> = this.select( state => state.selectedContest )
     private readonly loading$: Observable<boolean> = this.select( state => state.callState === LoadingState.LOADING )
     private readonly error$: Observable<string | null> = this.select( state => getError( state.callState ) )
 
@@ -56,30 +64,62 @@ export class ContestsStore extends ComponentStore<ContestsState>
             callState: LoadingState.LOADED
         } ) )
 
-    readonly updateContests = this.updater( ( state: ContestsState, contests: Array<Contest> ) =>
+    readonly setContests = this.updater( ( state: ContestsState, contests: Array<Contest> ) =>
         ( {
             ...state,
             error: "",
             contests: [ ...state.contests, ...contests ]
         } ) )
 
-    readonly details = this.updater( ( state: ContestsState, id: number ) =>
+    readonly selectContest = this.updater( ( state: ContestsState, contest: Contest ) =>
         ( {
             ...state,
-            selectedId: id,
-            selectedEntity: state.contests.find( item => item.contest_id === id )
+            selectedContest: contest
         } ) )
 
+    readonly setLocations = this.updater( ( state: ContestsState, locations: Array<OlympiadLocation> ) =>
+        ( {
+            ...state,
+            locations: locations
+        } ) )
+
+
     // EFFECTS
-    readonly reload = this.effect( () =>
+    readonly fetchAll = this.effect( () =>
     {
         this.setLoading()
+        this.tasksService.tasksUnauthorizedLocationAllGet().pipe(
+            tapResponse(
+                ( response: AllLocationResponseTaskUnauthorized ) => this.setLocations( response.locations ),
+                ( error: string ) => this.updateError( error )
+            ),
+            catchError( () => EMPTY )
+        )
         return this.tasksService.tasksParticipantOlympiadAllGet().pipe(
             tapResponse(
-                ( response: AllOlympiadsResponseTaskUnauthorized ) => this.updateContests( response.contest_list ),
+                ( response: AllOlympiadsResponseTaskUnauthorized ) => this.setContests( response.contest_list ),
                 ( error: string ) => this.updateError( error )
             ),
             catchError( () => EMPTY )
         )
     } )
+
+    readonly fetchSingle = this.effect( ( contestId$: Observable<number> ) =>
+        contestId$.pipe(
+            switchMap( ( id: number ) =>
+                this.tasksService.tasksParticipantOlympiadIdOlympiadGet( id ).pipe(
+                    tapResponse(
+                        ( response ) => this.selectContest( response ),
+                        ( error: string ) => this.updateError( error )
+                    ),
+                    catchError( () => EMPTY )
+                ) )
+        ) )
+
+
+    readonly enroll = this.effect( ( contestId$: number, x: number ) =>
+        this.tasksService.tasksParticipantContestIdContestEnrollPost( contestId$, EnrollRequestTaskParticipant ).pipe(
+            tap(
+                this.fetchAll )
+        ) )
 }

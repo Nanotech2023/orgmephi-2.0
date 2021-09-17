@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core'
 import { UsersService } from '@api/users/users.service'
-import { UserInfo, UserInfoRestrictedInput } from '@api/users/models'
+import { UserInfo } from '@api/users/models'
 import { Store } from '@ngrx/store'
 import { AuthSelectors, AuthState } from '@/auth/store'
 import { Observable } from 'rxjs'
@@ -13,11 +13,9 @@ import { Observable } from 'rxjs'
 } )
 export class ParticipantRegistrationFormComponent implements OnInit
 {
-    // @ts-ignore
-    userPersonalInfo: UserInfoRestrictedInput
+    editUserPersonalInfo!: Observable<UserInfo>
     currentStage: number
     totalStages = 2
-    private x: Observable<UserInfo | null>
 
     constructor( private authService: UsersService, private readonly store: Store<AuthState.State> )
     {
@@ -26,12 +24,11 @@ export class ParticipantRegistrationFormComponent implements OnInit
 
     ngOnInit(): void
     {
-        this.authService.userProfilePersonalPatch()
-        this.x = this.store.select( AuthSelectors.selectUserInfo )
+        this.editUserPersonalInfo = this.store.select( AuthSelectors.selectUserInfo )
+    }
 
-        let y
-        this.userPersonalInfo = {
-            document: y
-        }
+    onSubmit( editUserPersonalInfo: UserInfo ): void
+    {
+        this.authService.userProfilePersonalPatch( editUserPersonalInfo )
     }
 }

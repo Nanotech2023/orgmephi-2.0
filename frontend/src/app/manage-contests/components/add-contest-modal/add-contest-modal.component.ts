@@ -24,14 +24,17 @@ export class AddContestModalComponent
     constructor()
     {
         this.createBaseOlympiadRequestTaskCreator = {
+            diploma_1_condition: 9,
+            diploma_2_condition: 8,
+            diploma_3_condition: 7,
+            winner_1_condition: 10,
+            winner_2_condition: 9,
+            winner_3_condition: 8,
             description: '',
-            laureate_condition: 0,
             name: '',
             olympiad_type_id: 0,
             rules: '',
-            subject: SubjectEnum.Physics,
-            target_classes: [],
-            winning_condition: 0
+            subject: SubjectEnum.Physics
         }
         this.isCreated = false
     }
