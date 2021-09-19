@@ -71,6 +71,14 @@ def step_create_simple_contest(client, state):
     state.contest = dict()
     state.contest['contest_id'] = resp.json['contest_id']
 
+    request = {
+       ' locations': [f'{state.olympiad_location["location_id"]}'],
+    }
+    resp = client.post(f'contest/tasks/creator'
+                       f'/contest/{state.contest["contest_id"]}/add_location', json=request)
+
+    assert resp.status_code == 200
+
 
 def step_create_variants(client, state):
     request = {
