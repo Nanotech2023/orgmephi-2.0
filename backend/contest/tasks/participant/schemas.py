@@ -1,12 +1,7 @@
-from datetime import timedelta
-
 from marshmallow import Schema, fields
-from marshmallow_enum import EnumField
 
 from common import fields as common_fields
-from contest.tasks.model_schemas.location import OlympiadLocationSchema
-from contest.tasks.model_schemas.olympiad import TargetClassSchema, BaseContestSchema, SimpleContestSchema
-from contest.tasks.models import ContestHoldingTypeEnum, UserStatusEnum
+from contest.tasks.model_schemas.olympiad import SimpleContestSchema
 
 
 class AnswersInTaskRequestTaskParticipantSchema(Schema):
