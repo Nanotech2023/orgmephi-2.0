@@ -1,3 +1,4 @@
+from . import *
 from pytest_steps import test_steps
 from .steps_init import steps_init
 from .steps_register_creator import steps_register_creator
