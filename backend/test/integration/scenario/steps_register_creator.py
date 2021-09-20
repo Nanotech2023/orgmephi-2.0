@@ -34,5 +34,10 @@ def step_creator_fill_personal(client, state):
     assert resp.status_code == 200
 
 
+def step_admin_logout(client, state):
+    resp = client.logout('/user/auth/logout')
+    assert resp.status_code == 200
+
+
 steps_register_creator = [step_admin_login, step_creator_register, step_creator_give_permissions,
-                          step_creator_fill_personal]
+                          step_creator_fill_personal, step_admin_logout]
