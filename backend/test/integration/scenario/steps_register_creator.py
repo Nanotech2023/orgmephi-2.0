@@ -6,7 +6,7 @@ def step_admin_login(client, state):
     assert resp.status_code == 200
 
 
-def step_cretor_register(client, state):
+def step_creator_register(client, state):
     request = {'username': 'creator', 'password': 'qwertyA*1'}
     resp = client.post('/user/admin/internal_register', json=request)
     assert resp.status_code == 200
@@ -34,5 +34,5 @@ def step_creator_fill_personal(client, state):
     assert resp.status_code == 200
 
 
-steps_register_creator = [step_admin_login, step_cretor_register, step_creator_give_permissions,
+steps_register_creator = [step_admin_login, step_creator_register, step_creator_give_permissions,
                           step_creator_fill_personal]
