@@ -19,4 +19,4 @@ def step_create_olympiad_location(client, state):
     state.olympiad_location['url'] = 'https://www.example.com'
 
 
-steps_create_olympiad_type = [step_create_olympiad_type, step_create_olympiad_type]
+steps_create_olympiad_type = [step_create_olympiad_type, step_create_olympiad_location]

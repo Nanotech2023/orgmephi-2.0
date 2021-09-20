@@ -6,6 +6,9 @@ GENERATE_VARIANTS_NUMBER = 5
 
 
 def step_creator_login(client, state):
+    resp = client.logout('/user/auth/logout')
+    assert resp.status_code == 200
+
     resp = client.login('/user/auth/login', username=state.creator['username'], password=state.creator['password'])
     assert resp.status_code == 200
 
@@ -72,11 +75,11 @@ def step_create_simple_contest(client, state):
     state.contest['contest_id'] = resp.json['contest_id']
 
     request = {
-       ' locations': [f'{state.olympiad_location["location_id"]}'],
+       'locations': [f'{state.olympiad_location["location_id"]}'],
     }
-    resp = client.post(f'contest/tasks/creator'
+    resp = client.post(f'contest/tasks/editor'
                        f'/contest/{state.contest["contest_id"]}/add_location', json=request)
-
+    print(resp.data)
     assert resp.status_code == 200
 
 
@@ -98,7 +101,7 @@ def step_create_tasks(client, state):
     for i in range(GENERATE_VARIANTS_NUMBER):
         request = {
             'num_of_task': '1',
-            'recommended_answer': 'Test recommendation',
+            'recommended_answer': f'Test recommendation {str(i)}',
             'show_answer_after_contest': 'false',
             'task_points': '10', }
 
@@ -135,19 +138,19 @@ def step_create_tasks(client, state):
 
         answers = [
             {
-                'answer': 'test 1',
+                'answer': f'test 1.{str(i)}',
                 'is_right_answer': 'false'
             },
             {
-                'answer': 'test 2',
+                'answer': f'test 2.{str(i)}',
                 'is_right_answer': 'true'
             },
             {
-                'answer': 'test 3',
+                'answer': f'test 3.{str(i)}',
                 'is_right_answer': 'false'
             },
             {
-                'answer': 'test 4',
+                'answer': f'test 4.{str(i)}',
                 'is_right_answer': 'true'
             }
         ]
