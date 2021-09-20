@@ -113,28 +113,14 @@ def user_answer_get(user_id, contest_id, task_id, answer_type=None):
     return user_answer
 
 
-def get_task_points(user_work: Response):
-    from contest.tasks.models.tasks import Task
-    result = []
-    for answer in user_work.answers:
-        task = db_get_one_or_none(Task, 'task_id', answer.task_id)
-        result.append({
-            'task_id': task.task_id,
-            'task_points': task.task_points
-        })
-    return result
-
-
 def get_all_user_answers(user_id, contest_id):
     user_work = get_user_in_contest_work(user_id, contest_id)
-    tasks_points = get_task_points(user_work)
     answers = user_work.answers
     return {
         "user_id": user_work.user_id,
         "work_id": user_work.work_id,
         "contest_id": user_work.contest_id,
-        "user_answers": answers,
-        'tasks_points': tasks_points
+        "user_answers": answers
     }
 
 

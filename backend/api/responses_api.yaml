@@ -83,6 +83,8 @@ components:
           nullable: true
           readOnly: true
           type: number
+        right_answer:
+          $ref: '#/components/schemas/RightAnswer'
         task_id:
           nullable: true
           readOnly: true
@@ -90,6 +92,7 @@ components:
         task_points:
           type: integer
       required:
+      - right_answer
       - task_points
       type: object
     ContestResultSheetResponse:
@@ -118,6 +121,15 @@ components:
         answers:
           nullable: true
           type: string
+      required:
+      - answers
+      type: object
+    MultipleRightAnswer:
+      properties:
+        answers:
+          items:
+            type: string
+          type: array
       required:
       - answers
       type: object
@@ -157,6 +169,13 @@ components:
           nullable: true
           type: string
       type: object
+    PlainRightAnswer:
+      properties:
+        answer:
+          type: string
+      required:
+      - answer
+      type: object
     RangeAnswer:
       properties:
         answer:
@@ -171,6 +190,27 @@ components:
       required:
       - answer
       type: object
+    RangeRightAnswer:
+      properties:
+        end_value:
+          type: number
+        start_value:
+          type: number
+      required:
+      - end_value
+      - start_value
+      type: object
+    RightAnswer:
+      discriminator:
+        mapping:
+          Multiple: '#/components/schemas/MultipleRightAnswer'
+          Plain: '#/components/schemas/PlainRightAnswer'
+          Range: '#/components/schemas/RangeRightAnswer'
+        propertyName: type
+      oneOf:
+      - $ref: '#/components/schemas/PlainRightAnswer'
+      - $ref: '#/components/schemas/RangeRightAnswer'
+      - $ref: '#/components/schemas/MultipleRightAnswer'
     UserAnswerMarkResponse:
       properties:
         mark:
