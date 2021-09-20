@@ -5,14 +5,33 @@ from . import *
 PARTICIPANT_NUM = 5
 
 
+
 def step_school_register(client, state):
-    requests = [{'username': f'participant {i}', 'password': 'qwertyA*1'} for i in range(PARTICIPANT_NUM)]
-    responses = [client.post('/user/admin/internal_register', json=request) for request in requests]
+    requests = [{'auth_info': {
+                    'email': f'user{i}@example.com',
+                    'password': 'qwertyA*1'
+                 },
+                 'personal_info': {
+                     'date_of_birth':
+                         (datetime.date.today() - datetime.timedelta(days=(100 * i + 365 * 16))).isoformat(),
+                     "first_name": f"user {i}",
+                     "middle_name": f"user {i}",
+                     "second_name": f"user {i}"
+                 },
+                 "register_type": 'School'} for i in range(PARTICIPANT_NUM)]
+    responses = [client.post('/user/registration/school', json=request) for request in requests]
     for response in responses:
         assert response.status_code == 200
-    state.participants = [{'id': response.json['id'],
-                           'username': response.json['username'],
-                           'password': 'qwertyA*1'} for response in responses]
+    state.participants = [{'id': responses[i].json['id'],
+                           'username': responses[i].json['username'],
+                           'password': 'qwertyA*1',
+                           'personal': {
+                               'email': requests[i]['auth_info']['email'],
+                               'date_of_birth': requests[i]['personal_info']['date_of_birth'],
+                               "first_name": requests[i]['personal_info']['first_name'],
+                               "middle_name": requests[i]['personal_info']['middle_name'],
+                               "second_name": requests[i]['personal_info']['second_name']
+                           }} for i in range(PARTICIPANT_NUM)]
 
 
 def step_personal_info(client, state):
@@ -22,7 +41,7 @@ def step_personal_info(client, state):
 
         user_id = user['id']
 
-        date_of_birth = datetime.date.today() - datetime.timedelta(days=(100 * user['id'] + 365 * 16))
+        date_of_birth = datetime.date.fromisoformat(user['personal']['date_of_birth'])
 
         if user_id % 4 == 3:
             document = {
@@ -81,24 +100,20 @@ def step_personal_info(client, state):
             "date_of_birth": date_of_birth.isoformat(),
             "document": document,
             "dwelling": dwelling,
-            "email": f"user{user_id}@example.com",
-            "first_name": f"user {user_id}",
             "gender": "Male" if (user_id * 13 % 17) % 2 else 'Female',
             "limitations": {
                 "hearing": (user_id * 17 % 5) % 2,
                 "movement": (user_id * 13 % 5) % 2,
                 "sight": (user_id * 17 % 7) % 2
             },
-            "middle_name": f"user {user_id}",
             "phone": f"8 (800) 555 {user_id % 10}{(user_id + 1) % 10} {(user_id + 2) % 10}{(user_id + 3) % 10}",
-            "place_of_birth": f"place {user_id}",
-            "second_name": f"user {user_id}"
+            "place_of_birth": f"place {user_id}"
         }
 
         resp = client.patch('/user/profile/personal', json=request)
         assert resp.status_code == 200
 
-        user['personal'] = request
+        user['personal'].update(request)
 
         resp = client.logout('/user/auth/logout')
         assert resp.status_code == 200
