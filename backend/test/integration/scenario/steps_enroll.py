@@ -3,15 +3,12 @@ from datetime import datetime, timedelta
 from . import *
 
 
-# TODO ADD USER INIT AND CYCLE FOR 5 USERS
-
-
 def step_user_normal_enroll(client, state):
     for user in state.participants[:-1]:
         resp = client.login('/user/auth/login', username=user['username'], password=user['password'])
         assert resp.status_code == 200
 
-        request = {'location_id': f'{state.olympiad_location["location_id"]}'}
+        request = {'location_id': state.olympiad_location["location_id"]}
         resp = client.post(f'contest/tasks/participant'
                            f'/contest/{state.contest["contest_id"]}/enroll', json=request)
         print(resp.data)
@@ -44,7 +41,7 @@ def step_user_late_enroll(client, state):
     resp = client.login('/user/auth/login', username=wrong_user['username'], password=wrong_user['password'])
     assert resp.status_code == 200
 
-    request = {'location_id': f'{state.olympiad_location["location_id"]}'}
+    request = {'location_id': state.olympiad_location["location_id"]}
     resp = client.post(f'contest/tasks/participant'
                        f'/contest/{state.contest["contest_id"]}/enroll', json=request)
     assert resp.status_code == 409

@@ -1,5 +1,3 @@
-from common.util import db_populate
-from contest.tasks.models import TargetClass
 from . import *
 
 
@@ -60,6 +58,7 @@ def step_init_locations(client, state):
 
 
 def step_init_target_classes(client, state):
+    from contest.tasks.models import TargetClass
     classes = [str(target_class) for target_class in range(8, 12)] + ['student']
     target_classes = [TargetClass(target_class=target_class) for target_class in classes]
     for target_class in target_classes:

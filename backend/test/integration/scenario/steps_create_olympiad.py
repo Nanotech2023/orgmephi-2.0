@@ -15,14 +15,14 @@ def step_create_base_olympiad(client, state):
     request = {'name': 'Base olympiad 1',
                'description': 'Description of Base olympiad 1',
                'rules': 'Rules of Base olympiad 1',
-               'winner_1_condition': '0.9',
-               'winner_2_condition': '0.8',
-               'winner_3_condition': '0.7',
-               'diploma_1_condition': '0.6',
-               'diploma_2_condition': '0.5',
-               'diploma_3_condition': '0.4',
+               'winner_1_condition': 0.9,
+               'winner_2_condition': 0.8,
+               'winner_3_condition': 0.7,
+               'diploma_1_condition': 0.6,
+               'diploma_2_condition': 0.5,
+               'diploma_3_condition': 0.4,
                'olympiad_type_id': f'{state.olympiad_type["olympiad_type_id"]}',
-               'subject': f'{OlympiadSubjectEnum.Math.value}'}
+               'subject': OlympiadSubjectEnum.Math.value}
     resp = client.post('contest/tasks/creator/base_olympiad/create', json=request)
     assert resp.status_code == 200
     state.base_olympiad = dict()
@@ -39,8 +39,8 @@ def step_create_base_olympiad(client, state):
 def step_create_olympiad_composite(client, state):
     from contest.tasks.models import ContestHoldingTypeEnum
     request = {
-        'visibility': 'true',
-        'holding_type': f'{ContestHoldingTypeEnum.OnLineContest.value}', }
+        'visibility': True,
+        'holding_type': ContestHoldingTypeEnum.OnLineContest.value, }
     resp = client.post(f'contest/tasks/creator/base_olympiad/{state.base_olympiad["base_contest_id"]}'
                        f'/olympiad/create_composite', json=request)
     assert resp.status_code == 200
@@ -52,9 +52,9 @@ def step_create_stage(client, state):
     from contest.tasks.models import StageConditionEnum
     request = {
         'stage_name': 'Test stage',
-        'stage_num': '1',
+        'stage_num': 1,
         'this_stage_condition': 'Description of this stage condition',
-        'condition': f'{StageConditionEnum.No.value}', }
+        'condition': StageConditionEnum.No.value, }
     resp = client.post(f'contest/tasks/creator'
                        f'/olympiad/{state.composite_olympiad["contest_id"]}/stage/create', json=request)
     assert resp.status_code == 200
@@ -65,8 +65,8 @@ def step_create_stage(client, state):
 def step_create_simple_contest(client, state):
     from contest.tasks.models import ContestHoldingTypeEnum
     request = {
-        'visibility': 'true',
-        'holding_type': f'{ContestHoldingTypeEnum.OnLineContest.value}',
+        'visibility': True,
+        'holding_type': ContestHoldingTypeEnum.OnLineContest.value,
         'start_date': f'{datetime.utcnow()}',
         'end_date': f'{datetime.utcnow() + timedelta(hours=4)}',
         'end_of_enroll_date': f'{datetime.utcnow() + timedelta(hours=1)}',
@@ -79,7 +79,7 @@ def step_create_simple_contest(client, state):
     state.contest['contest_id'] = resp.json['contest_id']
 
     request = {
-        'locations': [f'{state.olympiad_location["location_id"]}'],
+        'locations': [state.olympiad_location["location_id"]],
     }
     resp = client.post(f'contest/tasks/editor'
                        f'/contest/{state.contest["contest_id"]}/add_location', json=request)
@@ -103,10 +103,10 @@ def step_create_variants(client, state):
 def step_create_tasks(client, state):
     for i in range(GENERATE_VARIANTS_NUMBER):
         request = {
-            'num_of_task': '1',
+            'num_of_task': 1,
             'recommended_answer': f'Test recommendation {str(i)}',
-            'show_answer_after_contest': 'false',
-            'task_points': '10', }
+            'show_answer_after_contest': False,
+            'task_points': 10, }
 
         resp = client.post(f'contest/tasks/creator'
                            f'/contest/{state.contest["contest_id"]}/variant/{state.variants[i]["variant_id"]}'
@@ -114,17 +114,17 @@ def step_create_tasks(client, state):
         assert resp.status_code == 200
         state.variants[i]['tasks']['plain'] = {
             "task_id": resp.json['task_id'],
-            "show_answer_after_contest": 'false',
-            "task_points": '10',
+            "show_answer_after_contest": False,
+            "task_points": 10,
             "recommended_answer": 'Test recommendation',
         }
 
         request = {
-            'num_of_task': '2',
-            'start_value': '0.1',
-            'end_value': '0.8',
-            'show_answer_after_contest': 'true',
-            'task_points': '8',
+            'num_of_task': 2,
+            'start_value': 0.1,
+            'end_value': 0.8,
+            'show_answer_after_contest': True,
+            'task_points': 8,
         }
 
         resp = client.post(f'contest/tasks/creator'
@@ -133,36 +133,36 @@ def step_create_tasks(client, state):
         assert resp.status_code == 200
         state.variants[i]['tasks']['range'] = {
             "task_id": resp.json['task_id'],
-            "show_answer_after_contest": 'true',
-            "task_points": '8',
-            "start_value": '0.1',
-            "end_value": '0.8',
+            "show_answer_after_contest": True,
+            "task_points": 8,
+            "start_value": 0.1,
+            "end_value": 0.8,
         }
 
         answers = [
             {
                 'answer': f'test 1.{str(i)}',
-                'is_right_answer': 'false'
+                'is_right_answer': False
             },
             {
                 'answer': f'test 2.{str(i)}',
-                'is_right_answer': 'true'
+                'is_right_answer': True
             },
             {
                 'answer': f'test 3.{str(i)}',
-                'is_right_answer': 'false'
+                'is_right_answer': False
             },
             {
                 'answer': f'test 4.{str(i)}',
-                'is_right_answer': 'true'
+                'is_right_answer': True
             }
         ]
 
         request = {
-            'num_of_task': '2',
+            'num_of_task': 2,
             'answers': answers,
-            'show_answer_after_contest': 'true',
-            'task_points': '15',
+            'show_answer_after_contest': True,
+            'task_points': 15,
         }
 
         resp = client.post(f'contest/tasks/creator'
@@ -171,8 +171,8 @@ def step_create_tasks(client, state):
         assert resp.status_code == 200
         state.variants[i]['tasks']['multiple'] = {
             "task_id": resp.json['task_id'],
-            "show_answer_after_contest": 'true',
-            "task_points": '15',
+            "show_answer_after_contest": True,
+            "task_points": 15,
             "answers": answers
         }
 
