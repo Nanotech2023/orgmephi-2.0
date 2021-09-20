@@ -12,8 +12,9 @@ def step_user_normal_enroll(client, state):
         assert resp.status_code == 200
 
         request = {'location_id': f'{state.olympiad_location["location_id"]}'}
-        resp = client.post(f'contest/tasks'
+        resp = client.post(f'contest/tasks/participant'
                            f'/contest/{state.contest["contest_id"]}/enroll', json=request)
+        print(resp.data)
         assert resp.status_code == 200
         state.olympiad_type = dict()
 
@@ -28,7 +29,7 @@ def step_change_contest_enroll(client, state):
     request = {
         'end_of_enroll_date': f'{datetime.utcnow() - timedelta(hours=1)}'
     }
-    resp = client.patch(f'contest/tasks/creator'
+    resp = client.patch(f'contest/tasks/editor'
                         f'/base_olympiad/{state.base_olympiad["base_contest_id"]}'
                         f'/olympiad/{state.contest["contest_id"]}', json=request)
     assert resp.status_code == 200
@@ -44,9 +45,9 @@ def step_user_late_enroll(client, state):
     assert resp.status_code == 200
 
     request = {'location_id': f'{state.olympiad_location["location_id"]}'}
-    resp = client.post(f'contest/tasks'
+    resp = client.post(f'contest/tasks/participant'
                        f'/contest/{state.contest["contest_id"]}/enroll', json=request)
-    assert resp.status_code == 200
+    assert resp.status_code == 409
 
     resp = client.logout('/user/auth/logout')
     assert resp.status_code == 200

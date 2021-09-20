@@ -1,3 +1,5 @@
+from common.util import db_populate
+from contest.tasks.models import TargetClass
 from . import *
 
 
@@ -57,4 +59,14 @@ def step_init_locations(client, state):
     state.university['country'] = university.country_name
 
 
-steps_init = [step_init_client, step_init_admin, step_init_locations]
+def step_init_target_classes(client, state):
+    classes = [str(target_class) for target_class in range(8, 12)] + ['student']
+    target_classes = [TargetClass(target_class=target_class) for target_class in classes]
+    for target_class in target_classes:
+        test_app.db.session.add(target_class)
+    test_app.db.session.commit()
+
+    state.target_classes = [target_class.target_class_id for target_class in target_classes]
+
+
+steps_init = [step_init_client, step_init_admin, step_init_locations, step_init_target_classes]

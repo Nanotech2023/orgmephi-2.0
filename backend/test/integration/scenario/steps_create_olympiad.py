@@ -6,9 +6,6 @@ GENERATE_VARIANTS_NUMBER = 5
 
 
 def step_creator_login(client, state):
-    resp = client.logout('/user/auth/logout')
-    assert resp.status_code == 200
-
     resp = client.login('/user/auth/login', username=state.creator['username'], password=state.creator['password'])
     assert resp.status_code == 200
 
@@ -30,6 +27,13 @@ def step_create_base_olympiad(client, state):
     assert resp.status_code == 200
     state.base_olympiad = dict()
     state.base_olympiad['base_contest_id'] = resp.json['base_contest_id']
+
+    request = {
+        'target_classes_ids': state.target_classes
+    }
+    resp = client.post(f'contest/tasks/editor'
+                       f'/base_olympiad/{state.base_olympiad["base_contest_id"]}/add_target_classes', json=request)
+    assert resp.status_code == 200
 
 
 def step_create_olympiad_composite(client, state):
@@ -75,11 +79,10 @@ def step_create_simple_contest(client, state):
     state.contest['contest_id'] = resp.json['contest_id']
 
     request = {
-       'locations': [f'{state.olympiad_location["location_id"]}'],
+        'locations': [f'{state.olympiad_location["location_id"]}'],
     }
     resp = client.post(f'contest/tasks/editor'
                        f'/contest/{state.contest["contest_id"]}/add_location', json=request)
-    print(resp.data)
     assert resp.status_code == 200
 
 
@@ -174,6 +177,11 @@ def step_create_tasks(client, state):
         }
 
 
+def step_creator_logout(client, state):
+    resp = client.logout('/user/auth/logout')
+    assert resp.status_code == 200
+
+
 steps_create_olympiad = [step_creator_login, step_create_base_olympiad, step_create_olympiad_composite,
                          step_create_stage, step_create_simple_contest, step_create_variants,
-                         step_create_tasks]
+                         step_create_tasks, step_creator_logout]
