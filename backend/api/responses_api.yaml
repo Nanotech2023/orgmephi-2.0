@@ -90,7 +90,7 @@ components:
           readOnly: true
           type: integer
         task_points:
-          type: integer
+          type: number
       required:
       - right_answer
       - task_points

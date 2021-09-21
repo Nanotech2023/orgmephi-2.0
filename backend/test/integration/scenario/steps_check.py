@@ -28,6 +28,9 @@ def step_creator_auto_check(client, state):
                            f'/user/{user_id}/status', json={'status': 'Accepted'})
         assert resp.status_code == 200
 
+    resp = client.post(f'contest/responses/creator/contest/{contest_id}/winning')
+    assert resp.status_code == 200
+
     resp = client.logout('/user/auth/logout')
     assert resp.status_code == 200
 

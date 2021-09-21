@@ -139,8 +139,6 @@ class BaseAnswer(db.Model):
     answer_type = db.Column(db.Enum(AnswerEnum), nullable=False)
     mark = db.Column(db.Float, default=0)
 
-    task_points = db.relationship(Task, uselist=False)
-
     __mapper_args__ = {
         'polymorphic_identity': AnswerEnum.BaseAnswer,
         'polymorphic_on': answer_type
@@ -165,6 +163,12 @@ class BaseAnswer(db.Model):
             right_answers = [elem['answer'] for elem in task.answers if elem['is_right_answer']]
             if task.show_answer_after_contest:
                 return {'answers': right_answers}
+
+    @hybrid_property
+    def task_points(self):
+        from common.util import db_get_one_or_none
+        task: Task = db_get_one_or_none(Task, 'task_id', self.task_id)
+        return task.task_points
 
 
 def add_range_answer(work_id, task_id, values):

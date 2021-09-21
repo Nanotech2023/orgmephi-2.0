@@ -875,6 +875,13 @@ components:
           type: array
         task_id:
           type: integer
+        task_type:
+          enum:
+          - PlainTask
+          - RangeTask
+          - MultipleChoiceTask
+          - BaseTask
+          type: string
       required:
       - task_id
       type: object
