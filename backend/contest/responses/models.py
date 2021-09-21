@@ -149,22 +149,21 @@ class BaseAnswer(db.Model):
     @hybrid_property
     def right_answer(self):
         from common.util import db_get_one_or_none
-        from contest.tasks.util import get_user_in_contest_by_id_if_possible
-        response = self.response
-        user_in_contest = get_user_in_contest_by_id_if_possible(response.contest_id, response.user_id)
-        if user_in_contest.show_results_to_user:
-            if self.answer_type.value == "PlainAnswerText" or self.answer_type.value == "PlainAnswerFile":
-                task: PlainTask = db_get_one_or_none(PlainTask, 'task_id', self.task_id)
+        if self.answer_type.value == "PlainAnswerText" or self.answer_type.value == "PlainAnswerFile":
+            task: PlainTask = db_get_one_or_none(PlainTask, 'task_id', self.task_id)
+            if task.show_answer_after_contest:
                 return {'answer': task.recommended_answer}
-            elif self.answer_type.value == "RangeAnswer":
-                task: RangeTask = db_get_one_or_none(RangeTask, 'task_id', self.task_id)
+        elif self.answer_type.value == "RangeAnswer":
+            task: RangeTask = db_get_one_or_none(RangeTask, 'task_id', self.task_id)
+            if task.show_answer_after_contest:
                 return {
                     'start_value': task.start_value,
                     'end_value': task.end_value,
                 }
-            elif self.answer_type.value == "MultipleChoiceAnswer":
-                task: MultipleChoiceTask = db_get_one_or_none(MultipleChoiceTask, 'task_id', self.task_id)
-                right_answers = [elem['answer'] for elem in task.answers if elem['is_right_answer']]
+        elif self.answer_type.value == "MultipleChoiceAnswer":
+            task: MultipleChoiceTask = db_get_one_or_none(MultipleChoiceTask, 'task_id', self.task_id)
+            right_answers = [elem['answer'] for elem in task.answers if elem['is_right_answer']]
+            if task.show_answer_after_contest:
                 return {'answers': right_answers}
 
 
