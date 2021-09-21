@@ -2,6 +2,7 @@ from . import *
 from datetime import datetime, timedelta
 
 
+# noinspection DuplicatedCode
 def step_response_to_contest_a(client, state):
     user = state.participants[0]
     contest_id = state.contest['contest_id']
