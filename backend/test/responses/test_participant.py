@@ -241,16 +241,24 @@ def test_get_status_participant(client, create_one_task):
 
 
 # noinspection DuplicatedCode
-def test_mark_participant(client, create_one_task):
-    contest_id = get_contest_id(create_one_task, DEFAULT_INDEX)
-    user_id = get_user_id(create_one_task, DEFAULT_INDEX)
-    task_id = get_plain_task_id(create_one_task, DEFAULT_INDEX)
+def test_mark_participant(client, create_two_tasks):
+    contest_id = get_contest_id(create_two_tasks, DEFAULT_INDEX)
+    user_id = get_user_id(create_two_tasks, DEFAULT_INDEX)
+    task_id = get_plain_task_id(create_two_tasks, DEFAULT_INDEX)
 
     resp = client.get(f'/contest/{contest_id}/task/{task_id}/user/self/mark')
     assert resp.status_code == 409
 
-    contest = create_one_task['contests'][DEFAULT_INDEX]
+    contest = create_two_tasks['contests'][DEFAULT_INDEX]
     contest.result_publication_date = datetime.utcnow() - timedelta(minutes=5)
+    test_app.db.session.commit()
+
+    resp = client.get(f'/contest/{contest_id}/task/{task_id}/user/self/mark')
+    assert resp.status_code == 409
+
+    from contest.tasks.util import get_user_in_contest_by_id_if_possible
+    user_in_contest = get_user_in_contest_by_id_if_possible(contest_id, user_id)
+    user_in_contest.show_results_to_user = True
     test_app.db.session.commit()
 
     resp = client.get(f'/contest/{contest_id}/task/{task_id}/user/self/mark')
@@ -370,13 +378,17 @@ def test_auto_check_participant(client, create_user_with_answers):
 
     resp = client.get(f'/contest/{contest_id}/user/self/mark')
     assert resp.status_code == 409
-    contest = create_user_with_answers['contests'][index]
-    contest.result_publication_date = datetime.utcnow() - timedelta(minutes=5)
-    test_app.db.session.commit()
 
     from contest.tasks.util import get_user_in_contest_by_id_if_possible
     user_in_contest = get_user_in_contest_by_id_if_possible(contest_id, user_id)
     user_in_contest.show_results_to_user = True
+    test_app.db.session.commit()
+
+    resp = client.get(f'/contest/{contest_id}/user/self/mark')
+    assert resp.status_code == 409
+
+    contest = create_user_with_answers['contests'][index]
+    contest.result_publication_date = datetime.utcnow() - timedelta(minutes=5)
     test_app.db.session.commit()
 
     resp = client.get(f'/contest/{contest_id}/user/self/mark')
@@ -391,7 +403,7 @@ def test_auto_check_participant(client, create_user_with_answers):
             assert answer['mark'] == 0
             assert answer['task_points'] == 11
             assert answer['task_id'] == plain_id
-            assert answer['right_answer']['answer'] == 'answer'
+            assert answer['right_answer'] is None
         elif answer['answer_type'] == 'RangeAnswer':
             assert answer['mark'] == 0
             assert answer['task_points'] == 5

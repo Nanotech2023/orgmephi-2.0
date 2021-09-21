@@ -102,6 +102,7 @@ def get_user_by_id_all_marks(contest_id):
           description: The results have not yet been published
     """
     self_user_id = jwt_get_id()
+    check_user_show_results(contest_id, self_user_id)
     check_time_publishing(contest_id)
     return get_all_user_answers(self_user_id, contest_id), 200
 
@@ -441,6 +442,7 @@ def self_user_answer_task_mark(contest_id, task_id):
           description: The results have not yet been published
     """
     self_user_id = jwt_get_id()
+    check_user_show_results(contest_id, self_user_id)
     check_time_publishing(contest_id)
     user_work = get_user_in_contest_work(self_user_id, contest_id)
     answer = get_answer_by_task_id_and_work_id(BaseAnswer, task_id, user_work.work_id)

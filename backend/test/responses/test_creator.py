@@ -359,12 +359,13 @@ def test_auto_check_creator(client, create_user_with_answers):
             assert answer['mark'] == 5
             assert answer['task_points'] == 5
             assert answer['task_id'] == range_id
-            assert answer['right_answer'] is None
+            assert answer['right_answer']['start_value'] == 0.5
+            assert answer['right_answer']['end_value'] == 0.7
         elif answer['answer_type'] == 'MultipleChoiceAnswer':
             assert answer['mark'] == 0
             assert answer['task_points'] == 7
             assert answer['task_id'] == multiple_id
-            assert answer['right_answer'] is None
+            assert answer['right_answer']['answers'] == ['1', '3']
 
     resp = client.post(f'/contest/{contest_id}/winning')
     assert resp.status_code == 409
