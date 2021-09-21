@@ -233,7 +233,6 @@ def get_all_tasks_self(id_contest):
           description: User not found
     """
 
-    db_get_or_raise(UserInContest, "user_id", str(jwt_get_id()))
     current_response = get_user_in_contest_work(str(jwt_get_id()), id_contest)
 
     # Contest not in progress
