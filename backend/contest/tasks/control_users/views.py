@@ -1,4 +1,5 @@
 from flask import request
+from marshmallow import EXCLUDE
 
 from common import get_current_module
 from common.errors import AlreadyExists
@@ -81,6 +82,63 @@ def add_user_to_contest(id_contest):
                                                    location_id=location_id,
                                                    variant_id=generate_variant(id_contest, user_id),
                                                    user_status=UserStatusEnum.Participant))
+
+    db.session.commit()
+    return {}, 200
+
+
+@module.route('/contest/<int:id_contest>/', methods=['PATCH'],
+              input_schema=UpdateUserInContestRequestTaskControlUsersSchema)
+def change_user_to_contest(id_contest):
+    """
+    Change user to contest
+    ---
+    patch:
+      parameters:
+        - in: path
+          description: ID of the contest
+          name: id_contest
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: UpdateUserInContestRequestTaskControlUsersSchema
+      security:
+        - JWTAccessToken: [ ]
+        - CSRFAccessToken: [ ]
+      responses:
+        '200':
+          description: OK
+        '400':
+          description: Bad request
+        '409':
+          description: Olympiad type already in use
+    """
+
+    values = request.marshmallow
+    user_ids = values['users_id']
+    location_id = values.get('location_id', None)
+
+    # Can't add without location
+    if location_id is not None:
+        db_get_or_raise(OlympiadLocation, "location_id", location_id)
+
+    current_contest = get_contest_if_possible(id_contest)
+    current_base_contest = get_base_contest(current_contest)
+    target_classes = current_base_contest.target_classes
+
+    for user_id in user_ids:
+        current_user = current_contest.users.filter_by(**{"user_id": str(user_id)}).one_or_none()
+
+        # If user is not in current contest
+        if current_user is None:
+            raise InsufficientData('user_id', user_id)
+
+        UserInContestSchema(load_instance=True).load(request.json, instance=current_user, session=db.session,
+                                                     partial=True, unknown=EXCLUDE)
 
     db.session.commit()
     return {}, 200
