@@ -135,7 +135,7 @@ def change_user_to_contest(id_contest):
 
         # If user is not in current contest
         if current_user is None:
-            raise InsufficientData('user_id', user_id)
+            raise NotFound('user_id', user_id)
 
         UserInContestSchema(load_instance=True).load(request.json, instance=current_user, session=db.session,
                                                      partial=True, unknown=EXCLUDE)

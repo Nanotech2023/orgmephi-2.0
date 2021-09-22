@@ -116,7 +116,6 @@ def test_change_user_from_contest(client, test_simple_contest_with_users,
             'users_id': [f'{test_user_university.id}'],
             'show_results_to_user': True,
         })
-    print(resp.data)
     assert resp.status_code == 200
 
     resp = client.patch(
