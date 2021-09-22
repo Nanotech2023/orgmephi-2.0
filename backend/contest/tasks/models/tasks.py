@@ -35,8 +35,7 @@ class Task(db.Model):
 
     __mapper_args__ = {
         'polymorphic_identity': TaskTypeEnum.BaseTask,
-        'polymorphic_on': task_type,
-        'with_polymorphic': '*'
+        'polymorphic_on': task_type
     }
 
 

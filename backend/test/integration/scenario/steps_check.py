@@ -10,6 +10,10 @@ def step_creator_auto_check(client, state):
     resp = client.post(f'contest/responses/creator/contest/{contest_id}/check')
     assert resp.status_code == 200
 
+
+def step_check_plain_task(client, state):
+    contest_id = state.contest['contest_id']
+
     for user in state.participants[:-1]:
         user_id = user['id']
         resp = client.get(f"contest/responses/creator/contest/{contest_id}"
@@ -28,11 +32,13 @@ def step_creator_auto_check(client, state):
                            f'/user/{user_id}/status', json={'status': 'Accepted'})
         assert resp.status_code == 200
 
-    resp = client.post(f'contest/responses/creator/contest/{contest_id}/winning')
+
+def step_set_user_statuses(client, state):
+    resp = client.post(f'contest/responses/creator/contest/{state.contest["contest_id"]}/winning')
     assert resp.status_code == 200
 
     resp = client.logout('/user/auth/logout')
     assert resp.status_code == 200
 
 
-steps_check = [step_creator_auto_check]
+steps_check = [step_creator_auto_check, step_check_plain_task, step_set_user_statuses]

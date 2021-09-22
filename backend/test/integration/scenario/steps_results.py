@@ -56,9 +56,7 @@ def step_show_results_to_creator(client, state):
     assert resp.status_code == 200
 
     user_answers = resp.json['user_answers']
-    print(user_answers)
     for answer in user_answers:
-        print(answer)
         if answer['answer_type'] == 'PlainAnswerText':
             assert answer['mark'] == 2 + user_id_a
             assert answer['right_answer'] is None

@@ -162,7 +162,7 @@ def check_contest_time_left(contest_id):
 
 
 def check_contest_duration(user_work: Response):
-    time_left = calculate_time_left(user_work, 0)
+    time_left = calculate_time_left(user_work, False)
     if user_work.work_status != work_status['InProgress'] or \
             time_left + app.config['RESPONSE_EXTRA_MINUTES'] <= timedelta(seconds=0):
         finish_contest(user_work)
@@ -280,7 +280,7 @@ def update_multiple_answers(answers, answer):
     answer.answers = [elem['answer'] for elem in answers]
 
 
-def calculate_time_left(user_work: Response, mode=1):
+def calculate_time_left(user_work: Response, only_positive_time=True):
     contest: SimpleContest = db_get_one_or_none(SimpleContest, "contest_id", user_work.contest_id)
     contest_duration = contest.contest_duration
     if user_work.work_status != work_status['InProgress']:
@@ -290,7 +290,7 @@ def calculate_time_left(user_work: Response, mode=1):
         time_left = contest.end_date - datetime.utcnow() + user_work.time_extension
     else:
         time_left = contest_duration + user_work.time_extension - time_spent
-    if time_left < timedelta(seconds=0) and mode:
+    if time_left < timedelta(seconds=0) and only_positive_time:
         time_left = timedelta(seconds=0)
     return time_left
 
