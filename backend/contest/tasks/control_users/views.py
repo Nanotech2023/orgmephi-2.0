@@ -87,7 +87,7 @@ def add_user_to_contest(id_contest):
     return {}, 200
 
 
-@module.route('/contest/<int:id_contest>/', methods=['PATCH'],
+@module.route('/contest/<int:id_contest>/edit_users', methods=['PATCH'],
               input_schema=UpdateUserInContestRequestTaskControlUsersSchema)
 def change_user_to_contest(id_contest):
     """
@@ -114,8 +114,6 @@ def change_user_to_contest(id_contest):
           description: OK
         '400':
           description: Bad request
-        '409':
-          description: Olympiad type already in use
     """
 
     values = request.marshmallow

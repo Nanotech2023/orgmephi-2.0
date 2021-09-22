@@ -2992,6 +2992,29 @@ paths:
       security:
       - JWTAccessToken: []
       - CSRFAccessToken: []
+  /tasks/control_users/contest/{id_contest}/edit_users:
+    patch:
+      parameters:
+      - description: ID of the contest
+        in: path
+        name: id_contest
+        required: true
+        schema:
+          type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateUserInContestRequestTaskControlUsers'
+        required: true
+      responses:
+        '200':
+          description: OK
+        '400':
+          description: Bad request
+      security:
+      - JWTAccessToken: []
+      - CSRFAccessToken: []
   /tasks/control_users/contest/{id_contest}/remove_user:
     post:
       parameters:
