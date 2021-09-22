@@ -114,6 +114,8 @@ def change_user_to_contest(id_contest):
           description: OK
         '400':
           description: Bad request
+        '404':
+          description: Not found
     """
 
     values = request.marshmallow
