@@ -108,6 +108,26 @@ def test_change_user_location(client, test_simple_contest_with_users, test_olymp
     assert resp.status_code == 409
 
 
+def test_change_user_from_contest(client, test_simple_contest_with_users,
+                                  test_olympiad_locations, test_user_university):
+    resp = client.patch(
+        f'/contest/{test_simple_contest_with_users[0].contest_id}/edit_users',
+        json={
+            'users_id': [f'{test_user_university.id}'],
+            'show_results_to_user': True,
+        })
+    assert resp.status_code == 200
+
+    resp = client.patch(
+        f'/contest/{test_simple_contest_with_users[0].contest_id}/edit_users',
+        json={
+            'users_id': [f'{test_user_university.id}'],
+            'show_results_to_user': True,
+            'location_id': '0',
+        })
+    assert resp.status_code == 404
+
+
 def test_remove_user_from_contest(client, test_simple_contest_with_users,
                                   test_olympiad_locations, test_user_university):
     resp = client.post(

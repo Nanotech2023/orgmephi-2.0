@@ -11,7 +11,6 @@ def step_user_normal_enroll(client, state):
         request = {'location_id': state.olympiad_location["location_id"]}
         resp = client.post(f'contest/tasks/participant'
                            f'/contest/{state.contest["contest_id"]}/enroll', json=request)
-        print(resp.data)
         assert resp.status_code == 200
         state.olympiad_type = dict()
 
