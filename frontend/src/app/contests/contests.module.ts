@@ -5,12 +5,16 @@ import { ContestListComponent } from '@/contests/containers/contest-list/contest
 import { ContestDetailsComponent } from '@/contests/containers/contest-details/contest-details.component'
 import { ContestsStore } from '@/contests/contests.store'
 import { ContestListItemComponent } from '@/contests/containers/contest-list-item/contest-list-item.component'
+import { ContestRegistrationComponent } from '@/contests/containers/contest-registration/contest-registration.component'
+import { ContestAssignmentComponent } from '@/contests/containers/contest-assignment/contest-assignment.component'
 
 
 const COMPONENTS = [
     ContestListComponent,
     ContestDetailsComponent,
-    ContestListItemComponent
+    ContestListItemComponent,
+    ContestRegistrationComponent,
+    ContestAssignmentComponent
 ]
 
 

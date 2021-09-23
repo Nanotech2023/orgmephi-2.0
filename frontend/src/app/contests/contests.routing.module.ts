@@ -3,6 +3,7 @@ import { RouterModule, Routes } from '@angular/router'
 import { AuthGuardService } from '@/shared/auth.guard.service'
 import { ContestListComponent } from '@/contests/containers/contest-list/contest-list.component'
 import { ContestDetailsComponent } from '@/contests/containers/contest-details/contest-details.component'
+import { ContestRegistrationComponent } from '@/contests/containers/contest-registration/contest-registration.component'
 
 
 const routes: Routes =
@@ -12,6 +13,9 @@ const routes: Routes =
         },
         {
             path: 'contests/:id', component: ContestDetailsComponent, canActivate: [ AuthGuardService ]
+        },
+        {
+            path: 'contests/:id/register', component: ContestRegistrationComponent, canActivate: [ AuthGuardService ]
         }
     ]
 

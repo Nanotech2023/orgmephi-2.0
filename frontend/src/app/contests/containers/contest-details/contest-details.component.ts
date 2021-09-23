@@ -6,7 +6,8 @@ import { Contest } from '@api/tasks/model'
 
 @Component( {
     selector: 'app-contest-details',
-    templateUrl: './contest-details.component.html'
+    templateUrl: './contest-details.component.html',
+    styleUrls: [ './contest-details.component.scss' ]
 } )
 export class ContestDetailsComponent
 {
@@ -25,8 +26,13 @@ export class ContestDetailsComponent
         } )
     }
 
-    onStartClick( contestId: number )
+    onStartClick( contestId: number ): void
     {
         this.contestsStore.getVariant( contestId )
+    }
+
+    getTargetClassesDisplay( contest: Contest ): string
+    {
+        return contest.base_contest?.target_classes?.map( item => item.target_class ).join( "," ) + " классы"
     }
 }

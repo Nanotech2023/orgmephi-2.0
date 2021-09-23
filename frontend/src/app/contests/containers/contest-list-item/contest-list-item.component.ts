@@ -6,7 +6,8 @@ import { ContestsStore } from '@/contests/contests.store'
 
 @Component( {
     selector: 'app-contest-list-item',
-    templateUrl: './contest-list-item.component.html'
+    templateUrl: './contest-list-item.component.html',
+    styleUrls: [ './contest-list-item.component.scss' ]
 } )
 export class ContestListItemComponent
 {

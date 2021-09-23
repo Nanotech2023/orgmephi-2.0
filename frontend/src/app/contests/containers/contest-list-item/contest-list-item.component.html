@@ -1,8 +1,24 @@
-<div class="card p-5 m-5">
-    <div class="card-body">
-        <h5 class="card-title">{{ contest.contest_id }}</h5>
-        <h5 class="card-title">{{ contest.base_contest?.name! }}</h5>
-        <p class="card-text">{{ contest.base_contest?.description! }}</p>
-        <a (click)="navigateTo()" class="btn btn-primary">Детали</a>
+<div class="col-md-6">
+    <div class="olymp_list_item">
+        <div class="olymp_status">
+            <span>STATUS</span>
+        </div>
+        <div class="olymp_subtitle">
+            <span>7-11 классы</span>
+            <span>Физика</span>
+            <span>Уровень 1</span>
+        </div>
+
+        <div class="olymp_title">
+            Отраслевая физико-математическая олимпиада школьников «Росатом» (OLYMP TITLE)
+        </div>
+
+        <div class="olymp_link">
+            <a href="#">
+                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32" fill="none">
+                    <path d="M18 6L16.57 7.393L24.15 15H4V17H24.15L16.57 24.573L18 26L28 16L18 6Z" fill="#171717"/>
+                </svg>
+            </a>
+        </div>
     </div>
 </div>
