@@ -1,8 +1,18 @@
 <ng-container *ngIf="contest$ | async as contest ">
-    <p>{{ contest.base_contest.base_contest_id }}</p>
-    <p>{{ contest.base_contest.name }}</p>
-    <p>{{ contest.base_contest.description }}</p>
-    <p>{{ contest.base_contest.diploma_1_condition }}</p>
-    <p>{{ contest.base_contest.diploma_2_condition }}</p>
-    <p>{{ contest.base_contest.diploma_3_condition }}</p>
+    <div class="container">
+        <div class="row">
+            <div class="col-4">
+                <p>{{ contest.base_contest.name }}</p>
+                <p>{{ contest.base_contest.subject }}</p>
+                <p>Просьба внимательно ознакомиться с регламентом олимпиады перед началом прохождения</p>
+                <button class="btn btn-primary" (click)="onEnrollClick(contest.contest_id, 1)">Зарегистрироваться</button>
+                <button class="btn btn-primary" (click)="onStartClick(contest.contest_id)">Начать олимпиаду</button>
+                <!---TODO location ID--->
+            </div>
+            <div class="col-8">
+                <p>{{ contest.base_contest.description }}</p>
+                <p>{{ contest.base_contest.rules }}</p>
+            </div>
+        </div>
+    </div>
 </ng-container>

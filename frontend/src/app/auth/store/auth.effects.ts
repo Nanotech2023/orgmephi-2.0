@@ -3,7 +3,8 @@ import { Actions, createEffect, ofType } from '@ngrx/effects'
 import { UsersService } from '@api/users/users.service'
 import {
     getUserInfoRequest,
-    getUserInfoSuccess, getUserSuccess,
+    getUserInfoSuccess,
+    getUserSuccess,
     loginRequest,
     loginSuccess,
     registerRequest,
@@ -13,15 +14,23 @@ import { catchError, concatMap, mergeMap, switchMap } from 'rxjs/operators'
 import { of } from 'rxjs'
 import { Router } from '@angular/router'
 import { CSRFPairUser, User, UserInfo } from '@api/users/models'
+import { TasksService } from '@api/tasks/tasks.service'
+import { ResponsesService } from '@api/responses/responses.service'
 
 
 // noinspection JSUnusedGlobalSymbols
 @Injectable()
 export class AuthEffects
 {
-    constructor( private actions$: Actions, private authService: UsersService, private router: Router )
+    constructor( private actions$: Actions, private router: Router, private authService: UsersService, private tasksService: TasksService, private responsesService: ResponsesService )
     {
     }
+
+    // init$ = createEffect( () =>
+    //     this.actions$.pipe(
+    //         ofType( ROOT_EFFECTS_INIT ),
+    //         map( action => this. )
+    //     ) )
 
     loginAttempt$ = createEffect( () =>
         this.actions$.pipe
@@ -31,8 +40,10 @@ export class AuthEffects
                 this.authService.userAuthLoginPost( loginRequestUser ).pipe(
                     mergeMap( ( csrfPair: CSRFPairUser ) =>
                         {
-                            this.authService.configuration.credentials[ "CSRFAcessToken" ] = csrfPair.csrf_access_token
-                            this.router.navigate( [ '/users' ] )
+                            this.authService.configuration.credentials[ "CSRFAccessToken" ] = csrfPair.csrf_access_token
+                            this.tasksService.configuration.credentials[ "CSRFAccessToken" ] = csrfPair.csrf_access_token
+                            this.responsesService.configuration.credentials[ "CSRFAccessToken" ] = csrfPair.csrf_access_token
+                            this.router.navigate( [ '/contests' ] )
                             return of( loginSuccess( {
                                 csrfPair: {
                                     csrf_access_token: csrfPair.csrf_access_token,

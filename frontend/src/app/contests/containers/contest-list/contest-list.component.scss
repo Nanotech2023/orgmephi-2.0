@@ -3,12 +3,13 @@
 .container_main {
   padding-right: 10%;
   padding-left: 10%;
-  margin: auto;
 }
 
 #contests, #results, #application, #services, #contests-list {
   width: 100%;
   min-height: 276px;
+  margin-left: 0;
+  margin-right: 0;
 }
 
 #contests {
@@ -323,18 +324,6 @@
         right: 13px;
 
       }
-    }
-  }
-
-}
-
-#contests-list {
-  ul {
-    list-style: none;
-    padding-top: 5%;
-
-    li {
-      padding-left: 10%;
     }
   }
 }

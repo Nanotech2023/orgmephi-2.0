@@ -3,16 +3,12 @@ import { RouterModule, Routes } from '@angular/router'
 import { ManageUsersComponent } from '@/manage-users/containers/manage-users/manage-users.component'
 
 
-const routes: Routes = [
-    {
-        path: '',
-        children: [
-            {
-                path: 'manage/users', component: ManageUsersComponent
-            }
-        ]
-    }
-]
+const routes: Routes =
+    [
+        {
+            path: 'manage/users', component: ManageUsersComponent
+        }
+    ]
 
 
 @NgModule( {

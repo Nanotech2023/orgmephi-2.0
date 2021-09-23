@@ -1,0 +1,8 @@
+<div class="card p-5 m-5">
+    <div class="card-body">
+        <h5 class="card-title">{{ contest.contest_id }}</h5>
+        <h5 class="card-title">{{ contest.base_contest?.name! }}</h5>
+        <p class="card-text">{{ contest.base_contest?.description! }}</p>
+        <a (click)="navigateTo()" class="btn btn-primary">Детали</a>
+    </div>
+</div>

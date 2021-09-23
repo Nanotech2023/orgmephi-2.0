@@ -3,16 +3,12 @@ import { ManageContestsComponent } from '@/manage-contests/containers/manage-con
 import { NgModule } from '@angular/core'
 
 
-const routes: Routes = [
-    {
-        path: '',
-        children: [
-            {
-                path: 'manage/contests', component: ManageContestsComponent
-            }
-        ]
-    }
-]
+const routes: Routes =
+    [
+        {
+            path: 'manage/contests', component: ManageContestsComponent
+        }
+    ]
 
 
 @NgModule( {

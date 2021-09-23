@@ -6,8 +6,7 @@ import { Contest } from '@api/tasks/model'
 
 @Component( {
     selector: 'app-contest-details',
-    templateUrl: './contest-details.component.html',
-    styleUrls: [ './contest-details.component.scss' ]
+    templateUrl: './contest-details.component.html'
 } )
 export class ContestDetailsComponent
 {
@@ -16,5 +15,18 @@ export class ContestDetailsComponent
     constructor( private contestsStore: ContestsStore )
     {
         this.contest$ = this.contestsStore.selectedContest
+    }
+
+    onEnrollClick( contestId: number, locationId: number )
+    {
+        this.contestsStore.enroll( {
+            contestId: contestId,
+            enrollRequestTaskParticipant: { location_id: locationId }
+        } )
+    }
+
+    onStartClick( contestId: number )
+    {
+        this.contestsStore.getVariant( contestId )
     }
 }

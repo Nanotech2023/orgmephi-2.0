@@ -28,20 +28,10 @@
             </button>
         </div>
     </div>
-    <div class="row" id="contests-list" *ngIf="showContestsList">
-        <ul *ngIf="contests$ | async as contests" [@listAnimation]="contests.length">
-            <li *ngFor="let contest of contests">
-                <p><a (click)="navigateTo(contest.contest_id)">{{ contest.contest_id }}</a></p>
-                <p>{{ contest.holding_type }}</p>
-                <p>{{ contest.base_contest.base_contest_id }}</p>
-                <p>{{ contest.base_contest.name }}</p>
-                <p>{{ contest.base_contest.description }}</p>
-                <p>{{ contest.base_contest.diploma_1_condition }}</p>
-                <p>{{ contest.base_contest.diploma_2_condition }}</p>
-                <p>{{ contest.base_contest.diploma_3_condition }}</p>
-                <p><a (click)="enroll(contest.contest_id)">Зарегистрироваться</a></p>
-            </li>
-        </ul>
+    <div class="card-group" *ngIf="showContestsList">
+        <ng-container *ngIf="contests$ | async as contests">
+            <app-contest-list-item *ngFor="let contest of contests"  [contest]="contest"></app-contest-list-item>
+        </ng-container>
     </div>
     <div class="row" id="results">
         <div class="col-md-4 title_container">
@@ -279,7 +269,7 @@
 
             <div class="text_container">
                 <p class="title">/ Сервисы</p>
-                <a routerLink="/user/olymp" class="subtitle"><p>_Заполнить анкету участника</p></a>
+                <a routerLink="/profile/edit" class="subtitle"><p>_Заполнить анкету участника</p></a>
                 <p class="subtitle">_Оформить Пропуск-ПРИГЛАШЕНИЕ в МИФИ </p>
                 <p class="subtitle">_Печать регистрационной карточки участника</p>
             </div>

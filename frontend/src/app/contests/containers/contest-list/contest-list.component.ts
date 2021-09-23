@@ -6,7 +6,6 @@ import { Contest } from '@api/tasks/model'
 import { ContestsStore } from '@/contests/contests.store'
 import { footerHeight } from '@/shared/consts'
 import { animate, query, stagger, state, style, transition, trigger } from '@angular/animations'
-import { Router } from '@angular/router'
 
 
 export const fadeAnimation = trigger( 'fadeAnimation', [
@@ -55,7 +54,7 @@ export class ContestListComponent implements OnInit
     showContestsList: boolean
     contests$: Observable<Contest[]>
 
-    constructor( private authStore: Store<AuthState.State>, private contestsStore: ContestsStore, private router: Router )
+    constructor( private authStore: Store<AuthState.State>, private contestsStore: ContestsStore )
     {
         this.showContestsList = false
         this.contests$ = this.contestsStore.contests
@@ -75,16 +74,5 @@ export class ContestListComponent implements OnInit
     collapseContestsList(): void
     {
         this.showContestsList = !this.showContestsList
-    }
-
-    navigateTo( contestId: number ): Promise<boolean>
-    {
-        this.contestsStore.fetchSingle( contestId )
-        return this.router.navigate( [ "/contests", contestId ] )
-    }
-
-    enroll( contestId: number ): void
-    {
-        this.contestsStore.enroll( contestId )
     }
 }

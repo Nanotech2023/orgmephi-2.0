@@ -5,19 +5,15 @@ import { ContestListComponent } from '@/contests/containers/contest-list/contest
 import { ContestDetailsComponent } from '@/contests/containers/contest-details/contest-details.component'
 
 
-const routes: Routes = [
-    {
-        path: '',
-        children: [
-            {
-                path: 'contests', component: ContestListComponent, canActivate: [ AuthGuardService ]
-            },
-            {
-                path: 'contests/:id', component: ContestDetailsComponent, canActivate: [ AuthGuardService ]
-            }
-        ]
-    }
-]
+const routes: Routes =
+    [
+        {
+            path: 'contests', component: ContestListComponent, canActivate: [ AuthGuardService ]
+        },
+        {
+            path: 'contests/:id', component: ContestDetailsComponent, canActivate: [ AuthGuardService ]
+        }
+    ]
 
 
 @NgModule( {
