@@ -9,7 +9,6 @@ def step_admin_login(client, state):
 def step_create_olympiad_type(client, state):
     request = {'olympiad_type': 'Test type'}
     resp = client.post('contest/tasks/admin/olympiad_type/create', json=request)
-    print(resp.data)
     assert resp.status_code == 200
     state.olympiad_type = dict()
     state.olympiad_type['olympiad_type_id'] = resp.json['olympiad_type_id']

@@ -2,9 +2,11 @@
 
 from datetime import datetime, timedelta
 import enum
+from sqlalchemy.ext.associationproxy import association_proxy
 from common import get_current_db
 from contest.tasks.models import UserInContest, Task, MultipleChoiceTask, PlainTask, RangeTask
 from sqlalchemy.ext.hybrid import hybrid_property
+
 
 db = get_current_db()
 
@@ -135,11 +137,12 @@ class BaseAnswer(db.Model):
 
     answer_id = db.Column(db.Integer, autoincrement=True, primary_key=True)
     work_id = db.Column(db.Integer, db.ForeignKey('response.work_id'))
-    task_id = db.Column(db.Integer, db.ForeignKey(f'{Task.__tablename__}.task_id'))
+    task_id = db.Column(db.Integer, db.ForeignKey(Task.task_id))
     answer_type = db.Column(db.Enum(AnswerEnum), nullable=False)
     mark = db.Column(db.Float, default=0)
 
-    task_points = db.relationship(Task, uselist=False)
+    task = db.relationship(Task, uselist=False)
+    task_points = association_proxy('task', 'task_points')
 
     __mapper_args__ = {
         'polymorphic_identity': AnswerEnum.BaseAnswer,
@@ -189,6 +192,7 @@ class RangeAnswer(BaseAnswer):
 
     __mapper_args__ = {
         'polymorphic_identity': AnswerEnum.RangeAnswer,
+        'with_polymorphic': '*'
     }
 
 
@@ -214,6 +218,7 @@ class PlainAnswerText(BaseAnswer):
 
     __mapper_args__ = {
         'polymorphic_identity': AnswerEnum.PlainAnswerText,
+        'with_polymorphic': '*'
     }
 
 
@@ -242,6 +247,7 @@ class PlainAnswerFile(BaseAnswer):
 
     __mapper_args__ = {
         'polymorphic_identity': AnswerEnum.PlainAnswerFile,
+        'with_polymorphic': '*'
     }
 
     def update(self, answer_new=None, filetype_new=None):
@@ -274,4 +280,5 @@ class MultipleChoiceAnswer(BaseAnswer):
 
     __mapper_args__ = {
         'polymorphic_identity': AnswerEnum.MultipleChoiceAnswer,
+        'with_polymorphic': '*'
     }
