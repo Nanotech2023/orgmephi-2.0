@@ -337,6 +337,11 @@ def test_auto_check_creator(client, create_user_with_answers):
     multiple_answer = user_answer_get(user_id, contest_id, multiple_id)
     assert multiple_answer.mark == 0
 
+    from contest.tasks.util import get_user_in_contest_by_id_if_possible
+    user_in_contest = get_user_in_contest_by_id_if_possible(contest_id, user_id)
+    user_in_contest.show_results_to_user = False
+    test_app.db.session.commit()
+
     resp = client.get(f'/contest/{contest_id}/user/{user_id}/mark')
     assert resp.status_code == 200
     assert resp.json['contest_id'] == contest_id
@@ -349,14 +354,18 @@ def test_auto_check_creator(client, create_user_with_answers):
             assert answer['mark'] == 0
             assert answer['task_points'] == 11
             assert answer['task_id'] == plain_id
+            assert answer['right_answer'] is None
         elif answer['answer_type'] == 'RangeAnswer':
             assert answer['mark'] == 5
             assert answer['task_points'] == 5
             assert answer['task_id'] == range_id
+            assert answer['right_answer']['start_value'] == 0.5
+            assert answer['right_answer']['end_value'] == 0.7
         elif answer['answer_type'] == 'MultipleChoiceAnswer':
             assert answer['mark'] == 0
             assert answer['task_points'] == 7
             assert answer['task_id'] == multiple_id
+            assert answer['right_answer']['answers'] == ['1', '3']
 
     resp = client.post(f'/contest/{contest_id}/winning')
     assert resp.status_code == 409

@@ -113,28 +113,14 @@ def user_answer_get(user_id, contest_id, task_id, answer_type=None):
     return user_answer
 
 
-def get_task_points(user_work: Response):
-    from contest.tasks.models.tasks import Task
-    result = []
-    for answer in user_work.answers:
-        task = db_get_one_or_none(Task, 'task_id', answer.task_id)
-        result.append({
-            'task_id': task.task_id,
-            'task_points': task.task_points
-        })
-    return result
-
-
 def get_all_user_answers(user_id, contest_id):
     user_work = get_user_in_contest_work(user_id, contest_id)
-    tasks_points = get_task_points(user_work)
     answers = user_work.answers
     return {
         "user_id": user_work.user_id,
         "work_id": user_work.work_id,
         "contest_id": user_work.contest_id,
-        "user_answers": answers,
-        'tasks_points': tasks_points
+        "user_answers": answers
     }
 
 
@@ -176,14 +162,9 @@ def check_contest_time_left(contest_id):
 
 
 def check_contest_duration(user_work: Response):
-    contest: SimpleContest = db_get_one_or_none(SimpleContest, "contest_id", user_work.contest_id)
-    contest_duration = contest.contest_duration
-    if contest_duration == timedelta(seconds=0):
-        contest_duration = contest.end_date - contest.start_date
-    time_spent = datetime.utcnow() - user_work.start_time
+    time_left = calculate_time_left(user_work, False)
     if user_work.work_status != work_status['InProgress'] or \
-            time_spent + app.config['RESPONSE_EXTRA_MINUTES'] > contest_duration or \
-            datetime.utcnow() > contest.end_date:
+            time_left + app.config['RESPONSE_EXTRA_MINUTES'] <= timedelta(seconds=0):
         finish_contest(user_work)
         raise TimingError("Olympiad is over for current user")
 
@@ -228,6 +209,13 @@ def check_user_multiple_answers(answers, task_id):
     for elem in user_answers:
         if elem not in answers:
             raise OlympiadError("Wrong answers for multiple type task")
+
+
+def check_user_show_results(contest_id, user_id):
+    from contest.tasks.util import get_user_in_contest_by_id_if_possible
+    user_in_contest = get_user_in_contest_by_id_if_possible(contest_id, user_id)
+    if not user_in_contest.show_results_to_user:
+        raise OlympiadError("Not allowed to see results")
 
 
 # Other funcs
@@ -292,17 +280,17 @@ def update_multiple_answers(answers, answer):
     answer.answers = [elem['answer'] for elem in answers]
 
 
-def calculate_time_left(user_work: Response):
+def calculate_time_left(user_work: Response, only_positive_time=True):
     contest: SimpleContest = db_get_one_or_none(SimpleContest, "contest_id", user_work.contest_id)
     contest_duration = contest.contest_duration
     if user_work.work_status != work_status['InProgress']:
         return timedelta(seconds=0)
     time_spent = datetime.utcnow() - user_work.start_time
     if contest_duration == timedelta(seconds=0):
-        time_left = contest.end_date - datetime.utcnow()
+        time_left = contest.end_date - datetime.utcnow() + user_work.time_extension
     else:
         time_left = contest_duration + user_work.time_extension - time_spent
-    if time_left < timedelta(seconds=0):
+    if time_left < timedelta(seconds=0) and only_positive_time:
         time_left = timedelta(seconds=0)
     return time_left
 
