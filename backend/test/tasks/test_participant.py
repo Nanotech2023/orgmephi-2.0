@@ -49,7 +49,6 @@ def test_enroll_in_contest_different_stages(client, test_simple_contest_in_stage
                        json={
                            'location_id': test_olympiad_locations[0].location_id
                        })
-    print(resp.data)
     assert resp.status_code == 200
 
 
@@ -59,7 +58,6 @@ def test_enroll_in_contest_different_stages2(client, test_simple_contest_in_stag
                        json={
                            'location_id': test_olympiad_locations[0].location_id
                        })
-    print(resp.data)
     assert resp.status_code == 200
 
 
@@ -69,7 +67,6 @@ def test_enroll_in_contest_different_stages3(client, test_simple_contest_in_stag
                        json={
                            'location_id': test_olympiad_locations[0].location_id
                        })
-    print(resp.data)
     assert resp.status_code == 200
 
 

@@ -2,9 +2,11 @@
 
 from datetime import datetime, timedelta
 import enum
+from sqlalchemy.ext.associationproxy import association_proxy
 from common import get_current_db
-from contest.tasks.models import UserInContest, Task
+from contest.tasks.models import UserInContest, Task, MultipleChoiceTask, PlainTask, RangeTask
 from sqlalchemy.ext.hybrid import hybrid_property
+
 
 db = get_current_db()
 
@@ -135,16 +137,37 @@ class BaseAnswer(db.Model):
 
     answer_id = db.Column(db.Integer, autoincrement=True, primary_key=True)
     work_id = db.Column(db.Integer, db.ForeignKey('response.work_id'))
-    task_id = db.Column(db.Integer, db.ForeignKey(f'{Task.__tablename__}.task_id'))
+    task_id = db.Column(db.Integer, db.ForeignKey(Task.task_id))
     answer_type = db.Column(db.Enum(AnswerEnum), nullable=False)
     mark = db.Column(db.Float, default=0)
 
-    task_points = db.relationship(Task, uselist=False)
+    task = db.relationship(Task, uselist=False)
+    task_points = association_proxy('task', 'task_points')
 
     __mapper_args__ = {
         'polymorphic_identity': AnswerEnum.BaseAnswer,
         'polymorphic_on': answer_type
     }
+
+    @hybrid_property
+    def right_answer(self):
+        from common.util import db_get_one_or_none
+        if self.answer_type.value == "PlainAnswerText" or self.answer_type.value == "PlainAnswerFile":
+            task: PlainTask = db_get_one_or_none(PlainTask, 'task_id', self.task_id)
+            if task.show_answer_after_contest:
+                return {'answer': task.recommended_answer}
+        elif self.answer_type.value == "RangeAnswer":
+            task: RangeTask = db_get_one_or_none(RangeTask, 'task_id', self.task_id)
+            if task.show_answer_after_contest:
+                return {
+                    'start_value': task.start_value,
+                    'end_value': task.end_value,
+                }
+        elif self.answer_type.value == "MultipleChoiceAnswer":
+            task: MultipleChoiceTask = db_get_one_or_none(MultipleChoiceTask, 'task_id', self.task_id)
+            right_answers = [elem['answer'] for elem in task.answers if elem['is_right_answer']]
+            if task.show_answer_after_contest:
+                return {'answers': right_answers}
 
 
 def add_range_answer(work_id, task_id, values):
@@ -169,6 +192,7 @@ class RangeAnswer(BaseAnswer):
 
     __mapper_args__ = {
         'polymorphic_identity': AnswerEnum.RangeAnswer,
+        'with_polymorphic': '*'
     }
 
 
@@ -194,6 +218,7 @@ class PlainAnswerText(BaseAnswer):
 
     __mapper_args__ = {
         'polymorphic_identity': AnswerEnum.PlainAnswerText,
+        'with_polymorphic': '*'
     }
 
 
@@ -222,6 +247,7 @@ class PlainAnswerFile(BaseAnswer):
 
     __mapper_args__ = {
         'polymorphic_identity': AnswerEnum.PlainAnswerFile,
+        'with_polymorphic': '*'
     }
 
     def update(self, answer_new=None, filetype_new=None):
@@ -254,4 +280,5 @@ class MultipleChoiceAnswer(BaseAnswer):
 
     __mapper_args__ = {
         'polymorphic_identity': AnswerEnum.MultipleChoiceAnswer,
+        'with_polymorphic': '*'
     }

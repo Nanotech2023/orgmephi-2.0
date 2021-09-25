@@ -85,7 +85,7 @@ def create_plain_task(create_user_in_contest):
     from contest.tasks.models.tasks import PlainTask
     plain_tasks = [PlainTask(num_of_task=1,
                              image_of_task=None,
-                             show_answer_after_contest=None,
+                             show_answer_after_contest=True,
                              task_points=11,
                              recommended_answer='answer')
                    for i in range(8)]
@@ -115,7 +115,7 @@ def create_one_task(create_user_response):
     from contest.tasks.models.tasks import PlainTask
     plain_tasks = [PlainTask(num_of_task=1,
                              image_of_task=None,
-                             show_answer_after_contest=None,
+                             show_answer_after_contest=False,
                              task_points=11,
                              recommended_answer='answer')
                    for i in range(8)]
@@ -132,7 +132,7 @@ def create_two_tasks(create_one_task):
     from contest.tasks.models.tasks import RangeTask
     range_tasks = [RangeTask(num_of_task=2,
                              image_of_task=None,
-                             show_answer_after_contest=False,
+                             show_answer_after_contest=True,
                              task_points=5,
                              start_value=0.5,
                              end_value=0.7)
@@ -150,7 +150,7 @@ def create_three_tasks(create_two_tasks):
     from contest.tasks.models.tasks import MultipleChoiceTask
     multiple_tasks = [MultipleChoiceTask(num_of_task=3,
                                          image_of_task=None,
-                                         show_answer_after_contest=False,
+                                         show_answer_after_contest=True,
                                          task_points=7)
                       for _ in range(8)]
     answers = [

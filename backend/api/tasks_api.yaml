@@ -875,6 +875,13 @@ components:
           type: array
         task_id:
           type: integer
+        task_type:
+          enum:
+          - PlainTask
+          - RangeTask
+          - MultipleChoiceTask
+          - BaseTask
+          type: string
       required:
       - task_id
       type: object
@@ -2989,6 +2996,31 @@ paths:
           description: Bad request
         '409':
           description: Olympiad type already in use
+      security:
+      - JWTAccessToken: []
+      - CSRFAccessToken: []
+  /tasks/control_users/contest/{id_contest}/edit_users:
+    patch:
+      parameters:
+      - description: ID of the contest
+        in: path
+        name: id_contest
+        required: true
+        schema:
+          type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateUserInContestRequestTaskControlUsers'
+        required: true
+      responses:
+        '200':
+          description: OK
+        '400':
+          description: Bad request
+        '404':
+          description: Not found
       security:
       - JWTAccessToken: []
       - CSRFAccessToken: []
