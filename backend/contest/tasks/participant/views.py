@@ -5,7 +5,6 @@ from flask import send_file, request
 from common import get_current_module
 from common.errors import AlreadyExists, TimeOver
 from common.util import send_pdf
-from contest.responses.models import ResponseStatusEnum
 from contest.responses.util import get_user_in_contest_work
 from contest.tasks.model_schemas.contest import VariantSchema
 from contest.tasks.model_schemas.olympiad import ContestSchema
@@ -53,11 +52,8 @@ def get_variant_self(id_contest):
           description: User not found
     """
 
-    db_get_or_raise(UserInContest, "user_id", str(jwt_get_id()))
-    current_response = get_user_in_contest_work(str(jwt_get_id()), id_contest)
-
-    # Contest not in progress
-    if current_response.status != ResponseStatusEnum.in_progress:
+    # Contest not in progress or 'not show answers' flag
+    if not user_can_view_variants_and_tasks(id_contest):
         raise ContestContentAccessDenied()
 
     variant = get_user_variant_if_possible(id_contest)
@@ -233,10 +229,8 @@ def get_all_tasks_self(id_contest):
           description: User not found
     """
 
-    current_response = get_user_in_contest_work(str(jwt_get_id()), id_contest)
-
-    # Contest not in progress
-    if current_response.status != ResponseStatusEnum.in_progress:
+    # Contest not in progress or 'not show answers' flag
+    if not user_can_view_variants_and_tasks(id_contest):
         raise ContestContentAccessDenied()
 
     tasks_list = get_user_tasks_if_possible(id_contest)
@@ -283,12 +277,10 @@ def get_task_image_self(id_contest, id_task):
           description: Olympiad type already in use
     """
 
-    db_get_or_raise(UserInContest, "user_id", str(jwt_get_id()))
-    current_response = get_user_in_contest_work(str(jwt_get_id()), id_contest)
-
-    # Contest not in progress
-    if current_response.status != ResponseStatusEnum.in_progress:
+    # Contest not in progress or 'not show answers' flag
+    if not user_can_view_variants_and_tasks(id_contest):
         raise ContestContentAccessDenied()
+
     task = get_user_task_if_possible(id_contest, id_task)
 
     if task.image_of_task is None:
