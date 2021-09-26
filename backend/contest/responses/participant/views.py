@@ -510,3 +510,26 @@ def self_user_finish_contest(contest_id):
     user_work = get_user_in_contest_work(self_user_id, contest_id)
     finish_contest(user_work)
     return {}, 200
+
+
+@module.route('/contest/user/self/results', methods=['GET'],
+              output_schema=AllUserResultsResponseSchema)
+def all_user_results():
+    """
+    Get all user results for all contests
+    ---
+    get:
+      security:
+        - JWTAccessToken: []
+        - CSRFAccessToken: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: AllUserResultsResponseSchema
+        '404':
+          description: User not found
+    """
+    self_user_id = jwt_get_id()
+    return get_all_user_responses(self_user_id), 200

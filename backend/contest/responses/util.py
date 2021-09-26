@@ -370,3 +370,26 @@ def set_user_statuses(contest_id):
         percent = user_work.mark / all_points
         user_in_contest.user_status = choose_status(percent, base_contest)
     db.session.commit()
+
+
+def get_all_user_responses(user_id):
+    results = db_get_list(UserInContest, 'user_id', user_id)
+    res = []
+    for user_card in results:
+        dict_ = {}
+        try:
+            user_work: Response = get_user_in_contest_work(user_card.user_id, user_card.contest_id)
+            dict_['mark'] = user_work.mark
+            dict_['status'] = user_work.status
+        except NotFound:
+            dict_['mark'] = 0
+            dict_['status'] = 'InProgress'
+            continue
+        dict_['user_status'] = user_card.user_status
+        contest = db_get_one_or_none(SimpleContest, 'contest_id', user_card.contest_id)
+        dict_['contest_info'] = contest
+        res.append(dict_)
+    return {
+        'results': res
+    }
+

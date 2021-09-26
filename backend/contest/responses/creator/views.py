@@ -799,3 +799,32 @@ def set_status_by_result(contest_id):
     is_all_checked(contest_id)
     set_user_statuses(contest_id)
     return {}, 200
+
+
+@module.route('/contest/user/<int:user_id>/results', methods=['GET'],
+              output_schema=AllUserResultsResponseSchema)
+def all_user_results(user_id):
+    """
+    Get all user results for all contests
+    ---
+    get:
+      security:
+        - JWTAccessToken: []
+        - CSRFAccessToken: []
+      parameters:
+        - in: path
+          description: Id of the user
+          name: user_id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: AllUserResultsResponseSchema
+        '404':
+          description: User not found
+    """
+    return get_all_user_responses(user_id), 200

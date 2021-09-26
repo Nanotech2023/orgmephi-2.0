@@ -20,6 +20,7 @@ class ResponseStatusEnum(enum.Enum):
     rejected: rejected work
     appeal: work sent for appeal
     correction: work sent for correction
+    no_results: results haven't been published yet
     """
 
     in_progress = 'InProgress'
@@ -28,6 +29,7 @@ class ResponseStatusEnum(enum.Enum):
     rejected = 'Rejected'
     appeal = 'Appeal'
     correction = 'Correction'
+    no_results = 'NoResults'
 
 
 work_status = {status.value: status for status in ResponseStatusEnum}
@@ -74,6 +76,15 @@ class Response(db.Model):
             mark += elem.mark
         return mark
 
+    def get_status(self):
+        from common.util import db_get_one_or_none
+        from contest.tasks.models.olympiad import SimpleContest
+        contest: SimpleContest= db_get_one_or_none(SimpleContest, 'contest_id', self.contest_id)
+        if self.work_status == work_status['Accepted']:
+            if datetime.utcnow() < contest.result_publication_date:
+                return work_status['NoResults']
+        return self.work_status
+
     @hybrid_property
     def status(self):
         from common.util import db_get_one_or_none
@@ -83,9 +94,9 @@ class Response(db.Model):
             if thread.status == ThreadStatus.open and thread.thread_type == ThreadType.appeal:
                 return work_status['Appeal']
             else:
-                return self.work_status
+                return self.get_status()
         else:
-            return self.work_status
+            return self.get_status()
 
 
 class ResponseFiletypeEnum(enum.Enum):
