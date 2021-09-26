@@ -41,7 +41,9 @@ export class ContestsStore extends ComponentStore<ContestsState>
         super( initialState )
     }
 
-    readonly contests: Observable<Contest[]> = this.select( state => state.contests )
+    // TODO fix when openapi will match real response
+    // @ts-ignore
+    readonly contests: Observable<Contest[]> = this.select( state => state.contests.map( item => item.contest ) )
     readonly selectedContest: Observable<Contest | undefined> = this.select( state => state.selectedContest )
     readonly locations: Observable<Contest | undefined> = this.select( state => state.selectedContest )
     private readonly loading$: Observable<boolean> = this.select( state => state.callState === LoadingState.LOADING )

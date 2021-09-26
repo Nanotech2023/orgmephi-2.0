@@ -26,6 +26,8 @@ import { ResponsesService } from '@api/responses/responses.service'
         LayoutModule,
         AuthModule,
         ContestsModule,
+        // TODO fix profile module
+        // ProfileModule,
         ManageUsersModule,
         ManageContestsModule,
         AppRoutingModule,

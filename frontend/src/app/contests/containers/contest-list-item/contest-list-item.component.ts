@@ -23,4 +23,9 @@ export class ContestListItemComponent
         this.contestsStore.selectContest( this.contest )
         return this.router.navigate( [ "/contests", this.contest.contest_id ] )
     }
+
+    getClassesForDisplay(): string | undefined
+    {
+        return this.contest.base_contest?.target_classes?.map( item => item.target_class ).join( "," )
+    }
 }
