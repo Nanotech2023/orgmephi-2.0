@@ -62,6 +62,8 @@ class OlympiadSubjectEnum(enum.Enum):
     Math = "Math"
     Physics = "Physics"
     Informatics = "Informatics"
+    NaturalSciences = "Natural Sciences"
+    Other = "Other"
 
 
 olympiad_subject_dict = {subject.value: subject for subject in OlympiadSubjectEnum}
