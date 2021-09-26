@@ -1,13 +1,25 @@
 import enum
 from datetime import datetime, timedelta
 
+from sqlalchemy import case
 from sqlalchemy.ext.associationproxy import association_proxy
+from sqlalchemy.ext.hybrid import hybrid_property
 
 from common import get_current_db
 
 db = get_current_db()
 
 DEFAULT_VISIBILITY = True
+
+"""
+Olympiad status
+"""
+
+
+class OlympiadStatusEnum(enum.Enum):
+    OlympiadSoon = "Will start soon"
+    OlympiadInProgress = "In progress"
+    OlympiadFinished = "Finished"
 
 
 class UserStatusEnum(enum.Enum):
@@ -262,12 +274,12 @@ class SimpleContest(Contest):
 
     contest_id = db.Column(db.Integer, db.ForeignKey('contest.contest_id'), primary_key=True)
 
-    start_date = db.Column(db.DateTime, index=True, default=datetime.utcnow)
-    end_date = db.Column(db.DateTime, index=True, default=datetime.utcnow)
+    start_date = db.Column(db.DateTime, index=True, default=datetime.utcnow())
+    end_date = db.Column(db.DateTime, index=True, default=datetime.utcnow())
     result_publication_date = db.Column(db.DateTime, nullable=True)
     end_of_enroll_date = db.Column(db.DateTime, nullable=True)
 
-    contest_duration = db.Column(db.Interval, default=timedelta(seconds=0),nullable=False)
+    contest_duration = db.Column(db.Interval, default=timedelta(seconds=0), nullable=False)
 
     target_classes = association_proxy('base_contest', 'target_classes')
 
@@ -293,6 +305,21 @@ class SimpleContest(Contest):
             self.previous_contest_id = previous_contest_id
         if previous_participation_condition is not None:
             self.previous_participation_condition = previous_participation_condition
+
+    @hybrid_property
+    def status(self):
+        if datetime.utcnow() < self.start_date:
+            return OlympiadStatusEnum.OlympiadSoon
+        elif datetime.utcnow() < self.end_date:
+            return OlympiadStatusEnum.OlympiadInProgress
+        else:
+            return OlympiadStatusEnum.OlympiadFinished
+
+    @status.expression
+    def status(cls):
+        return case([(datetime.utcnow() < cls.start_date, OlympiadStatusEnum.OlympiadSoon.value),
+                     (datetime.utcnow() < cls.end_date, OlympiadStatusEnum.OlympiadInProgress.value)],
+                    else_=OlympiadStatusEnum.OlympiadFinished.value)
 
 
 def add_composite_contest(db_session, visibility, base_contest_id=None, holding_type=None):

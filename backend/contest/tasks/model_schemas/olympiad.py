@@ -7,7 +7,6 @@ from contest.tasks.model_schemas.location import OlympiadLocationSchema
 from contest.tasks.models import *
 from contest.tasks.models.reference import TargetClass
 from user.models.auth import *
-
 """
 Target class
 """
@@ -85,6 +84,7 @@ class SimpleContestSchema(SQLAlchemySchema):
     visibility = auto_field(column_name='visibility', required=True)
     start_date = auto_field(column_name='start_date', required=True)
     end_date = auto_field(column_name='end_date', required=True)
+    status = EnumField(OlympiadStatusEnum, data_key='status', by_value=True)
     contest_duration = auto_field(column_name='contest_duration', required=True)
     result_publication_date = auto_field(column_name='result_publication_date', required=True)
     end_of_enroll_date = auto_field(column_name='end_of_enroll_date', required=True)
