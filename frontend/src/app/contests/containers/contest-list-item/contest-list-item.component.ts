@@ -11,7 +11,8 @@ import { ContestsStore } from '@/contests/contests.store'
 } )
 export class ContestListItemComponent
 {
-    @Input() contest!: Contest
+    // @ts-ignore
+    @Input() contest: Contest
 
     constructor( private contestsStore: ContestsStore, private router: Router )
     {
