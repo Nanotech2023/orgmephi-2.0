@@ -3,7 +3,7 @@ from marshmallow_enum import EnumField
 
 from common import fields as common_fields
 from contest.tasks.models import OlympiadSubjectEnum, StageConditionEnum, ContestHoldingTypeEnum, \
-    UserStatusEnum
+    UserStatusEnum, OlympiadLevelEnum
 
 
 # Base contest
@@ -20,6 +20,7 @@ class UpdateBaseOlympiadRequestTaskEditorSchema(Schema):
     diploma_3_condition = common_fields.FloatCondition(required=False)
     olympiad_type_id = fields.Int(required=False)
     subject = EnumField(OlympiadSubjectEnum, required=False, by_value=True)
+    level = EnumField(OlympiadLevelEnum, required=False, by_value=True)
 
 
 # Contest

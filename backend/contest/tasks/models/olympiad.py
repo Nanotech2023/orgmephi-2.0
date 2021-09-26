@@ -11,6 +11,19 @@ db = get_current_db()
 
 DEFAULT_VISIBILITY = True
 
+
+"""
+Olympiad level
+"""
+
+
+class OlympiadLevelEnum(enum.Enum):
+    Level1 = "1"
+    Level2 = "2"
+    Level3 = "3"
+    Level4 = "No level"
+
+
 """
 Olympiad status
 """
@@ -93,6 +106,7 @@ def add_base_contest(db_session, name,
                      description, rules,
                      olympiad_type_id,
                      subject,
+                     level,
                      certificate_template):
     """
     Create new base content object
@@ -109,7 +123,8 @@ def add_base_contest(db_session, name,
         diploma_2_condition=diploma_2_condition,
         diploma_3_condition=diploma_3_condition,
         olympiad_type_id=olympiad_type_id,
-        subject=subject
+        subject=subject,
+        level=level,
     )
     db_session.add(base_contest)
     return base_contest
@@ -153,6 +168,7 @@ class BaseContest(db.Model):
     description = db.Column(db.Text, nullable=False)
     olympiad_type_id = db.Column(db.Integer, db.ForeignKey('olympiad_type.olympiad_type_id'), nullable=False)
     subject = db.Column(db.Enum(OlympiadSubjectEnum), nullable=False)
+    level = db.Column(db.Enum(OlympiadLevelEnum), nullable=False)
     certificate_template = db.Column(db.Text, nullable=True)
 
     winner_1_condition = db.Column(db.Float, nullable=False)

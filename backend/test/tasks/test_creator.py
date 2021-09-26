@@ -22,6 +22,7 @@ def test_base_olympiad_create(client, test_olympiad_types):
                            'diploma_3_condition': '0.5',
                            'olympiad_type_id': f'{test_olympiad_types[0].olympiad_type_id}',
                            'subject': 'Math',
+                           'level': '1',
                        })
     assert resp.status_code == 200
 

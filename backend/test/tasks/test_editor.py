@@ -42,6 +42,7 @@ def test_base_olympiad_patch(client, test_base_contests, test_olympiad_types):
                             'diploma_3_condition': '0.8',
                             'olympiad_type_id': f'{test_olympiad_types[0].olympiad_type_id}',
                             'subject': 'Physics',
+                            'level': '2',
                         })
     assert resp.status_code == 200
 

@@ -48,9 +48,10 @@ def test_olympiad_locations():
 
 @pytest.fixture
 def test_base_contests(test_olympiad_types):
-    from contest.tasks.models import BaseContest, OlympiadSubjectEnum
+    from contest.tasks.models import BaseContest, OlympiadSubjectEnum, OlympiadLevelEnum
     contests = [BaseContest(name=f'Test {i}', rules=f'Test{i}', description=f'Test {i}',
                             subject=OlympiadSubjectEnum.Math,
+                            level=OlympiadLevelEnum.Level1,
                             winner_1_condition=0.95,
                             winner_2_condition=0.9,
                             winner_3_condition=0.8,

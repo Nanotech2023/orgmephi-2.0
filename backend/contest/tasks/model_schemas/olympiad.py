@@ -62,6 +62,7 @@ class BaseContestSchema(SQLAlchemySchema):
 
     olympiad_type_id = auto_field(column_name='olympiad_type_id', required=False)
     subject = EnumField(OlympiadSubjectEnum, data_key='subject', by_value=True, required=False)
+    level = EnumField(OlympiadLevelEnum, data_key='level', by_value=True, required=False)
     target_classes = fields.Nested(TargetClassSchema, many=True, required=False)
 
 

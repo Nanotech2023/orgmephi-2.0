@@ -11,7 +11,7 @@ def step_creator_login(client, state):
 
 
 def step_create_base_olympiad(client, state):
-    from contest.tasks.models import OlympiadSubjectEnum
+    from contest.tasks.models import OlympiadSubjectEnum, OlympiadLevelEnum
     request = {'name': 'Base olympiad 1',
                'description': 'Description of Base olympiad 1',
                'rules': 'Rules of Base olympiad 1',
@@ -21,6 +21,7 @@ def step_create_base_olympiad(client, state):
                'diploma_1_condition': 0.6,
                'diploma_2_condition': 0.5,
                'diploma_3_condition': 0.4,
+               'level': OlympiadLevelEnum.Level1.value,
                'olympiad_type_id': f'{state.olympiad_type["olympiad_type_id"]}',
                'subject': OlympiadSubjectEnum.Math.value}
     resp = client.post('contest/tasks/creator/base_olympiad/create', json=request)
