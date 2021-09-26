@@ -15,5 +15,16 @@ import { AnswersInTaskRequestTaskParticipant } from './answersInTaskRequestTaskP
 export interface TaskForUserResponseTaskParticipant { 
     answers?: Array<AnswersInTaskRequestTaskParticipant>;
     task_id: number;
+    task_type?: TaskForUserResponseTaskParticipant.TaskTypeEnum;
 }
+export namespace TaskForUserResponseTaskParticipant {
+    export type TaskTypeEnum = 'PlainTask' | 'RangeTask' | 'MultipleChoiceTask' | 'BaseTask';
+    export const TaskTypeEnum = {
+        PlainTask: 'PlainTask' as TaskTypeEnum,
+        RangeTask: 'RangeTask' as TaskTypeEnum,
+        MultipleChoiceTask: 'MultipleChoiceTask' as TaskTypeEnum,
+        BaseTask: 'BaseTask' as TaskTypeEnum
+    };
+}
+
 

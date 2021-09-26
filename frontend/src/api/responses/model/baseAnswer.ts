@@ -9,14 +9,16 @@
  * https://openapi-generator.tech
  * Do not edit the class manually.
  */
+import { RightAnswer } from './rightAnswer';
 
 
 export interface BaseAnswer { 
     readonly answer_id?: number;
     answer_type?: BaseAnswer.AnswerTypeEnum;
     readonly mark?: number | null;
+    right_answer: RightAnswer;
     readonly task_id?: number | null;
-    task_points: number;
+    readonly task_points: number | null;
 }
 export namespace BaseAnswer {
     export type AnswerTypeEnum = 'PlainAnswerText' | 'PlainAnswerFile' | 'RangeAnswer' | 'MultipleChoiceAnswer' | 'BaseAnswer';
