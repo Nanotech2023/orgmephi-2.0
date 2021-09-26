@@ -1,16 +1,17 @@
 import enum
 from datetime import datetime, timedelta
 
-from sqlalchemy import case
+from sqlalchemy import func, select
+from sqlalchemy.sql import case
 from sqlalchemy.ext.associationproxy import association_proxy
 from sqlalchemy.ext.hybrid import hybrid_property
 
+from contest.tasks.models.contest import Variant
 from common import get_current_db
 
 db = get_current_db()
 
 DEFAULT_VISIBILITY = True
-
 
 """
 Olympiad level
@@ -280,10 +281,12 @@ class SimpleContest(Contest):
     end_date: end date of contest
     result_publication_date: result publication date
 
+    regulations: regulations of the olympiad
+
     location: location of the olympiad
     previous_contest_id: previous contest id
     previous_participation_condition: previous participation condition
-    contest_duration: previous duration of the contest
+    contest_duration: duration of the contest
     variants: variants
     next_contest: next contests
 
@@ -292,20 +295,18 @@ class SimpleContest(Contest):
 
     contest_id = db.Column(db.Integer, db.ForeignKey('contest.contest_id'), primary_key=True)
 
-    start_date = db.Column(db.DateTime, index=True, default=datetime.utcnow())
-    end_date = db.Column(db.DateTime, index=True, default=datetime.utcnow())
+    start_date = db.Column(db.DateTime, index=True, default=datetime.utcnow)
+    end_date = db.Column(db.DateTime, index=True, default=datetime.utcnow)
     result_publication_date = db.Column(db.DateTime, nullable=True)
     end_of_enroll_date = db.Column(db.DateTime, nullable=True)
-
     contest_duration = db.Column(db.Interval, default=timedelta(seconds=0), nullable=False)
-
     target_classes = association_proxy('base_contest', 'target_classes')
-
     previous_contest_id = db.Column(db.Integer, db.ForeignKey('simple_contest.contest_id'), nullable=True)
     previous_participation_condition = db.Column(db.Enum(UserStatusEnum))
 
-    variants = db.relationship('Variant', lazy='dynamic',
-                               backref=db.backref('simple_contest', lazy='joined'))
+    regulations = db.Column(db.Text, nullable=True)
+
+    variants = db.relationship('Variant', backref=db.backref('simple_contest', lazy='joined'), lazy='dynamic')
 
     next_contests = db.relationship('SimpleContest',
                                     foreign_keys=[previous_contest_id])
@@ -323,6 +324,54 @@ class SimpleContest(Contest):
             self.previous_contest_id = previous_contest_id
         if previous_participation_condition is not None:
             self.previous_participation_condition = previous_participation_condition
+
+    @hybrid_property
+    def tasks_number(self):
+        if not self.variants:
+            return None
+        else:
+            variant = self.variants.all()
+            if len(variant) != 0:
+                tasks = variant[0].tasks
+                return len(tasks)
+            else:
+                return None
+
+    @tasks_number.expression
+    def tasks_number(cls):
+        # noinspection PyComparisonWithNone,PyUnresolvedReferences
+        return case([(select(func.count(Variant.variant_id) > 0).where(Variant.contest_id == cls.contest_id)
+                      .scalar_subquery(),
+                      select(Variant.tasks != None).where(Variant.contest_id == cls.contest_id)
+                      .scalar_subquery()
+                      )], else_=False)
+
+    @hybrid_property
+    def total_points(self):
+        if not self.variants:
+            return None
+        else:
+            variant = self.variants.all()
+            if len(variant) != 0:
+                sum_points = 0
+                tasks = variant[0].tasks
+                if len(tasks) != 0:
+                    for task in tasks:
+                        sum_points += task.task_points
+                    return sum_points
+                else:
+                    return None
+            else:
+                return None
+
+    @total_points.expression
+    def total_points(cls):
+        # noinspection PyComparisonWithNone,PyUnresolvedReferences
+        return case([(select(func.count(Variant.variant_id) > 0).where(Variant.contest_id == cls.contest_id)
+                      .scalar_subquery(),
+                      select(Variant.tasks != None).where(Variant.contest_id == cls.contest_id)
+                      .scalar_subquery()
+                      )], else_=False)
 
     @hybrid_property
     def status(self):

@@ -41,6 +41,7 @@ class BaseOlympiadIdResponseTaskCreatorSchema(Schema):
 
 
 class CreateSimpleContestRequestTaskCreatorSchema(Schema):
+    regulations = common_fields.Text(required=True)
     start_date = fields.DateTime(required=True)
     end_date = fields.DateTime(required=True)
     end_of_enroll_date = fields.DateTime(required=False)

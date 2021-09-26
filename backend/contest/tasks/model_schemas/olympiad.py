@@ -1,7 +1,8 @@
 from marshmallow_enum import EnumField
 from marshmallow_oneofschema import OneOfSchema
-from marshmallow_sqlalchemy import SQLAlchemySchema, auto_field, fields
+from marshmallow_sqlalchemy import SQLAlchemySchema, auto_field
 
+from marshmallow import fields
 from common.fields import text_validator, common_name_validator
 from contest.tasks.model_schemas.location import OlympiadLocationSchema
 from contest.tasks.models import *
@@ -85,7 +86,10 @@ class SimpleContestSchema(SQLAlchemySchema):
     visibility = auto_field(column_name='visibility', required=True)
     start_date = auto_field(column_name='start_date', required=True)
     end_date = auto_field(column_name='end_date', required=True)
+    regulations = auto_field(column_name='regulations', validate=text_validator, required=False)
     status = EnumField(OlympiadStatusEnum, data_key='status', by_value=True)
+    total_points = fields.Integer()
+    tasks_number = fields.Integer()
     contest_duration = auto_field(column_name='contest_duration', required=True)
     result_publication_date = auto_field(column_name='result_publication_date', required=True)
     end_of_enroll_date = auto_field(column_name='end_of_enroll_date', required=True)

@@ -112,9 +112,11 @@ def test_simple_contest(test_base_contests_with_target):
     from contest.tasks.models.olympiad import SimpleContest, ContestHoldingTypeEnum
     holding_types = [ContestHoldingTypeEnum.OnLineContest, ContestHoldingTypeEnum.OfflineContest]
     simple_contests = [SimpleContest(base_contest_id=test_base_contests_with_target[i].base_contest_id,
-                                     visibility=True, start_date=datetime.utcnow(),
+                                     visibility=True,
+                                     start_date=datetime.utcnow(),
                                      end_date=datetime.utcnow() + timedelta(hours=2),
                                      holding_type=holding_types[i % 2],
+                                     regulations=f'Test {i}',
                                      contest_duration=timedelta(minutes=30),
                                      result_publication_date=datetime.utcnow() + timedelta(hours=3),
                                      end_of_enroll_date=datetime.utcnow() + timedelta(minutes=15))
@@ -176,6 +178,7 @@ def test_simple_contest_in_stage_1(test_base_contests_with_target, test_stages):
                                      start_date=datetime.utcnow(),
                                      end_date=datetime.utcnow() + timedelta(hours=4),
                                      holding_type=holding_types[i % 2],
+                                     regulations=f'Test {i}',
                                      contest_duration=timedelta(minutes=30),
                                      result_publication_date=datetime.utcnow() + timedelta(hours=6),
                                      end_of_enroll_date=datetime.utcnow() + timedelta(minutes=15))
@@ -185,6 +188,7 @@ def test_simple_contest_in_stage_1(test_base_contests_with_target, test_stages):
                                 start_date=datetime.utcnow(),
                                 end_date=datetime.utcnow() + timedelta(hours=4),
                                 holding_type=holding_types[0],
+                                regulations=f'Test',
                                 contest_duration=timedelta(minutes=30),
                                 result_publication_date=datetime.utcnow() + timedelta(hours=6),
                                 end_of_enroll_date=datetime.utcnow() + timedelta(minutes=15))
@@ -227,6 +231,7 @@ def test_simple_contest_in_stage_2_contest_in_stage(test_base_contests_with_targ
                                      start_date=datetime.utcnow(),
                                      end_date=datetime.utcnow() + timedelta(hours=4),
                                      holding_type=holding_types[i % 2],
+                                     regulations=f'Test',
                                      contest_duration=timedelta(minutes=30),
                                      result_publication_date=datetime.utcnow() + timedelta(hours=6),
                                      end_of_enroll_date=datetime.utcnow() + timedelta(minutes=15))
@@ -238,6 +243,7 @@ def test_simple_contest_in_stage_2_contest_in_stage(test_base_contests_with_targ
                                              end_date=datetime.utcnow() + timedelta(hours=4),
                                              holding_type=holding_types[0],
                                              contest_duration=timedelta(minutes=30),
+                                             regulations=f'Test',
                                              result_publication_date=datetime.utcnow() + timedelta(hours=6),
                                              end_of_enroll_date=datetime.utcnow() + timedelta(minutes=15))
 
@@ -247,6 +253,7 @@ def test_simple_contest_in_stage_2_contest_in_stage(test_base_contests_with_targ
                                              end_date=datetime.utcnow() + timedelta(hours=4),
                                              holding_type=holding_types[0],
                                              contest_duration=timedelta(minutes=30),
+                                             regulations=f'Test',
                                              result_publication_date=datetime.utcnow() + timedelta(hours=6),
                                              end_of_enroll_date=datetime.utcnow() + timedelta(minutes=15),
                                              previous_contest_id=999,
@@ -290,6 +297,7 @@ def test_simple_contest_in_stage_and(test_base_contests_with_target, test_stages
                                      start_date=datetime.utcnow(),
                                      end_date=datetime.utcnow() + timedelta(hours=4),
                                      holding_type=holding_types[i % 2],
+                                     regulations=f'Test',
                                      contest_duration=timedelta(minutes=30),
                                      result_publication_date=datetime.utcnow() + timedelta(hours=6),
                                      end_of_enroll_date=datetime.utcnow() + timedelta(minutes=15))
@@ -299,6 +307,7 @@ def test_simple_contest_in_stage_and(test_base_contests_with_target, test_stages
                                 start_date=datetime.utcnow(),
                                 end_date=datetime.utcnow() + timedelta(hours=4),
                                 holding_type=holding_types[0],
+                                regulations=f'Test',
                                 contest_duration=timedelta(minutes=30),
                                 result_publication_date=datetime.utcnow() + timedelta(hours=6),
                                 end_of_enroll_date=datetime.utcnow() + timedelta(minutes=15))
@@ -345,6 +354,7 @@ def test_simple_contest_in_stage_2(test_base_contests_with_target, test_stages):
                                      start_date=datetime.utcnow(),
                                      end_date=datetime.utcnow() + timedelta(hours=4),
                                      holding_type=holding_types[i % 2],
+                                     regulations=f'Test',
                                      contest_duration=timedelta(minutes=30),
                                      result_publication_date=datetime.utcnow() + timedelta(hours=6),
                                      end_of_enroll_date=datetime.utcnow() + timedelta(minutes=15))
@@ -354,6 +364,7 @@ def test_simple_contest_in_stage_2(test_base_contests_with_target, test_stages):
                                 start_date=datetime.utcnow(),
                                 end_date=datetime.utcnow() + timedelta(hours=4),
                                 holding_type=holding_types[0],
+                                regulations=f'Test',
                                 contest_duration=timedelta(minutes=30),
                                 result_publication_date=datetime.utcnow() + timedelta(hours=6),
                                 end_of_enroll_date=datetime.utcnow() + timedelta(minutes=15))
@@ -398,6 +409,7 @@ def test_simple_contest_in_stage_3(test_base_contests_with_target, test_stages):
                                      start_date=datetime.utcnow(),
                                      end_date=datetime.utcnow() + timedelta(hours=4),
                                      holding_type=holding_types[i % 2],
+                                     regulations=f'Test',
                                      contest_duration=timedelta(minutes=30),
                                      result_publication_date=datetime.utcnow() + timedelta(hours=6),
                                      end_of_enroll_date=datetime.utcnow() + timedelta(minutes=15))
@@ -407,6 +419,7 @@ def test_simple_contest_in_stage_3(test_base_contests_with_target, test_stages):
                                 start_date=datetime.utcnow(),
                                 end_date=datetime.utcnow() + timedelta(hours=4),
                                 holding_type=holding_types[0],
+                                regulations=f'Test',
                                 contest_duration=timedelta(minutes=30),
                                 result_publication_date=datetime.utcnow() + timedelta(hours=6),
                                 end_of_enroll_date=datetime.utcnow() + timedelta(minutes=15))

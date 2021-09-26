@@ -70,6 +70,7 @@ def step_create_simple_contest(client, state):
         'holding_type': ContestHoldingTypeEnum.OnLineContest.value,
         'start_date': f'{datetime.utcnow()}',
         'end_date': f'{datetime.utcnow() + timedelta(hours=4)}',
+        'regulations': 'Test 0',
         'end_of_enroll_date': f'{datetime.utcnow() + timedelta(hours=1)}',
         'result_publication_date': f'{datetime.utcnow() + timedelta(hours=5)}',
         'stage_id': f'{state.stage["stage_id"]}'}
