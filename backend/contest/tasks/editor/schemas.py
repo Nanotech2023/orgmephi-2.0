@@ -9,7 +9,7 @@ from contest.tasks.models import OlympiadSubjectEnum, StageConditionEnum, Contes
 # Base contest
 
 class UpdateBaseOlympiadRequestTaskEditorSchema(Schema):
-    name = common_fields.CommonName(required=False)
+    name = common_fields.OlympiadName(required=False)
     description = common_fields.Text(required=False)
     rules = common_fields.Text(required=False)
     winner_1_condition = common_fields.FloatCondition(required=False)
@@ -77,6 +77,7 @@ class UpdatePlainRequestTaskEditorSchema(Schema):
     recommended_answer = common_fields.Text(required=False)
     show_answer_after_contest = fields.Boolean(required=False)
     task_points = fields.Integer(required=False)
+    answer_type = EnumField(OlympiadSubjectEnum, required=False, by_value=True)
 
 
 class UpdateRangeRequestTaskEditorSchema(Schema):

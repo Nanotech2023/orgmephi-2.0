@@ -154,6 +154,7 @@ components:
           - Physics
           - Informatics
           - Natural Sciences
+          - Engineering Sciences
           - Other
           type: string
         target_classes:
@@ -208,6 +209,7 @@ components:
           - Physics
           - Informatics
           - Natural Sciences
+          - Engineering Sciences
           - Other
           type: string
         target_classes:
@@ -346,7 +348,7 @@ components:
           - No level
           type: string
         name:
-          maxLength: 32
+          maxLength: 128
           type: string
         olympiad_type_id:
           type: integer
@@ -359,6 +361,7 @@ components:
           - Physics
           - Informatics
           - Natural Sciences
+          - Engineering Sciences
           - Other
           type: string
         winner_1_condition:
@@ -448,6 +451,15 @@ components:
       type: object
     CreatePlainRequestTaskCreator:
       properties:
+        answer_type:
+          enum:
+          - Math
+          - Physics
+          - Informatics
+          - Natural Sciences
+          - Engineering Sciences
+          - Other
+          type: string
         num_of_task:
           type: integer
         recommended_answer:
@@ -680,6 +692,11 @@ components:
       type: object
     PlainTask:
       properties:
+        answer_type:
+          enum:
+          - File
+          - Text
+          type: string
         num_of_task:
           type: integer
         recommended_answer:
@@ -1008,7 +1025,7 @@ components:
           - No level
           type: string
         name:
-          maxLength: 32
+          maxLength: 128
           type: string
         olympiad_type_id:
           type: integer
@@ -1021,6 +1038,7 @@ components:
           - Physics
           - Informatics
           - Natural Sciences
+          - Engineering Sciences
           - Other
           type: string
         winner_1_condition:
@@ -1100,6 +1118,15 @@ components:
       type: object
     UpdatePlainRequestTaskEditor:
       properties:
+        answer_type:
+          enum:
+          - Math
+          - Physics
+          - Informatics
+          - Natural Sciences
+          - Engineering Sciences
+          - Other
+          type: string
         num_of_task:
           type: integer
         recommended_answer:

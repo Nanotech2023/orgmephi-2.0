@@ -64,6 +64,7 @@ class OlympiadSubjectEnum(enum.Enum):
     Physics = "Physics"
     Informatics = "Informatics"
     NaturalSciences = "Natural Sciences"
+    EngineeringSciences = "Engineering Sciences"
     Other = "Other"
 
 

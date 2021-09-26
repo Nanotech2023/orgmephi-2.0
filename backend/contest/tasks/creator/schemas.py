@@ -14,7 +14,7 @@ from contest.tasks.models import OlympiadSubjectEnum, StageConditionEnum, Contes
 # Base contest
 
 class CreateBaseOlympiadRequestTaskCreatorSchema(Schema):
-    name = common_fields.CommonName(required=True)
+    name = common_fields.OlympiadName(required=True)
     description = common_fields.Text(required=True)
     rules = common_fields.Text(required=True)
     winner_1_condition = common_fields.FloatCondition(required=True)
@@ -141,6 +141,7 @@ class CreatePlainRequestTaskCreatorSchema(Schema):
     recommended_answer = common_fields.Text(required=True)
     show_answer_after_contest = fields.Boolean(required=False)
     task_points = fields.Integer(required=False)
+    answer_type = EnumField(OlympiadSubjectEnum, required=False, by_value=True)
 
 
 class CreateRangeRequestTaskCreatorSchema(Schema):
