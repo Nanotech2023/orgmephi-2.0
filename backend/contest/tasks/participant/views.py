@@ -461,7 +461,7 @@ def get_all_contests_self():
           description: OK
           content:
             application/json:
-              schema: AllOlympiadsResponseTaskUnauthorizedSchema
+              schema: FilterSimpleContestResponseTaskParticipantSchema
         '400':
           description: Bad request
         '409':
