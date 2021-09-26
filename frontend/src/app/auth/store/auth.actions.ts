@@ -1,5 +1,5 @@
 import { createAction, props } from '@ngrx/store'
-import { CSRFPairUser, LoginRequestUser, SchoolRegistrationRequestUser, User, UserInfo } from '@/auth/api/models'
+import { CSRFPairUser, LoginRequestUser, SchoolRegistrationRequestUser, User, UserInfo } from '@api/users/models'
 
 
 export const loginRequest = createAction(

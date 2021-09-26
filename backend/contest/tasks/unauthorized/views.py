@@ -1,9 +1,9 @@
-from common import get_current_app, get_current_module
+from flask import request
+
+from common import get_current_module
 from common.util import db_get_all
-from contest.tasks.model_schemas.schemas import OlympiadTypeSchema, BaseContestSchema, ContestSchema, StageSchema
-from contest.tasks.unauthorized.schemas import AllOlympiadTypesResponseTaskUnauthorizedSchema, \
-    AllBaseContestResponseTaskUnauthorizedSchema, AllOlympiadsResponseTaskUnauthorizedSchema, \
-    AllStagesResponseTaskUnauthorizedSchema
+from contest.tasks.unauthorized.schemas import *
+from contest.tasks.unauthorized.util import filter_olympiad_query
 from contest.tasks.util import *
 
 db = get_current_db()
@@ -67,12 +67,71 @@ def olympiad_type_get(id_olympiad_type):
         '404':
           description: Olympiad type not found
     """
-    olympiad = db_get_or_raise(OlympiadType, "olympiad_type_id", str(id_olympiad_type))
-    return olympiad, 200
+    current_olympiad = db_get_or_raise(OlympiadType, "olympiad_type_id", str(id_olympiad_type))
+    return current_olympiad, 200
+
+
+# Location
+
+
+@module.route('/location/all', methods=['GET'],
+              output_schema=AllLocationResponseTaskUnauthorizedSchema)
+def location_all():
+    """
+    Get all locations
+    ---
+    get:
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: AllLocationResponseTaskUnauthorizedSchema
+        '400':
+          description: Bad request
+        '409':
+          description: Olympiad type already in use
+        '404':
+          description: Olympiad type not found
+    """
+    locations = db_get_all(OlympiadLocation)
+    return {
+               "locations": locations
+           }, 200
+
+
+@module.route('/location/<int:id_location>', methods=['GET'],
+              output_schema=OlympiadLocationSchema)
+def id_location_get(id_location):
+    """
+    Get location by id
+    ---
+    get:
+      parameters:
+        - in: path
+          description: Id of the location
+          name: id_location
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: OlympiadLocationSchema
+        '400':
+          description: Bad request
+        '409':
+          description: Olympiad type already in use
+        '404':
+          description: Olympiad type not found
+    """
+    current_location = db_get_or_raise(OlympiadLocation, "location_id", str(id_location))
+    return current_location, 200
 
 
 # Olympiad
-# TODO Target class checking ???
 
 
 @module.route('/base_olympiad/all', methods=['GET'],
@@ -132,26 +191,56 @@ def base_olympiad_get(id_base_olympiad):
     return base_contest, 200
 
 
-@module.route('/base_olympiad/<int:id_base_olympiad>/olympiad/all', methods=['GET'],
-              output_schema=AllOlympiadsResponseTaskUnauthorizedSchema)
-def olympiads_all(id_base_olympiad):
+@module.route('/olympiad/all', methods=['GET'],
+              output_schema=FilterSimpleContestResponseSchema)
+def olympiads_all():
     """
     Get olympiads list
     ---
     get:
       parameters:
-        - in: path
-          description: Id of the base contest
-          name: id_base_olympiad
-          required: true
+        - in: query
+          name: offset
+          required: false
           schema:
             type: integer
+        - in: query
+          name: limit
+          required: false
+          schema:
+            type: integer
+        - in: query
+          name: base_contest_id
+          required: false
+          schema:
+            type: integer
+        - in: query
+          name: location_id
+          required: false
+          schema:
+            type: integer
+        - in: query
+          name: end_date
+          required: false
+          schema:
+            format: date-time
+            type: string
+        - in: query
+          name: target_class
+          required: false
+          schema:
+            type: integer
+        - in: query
+          name: only_count
+          required: false
+          schema:
+            type: boolean
       responses:
         '200':
           description: OK
           content:
             application/json:
-              schema: AllOlympiadsResponseTaskUnauthorizedSchema
+              schema: FilterSimpleContestResponseSchema
         '400':
           description: Bad request
         '409':
@@ -159,11 +248,7 @@ def olympiads_all(id_base_olympiad):
         '404':
           description: Olympiad type not found
     """
-    base_contest = db_get_or_raise(BaseContest, "base_contest_id", str(id_base_olympiad))
-    all_olympiads = [olympiad for olympiad in base_contest.child_contests]
-    return {
-               "contest_list": all_olympiads
-           }, 200
+    return filter_olympiad_query(request.args)
 
 
 @module.route('/base_olympiad/<int:id_base_olympiad>/olympiad/<int:id_olympiad>', methods=['GET'],
@@ -200,8 +285,8 @@ def olympiad_get(id_base_olympiad, id_olympiad):
           description: Olympiad type not found
     """
     db_get_or_raise(BaseContest, "base_contest_id", str(id_base_olympiad))
-    contest = db_get_or_raise(Contest, "contest_id", id_olympiad)
-    return contest, 200
+    current_contest = db_get_or_raise(Contest, "contest_id", id_olympiad)
+    return current_contest, 200
 
 
 # Stage
@@ -240,9 +325,9 @@ def stage_get(id_olympiad, id_stage):
         '404':
           description: Olympiad type not found
     """
-    olympiad = db_get_or_raise(Contest, "contest_id", str(id_olympiad))
+    current_olympiad = db_get_or_raise(Contest, "contest_id", str(id_olympiad))
     stage = db_get_or_raise(Stage, "stage_id", str(id_stage))
-    if olympiad.composite_type != ContestTypeEnum.CompositeContest or stage not in olympiad.stages:
+    if current_olympiad.composite_type != ContestTypeEnum.CompositeContest or stage not in current_olympiad.stages:
         raise InsufficientData('stage_id', 'not in current olympiad')
     return stage, 200
 
@@ -275,8 +360,68 @@ def stages_all(id_olympiad):
           description: Olympiad type not found
     """
     db_get_or_raise(Contest, "contest_id", str(id_olympiad))
-    contest = db_get_or_raise(CompositeContest, "contest_id", str(id_olympiad))
-    all_stages = [stage for stage in contest.stages]
+    current_contest = db_get_or_raise(CompositeContest, "contest_id", str(id_olympiad))
+    all_stages = [stage for stage in current_contest.stages]
     return {
                "stages_list": all_stages
            }, 200
+
+
+# Target classes
+
+
+@module.route('/target_class/all', methods=['GET'],
+              output_schema=AllTargetClassesRequestTaskUnauthorizedSchema)
+def target_classes_all():
+    """
+    Get all target classes
+    ---
+    get:
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: AllTargetClassesRequestTaskUnauthorizedSchema
+        '400':
+          description: Bad request
+        '409':
+          description: Target class already in use
+        '404':
+          description: Target class not found
+    """
+    target_classes = db_get_all(TargetClass)
+    return {
+               "target_classes": target_classes
+           }, 200
+
+
+@module.route('/target_class/<int:id_target_class>', methods=['GET'],
+              output_schema=TargetClassSchema)
+def get_target_class(id_target_class):
+    """
+    Get target class
+    ---
+    get:
+      parameters:
+        - in: path
+          description: Id of the location
+          name: id_target_class
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: TargetClassSchema
+        '400':
+          description: Bad request
+        '409':
+          description: Target class already in use
+        '404':
+          description: Target class not found
+    """
+    target_class = db_get_or_raise(TargetClass, "target_class_id", str(id_target_class))
+    return target_class, 200

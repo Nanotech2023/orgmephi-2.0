@@ -1,18 +1,16 @@
 from flask import request
 from marshmallow import EXCLUDE
 
-from common.errors import NotFound
 from common import get_current_app, get_current_module, get_current_db
-from common.util import db_get_or_raise
+from common.errors import NotFound, InsufficientData, WrongType
 from common.jwt_verify import jwt_get_id
-
-from user.models import User, UserInfo, StudentInfo, SchoolInfo
+from common.util import db_get_or_raise, send_pdf
 from user.model_schemas.auth import UserSchema
 from user.model_schemas.personal import UserInfoSchema
-from user.model_schemas.university import StudentInfoSchema, StudentInfoInputSchema
-from user.model_schemas.school import SchoolInfoSchema, SchoolInfoInputSchema
-
-from .schemas import SelfPasswordRequestUserSchema, SelfGroupsResponseUserSchema, UserInfoRestrictedInputSchema
+from user.model_schemas.school import SchoolInfoSchema
+from user.model_schemas.university import StudentInfoSchema
+from user.models import User, UserInfo, StudentInfo, SchoolInfo, UserTypeEnum
+from .schemas import SelfPasswordRequestUserSchema, SelfGroupsResponseUserSchema
 
 db = get_current_db()
 module = get_current_module()
@@ -92,7 +90,7 @@ def get_user_info_self():
     return user.user_info, 200
 
 
-@module.route('/personal', methods=['PATCH'], input_schema=UserInfoRestrictedInputSchema)
+@module.route('/personal', methods=['PATCH'])
 def set_user_info_self():
     """
     Set personal info for current user
@@ -102,10 +100,11 @@ def set_user_info_self():
         - JWTAccessToken: [ ]
         - CSRFAccessToken: [ ]
       requestBody:
+        description: Will not set 'email', 'first_name', 'middle_name', 'second_name' and 'date_of_birth'
         required: true
         content:
           application/json:
-            schema: UserInfoRestrictedInputSchema
+            schema: UserInfoSchema
       responses:
         '200':
           description: OK
@@ -117,8 +116,8 @@ def set_user_info_self():
     user = db_get_or_raise(User, "id", jwt_get_id())
     if user.user_info is None:
         user.user_info = UserInfo()
-    UserInfoSchema(load_instance=True).load(request.json, instance=user.user_info, session=db.session, partial=False,
-                                            unknown=EXCLUDE)
+    UserInfoSchema(load_instance=True, exclude=['email', 'first_name', 'middle_name', 'second_name', 'date_of_birth'])\
+        .load(request.json, instance=user.user_info, session=db.session, partial=False, unknown=EXCLUDE)
     db.session.commit()
     return {}, 200
 
@@ -146,7 +145,7 @@ def get_university_info_self():
     return user.student_info, 200
 
 
-@module.route('/university', methods=['PATCH'], input_schema=StudentInfoInputSchema)
+@module.route('/university', methods=['PATCH'])
 def set_university_info_self():
     """
     Set university student info for a user
@@ -159,7 +158,7 @@ def set_university_info_self():
         required: true
         content:
           application/json:
-            schema: StudentInfoInputSchema
+            schema: StudentInfoSchema
       responses:
         '200':
           description: OK
@@ -200,7 +199,7 @@ def get_school_info_self():
     return user.school_info, 200
 
 
-@module.route('/school', methods=['PATCH'], input_schema=SchoolInfoInputSchema)
+@module.route('/school', methods=['PATCH'])
 def set_school_info_self():
     """
     Set school student info for a user
@@ -213,7 +212,7 @@ def set_school_info_self():
         required: true
         content:
           application/json:
-            schema: SchoolInfoInputSchema
+            schema: SchoolInfoSchema
       responses:
         '200':
           description: OK
@@ -250,3 +249,51 @@ def get_user_groups_self():
     """
     user = db_get_or_raise(User, "id", jwt_get_id())
     return {'groups': user.groups}, 200
+
+
+@module.route('/unfilled', methods=['GET'])
+def check_filled():
+    """
+    Get fields of a user that must be filled to take part in a contest
+    ---
+    get:
+      security:
+        - JWTAccessToken: [ ]
+      responses:
+        '200':
+          description: Returns missing fields
+        '404':
+          description: User not found
+    """
+    user = db_get_or_raise(User, 'id', jwt_get_id())
+    return {'unfilled': user.unfilled()}, 200
+
+
+@module.route('/card', methods=['GET'])
+def generate_card():
+    """
+    Generate a participant card
+    ---
+    get:
+      security:
+        - JWTAccessToken: [ ]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/pdf:
+              schema:
+                type: string
+                format: binary
+        '404':
+          description: User not found
+        '409':
+          description: User is not a school student or has missing data
+    """
+    user = db_get_or_raise(User, 'id', jwt_get_id())
+    if user.type not in [UserTypeEnum.pre_university, UserTypeEnum.enrollee, UserTypeEnum.school]:
+        raise WrongType('User is not a school student')
+    unfilled = user.unfilled()
+    if len(unfilled) > 0:
+        raise InsufficientData('user', str(unfilled))
+    return send_pdf('participant_card.html', u=user)

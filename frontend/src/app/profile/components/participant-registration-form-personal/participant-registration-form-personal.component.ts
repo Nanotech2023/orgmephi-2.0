@@ -1,9 +1,7 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core'
-import { Gender, ParticipantRegister } from '@/users/models/participant'
-import { ParticipantService } from '@/users/services/participant.service'
 import { select, Store } from '@ngrx/store'
 import { AuthSelectors, AuthState } from '@/auth/store'
-import { User, UserInfo } from '@/auth/api/models'
+import { User, UserInfo } from '@api/users/models'
 import { Observable } from 'rxjs'
 
 

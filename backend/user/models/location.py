@@ -1,13 +1,17 @@
+from sqlalchemy.ext.hybrid import hybrid_property
 from common import get_current_db, get_current_app
 from .reference import City, Country
+from user.util import get_unfilled
 
 db = get_current_db()
 app = get_current_app()
 
+native_country = app.config['ORGMEPHI_NATIVE_COUNTRY']
+
 
 class Location(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    russian = db.Column(db.Boolean)
+    russian = db.Column(db.Boolean, nullable=False)
     rural = db.Column(db.Boolean)
 
     __mapper_args__ = {
@@ -15,6 +19,11 @@ class Location(db.Model):
         'with_polymorphic': '*',
         "polymorphic_on": russian
     }
+
+    _required_fields = ['russian', 'rural']
+
+    def unfilled(self):
+        return get_unfilled(self, self._required_fields, [])
 
 
 class LocationRussia(Location):
@@ -26,6 +35,20 @@ class LocationRussia(Location):
         'polymorphic_identity': True,
         'with_polymorphic': '*'
     }
+
+    _required_fields = ['city_name', 'region_name']
+
+    def unfilled(self):
+        return get_unfilled(self, self._required_fields, []) + super().unfilled()
+
+    @hybrid_property
+    def country(self):
+        return native_country
+
+    @country.setter
+    def country(self, value):
+        if value != native_country:
+            raise ValueError('Wrong country for native location')
 
 
 db.ForeignKeyConstraint((LocationRussia.city_name, LocationRussia.region_name), (City.name, City.region_name))
@@ -40,3 +63,8 @@ class LocationOther(Location):
         'polymorphic_identity': False,
         'with_polymorphic': '*'
     }
+
+    _required_fields = ['country_name', 'location']
+
+    def unfilled(self):
+        return get_unfilled(self, self._required_fields, []) + super().unfilled()

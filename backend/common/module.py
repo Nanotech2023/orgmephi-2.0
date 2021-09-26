@@ -25,6 +25,7 @@ class OrgMephiModule:
     """
     Application module
     """
+
     def __init__(self, name: str, package: str, access_level: Optional[OrgMephiAccessLevel], area: OrgMephiArea,
                  api_file: Optional[str] = None, marshmallow_api: bool = False):
         """
@@ -113,13 +114,14 @@ class OrgMephiModule:
         :param options: flask.Flask.route options
         :return: decorator
         """
+
         def decorator(f: Callable) -> Callable:
             """
             Decorator to initialize a new route for self (see flask.Flask.route)
             :param f: function to wrap
             :return: Provided function
             """
-            from .jwt_verify import jwt_required, jwt_required_role
+            from .jwt_verify import jwt_required_role
             from .errors import _catch_request_error
 
             func_wrapped = f
@@ -134,8 +136,6 @@ class OrgMephiModule:
 
             if self._access_level == OrgMephiAccessLevel.visitor:
                 pass
-            elif self._access_level == OrgMephiAccessLevel.participant:
-                func_wrapped = jwt_required(refresh=refresh)(func_wrapped)
             else:
                 roles = [v.value[1] for v in OrgMephiAccessLevel if v.value[0] >= self._access_level.value[0]]
                 func_wrapped = jwt_required_role(roles=roles, refresh=refresh)(func_wrapped)
@@ -147,6 +147,7 @@ class OrgMephiModule:
 
             self._blueprint.route(rule, **options)(func_wrapped)
             return f
+
         return decorator
 
     def add_module(self, module):
@@ -324,28 +325,28 @@ class OrgMephiModule:
 
     @staticmethod
     def _wrap_marshmallow_input(f: Callable, schema: Union[Type[Schema], Schema]):
-
-        if issubclass(schema, Schema):
+        import inspect
+        if inspect.isclass(schema) and issubclass(schema, Schema):
             # noinspection PyCallingNonCallable
             schema = schema()
 
         @wraps(f)
         def wrapper(*args, **kwargs):
             from flask import request
-            from marshmallow import RAISE
+            from marshmallow import EXCLUDE
             from marshmallow_sqlalchemy import SQLAlchemySchema
             if isinstance(schema, SQLAlchemySchema) and getattr(schema.Meta, 'load_instance', False):
                 raise TypeError('Trying to load instance with SQLAlchemySchema on request')
             else:
-                request.marshmallow = schema.load(data=request.json, unknown=RAISE)
+                request.marshmallow = schema.load(data=request.json, unknown=EXCLUDE)
             return f(*args, **kwargs)
 
         return wrapper
 
     @staticmethod
     def _wrap_marshmallow_output(f: Callable, schema: Union[Type[Schema], Schema]):
-
-        if issubclass(schema, Schema):
+        import inspect
+        if inspect.isclass(schema) and issubclass(schema, Schema):
             # noinspection PyCallingNonCallable
             schema = schema()
 

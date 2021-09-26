@@ -1,8 +1,10 @@
-from marshmallow_sqlalchemy import SQLAlchemySchema, auto_field
+from marshmallow_sqlalchemy import SQLAlchemySchema
 from marshmallow_sqlalchemy.fields import Nested
 from marshmallow_enum import EnumField
+from marshmallow import fields
 
 from user.models.auth import *
+from common import fields as common_fields
 
 from .personal import UserInfoSchema
 from .university import StudentInfoSchema
@@ -15,10 +17,10 @@ class UserSchema(SQLAlchemySchema):
         load_instance = True
         sqla_session = db.session
 
-    id = auto_field(column_name='id', dump_only=True)
-    username = auto_field(column_name='username')
-    role = EnumField(UserRoleEnum, data_key='role', by_value=True)
-    type = EnumField(UserTypeEnum, data_key='type', by_value=True)
+    id = fields.Integer(dump_only=True)
+    username = common_fields.CommonName(required=True)
+    role = EnumField(UserRoleEnum, by_value=True, required=True)
+    type = EnumField(UserTypeEnum, by_value=True, required=True)
 
 
 class GroupSchema(SQLAlchemySchema):
@@ -27,8 +29,8 @@ class GroupSchema(SQLAlchemySchema):
         load_instance = True
         sqla_session = db.session
 
-    id = auto_field(column_name='id', dump_only=True)
-    name = auto_field(column_name='name')
+    id = fields.Integer(dump_only=True)
+    name = common_fields.CommonName(required=True)
 
 
 class UserFullSchema(UserSchema):

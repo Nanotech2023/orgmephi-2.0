@@ -5,19 +5,15 @@ import { ParticipantRegistrationFormComponent } from '@/profile/components/parti
 import { AuthGuardService } from '@/shared/auth.guard.service'
 
 
-const routes: Routes = [
-    {
-        path: '',
-        children: [
-            {
-                path: 'user/olymp', component: ParticipantRegistrationFormComponent, canActivate: [ AuthGuardService ]
-            },
-            {
-                path: 'user/cabinet', component: ParticipantCabinetComponent, canActivate: [ AuthGuardService ]
-            }
-        ]
-    }
-]
+const routes: Routes =
+    [
+        {
+            path: 'profile', component: ParticipantCabinetComponent, canActivate: [ AuthGuardService ]
+        },
+        {
+            path: 'profile/edit', component: ParticipantRegistrationFormComponent, canActivate: [ AuthGuardService ]
+        }
+    ]
 
 
 @NgModule( {

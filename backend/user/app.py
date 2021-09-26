@@ -1,4 +1,4 @@
-from .default_config import DefaultConfiguration
+from default_config import DefaultConfiguration
 from common import OrgMephiApp
 
 from user import module

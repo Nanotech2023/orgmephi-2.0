@@ -1,0 +1,26 @@
+<div class="container">
+    <div class="row">
+        <div class="col-md-4">
+            <div class="olymp_title_container">
+                <div class="olymp_title">
+                    Список олимпиад НИЯУ «МИФИ»
+                </div>
+                <div class="olymp_subtitle">
+                    «Я — профессионал» — масштабная образовательная олимпиада нового формата для студентов разных
+                    специальностей: технических, гуманитарных и естественнонаучных.
+                </div>
+            </div>
+        </div>
+        <div class="col-md-8">
+            <div class="olymp_list">
+                <div class="row">
+                    <ng-container *ngIf="contests$ | async as contests">
+                        <div class="col-md-6" *ngFor="let contest of contests">
+                            <app-contest-list-item [contest]="contest"></app-contest-list-item>
+                        </div>
+                    </ng-container>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

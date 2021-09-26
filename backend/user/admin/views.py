@@ -1,19 +1,20 @@
-from flask import request, abort
+import secrets
+from flask import request
 from marshmallow import EXCLUDE
 import sqlalchemy.exc
 
-from common.errors import NotFound, AlreadyExists, InsufficientData
+from common.errors import NotFound, AlreadyExists
 from common import get_current_app, get_current_module, get_current_db
-from common.util import db_get_or_raise
+from common.util import db_get_or_raise, db_exists
 
 from user.util import update_password
 
-from user.models import User, add_user, UserInfo, Group, StudentInfo, SchoolInfo
+from user.models import User, init_user, UserInfo, Group, StudentInfo, SchoolInfo
 
 from user.model_schemas.auth import UserSchema, GroupSchema
-from user.model_schemas.personal import UserInfoSchema, UserInfoInputSchema
-from user.model_schemas.university import StudentInfoSchema, StudentInfoInputSchema
-from user.model_schemas.school import SchoolInfoSchema, SchoolInfoInputSchema
+from user.model_schemas.personal import UserInfoSchema
+from user.model_schemas.university import StudentInfoSchema
+from user.model_schemas.school import SchoolInfoSchema
 
 from .schemas import *
 
@@ -52,7 +53,8 @@ def register_internal():
     username = values['username']
     password_hash = app.password_policy.hash_password(values['password'], check=False)
     try:
-        user = add_user(db.session, username, password_hash, UserRoleEnum.participant, UserTypeEnum.internal)
+        user = init_user(username, password_hash, UserRoleEnum.participant, UserTypeEnum.internal)
+        db.session.add(user)
         db.session.commit()
     except sqlalchemy.exc.IntegrityError:
         raise AlreadyExists('username', username)
@@ -63,7 +65,6 @@ def register_internal():
 @module.route('/preregister', methods=['POST'], output_schema=PreregisterResponseUserSchema)
 def preregister():
     """
-    !NOT IMPLEMENTED!
     Register an unconfirmed user with a one-time password
     ---
     post:
@@ -79,7 +80,15 @@ def preregister():
         '403':
           description: Invalid role of current user
     """
-    abort(501)
+    rand_name = secrets.token_urlsafe(16)
+    while db_exists(db.session, User, 'username', rand_name):
+        rand_name = secrets.token_urlsafe(16)
+    rand_pass = secrets.token_urlsafe(app.config['ORGMEPHI_PREREGISTER_PASSWORD_LENGTH'])
+    user = User(username=rand_name, role=UserRoleEnum.unconfirmed, type=UserTypeEnum.pre_register)
+    user.password_hash = app.password_policy.hash_password(rand_pass, check=False)
+    db.session.add(user)
+    db.session.commit()
+    return {'registration_number': user.id, 'password': rand_pass}, 200
 
 
 @module.route('/password/<int:user_id>', methods=['POST'], input_schema=PasswordRequestUserSchema)
@@ -181,21 +190,15 @@ def set_user_type(user_id):
           description: Invalid role of current user
         '404':
           description: User not found
-        '409':
-          description: User is missing required info (e.g. university info for a university student)
     """
     user_type = request.marshmallow['type']
     user = db_get_or_raise(User, 'id', user_id)
-    if user_type != UserTypeEnum.internal and user_type != UserTypeEnum.pre_register and user.user_info is None:
-        raise InsufficientData('user', 'personal info')
-    if user_type == UserTypeEnum.university and user.student_info is None:
-        raise InsufficientData('user', 'university info')
     user.type = user_type
     db.session.commit()
     return {}, 200
 
 
-@module.route('/personal/<int:user_id>', methods=['PATCH'], input_schema=UserInfoInputSchema)
+@module.route('/personal/<int:user_id>', methods=['PATCH'])
 def set_user_info_admin(user_id):
     """
     Set personal info for a user
@@ -215,7 +218,7 @@ def set_user_info_admin(user_id):
         required: true
         content:
           application/json:
-            schema: UserInfoInputSchema
+            schema: UserInfoSchema
       responses:
         '200':
           description: OK
@@ -233,7 +236,7 @@ def set_user_info_admin(user_id):
     return {}, 200
 
 
-@module.route('/university/<int:user_id>', methods=['PATCH'], input_schema=StudentInfoInputSchema)
+@module.route('/university/<int:user_id>', methods=['PATCH'])
 def set_university_info_admin(user_id):
     """
     Set university student info for a user
@@ -253,7 +256,7 @@ def set_university_info_admin(user_id):
         required: true
         content:
           application/json:
-            schema: StudentInfoInputSchema
+            schema: StudentInfoSchema
       responses:
         '200':
           description: OK
@@ -271,7 +274,7 @@ def set_university_info_admin(user_id):
     return {}, 200
 
 
-@module.route('/school/<int:user_id>', methods=['PATCH'], input_schema=SchoolInfoInputSchema)
+@module.route('/school/<int:user_id>', methods=['PATCH'])
 def set_school_info_admin(user_id):
     """
     Set school student info for a user
@@ -291,7 +294,7 @@ def set_school_info_admin(user_id):
         required: true
         content:
           application/json:
-            schema: SchoolInfoInputSchema
+            schema: SchoolInfoSchema
       responses:
         '200':
           description: OK

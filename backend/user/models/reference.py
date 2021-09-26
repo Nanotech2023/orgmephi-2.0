@@ -24,9 +24,11 @@ def populate_country():
      pre-populate known country table with predefined values
     """
     from common.util import db_populate
-    names = open(db.get_app().config['ORGMEPHI_COUNTRY_FILE'], encoding='utf8').read().splitlines()
-    db_populate(db.session, Country, [Country(name=name) for name in names], 'name')
-    db.session.commit()
+    file_name = db.get_app().config.get('ORGMEPHI_COUNTRY_FILE', None)
+    if file_name is not None:
+        names = open(file_name, encoding='utf8').read().splitlines()
+        db_populate(db.session, Country, [Country(name=name) for name in names], 'name')
+        db.session.commit()
 
 
 class Region(db.Model):
@@ -49,9 +51,11 @@ def populate_regions():
      pre-populate known region table with predefined values
     """
     from common.util import db_populate
-    names = open(db.get_app().config['ORGMEPHI_REGION_FILE'], encoding='utf8').read().splitlines()
-    db_populate(db.session, Region, [Region(name=name) for name in names], 'name')
-    db.session.commit()
+    file_name = db.get_app().config.get('ORGMEPHI_REGION_FILE', None)
+    if file_name is not None:
+        names = open(file_name, encoding='utf8').read().splitlines()
+        db_populate(db.session, Region, [Region(name=name) for name in names], 'name')
+        db.session.commit()
 
 
 class City(db.Model):
@@ -87,13 +91,15 @@ def populate_cities():
      pre-populate known city table with predefined values
     """
     from common.util import db_populate
-    lines: list[str] = open(db.get_app().config['ORGMEPHI_CITY_FILE'], encoding='utf8').read().splitlines()
-    values = [line.split(sep=',') for line in lines]
-    cities = [_read_city(value[0].strip(), value[1].strip()) for value in values if len(value) >= 2]
-    cities = [city for city in cities if city is not None]
+    file_name = db.get_app().config.get('ORGMEPHI_CITY_FILE', None)
+    if file_name is not None:
+        lines: list[str] = open(file_name, encoding='utf8').read().splitlines()
+        values = [line.split(sep=',') for line in lines]
+        cities = [_read_city(value[0].strip(), value[1].strip()) for value in values if len(value) >= 2]
+        cities = [city for city in cities if city is not None]
 
-    db_populate(db.session, City, cities, keys=['name', 'region_name'])
-    db.session.commit()
+        db_populate(db.session, City, cities, keys=['name', 'region_name'])
+        db.session.commit()
 
 
 class University(db.Model):
@@ -132,10 +138,12 @@ def populate_university():
     pre-populate known university table with predefined values
     """
     from common.util import db_populate
-    lines: list[str] = open(db.get_app().config['ORGMEPHI_UNIVERSITY_FILE'], encoding='utf8').read().splitlines()
-    values = [line.split(sep=',') for line in lines]
-    unis = [_read_university(value[0].strip(), value[1].strip() if len(value) >= 2 else None) for value in values
-            if len(value) > 0]
+    file_name = db.get_app().config.get('ORGMEPHI_UNIVERSITY_FILE', None)
+    if file_name is not None:
+        lines: list[str] = open(file_name, encoding='utf8').read().splitlines()
+        values = [line.split(sep=',') for line in lines]
+        unis = [_read_university(value[0].strip(), value[1].strip() if len(value) >= 2 else None) for value in values
+                if len(value) > 0]
 
-    db_populate(db.session, University, unis, 'name')
-    db.session.commit()
+        db_populate(db.session, University, unis, 'name')
+        db.session.commit()

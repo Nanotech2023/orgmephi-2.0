@@ -1,8 +1,7 @@
 import { Component, ElementRef, EventEmitter, Input, Output, ViewChild } from '@angular/core'
-import { SchoolRegistrationRequestUser, TypeRequestUser } from '@/auth/api/models'
+import { SchoolRegistrationRequestUser, TypeRequestUser } from '@api/users/models'
 
 
-// @ts-nocheck
 @Component( {
     selector: 'app-add-user-modal',
     templateUrl: './add-user-modal.component.html',
@@ -11,12 +10,11 @@ import { SchoolRegistrationRequestUser, TypeRequestUser } from '@/auth/api/model
         '(document:click)': 'onClick($event)'
     }
 } )
-// @ts-check
 export class AddUserModalComponent
 {
     @Input() modalVisible!: boolean
     @Output() modalVisibleChange: EventEmitter<boolean> = new EventEmitter<boolean>()
-    @Output() userAdd: EventEmitter<SchoolRegistrationRequestUser> = new EventEmitter<SchoolRegistrationRequestUser>()
+    @Output() addClick: EventEmitter<SchoolRegistrationRequestUser> = new EventEmitter<SchoolRegistrationRequestUser>()
     @ViewChild( 'modal' ) modal!: ElementRef
 
     registerTypes: SchoolRegistrationRequestUser.RegisterTypeEnum[] = [ SchoolRegistrationRequestUser.RegisterTypeEnum.PreUniversity, SchoolRegistrationRequestUser.RegisterTypeEnum.School, SchoolRegistrationRequestUser.RegisterTypeEnum.Enrollee ]
@@ -31,8 +29,8 @@ export class AddUserModalComponent
         this.registerAttempt = {
             auth_info: { email: '', password: '' },
             register_type: this.registerTypes[ 0 ],
-            personal_info: { first_name: '', second_name: '', middle_name: '', date_of_birth: '' },
-            register_confirm: { registration_number: '', password: '' }
+            personal_info: { first_name: '', second_name: '', middle_name: '', date_of_birth: '' }
+            // register_confirm: { registration_number: 0, password: '' }
         }
         this.isRegistered = false
         this.agreementAccepted = true
@@ -63,9 +61,8 @@ export class AddUserModalComponent
     register( registerUser: SchoolRegistrationRequestUser ): void
     {
         this.isRegistered = true
-        this.userAdd.emit( registerUser )
+        this.addClick.emit( registerUser )
     }
-
 
     onClick( $event: any ): void
     {

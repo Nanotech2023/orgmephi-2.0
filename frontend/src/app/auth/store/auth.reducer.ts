@@ -1,6 +1,6 @@
 import { createReducer, on } from '@ngrx/store'
 import { getUserInfoSuccess, getUserSuccess, loginSuccess } from '@/auth/store/auth.actions'
-import { CSRFPairUser, User, UserInfo } from '@/auth/api/models'
+import { CSRFPairUser, User, UserInfo } from '@api/users/models'
 
 
 export const featureKey: string = 'auth'

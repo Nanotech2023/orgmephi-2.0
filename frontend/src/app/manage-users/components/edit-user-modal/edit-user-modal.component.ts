@@ -1,5 +1,5 @@
 import { Component, ElementRef, EventEmitter, Input, Output, ViewChild } from '@angular/core'
-import { User } from '@/auth/api/models'
+import { User } from '@api/users/models'
 
 
 @Component( {

@@ -141,9 +141,38 @@ class InsufficientData(RequestError):
         return '%s is missing %s' % (self.obj, self.data)
 
 
+class FileTooLarge(RequestError):
+    """
+    File is too large
+    """
+    def __init__(self):
+        """
+        Create error object
+        """
+        super(FileTooLarge, self).__init__(409)
+
+    def get_msg(self) -> str:
+        return 'Uploading file is greater then 10mb'
+
+
+class TimeOver(RequestError):
+    """
+    Time over for operation
+    """
+    def __init__(self, data: str):
+        """
+        Create error object
+        """
+        super(TimeOver, self).__init__(409)
+        self.data = data
+
+    def get_msg(self) -> str:
+        return 'Time is over for %s' % self.data
+
+
 class PermissionDenied(RequestError):
     """
-    User hos insufficient permissions to perform the operation
+    User has insufficient permissions to perform the operation
     """
     def __init__(self, roles: list[str]):
         """
@@ -155,3 +184,67 @@ class PermissionDenied(RequestError):
 
     def get_msg(self) -> str:
         return 'Roles %s are required to perform this action' % str(self.roles)
+
+
+class WrongType(RequestError):
+    """
+    Object type is inappropriate to perform an action
+    """
+    def __init__(self, msg: str):
+        """
+        Create error object
+        :param msg: message
+        """
+        super(WrongType, self).__init__(409)
+        self.msg = msg
+
+    def get_msg(self) -> str:
+        return self.msg
+
+
+class QuotaExceeded(RequestError):
+    """
+    User has exceeded quota for some action
+    """
+    def __init__(self, action: str, quota: int):
+        """
+        Create error object
+        :param action: Action to perform
+        :type quota: Quota for the action
+        """
+        super(QuotaExceeded, self).__init__(409)
+        self.action = action
+        self.quota = quota
+
+    def get_msg(self) -> str:
+        return f'Quota for "{self.action}" ({self.quota}) exceeded'
+
+
+class DataConflict(RequestError):
+    """
+    Conflict in request data
+    """
+    def __init__(self, msg: str):
+        """
+        Create error object
+        :param msg: message
+        """
+        super(DataConflict, self).__init__(409)
+        self.msg = msg
+
+    def get_msg(self) -> str:
+        return self.msg
+
+
+class CaptchaError(RequestError):
+    """
+    Wrong or expired captcha
+    """
+    def __init__(self):
+        """
+        Create error object
+        """
+        super(CaptchaError, self).__init__(409)
+
+    def get_msg(self) -> str:
+        return 'Captcha is wrong'

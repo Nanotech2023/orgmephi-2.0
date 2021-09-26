@@ -2,6 +2,7 @@ import enum
 from sqlalchemy.ext.hybrid import hybrid_property
 from common import get_current_db, get_current_app
 from .personal import UserInfo
+from user.util import get_unfilled
 
 db = get_current_db()
 app = get_current_app()
@@ -28,7 +29,7 @@ class Document(db.Model):
         Document ORM class
     """
     user_id = db.Column(db.Integer, db.ForeignKey(UserInfo.user_id), primary_key=True)
-    document_type = db.Column(db.Enum(DocumentTypeEnum))
+    document_type = db.Column(db.Enum(DocumentTypeEnum), nullable=False)
     series = db.Column(db.String)
     number = db.Column(db.String)
     issuer = db.Column(db.String)
@@ -56,3 +57,13 @@ class Document(db.Model):
         self.other_document_name = value
 
     user = db.relationship('UserInfo', back_populates='document')
+
+    _required_fields = {
+        DocumentTypeEnum.rf_passport: ['series', 'number', 'issuer', 'issue_date', 'rf_code'],
+        DocumentTypeEnum.rf_international_passport: ['series', 'number', 'issue_date'],
+        DocumentTypeEnum.foreign_passport: ['number', 'issue_date'],
+        DocumentTypeEnum.other_document: ['number', 'other_document_name']
+    }
+
+    def unfilled(self):
+        return get_unfilled(self, self._required_fields[self.document_type], [])

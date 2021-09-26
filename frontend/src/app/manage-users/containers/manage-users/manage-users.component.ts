@@ -1,5 +1,5 @@
 import { Component, OnInit, ViewChild } from '@angular/core'
-import { SchoolRegistrationRequestUser, User } from '@/auth/api/models'
+import { SchoolRegistrationRequestUser, User } from '@api/users/models'
 import { fixedHeight } from '@/shared/consts'
 import { AgGridAngular } from 'ag-grid-angular'
 import { ManageUsersStore } from '@/manage-users/manage-users.store'
@@ -21,9 +21,9 @@ export class ManageUsersComponent implements OnInit
         { field: 'role', sortable: true, filter: true, headerName: 'Роль' },
         { field: 'type', sortable: true, filter: true, headerName: 'Тип регистрации' }
     ]
-    addUserVisible: boolean = false
-    editUserVisible: boolean = false
-    editingUser: any = null
+    addModalVisible: boolean = false
+    editModalVisible: boolean = false
+    editing: any = null
     users$: Observable<User[]> = this.store.users$
     @ViewChild( 'table_users' ) agGrid!: AgGridAngular
 
@@ -44,8 +44,8 @@ export class ManageUsersComponent implements OnInit
         const selectedRows = this.agGrid.api.getSelectedRows()
         if ( selectedRows.length !== 0 )
         {
-            this.editingUser = selectedRows[ 0 ]
-            this.editUserVisible = true
+            this.editing = selectedRows[ 0 ]
+            this.editModalVisible = true
         }
     }
 
@@ -53,7 +53,7 @@ export class ManageUsersComponent implements OnInit
     {
         if ( $event == false )
         {
-            this.editingUser = null
+            this.editing = null
             this.agGrid.api.deselectAll()
         }
     }
