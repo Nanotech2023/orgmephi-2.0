@@ -134,6 +134,13 @@ components:
           type: number
         diploma_3_condition:
           type: number
+        level:
+          enum:
+          - '1'
+          - '2'
+          - '3'
+          - No level
+          type: string
         name:
           type: string
         olympiad_type_id:
@@ -146,6 +153,8 @@ components:
           - Math
           - Physics
           - Informatics
+          - Natural Sciences
+          - Other
           type: string
         target_classes:
           items:
@@ -179,6 +188,13 @@ components:
           type: number
         diploma_3_condition:
           type: number
+        level:
+          enum:
+          - '1'
+          - '2'
+          - '3'
+          - No level
+          type: string
         name:
           type: string
         olympiad_type_id:
@@ -191,6 +207,8 @@ components:
           - Math
           - Physics
           - Informatics
+          - Natural Sciences
+          - Other
           type: string
         target_classes:
           items:
@@ -320,6 +338,13 @@ components:
           maximum: 1.0
           minimum: 0.0
           type: number
+        level:
+          enum:
+          - '1'
+          - '2'
+          - '3'
+          - No level
+          type: string
         name:
           maxLength: 32
           type: string
@@ -333,6 +358,8 @@ components:
           - Math
           - Physics
           - Informatics
+          - Natural Sciences
+          - Other
           type: string
         winner_1_condition:
           maximum: 1.0
@@ -351,6 +378,7 @@ components:
       - diploma_1_condition
       - diploma_2_condition
       - diploma_3_condition
+      - level
       - name
       - olympiad_type_id
       - rules
@@ -494,6 +522,9 @@ components:
           - Diploma 3
           - Participant
           type: string
+        regulations:
+          maxLength: 1024
+          type: string
         result_publication_date:
           format: date-time
           type: string
@@ -507,6 +538,7 @@ components:
       required:
       - end_date
       - holding_type
+      - regulations
       - start_date
       - visibility
       type: object
@@ -550,6 +582,15 @@ components:
         contest_list:
           items:
             $ref: '#/components/schemas/SimpleContest'
+          type: array
+        count:
+          type: integer
+      type: object
+    FilterSimpleContestResponseTaskParticipant:
+      properties:
+        contest_list:
+          items:
+            $ref: '#/components/schemas/SimpleContestWithFlagResponseTaskParticipant'
           type: array
         count:
           type: integer
@@ -752,6 +793,10 @@ components:
           - Diploma 3
           - Participant
           type: string
+        regulations:
+          maxLength: 1024
+          nullable: true
+          type: string
         result_publication_date:
           format: date-time
           nullable: true
@@ -760,10 +805,20 @@ components:
           format: date-time
           nullable: true
           type: string
+        status:
+          enum:
+          - Will start soon
+          - In progress
+          - Finished
+          type: string
         target_classes:
           items:
             $ref: '#/components/schemas/TargetClass'
           type: array
+        tasks_number:
+          type: integer
+        total_points:
+          type: integer
         visibility:
           type: boolean
       required:
@@ -778,6 +833,17 @@ components:
       - result_publication_date
       - start_date
       - visibility
+      type: object
+    SimpleContestWithFlagResponseTaskParticipant:
+      properties:
+        contest:
+          allOf:
+          - $ref: '#/components/schemas/SimpleContest'
+          readOnly: true
+        enrolled:
+          type: boolean
+      required:
+      - enrolled
       type: object
     Stage:
       properties:
@@ -934,6 +1000,13 @@ components:
           maximum: 1.0
           minimum: 0.0
           type: number
+        level:
+          enum:
+          - '1'
+          - '2'
+          - '3'
+          - No level
+          type: string
         name:
           maxLength: 32
           type: string
@@ -947,6 +1020,8 @@ components:
           - Math
           - Physics
           - Informatics
+          - Natural Sciences
+          - Other
           type: string
         winner_1_condition:
           maximum: 1.0
@@ -988,6 +1063,9 @@ components:
           - Diploma 2
           - Diploma 3
           - Participant
+          type: string
+        regulations:
+          maxLength: 1024
           type: string
         result_publication_date:
           format: date-time
@@ -2623,7 +2701,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/AllOlympiadsResponseTaskUnauthorized'
+                $ref: '#/components/schemas/FilterSimpleContestResponseTaskParticipant'
           description: OK
         '400':
           description: Bad request
