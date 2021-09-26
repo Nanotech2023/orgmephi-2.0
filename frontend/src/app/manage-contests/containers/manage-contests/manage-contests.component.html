@@ -1,66 +1,66 @@
 <div class="container_main" [style]="{'min-height': minContainerHeight + 'px'}">
-        <div id="table-header">
-            <div class="row">
-                <div class="col-md-1">
-                    <button class="button-round" id="sertificate-button">
-                        <svg width="21" height="21" viewBox="0 0 21 21" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path
-                                d="M14 0.875H3.5C2.5375 0.875 1.75 1.6625 1.75 2.625V14.875H3.5V2.625H14V0.875ZM13.125 4.375L18.375 9.625V18.375C18.375 19.3375 17.5875 20.125 16.625 20.125H6.99125C6.02875 20.125 5.25 19.3375 5.25 18.375L5.25875 6.125C5.25875 5.1625 6.0375 4.375 7 4.375H13.125ZM12.25 10.5H17.0625L12.25 5.6875V10.5Z"
-                                fill="white"/>
-                        </svg>
-                    </button>
-                </div>
-                <div class="col-md-2">
-                    <span>Сертификаты</span>
-                </div>
-
-                <div class="col-md-1">
-                    <button class="button-round" id="statistics-button">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M10.5 20H13.5V4H10.5V20ZM6 20H9V12H6V20ZM15 9V20H18V9H15Z" fill="white"/>
-                        </svg>
-                    </button>
-                </div>
-                <div class="col-md-2">
-                    <span>Статистика</span>
-                </div>
-                <div class="col-md-1">
-                    <button class="button-round" id="add-button">
-                        <svg width="21" height="21" viewBox="0 0 21 21" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path
-                                d="M16.625 11.375H11.375V16.625H9.625V11.375H4.375V9.625H9.625V4.375H11.375V9.625H16.625V11.375Z"
-                                fill="white"/>
-                        </svg>
-                    </button>
-                </div>
-                <div class="col-md-2">
-                    <span>Добавить</span>
-                </div>
-                <div class="col-md-1">
-                    <button class="button-round" id="add-user-button" (click)="addModalVisible = true">
-                        <svg width="21" height="21" viewBox="0 0 21 21" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path
-                                d="M11.375 7C11.375 5.06625 9.80875 3.5 7.875 3.5C5.94125 3.5 4.375 5.06625 4.375 7C4.375 8.93375 5.94125 10.5 7.875 10.5C9.80875 10.5 11.375 8.93375 11.375 7ZM13.125 8.75V10.5H15.75V13.125H17.5V10.5H20.125V8.75H17.5V6.125H15.75V8.75H13.125ZM0.875 15.75V17.5H14.875V15.75C14.875 13.4225 10.2112 12.25 7.875 12.25C5.53875 12.25 0.875 13.4225 0.875 15.75Z"
-                                fill="white"/>
-                        </svg>
-                    </button>
-                </div>
-                <div class="col-md-2">
-                    <span>Быстрое добавление пользователя</span>
-                </div>
+    <div id="table-header">
+        <div class="row">
+            <div class="col-md-1">
+                <button class="button-round" id="sertificate-button">
+                    <svg width="21" height="21" viewBox="0 0 21 21" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path
+                            d="M14 0.875H3.5C2.5375 0.875 1.75 1.6625 1.75 2.625V14.875H3.5V2.625H14V0.875ZM13.125 4.375L18.375 9.625V18.375C18.375 19.3375 17.5875 20.125 16.625 20.125H6.99125C6.02875 20.125 5.25 19.3375 5.25 18.375L5.25875 6.125C5.25875 5.1625 6.0375 4.375 7 4.375H13.125ZM12.25 10.5H17.0625L12.25 5.6875V10.5Z"
+                            fill="white"/>
+                    </svg>
+                </button>
             </div>
-    <div id="table-container" class="ag-theme-alpine"
-         *ngIf="contests$ | async as contests" [style]="{'min-height': minContainerHeight - 86 + 'px'}">
-        <ag-grid-angular
-            #table_contests
-            pagination="true"
-            [style]="{'height': minContainerHeight + 'px'}"
-            id="table_contests"
-            [rowSelection]="'single'"
-            [rowData]="contests"
-            [columnDefs]="columnDefs"
-            [rowHeight]="50"
-            [getRowNodeId]="getRowNodeId">
-        </ag-grid-angular>
+            <div class="col-md-2">
+                <span>Сертификаты</span>
+            </div>
+            <div class="col-md-1">
+                <button class="button-round" id="statistics-button">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M10.5 20H13.5V4H10.5V20ZM6 20H9V12H6V20ZM15 9V20H18V9H15Z" fill="white"/>
+                    </svg>
+                </button>
+            </div>
+            <div class="col-md-2">
+                <span>Статистика</span>
+            </div>
+            <div class="col-md-1">
+                <button class="button-round" id="add-button">
+                    <svg width="21" height="21" viewBox="0 0 21 21" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path
+                            d="M16.625 11.375H11.375V16.625H9.625V11.375H4.375V9.625H9.625V4.375H11.375V9.625H16.625V11.375Z"
+                            fill="white"/>
+                    </svg>
+                </button>
+            </div>
+            <div class="col-md-2">
+                <span>Добавить</span>
+            </div>
+            <div class="col-md-1">
+                <button class="button-round" id="add-user-button" (click)="addModalVisible = true">
+                    <svg width="21" height="21" viewBox="0 0 21 21" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path
+                            d="M11.375 7C11.375 5.06625 9.80875 3.5 7.875 3.5C5.94125 3.5 4.375 5.06625 4.375 7C4.375 8.93375 5.94125 10.5 7.875 10.5C9.80875 10.5 11.375 8.93375 11.375 7ZM13.125 8.75V10.5H15.75V13.125H17.5V10.5H20.125V8.75H17.5V6.125H15.75V8.75H13.125ZM0.875 15.75V17.5H14.875V15.75C14.875 13.4225 10.2112 12.25 7.875 12.25C5.53875 12.25 0.875 13.4225 0.875 15.75Z"
+                            fill="white"/>
+                    </svg>
+                </button>
+            </div>
+            <div class="col-md-2">
+                <span>Быстрое добавление пользователя</span>
+            </div>
+        </div>
+        <div id="table-container" class="ag-theme-alpine"
+             *ngIf="contests$ | async as contests" [style]="{'min-height': minContainerHeight - 86 + 'px'}">
+            <ag-grid-angular
+                #table_contests
+                pagination="true"
+                [style]="{'height': minContainerHeight + 'px'}"
+                id="table_contests"
+                [rowSelection]="'single'"
+                [rowData]="contests"
+                [columnDefs]="columnDefs"
+                [rowHeight]="50"
+                [getRowNodeId]="getRowNodeId">
+            </ag-grid-angular>
+        </div>
     </div>
 </div>

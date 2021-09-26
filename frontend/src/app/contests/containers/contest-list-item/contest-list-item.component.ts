@@ -1,5 +1,5 @@
 import { Component, Input } from '@angular/core'
-import { Contest } from '@api/tasks/model'
+import { SimpleContestWithFlagResponseTaskParticipant } from '@api/tasks/model'
 import { Router } from '@angular/router'
 import { ContestsStore } from '@/contests/contests.store'
 
@@ -11,8 +11,7 @@ import { ContestsStore } from '@/contests/contests.store'
 } )
 export class ContestListItemComponent
 {
-    // @ts-ignore
-    @Input() contest: Contest
+    @Input() contest!: SimpleContestWithFlagResponseTaskParticipant
 
     constructor( private contestsStore: ContestsStore, private router: Router )
     {
@@ -21,11 +20,12 @@ export class ContestListItemComponent
     navigateTo(): Promise<boolean>
     {
         this.contestsStore.selectContest( this.contest )
-        return this.router.navigate( [ "/contests", this.contest.contest_id ] )
+        return this.router.navigate( [ "/contests", this.contest.contest?.contest_id ] )
     }
 
     getClassesForDisplay(): string | undefined
     {
-        return this.contest.base_contest?.target_classes?.map( item => item.target_class ).join( "," )
+        return this.contest.contest?.base_contest?.target_classes?.map( item => item.target_class ).join( "," )
+
     }
 }

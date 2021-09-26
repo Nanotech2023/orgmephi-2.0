@@ -1,6 +1,6 @@
 import { Component } from '@angular/core'
 import { ContestsStore } from '@/contests/contests.store'
-import { Contest } from '@api/tasks/model'
+import { Contest, SimpleContestWithFlagResponseTaskParticipant } from '@api/tasks/model'
 import { Observable } from 'rxjs'
 
 
@@ -11,7 +11,7 @@ import { Observable } from 'rxjs'
 } )
 export class ContestRegistrationComponent
 {
-    contest$: Observable<Contest | undefined>
+    contest$: Observable<SimpleContestWithFlagResponseTaskParticipant | undefined>
 
     constructor( private contestsStore: ContestsStore )
     {

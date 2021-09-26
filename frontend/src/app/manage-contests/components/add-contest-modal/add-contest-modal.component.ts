@@ -34,7 +34,8 @@ export class AddContestModalComponent
             name: '',
             olympiad_type_id: 0,
             rules: '',
-            subject: SubjectEnum.Physics
+            subject: SubjectEnum.Physics,
+            level: CreateBaseOlympiadRequestTaskCreator.LevelEnum._1
         }
         this.isCreated = false
     }

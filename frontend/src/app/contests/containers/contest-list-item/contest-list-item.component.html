@@ -1,16 +1,16 @@
 <div class="col-md-6">
     <div class="olymp_list_item">
         <div class="olymp_status">
-            <span>Слот Статус</span>
+            <span>{{ contest.contest?.status }}</span>
         </div>
         <div class="olymp_subtitle">
             <span>{{ getClassesForDisplay() }} классы</span>
-            <span>{{ contest.base_contest?.subject }}</span>
-            <span>Слот Уровень 1</span>
+            <span>{{ contest.contest?.base_contest?.subject }}</span>
+            <span>Уровень {{ contest.contest?.base_contest?.level }}</span>
         </div>
 
         <div class="olymp_title">
-            {{ contest.base_contest?.name }}
+            {{ contest.contest?.base_contest?.name }}
         </div>
 
         <div class="olymp_link">

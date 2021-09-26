@@ -12,10 +12,19 @@
 
 
 export interface PlainTask { 
+    answer_type?: PlainTask.AnswerTypeEnum;
     num_of_task: number;
     recommended_answer: string;
     show_answer_after_contest?: boolean | null;
     readonly task_id: number;
     task_points?: number | null;
 }
+export namespace PlainTask {
+    export type AnswerTypeEnum = 'File' | 'Text';
+    export const AnswerTypeEnum = {
+        File: 'File' as AnswerTypeEnum,
+        Text: 'Text' as AnswerTypeEnum
+    };
+}
+
 

@@ -12,9 +12,22 @@
 
 
 export interface CreatePlainRequestTaskCreator { 
+    answer_type?: CreatePlainRequestTaskCreator.AnswerTypeEnum;
     num_of_task: number;
     recommended_answer: string;
     show_answer_after_contest?: boolean;
     task_points?: number;
 }
+export namespace CreatePlainRequestTaskCreator {
+    export type AnswerTypeEnum = 'Math' | 'Physics' | 'Informatics' | 'Natural Sciences' | 'Engineering Sciences' | 'Other';
+    export const AnswerTypeEnum = {
+        Math: 'Math' as AnswerTypeEnum,
+        Physics: 'Physics' as AnswerTypeEnum,
+        Informatics: 'Informatics' as AnswerTypeEnum,
+        NaturalSciences: 'Natural Sciences' as AnswerTypeEnum,
+        EngineeringSciences: 'Engineering Sciences' as AnswerTypeEnum,
+        Other: 'Other' as AnswerTypeEnum
+    };
+}
+
 

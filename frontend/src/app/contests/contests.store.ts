@@ -5,10 +5,11 @@ import { CallState, getError, LoadingState } from '@/shared/callState'
 import { EMPTY, Observable } from 'rxjs'
 import {
     AllLocationResponseTaskUnauthorized,
-    AllOlympiadsResponseTaskUnauthorized,
     Contest,
     EnrollRequestTaskParticipant,
+    FilterSimpleContestResponseTaskParticipant,
     OlympiadLocation,
+    SimpleContestWithFlagResponseTaskParticipant,
     Variant
 } from '@api/tasks/model'
 import { catchError, switchMap } from 'rxjs/operators'
@@ -16,9 +17,9 @@ import { catchError, switchMap } from 'rxjs/operators'
 
 export interface ContestsState
 {
-    contests: Array<Contest>
+    contests: Array<SimpleContestWithFlagResponseTaskParticipant>
     locations: Array<OlympiadLocation>
-    selectedContest?: Contest
+    selectedContest?: SimpleContestWithFlagResponseTaskParticipant
     selectedVariant?: Variant
     callState: CallState
 }
@@ -41,11 +42,9 @@ export class ContestsStore extends ComponentStore<ContestsState>
         super( initialState )
     }
 
-    // TODO fix when openapi will match real response
-    // @ts-ignore
-    readonly contests: Observable<Contest[]> = this.select( state => state.contests.map( item => item.contest ) )
-    readonly selectedContest: Observable<Contest | undefined> = this.select( state => state.selectedContest )
-    readonly locations: Observable<Contest | undefined> = this.select( state => state.selectedContest )
+    readonly contests: Observable<SimpleContestWithFlagResponseTaskParticipant[]> = this.select( state => state.contests )
+    readonly selectedContest: Observable<SimpleContestWithFlagResponseTaskParticipant | undefined> = this.select( state => state.selectedContest )
+    // readonly locations: Observable<Contest | undefined> = this.select( state => state.selectedContest )
     private readonly loading$: Observable<boolean> = this.select( state => state.callState === LoadingState.LOADING )
     private readonly error$: Observable<string | null> = this.select( state => getError( state.callState ) )
 
@@ -69,14 +68,14 @@ export class ContestsStore extends ComponentStore<ContestsState>
             callState: LoadingState.LOADED
         } ) )
 
-    readonly setContests = this.updater( ( state: ContestsState, contests: Array<Contest> ) =>
+    readonly setContests = this.updater( ( state: ContestsState, contests: Array<SimpleContestWithFlagResponseTaskParticipant> ) =>
         ( {
             ...state,
             error: "",
             contests: [ ...state.contests, ...contests ]
         } ) )
 
-    readonly selectContest = this.updater( ( state: ContestsState, contest: Contest ) =>
+    readonly selectContest = this.updater( ( state: ContestsState, contest: SimpleContestWithFlagResponseTaskParticipant ) =>
         ( {
             ...state,
             selectedContest: contest
@@ -108,7 +107,7 @@ export class ContestsStore extends ComponentStore<ContestsState>
         )
         return this.tasksService.tasksParticipantOlympiadAllGet().pipe(
             tapResponse(
-                ( response: AllOlympiadsResponseTaskUnauthorized ) => this.setContests( response.contest_list ),
+                ( response: FilterSimpleContestResponseTaskParticipant ) => this.setContests( response.contest_list ?? [] ),
                 ( error: string ) => this.updateError( error )
             ),
             catchError( () => EMPTY )

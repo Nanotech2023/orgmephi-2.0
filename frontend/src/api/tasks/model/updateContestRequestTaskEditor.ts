@@ -18,6 +18,7 @@ export interface UpdateContestRequestTaskEditor {
     holding_type?: UpdateContestRequestTaskEditor.HoldingTypeEnum;
     previous_contest_id?: number;
     previous_participation_condition?: UpdateContestRequestTaskEditor.PreviousParticipationConditionEnum;
+    regulations?: string;
     result_publication_date?: string;
     start_date?: string;
     visibility?: boolean;

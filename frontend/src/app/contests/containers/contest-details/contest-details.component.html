@@ -4,15 +4,16 @@
             <div class="col-md-4">
                 <div class="olymp_title_container">
                     <div class="olymp_status">
-                        <span>СЛОТ Статус</span>
+                        <span>{{ contest.contest?.status }}</span>
                     </div>
+
                     <div class="olymp_title">
-                        {{ contest.base_contest.name }}
+                        {{ contest.contest?.base_contest?.name }}
                     </div>
                     <div class="olymp_subtitle">
                         <span>{{ getTargetClassesDisplay( contest ) }}</span>
-                        <span>{{ contest.base_contest?.subject }}</span>
-                        <span>СЛОТ Уровень 1 ?????</span>
+                        <span>{{ contest.contest?.base_contest?.subject }}</span>
+                        <span>Уровень {{ contest.contest?.status }}</span>
                     </div>
                     <div class="olymp_links">
                         <a>СЛОТ ссылка на сайт олимпиады</a>
@@ -57,7 +58,7 @@
                                      xmlns="http://www.w3.org/2000/svg">
                                     <rect x="1" y="1" width="36" height="36" rx="23" fill="#171717"/>
                                     <rect x="1" y="1" width="36" height="36" rx="23" stroke="#171717" stroke-width="2"/>
-                                    <!--       тут слот для номера этапа                         -->
+                                    <!--тут слот для номера этапа-->
                                     <text x="11" y="27" font-size="25" fill="white">2</text>
                                 </svg>
                                 СЛОТ НАЗВАНИЕ ЭТАПА Отборочный этап
@@ -74,8 +75,7 @@
                                         </svg>
                                     </div>
                                     <div class="col-md-6">
-                                        Описание
-                                        {{ contest.base_contest.description }}
+                                        {{ contest.contest?.base_contest?.description }}
                                     </div>
                                     <div class="col-md-5">
                                         <div class="stage_action">

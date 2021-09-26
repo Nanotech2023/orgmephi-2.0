@@ -4,7 +4,7 @@
             <div class="col-md-4">
                 <div class="olymp_title_container">
                     <div class="olymp_title">
-                        {{ contest.base_contest.name }}
+                        {{ contest.contest?.base_contest?.name }}
                     </div>
                     <div class="olymp_subtitle">
                         Просьба внимательно ознакомиться с регламентом олимпиады перед началом прохождения
@@ -30,7 +30,7 @@
                             </svg>
                             <br/>
                             <span class="icon_title">
-                            СЛОТ баллы 12 баллов
+                            {{ contest.contest?.total_points }} баллов
                         </span>
                         </div>
                         <div class="col-md-4">
@@ -46,7 +46,7 @@
                             </svg>
                             <br/>
                             <span class="icon_title">
-                            СЛОТ задания 6 заданий
+                            {{ contest.contest?.tasks_number }} заданий
                         </span>
                         </div>
                         <div class="col-md-4">
@@ -61,14 +61,14 @@
                             </svg>
                             <br/>
                             <span class="icon_title">
-                            СЛОТ продолжительность 180 минут
+                            {{ contest.contest?.contest_duration }} минут
                         </span>
                         </div>
                     </div>
                     <div class="rules_text">
                         <p>
                             СЛОТ регламент
-                            {{ contest.base_contest.rules }}
+                            {{ contest.contest?.base_contest?.rules }}
                             Дальше много тестового текста
                             1. Общие положения
                             1.1. Настоящий регламент разработан на основании Положения об олимпиаде школьников

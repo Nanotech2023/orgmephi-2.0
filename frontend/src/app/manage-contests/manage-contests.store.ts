@@ -3,13 +3,18 @@ import { ComponentStore, tapResponse } from '@ngrx/component-store'
 import { CallState, getError, LoadingState } from '@/shared/callState'
 import { EMPTY, Observable } from 'rxjs'
 import { catchError, concatMap } from 'rxjs/operators'
-import { AllOlympiadsResponseTaskUnauthorized, Contest, CreateBaseOlympiadRequestTaskCreator } from '@api/tasks/model'
+import {
+    AllOlympiadsResponseTaskUnauthorized,
+    CreateBaseOlympiadRequestTaskCreator,
+    FilterSimpleContestResponseTaskParticipant,
+    SimpleContestWithFlagResponseTaskParticipant
+} from '@api/tasks/model'
 import { TasksService } from '@api/tasks/tasks.service'
 
 
 export interface ManageContestsState
 {
-    contests: Array<Contest>
+    contests: Array<SimpleContestWithFlagResponseTaskParticipant>
     callState: CallState
 }
 
@@ -28,7 +33,7 @@ export class ManageContestsStore extends ComponentStore<ManageContestsState>
         super( initialState )
     }
 
-    readonly contests$: Observable<Contest[]> = this.select( state => state.contests )
+    readonly contests$: Observable<SimpleContestWithFlagResponseTaskParticipant[]> = this.select( state => state.contests )
     private readonly loading$: Observable<boolean> = this.select( state => state.callState === LoadingState.LOADING )
     private readonly error$: Observable<string | null> = this.select( state => getError( state.callState ) )
 
@@ -52,12 +57,14 @@ export class ManageContestsStore extends ComponentStore<ManageContestsState>
             callState: LoadingState.LOADED
         } ) )
 
-    readonly updateContests = this.updater( ( state: ManageContestsState, response: AllOlympiadsResponseTaskUnauthorized ) =>
-        ( {
-            ...state,
-            error: "",
-            contests: [ ...state.contests, ...response.contest_list ]
-        } ) )
+
+    // readonly updateContests = this.updater( ( state: ManageContestsState, response: AllOlympiadsResponseTaskUnauthorized ) =>
+    //     ( {
+    //         ...state,
+    //         error: "",
+    //         contests: [ ...state.contests, ...response.contest_list ]
+    //     } ) )
+
 
     // EFFECTS
     readonly reload = this.effect( () =>
@@ -65,7 +72,7 @@ export class ManageContestsStore extends ComponentStore<ManageContestsState>
         this.setLoading()
         return this.tasksService.tasksParticipantOlympiadAllGet().pipe(
             tapResponse(
-                ( response: AllOlympiadsResponseTaskUnauthorized ) =>
+                ( response: FilterSimpleContestResponseTaskParticipant ) =>
                     this.setState( {
                         contests: response.contest_list ?? [],
                         callState: LoadingState.LOADED

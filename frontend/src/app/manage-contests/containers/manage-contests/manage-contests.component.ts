@@ -3,7 +3,7 @@ import { ManageContestsStore } from '@/manage-contests/manage-contests.store'
 import { Observable } from 'rxjs'
 import { fixedHeight } from '@/shared/consts'
 import { User } from '@api/users/models'
-import { Contest } from '@api/tasks/model'
+import { Contest, SimpleContestWithFlagResponseTaskParticipant } from '@api/tasks/model'
 import { AgGridAngular } from 'ag-grid-angular'
 
 
@@ -28,7 +28,7 @@ export class ManageContestsComponent implements OnInit
         { field: 'visibility', sortable: true, filter: true, headerName: 'Видимость' }
     ]
 
-    contests$: Observable<Contest[]> = this.store.contests$
+    contests$: Observable<SimpleContestWithFlagResponseTaskParticipant[]> = this.store.contests$
     addModalVisible: boolean = false
     editModalVisible: boolean = false
     editing: any = null

@@ -1,7 +1,7 @@
 import { Component } from '@angular/core'
 import { Observable } from 'rxjs'
 import { ContestsStore } from '@/contests/contests.store'
-import { Contest } from '@api/tasks/model'
+import { Contest, SimpleContestWithFlagResponseTaskParticipant } from '@api/tasks/model'
 
 
 @Component( {
@@ -11,7 +11,7 @@ import { Contest } from '@api/tasks/model'
 } )
 export class ContestDetailsComponent
 {
-    contest$: Observable<Contest | undefined>
+    contest$: Observable<SimpleContestWithFlagResponseTaskParticipant | undefined>
 
     constructor( private contestsStore: ContestsStore )
     {
@@ -31,8 +31,8 @@ export class ContestDetailsComponent
         this.contestsStore.getVariant( contestId )
     }
 
-    getTargetClassesDisplay( contest: Contest ): string
+    getTargetClassesDisplay( contest: SimpleContestWithFlagResponseTaskParticipant ): string
     {
-        return contest.base_contest?.target_classes?.map( item => item.target_class ).join( "," ) + " классы"
+        return contest?.contest?.base_contest?.target_classes?.map( item => item.target_class ).join( "," ) + " классы"
     }
 }
