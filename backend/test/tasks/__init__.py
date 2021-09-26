@@ -174,7 +174,8 @@ def test_simple_contest_in_stage_1(test_base_contests_with_target, test_stages):
     from contest.tasks.models.olympiad import SimpleContest, ContestHoldingTypeEnum
     from contest.tasks.models import UserInContest
     holding_types = [ContestHoldingTypeEnum.OnLineContest, ContestHoldingTypeEnum.OfflineContest]
-    simple_contests = [SimpleContest(visibility=True,
+    simple_contests = [SimpleContest(base_contest_id=test_base_contests_with_target[0].base_contest_id,
+                                     visibility=True,
                                      start_date=datetime.utcnow(),
                                      end_date=datetime.utcnow() + timedelta(hours=4),
                                      holding_type=holding_types[i % 2],
@@ -184,7 +185,8 @@ def test_simple_contest_in_stage_1(test_base_contests_with_target, test_stages):
                                      end_of_enroll_date=datetime.utcnow() + timedelta(minutes=15))
                        for i in range(2)]
 
-    other_stage = SimpleContest(visibility=True,
+    other_stage = SimpleContest(base_contest_id=test_base_contests_with_target[0].base_contest_id,
+                                visibility=True,
                                 start_date=datetime.utcnow(),
                                 end_date=datetime.utcnow() + timedelta(hours=4),
                                 holding_type=holding_types[0],
@@ -227,7 +229,8 @@ def test_simple_contest_in_stage_2_contest_in_stage(test_base_contests_with_targ
     from contest.tasks.models.olympiad import SimpleContest, ContestHoldingTypeEnum
     from contest.tasks.models import UserInContest
     holding_types = [ContestHoldingTypeEnum.OnLineContest, ContestHoldingTypeEnum.OfflineContest]
-    simple_contests = [SimpleContest(visibility=True,
+    simple_contests = [SimpleContest(base_contest_id=test_base_contests_with_target[0].base_contest_id,
+                                     visibility=True,
                                      start_date=datetime.utcnow(),
                                      end_date=datetime.utcnow() + timedelta(hours=4),
                                      holding_type=holding_types[i % 2],
@@ -237,7 +240,8 @@ def test_simple_contest_in_stage_2_contest_in_stage(test_base_contests_with_targ
                                      end_of_enroll_date=datetime.utcnow() + timedelta(minutes=15))
                        for i in range(2)]
 
-    contest_in_other_stage_1 = SimpleContest(contest_id=999,
+    contest_in_other_stage_1 = SimpleContest(base_contest_id=test_base_contests_with_target[0].base_contest_id,
+                                             contest_id=999,
                                              visibility=True,
                                              start_date=datetime.utcnow(),
                                              end_date=datetime.utcnow() + timedelta(hours=4),
@@ -247,7 +251,8 @@ def test_simple_contest_in_stage_2_contest_in_stage(test_base_contests_with_targ
                                              result_publication_date=datetime.utcnow() + timedelta(hours=6),
                                              end_of_enroll_date=datetime.utcnow() + timedelta(minutes=15))
 
-    contest_in_other_stage_2 = SimpleContest(contest_id=1000,
+    contest_in_other_stage_2 = SimpleContest(base_contest_id=test_base_contests_with_target[0].base_contest_id,
+                                             contest_id=1000,
                                              visibility=True,
                                              start_date=datetime.utcnow(),
                                              end_date=datetime.utcnow() + timedelta(hours=4),
@@ -293,7 +298,8 @@ def test_simple_contest_in_stage_and(test_base_contests_with_target, test_stages
     from contest.tasks.models.olympiad import SimpleContest, ContestHoldingTypeEnum
     from contest.tasks.models import UserInContest
     holding_types = [ContestHoldingTypeEnum.OnLineContest, ContestHoldingTypeEnum.OfflineContest]
-    simple_contests = [SimpleContest(visibility=True,
+    simple_contests = [SimpleContest(base_contest_id=test_base_contests_with_target[0].base_contest_id,
+                                     visibility=True,
                                      start_date=datetime.utcnow(),
                                      end_date=datetime.utcnow() + timedelta(hours=4),
                                      holding_type=holding_types[i % 2],
@@ -303,7 +309,8 @@ def test_simple_contest_in_stage_and(test_base_contests_with_target, test_stages
                                      end_of_enroll_date=datetime.utcnow() + timedelta(minutes=15))
                        for i in range(2)]
 
-    other_stage = SimpleContest(visibility=True,
+    other_stage = SimpleContest(base_contest_id=test_base_contests_with_target[0].base_contest_id,
+                                visibility=True,
                                 start_date=datetime.utcnow(),
                                 end_date=datetime.utcnow() + timedelta(hours=4),
                                 holding_type=holding_types[0],
@@ -350,7 +357,8 @@ def test_simple_contest_in_stage_2(test_base_contests_with_target, test_stages):
     test_stages[1].stage_num = 1
 
     holding_types = [ContestHoldingTypeEnum.OnLineContest, ContestHoldingTypeEnum.OfflineContest]
-    simple_contests = [SimpleContest(visibility=True,
+    simple_contests = [SimpleContest(base_contest_id=test_base_contests_with_target[0].base_contest_id,
+                                     visibility=True,
                                      start_date=datetime.utcnow(),
                                      end_date=datetime.utcnow() + timedelta(hours=4),
                                      holding_type=holding_types[i % 2],
@@ -360,7 +368,8 @@ def test_simple_contest_in_stage_2(test_base_contests_with_target, test_stages):
                                      end_of_enroll_date=datetime.utcnow() + timedelta(minutes=15))
                        for i in range(2)]
 
-    other_stage = SimpleContest(visibility=True,
+    other_stage = SimpleContest(base_contest_id=test_base_contests_with_target[0].base_contest_id,
+                                visibility=True,
                                 start_date=datetime.utcnow(),
                                 end_date=datetime.utcnow() + timedelta(hours=4),
                                 holding_type=holding_types[0],
@@ -405,7 +414,8 @@ def test_simple_contest_in_stage_3(test_base_contests_with_target, test_stages):
     from contest.tasks.models import UserInContest
 
     holding_types = [ContestHoldingTypeEnum.OnLineContest, ContestHoldingTypeEnum.OfflineContest]
-    simple_contests = [SimpleContest(visibility=True,
+    simple_contests = [SimpleContest(base_contest_id=test_base_contests_with_target[0].base_contest_id,
+                                     visibility=True,
                                      start_date=datetime.utcnow(),
                                      end_date=datetime.utcnow() + timedelta(hours=4),
                                      holding_type=holding_types[i % 2],
@@ -415,7 +425,8 @@ def test_simple_contest_in_stage_3(test_base_contests_with_target, test_stages):
                                      end_of_enroll_date=datetime.utcnow() + timedelta(minutes=15))
                        for i in range(2)]
 
-    other_stage = SimpleContest(visibility=True,
+    other_stage = SimpleContest(base_contest_id=test_base_contests_with_target[0].base_contest_id,
+                                visibility=True,
                                 start_date=datetime.utcnow(),
                                 end_date=datetime.utcnow() + timedelta(hours=4),
                                 holding_type=holding_types[0],
