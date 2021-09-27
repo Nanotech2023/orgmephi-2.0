@@ -12,7 +12,7 @@ import { UserInfo } from '@api/users/models'
 } )
 export class ProfileViewComponent
 {
-    private userInfo$: Observable<UserInfo | null>
+    userInfo$: Observable<UserInfo | null>
 
     constructor( private profileStore: ProfileStore )
     {
