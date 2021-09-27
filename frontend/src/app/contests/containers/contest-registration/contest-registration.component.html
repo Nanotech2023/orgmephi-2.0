@@ -10,7 +10,8 @@
                         Просьба внимательно ознакомиться с регламентом олимпиады перед началом прохождения
                     </div>
                     <div class="olymp_start">
-                        <button (click)="onEnrollClick(contest.contest?.contest_id)">Зарегистрироваться на олимпиаду</button>
+                        <button (click)="onEnrollClick(contest.contest?.contest_id)">Зарегистрироваться на олимпиаду
+                        </button>
                     </div>
                     <div class="olymp_start">
                         <button (click)="onStartClick(contest.contest?.contest_id)">Начать олимпиаду</button>
@@ -64,7 +65,7 @@
                             </svg>
                             <br/>
                             <span class="icon_title">
-                            {{ contest.contest?.contest_duration }} минут
+                            {{ ( contest.contest?.contest_duration ?? 0 ) / 60 }} минут
                         </span>
                         </div>
                     </div>

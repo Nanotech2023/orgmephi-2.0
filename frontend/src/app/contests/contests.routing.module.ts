@@ -7,6 +7,7 @@ import { ContestRegistrationComponent } from '@/contests/containers/contest-regi
 import { HomeComponent } from '@/contests/containers/home/home.component'
 import { ContestListItemComponent } from '@/contests/components/contest-list-item/contest-list-item.component'
 import { ContestAssignmentComponent } from '@/contests/containers/contest-assignment/contest-assignment.component'
+import { ContestAssignmentItemComponent } from '@/contests/components/contest-assignment-item/contest-assignment-item.component'
 
 
 export const COMPONENTS = [
@@ -15,7 +16,8 @@ export const COMPONENTS = [
     ContestListItemComponent,
     ContestRegistrationComponent,
     ContestAssignmentComponent,
-    HomeComponent
+    HomeComponent,
+    ContestAssignmentItemComponent
 ]
 
 
@@ -31,7 +33,12 @@ const routes: Routes =
             path: 'contests/:id', component: ContestDetailsComponent, canActivate: [ AuthGuardService ]
         },
         {
-            path: 'contests/:id/register', component: ContestRegistrationComponent, canActivate: [ AuthGuardService ]
+            path: 'contests/:id/registration',
+            component: ContestRegistrationComponent,
+            canActivate: [ AuthGuardService ]
+        },
+        {
+            path: 'contests/:id/assignment', component: ContestAssignmentComponent, canActivate: [ AuthGuardService ]
         }
     ]
 
