@@ -1,12 +1,59 @@
-<div class="row">
-    <div class="col-4">
-        <p class="profile-left_name">Профиль пользователя</p>
-        <p class="profile-left_info">Пожалуйста заполните все поля профиля</p>
-    </div>
-    <div class="col-8">
-        <div>
-            <label class="profile-input_label">Фамилия</label>
-            <input class="profile-input_input" placeholder="Введите фамилию" readonly/>
+<div class="container">
+    <div class="row">
+        <div class="col-md-4">
+            <div class="profile_title_container">
+                <div class="profile_title">
+                    Профиль пользователя
+                </div>
+                <div class="profile_subtitle">
+                    Пожалуйста заполните все поля профиля
+                </div>
+            </div>
+        </div>
+        <div class="col-md-8">
+            <div class="profile_container">
+                <div class="photo_container">
+                    <div class="row">
+                        <div class="col-md-3">
+                            <img src="" alt="photo">
+                        </div>
+                        <div class="col-md-6">
+                            <p class="photo_title">Фото профиля</p>
+                            <p class="photo_subtitle">Только .jpg и .png файлы. Максимальный размер файла 500кб.</p>
+                        </div>
+                    </div>
+
+                </div>
+                <div class="form_container">
+                    <div class="form_item">
+                        <p class="form_label">Фамилия</p>
+                        <input class="form_input" placeholder="Введите фамилию">
+                    </div>
+                    <div class="form_item">
+                        <p class="form_label">Имя</p>
+                        <input class="form_input" placeholder="Введите имя">
+                    </div>
+                    <div class="form_item">
+                        <p class="form_label">Email</p>
+                        <input class="form_input" type="email" placeholder="Введите email">
+                    </div>
+                    <div class="form_item">
+                        <p class="form_label">Пароль</p>
+                        <input class="form_input" placeholder="Введите пароль" type="password">
+                    </div>
+                    <div class="form_item">
+                        <p class="form_label">Подтвердить пароль</p>
+                        <input class="form_input" placeholder="Введите пароль" type="password">
+                    </div>
+                    <div class="form_item">
+                        <p class="form_label">Дата рождения</p>
+                        <input class="form_input" placeholder="Введите дату рождения" type="date">
+                    </div>
+
+
+                </div>
+            </div>
+
         </div>
     </div>
 </div>
