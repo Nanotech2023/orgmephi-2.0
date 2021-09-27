@@ -2,7 +2,7 @@ import { Component, HostListener, OnInit } from '@angular/core'
 import { Store } from '@ngrx/store'
 import { AuthActions, AuthSelectors, AuthState } from '@/auth/store'
 import { Observable } from 'rxjs'
-import { ErrorValue, TypeAuthCredentials } from '@/auth/models'
+import { LoginRequestUser } from '@api/users/models'
 import { fixedHeight } from '@/shared/consts'
 
 
@@ -13,39 +13,35 @@ import { fixedHeight } from '@/shared/consts'
 } )
 export class LoginComponent implements OnInit
 {
-    loginAttempt: TypeAuthCredentials
+    loginAttempt: LoginRequestUser
     isAuthenticated$!: Observable<boolean>
-    error$!: Observable<ErrorValue[] | null>
     containerHeight: number
 
     constructor( private readonly store: Store<AuthState.State> )
     {
-        this.loginAttempt = { username: '', password: '' }
+        this.loginAttempt = { username: '', password: '', remember_me: false }
         this.containerHeight = fixedHeight
     }
 
     ngOnInit(): void
     {
-        this.isAuthenticated$ = this.store.select( AuthSelectors.selectIsAuthenticated )
-        this.error$ = this.store.select( AuthSelectors.selectError )
+        this.isAuthenticated$ = this.store.select( AuthSelectors.selectIsAuthorized )
     }
 
     @HostListener( 'window:resize', [ '$event' ] )
-    onResize()
+    onResize(): void
     {
         this.containerHeight = fixedHeight
     }
 
-    login( loginAttemptUser: TypeAuthCredentials ): void
+    login( loginAttempt: LoginRequestUser ): void
     {
-        const authentication = { authentication: { authCredentials: loginAttemptUser } }
-        const requestLogin = { authCredentials: loginAttemptUser, rememberMe: true }
-        this.store.dispatch( AuthActions.loginAttempt( { requestLogin: requestLogin } ) )
+        this.store.dispatch( AuthActions.loginRequest( { loginRequestUser: loginAttempt } ) )
     }
 
-    isValid( loginAttemptUser: TypeAuthCredentials ): boolean
+    isValid( loginAttemptUser: LoginRequestUser ): boolean
     {
         // TODO enforce email regex check
-        return !!( loginAttemptUser.password && loginAttemptUser.username )
+        return !!( loginAttemptUser.username && loginAttemptUser.password )
     }
 }

@@ -1,0 +1,60 @@
+<div #modal class="add-user-modal" *ngIf="modalVisible">
+    <div class="add-user-modal-content">
+        <svg (click)="modalVisible = false" width="22" height="23" viewBox="0 0 22 23" fill="none"
+             xmlns="http://www.w3.org/2000/svg">
+            <path d="M5.5 5.92773L17.2097 17.6374" stroke="#14142B" stroke-width="2" stroke-linecap="round"
+                  stroke-linejoin="round"/>
+            <path d="M4.5 17.6367L16.2097 5.92702" stroke="#14142B" stroke-width="2" stroke-linecap="round"
+                  stroke-linejoin="round"/>
+        </svg>
+        <div class="add-user-form-container">
+            <h2></h2>
+            <h4>Просьба заполнить все поля</h4>
+            <br/>
+            <ng-container *ngIf="isCreated; else registrationForm">
+                <div class="alert alert-success" *ngIf="isCreated">
+                    Регистрация успешно завершена
+                </div>
+            </ng-container>
+
+            <ng-template #registrationForm>
+                <div class="form-group row">
+                    <div class="col-sm-12">
+                        <input class="form-control" type="text" required
+                               [(ngModel)]="createBaseOlympiadRequestTaskCreator.name"
+                               #name="ngModel"
+                               name="name"
+                               placeholder="name">
+                        <div *ngIf="name.invalid && (name.dirty || name.touched)"
+                             class="error-message">
+                            <div *ngIf="name.errors?.required">
+                                Поле обязательно для заполнения
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <br/>
+                <div class="form-group row">
+                    <div class="col-sm-12">
+                        <input class="form-control" type="text" required
+                               [(ngModel)]="createBaseOlympiadRequestTaskCreator.description"
+                               #description="ngModel"
+                               name="description"
+                               placeholder="description">
+                        <div *ngIf="description.invalid && (description.dirty || description.touched)"
+                             class="error-message">
+                            <div *ngIf="description.errors?.required">
+                                Поле обязательно для заполнения
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <br/>
+
+                <button type="submit" class="btn btn-primary" [disabled]="!isValid()" (click)="create()">
+                    Создать
+                </button>
+            </ng-template>
+        </div>
+    </div>
+</div>

@@ -1,8 +1,8 @@
 import { Component } from '@angular/core'
 import { AuthActions, AuthState } from '@/auth/store'
 import { Store } from '@ngrx/store'
-import { RequestRegistration, RequestRegistrationSchool, TypeUserType, TypeUserTypeSchool } from '@/auth/models'
-import { Agreements } from '@/auth/models/agreements'
+import { SchoolRegistrationRequestUser } from '@api/users/models'
+import { Agreements } from '@/auth/agreements'
 
 
 @Component( {
@@ -13,22 +13,22 @@ import { Agreements } from '@/auth/models/agreements'
 export class RegisterComponent
 {
     agreements: string[] = Agreements
-    registerTypes: TypeUserTypeSchool[] = [ TypeUserTypeSchool.PreUniversity, TypeUserTypeSchool.School, TypeUserTypeSchool.Enrollee ]
+    registerTypes: SchoolRegistrationRequestUser.RegisterTypeEnum[] = [ SchoolRegistrationRequestUser.RegisterTypeEnum.PreUniversity, SchoolRegistrationRequestUser.RegisterTypeEnum.School, SchoolRegistrationRequestUser.RegisterTypeEnum.Enrollee ]
 
-    registerAttempt: RequestRegistration // TODO switch to RequestRegistration
+    registerAttempt: SchoolRegistrationRequestUser // TODO support RequestRegistrationUniversity
     isRegistered: boolean
 
-    selectedUserType: TypeUserType | null
+    selectedUserType: SchoolRegistrationRequestUser.RegisterTypeEnum | null
     hasRegisterNumber: boolean
     agreementAccepted: boolean
 
     constructor( private readonly store: Store<AuthState.State> )
     {
         this.registerAttempt = {
-            authInfo: { email: '', password: '' },
-            registerType: this.registerTypes[ 0 ],
-            personalInfo: { dateOfBirth: '', firstName: '', secondName: '', middleName: '' },
-            registerConfirm: { registrationNumber: '', password: '' }
+            auth_info: { email: '', password: '' },
+            register_type: this.registerTypes[ 0 ],
+            personal_info: { first_name: '', second_name: '', middle_name: '', date_of_birth: '' },
+            // register_confirm: { registration_number: 0, password: '' }
         }
         this.isRegistered = false
         this.agreementAccepted = false
@@ -36,24 +36,24 @@ export class RegisterComponent
         this.hasRegisterNumber = false
     }
 
-    selectRegisterType( userType: TypeUserTypeSchool ): void
+    selectRegisterType( userType: SchoolRegistrationRequestUser.RegisterTypeEnum ): void
     {
         this.selectedUserType = userType
     }
 
     isAvailable(): boolean
     {
-        return this.selectedUserType !== null && this.selectedUserType == TypeUserTypeSchool.School
+        return this.selectedUserType !== null && this.selectedUserType == SchoolRegistrationRequestUser.RegisterTypeEnum.School
     }
 
-    isValid( registration: RequestRegistration ): boolean
+    isValid( registration: SchoolRegistrationRequestUser ): boolean
     {
         return this.agreementAccepted
     }
 
-    register( registerUser: RequestRegistration ): void
+    register( registerUser: SchoolRegistrationRequestUser ): void
     {
         this.isRegistered = true
-        this.store.dispatch( AuthActions.registerAttempt( { requestRegistration: registerUser } ) )
+        this.store.dispatch( AuthActions.registerRequest( { registrationRequestUser: registerUser } ) )
     }
 }

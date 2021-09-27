@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core'
 import { select, Store } from '@ngrx/store'
 import { AuthSelectors, AuthState } from '@/auth/store'
 import { Observable } from 'rxjs'
-import { TypeUserInfo } from '@/auth/models'
+import { User, UserInfo } from '@api/users/models'
 
 
 @Component( {
@@ -12,15 +12,18 @@ import { TypeUserInfo } from '@/auth/models'
 } )
 export class InnerHeaderComponent implements OnInit
 {
-    userInfo!: Observable<TypeUserInfo | null>
     isAuthorized$!: Observable<boolean>
+    hasAccessToManagePages$!: Observable<boolean>
+    user$!: Observable<User | null>
+    userInfo$!: Observable<UserInfo | null>
 
     constructor( private store: Store<AuthState.State> ) { }
 
     ngOnInit(): void
     {
-        this.isAuthorized$ = this.store.pipe( select( AuthSelectors.selectIsAuthenticated ) )
-        this.userInfo = this.store.pipe( select( AuthSelectors.selectUserInfo ) )
+        this.isAuthorized$ = this.store.pipe( select( AuthSelectors.selectIsAuthorized ) )
+        this.hasAccessToManagePages$ = this.store.pipe( select( AuthSelectors.selectAccessToManagePages ) )
+        this.user$ = this.store.pipe( select( AuthSelectors.selectUser ) )
+        this.userInfo$ = this.store.pipe( select( AuthSelectors.selectUserInfo ) )
     }
-
 }

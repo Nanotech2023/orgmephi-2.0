@@ -1,45 +1,39 @@
 import { createAction, props } from '@ngrx/store'
-import {
-    ErrorResponse,
-    RequestLogin,
-    RequestRegistration,
-    ResponseLogin,
-    ResponseRegistration, TypeRegistrationPersonalInfo,
-    TypeUserInfo
-} from '@/auth/models'
+import { CSRFPairUser, LoginRequestUser, SchoolRegistrationRequestUser, User, UserInfo } from '@api/users/models'
 
 
-export const loginAttempt = createAction(
-    '[Auth] Login Attempt',
-    props<{ requestLogin: RequestLogin }>()
+export const loginRequest = createAction(
+    '[Auth] Login Request',
+    props<{ loginRequestUser: LoginRequestUser }>()
 )
-
 export const loginSuccess = createAction(
     '[Auth] Login Success',
-    props<{ responseLogin: ResponseLogin }>()
+    props<{ csrfPair: CSRFPairUser }>()
 )
 
-export const loginError = createAction(
-    '[Auth] Login Error',
-    props<{ error: ErrorResponse }>()
-)
 
-export const registerAttempt = createAction(
-    '[Auth] Register Attempt',
-    props<{ requestRegistration: RequestRegistration }>()
+export const registerRequest = createAction(
+    '[Auth] Register Request',
+    props<{ registrationRequestUser: SchoolRegistrationRequestUser }>()
 )
-
 export const registerSuccess = createAction(
-    '[Auth] Register Success',
-    props<{ responseRegistration: ResponseRegistration }>()
+    '[Auth] Register Success'
 )
 
-export const registerError = createAction(
-    '[Auth] Register Error',
-    props<{ error: ErrorResponse }>()
+
+export const getUserRequest = createAction(
+    '[Auth] Get User Request'
+)
+export const getUserSuccess = createAction(
+    '[Auth] Get User Success',
+    props<{ user: User }>()
 )
 
-export const pushPersonalInfo = createAction(
-    '[Auth] Push Personal Info',
-    props<{ personalInfo: TypeRegistrationPersonalInfo }>()
+
+export const getUserInfoRequest = createAction(
+    '[Auth] Get User Info Request'
+)
+export const getUserInfoSuccess = createAction(
+    '[Auth] Get User Info Success',
+    props<{ userInfo: UserInfo }>()
 )

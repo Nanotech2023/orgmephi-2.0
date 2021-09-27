@@ -1,36 +1,50 @@
 import { createFeatureSelector, createSelector, MemoizedSelector } from '@ngrx/store'
 import { featureKey, State } from '@/auth/store/auth.reducer'
-import { ErrorValue, TypeCSRFPair, TypePersonalInfo, TypeUserInfo } from '@/auth/models'
+import { CSRFPairUser, User, UserInfo } from '@api/users/models'
 
 
 export const selectFeature: MemoizedSelector<object, State> = createFeatureSelector<State>( featureKey )
 
-export const selectApiKeys: MemoizedSelector<State, TypeCSRFPair | null> = createSelector(
+export const selectApiKeys: MemoizedSelector<State, CSRFPairUser> = createSelector(
     selectFeature,
     ( state: State ) =>
-        state.csrfTokens
+        state.csrfTokens!
 )
 
-export const selectIsAuthenticated: MemoizedSelector<State, boolean> = createSelector(
+export const selectIsAuthorized: MemoizedSelector<State, boolean> = createSelector(
     selectFeature,
     ( state: State ) =>
         state.csrfTokens !== null
 )
 
-export const selectUserInfo: MemoizedSelector<State, TypeUserInfo | null> = createSelector(
+export const selectUser: MemoizedSelector<State, User> = createSelector(
     selectFeature,
     ( state: State ) =>
-        state.userInfo
+        state.user!
+)
+export const selectUserInfo: MemoizedSelector<State, UserInfo> = createSelector(
+    selectFeature,
+    ( state: State ) =>
+        state.userInfo!
 )
 
-export const selectPersonalInfo: MemoizedSelector<State, TypePersonalInfo | null> = createSelector(
+export const selectIsParticipant: MemoizedSelector<State, boolean> = createSelector(
     selectFeature,
     ( state: State ) =>
-        state.personalInfo
+        state.user?.role === User.RoleEnum.Participant
 )
 
-export const selectError: MemoizedSelector<State, ErrorValue[] | null> = createSelector(
+export const selectAccessToManagePages: MemoizedSelector<State, boolean> = createSelector(
     selectFeature,
     ( state: State ) =>
-        state.errors
+        state.user?.role === User.RoleEnum.Creator || state.user?.role === User.RoleEnum.Admin || state.user?.role === User.RoleEnum.System
+)
+
+export const copy: MemoizedSelector<State, UserInfo> = createSelector(
+    selectFeature,
+    ( state: State ) =>
+    {
+        const result: UserInfo = { ...state.userInfo }
+        return result
+    }
 )

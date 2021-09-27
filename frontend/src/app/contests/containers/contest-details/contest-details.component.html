@@ -1,0 +1,95 @@
+<ng-container *ngIf="contest$ | async as contest">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-4">
+                <div class="olymp_title_container">
+                    <div class="olymp_status">
+                        <span>СЛОТ Статус</span>
+                    </div>
+                    <div class="olymp_title">
+                        {{ contest.base_contest.name }}
+                    </div>
+                    <div class="olymp_subtitle">
+                        <span>{{ getTargetClassesDisplay( contest ) }}</span>
+                        <span>{{ contest.base_contest?.subject }}</span>
+                        <span>СЛОТ Уровень 1 ?????</span>
+                    </div>
+                    <div class="olymp_links">
+                        <a>СЛОТ ссылка на сайт олимпиады</a>
+                        <a>СЛОТ ссылка на регламент олимпиады</a>
+                        <a>СЛОТ ссылка на положение олимпиады</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-8">
+                <div class="olymp_stages">
+                    <div class="olymp_stages_content">
+                        <div class="olymp_stage" #stage1>
+                            <div class="olymp_stage_title">
+                                <svg width="48" height="48" viewBox="0 0 48 48" fill="none"
+                                     xmlns="http://www.w3.org/2000/svg">
+                                    <rect x="1" y="1" width="36" height="36" rx="23" fill="#171717"/>
+                                    <rect x="1" y="1" width="36" height="36" rx="23" stroke="#171717" stroke-width="2"/>
+                                    <text x="11" y="26" font-size="25" fill="white">1</text>
+                                </svg>
+                                Заполнение анкеты
+                                <div class="divider"></div>
+                            </div>
+                            <div class="olymp_stage_content">
+                                <div class="row">
+                                    <div class="col-md-1">ICON</div>
+                                    <div class="col-md-6">Для участия в олимпиаде НИЯУ МИФИ, вам необходимо заполнить
+                                        анкету участника олимпиады
+                                    </div>
+                                    <div class="col-md-5">
+                                        <div class="stage_action">
+                                            <a [routerLink]="['/profile']">
+                                                <button class="stage_action_button">Заполнить анкету</button>
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="olymp_stage" #stage2>
+                            <div class="olymp_stage_title">
+                                <svg width="48" height="48" viewBox="0 0 48 48" fill="none"
+                                     xmlns="http://www.w3.org/2000/svg">
+                                    <rect x="1" y="1" width="36" height="36" rx="23" fill="#171717"/>
+                                    <rect x="1" y="1" width="36" height="36" rx="23" stroke="#171717" stroke-width="2"/>
+                                    <!--       тут слот для номера этапа                         -->
+                                    <text x="11" y="27" font-size="25" fill="white">2</text>
+                                </svg>
+                                СЛОТ НАЗВАНИЕ ЭТАПА Отборочный этап
+                                <div class="divider"></div>
+                            </div>
+                            <div class="olymp_stage_content">
+                                <div class="row">
+                                    <div class="col-md-1">
+                                        <svg width="22" height="22" viewBox="0 0 22 22" fill="none"
+                                             xmlns="http://www.w3.org/2000/svg">
+                                            <path
+                                                d="M21.4 7C22.2 6.2 22.2 5 21.4 4.2L17.8 0.6C17 -0.2 15.8 -0.2 15 0.6L0 15.6V22H6.4L21.4 7ZM16.4 2L20 5.6L17 8.6L13.4 5L16.4 2ZM2 20V16.4L12 6.4L15.6 10L5.6 20H2Z"
+                                                fill="#565656"/>
+                                        </svg>
+                                    </div>
+                                    <div class="col-md-6">
+                                        Описание
+                                        {{ contest.base_contest.description }}
+                                    </div>
+                                    <div class="col-md-5">
+                                        <div class="stage_action">
+                                            <a [routerLink]="['register']">
+                                                <button class="stage_action_button">Принять участие</button>
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</ng-container>
