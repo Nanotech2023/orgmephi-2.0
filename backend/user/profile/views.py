@@ -261,7 +261,10 @@ def check_filled():
         - JWTAccessToken: [ ]
       responses:
         '200':
-          description: Returns missing fields
+          description: OK
+          content:
+            application/pdf:
+              schema: SelfUnfilledResponseSchema
         '404':
           description: User not found
     """
