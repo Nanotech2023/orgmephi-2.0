@@ -43,8 +43,8 @@
       border: 2px solid $black;
       box-sizing: border-box;
       border-radius: 100px;
-      width: 100px;
-      height: 100px;
+      width: 120px;
+      height: 120px;
       float: right;
     }
 
@@ -64,6 +64,19 @@
       line-height: 18px;
       letter-spacing: 0.16px;
       color: $grey;
+    }
+    
+    .photo_button{
+      border: none;
+      height: 48px;
+      width: 50%;
+      font-style: normal;
+      font-weight: normal;
+      font-size: 14px;
+      line-height: 18px;
+      letter-spacing: 0.16px;
+      color: #FFFFFF;
+      background-color: $black;
     }
   }
 
@@ -90,6 +103,26 @@
         border-top: none;
         width: 100%;
       }
+    }
+
+    button {
+      border: none;
+      height: 56px;
+      width: 50%;
+      font-style: normal;
+      font-weight: normal;
+      font-size: 14px;
+      line-height: 18px;
+      letter-spacing: 0.16px;
+      color: #FFFFFF;
+    }
+
+    button.save {
+      background-color: $blue;
+    }
+
+    button.cancel {
+      background-color: black;
     }
   }
 }

@@ -10,7 +10,7 @@
                 </div>
             </div>
         </div>
-        <div class="col-md-8">
+        <div class="col-md-8" *ngIf="userInfo$ | async as userInfo">
             <div class="profile_container">
                 <div class="photo_container">
                     <div class="row">
@@ -20,6 +20,7 @@
                         <div class="col-md-6">
                             <p class="photo_title">Фото профиля</p>
                             <p class="photo_subtitle">Только .jpg и .png файлы. Максимальный размер файла 500кб.</p>
+                            <button class="photo_button">Заменить</button>
                         </div>
                     </div>
 
@@ -27,15 +28,15 @@
                 <div class="form_container">
                     <div class="form_item">
                         <p class="form_label">Фамилия</p>
-                        <input class="form_input" placeholder="Введите фамилию">
+                        <input class="form_input" placeholder="Введите фамилию" *ngFor="userInfo.second_name">
                     </div>
                     <div class="form_item">
                         <p class="form_label">Имя</p>
-                        <input class="form_input" placeholder="Введите имя">
+                        <input class="form_input" placeholder="Введите имя" *ngFor="userInfo.first_name">
                     </div>
                     <div class="form_item">
                         <p class="form_label">Email</p>
-                        <input class="form_input" type="email" placeholder="Введите email">
+                        <input class="form_input" type="email" placeholder="Введите email" *ngFor="userInfo.email">
                     </div>
                     <div class="form_item">
                         <p class="form_label">Пароль</p>
@@ -47,10 +48,12 @@
                     </div>
                     <div class="form_item">
                         <p class="form_label">Дата рождения</p>
-                        <input class="form_input" placeholder="Введите дату рождения" type="date">
+                        <input class="form_input" placeholder="Введите дату рождения" type="date" *ngFor="userInfo.date_of_birth">
                     </div>
-
-
+                    <div class="form_item">
+                        <button class="save">Сохранить</button>
+                        <button class="cancel">Отменить</button>
+                    </div>
                 </div>
             </div>
 
