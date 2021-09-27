@@ -337,10 +337,6 @@ class SimpleContest(Contest):
             else:
                 return None
 
-    @tasks_number.expression
-    def tasks_number(cls):
-        return select(func.count(Variant.variant_id) > 0).where(Variant.contest_id == cls.contest_id).scalar_subquery()
-
     @hybrid_property
     def total_points(self):
         if not self.variants:
@@ -357,10 +353,6 @@ class SimpleContest(Contest):
                     return None
             else:
                 return None
-
-    @total_points.expression
-    def total_points(cls):
-        return select(func.count(Variant.variant_id) > 0).where(Variant.contest_id == cls.contest_id).scalar_subquery()
 
     @hybrid_property
     def status(self):
