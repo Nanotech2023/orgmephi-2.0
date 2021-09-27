@@ -1,11 +1,24 @@
 @import "./src/styles/colors";
 
-.container_main{
+.header_logo {
+  position: static;
+  width: 97px;
+  height: 64px;
+  left: 90px;
+  top: 0px;
+  flex: none;
+  order: 1;
+  flex-grow: 0;
+  margin: 0px 24px;
+}
+
+.container_main {
   padding-right: 10%;
   padding-left: 10%;
   margin: auto;
   overflow: auto;
 }
+
 .form-signin .checkbox {
   font-weight: 400;
 }

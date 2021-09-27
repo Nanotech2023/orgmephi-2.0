@@ -7,6 +7,7 @@ import {
 } from '@api/tasks/model'
 import { Observable } from 'rxjs'
 import { TasksService } from '@api/tasks/tasks.service'
+import { Router } from '@angular/router'
 
 
 @Component( {
@@ -19,7 +20,7 @@ export class ContestRegistrationComponent
     contest$: Observable<SimpleContestWithFlagResponseTaskParticipant | undefined>
     locations!: Array<OlympiadLocation>
 
-    constructor( private contestsStore: ContestsStore, private tasksService: TasksService )
+    constructor( private contestsStore: ContestsStore, private tasksService: TasksService, private router: Router )
     {
         this.contest$ = contestsStore.selectedContest
         this.tasksService.tasksUnauthorizedLocationAllGet().subscribe( items => this.locations = items.locations )
@@ -44,5 +45,6 @@ export class ContestRegistrationComponent
         {
             this.contestsStore.getVariant( contestId as number )
         }
+        this.router.navigate( [ '/contests/:id/assignment' ] )
     }
 }
