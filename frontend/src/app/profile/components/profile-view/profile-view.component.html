@@ -15,7 +15,7 @@
                 <div class="photo_container">
                     <div class="row">
                         <div class="col-md-3">
-                            <img src="" alt="photo">
+                            <img src="/assets/profile.png">
                         </div>
                         <div class="col-md-6">
                             <p class="photo_title">Фото профиля</p>
@@ -28,15 +28,34 @@
                 <div class="form_container">
                     <div class="form_item">
                         <p class="form_label">Фамилия</p>
-                        <input class="form_input" placeholder="Введите фамилию" *ngFor="userInfo.second_name">
+                        <input class="form_input" placeholder="Введите фамилию" [(ngModel)]="userInfo.second_name">
                     </div>
                     <div class="form_item">
                         <p class="form_label">Имя</p>
-                        <input class="form_input" placeholder="Введите имя" *ngFor="userInfo.first_name">
+                        <input class="form_input" placeholder="Введите имя" [(ngModel)]="userInfo.first_name">
+                    </div>
+                    <div class="form_item">
+                        <p class="form_label">Отчество</p>
+                        <input class="form_input" placeholder="Введите отчество" [(ngModel)]="userInfo.middle_name">
+                    </div>
+                    <div class="form_item">
+                        <p class="form_label">Дата рождения</p>
+                        <input class="form_input" placeholder="Введите дату рождения" type="date"
+                               [(ngModel)]="userInfo.date_of_birth">
+                    </div>
+                    <div class="form_item">
+                        <p class="form_label">Место рождения</p>
+                        <input class="form_input" placeholder="Введите место рождения" type="text"
+                               [(ngModel)]="userInfo.place_of_birth">
                     </div>
                     <div class="form_item">
                         <p class="form_label">Email</p>
-                        <input class="form_input" type="email" placeholder="Введите email" *ngFor="userInfo.email">
+                        <input class="form_input" type="email" placeholder="Введите email" [(ngModel)]="userInfo.email">
+                    </div>
+                    <div class="form_item">
+                        <p class="form_label">Номер телефона</p>
+                        <input class="form_input" placeholder="Введите номер телефона" type="text"
+                               [(ngModel)]="userInfo.phone">
                     </div>
                     <div class="form_item">
                         <p class="form_label">Пароль</p>
@@ -45,10 +64,6 @@
                     <div class="form_item">
                         <p class="form_label">Подтвердить пароль</p>
                         <input class="form_input" placeholder="Введите пароль" type="password">
-                    </div>
-                    <div class="form_item">
-                        <p class="form_label">Дата рождения</p>
-                        <input class="form_input" placeholder="Введите дату рождения" type="date" *ngFor="userInfo.date_of_birth">
                     </div>
                     <div class="form_item">
                         <button class="save">Сохранить</button>
