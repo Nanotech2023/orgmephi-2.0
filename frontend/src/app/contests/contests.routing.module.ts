@@ -22,7 +22,7 @@ export const COMPONENTS = [
 const routes: Routes =
     [
         {
-            path: '/home', component: HomeComponent, canActivate: [ AuthGuardService ]
+            path: 'home', component: HomeComponent, canActivate: [ AuthGuardService ]
         },
         {
             path: 'contests', component: ContestListComponent, canActivate: [ AuthGuardService ]

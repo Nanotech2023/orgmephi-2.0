@@ -18,19 +18,6 @@ export class ContestDetailsComponent
         this.contest$ = this.contestsStore.selectedContest
     }
 
-    onEnrollClick( contestId: number, locationId: number )
-    {
-        this.contestsStore.enroll( {
-            contestId: contestId,
-            enrollRequestTaskParticipant: { location_id: locationId }
-        } )
-    }
-
-    onStartClick( contestId: number ): void
-    {
-        this.contestsStore.getVariant( contestId )
-    }
-
     getTargetClassesDisplay( contest: SimpleContestWithFlagResponseTaskParticipant ): string
     {
         return contest?.contest?.base_contest?.target_classes?.map( item => item.target_class ).join( "," ) + " классы"

@@ -44,7 +44,6 @@ export class ContestsStore extends ComponentStore<ContestsState>
 
     readonly contests: Observable<SimpleContestWithFlagResponseTaskParticipant[]> = this.select( state => state.contests )
     readonly selectedContest: Observable<SimpleContestWithFlagResponseTaskParticipant | undefined> = this.select( state => state.selectedContest )
-    // readonly locations: Observable<Contest | undefined> = this.select( state => state.selectedContest )
     private readonly loading$: Observable<boolean> = this.select( state => state.callState === LoadingState.LOADING )
     private readonly error$: Observable<string | null> = this.select( state => getError( state.callState ) )
 
@@ -87,24 +86,11 @@ export class ContestsStore extends ComponentStore<ContestsState>
             variant: variant
         } ) )
 
-
-    readonly setLocations = this.updater( ( state: ContestsState, locations: Array<OlympiadLocation> ) =>
-        ( {
-            ...state,
-            locations: locations
-        } ) )
     // EFFECTS
 
     readonly fetchAll = this.effect( () =>
     {
         this.setLoading()
-        this.tasksService.tasksUnauthorizedLocationAllGet().pipe(
-            tapResponse(
-                ( response: AllLocationResponseTaskUnauthorized ) => this.setLocations( response.locations ),
-                ( error: string ) => this.updateError( error )
-            ),
-            catchError( () => EMPTY )
-        )
         return this.tasksService.tasksParticipantOlympiadAllGet().pipe(
             tapResponse(
                 ( response: FilterSimpleContestResponseTaskParticipant ) => this.setContests( response.contest_list ?? [] ),
