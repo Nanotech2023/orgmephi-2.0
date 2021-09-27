@@ -42,7 +42,7 @@ export class AuthEffects
                             this.authService.configuration.credentials[ "CSRFAccessToken" ] = csrfPair.csrf_access_token
                             this.tasksService.configuration.credentials[ "CSRFAccessToken" ] = csrfPair.csrf_access_token
                             this.responsesService.configuration.credentials[ "CSRFAccessToken" ] = csrfPair.csrf_access_token
-                            this.router.navigate( [ '/profile' ] )
+                            this.router.navigate( [ '/home' ] )
                             return of( loginSuccess( {
                                 csrfPair: {
                                     csrf_access_token: csrfPair.csrf_access_token,
