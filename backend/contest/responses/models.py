@@ -32,9 +32,6 @@ class ResponseStatusEnum(enum.Enum):
     no_results = 'NoResults'
 
 
-work_status = {status.value: status for status in ResponseStatusEnum}
-
-
 def add_user_response(db_session, user_id, contest_id):
     user_work = Response(
         user_id=user_id,
@@ -79,10 +76,10 @@ class Response(db.Model):
     def get_status(self):
         from common.util import db_get_one_or_none
         from contest.tasks.models.olympiad import SimpleContest
-        contest: SimpleContest= db_get_one_or_none(SimpleContest, 'contest_id', self.contest_id)
-        if self.work_status == work_status['Accepted']:
+        contest: SimpleContest = db_get_one_or_none(SimpleContest, 'contest_id', self.contest_id)
+        if self.work_status == ResponseStatusEnum.accepted:
             if datetime.utcnow() < contest.result_publication_date:
-                return work_status['NoResults']
+                return ResponseStatusEnum.no_results
         return self.work_status
 
     @hybrid_property
@@ -92,7 +89,7 @@ class Response(db.Model):
         thread = db_get_one_or_none(Thread, 'related_work_id', self.work_id)
         if thread is not None:
             if thread.status == ThreadStatus.open and thread.thread_type == ThreadType.appeal:
-                return work_status['Appeal']
+                return ResponseStatusEnum.appeal
             else:
                 return self.get_status()
         else:

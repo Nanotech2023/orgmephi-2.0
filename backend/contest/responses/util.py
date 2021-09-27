@@ -6,8 +6,8 @@ from common.util import db_get_one_or_none, db_exists, db_get_or_raise, db_get_l
 from contest.tasks.models import SimpleContest, RangeTask, MultipleChoiceTask, PlainTask, ContestHoldingTypeEnum, \
     UserInContest
 from .models import Response, PlainAnswerText, RangeAnswer, MultipleChoiceAnswer, PlainAnswerFile, BaseAnswer, \
-    answer_dict, work_status, add_user_response, add_plain_answer_file, add_plain_answer_text, add_range_answer, \
-    add_multiple_answer
+    answer_dict, add_user_response, add_plain_answer_file, add_plain_answer_text, add_range_answer, \
+    add_multiple_answer, ResponseStatusEnum
 from ..tasks.util import validate_file_size, is_task_in_contest
 
 db = get_current_db()
@@ -163,7 +163,7 @@ def check_contest_time_left(contest_id):
 
 def check_contest_duration(user_work: Response):
     time_left = calculate_time_left(user_work, False)
-    if user_work.work_status != work_status['InProgress'] or \
+    if user_work.work_status != ResponseStatusEnum.in_progress or \
             time_left + app.config['RESPONSE_EXTRA_MINUTES'] <= timedelta(seconds=0):
         finish_contest(user_work)
         raise TimingError("Olympiad is over for current user")
@@ -235,7 +235,7 @@ def create_user_response(contest_id, user_id):
 
 
 def finish_contest(user_work: Response):
-    user_work.work_status = work_status['NotChecked']
+    user_work.work_status = ResponseStatusEnum.not_checked
     user_in_contest: UserInContest = UserInContest.query.filter_by(contest_id=user_work.contest_id,
                                                                    user_id=user_work.user_id).one_or_none()
     user_in_contest.completed_the_contest = True
@@ -283,7 +283,7 @@ def update_multiple_answers(answers, answer):
 def calculate_time_left(user_work: Response, only_positive_time=True):
     contest: SimpleContest = db_get_one_or_none(SimpleContest, "contest_id", user_work.contest_id)
     contest_duration = contest.contest_duration
-    if user_work.work_status != work_status['InProgress']:
+    if user_work.work_status != ResponseStatusEnum.in_progress:
         return timedelta(seconds=0)
     time_spent = datetime.utcnow() - user_work.start_time
     if contest_duration == timedelta(seconds=0):
@@ -333,7 +333,7 @@ def check_user_work(user_work: Response):
                 answer.answer_type == answer_dict['PlainAnswerFile']:
             plain_count += 1
     if plain_count == 0:
-        user_work.work_status = work_status['Accepted']
+        user_work.work_status = ResponseStatusEnum.accepted
     db.session.commit()
 
 
@@ -384,7 +384,6 @@ def get_all_user_responses(user_id):
         except NotFound:
             dict_['mark'] = 0
             dict_['status'] = 'InProgress'
-            continue
         dict_['user_status'] = user_card.user_status
         contest = db_get_one_or_none(SimpleContest, 'contest_id', user_card.contest_id)
         dict_['contest_info'] = contest
@@ -392,4 +391,3 @@ def get_all_user_responses(user_id):
     return {
         'results': res
     }
-

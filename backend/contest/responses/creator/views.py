@@ -1,7 +1,6 @@
 import io
 from flask import request, send_file
 from common import get_current_module
-from common.util import db_get_list
 from contest.responses.util import *
 from contest.responses.model_schemas.schemas import AnswerSchema
 from .schemas import *
@@ -766,7 +765,7 @@ def auto_check_users_answers(contest_id):
     is_contest_over(contest_id)
     users_in_contest = db_get_list(Response, 'contest_id', contest_id)
     for user_work in users_in_contest:
-        if user_work.status == work_status['InProgress'] or user_work.status == work_status['NotChecked']:
+        if user_work.status == ResponseStatusEnum.in_progress or user_work.status == ResponseStatusEnum.not_checked:
             check_user_work(user_work)
     return {}, 200
 
