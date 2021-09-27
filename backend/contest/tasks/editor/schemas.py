@@ -3,7 +3,7 @@ from marshmallow_enum import EnumField
 
 from common import fields as common_fields
 from contest.tasks.models import OlympiadSubjectEnum, StageConditionEnum, ContestHoldingTypeEnum, \
-    UserStatusEnum, OlympiadLevelEnum
+    UserStatusEnum, OlympiadLevelEnum, TaskAnswerTypeEnum
 
 
 # Base contest
@@ -77,7 +77,7 @@ class UpdatePlainRequestTaskEditorSchema(Schema):
     recommended_answer = common_fields.Text(required=False)
     show_answer_after_contest = fields.Boolean(required=False)
     task_points = fields.Integer(required=False)
-    answer_type = EnumField(OlympiadSubjectEnum, required=False, by_value=True)
+    answer_type = EnumField(TaskAnswerTypeEnum, required=False, by_value=True)
 
 
 class UpdateRangeRequestTaskEditorSchema(Schema):

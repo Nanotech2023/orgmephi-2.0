@@ -8,7 +8,7 @@ from contest.tasks.model_schemas.contest import VariantSchema
 from contest.tasks.model_schemas.olympiad import ContestSchema, BaseContestSchema, StageSchema
 from contest.tasks.model_schemas.tasks import TaskSchema
 from contest.tasks.models import OlympiadSubjectEnum, StageConditionEnum, ContestHoldingTypeEnum, \
-    UserStatusEnum, OlympiadLevelEnum
+    UserStatusEnum, OlympiadLevelEnum, TaskAnswerTypeEnum
 
 
 # Base contest
@@ -141,7 +141,7 @@ class CreatePlainRequestTaskCreatorSchema(Schema):
     recommended_answer = common_fields.Text(required=True)
     show_answer_after_contest = fields.Boolean(required=False)
     task_points = fields.Integer(required=False)
-    answer_type = EnumField(OlympiadSubjectEnum, required=False, by_value=True)
+    answer_type = EnumField(TaskAnswerTypeEnum, required=False, by_value=True)
 
 
 class CreateRangeRequestTaskCreatorSchema(Schema):
