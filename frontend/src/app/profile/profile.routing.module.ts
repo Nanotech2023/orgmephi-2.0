@@ -1,18 +1,17 @@
 import { NgModule } from '@angular/core'
 import { RouterModule, Routes } from '@angular/router'
-import { ParticipantCabinetComponent } from '@/profile/components/participant-cabinet/participant-cabinet.component'
-import { ParticipantRegistrationFormComponent } from '@/profile/components/participant-registration-form/participant-registration-form.component'
+import { ProfileViewComponent } from '@/profile/components/profile-view/profile-view.component'
 import { AuthGuardService } from '@/shared/auth.guard.service'
 
 
 const routes: Routes =
     [
         {
-            path: 'profile', component: ParticipantCabinetComponent, canActivate: [ AuthGuardService ]
+            path: 'profile', component: ProfileViewComponent, canActivate: [ AuthGuardService ]
         },
-        {
-            path: 'profile/edit', component: ParticipantRegistrationFormComponent, canActivate: [ AuthGuardService ]
-        }
+        // {
+        //     path: 'profile/edit', component: ProfileEditComponent, canActivate: [ AuthGuardService ]
+        // }
     ]
 
 

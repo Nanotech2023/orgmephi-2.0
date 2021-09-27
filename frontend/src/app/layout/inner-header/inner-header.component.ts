@@ -24,6 +24,5 @@ export class InnerHeaderComponent implements OnInit
         this.isAuthorized$ = this.store.pipe( select( AuthSelectors.selectIsAuthorized ) )
         this.hasAccessToManagePages$ = this.store.pipe( select( AuthSelectors.selectAccessToManagePages ) )
         this.user$ = this.store.pipe( select( AuthSelectors.selectUser ) )
-        this.userInfo$ = this.store.pipe( select( AuthSelectors.selectUserInfo ) )
     }
 }
