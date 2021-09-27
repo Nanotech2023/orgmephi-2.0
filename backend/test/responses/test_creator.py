@@ -436,6 +436,22 @@ def test_auto_check_creator(client, create_user_with_answers):
     user_in_contest = UserInContest.query.filter_by(contest_id=contest_id, user_id=user_id).one_or_none()
     assert user_in_contest.user_status == UserStatusEnum.Winner_1
 
+    resp = client.get(f'/contest/user/{user_id}/results')
+    assert resp.status_code == 200
+
+    results = resp.json['results']
+    contest = results[0]['contest_info']
+    assert len(results) == 8
+    assert contest['subject'] == 'Math'
+
+    start_year = datetime.utcnow().year - 1 if datetime.utcnow().month < 6 else datetime.utcnow().year
+    end_year = datetime.utcnow().year if datetime.utcnow().month < 6 else datetime.utcnow().year + 1
+    assert contest['start_year'] == start_year
+    assert contest['end_year'] == end_year
+    assert results[0]['status'] == 'NoResults'
+    assert results[0]['mark'] == 23
+    assert results[0]['user_status'] == 'Winner 1'
+
 
 # noinspection DuplicatedCode
 def test_auto_check_status(client, create_three_tasks):
@@ -464,7 +480,8 @@ def test_auto_check_status(client, create_three_tasks):
 
     from contest.responses.util import user_answer_get, get_user_in_contest_work
     user_work = get_user_in_contest_work(user_id, contest_id)
-    assert user_work.status.value == 'Accepted'
+    assert user_work.status.value == 'NoResults'
+    assert user_work.work_status.value == 'Accepted'
     range_answer = user_answer_get(user_id, contest_id, range_id)
     assert range_answer.mark == 5
     multiple_answer = user_answer_get(user_id, contest_id, multiple_id)

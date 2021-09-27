@@ -315,10 +315,27 @@ class SimpleContest(Contest):
     locations = db.relationship('OlympiadLocation', secondary=locationInContest, lazy='subquery',
                                 backref=db.backref('contest', lazy=True))
 
+    name = association_proxy('base_contest', 'name')
+    subject = association_proxy('base_contest', 'subject')
+
     __mapper_args__ = {
         'polymorphic_identity': ContestTypeEnum.SimpleContest,
         'with_polymorphic': '*'
     }
+
+    @hybrid_property
+    def start_year(self):
+        if self.start_date.month < 6:
+            return self.start_date.year - 1
+        else:
+            return self.start_date.year
+
+    @hybrid_property
+    def end_year(self):
+        if self.start_date.month < 6:
+            return self.start_date.year
+        else:
+            return self.start_date.year + 1
 
     def change_previous(self, previous_contest_id=None, previous_participation_condition=None):
         if previous_contest_id is not None:

@@ -2,7 +2,9 @@ from marshmallow import Schema, fields
 from common import fields as common_fields
 from contest.responses.model_schemas.schemas import BaseAnswerSchema, AnswerWithoutMarkSchema
 from contest.responses.models import ResponseStatusEnum
+from contest.tasks.models.user import UserStatusEnum
 from marshmallow_enum import EnumField
+from contest.tasks.model_schemas.olympiad import ContestInfoSchema
 
 
 class AllUserAnswersResponseSchema(Schema):
@@ -55,3 +57,14 @@ class UserAnswerMarkResponseSchema(Schema):
 
 class UserTimeResponseRequestSchema(Schema):
     time = fields.TimeDelta(required=True, nullable=False)
+
+
+class UserResultsForContestResponseSchema(Schema):
+    mark = fields.Float(required=True)
+    status = EnumField(ResponseStatusEnum, by_value=True, required=True)
+    user_status = EnumField(UserStatusEnum, by_value=True, required=True)
+    contest_info = fields.Nested(nested=ContestInfoSchema, required=True)
+
+
+class AllUserResultsResponseSchema(Schema):
+    results = fields.List(fields.Nested(UserResultsForContestResponseSchema), required=True)
