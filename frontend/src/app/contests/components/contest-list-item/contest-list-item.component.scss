@@ -38,6 +38,7 @@
     border-bottom: 2px solid #171717;
     padding-top: 8%;
     padding-bottom: 8%;
+    width: 100%;
 
 
     .olymp_status {
@@ -108,6 +109,9 @@
   border-bottom: 2px solid #171717;
   padding-top: 8%;
   padding-bottom: 8%;
+  padding-left: 1%;
+  padding-left: 2%;
+  height: 400px;
 
 
   .olymp_status {
@@ -115,7 +119,7 @@
     flex-direction: row;
     align-items: flex-start;
     padding: 8px 12px;
-    width: 142px;
+    width: fit-content;
     height: 32px;
     background: #171717;
     border-radius: 18px;
@@ -170,5 +174,24 @@
 
   .olymp_link {
     padding-top: 10%;
+  }
+}
+
+.olymp_list_item:hover {
+  border: none;
+  background-image: linear-gradient(114.44deg, #206ac4 0%, #0055BB 44.27%, #023d85 100%);
+  transform: scale(1.01);
+  transition: all 500ms ease;
+
+  .olymp_status, .olymp_title, span, .olymp_subtitle span {
+    color: #FFFFFFFF;
+  }
+
+  .olymp_link {
+    svg, path {
+      color: #FFFFFFFF;
+      fill: #FFFFFFFF;
+      stroke: #FFFFFFFF;;
+    }
   }
 }

@@ -1,5 +1,5 @@
 import { Component, Input } from '@angular/core'
-import { SimpleContestWithFlagResponseTaskParticipant } from '@api/tasks/model'
+import { SimpleContest, SimpleContestWithFlagResponseTaskParticipant, TargetClass } from '@api/tasks/model'
 import { Router } from '@angular/router'
 import { ContestsStore } from '@/contests/contests.store'
 
@@ -23,9 +23,28 @@ export class ContestListItemComponent
         return this.router.navigate( [ "/contests", this.contest.contest?.contest_id ] )
     }
 
-    getClassesForDisplay(): string | undefined
+    getClassesForDisplay(): string
     {
-        return this.contest.contest?.base_contest?.target_classes?.map( item => item.target_class ).join( "," )
+        let targetClasses = this.contest.contest?.base_contest?.target_classes as TargetClass[]
+        if ( targetClasses && targetClasses.length )
+        {
+            return `${ targetClasses[ 0 ].target_class }-${ targetClasses[ targetClasses.length - 1 ].target_class }`
+        }
+        return ""
+    }
 
+    getStatusDisplay(): string
+    {
+        switch ( this.contest.contest?.status )
+        {
+            case SimpleContest.StatusEnum.WillStartSoon:
+                return "Скоро начнётся"
+            case SimpleContest.StatusEnum.InProgress:
+                return "Проходит"
+            case SimpleContest.StatusEnum.Finished:
+                return "Олимпиада завершена"
+            default:
+                return "Скоро начнётся"
+        }
     }
 }
