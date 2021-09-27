@@ -227,6 +227,7 @@ def test_get_contest_in_stage_self_error(client, test_composite_contest_with_use
 
 def test_olympiads_all(client, test_simple_contest, test_contests_composite):
     resp = client.get('/olympiad/all')
+    print(resp.data)
     assert resp.status_code == 200
     assert len(test_simple_contest + test_contests_composite) == resp.json['count']
 

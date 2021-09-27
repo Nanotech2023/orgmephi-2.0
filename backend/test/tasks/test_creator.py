@@ -22,6 +22,7 @@ def test_base_olympiad_create(client, test_olympiad_types):
                            'diploma_3_condition': '0.5',
                            'olympiad_type_id': f'{test_olympiad_types[0].olympiad_type_id}',
                            'subject': 'Math',
+                           'level': '1',
                        })
     assert resp.status_code == 200
 
@@ -36,6 +37,7 @@ def test_olympiad_create_simple(client, test_base_contests, test_stages):
                        json={
                            'start_date': f'{datetime.utcnow()}',
                            'end_date': f'{datetime.utcnow() + timedelta(hours=4)}',
+                           'regulations': 'Test 0',
                            'end_of_enroll_date': f'{datetime.utcnow() + timedelta(hours=1)}',
                            'result_publication_date': f'{datetime.utcnow() + timedelta(hours=6)}',
                            'visibility': 'false',
@@ -52,6 +54,7 @@ def test_olympiad_create_simple(client, test_base_contests, test_stages):
                            'start_date': f'{datetime.utcnow()}',
                            'end_date': f'{datetime.utcnow() + timedelta(hours=4)}',
                            'end_of_enroll_date': f'{datetime.utcnow() + timedelta(hours=1)}',
+                           'regulations': 'Test 0',
                            'result_publication_date': f'{datetime.utcnow() + timedelta(hours=6)}',
                            'previous_contest_id': f'{simple_contest.contest_id}',
                            'previous_participation_condition': f'{UserStatusEnum.Winner_1.value}',
@@ -65,6 +68,7 @@ def test_olympiad_create_simple(client, test_base_contests, test_stages):
                        json={
                            'start_date': f'{datetime.utcnow()}',
                            'end_date': f'{datetime.utcnow() + timedelta(hours=4)}',
+                           'regulations': 'Test 0',
                            'end_of_enroll_date': f'{datetime.utcnow() + timedelta(hours=1)}',
                            'result_publication_date': f'{datetime.utcnow() + timedelta(hours=6)}',
                            'previous_contest_id': f'{simple_contest.contest_id}',

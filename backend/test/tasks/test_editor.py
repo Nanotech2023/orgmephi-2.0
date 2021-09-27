@@ -42,6 +42,7 @@ def test_base_olympiad_patch(client, test_base_contests, test_olympiad_types):
                             'diploma_3_condition': '0.8',
                             'olympiad_type_id': f'{test_olympiad_types[0].olympiad_type_id}',
                             'subject': 'Physics',
+                            'level': '2',
                         })
     assert resp.status_code == 200
 
@@ -85,6 +86,7 @@ def test_olympiad_patch(client, test_base_contests, test_simple_contest, test_co
         json={
             'start_date': f'{new_start_date}',
             'end_date': f'{new_end_date}',
+            'regulations': 'Test 0',
             'end_of_enroll_date': f'{new_end_of_enroll_date}',
             'result_publication_date': f'{new_result_publication_date}',
             'visibility': 'true',

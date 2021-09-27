@@ -8,13 +8,13 @@ from contest.tasks.model_schemas.contest import VariantSchema
 from contest.tasks.model_schemas.olympiad import ContestSchema, BaseContestSchema, StageSchema
 from contest.tasks.model_schemas.tasks import TaskSchema
 from contest.tasks.models import OlympiadSubjectEnum, StageConditionEnum, ContestHoldingTypeEnum, \
-    UserStatusEnum
+    UserStatusEnum, OlympiadLevelEnum, TaskAnswerTypeEnum
 
 
 # Base contest
 
 class CreateBaseOlympiadRequestTaskCreatorSchema(Schema):
-    name = common_fields.CommonName(required=True)
+    name = common_fields.OlympiadName(required=True)
     description = common_fields.Text(required=True)
     rules = common_fields.Text(required=True)
     winner_1_condition = common_fields.FloatCondition(required=True)
@@ -25,6 +25,7 @@ class CreateBaseOlympiadRequestTaskCreatorSchema(Schema):
     diploma_3_condition = common_fields.FloatCondition(required=True)
     olympiad_type_id = fields.Int(required=True)
     subject = EnumField(OlympiadSubjectEnum, required=True, by_value=True)
+    level = EnumField(OlympiadLevelEnum, required=True, by_value=True)
 
 
 class BaseOlympiadResponseTaskCreatorSchema(BaseContestSchema):
@@ -40,6 +41,7 @@ class BaseOlympiadIdResponseTaskCreatorSchema(Schema):
 
 
 class CreateSimpleContestRequestTaskCreatorSchema(Schema):
+    regulations = common_fields.Text(required=True)
     start_date = fields.DateTime(required=True)
     end_date = fields.DateTime(required=True)
     end_of_enroll_date = fields.DateTime(required=False)
@@ -139,6 +141,7 @@ class CreatePlainRequestTaskCreatorSchema(Schema):
     recommended_answer = common_fields.Text(required=True)
     show_answer_after_contest = fields.Boolean(required=False)
     task_points = fields.Integer(required=False)
+    answer_type = EnumField(TaskAnswerTypeEnum, required=False, by_value=True)
 
 
 class CreateRangeRequestTaskCreatorSchema(Schema):

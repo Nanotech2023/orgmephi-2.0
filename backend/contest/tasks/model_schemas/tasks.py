@@ -1,3 +1,4 @@
+from marshmallow_enum import EnumField
 from marshmallow_oneofschema import OneOfSchema
 from marshmallow_sqlalchemy import SQLAlchemySchema, auto_field
 
@@ -21,6 +22,7 @@ class PlainTaskSchema(SQLAlchemySchema):
     recommended_answer = auto_field(column_name='recommended_answer', validate=text_validator, required=True)
     show_answer_after_contest = auto_field(column_name='show_answer_after_contest', required=False)
     task_points = auto_field(column_name='task_points', required=False)
+    answer_type = EnumField(TaskAnswerTypeEnum, data_key='answer_type', by_value=True, required=False)
 
 
 class RangeTaskSchema(SQLAlchemySchema):
