@@ -331,31 +331,20 @@ class SimpleContest(Contest):
         if not self.variants:
             return None
         else:
-            variant = self.variants.all()
-            if len(variant) != 0:
-                tasks = variant[0].tasks
+            if self.variants.count() != 0:
+                tasks = self.variants.first().tasks
                 return len(tasks)
             else:
                 return None
-
-    @tasks_number.expression
-    def tasks_number(cls):
-        # noinspection PyComparisonWithNone,PyUnresolvedReferences
-        return case([(select(func.count(Variant.variant_id) > 0).where(Variant.contest_id == cls.contest_id)
-                      .scalar_subquery(),
-                      select(Variant.tasks != None).where(Variant.contest_id == cls.contest_id)
-                      .scalar_subquery()
-                      )], else_=False)
 
     @hybrid_property
     def total_points(self):
         if not self.variants:
             return None
         else:
-            variant = self.variants.all()
-            if len(variant) != 0:
+            if self.variants.count() != 0:
                 sum_points = 0
-                tasks = variant[0].tasks
+                tasks = self.variants.first().tasks
                 if len(tasks) != 0:
                     for task in tasks:
                         sum_points += task.task_points
@@ -364,15 +353,6 @@ class SimpleContest(Contest):
                     return None
             else:
                 return None
-
-    @total_points.expression
-    def total_points(cls):
-        # noinspection PyComparisonWithNone,PyUnresolvedReferences
-        return case([(select(func.count(Variant.variant_id) > 0).where(Variant.contest_id == cls.contest_id)
-                      .scalar_subquery(),
-                      select(Variant.tasks != None).where(Variant.contest_id == cls.contest_id)
-                      .scalar_subquery()
-                      )], else_=False)
 
     @hybrid_property
     def status(self):

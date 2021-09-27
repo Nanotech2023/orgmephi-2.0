@@ -1,0 +1,52 @@
+.profile-left_name {
+  /* Heading 2 */
+  font-family: Inter;
+  font-style: normal;
+  font-weight: normal;
+  font-size: 42px;
+  line-height: 50px; /* or 119% */
+  color: #171717;
+  /* Inside Auto Layout */
+  flex: none;
+  order: 0;
+  align-self: stretch;
+  flex-grow: 0;
+  margin: 8px 0px;
+}
+
+.profile-left_info {
+  font-family: Inter;
+  font-style: normal;
+  font-weight: normal;
+  font-size: 16px;
+  line-height: 24px; /* identical to box height, or 150% */
+  color: #565656;
+  /* Inside Auto Layout */
+  flex: none;
+  order: 1;
+  align-self: stretch;
+  flex-grow: 0;
+  margin: 8px 0px;
+}
+
+.profile-input_label {
+  font-family: Inter;
+  font-style: normal;
+  font-weight: normal;
+  font-size: 12px;
+  line-height: 16px;
+  /* identical to box height, or 133% */
+  letter-spacing: 0.32px;
+  color: #565656;
+}
+
+.profile-input_input {
+  font-family: Inter;
+  font-style: normal;
+  font-weight: normal;
+  font-size: 14px;
+  line-height: 18px;
+  /* identical to box height, or 129% */
+  letter-spacing: 0.16px;
+  color: #8C8C8C;
+}

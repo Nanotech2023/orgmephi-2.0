@@ -15,6 +15,7 @@ import { ManageUsersModule } from '@/manage-users/manage-users.module'
 import { AuthGuardService } from '@/shared/auth.guard.service'
 import { TasksService } from '@api/tasks/tasks.service'
 import { ResponsesService } from '@api/responses/responses.service'
+import { ProfileModule } from '@/profile/profile.module'
 
 
 @NgModule( {
@@ -26,8 +27,7 @@ import { ResponsesService } from '@api/responses/responses.service'
         LayoutModule,
         AuthModule,
         ContestsModule,
-        // TODO fix profile module
-        // ProfileModule,
+        ProfileModule,
         ManageUsersModule,
         ManageContestsModule,
         AppRoutingModule,

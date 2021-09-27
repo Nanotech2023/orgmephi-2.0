@@ -2,8 +2,7 @@ import { Injectable } from '@angular/core'
 import { Actions, createEffect, ofType } from '@ngrx/effects'
 import { UsersService } from '@api/users/users.service'
 import {
-    getUserInfoRequest,
-    getUserInfoSuccess,
+    getUserRequest,
     getUserSuccess,
     loginRequest,
     loginSuccess,
@@ -13,7 +12,7 @@ import {
 import { catchError, concatMap, mergeMap, switchMap } from 'rxjs/operators'
 import { of } from 'rxjs'
 import { Router } from '@angular/router'
-import { CSRFPairUser, User, UserInfo } from '@api/users/models'
+import { CSRFPairUser, User } from '@api/users/models'
 import { TasksService } from '@api/tasks/tasks.service'
 import { ResponsesService } from '@api/responses/responses.service'
 
@@ -43,7 +42,7 @@ export class AuthEffects
                             this.authService.configuration.credentials[ "CSRFAccessToken" ] = csrfPair.csrf_access_token
                             this.tasksService.configuration.credentials[ "CSRFAccessToken" ] = csrfPair.csrf_access_token
                             this.responsesService.configuration.credentials[ "CSRFAccessToken" ] = csrfPair.csrf_access_token
-                            this.router.navigate( [ '/contests' ] )
+                            this.router.navigate( [ '/profile' ] )
                             return of( loginSuccess( {
                                 csrfPair: {
                                     csrf_access_token: csrfPair.csrf_access_token,
@@ -61,14 +60,14 @@ export class AuthEffects
     loginSuccess$ = createEffect( () =>
         this.actions$.pipe(
             ofType( loginSuccess ),
-            switchMap( () => [ getUserInfoRequest() ] )
+            switchMap( () => [ getUserRequest() ] )
         )
     )
 
 
     getUserRequest$ = createEffect( () =>
         this.actions$.pipe(
-            ofType( getUserInfoRequest ),
+            ofType( getUserRequest ),
             concatMap( () =>
                 this.authService.userProfileUserGet().pipe(
                     mergeMap( ( user: User ) => of( getUserSuccess( { user: user } ) ) ),
@@ -78,20 +77,7 @@ export class AuthEffects
         )
     )
 
-    getUserInfoRequest$ = createEffect( () =>
-        this.actions$.pipe(
-            ofType( getUserInfoRequest ),
-            concatMap( () =>
-                this.authService.userProfilePersonalGet().pipe(
-                    mergeMap( ( userInfo: UserInfo ) => of( getUserInfoSuccess( { userInfo: userInfo } ) ) ),
-                    catchError( error => of( error( { error: error } ) ) )
-                )
-            )
-        )
-    )
-
-
-    registerAttempt$ = createEffect( () =>
+    registerRequest$ = createEffect( () =>
         this.actions$.pipe
         (
             ofType( registerRequest ),

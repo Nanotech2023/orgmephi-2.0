@@ -10,3 +10,7 @@ class SelfPasswordRequestUserSchema(Schema):
 
 class SelfGroupsResponseUserSchema(Schema):
     groups = fields.Nested(GroupSchema, many=True, required=True)
+
+
+class SelfUnfilledResponseSchema(Schema):
+    unfilled = fields.List(fields.Dict())

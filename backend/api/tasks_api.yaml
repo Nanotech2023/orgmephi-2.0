@@ -453,12 +453,8 @@ components:
       properties:
         answer_type:
           enum:
-          - Math
-          - Physics
-          - Informatics
-          - Natural Sciences
-          - Engineering Sciences
-          - Other
+          - File
+          - Text
           type: string
         num_of_task:
           type: integer
@@ -1120,12 +1116,8 @@ components:
       properties:
         answer_type:
           enum:
-          - Math
-          - Physics
-          - Informatics
-          - Natural Sciences
-          - Engineering Sciences
-          - Other
+          - File
+          - Text
           type: string
         num_of_task:
           type: integer
