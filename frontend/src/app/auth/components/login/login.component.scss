@@ -1,159 +1,127 @@
 @import "./src/styles/colors";
 
-.header_logo {
-  position: static;
-  width: 97px;
-  height: 64px;
-  left: 90px;
-  top: 0px;
-  flex: none;
-  order: 1;
-  flex-grow: 0;
-  margin: 0px 24px;
+body, .container, .row, html {
+  height: 100vh
 }
 
-.container_main {
-  padding-right: 10%;
-  padding-left: 10%;
-  margin: auto;
-  overflow: auto;
-}
-
-.form-signin .checkbox {
-  font-weight: 400;
-}
-
-.form-signin .form-floating:focus-within {
-  z-index: 2;
-}
-
-.form-signin input[type="email"] {
-  margin-bottom: -1px;
-  border-bottom-right-radius: 0;
-  border-bottom-left-radius: 0;
-}
-
-.form-signin input[type="password"] {
-  margin-bottom: 10px;
-  border-top-left-radius: 0;
-  border-top-right-radius: 0;
-}
-
-.alert {
-  margin-top: 2%;
-}
-
-fieldset {
-  border: 0.5px solid rgba(0, 0, 0, 0.2);
-  padding: 2%;
-  margin-top: 2%;
-}
-
-
-.container_right, .container_left {
+body {
   display: flex;
-  flex-direction: column;
-  justify-items: center;
-  justify-content: center;
-  overflow: auto;
+  flex-direction: row;
+  align-items: center;
 }
 
-.container_left {
-  background-color: #0C32C6;
+.container {
+  width: 100%;
+}
 
-  .container_left_picture, .container_left_icon, .container_left_title {
-    width: 100%;
-    display: flex;
-    justify-content: center;
-    justify-items: center;
-    flex-direction: row;
-  }
+.img-static {
+  position: absolute;
+  left: 2%;
+  top: 2%;
+}
 
-  .container_left_title {
-    flex-direction: column;
-    color: #FFFFFF;
-    padding-top: 5%;
-    padding-bottom: 5%;
-    font-family: Roboto;
+.col-md-4, .col-md-8 {
+  padding-top: 10%;
+}
+
+.col-md-4 {
+  border-left: 2px solid $black;
+}
+
+
+.title {
+  font-style: normal;
+  font-weight: normal;
+  font-size: 54px;
+  line-height: 64px;
+  color: $black;
+}
+
+.form_container {
+  padding-left: 7%;
+
+  .form_title {
     font-style: normal;
-    font-weight: 300;
+    font-weight: normal;
+    font-size: 42px;
+    line-height: 50px;
+    color: $black;
+    flex: none;
+    order: 0;
+    align-self: stretch;
+    flex-grow: 0;
+    margin: 8px 0;
+  }
 
-    p {
-      text-align: center;
+  .form_subtitle {
+    font-style: normal;
+    font-weight: normal;
+    font-size: 16px;
+    line-height: 24px;
+    color: $grey;
+    flex: none;
+    order: 1;
+    align-self: stretch;
+    flex-grow: 0;
+    margin: 8px 0;
+  }
+
+  .form_group {
+    .form_label {
+      margin-top: 10%;
+      margin-bottom: 2px;
     }
-  }
-}
 
-.container_right {
-  padding: 5%;
-  background: #FFFFFF;
-  box-shadow: -5px 3px 67px rgba(0, 0, 0, 0.15);
+    input {
+      width: 100%;
+    }
 
-  .container_right_title, .container_right_form {
-    width: 100%;
-    display: flex;
-    justify-content: center;
-    justify-items: center;
-    flex-direction: column;
-  }
-
-  .container_right_title {
-    padding-top: 25px;
-  }
-
-  .container_right_form {
+    a {
+      color: $blue;
+      text-decoration: none;
+    }
 
     button {
-      background: #3E5FE4;
-      width: 100%;
-      min-height: 56px;
+      height: 56px;
+      background-color: $blue;
+      flex: none;
+      order: 2;
+      align-self: stretch;
+      flex-grow: 0;
+      margin: 32px 0px;
+      font-style: normal;
+      font-weight: normal;
+      font-size: 14px;
+      line-height: 18px;
+      letter-spacing: 0.16px;
       color: #FFFFFF;
-      text-align: center;
-      font-size: 20px;
-      font-weight: lighter;
       border: none;
+      width: 100%;
     }
 
     button:hover {
-      background-color: #0C32C6;
+      background-color: #004AA4;
     }
-
-    p {
-      margin-bottom: 0;
-    }
-
-    .input_error {
-      color: $error;
-    }
-  }
-
-  .container_right_actions {
-    margin-top: 5%;
-    border-top: 1px dashed #CCCCCC;
-
-    p {
-      color: #828282;
-    }
-
-    .col-6 {
-      justify-items: center;
-      justify-content: center;
-      flex-direction: column;
-      text-align: center;
-    }
-
-    .col-6:first-child {
-      border-right: 1px solid $error;
-    }
-
-    .col-6 a {
-      font-weight: bolder;
-      color: $error;
-    }
-
-    .row {
-      padding-top: 3%;
-      padding-bottom: 3%;
+    
+    p{
+      margin-bottom: 1%;
+      color: $grey;
+      font-size: 14px;
+      line-height: 18px;
+      letter-spacing: 0.16px;
     }
   }
+  
+  
+
+}
+
+.image {
+  padding-top: 3%;
+}
+
+.copyright {
+  position: absolute;
+  bottom: 5%;
+  left: 7%;
 }
