@@ -1,0 +1,121 @@
+@import "src/styles/colors";
+
+$paddingPx: 25px;
+
+.registration-form {
+  width: 100%;
+}
+
+.group_label {
+  margin-top: 15%;
+  margin-bottom: 1%;
+  font-style: normal;
+  font-weight: 600;
+  font-size: 14px;
+  line-height: 18px;
+  letter-spacing: 0.16px;
+  color: $black;
+  padding-left: $paddingPx
+}
+
+.form_label {
+  font-style: normal;
+  font-weight: normal;
+  font-size: 12px;
+  line-height: 16px;
+  color: $grey;
+  flex: none;
+  order: 0;
+  flex-grow: 0;
+  margin-top: 1%;
+  padding-left: $paddingPx
+}
+
+.radio_group {
+  width: 40%;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  padding-left: $paddingPx;
+
+
+  .radio_group_item {
+    margin: auto;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+
+    span {
+      margin-left: 25%;
+    }
+  }
+}
+
+.input_group {
+  //width: 173%;
+  width: 38vw;
+  margin-top: 15%;
+  border-top: 2px solid $black;
+
+  .input_group_item {
+    padding-top: 3%;
+
+    input {
+      margin-left: $paddingPx;
+      width: 50%;
+    }
+
+    .input_error {
+      font-style: normal;
+      font-weight: normal;
+      font-size: 12px;
+      line-height: 16px;
+      color: $error;
+      flex: none;
+      order: 0;
+      flex-grow: 0;
+      margin-top: 1%;
+      padding-left: $paddingPx
+    }
+
+    button {
+      height: 56px;
+      background-color: $blue;
+      flex: none;
+      order: 2;
+      align-self: stretch;
+      flex-grow: 0;
+      margin-top: 32px;
+      margin-bottom: 0;
+      font-style: normal;
+      font-weight: normal;
+      font-size: 14px;
+      line-height: 18px;
+      letter-spacing: 0.16px;
+      color: #FFFFFF;
+      border: none;
+      width: 50%;
+      margin-left: $paddingPx
+    }
+
+    button:hover {
+      background-color: #004AA4;
+    }
+
+    .checkbox {
+      width: 15px;
+      height: 15px;
+      flex: none;
+      order: 0;
+      flex-grow: 0;
+      margin: 0px 8px;
+    }
+
+    .radio_group {
+      margin-left: 30px;
+
+    }
+  }
+}

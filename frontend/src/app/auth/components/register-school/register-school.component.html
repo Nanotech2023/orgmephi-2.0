@@ -1,0 +1,140 @@
+<div class="registration-form">
+    <p class="group_label">Данные для подтверждения регистрации</p>
+    <p class="form_label">Регистрационный номер и код активации</p>
+    <div class="radio_group">
+        <div class="radio_group_item">
+            <input type="radio" [(ngModel)]="hasRegisterNumber" value="true">
+            <span>Да</span>
+        </div>
+        <div class="radio_group_item">
+            <input type="radio" [(ngModel)]="hasRegisterNumber" value="false">
+            <span>Нет</span>
+        </div>
+    </div>
+    <div class="input_group">
+        <p class="group_label">Данные для авторизации в системе</p>
+        <div class="input_group_item">
+            <p class="form_label">Email</p>
+            <input type="email" email required [(ngModel)]="registerAttempt.auth_info.email"
+                   #email="ngModel"
+                   name="email"
+                   placeholder="Введите Email">
+            <div *ngIf="email.invalid && (email.dirty || email.touched)"
+                 class="input_error">
+                <div *ngIf="email.errors?.required">
+                    Поле обязательно для заполнения
+                </div>
+                <div *ngIf="email.errors?.email">
+                    Невалидный e-mail
+                </div>
+            </div>
+        </div>
+        <div class="input_group_item">
+            <p class="form_label">Пароль</p>
+            <input type="password" required minlength="6" #password="ngModel"
+                   name="password" placeholder="Придумайте пароль"
+                   [(ngModel)]="registerAttempt.auth_info.password">
+            <div *ngIf="password.invalid && (password.dirty || password.touched)"
+                 class="input_error">
+                <div *ngIf="password.errors?.required">
+                    Поле обязательно для заполнения
+                </div>
+                <div *ngIf="password.errors?.minlength">
+                    Пароль должен содержать не менее 6-ти символов
+                </div>
+            </div>
+        </div>
+        <div class="input_group_item">
+            <p class="form_label">Пароль</p>
+            <input type="password" required minlength="6" #password="ngModel"
+                   name="password" placeholder="Подтвердить пароль"
+                   [(ngModel)]="registerAttempt.auth_info.password">
+            <div *ngIf="password.invalid && (password.dirty || password.touched)"
+                 class="input_error">
+                <div *ngIf="password.errors?.required">
+                    Поле обязательно для заполнения
+                </div>
+                <div *ngIf="password.errors?.minlength">
+                    Пароль должен содержать не менее 6-ти символов
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="input_group">
+        <p class="group_label">Персональная информация</p>
+        <div class="input_group_item">
+            <p class="form_label">Фамилия</p>
+            <input type="text" required
+                   [(ngModel)]="registerAttempt.personal_info.second_name"
+                   #second_name="ngModel"
+                   name="second_name"
+                   placeholder="Введите фамилию">
+            <div *ngIf="second_name.invalid && (second_name.dirty || second_name.touched)"
+                 class="input_error">
+                <div *ngIf="second_name.errors?.required">
+                    Поле обязательно для заполнения
+                </div>
+            </div>
+        </div>
+        <div class="input_group_item">
+            <p class="form_label">Имя</p>
+            <input type="text" required
+                   [(ngModel)]="registerAttempt.personal_info.first_name"
+                   #name="ngModel"
+                   name="name"
+                   placeholder="Введите имя">
+            <div *ngIf="name.invalid && (name.dirty || name.touched)"
+                 class="input_error">
+                <div *ngIf="name.errors?.required">
+                    Поле обязательно для заполнения
+                </div>
+            </div>
+
+        </div>
+        <div class="input_group_item">
+            <p class="form_label">Отчество<br/>
+                В случае отсутствия отчества введите: "Без отчества"</p>
+            <input type="text" required
+                   [(ngModel)]="registerAttempt.personal_info.middle_name"
+                   #lastName="ngModel"
+                   name="lastName"
+                   placeholder="Введите отчество">
+            <div *ngIf="lastName.invalid && (lastName.dirty || lastName.touched)"
+                 class="input_error">
+                <div *ngIf="lastName.errors?.required">
+                    Поле обязательно для заполнения
+                </div>
+            </div>
+        </div>
+        <div class="input_group_item">
+            <p class="form_label">Дата рождения</p>
+            <input type="date" required
+                   [(ngModel)]="registerAttempt.personal_info.date_of_birth"
+                   #birthDate="ngModel"
+                   name="birthDate">
+            <div *ngIf="birthDate.invalid && (birthDate.dirty || birthDate.touched)"
+                 class="input_error">
+                <div *ngIf="birthDate.errors?.required">
+                    Поле обязательно для заполнения
+                </div>
+            </div>
+        </div>
+
+        <div class="input_group_item">
+            <div class="radio_group">
+                <div class="radio_group_item">
+                    <input type="checkbox" class="checkbox" [(ngModel)]="agreementAccepted">
+                    <span class="form_label" style="margin-left: 0">Я согласен на обработку персональных данных</span>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="input_group_item">
+            <button type="submit" [disabled]="!isValid(registerAttempt)"
+                    (click)="register(registerAttempt)">
+                Зарегистрироваться
+            </button>
+        </div>
+    </div>
+</div>

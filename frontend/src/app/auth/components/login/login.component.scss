@@ -21,7 +21,7 @@ body {
 }
 
 .col-md-4, .col-md-8 {
-  padding-top: 10%;
+  padding-top: 10vh;
 }
 
 .col-md-4 {
@@ -67,6 +67,7 @@ body {
   }
 
   .form_group {
+    padding-bottom: 15%;
     .form_label {
       margin-top: 10%;
       margin-bottom: 2px;
@@ -79,6 +80,10 @@ body {
     a {
       color: $blue;
       text-decoration: none;
+    }
+
+    a:hover {
+      text-decoration: $blue solid;
     }
 
     button {
@@ -102,8 +107,8 @@ body {
     button:hover {
       background-color: #004AA4;
     }
-    
-    p{
+
+    p {
       margin-bottom: 1%;
       color: $grey;
       font-size: 14px;
@@ -111,13 +116,16 @@ body {
       letter-spacing: 0.16px;
     }
   }
-  
-  
+
 
 }
 
 .image {
-  padding-top: 3%;
+  padding-top: 5vh;
+
+  img {
+    max-height: initial;
+  }
 }
 
 .copyright {
