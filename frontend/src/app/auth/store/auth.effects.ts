@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core'
 import { Actions, createEffect, ofType } from '@ngrx/effects'
 import { UsersService } from '@api/users/users.service'
 import {
+    errorCaught,
     getUserRequest,
     getUserSuccess,
     loginRequest,
@@ -25,12 +26,6 @@ export class AuthEffects
     {
     }
 
-    // init$ = createEffect( () =>
-    //     this.actions$.pipe(
-    //         ofType( ROOT_EFFECTS_INIT ),
-    //         map( action => this. )
-    //     ) )
-
     loginAttempt$ = createEffect( () =>
         this.actions$.pipe
         (
@@ -39,9 +34,6 @@ export class AuthEffects
                 this.authService.userAuthLoginPost( loginRequestUser ).pipe(
                     mergeMap( ( csrfPair: CSRFPairUser ) =>
                         {
-                            this.authService.configuration.credentials[ "CSRFAccessToken" ] = csrfPair.csrf_access_token
-                            this.tasksService.configuration.credentials[ "CSRFAccessToken" ] = csrfPair.csrf_access_token
-                            this.responsesService.configuration.credentials[ "CSRFAccessToken" ] = csrfPair.csrf_access_token
                             this.router.navigate( [ '/home' ] )
                             return of( loginSuccess( {
                                 csrfPair: {
@@ -51,7 +43,7 @@ export class AuthEffects
                             } ) )
                         }
                     ),
-                    catchError( error => of( error( { error: error } ) ) )
+                    catchError( error => of( errorCaught( { error: error } ) ) )
                 )
             )
         )
@@ -71,7 +63,7 @@ export class AuthEffects
             concatMap( () =>
                 this.authService.userProfileUserGet().pipe(
                     mergeMap( ( user: User ) => of( getUserSuccess( { user: user } ) ) ),
-                    catchError( error => of( error( { error: error } ) ) )
+                    catchError( error => of( errorCaught( { error: error } ) ) )
                 )
             )
         )
@@ -84,7 +76,7 @@ export class AuthEffects
             concatMap( ( { registrationRequestUser } ) =>
                 this.authService.userRegistrationSchoolPost( registrationRequestUser ).pipe(
                     mergeMap( () => of( registerSuccess() ) ),
-                    catchError( error => of( error( { error: error } ) )
+                    catchError( error => of( errorCaught( { error: error } ) )
                     )
                 )
             )

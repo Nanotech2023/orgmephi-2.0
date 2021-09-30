@@ -2,7 +2,6 @@ import { Component, OnInit } from '@angular/core'
 import { select, Store } from '@ngrx/store'
 import { AuthSelectors, AuthState } from '@/auth/store'
 import { Observable } from 'rxjs'
-import { fixedHeight } from '@/shared/consts'
 
 
 @Component( {
@@ -15,7 +14,7 @@ export class AppComponent implements OnInit
 
     constructor( private store: Store<AuthState.State> ) {}
 
-    title = 'MEPhI-Olymp'
+    title = 'ORG MEPhI'
 
     ngOnInit(): void
     {

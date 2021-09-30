@@ -110,6 +110,8 @@ export class TasksService
             this.configuration.basePath = basePath
         }
         this.configuration.withCredentials = true
+        this.configuration.credentials[ "CSRFAccessToken" ] = () => localStorage.getItem( 'CSRFAccessToken' ) ?? undefined
+        this.configuration.credentials[ "CSRFRefreshToken" ] = () => localStorage.getItem( 'CSRFRefreshToken' ) ?? undefined
         this.encoder = this.configuration.encoder || new CustomHttpParameterCodec()
     }
 

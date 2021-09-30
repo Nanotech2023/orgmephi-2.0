@@ -75,7 +75,6 @@ export class UsersService
             }
             this.configuration.basePath = basePath
         }
-        this.configuration.withCredentials = true
         this.encoder = this.configuration.encoder || new CustomHttpParameterCodec()
     }
 
@@ -1259,6 +1258,7 @@ export class UsersService
     public userAuthRefreshPost( observe?: 'events', reportProgress?: boolean, options?: { httpHeaderAccept?: 'application/json', context?: HttpContext } ): Observable<HttpEvent<CSRFPairUser>>;
     public userAuthRefreshPost( observe: any = 'body', reportProgress: boolean = false, options?: { httpHeaderAccept?: 'application/json', context?: HttpContext } ): Observable<any>
     {
+        console.log( '$init' )
 
         let localVarHeaders = this.defaultHeaders
 

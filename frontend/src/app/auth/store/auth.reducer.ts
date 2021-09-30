@@ -23,7 +23,11 @@ export const reducer =
         initialState,
         on( loginSuccess,
             ( state, { csrfPair } ) =>
-                ( { ...state, csrfTokens: csrfPair } )
+            {
+                localStorage.setItem( 'CSRFAccessToken', csrfPair.csrf_access_token )
+                localStorage.setItem( 'CSRFRefreshToken', csrfPair.csrf_refresh_token )
+                return ( { ...state, csrfTokens: csrfPair } )
+            }
         ),
         on( getUserSuccess,
             ( state, { user } ) =>

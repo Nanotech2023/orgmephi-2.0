@@ -16,6 +16,7 @@ import { AuthGuardService } from '@/shared/auth.guard.service'
 import { TasksService } from '@api/tasks/tasks.service'
 import { ResponsesService } from '@api/responses/responses.service'
 import { ProfileModule } from '@/profile/profile.module'
+import { RootEffects } from '@/app.effects'
 
 
 @NgModule( {
@@ -32,7 +33,7 @@ import { ProfileModule } from '@/profile/profile.module'
         ManageContestsModule,
         AppRoutingModule,
         StoreModule.forRoot( {} ),
-        EffectsModule.forRoot( [] ),
+        EffectsModule.forRoot( [ RootEffects ] ),
         environment.production ? [] : StoreDevtoolsModule.instrument()
     ],
     providers: [
