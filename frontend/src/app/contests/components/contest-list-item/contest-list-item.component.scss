@@ -179,9 +179,10 @@
 
 .olymp_list_item:hover {
   border: none;
-  background-image: linear-gradient(114.44deg, #206ac4 0%, #0055BB 44.27%, #023d85 100%);
-  transform: scale(1.01);
+  transform: scale(1.1);
   transition: all 500ms ease;
+  background: linear-gradient(0deg, rgba($blue, 0.99), rgba($blue, 1)), url("~src/assets/Pryon AI_loading_by_gleb 1.png");
+  background-blend-mode: multiply;
 
   .olymp_status, .olymp_title, span, .olymp_subtitle span {
     color: #FFFFFFFF;
