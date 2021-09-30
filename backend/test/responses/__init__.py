@@ -112,12 +112,14 @@ def create_user_response(create_user_in_contest):
 # noinspection DuplicatedCode
 @pytest.fixture
 def create_one_task(create_user_response):
-    from contest.tasks.models.tasks import PlainTask
+    from contest.tasks.models.tasks import PlainTask, TaskAnswerTypeEnum
+    types = [TaskAnswerTypeEnum.Text, TaskAnswerTypeEnum.File]
     plain_tasks = [PlainTask(num_of_task=1,
                              image_of_task=None,
                              show_answer_after_contest=False,
                              task_points=11,
-                             recommended_answer='answer')
+                             recommended_answer='answer',
+                             answer_type=types[i % 2])
                    for i in range(8)]
     test_app.db.session.add_all(plain_tasks)
     for i in range(8):

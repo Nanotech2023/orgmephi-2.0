@@ -147,6 +147,7 @@ def test_create_thread(client, test_thread_categories, create_user_response):
     }
     resp = client.post('/thread', json=request)
     assert resp.status_code == 200
+    assert work.status.value == 'Appeal'
 
     thr = Thread.query.filter_by(id=resp.json['id']).one_or_none()
     cmp_thread(thr, resp.json)

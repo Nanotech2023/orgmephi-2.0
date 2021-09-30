@@ -134,8 +134,12 @@ def check_task_type(task_id, task_type):
     task = None
     if task_type == answer_dict['PlainAnswerFile']:
         task = db_get_one_or_none(PlainTask, "task_id", task_id)
+        if task is not None and task.answer_type.value != 'File':
+            raise OlympiadError("Wrong answer type for Plain Task")
     elif task_type == answer_dict['PlainAnswerText']:
         task = db_get_one_or_none(PlainTask, "task_id", task_id)
+        if task is not None and task.answer_type.value != 'Text':
+            raise OlympiadError("Wrong answer type for Plain Task")
     elif task_type == answer_dict['RangeAnswer']:
         task = db_get_one_or_none(RangeTask, "task_id", task_id)
     elif task_type == answer_dict['MultipleChoiceAnswer']:
