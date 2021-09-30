@@ -10,33 +10,33 @@ def client(client_university):
 # Variant
 
 
-def test_enroll_in_contest(client, test_variant, test_simple_contest, test_user_for_student_contest,
+def test_enroll_in_contest(client, test_variant, test_simple_contest_with_location, test_user_for_student_contest,
                            test_olympiad_locations):
-    resp = client.post(f'/contest/{test_simple_contest[0].contest_id}/enroll',
+    resp = client.post(f'/contest/{test_simple_contest_with_location[0].contest_id}/enroll',
                        json={
                            'location_id': test_olympiad_locations[0].location_id
                        })
     assert resp.status_code == 200
 
-    resp = client.post(f'/contest/{test_simple_contest[0].contest_id}/enroll',
+    resp = client.post(f'/contest/{test_simple_contest_with_location[0].contest_id}/enroll',
                        json={
                            'location_id': test_olympiad_locations[0].location_id
                        })
     assert resp.status_code == 409
 
-    resp = client.post(f'/contest/{test_simple_contest[1].contest_id}/enroll',
+    resp = client.post(f'/contest/{test_simple_contest_with_location[1].contest_id}/enroll',
                        json={
                            'location_id': test_olympiad_locations[0].location_id
                        })
     assert resp.status_code == 409
 
-    resp = client.post(f'/contest/{test_simple_contest[3].contest_id}/enroll',
+    resp = client.post(f'/contest/{test_simple_contest_with_location[3].contest_id}/enroll',
                        json={
                            'location_id': test_olympiad_locations[0].location_id
                        })
     assert resp.status_code == 403
 
-    resp = client.post(f'/contest/{test_simple_contest[4].contest_id}/enroll',
+    resp = client.post(f'/contest/{test_simple_contest_with_location[4].contest_id}/enroll',
                        json={
                            'location_id': test_olympiad_locations[0].location_id
                        })

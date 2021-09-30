@@ -111,7 +111,9 @@ def enroll_in_contest(id_contest):
 
     # Can't add without location
     if location_id is not None:
-        db_get_or_raise(OlympiadLocation, "location_id", location_id)
+        this_location = db_get_or_raise(OlympiadLocation, "location_id", location_id)
+        if this_location not in current_contest.locations:
+            raise InsufficientData('location_id', "current_contest")
 
     # User is already enrolled
     if is_user_in_contest(user_id, current_contest):
