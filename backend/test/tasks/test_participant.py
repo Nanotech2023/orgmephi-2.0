@@ -108,6 +108,7 @@ def test_change_user_location_in_contest(client, test_simple_contest_with_users,
                        json={
                            'location_id': test_olympiad_locations[0].location_id
                        })
+    print(resp.data)
     assert resp.status_code == 200
 
 
