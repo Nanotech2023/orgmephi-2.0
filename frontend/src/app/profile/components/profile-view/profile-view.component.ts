@@ -1,7 +1,8 @@
 import { Component } from '@angular/core'
 import { ProfileStore } from '@/profile/profile.store'
 import { Observable } from 'rxjs'
-import { UserInfo } from '@api/users/models'
+import { UserInfo, SchoolInfo } from '@api/users/models'
+import { LoadingState } from '@/shared/callState'
 
 
 @Component( {
@@ -12,11 +13,21 @@ import { UserInfo } from '@api/users/models'
 } )
 export class ProfileViewComponent
 {
-    userInfo$: Observable<UserInfo | null>
+    viewModel$: Observable<{ loading: boolean; error: string | null, userProfileUnfilled: string, userInfo: UserInfo, schoolInfo: SchoolInfo }>
 
     constructor( private profileStore: ProfileStore )
     {
         this.profileStore.fetch()
-        this.userInfo$ = this.profileStore.userInfo$
+        this.viewModel$ = this.profileStore.viewModel$
+    }
+
+    updateUserInfo( userInfo: UserInfo )
+    {
+        this.profileStore.updateUserInfo( userInfo )
+    }
+
+    updateSchoolInfo( schoolInfo: SchoolInfo )
+    {
+        this.profileStore.updateSchoolInfo( schoolInfo )
     }
 }

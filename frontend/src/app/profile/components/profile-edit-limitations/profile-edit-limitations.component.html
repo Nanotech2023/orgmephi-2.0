@@ -1,0 +1,17 @@
+<div class="form_container">
+    <div class="form_item">
+        <p class="form_label">sight</p>
+        <input class="form_input" type="checkbox"
+               [(ngModel)]="limitations.sight" (ngModelChange)="onModelChange(limitations)">
+    </div>
+    <div class="form_item">
+        <p class="form_label">movement</p>
+        <input class="form_input" type="checkbox"
+               [(ngModel)]="limitations.movement" (ngModelChange)="onModelChange(limitations)">
+    </div>
+    <div class="form_item">
+        <p class="form_label">hearing</p>
+        <input class="form_input" type="checkbox"
+               [(ngModel)]="limitations.hearing" (ngModelChange)="onModelChange(limitations)">
+    </div>
+</div>

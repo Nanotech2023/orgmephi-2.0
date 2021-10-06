@@ -2,10 +2,18 @@ import { NgModule } from '@angular/core'
 import { SharedModule } from '@/shared/shared.module'
 import { ProfileRoutingModule } from '@/profile/profile.routing.module'
 import { ProfileViewComponent } from '@/profile/components/profile-view/profile-view.component'
+import { ProfileEditDocumentComponent } from '@/profile/components/profile-edit-document/profile-edit-document.component'
+import { ProfileEditPersonalComponent } from '@/profile/components/profile-edit-personal/profile-edit-personal.component'
+import { ProfileEditLimitationsComponent } from '@/profile/components/profile-edit-limitations/profile-edit-limitations.component'
+import { ProfileEditDwellingComponent } from '@/profile/components/profile-edit-dwelling/profile-edit-dwelling.component'
 
 
 const COMPONENTS = [
-    ProfileViewComponent
+    ProfileViewComponent,
+    ProfileEditPersonalComponent,
+    ProfileEditDocumentComponent,
+    ProfileEditDwellingComponent,
+    ProfileEditLimitationsComponent
 ]
 
 
