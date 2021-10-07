@@ -472,31 +472,17 @@ def test_token_wrong_type(client):
     test_app.config['ORGMEPHI_ENABLE_PASSWORD_RECOVERY'] = False
 
 
-def test_resend_confirmation(client):
+def test_resend_confirmation(client, test_user_unconfirmed):
     test_app.config['ORGMEPHI_CONFIRM_EMAIL'] = True
     with test_app.mail.record_messages() as outbox:
-        request = {
-            "auth_info": {
-                "email": "confirm@example.com",
-                "password": "qwertyA*1"
-            },
-            "personal_info": {
-                "date_of_birth": "2021-09-01",
-                "first_name": "string",
-                "middle_name": "string",
-                "second_name": "string"
-            },
-            "register_type": "School"
-        }
-        client.post('/school', json=request)
-        resp = client.post('/resend/confirm@example.com')
+        resp = client.post(f'/resend/{test_user_unconfirmed.user_info.email}')
         assert resp.status_code == 204
-        assert len(outbox) == 2
-        assert outbox[1].recipients[0] == 'confirm@example.com'
+        assert len(outbox) == 1
+        assert outbox[0].recipients[0] == test_user_unconfirmed.user_info.email
         token = test_app.config['TESTING_LAST_EMAIL_TOKEN']
-        assert token in outbox[1].body
-        if outbox[1].html is not None:
-            assert token in outbox[1].html
+        assert token in outbox[0].body
+        if outbox[0].html is not None:
+            assert token in outbox[0].html
 
         resp = client.post(f'/confirm/{token}')
         assert resp.status_code == 204
@@ -504,9 +490,43 @@ def test_resend_confirmation(client):
 
 
 def test_resend_confirmation_already_confirmed(client, test_user_school):
-    test_user_school.user_info.email = 'test@example.org'
-    test_app.db.session.commit()
     test_app.config['ORGMEPHI_CONFIRM_EMAIL'] = True
     resp = client.post(f'/resend/{test_user_school.user_info.email}')
+    assert resp.status_code == 409
+    test_app.config['ORGMEPHI_CONFIRM_EMAIL'] = False
+
+
+def test_resend_confirmation_auth(client, test_user_unconfirmed):
+    test_app.config['ORGMEPHI_CONFIRM_EMAIL'] = True
+    client.fake_login(test_user_unconfirmed.username, test_user_unconfirmed.role.value, test_user_unconfirmed.id)
+    with test_app.mail.record_messages() as outbox:
+        resp = client.post('/resend')
+        assert resp.status_code == 204
+        assert len(outbox) == 1
+        assert outbox[0].recipients[0] == test_user_unconfirmed.user_info.email
+        token = test_app.config['TESTING_LAST_EMAIL_TOKEN']
+        assert token in outbox[0].body
+        if outbox[0].html is not None:
+            assert token in outbox[0].html
+
+        resp = client.post(f'/confirm/{token}')
+        assert resp.status_code == 204
+    test_app.config['ORGMEPHI_CONFIRM_EMAIL'] = False
+
+
+def test_resend_confirmation_auth_already_confirmed(client, test_user_school):
+    test_app.config['ORGMEPHI_CONFIRM_EMAIL'] = True
+    client.fake_login(test_user_school.username, test_user_school.role.value, test_user_school.id)
+    resp = client.post('/resend')
+    assert resp.status_code == 409
+    test_app.config['ORGMEPHI_CONFIRM_EMAIL'] = False
+
+
+def test_resend_confirmation_auth_no_email(client, test_user_unconfirmed):
+    test_app.config['ORGMEPHI_CONFIRM_EMAIL'] = True
+    test_user_unconfirmed.user_info.email = None
+    test_app.db.session.commit()
+    client.fake_login(test_user_unconfirmed.username, test_user_unconfirmed.role.value, test_user_unconfirmed.id)
+    resp = client.post('/resend')
     assert resp.status_code == 409
     test_app.config['ORGMEPHI_CONFIRM_EMAIL'] = False

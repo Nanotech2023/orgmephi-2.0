@@ -8,9 +8,10 @@ from marshmallow import EXCLUDE
 from itsdangerous import URLSafeTimedSerializer
 from captcha.image import ImageCaptcha
 
-from common.errors import AlreadyExists, NotFound, CaptchaError, WrongType
+from common.errors import AlreadyExists, NotFound, CaptchaError, WrongType, InsufficientData
 from common import get_current_app, get_current_module, get_current_db
 from common.util import db_get_all, db_get_or_raise, db_get_one_or_none, db_exists
+from common.jwt_verify import jwt_required, jwt_get_id
 
 from user.models import init_user, UserRoleEnum, University, Country, Region, UserInfo
 from user.model_schemas.auth import User, UserSchema, Captcha
@@ -248,6 +249,33 @@ def resend_email(email):
     if user_info.user.role != UserRoleEnum.unconfirmed or user_info.user.type == UserTypeEnum.pre_register:
         raise WrongType('User is already confirmed')
     send_email_confirmation(user_info.email)
+    return {}, 204
+
+
+@module.route('/resend', methods=['POST'])
+@jwt_required()
+def resend_email_auth():
+    """
+    Resend email confirmation message for authorized user
+    ---
+    post:
+      security:
+        - JWTAccessToken: [ ]
+        - CSRFAccessToken: [ ]
+      responses:
+        '204':
+          description: OK
+        '409':
+          description: User is already confirmed or is not linked to email
+    """
+    if not app.config.get('ORGMEPHI_CONFIRM_EMAIL', False):
+        abort(404)
+    user = db_get_or_raise(User, 'id', jwt_get_id())
+    if user.role != UserRoleEnum.unconfirmed or user.type == UserTypeEnum.pre_register:
+        raise WrongType('User is already confirmed')
+    if getattr(getattr(user, 'user_info', None), 'email', None) is None:
+        raise InsufficientData('user', 'email')
+    send_email_confirmation(user.user_info.email)
     return {}, 204
 
 
