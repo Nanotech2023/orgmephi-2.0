@@ -84,9 +84,8 @@ class Response(db.Model):
 
     @hybrid_property
     def status(self):
-        from common.util import db_get_one_or_none
         from messages.models import Thread, ThreadStatus, ThreadType
-        thread = db_get_one_or_none(Thread, 'related_work_id', self.work_id)
+        thread = Thread.query.filter_by(author_id=self.user_id, related_contest_id=self.contest_id).one_or_none()
         if thread is not None:
             if thread.status == ThreadStatus.open and thread.thread_type == ThreadType.appeal:
                 return ResponseStatusEnum.appeal
