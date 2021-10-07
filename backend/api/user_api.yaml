@@ -834,6 +834,22 @@ paths:
           description: Bad request or weak password
         '409':
           description: Username already in use
+  /user/registration/resend/{email}:
+    post:
+      parameters:
+      - description: Email
+        in: path
+        name: email
+        required: true
+        schema:
+          type: string
+      responses:
+        '204':
+          description: OK
+        '404':
+          description: User not found
+        '409':
+          description: User is already confirmed
   /user/registration/confirm/{token}:
     post:
       parameters:

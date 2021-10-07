@@ -470,3 +470,43 @@ def test_token_wrong_type(client):
 
     test_app.config['ORGMEPHI_CONFIRM_EMAIL'] = False
     test_app.config['ORGMEPHI_ENABLE_PASSWORD_RECOVERY'] = False
+
+
+def test_resend_confirmation(client):
+    test_app.config['ORGMEPHI_CONFIRM_EMAIL'] = True
+    with test_app.mail.record_messages() as outbox:
+        request = {
+            "auth_info": {
+                "email": "confirm@example.com",
+                "password": "qwertyA*1"
+            },
+            "personal_info": {
+                "date_of_birth": "2021-09-01",
+                "first_name": "string",
+                "middle_name": "string",
+                "second_name": "string"
+            },
+            "register_type": "School"
+        }
+        client.post('/school', json=request)
+        resp = client.post('/resend/confirm@example.com')
+        assert resp.status_code == 204
+        assert len(outbox) == 2
+        assert outbox[1].recipients[0] == 'confirm@example.com'
+        token = test_app.config['TESTING_LAST_EMAIL_TOKEN']
+        assert token in outbox[1].body
+        if outbox[1].html is not None:
+            assert token in outbox[1].html
+
+        resp = client.post(f'/confirm/{token}')
+        assert resp.status_code == 204
+    test_app.config['ORGMEPHI_CONFIRM_EMAIL'] = False
+
+
+def test_resend_confirmation_already_confirmed(client, test_user_school):
+    test_user_school.user_info.email = 'test@example.org'
+    test_app.db.session.commit()
+    test_app.config['ORGMEPHI_CONFIRM_EMAIL'] = True
+    resp = client.post(f'/resend/{test_user_school.user_info.email}')
+    assert resp.status_code == 409
+    test_app.config['ORGMEPHI_CONFIRM_EMAIL'] = False

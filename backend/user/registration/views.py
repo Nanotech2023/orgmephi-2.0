@@ -8,7 +8,7 @@ from marshmallow import EXCLUDE
 from itsdangerous import URLSafeTimedSerializer
 from captcha.image import ImageCaptcha
 
-from common.errors import AlreadyExists, NotFound, CaptchaError
+from common.errors import AlreadyExists, NotFound, CaptchaError, WrongType
 from common import get_current_app, get_current_module, get_current_db
 from common.util import db_get_all, db_get_or_raise, db_get_one_or_none, db_exists
 
@@ -61,6 +61,12 @@ def send_email(subject, recipient, template_name_or_list, **context):
 
 _captcha_chars = string.ascii_uppercase + string.digits
 _captcha_chars = _captcha_chars.replace('1', '').replace('I', '').replace('0', '').replace('O', '')
+
+
+def send_email_confirmation(email):
+    token = dump_email_token(email, 'confirm')
+    subj = app.config['ORGMEPHI_MAIL_CONFIRM_SUBJECT']
+    send_email(subj, email, 'email_confirmation.html', confirmation_token=token)
 
 
 def generate_captcha(width, height):
@@ -137,9 +143,7 @@ def register(values):
                                                                             partial=False, unknown=EXCLUDE)
 
     if email_confirm:
-        token = dump_email_token(user.user_info.email, 'confirm')
-        subj = app.config['ORGMEPHI_MAIL_CONFIRM_SUBJECT']
-        send_email(subj, user.user_info.email, 'email_confirmation.html', confirmation_token=token)
+        send_email_confirmation(user.user_info.email)
 
     db.session.commit()
     return user
@@ -215,6 +219,36 @@ def register_university():
           description: Username already in use
     """
     return register(request.marshmallow), 200
+
+
+@module.route('/resend/<string:email>', methods=['POST'])
+def resend_email(email):
+    """
+    Resend email confirmation message
+    ---
+    post:
+      parameters:
+        - in: path
+          description: Email
+          name: email
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: OK
+        '404':
+          description: User not found
+        '409':
+          description: User is already confirmed
+    """
+    if not app.config.get('ORGMEPHI_CONFIRM_EMAIL', False):
+        abort(404)
+    user_info = db_get_or_raise(UserInfo, 'email', email)
+    if user_info.user.role != UserRoleEnum.unconfirmed or user_info.user.type == UserTypeEnum.pre_register:
+        raise WrongType('User is already confirmed')
+    send_email_confirmation(user_info.email)
+    return {}, 204
 
 
 @module.route('/confirm/<string:token>', methods=['POST'])
