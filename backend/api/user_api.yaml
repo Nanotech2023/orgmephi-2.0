@@ -2,11 +2,14 @@ components:
   schemas:
     CSRFPairUser:
       properties:
+        confirmed:
+          type: boolean
         csrf_access_token:
           type: string
         csrf_refresh_token:
           type: string
       required:
+      - confirmed
       - csrf_access_token
       - csrf_refresh_token
       type: object
