@@ -123,6 +123,9 @@ components:
           - Math
           - Physics
           - Informatics
+          - Natural Sciences
+          - Engineering Sciences
+          - Other
           type: string
       required:
       - contest_id
