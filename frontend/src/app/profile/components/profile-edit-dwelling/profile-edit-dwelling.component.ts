@@ -13,19 +13,19 @@ export class ProfileEditDwellingComponent
     @Output() modelChange = new EventEmitter<Location>()
     dwelling: LocationRussia = ( this.model as LocationRussia ) ?? this.getEmptyLocation()
 
-    onModelChange( $event: LocationRussia )
+    onModelChange(): void
     {
         this.modelChange.emit( this.dwelling )
     }
 
-    onCityChange( $event: string )
+    onCityChange( $event: string ): void
     {
         // @ts-ignore
         this.dwelling.city.name = $event
         this.modelChange.emit( this.dwelling )
     }
 
-    onRegionChange( $event: string )
+    onRegionChange( $event: string ): void
     {
         // @ts-ignore
         this.dwelling.city?.region_name = $event

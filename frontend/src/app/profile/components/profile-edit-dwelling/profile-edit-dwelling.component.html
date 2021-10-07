@@ -2,7 +2,7 @@
     <div class="form_item">
         <p class="form_label">location_type</p>
         <input class="form_input" type="text" readonly
-               [ngModel]="dwelling.location_type" (ngModelChange)="onModelChange(dwelling)">
+               [ngModel]="dwelling.location_type" (ngModelChange)="onModelChange()">
     </div>
     <div class="form_item">
         <p class="form_label">country</p>
@@ -22,6 +22,6 @@
     <div class="form_item">
         <p class="form_label">rural</p>
         <input class="form_input" type="checkbox"
-               [(ngModel)]="dwelling.rural" (ngModelChange)="onModelChange(dwelling)">
+               [(ngModel)]="dwelling.rural" (ngModelChange)="onModelChange()">
     </div>
 </div>

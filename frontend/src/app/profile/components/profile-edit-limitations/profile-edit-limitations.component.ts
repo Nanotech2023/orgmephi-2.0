@@ -11,14 +11,14 @@ export class ProfileEditLimitationsComponent
 {
     @Input() model!: UserLimitations | undefined
     @Output() modelChange = new EventEmitter<UserLimitations>()
-    limitations: UserLimitations = this.model ?? this.getEmptyLocation()
+    limitations: UserLimitations = this.model ?? this.getEmptyLimitations()
 
-    onModelChange( $event: UserLimitations )
+    onModelChange(): void
     {
-        this.modelChange.emit( $event )
+        this.modelChange.emit( this.limitations )
     }
 
-    getEmptyLocation(): UserLimitations
+    private getEmptyLimitations(): UserLimitations
     {
         return {
             hearing: undefined,

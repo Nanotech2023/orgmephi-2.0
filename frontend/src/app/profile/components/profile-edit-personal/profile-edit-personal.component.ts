@@ -7,19 +7,14 @@ import { UserInfo, UserLimitations } from '@api/users/models'
     templateUrl: './profile-edit-personal.component.html',
     styleUrls: [ './profile-edit-personal.component.scss' ]
 } )
-export class ProfileEditPersonalComponent implements OnInit
+export class ProfileEditPersonalComponent
 {
     @Input() model!: UserInfo
     @Output() modelChange = new EventEmitter<UserInfo>()
     userInfo: UserInfo = this.model
 
-    onModelChange( $event: UserInfo )
+    onModelChange(): void
     {
-        this.modelChange.emit( $event )
-    }
-
-    ngOnInit(): void
-    {
-        console.log( this.userInfo )
+        this.modelChange.emit( this.userInfo )
     }
 }

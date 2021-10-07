@@ -14,9 +14,9 @@ export class ProfileEditDocumentComponent
     @Output() modelChange = new EventEmitter<Document>()
     document: Document = this.model ?? this.getEmptyDocument()
 
-    onModelChange( $event: Document )
+    onModelChange(): void
     {
-        this.modelChange.emit( $event )
+        this.modelChange.emit( this.document )
     }
 
     getEmptyDocument(): Document

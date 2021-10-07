@@ -1258,8 +1258,6 @@ export class UsersService
     public userAuthRefreshPost( observe?: 'events', reportProgress?: boolean, options?: { httpHeaderAccept?: 'application/json', context?: HttpContext } ): Observable<HttpEvent<CSRFPairUser>>;
     public userAuthRefreshPost( observe: any = 'body', reportProgress: boolean = false, options?: { httpHeaderAccept?: 'application/json', context?: HttpContext } ): Observable<any>
     {
-        console.log( '$init' )
-
         let localVarHeaders = this.defaultHeaders
 
         let localVarCredential: string | undefined
