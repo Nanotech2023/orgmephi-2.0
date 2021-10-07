@@ -26,8 +26,7 @@ def test_threads(test_thread_categories, create_user_response):
                       resolved=(i % 2),
                       status=thread_statuses[i % len(thread_types)],
                       topic=f'Test message {i}',
-                      related_contest_id=responses[i % len(responses)].contest_id,
-                      related_work=responses[i % len(responses)]
+                      related_contest_id=responses[i % len(responses)].contest_id
                       ) for i in range(8)]
     for i in range(len(threads)):
         if threads[i].status != ThreadStatus.open:
@@ -63,7 +62,6 @@ def cmp_thread(thread, json):
     assert json['post_time'] == thread.post_time.isoformat()
     assert json['topic'] == thread.topic
     assert json['related_contest'] == thread.related_contest_id
-    assert json['related_work'] == thread.related_work_id
     if thread.resolved:
         assert json['resolve_time'] == thread.resolve_time.isoformat()
 

@@ -16,7 +16,6 @@ class FilterThreadsMessagesRequestSchema(Schema):
     category_name = common_fields.CommonName()
     only_count = fields.Boolean()
     contest_id = fields.Integer(attribute='related_contest_id')
-    work_id = fields.Integer(attribute='related_work_id')
 
 
 class FilterThreadsMessagesResponseSchema(Schema):
@@ -24,7 +23,7 @@ class FilterThreadsMessagesResponseSchema(Schema):
     count = fields.Integer()
 
 
-_filter_fields = ['resolved', 'answered', 'thread_type', 'category_name', 'related_contest_id', 'related_work_id']
+_filter_fields = ['resolved', 'answered', 'thread_type', 'category_name', 'related_contest_id']
 
 
 def filter_threads_query(args, user_id):

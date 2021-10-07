@@ -175,11 +175,6 @@ def filter_threads():
           required: false
           schema:
             type: integer
-        - in: query
-          name: work_id
-          required: false
-          schema:
-            type: integer
       security:
         - JWTAccessToken: [ ]
       responses:
