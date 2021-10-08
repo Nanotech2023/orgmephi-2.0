@@ -236,8 +236,7 @@ class Contest(db.Model):
 
     __mapper_args__ = {
         'polymorphic_identity': ContestTypeEnum.Contest,
-        'polymorphic_on': composite_type,
-        'with_polymorphic': '*'
+        'polymorphic_on': composite_type
     }
 
 
