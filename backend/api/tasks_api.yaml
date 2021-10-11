@@ -1194,6 +1194,16 @@ components:
           type: integer
         show_results_to_user:
           type: boolean
+        user_status:
+          enum:
+          - Winner 1
+          - Winner 2
+          - Winner 3
+          - Diploma 1
+          - Diploma 2
+          - Diploma 3
+          - Participant
+          type: string
         users_id:
           items:
             type: integer
