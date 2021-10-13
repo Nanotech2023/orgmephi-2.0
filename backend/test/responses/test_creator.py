@@ -65,14 +65,15 @@ def test_plain_task_text_creator(client, create_two_tasks):
 
 
 def test_plain_task_file_creator(client, create_one_task):
-    contest_id = get_contest_id(create_one_task, DEFAULT_INDEX)
-    user_id = get_user_id(create_one_task, DEFAULT_INDEX)
-    task_id = get_plain_task_id(create_one_task, DEFAULT_INDEX)
+    index = 1
+    contest_id = get_contest_id(create_one_task, index)
+    user_id = get_user_id(create_one_task, index)
+    task_id = get_plain_task_id(create_one_task, index)
     task_id_from_different_contest = get_plain_task_id(create_one_task, 2)
 
     resp = client.post(f'/contest/{contest_id}/task/{task_id_from_different_contest}/user/{user_id}/png',
                        data=b'Test')
-    assert resp.status_code == 404
+    assert resp.status_code == 409
 
     resp = client.post(f'/contest/{contest_id}/task/{task_id}/user/{user_id}/png', data=b'Test')
     assert resp.status_code == 200
@@ -81,6 +82,25 @@ def test_plain_task_file_creator(client, create_one_task):
     user_answer = user_answer_get(user_id, contest_id, task_id, 'PlainAnswerFile')
     assert user_answer.answer_file == b'Test'
     assert user_answer.filetype.value == 'png'
+
+
+# noinspection DuplicatedCode
+def test_plain_task_file_failed(client, create_one_task):
+    contest_id_text = get_contest_id(create_one_task, DEFAULT_INDEX)
+    user_id_text = get_user_id(create_one_task, DEFAULT_INDEX)
+    task_id_text = get_plain_task_id(create_one_task, DEFAULT_INDEX)
+
+    resp = client.post(f'/contest/{contest_id_text}/task/{task_id_text}/user/{user_id_text}/png', data=b'Test')
+    assert resp.status_code == 409
+
+    index = 1
+    contest_id_file = get_contest_id(create_one_task, index)
+    user_id_file = get_user_id(create_one_task, index)
+    task_id_file = get_plain_task_id(create_one_task, index)
+
+    resp = client.post(f'/contest/{contest_id_file}/task/{task_id_file}/user/{user_id_file}/plain',
+                       json={'answer_text': 'answer'})
+    assert resp.status_code == 409
 
 
 def test_plain_task_get_creator(client, create_one_task):
@@ -436,6 +456,22 @@ def test_auto_check_creator(client, create_user_with_answers):
     user_in_contest = UserInContest.query.filter_by(contest_id=contest_id, user_id=user_id).one_or_none()
     assert user_in_contest.user_status == UserStatusEnum.Winner_1
 
+    resp = client.get(f'/contest/user/{user_id}/results')
+    assert resp.status_code == 200
+
+    results = resp.json['results']
+    contest = results[0]['contest_info']
+    assert len(results) == 8
+    assert contest['subject'] == 'Math'
+
+    start_year = datetime.utcnow().year - 1 if datetime.utcnow().month < 6 else datetime.utcnow().year
+    end_year = datetime.utcnow().year if datetime.utcnow().month < 6 else datetime.utcnow().year + 1
+    assert contest['start_year'] == start_year
+    assert contest['end_year'] == end_year
+    assert results[0]['status'] == 'NoResults'
+    assert results[0]['mark'] == 23
+    assert results[0]['user_status'] == 'Winner 1'
+
 
 # noinspection DuplicatedCode
 def test_auto_check_status(client, create_three_tasks):
@@ -464,7 +500,8 @@ def test_auto_check_status(client, create_three_tasks):
 
     from contest.responses.util import user_answer_get, get_user_in_contest_work
     user_work = get_user_in_contest_work(user_id, contest_id)
-    assert user_work.status.value == 'Accepted'
+    assert user_work.status.value == 'NoResults'
+    assert user_work.work_status.value == 'Accepted'
     range_answer = user_answer_get(user_id, contest_id, range_id)
     assert range_answer.mark == 5
     multiple_answer = user_answer_get(user_id, contest_id, multiple_id)

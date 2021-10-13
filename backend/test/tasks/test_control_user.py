@@ -7,10 +7,10 @@ def client(client_creator):
     yield client_creator
 
 
-def test_add_user_to_contest(client, test_variant, test_simple_contest, test_olympiad_locations,
+def test_add_user_to_contest(client, test_variant, test_simple_contest_with_location, test_olympiad_locations,
                              test_user_for_student_contest):
     resp = client.post(
-        f'/contest/{test_simple_contest[0].contest_id}/add_user',
+        f'/contest/{test_simple_contest_with_location[0].contest_id}/add_user',
         json={
             'users_id': [f'{test_user_for_student_contest.id}'],
             'location_id': f'{test_olympiad_locations[0].location_id}',
@@ -20,7 +20,7 @@ def test_add_user_to_contest(client, test_variant, test_simple_contest, test_oly
     assert resp.status_code == 200
 
     resp = client.post(
-        f'/contest/{test_simple_contest[0].contest_id}/add_user',
+        f'/contest/{test_simple_contest_with_location[0].contest_id}/add_user',
         json={
             'users_id': [f'{test_user_for_student_contest.id}'],
             'location_id': f'{test_olympiad_locations[0].location_id}',
@@ -30,7 +30,7 @@ def test_add_user_to_contest(client, test_variant, test_simple_contest, test_oly
     assert resp.status_code == 409
 
     resp = client.post(
-        f'/contest/{test_simple_contest[1].contest_id}/add_user',
+        f'/contest/{test_simple_contest_with_location[1].contest_id}/add_user',
         json={
             'users_id': [f'{test_user_for_student_contest.id}'],
             'location_id': f'{test_olympiad_locations[0].location_id}',
@@ -40,7 +40,7 @@ def test_add_user_to_contest(client, test_variant, test_simple_contest, test_oly
     assert resp.status_code == 409
 
     resp = client.post(
-        f'/contest/{test_simple_contest[3].contest_id}/add_user',
+        f'/contest/{test_simple_contest_with_location[3].contest_id}/add_user',
         json={
             'users_id': [f'{test_user_for_student_contest.id}'],
             'location_id': f'{test_olympiad_locations[0].location_id}',
@@ -77,10 +77,10 @@ def test_add_user_to_contest_and_2_contest(client, test_variant, test_simple_con
     assert resp.status_code == 409
 
 
-def test_add_user_to_contest_school(client, test_variant, test_simple_contest, test_olympiad_locations,
+def test_add_user_to_contest_school(client, test_variant, test_simple_contest_with_location, test_olympiad_locations,
                                     test_user_school):
     resp = client.post(
-        f'/contest/{test_simple_contest[0].contest_id}/add_user',
+        f'/contest/{test_simple_contest_with_location[0].contest_id}/add_user',
         json={
             'users_id': [f'{test_user_school.id}'],
             'location_id': f'{test_olympiad_locations[0].location_id}',

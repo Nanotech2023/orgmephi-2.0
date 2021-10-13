@@ -8,7 +8,6 @@ from sqlalchemy.ext.hybrid import hybrid_property
 
 from user.models import User
 from contest.tasks.models import Contest
-from contest.responses.models import Response
 
 db = get_current_db()
 app = get_current_app()
@@ -48,7 +47,6 @@ class Thread(db.Model):
     topic = db.Column(db.String, nullable=False)
 
     related_contest_id = db.Column(db.Integer, db.ForeignKey(Contest.contest_id))
-    related_work_id = db.Column(db.Integer, db.ForeignKey(Response.work_id))
 
     messages = db.relationship('Message', back_populates='thread', lazy=True, uselist=True,
                                cascade='save-update, merge, delete, delete-orphan', order_by='Message.post_time')
@@ -58,7 +56,6 @@ class Thread(db.Model):
     category = db.relationship('ThreadCategory')
 
     related_contest = db.relationship('Contest')
-    related_work = db.relationship('Response')
 
     @hybrid_property
     def author_username(self):

@@ -52,7 +52,6 @@ class StudentUniversity(db.Model):
     known = db.Column(db.Boolean, nullable=False)
 
     __mapper_args__ = {
-        'with_polymorphic': '*',
         "polymorphic_on": known
     }
 

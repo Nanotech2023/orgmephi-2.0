@@ -8,6 +8,8 @@ from contest.tasks.model_schemas.location import OlympiadLocationSchema
 from contest.tasks.models import *
 from contest.tasks.models.reference import TargetClass
 from user.models.auth import *
+from marshmallow import fields as m_f
+
 """
 Target class
 """
@@ -103,6 +105,19 @@ class SimpleContestSchema(SQLAlchemySchema):
                              data_key='holding_type',
                              by_value=True, required=True)
     base_contest = fields.Nested(BaseContestSchema, required=True, dump_only=True)
+
+
+class ContestInfoSchema(SQLAlchemySchema):
+    class Meta:
+        model = SimpleContest
+        load_instance = True
+        sqla_session = db.session
+
+    name = auto_field(column_name='name', dump_only=True, required=True)
+    subject = EnumField(OlympiadSubjectEnum, data_key='subject', by_value=True)
+    contest_id = auto_field(column_name='contest_id', dump_only=True)
+    start_year = m_f.Int(required=True)
+    end_year = m_f.Int(required=True)
 
 
 class StageSchema(SQLAlchemySchema):
