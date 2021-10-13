@@ -33,6 +33,7 @@ export * from './schoolInfo';
 export * from './schoolRegistrationRequestUser';
 export * from './selfGroupsResponseUser';
 export * from './selfPasswordRequestUser';
+export * from './selfUnfilledResponse';
 export * from './studentInfo';
 export * from './studentUniversity';
 export * from './studentUniversityCustom';

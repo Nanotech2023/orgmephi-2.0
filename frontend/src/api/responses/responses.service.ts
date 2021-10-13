@@ -20,6 +20,7 @@ import { Configuration } from '@api/configuration'
 import {
     AllUserAnswersResponse,
     AllUserMarksResponse,
+    AllUserResultsResponse,
     Answer,
     ContestResultSheetResponse,
     MultipleAnswerRequest,
@@ -1559,6 +1560,76 @@ export class ResponsesService
     }
 
     /**
+     * @param userId Id of the user
+     * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
+     * @param reportProgress flag to report request and response progress.
+     */
+    public responsesCreatorContestUserUserIdResultsGet( userId: number, observe?: 'body', reportProgress?: boolean, options?: { httpHeaderAccept?: 'application/json', context?: HttpContext } ): Observable<AllUserResultsResponse>;
+    public responsesCreatorContestUserUserIdResultsGet( userId: number, observe?: 'response', reportProgress?: boolean, options?: { httpHeaderAccept?: 'application/json', context?: HttpContext } ): Observable<HttpResponse<AllUserResultsResponse>>;
+    public responsesCreatorContestUserUserIdResultsGet( userId: number, observe?: 'events', reportProgress?: boolean, options?: { httpHeaderAccept?: 'application/json', context?: HttpContext } ): Observable<HttpEvent<AllUserResultsResponse>>;
+    public responsesCreatorContestUserUserIdResultsGet( userId: number, observe: any = 'body', reportProgress: boolean = false, options?: { httpHeaderAccept?: 'application/json', context?: HttpContext } ): Observable<any>
+    {
+        if ( userId === null || userId === undefined )
+        {
+            throw new Error( 'Required parameter userId was null or undefined when calling responsesCreatorContestUserUserIdResultsGet.' )
+        }
+
+        let localVarHeaders = this.defaultHeaders
+
+        let localVarCredential: string | undefined
+        // authentication (CSRFAccessToken) required
+        localVarCredential = this.configuration.lookupCredential( 'CSRFAccessToken' )
+        if ( localVarCredential )
+        {
+            localVarHeaders = localVarHeaders.set( 'X-CSRF-TOKEN', localVarCredential )
+        }
+
+        // authentication (JWTAccessToken) required
+        localVarCredential = this.configuration.lookupCredential( 'JWTAccessToken' )
+        if ( localVarCredential )
+        {
+        }
+
+        let localVarHttpHeaderAcceptSelected: string | undefined = options && options.httpHeaderAccept
+        if ( localVarHttpHeaderAcceptSelected === undefined )
+        {
+            // to determine the Accept header
+            const httpHeaderAccepts: string[] = [
+                'application/json'
+            ]
+            localVarHttpHeaderAcceptSelected = this.configuration.selectHeaderAccept( httpHeaderAccepts )
+        }
+        if ( localVarHttpHeaderAcceptSelected !== undefined )
+        {
+            localVarHeaders = localVarHeaders.set( 'Accept', localVarHttpHeaderAcceptSelected )
+        }
+
+        let localVarHttpContext: HttpContext | undefined = options && options.context
+        if ( localVarHttpContext === undefined )
+        {
+            localVarHttpContext = new HttpContext()
+        }
+
+
+        let responseType_: 'text' | 'json' = 'json'
+        if ( localVarHttpHeaderAcceptSelected && localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+        {
+            responseType_ = 'text'
+        }
+
+        return this.httpClient.get<AllUserResultsResponse>( `${ this.configuration.basePath }/responses/creator/contest/user/${ encodeURIComponent( String( userId ) ) }/results`,
+            {
+                context: localVarHttpContext,
+                responseType: <any> responseType_,
+                withCredentials: this.configuration.withCredentials,
+                headers: localVarHeaders,
+                observe: observe,
+                reportProgress: reportProgress
+            }
+        )
+    }
+
+    /**
      * @param contestId Id of the contest
      * @param taskId Id of the task
      * @param filetype Filetype
@@ -2518,4 +2589,70 @@ export class ResponsesService
             }
         )
     }
+
+    /**
+     * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
+     * @param reportProgress flag to report request and response progress.
+     */
+    public responsesParticipantContestUserSelfResultsGet( observe?: 'body', reportProgress?: boolean, options?: { httpHeaderAccept?: 'application/json', context?: HttpContext } ): Observable<AllUserResultsResponse>;
+    public responsesParticipantContestUserSelfResultsGet( observe?: 'response', reportProgress?: boolean, options?: { httpHeaderAccept?: 'application/json', context?: HttpContext } ): Observable<HttpResponse<AllUserResultsResponse>>;
+    public responsesParticipantContestUserSelfResultsGet( observe?: 'events', reportProgress?: boolean, options?: { httpHeaderAccept?: 'application/json', context?: HttpContext } ): Observable<HttpEvent<AllUserResultsResponse>>;
+    public responsesParticipantContestUserSelfResultsGet( observe: any = 'body', reportProgress: boolean = false, options?: { httpHeaderAccept?: 'application/json', context?: HttpContext } ): Observable<any>
+    {
+
+        let localVarHeaders = this.defaultHeaders
+
+        let localVarCredential: string | undefined
+        // authentication (CSRFAccessToken) required
+        localVarCredential = this.configuration.lookupCredential( 'CSRFAccessToken' )
+        if ( localVarCredential )
+        {
+            localVarHeaders = localVarHeaders.set( 'X-CSRF-TOKEN', localVarCredential )
+        }
+
+        // authentication (JWTAccessToken) required
+        localVarCredential = this.configuration.lookupCredential( 'JWTAccessToken' )
+        if ( localVarCredential )
+        {
+        }
+
+        let localVarHttpHeaderAcceptSelected: string | undefined = options && options.httpHeaderAccept
+        if ( localVarHttpHeaderAcceptSelected === undefined )
+        {
+            // to determine the Accept header
+            const httpHeaderAccepts: string[] = [
+                'application/json'
+            ]
+            localVarHttpHeaderAcceptSelected = this.configuration.selectHeaderAccept( httpHeaderAccepts )
+        }
+        if ( localVarHttpHeaderAcceptSelected !== undefined )
+        {
+            localVarHeaders = localVarHeaders.set( 'Accept', localVarHttpHeaderAcceptSelected )
+        }
+
+        let localVarHttpContext: HttpContext | undefined = options && options.context
+        if ( localVarHttpContext === undefined )
+        {
+            localVarHttpContext = new HttpContext()
+        }
+
+
+        let responseType_: 'text' | 'json' = 'json'
+        if ( localVarHttpHeaderAcceptSelected && localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+        {
+            responseType_ = 'text'
+        }
+
+        return this.httpClient.get<AllUserResultsResponse>( `${ this.configuration.basePath }/responses/participant/contest/user/self/results`,
+            {
+                context: localVarHttpContext,
+                responseType: <any> responseType_,
+                withCredentials: this.configuration.withCredentials,
+                headers: localVarHeaders,
+                observe: observe,
+                reportProgress: reportProgress
+            }
+        )
+    }
+
 }

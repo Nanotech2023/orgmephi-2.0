@@ -1,5 +1,5 @@
 import { Actions, createEffect, ofType, ROOT_EFFECTS_INIT } from '@ngrx/effects'
-import { catchError, concatMap, finalize, mergeMap, tap } from 'rxjs/operators'
+import { catchError, concatMap, finalize, mergeMap } from 'rxjs/operators'
 import { CSRFPairUser } from '@api/users/models'
 import { of } from 'rxjs'
 import { errorCaught, loginSuccess } from '@/auth/store/auth.actions'
@@ -24,12 +24,7 @@ export class RootEffects
             ofType( ROOT_EFFECTS_INIT ),
             concatMap( () => this.authService.userAuthRefreshPost().pipe(
                 mergeMap( ( csrfPair: CSRFPairUser ) =>
-                    of( loginSuccess( {
-                        csrfPair: {
-                            csrf_access_token: csrfPair.csrf_access_token,
-                            csrf_refresh_token: csrfPair.csrf_refresh_token
-                        }
-                    } ) )
+                    of( loginSuccess( { csrfPair } ) )
                 ),
                 finalize( () => this.router.initialNavigation() ),
                 catchError( error => of( errorCaught( { error: error } ) ) )

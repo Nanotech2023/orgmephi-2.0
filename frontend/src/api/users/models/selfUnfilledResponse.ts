@@ -11,9 +11,7 @@
  */
 
 
-export interface CSRFPairUser { 
-    confirmed: boolean;
-    csrf_access_token: string;
-    csrf_refresh_token: string;
+export interface SelfUnfilledResponse { 
+    unfilled?: Array<object>;
 }
 

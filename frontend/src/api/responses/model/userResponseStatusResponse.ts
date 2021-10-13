@@ -15,14 +15,15 @@ export interface UserResponseStatusResponse {
     status: UserResponseStatusResponse.StatusEnum;
 }
 export namespace UserResponseStatusResponse {
-    export type StatusEnum = 'InProgress' | 'NotChecked' | 'Accepted' | 'Rejected' | 'Appeal' | 'Correction';
+    export type StatusEnum = 'InProgress' | 'NotChecked' | 'Accepted' | 'Rejected' | 'Appeal' | 'Correction' | 'NoResults';
     export const StatusEnum = {
         InProgress: 'InProgress' as StatusEnum,
         NotChecked: 'NotChecked' as StatusEnum,
         Accepted: 'Accepted' as StatusEnum,
         Rejected: 'Rejected' as StatusEnum,
         Appeal: 'Appeal' as StatusEnum,
-        Correction: 'Correction' as StatusEnum
+        Correction: 'Correction' as StatusEnum,
+        NoResults: 'NoResults' as StatusEnum
     };
 }
 

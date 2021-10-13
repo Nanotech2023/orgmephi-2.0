@@ -19,14 +19,10 @@ export interface CreatePlainRequestTaskCreator {
     task_points?: number;
 }
 export namespace CreatePlainRequestTaskCreator {
-    export type AnswerTypeEnum = 'Math' | 'Physics' | 'Informatics' | 'Natural Sciences' | 'Engineering Sciences' | 'Other';
+    export type AnswerTypeEnum = 'File' | 'Text';
     export const AnswerTypeEnum = {
-        Math: 'Math' as AnswerTypeEnum,
-        Physics: 'Physics' as AnswerTypeEnum,
-        Informatics: 'Informatics' as AnswerTypeEnum,
-        NaturalSciences: 'Natural Sciences' as AnswerTypeEnum,
-        EngineeringSciences: 'Engineering Sciences' as AnswerTypeEnum,
-        Other: 'Other' as AnswerTypeEnum
+        File: 'File' as AnswerTypeEnum,
+        Text: 'Text' as AnswerTypeEnum
     };
 }
 

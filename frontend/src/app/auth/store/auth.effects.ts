@@ -36,10 +36,7 @@ export class AuthEffects
                         {
                             this.router.navigate( [ '/home' ] )
                             return of( loginSuccess( {
-                                csrfPair: {
-                                    csrf_access_token: csrfPair.csrf_access_token,
-                                    csrf_refresh_token: csrfPair.csrf_refresh_token
-                                }
+                                csrfPair: csrfPair
                             } ) )
                         }
                     ),
