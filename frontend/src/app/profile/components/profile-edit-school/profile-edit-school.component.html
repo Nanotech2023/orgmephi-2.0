@@ -1,0 +1,23 @@
+<div class="form_container">
+    <app-profile-edit-dwelling [(model)]="schoolInfo.location"></app-profile-edit-dwelling>
+    <div class="form_item">
+        <p class="form_label">schoolInfo.school_type</p>
+        <input class="form_input" placeholder="Введите тип школы" type="text"
+               [(ngModel)]="schoolInfo.school_type" (ngModelChange)="onModelChange()">
+    </div>
+    <div class="form_item">
+        <p class="form_label">schoolInfo.name</p>
+        <input class="form_input" placeholder="Введите название школы" type="text"
+               [(ngModel)]="schoolInfo.name" (ngModelChange)="onModelChange()">
+    </div>
+    <div class="form_item">
+        <p class="form_label">schoolInfo.number</p>
+        <input class="form_input" placeholder="Введите номер школы" type="text"
+               [(ngModel)]="schoolInfo.number" (ngModelChange)="onModelChange()">
+    </div>
+    <div class="form_item">
+        <p class="form_label">schoolInfo.grade</p>
+        <input class="form_input" placeholder="Введите оценку" type="number"
+               [(ngModel)]="schoolInfo.grade" (ngModelChange)="onModelChange()">
+    </div>
+</div>
