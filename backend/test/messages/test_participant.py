@@ -124,16 +124,6 @@ def test_get_all_by_contest(client, test_threads):
     cmp_thread_list(filtered_threads, resp.json)
 
 
-# noinspection DuplicatedCode
-def test_get_all_by_response(client, test_threads):
-    test_work = test_threads[0].related_work
-    filtered_threads = [v for v in test_threads if v.related_work == test_work]
-
-    resp = client.get(f'/threads?work_id={test_work.work_id}')
-    assert resp.status_code == 200
-    cmp_thread_list(filtered_threads, resp.json)
-
-
 def test_create_thread(client, test_thread_categories, create_user_response):
     from messages.models import Thread
     work = create_user_response['responses'][0]
@@ -141,12 +131,12 @@ def test_create_thread(client, test_thread_categories, create_user_response):
         "category": test_thread_categories[0].name,
         "message": "Test",
         "related_contest": work.contest_id,
-        "related_work": work.work_id,
         "thread_type": "Appeal",
         "topic": "string"
     }
     resp = client.post('/thread', json=request)
     assert resp.status_code == 200
+    assert work.status.value == 'Appeal'
 
     thr = Thread.query.filter_by(id=resp.json['id']).one_or_none()
     cmp_thread(thr, resp.json)
@@ -160,21 +150,7 @@ def test_create_thread_missing_contest(client, test_thread_categories, create_us
     request = {
         "category": test_thread_categories[0].name,
         "message": "Test",
-        "related_work": work.work_id,
         "thread_type": "Contest",
-        "topic": "string"
-    }
-    resp = client.post('/thread', json=request)
-    assert resp.status_code == 400
-
-
-def test_create_thread_missing_work(client, test_thread_categories, create_user_response):
-    work = create_user_response['responses'][0]
-    request = {
-        "category": test_thread_categories[0].name,
-        "message": "Test",
-        "related_contest": work.contest_id,
-        "thread_type": "Appeal",
         "topic": "string"
     }
     resp = client.post('/thread', json=request)
@@ -187,7 +163,6 @@ def test_create_thread_quota(client, test_thread_categories, create_user_respons
         "category": test_thread_categories[0].name,
         "message": "Test",
         "related_contest": work.contest_id,
-        "related_work": work.work_id,
         "thread_type": "Appeal",
         "topic": "string"
     }
@@ -198,21 +173,6 @@ def test_create_thread_quota(client, test_thread_categories, create_user_respons
 
     resp = client.post('/thread', json=request)
     assert resp.status_code == 409
-
-
-def test_create_thread_wrong_author(client, test_user_school, test_thread_categories, create_user_response):
-    client.fake_login(username=test_user_school.username, role=test_user_school.role.value, user_id=test_user_school.id)
-    work = create_user_response['responses'][0]
-    request = {
-        "category": test_thread_categories[0].name,
-        "message": "Test",
-        "related_work": work.work_id,
-        "thread_type": "Appeal",
-        "topic": "string"
-    }
-
-    resp = client.post('/thread', json=request)
-    assert resp.status_code == 404
 
 
 def test_get_thread(client, test_threads, test_messages):

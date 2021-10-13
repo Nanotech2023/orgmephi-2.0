@@ -1,12 +1,14 @@
 from marshmallow_enum import EnumField
 from marshmallow_oneofschema import OneOfSchema
-from marshmallow_sqlalchemy import SQLAlchemySchema, auto_field, fields
+from marshmallow_sqlalchemy import SQLAlchemySchema, auto_field
 
+from marshmallow import fields
 from common.fields import text_validator, common_name_validator
 from contest.tasks.model_schemas.location import OlympiadLocationSchema
 from contest.tasks.models import *
 from contest.tasks.models.reference import TargetClass
 from user.models.auth import *
+from marshmallow import fields as m_f
 
 """
 Target class
@@ -63,6 +65,7 @@ class BaseContestSchema(SQLAlchemySchema):
 
     olympiad_type_id = auto_field(column_name='olympiad_type_id', required=False)
     subject = EnumField(OlympiadSubjectEnum, data_key='subject', by_value=True, required=False)
+    level = EnumField(OlympiadLevelEnum, data_key='level', by_value=True, required=False)
     target_classes = fields.Nested(TargetClassSchema, many=True, required=False)
 
 
@@ -85,6 +88,10 @@ class SimpleContestSchema(SQLAlchemySchema):
     visibility = auto_field(column_name='visibility', required=True)
     start_date = auto_field(column_name='start_date', required=True)
     end_date = auto_field(column_name='end_date', required=True)
+    regulations = auto_field(column_name='regulations', validate=text_validator, required=False)
+    status = EnumField(OlympiadStatusEnum, data_key='status', by_value=True)
+    total_points = fields.Integer()
+    tasks_number = fields.Integer()
     contest_duration = auto_field(column_name='contest_duration', required=True)
     result_publication_date = auto_field(column_name='result_publication_date', required=True)
     end_of_enroll_date = auto_field(column_name='end_of_enroll_date', required=True)
@@ -98,6 +105,19 @@ class SimpleContestSchema(SQLAlchemySchema):
                              data_key='holding_type',
                              by_value=True, required=True)
     base_contest = fields.Nested(BaseContestSchema, required=True, dump_only=True)
+
+
+class ContestInfoSchema(SQLAlchemySchema):
+    class Meta:
+        model = SimpleContest
+        load_instance = True
+        sqla_session = db.session
+
+    name = auto_field(column_name='name', dump_only=True, required=True)
+    subject = EnumField(OlympiadSubjectEnum, data_key='subject', by_value=True)
+    contest_id = auto_field(column_name='contest_id', dump_only=True)
+    start_year = m_f.Int(required=True)
+    end_year = m_f.Int(required=True)
 
 
 class StageSchema(SQLAlchemySchema):

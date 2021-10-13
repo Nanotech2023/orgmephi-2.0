@@ -31,6 +31,7 @@ def test_user_admin():
     user.username = 'admin'
     user.role = UserRoleEnum.admin
     user.type = UserTypeEnum.internal
+    user.user_info.email = 'admin@example.org'
     test_app.db.session.commit()
     yield user
 
@@ -42,6 +43,7 @@ def test_user_creator():
     user.username = 'creator'
     user.role = UserRoleEnum.creator
     user.type = UserTypeEnum.internal
+    user.user_info.email = 'creator@example.org'
     test_app.db.session.commit()
     yield user
 
@@ -53,6 +55,7 @@ def test_user_school():
     user.username = 'school'
     user.role = UserRoleEnum.participant
     user.type = UserTypeEnum.school
+    user.user_info.email = 'school@example.org'
     test_app.db.session.commit()
     yield user
 
@@ -64,13 +67,26 @@ def test_user_university():
     user.username = 'university'
     user.role = UserRoleEnum.participant
     user.type = UserTypeEnum.university
+    user.user_info.email = 'university@example.org'
     test_app.db.session.commit()
     yield user
 
 
 @pytest.fixture
-def test_users(test_user_admin, test_user_creator, test_user_school, test_user_university):
-    yield [test_user_admin, test_user_creator, test_user_school, test_user_university]
+def test_user_unconfirmed():
+    from user.models import UserTypeEnum, UserRoleEnum
+    user = _generate_user()
+    user.username = 'unconfirmed'
+    user.role = UserRoleEnum.unconfirmed
+    user.type = UserTypeEnum.school
+    user.user_info.email = 'unconfirmed@example.org'
+    test_app.db.session.commit()
+    yield user
+
+
+@pytest.fixture
+def test_users(test_user_admin, test_user_creator, test_user_school, test_user_university, test_user_unconfirmed):
+    yield [test_user_admin, test_user_creator, test_user_school, test_user_university, test_user_unconfirmed]
 
 
 @pytest.fixture

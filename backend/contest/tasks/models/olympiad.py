@@ -1,13 +1,39 @@
 import enum
 from datetime import datetime, timedelta
 
+from sqlalchemy import func, select
+from sqlalchemy.sql import case
 from sqlalchemy.ext.associationproxy import association_proxy
+from sqlalchemy.ext.hybrid import hybrid_property
 
+from contest.tasks.models.contest import Variant
 from common import get_current_db
 
 db = get_current_db()
 
 DEFAULT_VISIBILITY = True
+
+"""
+Olympiad level
+"""
+
+
+class OlympiadLevelEnum(enum.Enum):
+    Level1 = "1"
+    Level2 = "2"
+    Level3 = "3"
+    Level4 = "No level"
+
+
+"""
+Olympiad status
+"""
+
+
+class OlympiadStatusEnum(enum.Enum):
+    OlympiadSoon = "Will start soon"
+    OlympiadInProgress = "In progress"
+    OlympiadFinished = "Finished"
 
 
 class UserStatusEnum(enum.Enum):
@@ -37,6 +63,9 @@ class OlympiadSubjectEnum(enum.Enum):
     Math = "Math"
     Physics = "Physics"
     Informatics = "Informatics"
+    NaturalSciences = "Natural Sciences"
+    EngineeringSciences = "Engineering Sciences"
+    Other = "Other"
 
 
 olympiad_subject_dict = {subject.value: subject for subject in OlympiadSubjectEnum}
@@ -81,6 +110,7 @@ def add_base_contest(db_session, name,
                      description, rules,
                      olympiad_type_id,
                      subject,
+                     level,
                      certificate_template):
     """
     Create new base content object
@@ -97,7 +127,8 @@ def add_base_contest(db_session, name,
         diploma_2_condition=diploma_2_condition,
         diploma_3_condition=diploma_3_condition,
         olympiad_type_id=olympiad_type_id,
-        subject=subject
+        subject=subject,
+        level=level,
     )
     db_session.add(base_contest)
     return base_contest
@@ -141,6 +172,7 @@ class BaseContest(db.Model):
     description = db.Column(db.Text, nullable=False)
     olympiad_type_id = db.Column(db.Integer, db.ForeignKey('olympiad_type.olympiad_type_id'), nullable=False)
     subject = db.Column(db.Enum(OlympiadSubjectEnum), nullable=False)
+    level = db.Column(db.Enum(OlympiadLevelEnum), nullable=False)
     certificate_template = db.Column(db.Text, nullable=True)
 
     winner_1_condition = db.Column(db.Float, nullable=False)
@@ -204,8 +236,7 @@ class Contest(db.Model):
 
     __mapper_args__ = {
         'polymorphic_identity': ContestTypeEnum.Contest,
-        'polymorphic_on': composite_type,
-        'with_polymorphic': '*'
+        'polymorphic_on': composite_type
     }
 
 
@@ -250,10 +281,12 @@ class SimpleContest(Contest):
     end_date: end date of contest
     result_publication_date: result publication date
 
+    regulations: regulations of the olympiad
+
     location: location of the olympiad
     previous_contest_id: previous contest id
     previous_participation_condition: previous participation condition
-    contest_duration: previous duration of the contest
+    contest_duration: duration of the contest
     variants: variants
     next_contest: next contests
 
@@ -266,16 +299,14 @@ class SimpleContest(Contest):
     end_date = db.Column(db.DateTime, index=True, default=datetime.utcnow)
     result_publication_date = db.Column(db.DateTime, nullable=True)
     end_of_enroll_date = db.Column(db.DateTime, nullable=True)
-
-    contest_duration = db.Column(db.Interval, default=timedelta(seconds=0),nullable=False)
-
+    contest_duration = db.Column(db.Interval, default=timedelta(seconds=0), nullable=False)
     target_classes = association_proxy('base_contest', 'target_classes')
-
     previous_contest_id = db.Column(db.Integer, db.ForeignKey('simple_contest.contest_id'), nullable=True)
     previous_participation_condition = db.Column(db.Enum(UserStatusEnum))
 
-    variants = db.relationship('Variant', lazy='dynamic',
-                               backref=db.backref('simple_contest', lazy='joined'))
+    regulations = db.Column(db.Text, nullable=True)
+
+    variants = db.relationship('Variant', backref=db.backref('simple_contest', lazy='joined'), lazy='dynamic')
 
     next_contests = db.relationship('SimpleContest',
                                     foreign_keys=[previous_contest_id])
@@ -283,16 +314,76 @@ class SimpleContest(Contest):
     locations = db.relationship('OlympiadLocation', secondary=locationInContest, lazy='subquery',
                                 backref=db.backref('contest', lazy=True))
 
+    name = association_proxy('base_contest', 'name')
+    subject = association_proxy('base_contest', 'subject')
+
     __mapper_args__ = {
         'polymorphic_identity': ContestTypeEnum.SimpleContest,
         'with_polymorphic': '*'
     }
+
+    @hybrid_property
+    def start_year(self):
+        if self.start_date.month < 6:
+            return self.start_date.year - 1
+        else:
+            return self.start_date.year
+
+    @hybrid_property
+    def end_year(self):
+        if self.start_date.month < 6:
+            return self.start_date.year
+        else:
+            return self.start_date.year + 1
 
     def change_previous(self, previous_contest_id=None, previous_participation_condition=None):
         if previous_contest_id is not None:
             self.previous_contest_id = previous_contest_id
         if previous_participation_condition is not None:
             self.previous_participation_condition = previous_participation_condition
+
+    @hybrid_property
+    def tasks_number(self):
+        if not self.variants:
+            return None
+        else:
+            if self.variants.count() != 0:
+                tasks = self.variants.first().tasks
+                return len(tasks)
+            else:
+                return None
+
+    @hybrid_property
+    def total_points(self):
+        if not self.variants:
+            return None
+        else:
+            if self.variants.count() != 0:
+                sum_points = 0
+                tasks = self.variants.first().tasks
+                if len(tasks) != 0:
+                    for task in tasks:
+                        sum_points += task.task_points
+                    return sum_points
+                else:
+                    return None
+            else:
+                return None
+
+    @hybrid_property
+    def status(self):
+        if datetime.utcnow() < self.start_date:
+            return OlympiadStatusEnum.OlympiadSoon
+        elif datetime.utcnow() < self.end_date:
+            return OlympiadStatusEnum.OlympiadInProgress
+        else:
+            return OlympiadStatusEnum.OlympiadFinished
+
+    @status.expression
+    def status(cls):
+        return case([(datetime.utcnow() < cls.start_date, OlympiadStatusEnum.OlympiadSoon.value),
+                     (datetime.utcnow() < cls.end_date, OlympiadStatusEnum.OlympiadInProgress.value)],
+                    else_=OlympiadStatusEnum.OlympiadFinished.value)
 
 
 def add_composite_contest(db_session, visibility, base_contest_id=None, holding_type=None):

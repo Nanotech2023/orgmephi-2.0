@@ -35,6 +35,15 @@ components:
       - user_id
       - work_id
       type: object
+    AllUserResultsResponse:
+      properties:
+        results:
+          items:
+            $ref: '#/components/schemas/UserResultsForContestResponse'
+          type: array
+      required:
+      - results
+      type: object
     Answer:
       discriminator:
         mapping:
@@ -96,6 +105,33 @@ components:
       required:
       - right_answer
       - task_points
+      type: object
+    ContestInfo:
+      properties:
+        contest_id:
+          readOnly: true
+          type: integer
+        end_year:
+          type: integer
+        name:
+          readOnly: true
+          type: string
+        start_year:
+          type: integer
+        subject:
+          enum:
+          - Math
+          - Physics
+          - Informatics
+          - Natural Sciences
+          - Engineering Sciences
+          - Other
+          type: string
+      required:
+      - contest_id
+      - end_year
+      - name
+      - start_year
       type: object
     ContestResultSheetResponse:
       properties:
@@ -240,9 +276,42 @@ components:
           - Rejected
           - Appeal
           - Correction
+          - NoResults
           type: string
       required:
       - status
+      type: object
+    UserResultsForContestResponse:
+      properties:
+        contest_info:
+          $ref: '#/components/schemas/ContestInfo'
+        mark:
+          type: number
+        status:
+          enum:
+          - InProgress
+          - NotChecked
+          - Accepted
+          - Rejected
+          - Appeal
+          - Correction
+          - NoResults
+          type: string
+        user_status:
+          enum:
+          - Winner 1
+          - Winner 2
+          - Winner 3
+          - Diploma 1
+          - Diploma 2
+          - Diploma 3
+          - Participant
+          type: string
+      required:
+      - contest_info
+      - mark
+      - status
+      - user_status
       type: object
     UserTimeResponseRequest:
       properties:
@@ -880,6 +949,27 @@ paths:
       security:
       - JWTAccessToken: []
       - CSRFAccessToken: []
+  /responses/creator/contest/user/{user_id}/results:
+    get:
+      parameters:
+      - description: Id of the user
+        in: path
+        name: user_id
+        required: true
+        schema:
+          type: integer
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AllUserResultsResponse'
+          description: OK
+        '404':
+          description: User not found
+      security:
+      - JWTAccessToken: []
+      - CSRFAccessToken: []
   /responses/participant/contest/{contest_id}/user/self/create:
     post:
       parameters:
@@ -1254,6 +1344,20 @@ paths:
           description: OK
         '404':
           description: User or contest not found
+      security:
+      - JWTAccessToken: []
+      - CSRFAccessToken: []
+  /responses/participant/contest/user/self/results:
+    get:
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AllUserResultsResponse'
+          description: OK
+        '404':
+          description: User not found
       security:
       - JWTAccessToken: []
       - CSRFAccessToken: []

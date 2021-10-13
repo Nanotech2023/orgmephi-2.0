@@ -55,6 +55,7 @@ def base_olympiad_create():
     diploma_3_condition = values['diploma_3_condition']
 
     subject = values['subject']
+    level = values['level']
 
     db_get_or_raise(OlympiadType, "olympiad_type_id", values["olympiad_type_id"])
     base_contest = add_base_contest(db.session,
@@ -69,7 +70,8 @@ def base_olympiad_create():
                                     diploma_3_condition=diploma_3_condition,
                                     rules=rules,
                                     olympiad_type_id=olympiad_type_id,
-                                    subject=subject)
+                                    subject=subject,
+                                    level=level)
 
     db.session.commit()
 
@@ -133,6 +135,7 @@ def olympiad_create_simple(id_base_olympiad):
     base_contest = db_get_or_raise(BaseContest, "base_contest_id", str(id_base_olympiad))
 
     current_contest = add_simple_contest(db.session,
+                                         base_contest_id=id_base_olympiad,
                                          visibility=visibility,
                                          start_date=start_date,
                                          end_date=end_date,
@@ -146,11 +149,12 @@ def olympiad_create_simple(id_base_olympiad):
     if previous_contest_id is not None:
         prev_contest = db_get_or_raise(Contest, "contest_id", str(previous_contest_id))
         prev_contest.next_contests.append(current_contest)
-    base_contest.child_contests.append(current_contest)
 
     if stage_id is not None:
         stage = db_get_or_raise(Stage, "stage_id", str(stage_id))
         stage.contests.append(current_contest)
+    else:
+        base_contest.child_contests.append(current_contest)
 
     db.session.commit()
 

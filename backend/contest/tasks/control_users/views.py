@@ -53,11 +53,14 @@ def add_user_to_contest(id_contest):
     location_id = values.get('location_id', None)
     check_condition = values.get('check_condition', False)
 
+    current_contest = get_contest_if_possible(id_contest)
+
     # Can't add without location
     if location_id is not None:
-        db_get_or_raise(OlympiadLocation, "location_id", location_id)
+        this_location = db_get_or_raise(OlympiadLocation, "location_id", location_id)
+        if this_location not in current_contest.locations:
+            raise InsufficientData('location_id', "current_contest")
 
-    current_contest = get_contest_if_possible(id_contest)
     current_base_contest = get_base_contest(current_contest)
     target_classes = current_base_contest.target_classes
 

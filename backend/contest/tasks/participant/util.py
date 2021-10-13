@@ -1,5 +1,7 @@
+from sqlalchemy.orm import selectin_polymorphic, with_polymorphic
+
 from common.jwt_verify import jwt_get_id
-from contest.tasks.models import SimpleContest, Contest
+from contest.tasks.models import SimpleContest, Contest, CompositeContest
 from contest.tasks.unauthorized.schemas import FilterOlympiadAllRequestSchema
 from contest.tasks.util import is_user_in_contest
 
@@ -26,7 +28,7 @@ def filter_olympiad_query_with_enrolled_flag(args):
     offset = marshmallow.get('offset', None)
     limit = marshmallow.get('limit', None)
 
-    query = query.order_by(SimpleContest.start_date)
+    query = query.with_polymorphic([SimpleContest]).order_by(SimpleContest.start_date)
 
     if limit is not None:
         query = query.limit(limit)

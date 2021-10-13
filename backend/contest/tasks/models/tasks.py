@@ -5,6 +5,11 @@ from common import get_current_db
 db = get_current_db()
 
 
+class TaskAnswerTypeEnum(enum.Enum):
+    File = "File"
+    Text = "Text"
+
+
 class TaskTypeEnum(enum.Enum):
     PlainTask = "PlainTask"
     RangeTask = "RangeTask"
@@ -40,7 +45,7 @@ class Task(db.Model):
 
 
 def add_plain_task(db_session, num_of_task, recommended_answer, image_of_task=None,
-                   task_points=None, show_answer_after_contest=None):
+                   task_points=None, show_answer_after_contest=None, answer_type=TaskAnswerTypeEnum.Text):
     """
     Create new plain task object
     """
@@ -50,6 +55,7 @@ def add_plain_task(db_session, num_of_task, recommended_answer, image_of_task=No
         show_answer_after_contest=show_answer_after_contest,
         task_points=task_points,
         recommended_answer=recommended_answer,
+        answer_type=answer_type,
     )
     db_session.add(task)
     return task
@@ -67,6 +73,7 @@ class PlainTask(Task):
 
     task_id = db.Column(db.Integer, db.ForeignKey('base_task.task_id'), primary_key=True)
     recommended_answer = db.Column(db.Text, nullable=False)
+    answer_type = db.Column(db.Enum(TaskAnswerTypeEnum), default=TaskAnswerTypeEnum.Text)
 
     __mapper_args__ = {
         'polymorphic_identity': TaskTypeEnum.PlainTask,

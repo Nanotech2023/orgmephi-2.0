@@ -11,3 +11,4 @@ class LoginRequestUserSchema(Schema):
 class CSRFPairUserSchema(Schema):
     csrf_access_token = fields.String(required=True)
     csrf_refresh_token = fields.String(required=True)
+    confirmed = fields.Bool(required=True)

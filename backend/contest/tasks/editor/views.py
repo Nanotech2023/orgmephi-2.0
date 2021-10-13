@@ -853,8 +853,8 @@ def add_locations_to_contest(id_contest):
 
     for location_id in locations:
         current_location = db_get_or_raise(OlympiadLocation, "location_id", str(location_id))
-
-        current_contest.locations.append(current_location)
+        if current_location not in current_contest.locations:
+            current_contest.locations.append(current_location)
 
     db.session.commit()
     return {}, 200

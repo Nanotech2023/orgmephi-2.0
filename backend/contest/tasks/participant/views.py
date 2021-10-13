@@ -5,7 +5,6 @@ from flask import send_file, request
 from common import get_current_module
 from common.errors import AlreadyExists, TimeOver
 from common.util import send_pdf
-from contest.responses.models import ResponseStatusEnum
 from contest.responses.util import get_user_in_contest_work
 from contest.tasks.model_schemas.contest import VariantSchema
 from contest.tasks.model_schemas.olympiad import ContestSchema
@@ -53,11 +52,8 @@ def get_variant_self(id_contest):
           description: User not found
     """
 
-    db_get_or_raise(UserInContest, "user_id", str(jwt_get_id()))
-    current_response = get_user_in_contest_work(str(jwt_get_id()), id_contest)
-
-    # Contest not in progress
-    if current_response.status != ResponseStatusEnum.in_progress:
+    # Contest not in progress or 'not show answers' flag
+    if not user_can_view_variants_and_tasks(id_contest):
         raise ContestContentAccessDenied()
 
     variant = get_user_variant_if_possible(id_contest)
@@ -115,7 +111,9 @@ def enroll_in_contest(id_contest):
 
     # Can't add without location
     if location_id is not None:
-        db_get_or_raise(OlympiadLocation, "location_id", location_id)
+        this_location = db_get_or_raise(OlympiadLocation, "location_id", location_id)
+        if this_location not in current_contest.locations:
+            raise InsufficientData('location_id', "current_contest")
 
     # User is already enrolled
     if is_user_in_contest(user_id, current_contest):
@@ -183,8 +181,11 @@ def change_user_location_in_contest(id_contest):
     if datetime.utcnow() > current_contest.end_of_enroll_date:
         raise TimeOver("Time for enrolling is over")
 
+    # Can't add without location
     if location_id is not None:
-        db_get_or_raise(OlympiadLocation, "location_id", location_id)
+        this_location = db_get_or_raise(OlympiadLocation, "location_id", location_id)
+        if this_location not in current_contest.locations:
+            raise InsufficientData('location_id', "current_contest")
 
     current_user = current_contest.users.filter_by(
         **{
@@ -233,10 +234,8 @@ def get_all_tasks_self(id_contest):
           description: User not found
     """
 
-    current_response = get_user_in_contest_work(str(jwt_get_id()), id_contest)
-
-    # Contest not in progress
-    if current_response.status != ResponseStatusEnum.in_progress:
+    # Contest not in progress or 'not show answers' flag
+    if not user_can_view_variants_and_tasks(id_contest):
         raise ContestContentAccessDenied()
 
     tasks_list = get_user_tasks_if_possible(id_contest)
@@ -283,12 +282,10 @@ def get_task_image_self(id_contest, id_task):
           description: Olympiad type already in use
     """
 
-    db_get_or_raise(UserInContest, "user_id", str(jwt_get_id()))
-    current_response = get_user_in_contest_work(str(jwt_get_id()), id_contest)
-
-    # Contest not in progress
-    if current_response.status != ResponseStatusEnum.in_progress:
+    # Contest not in progress or 'not show answers' flag
+    if not user_can_view_variants_and_tasks(id_contest):
         raise ContestContentAccessDenied()
+
     task = get_user_task_if_possible(id_contest, id_task)
 
     if task.image_of_task is None:
@@ -461,7 +458,7 @@ def get_all_contests_self():
           description: OK
           content:
             application/json:
-              schema: AllOlympiadsResponseTaskUnauthorizedSchema
+              schema: FilterSimpleContestResponseTaskParticipantSchema
         '400':
           description: Bad request
         '409':

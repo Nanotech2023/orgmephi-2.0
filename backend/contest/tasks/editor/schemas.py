@@ -3,13 +3,13 @@ from marshmallow_enum import EnumField
 
 from common import fields as common_fields
 from contest.tasks.models import OlympiadSubjectEnum, StageConditionEnum, ContestHoldingTypeEnum, \
-    UserStatusEnum
+    UserStatusEnum, OlympiadLevelEnum, TaskAnswerTypeEnum
 
 
 # Base contest
 
 class UpdateBaseOlympiadRequestTaskEditorSchema(Schema):
-    name = common_fields.CommonName(required=False)
+    name = common_fields.OlympiadName(required=False)
     description = common_fields.Text(required=False)
     rules = common_fields.Text(required=False)
     winner_1_condition = common_fields.FloatCondition(required=False)
@@ -20,11 +20,13 @@ class UpdateBaseOlympiadRequestTaskEditorSchema(Schema):
     diploma_3_condition = common_fields.FloatCondition(required=False)
     olympiad_type_id = fields.Int(required=False)
     subject = EnumField(OlympiadSubjectEnum, required=False, by_value=True)
+    level = EnumField(OlympiadLevelEnum, required=False, by_value=True)
 
 
 # Contest
 
 class UpdateContestRequestTaskEditorSchema(Schema):
+    regulations = common_fields.Text(required=False)
     start_date = fields.DateTime(required=False)
     end_date = fields.DateTime(required=False)
     result_publication_date = fields.DateTime(required=False)
@@ -75,6 +77,7 @@ class UpdatePlainRequestTaskEditorSchema(Schema):
     recommended_answer = common_fields.Text(required=False)
     show_answer_after_contest = fields.Boolean(required=False)
     task_points = fields.Integer(required=False)
+    answer_type = EnumField(TaskAnswerTypeEnum, required=False, by_value=True)
 
 
 class UpdateRangeRequestTaskEditorSchema(Schema):

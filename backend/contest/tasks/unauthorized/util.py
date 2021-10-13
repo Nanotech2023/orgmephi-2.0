@@ -24,7 +24,7 @@ def filter_olympiad_query(args):
     offset = marshmallow.get('offset', None)
     limit = marshmallow.get('limit', None)
 
-    query = query.order_by(SimpleContest.start_date)
+    query = query.with_polymorphic([SimpleContest]).order_by(SimpleContest.start_date)
 
     if limit is not None:
         query = query.limit(limit)
