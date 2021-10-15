@@ -1,11 +1,12 @@
 <div class="tasks_list_item">
     <div class="task_title">
-        Задание {{taskId}}. {{ taskTitle }}
+        Задание {{task.task_id}}. {{ task.task_type }} <br/>
+        {{task.answers}}
     </div>
     <div class="row">
         <div class="col-md-8">
             <div class="task_image">
-                <img [src]="taskImage()" alt="Задание" class="img-fluid">
+                <img [src]="taskImage" alt="Задание" class="img-fluid">
             </div>
         </div>
         <div class="col-md-4">

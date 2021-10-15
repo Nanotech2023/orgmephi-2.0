@@ -1,10 +1,6 @@
 import { Component } from '@angular/core'
 import { ContestsStore } from '@/contests/contests.store'
-import {
-    AllLocationResponseTaskUnauthorized,
-    OlympiadLocation,
-    SimpleContestWithFlagResponseTaskParticipant
-} from '@api/tasks/model'
+import { OlympiadLocation, SimpleContestWithFlagResponseTaskParticipant } from '@api/tasks/model'
 import { Observable } from 'rxjs'
 import { TasksService } from '@api/tasks/tasks.service'
 import { Router } from '@angular/router'
@@ -41,10 +37,6 @@ export class ContestRegistrationComponent
 
     onStartClick( contestId: number | undefined ): void
     {
-        if ( contestId as number )
-        {
-            this.contestsStore.getVariant( contestId as number )
-        }
-        this.router.navigate( [ '/contests/:id/assignment' ] )
+        this.router.navigate( [ `/contests/${ contestId }/assignment` ] )
     }
 }

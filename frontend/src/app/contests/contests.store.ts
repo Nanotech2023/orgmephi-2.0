@@ -25,13 +25,14 @@ export interface ContestsState
 }
 
 
-const initialState: ContestsState = {
-    contests: [],
-    locations: [],
-    selectedVariant: undefined,
-    selectedContest: undefined,
-    callState: LoadingState.INIT
-}
+const initialState: ContestsState =
+    {
+        contests: [],
+        locations: [],
+        selectedVariant: undefined,
+        selectedContest: undefined,
+        callState: LoadingState.INIT
+    }
 
 
 @Injectable()
@@ -87,7 +88,6 @@ export class ContestsStore extends ComponentStore<ContestsState>
         } ) )
 
     // EFFECTS
-
     readonly fetchAll = this.effect( () =>
     {
         this.setLoading()
@@ -99,32 +99,6 @@ export class ContestsStore extends ComponentStore<ContestsState>
             catchError( () => EMPTY )
         )
     } )
-
-    readonly getVariant = this.effect( ( contestId$: Observable<number> ) =>
-    {
-        this.setLoading()
-        return contestId$.pipe( switchMap( ( contest: number ) =>
-                this.tasksService.tasksParticipantContestIdContestVariantSelfGet( contest ).pipe(
-                    tapResponse(
-                        ( response: Variant ) => this.setVariant( response ),
-                        ( error: string ) => this.updateError( error )
-                    )
-                )
-            ),
-            catchError( () => EMPTY ) )
-    } )
-
-    // readonly fetchSingle = this.effect( ( contestId$: Observable<number> ) =>
-    //     contestId$.pipe(
-    //         switchMap( ( id: number ) =>
-    //             this.tasksService.tasksParticipantOlympiadIdOlympiadGet( id ).pipe(
-    //                 tapResponse(
-    //                     ( response ) => this.selectContest( response ),
-    //                     ( error: string ) => this.updateError( error )
-    //                 ),
-    //                 catchError( () => EMPTY )
-    //             ) )
-    //     ) )
 
     readonly enroll = this.effect( ( contest$: Observable<{ contestId: number, enrollRequestTaskParticipant: EnrollRequestTaskParticipant }> ) =>
         contest$.pipe(

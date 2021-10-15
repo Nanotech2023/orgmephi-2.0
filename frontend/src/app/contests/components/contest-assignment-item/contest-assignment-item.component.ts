@@ -1,4 +1,9 @@
-import { Component, Input } from '@angular/core'
+import { Component, Input, OnDestroy, OnInit } from '@angular/core'
+import { TaskForUserResponseTaskParticipant } from '@api/tasks/model'
+import { ResponsesService } from '@api/responses/responses.service'
+import { TasksService } from '@api/tasks/tasks.service'
+import { Observable, Subscription } from 'rxjs'
+import { DomSanitizer, SafeUrl } from '@angular/platform-browser'
 
 
 @Component( {
@@ -6,13 +11,32 @@ import { Component, Input } from '@angular/core'
     templateUrl: './contest-assignment-item.component.html',
     styleUrls: [ './contest-assignment-item.component.scss' ]
 } )
-export class ContestAssignmentItemComponent
+export class ContestAssignmentItemComponent implements OnInit, OnDestroy
 {
-    @Input() taskTitle!: string
-    @Input() taskId!: number
+    @Input() task!: TaskForUserResponseTaskParticipant
+    @Input() contestId!: number | null
+    taskImage!: Observable<Blob>
+    imageUrl!: SafeUrl
+    private subscription!: Subscription
 
-    taskImage(): string
+    constructor( private tasksService: TasksService, private responsesService: ResponsesService, private sanitizer: DomSanitizer )
     {
-        return `assets/task${ this.taskId }.png`
+    }
+
+    ngOnInit(): void
+    {
+        if ( !!this.contestId )
+        {
+            this.subscription = this.tasksService.tasksParticipantContestIdContestTasksIdTaskImageSelfGet( this.contestId, this.task.task_id ).subscribe( data =>
+            {
+                const unsafeImageUrl = URL.createObjectURL( data )
+                this.imageUrl = this.sanitizer.bypassSecurityTrustUrl( unsafeImageUrl )
+            } )
+        }
+    }
+
+    ngOnDestroy(): void
+    {
+        this.subscription?.unsubscribe()
     }
 }

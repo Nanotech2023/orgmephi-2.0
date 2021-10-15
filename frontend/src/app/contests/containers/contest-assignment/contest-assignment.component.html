@@ -4,7 +4,7 @@
             <div class="col-md-4">
                 <div class="olymp_title_container">
                     <div class="olymp_title">
-                        {{ contest.contest?.base_contest?.name }}
+                        {{ contest?.base_contest?.name }}
                     </div>
                     <div class="olymp_subtitle">
                         Помните время на выполнение заданий ограничено
@@ -50,9 +50,11 @@
             </div>
             <div class="col-md-8">
                 <div class="tasks_list">
-                    <app-contest-assignment-item [taskId]="1" taskTitle="Ускорение шарика"></app-contest-assignment-item>
-                    <app-contest-assignment-item [taskId]="2" taskTitle="Движение связанных брусков"></app-contest-assignment-item>
-                    <app-contest-assignment-item [taskId]="3" taskTitle="Цилиндр с газом"></app-contest-assignment-item>
+                    <ng-container *ngIf="tasks$ | async as tasks">
+                        <ng-container *ngFor="let task of tasks">
+                            <app-contest-assignment-item [contestId]= "contestId" [task]="task" taskTitle="Ускорение шарика"></app-contest-assignment-item>
+                        </ng-container>
+                    </ng-container>
                 </div>
             </div>
         </div>

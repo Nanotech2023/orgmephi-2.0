@@ -30,15 +30,15 @@ const routes: Routes =
             path: 'contests', component: ContestListComponent, canActivate: [ AuthGuardService ]
         },
         {
-            path: 'contests/:id', component: ContestDetailsComponent, canActivate: [ AuthGuardService ]
+            path: 'contests/:contestId', component: ContestDetailsComponent, canActivate: [ AuthGuardService ]
         },
         {
-            path: 'contests/:id/registration',
+            path: 'contests/:contestId/registration',
             component: ContestRegistrationComponent,
             canActivate: [ AuthGuardService ]
         },
         {
-            path: 'contests/:id/assignment', component: ContestAssignmentComponent, canActivate: [ AuthGuardService ]
+            path: 'contests/:contestId/assignment', component: ContestAssignmentComponent, canActivate: [ AuthGuardService ]
         }
     ]
 

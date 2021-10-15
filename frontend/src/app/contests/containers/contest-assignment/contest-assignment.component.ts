@@ -1,23 +1,42 @@
 import { Component, OnDestroy, OnInit } from '@angular/core'
 import { Observable } from 'rxjs'
-import { SimpleContestWithFlagResponseTaskParticipant } from '@api/tasks/model'
-import { ContestsStore } from '@/contests/contests.store'
+import { Contest, TaskForUserResponseTaskParticipant, Variant } from '@api/tasks/model'
+import { ContestAssignmentStore } from '@/contests/containers/contest-assignment/contest-assignment.store'
+import { ActivatedRoute } from '@angular/router'
 
 
 @Component( {
     selector: 'app-contest-assignment',
     templateUrl: './contest-assignment.component.html',
-    styleUrls: [ './contest-assignment.component.scss' ]
+    styleUrls: [ './contest-assignment.component.scss' ],
+    providers: [ ContestAssignmentStore ]
 } )
 export class ContestAssignmentComponent implements OnInit, OnDestroy
 {
-    contest$: Observable<SimpleContestWithFlagResponseTaskParticipant | undefined>
+    contestId!: number | null
+
+    contest$: Observable<Contest | undefined>
+    variant$: Observable<Variant | undefined>
+
     timeLeft: number = 14400
     interval!: number
+    tasks$: Observable<Array<TaskForUserResponseTaskParticipant>>
 
-    constructor( private contestsStore: ContestsStore )
+    constructor( private route: ActivatedRoute, private contestAssignmentStore: ContestAssignmentStore )
     {
-        this.contest$ = this.contestsStore.selectedContest
+        this.route.paramMap.subscribe( paramMap =>
+        {
+            this.contestId = Number( paramMap.get( 'contestId' ) )
+            if ( !!this.contestId )
+            {
+                this.contestAssignmentStore.fetchContest( this.contestId )
+                this.contestAssignmentStore.fetchVariant( this.contestId )
+                this.contestAssignmentStore.fetchTasks( this.contestId )
+            }
+        } )
+        this.contest$ = this.contestAssignmentStore.contest$
+        this.variant$ = this.contestAssignmentStore.variant$
+        this.tasks$ = this.contestAssignmentStore.tasks$
     }
 
     getDisplayTime(): string
