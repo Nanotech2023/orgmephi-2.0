@@ -37,7 +37,7 @@ import {
 } )
 export class ResponsesService
 {
-    protected basePath = 'http://127.0.0.1:5000'
+    protected basePath = 'http://127.0.0.1:5000/contest'
     public defaultHeaders = new HttpHeaders()
     public configuration = new Configuration()
     public encoder: HttpParameterCodec

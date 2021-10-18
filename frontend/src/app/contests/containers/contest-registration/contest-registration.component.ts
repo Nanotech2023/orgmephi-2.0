@@ -18,7 +18,7 @@ export class ContestRegistrationComponent
 
     constructor( private contestsStore: ContestsStore, private tasksService: TasksService, private router: Router )
     {
-        this.contest$ = contestsStore.selectedContest
+        this.contest$ = contestsStore.contest$
         this.tasksService.tasksUnauthorizedLocationAllGet().subscribe( items => this.locations = items.locations )
     }
 
@@ -30,13 +30,14 @@ export class ContestRegistrationComponent
         {
             this.contestsStore.enroll( {
                 contestId: contestId as number,
-                enrollRequestTaskParticipant: { location_id: locationId }
+                locationId: locationId
             } )
         }
     }
 
     onStartClick( contestId: number | undefined ): void
     {
+        this.contestsStore.start( contestId as number )
         this.router.navigate( [ `/contests/${ contestId }/assignment` ] )
     }
 }

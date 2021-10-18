@@ -4,15 +4,13 @@ import { TasksService } from '@api/tasks/tasks.service'
 import { CallState, getError, LoadingState } from '@/shared/callState'
 import { EMPTY, Observable } from 'rxjs'
 import {
-    AllLocationResponseTaskUnauthorized,
-    Contest,
     EnrollRequestTaskParticipant,
     FilterSimpleContestResponseTaskParticipant,
     OlympiadLocation,
-    SimpleContestWithFlagResponseTaskParticipant,
-    Variant
+    SimpleContestWithFlagResponseTaskParticipant
 } from '@api/tasks/model'
 import { catchError, switchMap } from 'rxjs/operators'
+import { ResponsesService } from '@api/responses/responses.service'
 
 
 export interface ContestsState
@@ -20,7 +18,6 @@ export interface ContestsState
     contests: Array<SimpleContestWithFlagResponseTaskParticipant>
     locations: Array<OlympiadLocation>
     selectedContest?: SimpleContestWithFlagResponseTaskParticipant
-    selectedVariant?: Variant
     callState: CallState
 }
 
@@ -29,7 +26,6 @@ const initialState: ContestsState =
     {
         contests: [],
         locations: [],
-        selectedVariant: undefined,
         selectedContest: undefined,
         callState: LoadingState.INIT
     }
@@ -38,13 +34,13 @@ const initialState: ContestsState =
 @Injectable()
 export class ContestsStore extends ComponentStore<ContestsState>
 {
-    constructor( private tasksService: TasksService )
+    constructor( private tasksService: TasksService, private responsesService: ResponsesService )
     {
         super( initialState )
     }
 
-    readonly contests: Observable<SimpleContestWithFlagResponseTaskParticipant[]> = this.select( state => state.contests )
-    readonly selectedContest: Observable<SimpleContestWithFlagResponseTaskParticipant | undefined> = this.select( state => state.selectedContest )
+    readonly contests$: Observable<SimpleContestWithFlagResponseTaskParticipant[]> = this.select( state => state.contests )
+    readonly contest$: Observable<SimpleContestWithFlagResponseTaskParticipant | undefined> = this.select( state => state.selectedContest )
     private readonly loading$: Observable<boolean> = this.select( state => state.callState === LoadingState.LOADING )
     private readonly error$: Observable<string | null> = this.select( state => getError( state.callState ) )
 
@@ -81,12 +77,6 @@ export class ContestsStore extends ComponentStore<ContestsState>
             selectedContest: contest
         } ) )
 
-    readonly setVariant = this.updater( ( state: ContestsState, variant: Variant ) =>
-        ( {
-            ...state,
-            variant: variant
-        } ) )
-
     // EFFECTS
     readonly fetchAll = this.effect( () =>
     {
@@ -100,10 +90,22 @@ export class ContestsStore extends ComponentStore<ContestsState>
         )
     } )
 
-    readonly enroll = this.effect( ( contest$: Observable<{ contestId: number, enrollRequestTaskParticipant: EnrollRequestTaskParticipant }> ) =>
-        contest$.pipe(
-            switchMap( ( contest: { contestId: number; enrollRequestTaskParticipant: EnrollRequestTaskParticipant } ) =>
-                this.tasksService.tasksParticipantContestIdContestEnrollPost( contest.contestId, contest.enrollRequestTaskParticipant ).pipe(
+    readonly enroll = this.effect( ( enroll$: Observable<{ contestId: number, locationId: number }> ) =>
+        enroll$.pipe(
+            switchMap( ( enroll: { contestId: number, locationId: number } ) =>
+            {
+                const { contestId, locationId } = enroll
+                const enrollRequestTaskParticipant: EnrollRequestTaskParticipant = { location_id: locationId }
+                return this.tasksService.tasksParticipantContestIdContestEnrollPost( contestId, enrollRequestTaskParticipant ).pipe(
+                    catchError( () => EMPTY )
+                )
+            } )
+        ) )
+
+    readonly start = this.effect( ( contestId$: Observable<number> ) =>
+        contestId$.pipe(
+            switchMap( ( contestId: number ) =>
+                this.responsesService.responsesParticipantContestContestIdUserSelfCreatePost( contestId ).pipe(
                     catchError( () => EMPTY )
                 ) )
         ) )

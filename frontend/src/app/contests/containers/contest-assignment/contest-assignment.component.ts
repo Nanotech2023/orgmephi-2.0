@@ -14,13 +14,8 @@ import { ActivatedRoute } from '@angular/router'
 export class ContestAssignmentComponent implements OnInit, OnDestroy
 {
     contestId!: number | null
-
-    contest$: Observable<Contest | undefined>
-    variant$: Observable<Variant | undefined>
-
-    timeLeft: number = 14400
-    interval!: number
-    tasks$: Observable<Array<TaskForUserResponseTaskParticipant>>
+    // interval!: number
+    viewModel$: Observable<{ loading: boolean; error: string | null; contest: Contest | undefined; variant: Variant | undefined; tasks: Array<TaskForUserResponseTaskParticipant>; time: number | undefined }>
 
     constructor( private route: ActivatedRoute, private contestAssignmentStore: ContestAssignmentStore )
     {
@@ -32,35 +27,36 @@ export class ContestAssignmentComponent implements OnInit, OnDestroy
                 this.contestAssignmentStore.fetchContest( this.contestId )
                 this.contestAssignmentStore.fetchVariant( this.contestId )
                 this.contestAssignmentStore.fetchTasks( this.contestId )
+                this.contestAssignmentStore.fetchTime( this.contestId )
             }
         } )
-        this.contest$ = this.contestAssignmentStore.contest$
-        this.variant$ = this.contestAssignmentStore.variant$
-        this.tasks$ = this.contestAssignmentStore.tasks$
+        this.viewModel$ = this.contestAssignmentStore.viewModel$
     }
 
-    getDisplayTime(): string
+    getDisplayTime( timeLeft: number | undefined ): string
     {
-        return new Date( this.timeLeft * 1000 ).toISOString().substr( 11, 8 )
+        if ( timeLeft === undefined )
+            return ""
+        return new Date( timeLeft * 1000 ).toISOString().substr( 11, 8 )
     }
 
     ngOnInit(): void
     {
-        this.interval = setInterval( () =>
-        {
-            if ( this.timeLeft > 0 )
-            {
-                this.timeLeft--
-            }
-            else
-            {
-                this.timeLeft = 60
-            }
-        }, 1000 )
+        // this.interval = setInterval( () =>
+        // {
+        //     if ( this.timeLeft > 0 )
+        //     {
+        //         this.timeLeft--
+        //     }
+        //     else
+        //     {
+        //         this.timeLeft = 60
+        //     }
+        // }, 1000 )
     }
 
     ngOnDestroy(): void
     {
-        clearInterval( this.interval )
+        // clearInterval( this.interval )
     }
 }

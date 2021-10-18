@@ -15,7 +15,7 @@ export class ContestDetailsComponent
 
     constructor( private contestsStore: ContestsStore )
     {
-        this.contest$ = this.contestsStore.selectedContest
+        this.contest$ = this.contestsStore.contest$
     }
 
     getTargetClassesDisplay( contest: SimpleContestWithFlagResponseTaskParticipant ): string

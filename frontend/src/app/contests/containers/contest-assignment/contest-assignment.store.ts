@@ -5,39 +5,62 @@ import { catchError, switchMap } from 'rxjs/operators'
 import { EMPTY, Observable } from 'rxjs'
 import { CallState, getError, LoadingState } from '@/shared/callState'
 import { TasksService } from '@api/tasks/tasks.service'
+import { ResponsesService } from '@api/responses/responses.service'
+import { UserTimeResponseRequest } from '@api/responses/model'
 
 
 export interface ContestAssignmentState
 {
     callState: CallState,
-    variant?: Variant
     contest?: Contest
+    variant?: Variant
     tasks: Array<TaskForUserResponseTaskParticipant>
+    time?: number
 }
 
 
 const initialState: ContestAssignmentState =
     {
         callState: LoadingState.INIT,
-        variant: undefined,
         contest: undefined,
-        tasks: []
+        variant: undefined,
+        tasks: [],
+        time: undefined
     }
 
 
 @Injectable()
 export class ContestAssignmentStore extends ComponentStore<ContestAssignmentState>
 {
-    constructor( private tasksService: TasksService )
+    constructor( private tasksService: TasksService, private responsesService: ResponsesService )
     {
         super( initialState )
     }
 
     private readonly loading$: Observable<boolean> = this.select( state => state.callState === LoadingState.LOADING )
     private readonly error$: Observable<string | null> = this.select( state => getError( state.callState ) )
-    readonly contest$: Observable<Contest | undefined> = this.select( state => state.contest )
-    readonly variant$: Observable<Variant | undefined> = this.select( state => state.variant )
-    readonly tasks$: Observable<Array<TaskForUserResponseTaskParticipant>> = this.select( state => state.tasks )
+    private readonly contest$: Observable<Contest | undefined> = this.select( state => state.contest )
+    private readonly variant$: Observable<Variant | undefined> = this.select( state => state.variant )
+    private readonly tasks$: Observable<Array<TaskForUserResponseTaskParticipant>> = this.select( state => state.tasks )
+    private readonly time$: Observable<number | undefined> = this.select( state => state.time )
+
+    readonly viewModel$: Observable<{ loading: boolean; error: string | null, contest: Contest | undefined, variant: Variant | undefined, tasks: Array<TaskForUserResponseTaskParticipant>, time: number | undefined }> = this.select(
+        this.loading$,
+        this.error$,
+        this.contest$,
+        this.variant$,
+        this.tasks$,
+        this.time$,
+        ( loading, error, contest, variant, tasks, time ) =>
+            ( {
+                loading: loading,
+                error: error,
+                contest: contest,
+                variant: variant,
+                tasks: tasks,
+                time: time
+            } )
+    )
 
     // UPDATERS
     readonly updateError = this.updater( ( state: ContestAssignmentState, error: string ) =>
@@ -76,7 +99,27 @@ export class ContestAssignmentStore extends ComponentStore<ContestAssignmentStat
             tasks: response.tasks_list
         } ) )
 
+    readonly setTime = this.updater( ( state: ContestAssignmentState, response: UserTimeResponseRequest ) =>
+        ( {
+            ...state,
+            time: response.time
+        } ) )
+
     // EFFECTS
+    readonly fetchTasks = this.effect( ( contestId$: Observable<number> ) =>
+    {
+        this.setLoading()
+        return contestId$.pipe( switchMap( ( contest: number ) =>
+                this.tasksService.tasksParticipantContestIdContestTasksSelfGet( contest ).pipe(
+                    tapResponse(
+                        ( response: AllTaskResponseTaskParticipant ) => this.setTasks( response ),
+                        ( error: string ) => this.updateError( error )
+                    )
+                )
+            ),
+            catchError( () => EMPTY ) )
+    } )
+
     readonly fetchContest = this.effect( ( contestId$: Observable<number> ) =>
         contestId$.pipe(
             switchMap( ( id: number ) =>
@@ -103,13 +146,13 @@ export class ContestAssignmentStore extends ComponentStore<ContestAssignmentStat
             catchError( () => EMPTY ) )
     } )
 
-    readonly fetchTasks = this.effect( ( contestId$: Observable<number> ) =>
+    readonly fetchTime = this.effect( ( contestId$: Observable<number> ) =>
     {
         this.setLoading()
         return contestId$.pipe( switchMap( ( contest: number ) =>
-                this.tasksService.tasksParticipantContestIdContestTasksSelfGet( contest ).pipe(
+                this.responsesService.responsesParticipantContestContestIdUserSelfTimeGet( contest ).pipe(
                     tapResponse(
-                        ( response: AllTaskResponseTaskParticipant ) => this.setTasks( response ),
+                        ( response: UserTimeResponseRequest ) => this.setTime( response ),
                         ( error: string ) => this.updateError( error )
                     )
                 )

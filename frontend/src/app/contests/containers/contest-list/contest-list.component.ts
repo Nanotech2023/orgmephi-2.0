@@ -22,7 +22,7 @@ export class ContestListComponent implements OnInit
     constructor( private authStore: Store<AuthState.State>, private contestsStore: ContestsStore, private router: Router )
     {
         this.showContestsList = false
-        this.contests$ = this.contestsStore.contests
+        this.contests$ = this.contestsStore.contests$
     }
 
     ngOnInit(): void
