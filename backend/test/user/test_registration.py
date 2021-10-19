@@ -319,7 +319,7 @@ def test_register_over_unconfirmed(client):
     resp = client.post('/school', json=request)
     assert resp.status_code == 200
 
-    user = User.query.filter_by(id=user.id).one_or_none()
+    user = User.query.filter_by(id=resp.json['id']).one_or_none()
     assert user.user_info.first_name == 'string'
 
 
