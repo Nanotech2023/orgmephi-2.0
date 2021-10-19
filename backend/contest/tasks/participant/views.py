@@ -22,7 +22,7 @@ app = get_current_app()
 
 @module.route(
     '/contest/<int:id_contest>/variant/self',
-    methods=['GET'], output_schema=VariantSchema)
+    methods=['GET'], output_schema=VariantWithCompletedTasksCountTaskParticipantSchema)
 def get_variant_self(id_contest):
     """
     Get variant for user in current contest
@@ -43,7 +43,7 @@ def get_variant_self(id_contest):
           description: OK
           content:
             application/json:
-              schema: VariantSchema
+              schema: VariantWithCompletedTasksCountTaskParticipantSchema
         '400':
           description: Bad request
         '409':
@@ -52,12 +52,21 @@ def get_variant_self(id_contest):
           description: User not found
     """
 
+    from contest.responses.models import Response
+
     # Contest not in progress or 'not show answers' flag
     if not user_can_view_variants_and_tasks(id_contest):
         raise ContestContentAccessDenied()
 
     variant = get_user_variant_if_possible(id_contest)
-    return variant, 200
+
+    user_work: Response = get_user_in_contest_work(jwt_get_id(), id_contest)
+    count_of_completed_tasks = user_work.answers.count()
+
+    return {
+        'variant': variant,
+        'completed_task_count': count_of_completed_tasks
+    }, 200
 
 
 # Enroll in Contest

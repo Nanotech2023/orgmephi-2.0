@@ -84,7 +84,7 @@ def test_get_variant_self(client, test_simple_contest_with_users,
                           test_variant):
     resp = client.get(f'/contest/{test_simple_contest_with_users[0].contest_id}/variant/self')
     assert resp.status_code == 200
-    assert test_simple_contest_with_users[0].users.all()[0].variant_id == resp.json['variant_id']
+    assert test_simple_contest_with_users[0].users.all()[0].variant_id == resp.json['variant']['variant_id']
 
     resp = client.get(f'/contest/{test_simple_contest_with_users[1].contest_id}/variant/self')
     assert resp.status_code == 404
