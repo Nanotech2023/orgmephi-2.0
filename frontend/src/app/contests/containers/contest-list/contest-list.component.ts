@@ -31,12 +31,6 @@ export class ContestListComponent implements OnInit
         this.contestsStore.fetchAll()
     }
 
-    navigateTo( contest: SimpleContestWithFlagResponseTaskParticipant ): Promise<boolean>
-    {
-        this.contestsStore.selectContest( contest )
-        return this.router.navigate( [ "/contests", contest.contest?.contest_id ] )
-    }
-
     collapseContestsList(): void
     {
         this.showContestsList = !this.showContestsList

@@ -3,7 +3,10 @@
         <div class="col-md-4">
             <div class="home_title_container">
                 <div class="home_title">
-                    Добро пожаловать, уважаемый студент!
+                    Добро пожаловать,
+                    <ng-container *ngIf="personalInfo$ | async as personalInfo">
+                        {{ personalInfo.first_name }} {{ personalInfo.middle_name }}!
+                    </ng-container>
                 </div>
                 <div class="home_subtitle">
                     «Я — профессионал» — масштабная образовательная олимпиада нового формата для студентов разных

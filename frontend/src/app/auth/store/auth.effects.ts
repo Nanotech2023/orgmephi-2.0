@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core'
 import { Actions, createEffect, ofType } from '@ngrx/effects'
 import { UsersService } from '@api/users/users.service'
 import {
-    errorCaught,
+    errorCaught, getUserInfoRequest, getUserInfoSuccess,
     getUserRequest,
     getUserSuccess,
     loginRequest,
@@ -13,7 +13,7 @@ import {
 import { catchError, concatMap, mergeMap, switchMap } from 'rxjs/operators'
 import { of } from 'rxjs'
 import { Router } from '@angular/router'
-import { CSRFPairUser, User } from '@api/users/models'
+import { CSRFPairUser, User, UserInfo } from '@api/users/models'
 import { TasksService } from '@api/tasks/tasks.service'
 import { ResponsesService } from '@api/responses/responses.service'
 
@@ -49,7 +49,7 @@ export class AuthEffects
     loginSuccess$ = createEffect( () =>
         this.actions$.pipe(
             ofType( loginSuccess ),
-            switchMap( () => [ getUserRequest() ] )
+            switchMap( () => [ getUserRequest(), getUserInfoRequest() ] )
         )
     )
 
@@ -60,6 +60,18 @@ export class AuthEffects
             concatMap( () =>
                 this.authService.userProfileUserGet().pipe(
                     mergeMap( ( user: User ) => of( getUserSuccess( { user: user } ) ) ),
+                    catchError( error => of( errorCaught( { error: error } ) ) )
+                )
+            )
+        )
+    )
+
+    getUserInfoRequest$ = createEffect( () =>
+        this.actions$.pipe(
+            ofType( getUserInfoRequest ),
+            concatMap( () =>
+                this.authService.userProfilePersonalGet().pipe(
+                    mergeMap( ( userInfo: UserInfo ) => of( getUserInfoSuccess( { userInfo: userInfo } ) ) ),
                     catchError( error => of( errorCaught( { error: error } ) ) )
                 )
             )

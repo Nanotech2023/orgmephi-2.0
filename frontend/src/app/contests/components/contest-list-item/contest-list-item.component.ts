@@ -19,7 +19,16 @@ export class ContestListItemComponent
 
     navigateTo(): Promise<boolean>
     {
-        this.contestsStore.selectContest( this.contest )
+        // TODO allow select other locations
+        const locationId = 3
+        if ( this.contest.contest )
+        {
+            this.contestsStore.enroll( {
+                contestId: this.contest.contest.contest_id as number,
+                locationId: locationId
+            } )
+            this.contestsStore.selectContest( this.contest.contest )
+        }
         return this.router.navigate( [ "/contests", this.contest.contest?.contest_id ] )
     }
 

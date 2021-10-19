@@ -4,15 +4,15 @@
             <div class="col-md-4">
                 <div class="olymp_title_container">
                     <div class="olymp_status">
-                        <span>{{ contest.contest?.status }}</span>
+                        <span>{{ contest.status }}</span>
                     </div>
                     <div class="olymp_title">
-                        {{ contest.contest?.base_contest?.name }}                   
+                        {{ contest.base_contest?.name }}
                     </div>
                     <div class="olymp_subtitle">
                         <span>{{ getTargetClassesDisplay( contest ) }}</span>
-                        <span>{{ contest.contest?.base_contest?.subject }}</span>
-                        <span>Уровень {{ contest.contest?.status }}</span>
+                        <span>{{ contest.base_contest?.subject }}</span>
+                        <span>Уровень {{ contest.base_contest?.level }}</span>
                     </div>
                     <div class="olymp_links">
                         <a href="https://olymp.mephi.ru/rosatom/about">Сайт олимпиады</a>
@@ -70,7 +70,7 @@
                                         </svg>
                                     </div>
                                     <div class="col-md-6">
-                                        {{ contest.contest?.base_contest?.description }}
+                                        {{ contest.base_contest?.description }}
                                     </div>
                                     <div class="col-md-5">
                                         <div class="stage_action">

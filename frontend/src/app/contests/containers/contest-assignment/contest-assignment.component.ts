@@ -1,8 +1,10 @@
-import { Component, OnDestroy, OnInit } from '@angular/core'
+import { Component, EventEmitter, OnDestroy, OnInit } from '@angular/core'
 import { Observable } from 'rxjs'
 import { Contest, TaskForUserResponseTaskParticipant, Variant } from '@api/tasks/model'
 import { ContestAssignmentStore } from '@/contests/containers/contest-assignment/contest-assignment.store'
-import { ActivatedRoute } from '@angular/router'
+import { ActivatedRoute, Router } from '@angular/router'
+import { UserResponseStatusResponse } from '@api/responses/model'
+import { Document } from '@api/users/models'
 
 
 @Component( {
@@ -14,8 +16,10 @@ import { ActivatedRoute } from '@angular/router'
 export class ContestAssignmentComponent implements OnInit, OnDestroy
 {
     contestId!: number | null
-    // interval!: number
-    viewModel$: Observable<{ loading: boolean; error: string | null; contest: Contest | undefined; variant: Variant | undefined; tasks: Array<TaskForUserResponseTaskParticipant>; time: number | undefined }>
+    interval!: number
+    viewModel$: Observable<{ loading: boolean; error: string | null; contest: Contest | undefined; variant: Variant | undefined; tasks: Array<TaskForUserResponseTaskParticipant>; time: number | undefined; status: UserResponseStatusResponse.StatusEnum | undefined }>
+    timeLeft: number | undefined
+    answerCount: number = 0
 
     constructor( private route: ActivatedRoute, private contestAssignmentStore: ContestAssignmentStore )
     {
@@ -28,35 +32,56 @@ export class ContestAssignmentComponent implements OnInit, OnDestroy
                 this.contestAssignmentStore.fetchVariant( this.contestId )
                 this.contestAssignmentStore.fetchTasks( this.contestId )
                 this.contestAssignmentStore.fetchTime( this.contestId )
+                this.contestAssignmentStore.fetchStatus( this.contestId )
             }
         } )
         this.viewModel$ = this.contestAssignmentStore.viewModel$
     }
 
-    getDisplayTime( timeLeft: number | undefined ): string
+    getDisplayTime( time: number | undefined ): string
     {
-        if ( timeLeft === undefined )
+        if ( this.timeLeft === undefined )
+        {
+            this.timeLeft = time
             return ""
-        return new Date( timeLeft * 1000 ).toISOString().substr( 11, 8 )
+        }
+        return new Date( this.timeLeft * 1000 ).toISOString().substr( 11, 8 )
     }
 
     ngOnInit(): void
     {
-        // this.interval = setInterval( () =>
-        // {
-        //     if ( this.timeLeft > 0 )
-        //     {
-        //         this.timeLeft--
-        //     }
-        //     else
-        //     {
-        //         this.timeLeft = 60
-        //     }
-        // }, 1000 )
+        this.interval = setInterval( () =>
+        {
+            if ( this.timeLeft === undefined )
+                return
+            if ( this.timeLeft > 0 )
+            {
+                this.timeLeft--
+            }
+            else
+            {
+                this.timeLeft = 0
+            }
+        }, 1000 )
     }
 
     ngOnDestroy(): void
     {
-        // clearInterval( this.interval )
+        clearInterval( this.interval )
+    }
+
+    finish(): void
+    {
+        if ( this.contestId !== null )
+        {
+            this.contestAssignmentStore.finish( this.contestId )
+            this.contestAssignmentStore.fetchTime( this.contestId )
+        }
+    }
+
+    onAnswered( $event: boolean )
+    {
+        if ( $event )
+            this.answerCount++
     }
 }

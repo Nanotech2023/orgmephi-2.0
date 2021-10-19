@@ -1,5 +1,5 @@
 import { createAction, props } from '@ngrx/store'
-import { CSRFPairUser, LoginRequestUser, SchoolRegistrationRequestUser, User} from '@api/users/models'
+import { CSRFPairUser, LoginRequestUser, SchoolRegistrationRequestUser, User, UserInfo } from '@api/users/models'
 
 
 export const loginRequest = createAction(
@@ -27,6 +27,14 @@ export const getUserRequest = createAction(
 export const getUserSuccess = createAction(
     '[Auth] Get User Success',
     props<{ user: User }>()
+)
+
+export const getUserInfoRequest = createAction(
+    '[Auth] Get User Info Request'
+)
+export const getUserInfoSuccess = createAction(
+    '[Auth] Get User Success',
+    props<{ userInfo: UserInfo }>()
 )
 
 export const errorCaught = createAction(

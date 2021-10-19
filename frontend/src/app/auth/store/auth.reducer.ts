@@ -1,6 +1,6 @@
 import { createReducer, on } from '@ngrx/store'
-import { getUserSuccess, loginSuccess } from '@/auth/store/auth.actions'
-import { CSRFPairUser, User } from '@api/users/models'
+import { getUserInfoSuccess, getUserSuccess, loginSuccess } from '@/auth/store/auth.actions'
+import { CSRFPairUser, User, UserInfo } from '@api/users/models'
 
 
 export const featureKey: string = 'auth'
@@ -9,13 +9,15 @@ export const featureKey: string = 'auth'
 export interface State
 {
     csrfTokens: CSRFPairUser | null
-    user: User | null
+    user: User | null,
+    userInfo: UserInfo | null
 }
 
 
 const initialState: State = {
     csrfTokens: null,
-    user: null
+    user: null,
+    userInfo: null
 }
 
 export const reducer =
@@ -32,5 +34,9 @@ export const reducer =
         on( getUserSuccess,
             ( state, { user } ) =>
                 ( { ...state, user: user } )
+        ),
+        on( getUserInfoSuccess,
+            ( state, { userInfo } ) =>
+                ( { ...state, userInfo: userInfo } )
         )
     )

@@ -1,9 +1,11 @@
 import { Component } from '@angular/core'
 import { ContestsStore } from '@/contests/contests.store'
-import { OlympiadLocation, SimpleContestWithFlagResponseTaskParticipant } from '@api/tasks/model'
+import { OlympiadLocation, SimpleContest } from '@api/tasks/model'
 import { Observable } from 'rxjs'
 import { TasksService } from '@api/tasks/tasks.service'
-import { Router } from '@angular/router'
+import { ActivatedRoute, Router } from '@angular/router'
+import { ResponsesService } from '@api/responses/responses.service'
+import { UserResponseStatusResponse } from '@api/responses/model'
 
 
 @Component( {
@@ -13,31 +15,39 @@ import { Router } from '@angular/router'
 } )
 export class ContestRegistrationComponent
 {
-    contest$: Observable<SimpleContestWithFlagResponseTaskParticipant | undefined>
+    contest$: Observable<SimpleContest | undefined>
     locations!: Array<OlympiadLocation>
+    contestId!: number | null
+    contestStatus$!: Observable<UserResponseStatusResponse>
 
-    constructor( private contestsStore: ContestsStore, private tasksService: TasksService, private router: Router )
+    constructor( private route: ActivatedRoute, private contestsStore: ContestsStore, private tasksService: TasksService, private responsesService: ResponsesService, private router: Router )
     {
-        this.contest$ = contestsStore.contest$
-        this.tasksService.tasksUnauthorizedLocationAllGet().subscribe( items => this.locations = items.locations )
-    }
-
-    onEnrollClick( contestId: number | undefined )
-    {
-        // TODO allow select other locations
-        const locationId = 2
-        if ( contestId as number )
+        this.route.paramMap.subscribe( paramMap =>
         {
-            this.contestsStore.enroll( {
-                contestId: contestId as number,
-                locationId: locationId
-            } )
-        }
+            this.contestId = Number( paramMap.get( 'contestId' ) )
+            if ( !!this.contestId )
+            {
+                this.contestsStore.fetchSingle( this.contestId )
+                this.contestStatus$ = this.responsesService.responsesParticipantContestContestIdUserSelfStatusGet( this.contestId )
+            }
+        } )
+        this.contest$ = this.contestsStore.contest$
+        this.tasksService.tasksUnauthorizedLocationAllGet().subscribe( items => this.locations = items.locations )
     }
 
     onStartClick( contestId: number | undefined ): void
     {
         this.contestsStore.start( contestId as number )
         this.router.navigate( [ `/contests/${ contestId }/assignment` ] )
+    }
+
+    inProgress( contestStatus: UserResponseStatusResponse ): boolean
+    {
+        return contestStatus.status === UserResponseStatusResponse.StatusEnum.InProgress
+    }
+
+    finished( contestStatus: UserResponseStatusResponse ): boolean
+    {
+        return !this.inProgress( contestStatus )
     }
 }

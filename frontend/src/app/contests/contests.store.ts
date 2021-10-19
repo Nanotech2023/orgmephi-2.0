@@ -4,9 +4,11 @@ import { TasksService } from '@api/tasks/tasks.service'
 import { CallState, getError, LoadingState } from '@/shared/callState'
 import { EMPTY, Observable } from 'rxjs'
 import {
+    Contest,
     EnrollRequestTaskParticipant,
     FilterSimpleContestResponseTaskParticipant,
     OlympiadLocation,
+    SimpleContest,
     SimpleContestWithFlagResponseTaskParticipant
 } from '@api/tasks/model'
 import { catchError, switchMap } from 'rxjs/operators'
@@ -17,7 +19,7 @@ export interface ContestsState
 {
     contests: Array<SimpleContestWithFlagResponseTaskParticipant>
     locations: Array<OlympiadLocation>
-    selectedContest?: SimpleContestWithFlagResponseTaskParticipant
+    contest?: Contest
     callState: CallState
 }
 
@@ -26,7 +28,7 @@ const initialState: ContestsState =
     {
         contests: [],
         locations: [],
-        selectedContest: undefined,
+        contest: undefined,
         callState: LoadingState.INIT
     }
 
@@ -40,7 +42,11 @@ export class ContestsStore extends ComponentStore<ContestsState>
     }
 
     readonly contests$: Observable<SimpleContestWithFlagResponseTaskParticipant[]> = this.select( state => state.contests )
-    readonly contest$: Observable<SimpleContestWithFlagResponseTaskParticipant | undefined> = this.select( state => state.selectedContest )
+    readonly contest$: Observable<SimpleContest | undefined> = this.select( state =>
+    {
+        console.log( state.contest )
+        return state.contest as SimpleContest
+    } )
     private readonly loading$: Observable<boolean> = this.select( state => state.callState === LoadingState.LOADING )
     private readonly error$: Observable<string | null> = this.select( state => getError( state.callState ) )
 
@@ -71,10 +77,10 @@ export class ContestsStore extends ComponentStore<ContestsState>
             contests: [ ...state.contests, ...contests ]
         } ) )
 
-    readonly selectContest = this.updater( ( state: ContestsState, contest: SimpleContestWithFlagResponseTaskParticipant ) =>
+    readonly selectContest = this.updater( ( state: ContestsState, contest: Contest ) =>
         ( {
             ...state,
-            selectedContest: contest
+            contest: contest
         } ) )
 
     // EFFECTS
@@ -89,6 +95,17 @@ export class ContestsStore extends ComponentStore<ContestsState>
             catchError( () => EMPTY )
         )
     } )
+
+    readonly fetchSingle = this.effect( ( contestId$: Observable<number> ) =>
+        contestId$.pipe(
+            switchMap( ( contestId: number ) =>
+                this.tasksService.tasksParticipantOlympiadIdOlympiadGet( contestId ).pipe(
+                    tapResponse(
+                        ( response: Contest ) => this.selectContest( response ),
+                        ( error: string ) => this.updateError( error )
+                    ),
+                    catchError( () => EMPTY ) ) )
+        ) )
 
     readonly enroll = this.effect( ( enroll$: Observable<{ contestId: number, locationId: number }> ) =>
         enroll$.pipe(

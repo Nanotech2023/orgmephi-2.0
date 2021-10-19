@@ -1,7 +1,8 @@
 import { Component } from '@angular/core'
 import { Observable } from 'rxjs'
 import { ContestsStore } from '@/contests/contests.store'
-import { Contest, SimpleContestWithFlagResponseTaskParticipant } from '@api/tasks/model'
+import { Contest, SimpleContest, SimpleContestWithFlagResponseTaskParticipant } from '@api/tasks/model'
+import { ActivatedRoute } from '@angular/router'
 
 
 @Component( {
@@ -11,15 +12,24 @@ import { Contest, SimpleContestWithFlagResponseTaskParticipant } from '@api/task
 } )
 export class ContestDetailsComponent
 {
-    contest$: Observable<SimpleContestWithFlagResponseTaskParticipant | undefined>
+    contest$: Observable<SimpleContest | undefined>
+    contestId!: number | null
 
-    constructor( private contestsStore: ContestsStore )
+    constructor( private route: ActivatedRoute, private contestsStore: ContestsStore )
     {
+        this.route.paramMap.subscribe( paramMap =>
+        {
+            this.contestId = Number( paramMap.get( 'contestId' ) )
+            if ( !!this.contestId )
+            {
+                this.contestsStore.fetchSingle( this.contestId )
+            }
+        } )
         this.contest$ = this.contestsStore.contest$
     }
 
-    getTargetClassesDisplay( contest: SimpleContestWithFlagResponseTaskParticipant ): string
+    getTargetClassesDisplay( contest: SimpleContest ): string
     {
-        return contest?.contest?.base_contest?.target_classes?.map( item => item.target_class ).join( "," ) + " классы"
+        return contest.base_contest?.target_classes?.map( item => item.target_class ).join( "," ) + " классы"
     }
 }
