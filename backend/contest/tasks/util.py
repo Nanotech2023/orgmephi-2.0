@@ -160,12 +160,12 @@ def generate_variant(contest_id, user_id):
     :return: final variant number
     """
     current_contest = db_get_or_raise(Contest, "contest_id", contest_id)
-    variant_numbers_list = [variant.variant_number for variant in current_contest.variants.all()]
-    variants_amount = len(variant_numbers_list)
+    variant_id_list = [variant.variant_id for variant in current_contest.variants.all()]
+    variants_amount = len(variant_id_list)
     if variants_amount == 0:
         raise DataConflict('No variants found in current contest')
     random_number = secrets.randbelow(variants_amount * 420)
-    final_variant_number = variant_numbers_list[(user_id + random_number) % variants_amount]
+    final_variant_number = variant_id_list[(user_id + random_number) % variants_amount]
     return final_variant_number
 
 
