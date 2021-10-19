@@ -656,16 +656,18 @@ def test_simple_contest_with_users_not_in_progress(test_simple_contest, test_var
     from contest.responses.models import add_user_response, ResponseStatusEnum
     from contest.tasks.models.user import UserInContest, UserStatusEnum
     user_id = test_user_for_student_contest.id
-    user_in_contest = UserInContest(user_id=user_id,
-                                    show_results_to_user=True,
-                                    user_status=UserStatusEnum.Participant.value,
-                                    variant_id=test_variant[0].variant_id,
-                                    location_id=test_olympiad_locations[0].location_id)
-    test_simple_contest[0].users.append(user_in_contest)
+    user_in_contest_ = UserInContest(user_id=user_id,
+                                     show_results_to_user=True,
+                                     user_status=UserStatusEnum.Participant.value,
+                                     variant_id=test_variant[0].variant_id,
+                                     location_id=test_olympiad_locations[0].location_id)
+    test_simple_contest[0].users.append(user_in_contest_)
 
+    test_app.db.session.add(user_in_contest_)
+    test_app.db.session.commit()
     user_work = add_user_response(test_app.db.session, user_id, test_simple_contest[0].contest_id)
+
     user_work.work_status = ResponseStatusEnum.not_checked
-    test_app.db.session.add(user_in_contest)
     test_app.db.session.add(user_work)
 
     test_app.db.session.commit()
@@ -679,18 +681,19 @@ def test_simple_contest_with_users_ended(test_simple_contest, test_variant, test
     from contest.responses.models import add_user_response, ResponseStatusEnum
     from contest.tasks.models.user import UserInContest, UserStatusEnum
     user_id = test_user_for_student_contest.id
-    user_in_contest = UserInContest(user_id=user_id,
-                                    show_results_to_user=True,
-                                    user_status=UserStatusEnum.Participant.value,
-                                    variant_id=test_variant[0].variant_id,
-                                    location_id=test_olympiad_locations[0].location_id)
-    test_simple_contest[0].users.append(user_in_contest)
+    user_in_contest_ = UserInContest(user_id=user_id,
+                                     show_results_to_user=True,
+                                     user_status=UserStatusEnum.Participant.value,
+                                     variant_id=test_variant[0].variant_id,
+                                     location_id=test_olympiad_locations[0].location_id)
+    test_simple_contest[0].users.append(user_in_contest_)
 
+    test_app.db.session.add(user_in_contest_)
+    test_app.db.session.commit()
     user_work = add_user_response(test_app.db.session, user_id, test_simple_contest[0].contest_id)
-    user_work.work_status = ResponseStatusEnum.in_progress
+
     test_simple_contest[0].result_publication_date = datetime.utcnow()
     test_simple_contest[0].end_of_enroll_date = datetime.utcnow()
-    test_app.db.session.add(user_in_contest)
     test_app.db.session.add(user_work)
 
     test_app.db.session.commit()
@@ -711,9 +714,10 @@ def test_composite_contest_with_users(test_simple_contest_in_stage_1, test_varia
                                     location_id=test_olympiad_locations[0].location_id)
     test_simple_contest_in_stage_1[0].users.append(user_in_contest)
 
-    user_work = add_user_response(test_app.db.session, user_id, test_simple_contest_in_stage_1[0].contest_id)
-    user_work.work_status = ResponseStatusEnum.in_progress
     test_app.db.session.add(user_in_contest)
+    test_app.db.session.commit()
+    user_work = add_user_response(test_app.db.session, user_id, test_simple_contest_in_stage_1[0].contest_id)
+
     test_app.db.session.add(user_work)
 
     test_app.db.session.commit()
