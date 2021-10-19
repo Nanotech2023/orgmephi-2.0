@@ -609,19 +609,19 @@ def test_simple_contest_with_users(test_simple_contest_with_location, test_varia
     from contest.responses.models import add_user_response, ResponseStatusEnum
     from contest.tasks.models.user import UserInContest, UserStatusEnum
     user_id = test_user_for_student_contest.id
-    user_in_contest = UserInContest(user_id=user_id,
-                                    show_results_to_user=True,
-                                    user_status=UserStatusEnum.Participant.value,
-                                    variant_id=test_variant[0].variant_id,
-                                    location_id=test_olympiad_locations[0].location_id)
-    test_simple_contest_with_location[0].users.append(user_in_contest)
+    user_in_contest_ = UserInContest(user_id=user_id,
+                                     show_results_to_user=True,
+                                     user_status=UserStatusEnum.Participant.value,
+                                     variant_id=test_variant[0].variant_id,
+                                     location_id=test_olympiad_locations[0].location_id)
+    test_simple_contest_with_location[0].users.append(user_in_contest_)
 
-    user_work = add_user_response(test_app.db.session, user_id, test_simple_contest_with_location[0].contest_id)
-    user_work.work_status = ResponseStatusEnum.in_progress
-    test_app.db.session.add(user_in_contest)
-    test_app.db.session.add(user_work)
-
+    test_app.db.session.add(user_in_contest_)
     test_app.db.session.commit()
+    user_work = add_user_response(test_app.db.session, user_id, test_simple_contest_with_location[0].contest_id)
+    test_app.db.session.add(user_work)
+    test_app.db.session.commit()
+
     yield test_simple_contest_with_location
 
 
@@ -632,16 +632,17 @@ def test_simple_contest_with_users_no_variant(test_simple_contest_with_location,
     from contest.responses.models import add_user_response, ResponseStatusEnum
     from contest.tasks.models.user import UserInContest, UserStatusEnum
     user_id = test_user_for_student_contest.id
-    user_in_contest = UserInContest(user_id=user_id,
-                                    show_results_to_user=True,
-                                    user_status=UserStatusEnum.Participant.value,
-                                    variant_id=152,
-                                    location_id=test_olympiad_locations[0].location_id)
-    test_simple_contest_with_location[0].users.append(user_in_contest)
+    user_in_contest_ = UserInContest(user_id=user_id,
+                                     show_results_to_user=True,
+                                     user_status=UserStatusEnum.Participant.value,
+                                     variant_id=152,
+                                     location_id=test_olympiad_locations[0].location_id)
+    test_simple_contest_with_location[0].users.append(user_in_contest_)
+
+    test_app.db.session.add(user_in_contest_)
+    test_app.db.session.commit()
 
     user_work = add_user_response(test_app.db.session, user_id, test_simple_contest_with_location[0].contest_id)
-    user_work.work_status = ResponseStatusEnum.in_progress
-    test_app.db.session.add(user_in_contest)
     test_app.db.session.add(user_work)
 
     test_app.db.session.commit()
