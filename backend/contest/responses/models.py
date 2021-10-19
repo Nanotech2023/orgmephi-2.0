@@ -57,8 +57,8 @@ class Response(db.Model):
     """
 
     work_id = db.Column(db.Integer, autoincrement=True, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey(UserInContest.user_id))
-    contest_id = db.Column(db.Integer, db.ForeignKey(UserInContest.contest_id))
+    user_id = db.Column(db.Integer)
+    contest_id = db.Column(db.Integer)
     start_time = db.Column(db.DateTime, default=datetime.utcnow())
     finish_time = db.Column(db.DateTime, default=datetime.utcnow())
     time_extension = db.Column(db.Interval, default=timedelta(seconds=0))
@@ -93,6 +93,10 @@ class Response(db.Model):
                 return self.get_status()
         else:
             return self.get_status()
+
+
+db.ForeignKeyConstraint((Response.user_id, Response.contest_id),
+                        (UserInContest.user_id, UserInContest.contest_id))
 
 
 class ResponseFiletypeEnum(enum.Enum):
