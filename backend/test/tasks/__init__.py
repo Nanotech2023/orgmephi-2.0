@@ -26,19 +26,19 @@ def test_olympiad_types():
 
 
 @pytest.fixture
-def test_olympiad_locations():
+def test_olympiad_locations(test_city, test_country_native):
     from contest.tasks.models import OnlineOlympiadLocation, RussiaOlympiadLocation, \
         OtherOlympiadLocation
     online_olympiad_location = [
         OnlineOlympiadLocation(url=f'Test {i}') for i in range(2)
     ]
     russia_olympiad_location = [
-        RussiaOlympiadLocation(city_name='Москва',
-                               region_name='Московская обл.',
+        RussiaOlympiadLocation(city_name=f'{test_city.name}',
+                               region_name=f'{test_city.region_name}',
                                address=f'Test {i}') for i in range(2)
     ]
     other_olympiad_location = [
-        OtherOlympiadLocation(country_name='Россия',
+        OtherOlympiadLocation(country_name=f'{test_country_native.name}',
                               location=f'Test {i}') for i in range(2)
     ]
     test_app.db.session.add_all(online_olympiad_location + russia_olympiad_location + other_olympiad_location)
