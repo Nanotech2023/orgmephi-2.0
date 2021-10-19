@@ -96,7 +96,7 @@ class Response(db.Model):
 
 
 db.ForeignKeyConstraint((Response.user_id, Response.contest_id),
-                        (UserInContest.user_id, UserInContest.contest_id))
+                        (UserInContest.user_id, UserInContest.contest_id), ondelete='cascade')
 
 
 class ResponseFiletypeEnum(enum.Enum):
