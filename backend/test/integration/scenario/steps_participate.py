@@ -17,7 +17,7 @@ def step_response_to_contest_a(client, state):
                       f'/contest/{contest_id}/variant/self')
     assert resp.status_code == 200
 
-    var_id = resp.json['variant_id']
+    var_id = resp.json['variant']['variant_id']
     resp = client.get(f'contest/tasks/participant'
                       f'/contest/{contest_id}/tasks/self')
     assert resp.status_code == 200

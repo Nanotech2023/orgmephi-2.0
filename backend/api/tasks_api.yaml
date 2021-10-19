@@ -1296,6 +1296,15 @@ components:
       - variant_description
       - variant_number
       type: object
+    VariantWithCompletedTasksCountTaskParticipant:
+      properties:
+        completed_task_count:
+          type: integer
+        variant:
+          $ref: '#/components/schemas/Variant'
+      required:
+      - completed_task_count
+      type: object
   securitySchemes:
     CSRFAccessToken:
       in: header
@@ -2504,7 +2513,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Variant'
+                $ref: '#/components/schemas/VariantWithCompletedTasksCountTaskParticipant'
           description: OK
         '400':
           description: Bad request
