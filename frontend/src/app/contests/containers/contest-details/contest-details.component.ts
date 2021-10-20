@@ -3,6 +3,7 @@ import { Observable } from 'rxjs'
 import { ContestsStore } from '@/contests/contests.store'
 import { Contest, SimpleContest, SimpleContestWithFlagResponseTaskParticipant } from '@api/tasks/model'
 import { ActivatedRoute } from '@angular/router'
+import { getClassesForDisplay, getStatusDisplay } from '@/shared/displayUtils'
 
 
 @Component( {
@@ -30,6 +31,11 @@ export class ContestDetailsComponent
 
     getTargetClassesDisplay( contest: SimpleContest ): string
     {
-        return contest.base_contest?.target_classes?.map( item => item.target_class ).join( "," ) + " классы"
+        return getClassesForDisplay( contest )
+    }
+
+    getStatusForDisplay( contest: SimpleContest )
+    {
+        return getStatusDisplay( contest )
     }
 }

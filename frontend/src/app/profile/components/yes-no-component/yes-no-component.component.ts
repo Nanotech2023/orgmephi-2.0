@@ -9,14 +9,10 @@ import { SchoolInfo } from '@api/users/models'
 } )
 export class YesNoComponentComponent
 {
-    @Input() model!: boolean
+    @Input() model!: boolean | null | undefined
     @Input() radioId!: string
     @Output() modelChange = new EventEmitter<boolean>()
 
-    checked( b: boolean )
-    {
-        return this.model === b
-    }
 
     nameYes()
     {

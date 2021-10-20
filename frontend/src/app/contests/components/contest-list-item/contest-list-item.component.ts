@@ -1,7 +1,8 @@
 import { Component, Input } from '@angular/core'
-import { SimpleContest, SimpleContestWithFlagResponseTaskParticipant, TargetClass } from '@api/tasks/model'
+import { SimpleContestWithFlagResponseTaskParticipant, TargetClass } from '@api/tasks/model'
 import { Router } from '@angular/router'
 import { ContestsStore } from '@/contests/contests.store'
+import { getClassesForDisplay, getStatusDisplay } from '@/shared/displayUtils'
 
 
 @Component( {
@@ -34,26 +35,11 @@ export class ContestListItemComponent
 
     getClassesForDisplay(): string
     {
-        let targetClasses = this.contest.contest?.base_contest?.target_classes as TargetClass[]
-        if ( targetClasses && targetClasses.length )
-        {
-            return `${ targetClasses[ 0 ].target_class }-${ targetClasses[ targetClasses.length - 1 ].target_class }`
-        }
-        return ""
+        return getClassesForDisplay(this.contest.contest)
     }
 
     getStatusDisplay(): string
     {
-        switch ( this.contest.contest?.status )
-        {
-            case SimpleContest.StatusEnum.WillStartSoon:
-                return "Скоро начнётся"
-            case SimpleContest.StatusEnum.InProgress:
-                return "Проходит"
-            case SimpleContest.StatusEnum.Finished:
-                return "Олимпиада завершена"
-            default:
-                return "Скоро начнётся"
-        }
+        return getStatusDisplay( this.contest.contest )
     }
 }

@@ -4,7 +4,7 @@
             <div class="col-md-4">
                 <div class="olymp_title_container">
                     <div class="olymp_status">
-                        <span>{{ contest.status }}</span>
+                        <span>{{ getStatusForDisplay(contest) }}</span>
                     </div>
                     <div class="olymp_title">
                         {{ contest.base_contest?.name }}

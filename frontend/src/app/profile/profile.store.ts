@@ -124,7 +124,8 @@ export class ProfileStore extends ComponentStore<ProfileState>
             number: undefined,
             user_id: undefined,
             school_type: SchoolInfo.SchoolTypeEnum.School,
-            name: undefined
+            name: undefined,
+            location: this.getEmptyLocation()
         }
     }
 
