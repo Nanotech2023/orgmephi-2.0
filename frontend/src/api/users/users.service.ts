@@ -46,12 +46,13 @@ import {
     UserInfo,
     UserListResponseUser
 } from '@api/users/models'
+import { environment } from '@environments/environment'
 
 
 @Injectable()
 export class UsersService
 {
-    protected basePath = 'http://127.0.0.1:5000'
+    protected basePath = environment.apiUrl
     public defaultHeaders = new HttpHeaders()
     public configuration = new Configuration()
     public encoder: HttpParameterCodec

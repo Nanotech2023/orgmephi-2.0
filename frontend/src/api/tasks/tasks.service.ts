@@ -84,6 +84,7 @@ import {
     VariantIdResponseTaskCreator,
     VariantResponseTaskCreator
 } from '@api/tasks/model'
+import { environment } from '@environments/environment'
 
 
 @Injectable( {
@@ -91,7 +92,7 @@ import {
 } )
 export class TasksService
 {
-    protected basePath = 'http://127.0.0.1:5000/contest'
+    protected basePath = environment.apiUrl + '/contest'
     public defaultHeaders = new HttpHeaders()
     public configuration = new Configuration()
     public encoder: HttpParameterCodec
