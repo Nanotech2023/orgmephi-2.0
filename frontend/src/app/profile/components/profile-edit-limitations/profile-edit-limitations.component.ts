@@ -7,19 +7,13 @@ import { UserLimitations } from '@api/users/models'
     templateUrl: './profile-edit-limitations.component.html',
     styleUrls: [ './profile-edit-limitations.component.scss' ]
 } )
-export class ProfileEditLimitationsComponent implements OnInit
+export class ProfileEditLimitationsComponent
 {
-    @Input() model!: UserLimitations | undefined
+    @Input() model!: UserLimitations
     @Output() modelChange = new EventEmitter<UserLimitations>()
-    limitations!: UserLimitations
-
-    ngOnInit(): void
-    {
-        this.limitations = this.model!
-    }
 
     onModelChange(): void
     {
-        this.modelChange.emit( this.limitations )
+        this.modelChange.emit( this.model )
     }
 }

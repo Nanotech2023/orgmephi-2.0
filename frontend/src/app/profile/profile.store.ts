@@ -74,7 +74,7 @@ export class ProfileStore extends ComponentStore<ProfileState>
             userInfoDocument: userInfoDocument ?? this.getEmptyDocument(),
             userInfoDwelling: userInfoDwelling ?? this.getEmptyLocation(),
             userInfoLimitations: userInfoLimitations ?? this.getEmptyLimitations(),
-            schoolInfo: schoolInfo ?? {}
+            schoolInfo: schoolInfo ?? this.getEmptySchool()
         } )
     )
 
@@ -109,11 +109,22 @@ export class ProfileStore extends ComponentStore<ProfileState>
     private getEmptyLimitations(): UserLimitations
     {
         return {
-            hearing: undefined,
-            movement: undefined,
-            sight: undefined,
+            hearing: false,
+            movement: false,
+            sight: false,
             // @ts-ignore
             user_id: undefined
+        }
+    }
+
+    getEmptySchool(): SchoolInfo
+    {
+        return {
+            grade: undefined,
+            number: undefined,
+            user_id: undefined,
+            school_type: SchoolInfo.SchoolTypeEnum.School,
+            name: undefined
         }
     }
 

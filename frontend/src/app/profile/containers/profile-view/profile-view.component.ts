@@ -22,6 +22,8 @@ export class ProfileViewComponent
         schoolInfo: SchoolInfo
     }>
 
+    readonly genders: ( "Male" | "Female" )[] = [ UserInfo.GenderEnum.Male, UserInfo.GenderEnum.Female ]
+
     constructor( private profileStore: ProfileStore )
     {
         this.profileStore.fetch()

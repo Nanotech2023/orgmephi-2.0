@@ -1,5 +1,5 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core'
-import { SchoolInfo } from '@api/users/models'
+import { LocationRussia, SchoolInfo } from '@api/users/models'
 
 
 @Component( {
@@ -7,30 +7,23 @@ import { SchoolInfo } from '@api/users/models'
     templateUrl: './profile-edit-school.component.html',
     styleUrls: [ './profile-edit-school.component.scss' ]
 } )
-export class ProfileEditSchoolComponent implements OnInit
+export class ProfileEditSchoolComponent
 {
-    @Input() model!: SchoolInfo | undefined
+    @Input() model!: SchoolInfo
     @Output() modelChange = new EventEmitter<SchoolInfo>()
-    schoolInfo! : SchoolInfo
 
-    ngOnInit(): void
+    get schoolLocation(): LocationRussia
     {
-        this.schoolInfo = this.model ?? this.getEmptySchool()
+        return this.model.location as LocationRussia
+    }
+
+    set schoolLocation( location: LocationRussia )
+    {
+        this.model.location = location
     }
 
     onModelChange(): void
     {
-        this.modelChange.emit( this.schoolInfo )
-    }
-
-    getEmptySchool(): SchoolInfo
-    {
-        return {
-            grade: undefined,
-            number: undefined,
-            user_id: undefined,
-            school_type: SchoolInfo.SchoolTypeEnum.School,
-            name: undefined
-        }
+        this.modelChange.emit( this.model )
     }
 }

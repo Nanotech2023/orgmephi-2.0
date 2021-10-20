@@ -11,10 +11,9 @@ export class ProfileEditPersonalComponent
 {
     @Input() model!: UserInfo
     @Output() modelChange = new EventEmitter<UserInfo>()
-    userInfo: UserInfo = this.model
 
     onModelChange(): void
     {
-        this.modelChange.emit( this.userInfo )
+        this.modelChange.emit( this.model )
     }
 }

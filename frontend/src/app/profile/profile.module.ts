@@ -7,6 +7,7 @@ import { ProfileEditPersonalComponent } from '@/profile/components/profile-edit-
 import { ProfileEditLimitationsComponent } from '@/profile/components/profile-edit-limitations/profile-edit-limitations.component'
 import { ProfileEditDwellingComponent } from '@/profile/components/profile-edit-dwelling/profile-edit-dwelling.component'
 import { ProfileEditSchoolComponent } from '@/profile/components/profile-edit-school/profile-edit-school.component'
+import { YesNoComponentComponent } from '@/profile/components/yes-no-component/yes-no-component.component'
 
 
 const COMPONENTS = [
@@ -15,7 +16,8 @@ const COMPONENTS = [
     ProfileEditDocumentComponent,
     ProfileEditDwellingComponent,
     ProfileEditLimitationsComponent,
-    ProfileEditSchoolComponent
+    ProfileEditSchoolComponent,
+    YesNoComponentComponent
 ]
 
 

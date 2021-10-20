@@ -1,37 +1,32 @@
 <div class="form_container">
     <div class="form_item">
-        <p class="form_label">Имя документа</p>
-        <input class="form_input" type="text" readonly
-               [ngModel]="document.document_name" (ngModelChange)="onModelChange()">
-    </div>
-    <!--                            <div class="form_item">-->
-    <!--                                <p class="form_label">document.code</p>-->
-    <!--                                <input class="form_input" placeholder="Введите фамилию" type="text"-->
-    <!--                                       [(ngModel)]="document.code">-->
-    <!--                            </div>-->
-    <div class="form_item">
         <p class="form_label">Тип документа</p>
         <input class="form_input" placeholder="Введите тип документа" type="text"
-               [(ngModel)]="document.document_type" (ngModelChange)="onModelChange()">
+               [(ngModel)]="model.document_type" disabled (ngModelChange)="onModelChange()">
     </div>
     <div class="form_item">
         <p class="form_label">Серия паспорта</p>
         <input class="form_input" placeholder="Введите серию паспорта" type="text"
-               [(ngModel)]="document.series" (ngModelChange)="onModelChange()">
+               [(ngModel)]="model.series" (ngModelChange)="onModelChange()">
     </div>
     <div class="form_item">
         <p class="form_label">Номер паспорта</p>
         <input class="form_input" placeholder="Введите номер паспорта" type="text"
-               [(ngModel)]="document.number" (ngModelChange)="onModelChange()">
+               [(ngModel)]="model.number" (ngModelChange)="onModelChange()">
     </div>
     <div class="form_item">
-        <p class="form_label">Дата выдачи</p>
+        <p class="form_label">Кем выдан</p>
+        <textarea class="form_input" placeholder="Введите место выдачи"
+                  [(ngModel)]="model.issuer" (ngModelChange)="onModelChange()"></textarea>
+    </div>
+    <div class="form_item">
+        <p class="form_label">Когда выдан</p>
         <input class="form_input" placeholder="Введите дату выдачи паспорта" type="date"
-               [(ngModel)]="document.issue_date" (ngModelChange)="onModelChange()">
+               [(ngModel)]="model.issue_date" (ngModelChange)="onModelChange()">
     </div>
     <div class="form_item">
-        <p class="form_label">Паспорт выдан</p>
-        <input class="form_input" placeholder="Введите кем выдан паспорт" type="text"
-               [(ngModel)]="document.issuer" (ngModelChange)="onModelChange()">
+        <p class="form_label">Код подразделения</p>
+        <input class="form_input" placeholder="Введите код подразделения" type="text"
+               [(ngModel)]="model.code">
     </div>
 </div>

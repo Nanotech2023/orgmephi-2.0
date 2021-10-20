@@ -1,6 +1,5 @@
-import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core'
-import { Document, Location } from '@api/users/models'
-import { DocumentTypeEnum } from '@api/users/models/documentType'
+import { Component, EventEmitter, Input, Output } from '@angular/core'
+import { Document, DocumentRF } from '@api/users/models'
 
 
 @Component( {
@@ -8,20 +7,13 @@ import { DocumentTypeEnum } from '@api/users/models/documentType'
     templateUrl: './profile-edit-document.component.html',
     styleUrls: [ './profile-edit-document.component.scss' ]
 } )
-export class ProfileEditDocumentComponent implements OnInit
+export class ProfileEditDocumentComponent
 {
-    @Input() model!: Document | undefined
+    @Input() model!: DocumentRF
     @Output() modelChange = new EventEmitter<Document>()
-    document!: Document
-
-    ngOnInit(): void
-    {
-        this.document = this.model!
-    }
 
     onModelChange(): void
     {
-        this.modelChange.emit( this.document )
+        this.modelChange.emit( this.model )
     }
-
 }

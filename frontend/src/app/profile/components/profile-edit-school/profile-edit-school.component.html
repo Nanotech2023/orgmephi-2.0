@@ -1,23 +1,23 @@
 <div class="form_container">
-<!--    <app-profile-edit-dwelling [(model)]="schoolInfo.location"></app-profile-edit-dwelling>-->
     <div class="form_item">
-        <p class="form_label">schoolInfo.school_type</p>
-        <input class="form_input" placeholder="Введите тип школы" type="text"
-               [(ngModel)]="schoolInfo.school_type" (ngModelChange)="onModelChange()">
+        <p class="form_label">Тип образовательного учреждения</p>
+        <input class="form_input" placeholder="Выберите тип учреждения" type="text"
+               [(ngModel)]="model.school_type" (ngModelChange)="onModelChange()">
     </div>
     <div class="form_item">
-        <p class="form_label">schoolInfo.name</p>
-        <input class="form_input" placeholder="Введите название школы" type="text"
-               [(ngModel)]="schoolInfo.name" (ngModelChange)="onModelChange()">
+        <p class="form_label">Номер образовательного учреждения</p>
+        <input class="form_input" placeholder="Введите ноль, если нет номера" type="text"
+               [(ngModel)]="model.number" (ngModelChange)="onModelChange()">
     </div>
     <div class="form_item">
-        <p class="form_label">schoolInfo.number</p>
-        <input class="form_input" placeholder="Введите номер школы" type="text"
-               [(ngModel)]="schoolInfo.number" (ngModelChange)="onModelChange()">
+        <p class="form_label">Название образовательного учреждения</p>
+        <input class="form_input" placeholder="Введите название учреждения" type="text"
+               [(ngModel)]="model.name" (ngModelChange)="onModelChange()">
     </div>
     <div class="form_item">
-        <p class="form_label">schoolInfo.grade</p>
-        <input class="form_input" placeholder="Введите год обучения" type="number"
-               [(ngModel)]="schoolInfo.grade" (ngModelChange)="onModelChange()">
+        <p class="form_label">Являюсь учащимся</p>
+        <input class="form_input" placeholder="Введите класс" type="number"
+               [(ngModel)]="model.grade" (ngModelChange)="onModelChange()">
     </div>
+    <app-profile-edit-dwelling [(model)]="schoolLocation"></app-profile-edit-dwelling>
 </div>

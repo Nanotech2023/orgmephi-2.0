@@ -57,8 +57,9 @@
                         <div class="profile_subtitle">Личные данные</div>
                         <div class="form_item">
                             <p class="form_label">Пол</p>
-                            <input class="form_input" placeholder="Введите пол" type="text"
-                                   [(ngModel)]="viewModel.userInfo.gender">
+                            <select class="form_input" [(ngModel)]="viewModel.userInfo.gender">
+                                <option *ngFor="let gender of genders" [ngValue]="gender">{{gender}}</option>
+                            </select>
                         </div>
                         <div class="form_item">
                             <p class="form_label">Дата рождения</p>
@@ -71,18 +72,18 @@
                                    [(ngModel)]="viewModel.userInfo.place_of_birth">
                         </div>
                     </div>
-                    <div class="profile_subtitle">Документ</div>
+                    <div class="profile_subtitle">Паспортные данные</div>
                     <app-profile-edit-document [(model)]="viewModel.userInfoDocument">
                     </app-profile-edit-document>
-                    <div class="profile_subtitle">Прописка</div>
+                    <div class="profile_subtitle">Место регистрации</div>
                     <app-profile-edit-dwelling [(model)]="viewModel.userInfoDwelling">
                     </app-profile-edit-dwelling>
-                    <div class="profile_subtitle">Школа</div>
-                    <app-profile-edit-school [(model)]="viewModel.schoolInfo">
-                    </app-profile-edit-school>
-                    <div class="profile_subtitle">Ограничения</div>
+                    <div class="profile_subtitle">Особые условия при проведении олимпиад</div>
                     <app-profile-edit-limitations [(model)]="viewModel.userInfoLimitations">
                     </app-profile-edit-limitations>
+                    <div class="profile_subtitle">Выпускающее образовательное учреждение</div>
+                    <app-profile-edit-school [(model)]="viewModel.schoolInfo">
+                    </app-profile-edit-school>
 
                     <div class="form_container">
                         <div class="form_item">

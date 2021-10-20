@@ -7,34 +7,28 @@ import { Location, LocationOther, LocationRussia } from '@api/users/models'
     templateUrl: './profile-edit-dwelling.component.html',
     styleUrls: [ './profile-edit-dwelling.component.scss' ]
 } )
-export class ProfileEditDwellingComponent implements OnInit
+export class ProfileEditDwellingComponent
 {
     @Input() model!: LocationRussia
     @Output() modelChange = new EventEmitter<LocationRussia>()
-    dwelling!: LocationRussia
-
-    ngOnInit(): void
-    {
-        this.dwelling = this.model as LocationRussia
-    }
 
     onModelChange(): void
     {
-        this.modelChange.emit( this.dwelling )
+        this.modelChange.emit( this.model )
     }
 
     onCityChange( $event: string ): void
     {
         // @ts-ignore
-        this.dwelling.city.name = $event
-        this.modelChange.emit( this.dwelling )
+        this.model.city.name = $event
+        this.modelChange.emit( this.model )
     }
 
     onRegionChange( $event: string ): void
     {
         // @ts-ignore
-        this.dwelling.city?.region_name = $event
-        this.modelChange.emit( this.dwelling )
+        this.model.city?.region_name = $event
+        this.modelChange.emit( this.model )
     }
 
 }

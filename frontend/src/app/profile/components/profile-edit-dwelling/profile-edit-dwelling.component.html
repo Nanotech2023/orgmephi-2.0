@@ -1,27 +1,22 @@
 <div class="form_container">
     <div class="form_item">
-        <p class="form_label">location_type</p>
+        <p class="form_label">Страна</p>
         <input class="form_input" type="text" readonly
-               [ngModel]="dwelling.location_type" (ngModelChange)="onModelChange()">
+               [(ngModel)]="model.country">
     </div>
     <div class="form_item">
-        <p class="form_label">country</p>
-        <input class="form_input" type="text" readonly
-               [(ngModel)]="dwelling.country">
+        <p class="form_label">Регион</p>
+        <input class="form_input" type="text" placeholder="Введите регион"
+               [ngModel]="model.city?.region_name ?? ''" (ngModelChange)="onRegionChange($event)">
     </div>
     <div class="form_item">
-        <p class="form_label">city.region_name</p>
-        <input class="form_input" type="text"
-               [ngModel]="dwelling.city?.region_name ?? ''" (ngModelChange)="onRegionChange($event)">
+        <p class="form_label">Населённый пункт</p>
+        <input class="form_input" type="text" placeholder="Введите населённый пункт"
+               [ngModel]="model.city?.name ?? ''" (ngModelChange)="onCityChange($event)">
     </div>
     <div class="form_item">
-        <p class="form_label">city.name</p>
-        <input class="form_input" type="text"
-               [ngModel]="dwelling.city?.name ?? ''" (ngModelChange)="onCityChange($event)">
-    </div>
-    <div class="form_item">
-        <p class="form_label">rural</p>
-        <input class="form_input" type="checkbox"
-               [(ngModel)]="dwelling.rural" (ngModelChange)="onModelChange()">
+        <p class="form_label">Являетесь ли вы жителем сельской местности?</p>
+        <app-yes-no-component radioId="rural" [(ngModel)]="model.rural"
+                              (modelChange)="onModelChange()"></app-yes-no-component>
     </div>
 </div>

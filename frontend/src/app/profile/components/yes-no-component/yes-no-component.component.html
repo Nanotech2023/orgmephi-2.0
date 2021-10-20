@@ -1,0 +1,16 @@
+<div class="form-check_container">
+    <div class="form-check">
+        <input class="form-check-input" type="radio" [id]="nameYes" [checked]="checked(true)"
+               (click)="onChecked(true)">
+        <label class="form-check-label" [for]="nameYes">
+            Да
+        </label>
+    </div>
+    <div class="form-check ms-3">
+        <input class="form-check-input" type="radio" [id]="nameNo" [checked]="checked(false)"
+               (click)="onChecked(false)">
+        <label class="form-check-label" [for]="nameNo">
+            Нет
+        </label>
+    </div>
+</div>
