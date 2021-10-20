@@ -1,5 +1,5 @@
 <div class="form_container">
-    <app-profile-edit-dwelling [(model)]="schoolInfo.location"></app-profile-edit-dwelling>
+<!--    <app-profile-edit-dwelling [(model)]="schoolInfo.location"></app-profile-edit-dwelling>-->
     <div class="form_item">
         <p class="form_label">schoolInfo.school_type</p>
         <input class="form_input" placeholder="Введите тип школы" type="text"
@@ -17,7 +17,7 @@
     </div>
     <div class="form_item">
         <p class="form_label">schoolInfo.grade</p>
-        <input class="form_input" placeholder="Введите оценку" type="number"
+        <input class="form_input" placeholder="Введите год обучения" type="number"
                [(ngModel)]="schoolInfo.grade" (ngModelChange)="onModelChange()">
     </div>
 </div>

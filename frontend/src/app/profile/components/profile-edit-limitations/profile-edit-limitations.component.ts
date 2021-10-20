@@ -1,5 +1,5 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core'
-import { Document, Location, LocationOther, UserLimitations } from '@api/users/models'
+import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core'
+import { UserLimitations } from '@api/users/models'
 
 
 @Component( {
@@ -7,25 +7,19 @@ import { Document, Location, LocationOther, UserLimitations } from '@api/users/m
     templateUrl: './profile-edit-limitations.component.html',
     styleUrls: [ './profile-edit-limitations.component.scss' ]
 } )
-export class ProfileEditLimitationsComponent
+export class ProfileEditLimitationsComponent implements OnInit
 {
     @Input() model!: UserLimitations | undefined
     @Output() modelChange = new EventEmitter<UserLimitations>()
-    limitations: UserLimitations = this.model ?? this.getEmptyLimitations()
+    limitations!: UserLimitations
+
+    ngOnInit(): void
+    {
+        this.limitations = this.model!
+    }
 
     onModelChange(): void
     {
         this.modelChange.emit( this.limitations )
-    }
-
-    private getEmptyLimitations(): UserLimitations
-    {
-        return {
-            hearing: undefined,
-            movement: undefined,
-            sight: undefined,
-            // @ts-ignore
-            user_id: undefined
-        }
     }
 }

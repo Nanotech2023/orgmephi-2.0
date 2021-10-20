@@ -1,7 +1,7 @@
 import { Component } from '@angular/core'
 import { ProfileStore } from '@/profile/profile.store'
 import { Observable } from 'rxjs'
-import { UserInfo, SchoolInfo } from '@api/users/models'
+import { UserInfo, SchoolInfo, DocumentRF, LocationRussia, UserLimitations } from '@api/users/models'
 import { LoadingState } from '@/shared/callState'
 
 
@@ -13,7 +13,14 @@ import { LoadingState } from '@/shared/callState'
 } )
 export class ProfileViewComponent
 {
-    viewModel$: Observable<{ loading: boolean; error: string | null, userProfileUnfilled: string, userInfo: UserInfo, schoolInfo: SchoolInfo }>
+    viewModel$: Observable<{
+        loading: boolean; error: string | null, userProfileUnfilled: string,
+        userInfo: UserInfo,
+        userInfoDocument: DocumentRF,
+        userInfoDwelling: LocationRussia,
+        userInfoLimitations: UserLimitations,
+        schoolInfo: SchoolInfo
+    }>
 
     constructor( private profileStore: ProfileStore )
     {

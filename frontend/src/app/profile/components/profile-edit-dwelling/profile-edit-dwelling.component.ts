@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core'
+import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core'
 import { Location, LocationOther, LocationRussia } from '@api/users/models'
 
 
@@ -7,11 +7,16 @@ import { Location, LocationOther, LocationRussia } from '@api/users/models'
     templateUrl: './profile-edit-dwelling.component.html',
     styleUrls: [ './profile-edit-dwelling.component.scss' ]
 } )
-export class ProfileEditDwellingComponent
+export class ProfileEditDwellingComponent implements OnInit
 {
-    @Input() model!: Location | undefined
-    @Output() modelChange = new EventEmitter<Location>()
-    dwelling: LocationRussia = ( this.model as LocationRussia ) ?? this.getEmptyLocation()
+    @Input() model!: LocationRussia
+    @Output() modelChange = new EventEmitter<LocationRussia>()
+    dwelling!: LocationRussia
+
+    ngOnInit(): void
+    {
+        this.dwelling = this.model as LocationRussia
+    }
 
     onModelChange(): void
     {
@@ -32,16 +37,4 @@ export class ProfileEditDwellingComponent
         this.modelChange.emit( this.dwelling )
     }
 
-    getEmptyLocation(): LocationRussia
-    {
-        return {
-            country: "Россия",
-            city: {
-                region_name: "",
-                name: ""
-            },
-            location_type: LocationOther.LocationTypeEnum.Russian,
-            rural: false
-        } as LocationRussia
-    }
 }

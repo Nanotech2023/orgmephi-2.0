@@ -79,9 +79,9 @@ export class ContestAssignmentComponent implements OnInit, OnDestroy
         }
     }
 
-    onAnswered( $event: boolean )
+    onAnswered( $event: number, length: number )
     {
-        if ( $event )
+        if ( $event && this.answerCount < length )
             this.answerCount++
     }
 }

@@ -43,7 +43,7 @@
                 <div class="tasks_list">
                     <ng-container *ngFor="let task of viewModel.tasks">
                         <app-contest-assignment-item [contestId]="contestId"
-                                                     [task]="task" (answered)="onAnswered($event)"></app-contest-assignment-item>
+                                                     [task]="task" (answered)="onAnswered($event, viewModel.tasks.length)"></app-contest-assignment-item>
                     </ng-container>
                 </div>
             </div>
