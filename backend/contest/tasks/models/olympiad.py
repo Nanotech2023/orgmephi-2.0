@@ -246,6 +246,8 @@ def add_simple_contest(db_session,
                        visibility,
                        start_date,
                        end_date,
+                       regulations=None,
+                       supervisor=None,
                        result_publication_date=None,
                        end_of_enroll_date=None,
                        holding_type=None,
@@ -261,6 +263,8 @@ def add_simple_contest(db_session,
         visibility=visibility,
         start_date=start_date,
         end_date=end_date,
+        regulations=regulations,
+        supervisor=supervisor,
         holding_type=holding_type,
         contest_duration=contest_duration,
         result_publication_date=result_publication_date,
@@ -288,6 +292,7 @@ class SimpleContest(Contest):
     result_publication_date: result publication date
 
     regulations: regulations of the olympiad
+    supervisor: supervisor of the olympiad
 
     location: location of the olympiad
     previous_contest_id: previous contest id
@@ -311,6 +316,7 @@ class SimpleContest(Contest):
     previous_participation_condition = db.Column(db.Enum(UserStatusEnum))
 
     regulations = db.Column(db.Text, nullable=True)
+    supervisor = db.Column(db.Text, nullable=True)
 
     variants = db.relationship('Variant', backref=db.backref('simple_contest', lazy='joined'), lazy='dynamic')
     next_contests = db.relationship('SimpleContest',

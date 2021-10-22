@@ -3,7 +3,7 @@ from marshmallow_oneofschema import OneOfSchema
 from marshmallow_sqlalchemy import SQLAlchemySchema, auto_field
 
 from marshmallow import fields
-from common.fields import text_validator, common_name_validator
+from common.fields import text_validator, common_name_validator, username_validator
 from contest.tasks.model_schemas.location import OlympiadLocationSchema
 from contest.tasks.models import *
 from contest.tasks.models.reference import TargetClass
@@ -101,6 +101,7 @@ class SimpleContestSchema(SQLAlchemySchema):
     start_date = auto_field(column_name='start_date', required=True)
     end_date = auto_field(column_name='end_date', required=True)
     regulations = auto_field(column_name='regulations', validate=text_validator, required=False)
+    supervisor = auto_field(column_name='supervisor', validate=username_validator, required=False)
     status = EnumField(OlympiadStatusEnum, data_key='status', by_value=True)
     total_points = fields.Integer()
     tasks_number = fields.Integer()

@@ -550,12 +550,14 @@ components:
         start_date:
           format: date-time
           type: string
+        supervisor:
+          maxLength: 64
+          type: string
         visibility:
           type: boolean
       required:
       - end_date
       - holding_type
-      - regulations
       - start_date
       - visibility
       type: object
@@ -849,6 +851,10 @@ components:
           - In progress
           - Finished
           type: string
+        supervisor:
+          maxLength: 64
+          nullable: true
+          type: string
         target_classes:
           items:
             $ref: '#/components/schemas/TargetClass'
@@ -1111,6 +1117,9 @@ components:
           type: string
         start_date:
           format: date-time
+          type: string
+        supervisor:
+          maxLength: 64
           type: string
         visibility:
           type: boolean
