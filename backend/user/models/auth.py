@@ -123,9 +123,11 @@ def add_group_everyone():
     """
     Add everyone group after creation
     """
-    everyone_group = Group(name='Everyone')
-    db.session.add(everyone_group)
-    db.session.commit()
+    from common.util import db_exists
+    if not db_exists(db.session, Group, 'name', 'Everyone'):
+        everyone_group = Group(name='Everyone')
+        db.session.add(everyone_group)
+        db.session.commit()
 
 
 class Group(db.Model):

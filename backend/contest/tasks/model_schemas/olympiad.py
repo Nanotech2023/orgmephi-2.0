@@ -78,6 +78,17 @@ Stage
 """
 
 
+class ContestGroupRestrictionSchema(SQLAlchemySchema):
+    class Meta:
+        model = ContestGroupRestriction
+        load_instance = True
+        sqla_session = db.session
+
+    contest_id = auto_field(column_name='contest_id', dump_only=True, required=True)
+    group_id = auto_field(column_name='group_id', dump_only=True, required=True)
+    restriction = EnumField(ContestGroupRestrictionEnum, data_key='restriction', by_value=True, required=True)
+
+
 class SimpleContestSchema(SQLAlchemySchema):
     class Meta:
         model = SimpleContest

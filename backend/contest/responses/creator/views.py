@@ -2,8 +2,10 @@ import io
 from flask import request, send_file
 from common import get_current_module
 from contest.responses.util import *
+from common.jwt_verify import jwt_get_id
 from contest.responses.model_schemas.schemas import AnswerSchema
 from .schemas import *
+from contest.tasks.models.olympiad import ContestGroupRestrictionEnum
 
 db = get_current_db()
 module = get_current_module()
@@ -35,11 +37,15 @@ def create_user_response_for_contest(contest_id, user_id):
       responses:
         '200':
           description: OK
+        '403':
+          description: Permission Denied
         '404':
           description: User or contest not found
         '409':
           description: Timing error
     """
+    creator_id = jwt_get_id()
+    check_user_role(creator_id)
     create_user_response(contest_id, user_id)
     return {}, 200
 
@@ -77,6 +83,8 @@ def get_user_by_id_all_answers(contest_id, user_id):
         '404':
           description: User or contest not found
     """
+    creator_id = jwt_get_id()
+    check_contest_restriction(creator_id, contest_id, ContestGroupRestrictionEnum.view_response)
     return get_all_user_answers(user_id, contest_id), 200
 
 
@@ -113,6 +121,8 @@ def get_user_by_id_all_marks(contest_id, user_id):
         '404':
           description: User or contest not found
     """
+    creator_id = jwt_get_id()
+    check_contest_restriction(creator_id, contest_id, ContestGroupRestrictionEnum.view_mark_and_user_status)
     return get_all_user_answers(user_id, contest_id), 200
 
 
@@ -160,6 +170,8 @@ def user_answer_for_task_by_id_plain_file(contest_id, task_id, user_id):
         '404':
           description: User, contest or task not found
     """
+    creator_id = jwt_get_id()
+    check_contest_restriction(creator_id, contest_id, ContestGroupRestrictionEnum.view_response)
     user_answer = user_answer_get(user_id, contest_id, task_id, 'PlainAnswerFile')
     return send_file(io.BytesIO(user_answer.answer_file),
                      attachment_filename=f'userid_{user_id}_taskid_{task_id}.{user_answer.filetype.value}',
@@ -205,6 +217,8 @@ def user_answer_for_task_by_id(contest_id, task_id, user_id):
         '404':
           description: User, contest or task not found
     """
+    creator_id = jwt_get_id()
+    check_contest_restriction(creator_id, contest_id, ContestGroupRestrictionEnum.view_response)
     return user_answer_get(user_id, contest_id, task_id), 200
 
 
@@ -258,6 +272,8 @@ def user_answer_for_task_by_id_post_plain_file(contest_id, task_id, user_id, fil
         '409':
           description: Timing error or file is too large
     """
+    creator_id = jwt_get_id()
+    check_contest_restriction(creator_id, contest_id, ContestGroupRestrictionEnum.edit_user_status)
     check_task_type(task_id, answer_dict['PlainAnswerFile'])
     user_answer_post_file(request.data, filetype, user_id, contest_id, task_id)
     return {}, 200
@@ -306,6 +322,8 @@ def user_answer_for_task_by_id_post_plain_text(contest_id, task_id, user_id):
         '409':
           description: Timing error
     """
+    creator_id = jwt_get_id()
+    check_contest_restriction(creator_id, contest_id, ContestGroupRestrictionEnum.edit_user_status)
     check_task_type(task_id, answer_dict['PlainAnswerText'])
     values = request.marshmallow
     user_answer_post(user_id, contest_id, task_id, values, 'PlainAnswerText')
@@ -355,6 +373,8 @@ def user_answer_for_task_by_id_range(contest_id, task_id, user_id):
         '409':
           description: Timing error
     """
+    creator_id = jwt_get_id()
+    check_contest_restriction(creator_id, contest_id, ContestGroupRestrictionEnum.edit_user_status)
     check_task_type(task_id, answer_dict['RangeAnswer'])
     values = request.marshmallow
     user_answer_post(user_id, contest_id, task_id, values, 'RangeAnswer')
@@ -404,6 +424,8 @@ def user_answer_for_task_by_id_multiple(contest_id, task_id, user_id):
         '409':
           description: Timing error or wrong answers
     """
+    creator_id = jwt_get_id()
+    check_contest_restriction(creator_id, contest_id, ContestGroupRestrictionEnum.edit_user_status)
     check_task_type(task_id, answer_dict['MultipleChoiceAnswer'])
     values = request.marshmallow
     check_user_multiple_answers(values['answers'], task_id)
@@ -449,6 +471,8 @@ def user_status_for_response_by_id_post(contest_id, user_id):
         '404':
           description: User or contest not found
     """
+    creator_id = jwt_get_id()
+    check_contest_restriction(creator_id, contest_id, ContestGroupRestrictionEnum.edit_user_status)
     values = request.marshmallow
     user_work = get_user_in_contest_work(user_id, contest_id)
     user_work.work_status = values['status']
@@ -492,6 +516,8 @@ def user_status_for_response_by_id(contest_id, user_id):
         '404':
           description: User or contest not found
     """
+    creator_id = jwt_get_id()
+    check_contest_restriction(creator_id, contest_id, ContestGroupRestrictionEnum.view_mark_and_user_status)
     user_work = get_user_in_contest_work(user_id, contest_id)
     return user_work, 200
 
@@ -521,6 +547,8 @@ def get_list_for_stage(contest_id):
         '404':
           description: Contest not found
     """
+    creator_id = jwt_get_id()
+    check_contest_restriction(creator_id, contest_id, ContestGroupRestrictionEnum.view_mark_and_user_status)
     users_in_contest = db_get_list(Response, 'contest_id', contest_id)
     return {
                'contest_id': contest_id,
@@ -570,6 +598,8 @@ def user_answer_task_mark_post(contest_id, user_id, task_id):
         '409':
           description: Mark Error
     """
+    creator_id = jwt_get_id()
+    check_contest_restriction(creator_id, contest_id, ContestGroupRestrictionEnum.edit_mark)
     values = request.marshmallow
     check_mark_for_task(values['mark'], task_id)
     user_work = get_user_in_contest_work(user_id, contest_id)
@@ -619,6 +649,8 @@ def user_answer_task_mark(contest_id, user_id, task_id):
         '404':
           description: User or contest not found
     """
+    creator_id = jwt_get_id()
+    check_contest_restriction(creator_id, contest_id, ContestGroupRestrictionEnum.view_mark_and_user_status)
     user_work = get_user_in_contest_work(user_id, contest_id)
     answer = get_answer_by_task_id_and_work_id(BaseAnswer, task_id, user_work.work_id)
     if answer is None:
@@ -658,6 +690,8 @@ def user_by_id_time_left(contest_id, user_id):
         '404':
           description: User or contest not found
     """
+    creator_id = jwt_get_id()
+    check_contest_restriction(creator_id, contest_id, ContestGroupRestrictionEnum.view_response)
     user_work = get_user_in_contest_work(user_id, contest_id)
     return {
         "time": calculate_time_left(user_work)
@@ -698,6 +732,8 @@ def user_by_id_extend_time(contest_id, user_id):
         '404':
           description: User or contest not found
     """
+    creator_id = jwt_get_id()
+    check_contest_restriction(creator_id, contest_id, ContestGroupRestrictionEnum.edit_user_status)
     values = request.marshmallow
     user_work: Response = get_user_in_contest_work(user_id, contest_id)
     user_work.time_extension = values['time']
@@ -733,6 +769,8 @@ def user_by_id_finish_contest(contest_id, user_id):
         '404':
           description: User or contest not found
     """
+    creator_id = jwt_get_id()
+    check_contest_restriction(creator_id, contest_id, ContestGroupRestrictionEnum.edit_user_status)
     user_work = get_user_in_contest_work(user_id, contest_id)
     finish_contest(user_work)
     return {}, 200
@@ -762,6 +800,8 @@ def auto_check_users_answers(contest_id):
         '409':
           description: Olympiad error
     """
+    creator_id = jwt_get_id()
+    check_contest_restriction(creator_id, contest_id, ContestGroupRestrictionEnum.edit_mark)
     is_contest_over(contest_id)
     users_in_contest = db_get_list(Response, 'contest_id', contest_id)
     for user_work in users_in_contest:
@@ -794,6 +834,8 @@ def set_status_by_result(contest_id):
         '409':
           description: Olympiad error
     """
+    creator_id = jwt_get_id()
+    check_contest_restriction(creator_id, contest_id, ContestGroupRestrictionEnum.edit_user_status)
     is_contest_over(contest_id)
     is_all_checked(contest_id)
     set_user_statuses(contest_id)

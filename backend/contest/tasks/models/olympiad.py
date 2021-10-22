@@ -311,7 +311,7 @@ class SimpleContest(Contest):
     regulations = db.Column(db.Text, nullable=True)
 
     variants = db.relationship('Variant', backref=db.backref('simple_contest', lazy='joined'), lazy='dynamic')
-
+    group_restrictions = db.relationship('ContestGroupRestriction', lazy='dynamic')
     next_contests = db.relationship('SimpleContest',
                                     foreign_keys=[previous_contest_id])
 
@@ -404,6 +404,9 @@ class ContestGroupRestrictionEnum(enum.Enum):
     view_response = 'ViewResponse'
     edit_mark = 'EditMark'
     edit_user_status = 'EditUserStatus'
+
+
+restriction_range = {elem.value: i for i, elem in enumerate(ContestGroupRestrictionEnum)}
 
 
 class ContestGroupRestriction(db.Model):

@@ -1,7 +1,7 @@
 from common import get_current_db, get_current_app
 from .model_schemas.schemas import PlainAnswerTextSchema, RangeAnswerSchema
 from datetime import datetime, timedelta
-from common.errors import NotFound, RequestError, AlreadyExists
+from common.errors import NotFound, RequestError, AlreadyExists, PermissionDenied
 from common.util import db_get_one_or_none, db_exists, db_get_or_raise, db_get_list
 from contest.tasks.models import SimpleContest, RangeTask, MultipleChoiceTask, PlainTask, ContestHoldingTypeEnum, \
     UserInContest
@@ -47,6 +47,21 @@ class OlympiadError(RequestError):
 
     def get_msg(self) -> str:
         return self.message
+
+
+class RestrictionError(RequestError):
+    """
+    Restriction error
+    """
+
+    def __init__(self):
+        """
+        Create error object
+        """
+        super(RestrictionError, self).__init__(403)
+
+    def get_msg(self) -> str:
+        return "Your group is not allowed to do this"
 
 
 # Dicts
@@ -220,6 +235,31 @@ def check_user_show_results(contest_id, user_id):
     user_in_contest = get_user_in_contest_by_id_if_possible(contest_id, user_id)
     if not user_in_contest.show_results_to_user:
         raise OlympiadError("Not allowed to see results")
+
+
+def check_user_role(user_id):
+    from user.models.auth import User, UserRoleEnum
+    user: User = db_get_one_or_none(User, 'id', user_id)
+    if user.role != UserRoleEnum.admin:
+        raise PermissionDenied(['admin'])
+
+
+def check_contest_restriction(user_id, contest_id, restriction_level):
+    from contest.tasks.models.olympiad import restriction_range
+    from user.models.auth import User, Group, UserRoleEnum
+    user: User = db_get_one_or_none(User, 'id', user_id)
+    if user.role == UserRoleEnum.admin:
+        return
+    contest: SimpleContest = db_get_or_raise(SimpleContest, 'contest_id', contest_id)
+    everyone = db_get_one_or_none(Group, 'name', 'Everyone')
+    everyone_restriction = contest.group_restrictions.filter_by(group_id=everyone.id).all()
+    user_restrictions = [restriction_range[elem.restriction.value] for elem in everyone_restriction]
+    for group in user.groups:
+        restrictions = contest.group_restrictions.filter_by(group_id=group.id).all()
+        for elem in restrictions:
+            user_restrictions.append(restriction_range[elem.restriction.value])
+    if restriction_range[restriction_level.value] > max(user_restrictions):
+        raise RestrictionError()
 
 
 # Other funcs
