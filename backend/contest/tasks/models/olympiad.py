@@ -311,7 +311,7 @@ class SimpleContest(Contest):
     regulations = db.Column(db.Text, nullable=True)
 
     variants = db.relationship('Variant', backref=db.backref('simple_contest', lazy='joined'), lazy='dynamic')
-    group_restrictions = db.relationship('ContestGroupRestriction', lazy='dynamic')
+    group_restrictions = db.relationship('ContestGroupRestriction', lazy='dynamic', cascade="all, delete")
     next_contests = db.relationship('SimpleContest',
                                     foreign_keys=[previous_contest_id])
 

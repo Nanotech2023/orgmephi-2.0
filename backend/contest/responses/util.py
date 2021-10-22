@@ -247,13 +247,13 @@ def check_user_role(user_id):
 def check_contest_restriction(user_id, contest_id, restriction_level):
     from contest.tasks.models.olympiad import restriction_range
     from user.models.auth import User, Group, UserRoleEnum
-    user: User = db_get_one_or_none(User, 'id', user_id)
+    user: User = db_get_or_raise(User, 'id', user_id)
     if user.role == UserRoleEnum.admin:
         return
     contest: SimpleContest = db_get_or_raise(SimpleContest, 'contest_id', contest_id)
     everyone = db_get_one_or_none(Group, 'name', 'Everyone')
-    everyone_restriction = contest.group_restrictions.filter_by(group_id=everyone.id).all()
-    user_restrictions = [restriction_range[elem.restriction.value] for elem in everyone_restriction]
+    everyone_restriction = contest.group_restrictions.filter_by(group_id=everyone.id).first()
+    user_restrictions = [restriction_range[everyone_restriction.restriction.value]]
     for group in user.groups:
         restrictions = contest.group_restrictions.filter_by(group_id=group.id).all()
         for elem in restrictions:

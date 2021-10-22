@@ -79,7 +79,7 @@ def get_user_by_id_all_answers(contest_id, user_id):
             application/json:
               schema: AllUserAnswersResponseSchema
         '403':
-          description: Not enough rights for current user
+          description: Restriction error
         '404':
           description: User or contest not found
     """
@@ -117,7 +117,7 @@ def get_user_by_id_all_marks(contest_id, user_id):
             application/json:
               schema: AllUserMarksResponseSchema
         '403':
-          description: Not enough rights for current user
+          description: Restriction error
         '404':
           description: User or contest not found
     """
@@ -166,7 +166,7 @@ def user_answer_for_task_by_id_plain_file(contest_id, task_id, user_id):
             application/vnd.openxmlformats-officedocument.wordprocessingml.document: {schema: {format: binary, type: string}}
             application/vnd.oasis.opendocument.text: {schema: {format: binary, type: string}}
         '403':
-          description: Not enough rights for current user
+          description: Restriction error
         '404':
           description: User, contest or task not found
     """
@@ -213,7 +213,7 @@ def user_answer_for_task_by_id(contest_id, task_id, user_id):
             application/json:
               schema: AnswerSchema
         '403':
-          description: Not enough rights for current user
+          description: Restriction error
         '404':
           description: User, contest or task not found
     """
@@ -266,7 +266,7 @@ def user_answer_for_task_by_id_post_plain_file(contest_id, task_id, user_id, fil
         '200':
           description: OK
         '403':
-          description: Not enough rights for current user
+          description: Restriction error
         '404':
           description: User, contest or task not found
         '409':
@@ -316,7 +316,7 @@ def user_answer_for_task_by_id_post_plain_text(contest_id, task_id, user_id):
         '200':
           description: OK
         '403':
-          description: Not enough rights for current user
+          description: Restriction error
         '404':
           description: User, contest or task not found
         '409':
@@ -367,7 +367,7 @@ def user_answer_for_task_by_id_range(contest_id, task_id, user_id):
         '200':
           description: OK
         '403':
-          description: Not enough rights for current user
+          description: Restriction error
         '404':
           description: User, contest or task not found
         '409':
@@ -418,7 +418,7 @@ def user_answer_for_task_by_id_multiple(contest_id, task_id, user_id):
         '200':
           description: OK
         '403':
-          description: Not enough rights for current user
+          description: Restriction error
         '404':
           description: User, contest or task not found
         '409':
@@ -467,7 +467,7 @@ def user_status_for_response_by_id_post(contest_id, user_id):
         '400':
           description: Incorrect mark or status
         '403':
-          description: Invalid role of current user
+          description: Restriction error
         '404':
           description: User or contest not found
     """
@@ -512,7 +512,7 @@ def user_status_for_response_by_id(contest_id, user_id):
         '400':
           description: Incorrect mark or status
         '403':
-          description: Invalid role of current user
+          description: Restriction error
         '404':
           description: User or contest not found
     """
@@ -544,6 +544,8 @@ def get_list_for_stage(contest_id):
           content:
             application/json:
               schema: ContestResultSheetResponseSchema
+        '403':
+          description: Restriction error
         '404':
           description: Contest not found
     """
@@ -593,6 +595,8 @@ def user_answer_task_mark_post(contest_id, user_id, task_id):
       responses:
         '200':
           description: OK
+        '403':
+          description: Restriction error
         '404':
           description: User or contest not found
         '409':
@@ -646,6 +650,8 @@ def user_answer_task_mark(contest_id, user_id, task_id):
           content:
             application/json:
               schema: UserAnswerMarkResponseSchema
+        '403':
+          description: Restriction error
         '404':
           description: User or contest not found
     """
@@ -687,6 +693,8 @@ def user_by_id_time_left(contest_id, user_id):
           content:
             application/json:
               schema: UserTimeResponseRequestSchema
+        '403':
+          description: Restriction error
         '404':
           description: User or contest not found
     """
@@ -729,6 +737,8 @@ def user_by_id_extend_time(contest_id, user_id):
       responses:
         '200':
           description: OK
+        '403':
+          description: Restriction error
         '404':
           description: User or contest not found
     """
@@ -766,6 +776,8 @@ def user_by_id_finish_contest(contest_id, user_id):
       responses:
         '200':
           description: OK
+        '403':
+          description: Restriction error
         '404':
           description: User or contest not found
     """
@@ -795,6 +807,8 @@ def auto_check_users_answers(contest_id):
       responses:
         '200':
           description: OK
+        '403':
+          description: Restriction error
         '404':
           description: Contest not found
         '409':
@@ -829,6 +843,8 @@ def set_status_by_result(contest_id):
       responses:
         '200':
           description: OK
+        '403':
+          description: Restriction error
         '404':
           description: Contest not found
         '409':
