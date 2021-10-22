@@ -362,6 +362,8 @@ paths:
       responses:
         '200':
           description: OK
+        '403':
+          description: Permission Denied
         '404':
           description: User or contest not found
         '409':
@@ -392,7 +394,7 @@ paths:
                 $ref: '#/components/schemas/AllUserAnswersResponse'
           description: OK
         '403':
-          description: Not enough rights for current user
+          description: Restriction error
         '404':
           description: User or contest not found
       security:
@@ -420,7 +422,7 @@ paths:
                 $ref: '#/components/schemas/AllUserMarksResponse'
           description: OK
         '403':
-          description: Not enough rights for current user
+          description: Restriction error
         '404':
           description: User or contest not found
       security:
@@ -483,7 +485,7 @@ paths:
                 type: string
           description: OK
         '403':
-          description: Not enough rights for current user
+          description: Restriction error
         '404':
           description: User, contest or task not found
       security:
@@ -517,7 +519,7 @@ paths:
                 $ref: '#/components/schemas/Answer'
           description: OK
         '403':
-          description: Not enough rights for current user
+          description: Restriction error
         '404':
           description: User, contest or task not found
       security:
@@ -559,7 +561,7 @@ paths:
         '200':
           description: OK
         '403':
-          description: Not enough rights for current user
+          description: Restriction error
         '404':
           description: User, contest or task not found
         '409':
@@ -597,7 +599,7 @@ paths:
         '200':
           description: OK
         '403':
-          description: Not enough rights for current user
+          description: Restriction error
         '404':
           description: User, contest or task not found
         '409':
@@ -635,7 +637,7 @@ paths:
         '200':
           description: OK
         '403':
-          description: Not enough rights for current user
+          description: Restriction error
         '404':
           description: User, contest or task not found
         '409':
@@ -673,7 +675,7 @@ paths:
         '200':
           description: OK
         '403':
-          description: Not enough rights for current user
+          description: Restriction error
         '404':
           description: User, contest or task not found
         '409':
@@ -708,7 +710,7 @@ paths:
         '400':
           description: Incorrect mark or status
         '403':
-          description: Invalid role of current user
+          description: Restriction error
         '404':
           description: User or contest not found
       security:
@@ -738,7 +740,7 @@ paths:
         '400':
           description: Incorrect mark or status
         '403':
-          description: Invalid role of current user
+          description: Restriction error
         '404':
           description: User or contest not found
       security:
@@ -760,6 +762,8 @@ paths:
               schema:
                 $ref: '#/components/schemas/ContestResultSheetResponse'
           description: OK
+        '403':
+          description: Restriction error
         '404':
           description: Contest not found
       security:
@@ -794,6 +798,8 @@ paths:
       responses:
         '200':
           description: OK
+        '403':
+          description: Restriction error
         '404':
           description: User or contest not found
         '409':
@@ -828,6 +834,8 @@ paths:
               schema:
                 $ref: '#/components/schemas/UserAnswerMarkResponse'
           description: OK
+        '403':
+          description: Restriction error
         '404':
           description: User or contest not found
       security:
@@ -855,6 +863,8 @@ paths:
               schema:
                 $ref: '#/components/schemas/UserTimeResponseRequest'
           description: OK
+        '403':
+          description: Restriction error
         '404':
           description: User or contest not found
       security:
@@ -883,6 +893,8 @@ paths:
       responses:
         '200':
           description: OK
+        '403':
+          description: Restriction error
         '404':
           description: User or contest not found
       security:
@@ -906,6 +918,8 @@ paths:
       responses:
         '200':
           description: OK
+        '403':
+          description: Restriction error
         '404':
           description: User or contest not found
       security:
@@ -923,6 +937,8 @@ paths:
       responses:
         '200':
           description: OK
+        '403':
+          description: Restriction error
         '404':
           description: Contest not found
         '409':
@@ -942,6 +958,8 @@ paths:
       responses:
         '200':
           description: OK
+        '403':
+          description: Restriction error
         '404':
           description: Contest not found
         '409':

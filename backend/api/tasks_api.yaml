@@ -271,6 +271,26 @@ components:
       oneOf:
       - $ref: '#/components/schemas/SimpleContest'
       - $ref: '#/components/schemas/CompositeContest'
+    ContestGroupRestriction:
+      properties:
+        contest_id:
+          readOnly: true
+          type: integer
+        group_id:
+          readOnly: true
+          type: integer
+        restriction:
+          enum:
+          - ViewMarkAndUserStatus
+          - ViewResponse
+          - EditMark
+          - EditUserStatus
+          type: string
+      required:
+      - contest_id
+      - group_id
+      - restriction
+      type: object
     ContestIdResponseTaskCreator:
       properties:
         contest_id:
@@ -402,6 +422,23 @@ components:
       required:
       - holding_type
       - visibility
+      type: object
+    CreateContestGroupRestrictionAdmin:
+      properties:
+        group_ids:
+          items:
+            type: integer
+          type: array
+        restriction:
+          enum:
+          - ViewMarkAndUserStatus
+          - ViewResponse
+          - EditMark
+          - EditUserStatus
+          type: string
+      required:
+      - group_ids
+      - restriction
       type: object
     CreateMultipleRequestTaskCreator:
       properties:
@@ -602,6 +639,15 @@ components:
           type: array
         count:
           type: integer
+      type: object
+    GetContestGroupRestrictionListAdmin:
+      properties:
+        restrictions:
+          items:
+            $ref: '#/components/schemas/ContestGroupRestriction'
+          type: array
+      required:
+      - restrictions
       type: object
     LocationResponseTaskAdmin:
       properties:
@@ -2496,6 +2542,77 @@ paths:
           description: Olympiad type already in use
         '404':
           description: Olympiad type not found
+      security:
+      - JWTAccessToken: []
+      - CSRFAccessToken: []
+  /tasks/admin/contest/{contest_id}/restrictions:
+    post:
+      parameters:
+      - description: Id of the contest
+        in: path
+        name: contest_id
+        required: true
+        schema:
+          type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateContestGroupRestrictionAdmin'
+        required: true
+      responses:
+        '200':
+          description: OK
+        '400':
+          description: Bad request
+        '404':
+          description: Contest or group not found
+      security:
+      - JWTAccessToken: []
+      - CSRFAccessToken: []
+    patch:
+      parameters:
+      - description: Id of the contest
+        in: path
+        name: contest_id
+        required: true
+        schema:
+          type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateContestGroupRestrictionAdmin'
+        required: true
+      responses:
+        '200':
+          description: OK
+        '400':
+          description: Bad request
+        '404':
+          description: Contest or group not found
+      security:
+      - JWTAccessToken: []
+      - CSRFAccessToken: []
+    get:
+      parameters:
+      - description: Id of the contest
+        in: path
+        name: contest_id
+        required: true
+        schema:
+          type: integer
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetContestGroupRestrictionListAdmin'
+          description: OK
+        '400':
+          description: Bad request
+        '404':
+          description: Contest or group not found
       security:
       - JWTAccessToken: []
       - CSRFAccessToken: []
