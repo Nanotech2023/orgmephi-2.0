@@ -118,6 +118,16 @@ def init_user(username, password_hash, user_role, user_type, user=None):
     return user
 
 
+@app.db_prepare_action()
+def add_group_everyone():
+    """
+    Add everyone group after creation
+    """
+    everyone_group = Group(name='Everyone')
+    db.session.add(everyone_group)
+    db.session.commit()
+
+
 class Group(db.Model):
     """
         Group ORM class

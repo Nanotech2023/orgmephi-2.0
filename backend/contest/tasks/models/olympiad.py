@@ -5,7 +5,7 @@ from sqlalchemy import func, select
 from sqlalchemy.sql import case
 from sqlalchemy.ext.associationproxy import association_proxy
 from sqlalchemy.ext.hybrid import hybrid_property
-
+from user.models.auth import Group
 from contest.tasks.models.contest import Variant
 from common import get_current_db
 
@@ -267,6 +267,10 @@ def add_simple_contest(db_session,
         previous_participation_condition=previous_participation_condition,
     )
     db_session.add(simple_contest)
+    from common.util import db_get_one_or_none
+    everyone_group: Group = db_get_one_or_none(Group, 'name', 'Everyone')
+    add_group_restriction(db_session, simple_contest.contest_id, everyone_group.id,
+                          ContestGroupRestrictionEnum.edit_user_status)
     return simple_contest
 
 
@@ -384,6 +388,35 @@ class SimpleContest(Contest):
         return case([(datetime.utcnow() < cls.start_date, OlympiadStatusEnum.OlympiadSoon.value),
                      (datetime.utcnow() < cls.end_date, OlympiadStatusEnum.OlympiadInProgress.value)],
                     else_=OlympiadStatusEnum.OlympiadFinished.value)
+
+
+def add_group_restriction(db_session, contest_id, group_id, restriction):
+    group_restriction = ContestGroupRestriction(
+        contest_id=contest_id,
+        group_id=group_id,
+        restriction=restriction
+    )
+    db_session.add(group_restriction)
+
+
+class ContestGroupRestrictionEnum(enum.Enum):
+    view_mark_and_user_status = 'ViewMarkAndUserStatus'
+    view_response = 'ViewResponse'
+    edit_mark = 'EditMark'
+    edit_user_status = 'EditUserStatus'
+
+
+class ContestGroupRestriction(db.Model):
+    """
+    Contest Group Restriction model
+
+    contest_id: id of the contest
+    group_id: id of the group
+    restriction: restriction for group
+    """
+    contest_id = db.Column(db.Integer, db.ForeignKey(SimpleContest.contest_id), primary_key=True)
+    group_id = db.Column(db.Integer, db.ForeignKey(Group.id), primary_key=True)
+    restriction = db.Column(db.Enum(ContestGroupRestrictionEnum))
 
 
 def add_composite_contest(db_session, visibility, base_contest_id=None, holding_type=None):
