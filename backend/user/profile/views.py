@@ -1,8 +1,10 @@
+import io
+
 from flask import request
 from marshmallow import EXCLUDE
 
 from common import get_current_app, get_current_module, get_current_db
-from common.errors import NotFound, InsufficientData, WrongType
+from common.errors import NotFound, InsufficientData, WrongType, QuotaExceeded, DataConflict
 from common.jwt_verify import jwt_get_id
 from common.util import db_get_or_raise, send_pdf
 from user.model_schemas.auth import UserSchema
@@ -300,3 +302,65 @@ def generate_card():
     if len(unfilled) > 0:
         raise InsufficientData('user', str(unfilled))
     return send_pdf('participant_card.html', u=user)
+
+
+@module.route('/photo', methods=['PUT'])
+def post_photo():
+    """
+    Edit photo
+    ---
+    put:
+      requestBody:
+        required: true
+        content:
+          image/*:
+            schema:
+              type: string
+              format: binary
+      security:
+        - JWTAccessToken: [ ]
+        - CSRFAccessToken: [ ]
+      responses:
+        '204':
+          description: OK
+        '409':
+          description: File is too big
+
+    """
+    file = request.data
+    if file == b'':
+        raise InsufficientData('request', 'image')
+    if len(file) > 4 * 1024 * 1024:
+        raise QuotaExceeded('Image is too large', 4 * 1024 * 1024)
+    user = db_get_or_raise(User, 'id', jwt_get_id())
+    user.user_info.photo = file
+    db.session.commit()
+    return {}, 204
+
+
+@module.route('/photo', methods=['GET'])
+def get_photo():
+    """
+    Get photo
+    ---
+    get:
+      security:
+        - JWTAccessToken: [ ]
+      responses:
+        '200':
+          description: OK
+          content:
+            image/*:
+              schema:
+                type: string
+                format: binary
+        '404':
+          description: User not found
+        '409':
+          description: Photo not attached
+    """
+    from flask import send_file
+    user = db_get_or_raise(User, 'id', jwt_get_id())
+    if user.user_info.photo is None:
+        raise DataConflict('Image not present')
+    return send_file(io.BytesIO(user.user_info.photo), mimetype='image/*')

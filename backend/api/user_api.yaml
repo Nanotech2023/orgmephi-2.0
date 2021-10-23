@@ -1228,6 +1228,38 @@ paths:
           description: User is not a school student or has missing data
       security:
       - JWTAccessToken: []
+  /user/profile/photo:
+    put:
+      requestBody:
+        content:
+          image/*:
+            schema:
+              format: binary
+              type: string
+        required: true
+      responses:
+        '204':
+          description: OK
+        '409':
+          description: File is too big
+      security:
+      - JWTAccessToken: []
+      - CSRFAccessToken: []
+    get:
+      responses:
+        '200':
+          content:
+            image/*:
+              schema:
+                format: binary
+                type: string
+          description: OK
+        '404':
+          description: User not found
+        '409':
+          description: Photo not attached
+      security:
+      - JWTAccessToken: []
   /user/admin/internal_register:
     post:
       requestBody:
@@ -1511,6 +1543,52 @@ paths:
       security:
       - JWTAccessToken: []
       - CSRFAccessToken: []
+  /user/admin/personal/{user_id}/photo:
+    put:
+      parameters:
+      - description: ID of user
+        in: path
+        name: user_id
+        required: true
+        schema:
+          type: integer
+      requestBody:
+        content:
+          image/*:
+            schema:
+              format: binary
+              type: string
+        required: true
+      responses:
+        '204':
+          description: OK
+        '409':
+          description: File is too big
+      security:
+      - JWTAccessToken: []
+      - CSRFAccessToken: []
+    get:
+      parameters:
+      - description: ID of user
+        in: path
+        name: user_id
+        required: true
+        schema:
+          type: integer
+      responses:
+        '200':
+          content:
+            image/*:
+              schema:
+                format: binary
+                type: string
+          description: OK
+        '404':
+          description: User not found
+        '409':
+          description: Photo not attached
+      security:
+      - JWTAccessToken: []
   /user/creator/user/{user_id}:
     get:
       parameters:

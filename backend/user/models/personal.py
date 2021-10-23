@@ -44,6 +44,7 @@ class UserInfo(db.Model):
     date_of_birth = db.Column(db.Date)
     place_of_birth = db.Column(db.String)
     gender = db.Column(db.Enum(GenderEnum))
+    photo = db.Column(db.LargeBinary)
 
     user = db.relationship('User', back_populates='user_info', lazy='select')
     dwelling = db.relationship('Location', lazy='select', uselist=False, single_parent=True,
