@@ -248,3 +248,19 @@ class CaptchaError(RequestError):
 
     def get_msg(self) -> str:
         return 'Captcha is wrong'
+
+
+class MediaError(RequestError):
+    """
+    Invalid media attachment
+    """
+    def __init__(self, msg):
+        """
+        Create error object
+        :param msg: Error message
+        """
+        super(MediaError, self).__init__(400)
+        self._msg = msg
+
+    def get_msg(self) -> str:
+        return self._msg

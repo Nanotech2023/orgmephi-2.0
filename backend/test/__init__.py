@@ -1,6 +1,6 @@
 import pytest
 
-from common.testing import get_test_app, OrgMephiTestingClient, reset_db
+from common.testing import get_test_app, OrgMephiTestingClient, reset_db, test_image
 
 from aggregate import module
 print(__package__)
