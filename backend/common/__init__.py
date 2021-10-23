@@ -309,7 +309,7 @@ class OrgMephiApp:
                 functools.partial(FileSystemStore, f'{root_path}/{val[1]}', f'{val[1]}'),
                 default=False
             )
-        self._store_manager = StoreManager(self._db.session)
+        self._store_manager = StoreManager(self._db.session, delete_orphan=True)
 
 
 _orgmephi_current_module: ContextVar[Optional[OrgMephiModule]] = ContextVar('orgmephi_current_module', default=None)
