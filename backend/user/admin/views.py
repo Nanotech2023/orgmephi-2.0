@@ -1,9 +1,10 @@
+import io
 import secrets
 from flask import request
 from marshmallow import EXCLUDE
 import sqlalchemy.exc
 
-from common.errors import NotFound, AlreadyExists
+from common.errors import NotFound, AlreadyExists, InsufficientData, QuotaExceeded, DataConflict
 from common import get_current_app, get_current_module, get_current_db
 from common.util import db_get_or_raise, db_exists
 
@@ -458,3 +459,79 @@ def remove_user_groups(user_id):
     group.users.remove(user)
     db.session.commit()
     return {}, 200
+
+
+@module.route('/personal/<int:user_id>/photo', methods=['PUT'])
+def post_photo(user_id):
+    """
+    Edit photo
+    ---
+    put:
+      parameters:
+        - in: path
+          description: ID of user
+          name: user_id
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          image/*:
+            schema:
+              type: string
+              format: binary
+      security:
+        - JWTAccessToken: [ ]
+        - CSRFAccessToken: [ ]
+      responses:
+        '204':
+          description: OK
+        '409':
+          description: File is too big
+
+    """
+    file = request.data
+    if file == b'':
+        raise InsufficientData('request', 'image')
+    if len(file) > 4 * 1024 * 1024:
+        raise QuotaExceeded('Image is too large', 4 * 1024 * 1024)
+    user = db_get_or_raise(User, 'id', user_id)
+    user.user_info.photo = file
+    db.session.commit()
+    return {}, 204
+
+
+@module.route('/personal/<int:user_id>/photo', methods=['GET'])
+def get_photo(user_id):
+    """
+    Get photo
+    ---
+    get:
+      parameters:
+        - in: path
+          description: ID of user
+          name: user_id
+          required: true
+          schema:
+            type: integer
+      security:
+        - JWTAccessToken: [ ]
+      responses:
+        '200':
+          description: OK
+          content:
+            image/*:
+              schema:
+                type: string
+                format: binary
+        '404':
+          description: User not found
+        '409':
+          description: Photo not attached
+    """
+    from flask import send_file
+    user = db_get_or_raise(User, 'id', user_id)
+    if user.user_info.photo is None:
+        raise DataConflict('Image not present')
+    return send_file(io.BytesIO(user.user_info.photo), mimetype='image/*')
