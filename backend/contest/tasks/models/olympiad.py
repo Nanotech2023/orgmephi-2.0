@@ -421,6 +421,9 @@ class ContestGroupRestriction(db.Model):
     group_id = db.Column(db.Integer, db.ForeignKey(Group.id), primary_key=True)
     restriction = db.Column(db.Enum(ContestGroupRestrictionEnum))
 
+    group = db.relationship(Group, uselist=False)
+    group_name = association_proxy('group', 'name')
+
 
 def add_composite_contest(db_session, visibility, base_contest_id=None, holding_type=None):
     """

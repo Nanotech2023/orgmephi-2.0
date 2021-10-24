@@ -118,6 +118,11 @@ def init_user(username, password_hash, user_role, user_type, user=None):
     return user
 
 
+def get_group_for_everyone():
+    from common.util import db_get_one_or_none
+    return db_get_one_or_none(Group, 'name', 'Everyone')
+
+
 @app.db_prepare_action()
 def add_group_everyone():
     """

@@ -87,6 +87,7 @@ class ContestGroupRestrictionSchema(SQLAlchemySchema):
     contest_id = auto_field(column_name='contest_id', dump_only=True, required=True)
     group_id = auto_field(column_name='group_id', dump_only=True, required=True)
     restriction = EnumField(ContestGroupRestrictionEnum, data_key='restriction', by_value=True, required=True)
+    group_name = auto_field(column_name='group_name', dump_only=True, required=True)
 
 
 class SimpleContestSchema(SQLAlchemySchema):

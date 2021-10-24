@@ -245,19 +245,20 @@ def check_user_role(user_id):
 
 
 def check_contest_restriction(user_id, contest_id, restriction_level):
-    from contest.tasks.models.olympiad import restriction_range
-    from user.models.auth import User, Group, UserRoleEnum
+    from contest.tasks.models.olympiad import restriction_range, ContestGroupRestriction
+    from user.models.auth import User, UserRoleEnum, get_group_for_everyone
     user: User = db_get_or_raise(User, 'id', user_id)
     if user.role == UserRoleEnum.admin:
         return
     contest: SimpleContest = db_get_or_raise(SimpleContest, 'contest_id', contest_id)
-    everyone = db_get_one_or_none(Group, 'name', 'Everyone')
+    everyone = get_group_for_everyone()
     everyone_restriction = contest.group_restrictions.filter_by(group_id=everyone.id).first()
+    print(everyone_restriction)
     user_restrictions = [restriction_range[everyone_restriction.restriction.value]]
-    for group in user.groups:
-        restrictions = contest.group_restrictions.filter_by(group_id=group.id).all()
-        for elem in restrictions:
-            user_restrictions.append(restriction_range[elem.restriction.value])
+    group_names = [group.name for group in user.groups]
+    restrictions = contest.group_restrictions.filter(ContestGroupRestriction.group_name.in_(group_names)).all()
+    print(restrictions)
+    user_restrictions = user_restrictions + [restriction_range[elem.restriction.value] for elem in restrictions]
     if restriction_range[restriction_level.value] > max(user_restrictions):
         raise RestrictionError()
 

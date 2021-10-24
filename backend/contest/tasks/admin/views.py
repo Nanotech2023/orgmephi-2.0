@@ -248,7 +248,7 @@ def location_remove(id_location):
 
 
 @module.route('/contest/<int:contest_id>/restrictions', methods=['POST'],
-              input_schema=CreateContestGroupRestrictionAdminSchema)
+              input_schema=ContestGroupRestrictionListAdminSchema)
 def contest_restriction_create(contest_id):
     """
     Add new restriction
@@ -265,7 +265,7 @@ def contest_restriction_create(contest_id):
         required: true
         content:
           application/json:
-            schema: CreateContestGroupRestrictionAdminSchema
+            schema: ContestGroupRestrictionListAdminSchema
       security:
         - JWTAccessToken: [ ]
         - CSRFAccessToken: [ ]
@@ -278,22 +278,23 @@ def contest_restriction_create(contest_id):
           description: Contest or group not found
     """
     values = request.marshmallow
-    groups = values['group_ids']
-    restriction = values['restriction']
+    restrictions = values['restrictions']
     current_contest: SimpleContest = db_get_or_raise(SimpleContest, 'contest_id', contest_id)
-    for group_id in groups:
-        db_get_or_raise(Group, 'id', group_id)
-        if current_contest.group_restrictions.filter_by(group_id=group_id).first() is not None:
-            raise AlreadyExists(field='contest_id , group_id', value=f'{contest_id} , {group_id}')
+    for restriction_elem in restrictions:
+        group_name = restriction_elem['group_name']
+        restriction = restriction_elem['restriction']
+        group = db_get_or_raise(Group, 'name', group_name)
+        if current_contest.group_restrictions.filter_by(group_id=group.id).first() is not None:
+            raise AlreadyExists(field='contest_id , group_name', value=f'{contest_id} , {group_name}')
         current_contest.group_restrictions.append(ContestGroupRestriction(contest_id=contest_id,
-                                                                          group_id=group_id,
+                                                                          group_id=group.id,
                                                                           restriction=restriction))
     db.session.commit()
     return {}, 200
 
 
 @module.route('/contest/<int:contest_id>/restrictions', methods=['PATCH'],
-              input_schema=CreateContestGroupRestrictionAdminSchema)
+              input_schema=ContestGroupRestrictionListAdminSchema)
 def contest_restriction_change(contest_id):
     """
     Change current contest restrictions
@@ -310,7 +311,7 @@ def contest_restriction_change(contest_id):
         required: true
         content:
           application/json:
-            schema: CreateContestGroupRestrictionAdminSchema
+            schema: ContestGroupRestrictionListAdminSchema
       security:
         - JWTAccessToken: [ ]
         - CSRFAccessToken: [ ]
@@ -323,21 +324,23 @@ def contest_restriction_change(contest_id):
           description: Contest or group not found
     """
     values = request.marshmallow
-    groups = values['group_ids']
-    restriction = values['restriction']
+    restrictions = values['restrictions']
     current_contest: SimpleContest = db_get_or_raise(SimpleContest, 'contest_id', contest_id)
-    for group_id in groups:
-        restriction_elem: ContestGroupRestriction = current_contest.group_restrictions.\
-            filter_by(group_id=group_id).first()
-        if restriction_elem is None:
-            raise NotFound(field='contest_id , group_id', value=f'{contest_id} , {group_id}')
-        restriction_elem.restriction = restriction
+    for restriction_elem in restrictions:
+        group_name = restriction_elem['group_name']
+        restriction = restriction_elem['restriction']
+        group = db_get_or_raise(Group, 'name', group_name)
+        group_restriction: ContestGroupRestriction = current_contest.group_restrictions.\
+            filter_by(group_id=group.id).first()
+        if group_restriction is None:
+            raise NotFound(field='contest_id , group_name', value=f'{contest_id} , {group_name}')
+        group_restriction.restriction = restriction
     db.session.commit()
     return {}, 200
 
 
 @module.route('/contest/<int:contest_id>/restrictions', methods=['GET'],
-              output_schema=GetContestGroupRestrictionListAdminSchema)
+              output_schema=ContestGroupRestrictionListAdminSchema)
 def contest_restriction_get(contest_id):
     """
     Get current contest restrictions
@@ -358,7 +361,7 @@ def contest_restriction_get(contest_id):
           description: OK
           content:
             application/json:
-              schema: GetContestGroupRestrictionListAdminSchema
+              schema: ContestGroupRestrictionListAdminSchema
         '400':
           description: Bad request
         '404':

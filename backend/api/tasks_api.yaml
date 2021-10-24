@@ -271,25 +271,14 @@ components:
       oneOf:
       - $ref: '#/components/schemas/SimpleContest'
       - $ref: '#/components/schemas/CompositeContest'
-    ContestGroupRestriction:
+    ContestGroupRestrictionListAdmin:
       properties:
-        contest_id:
-          readOnly: true
-          type: integer
-        group_id:
-          readOnly: true
-          type: integer
-        restriction:
-          enum:
-          - ViewMarkAndUserStatus
-          - ViewResponse
-          - EditMark
-          - EditUserStatus
-          type: string
+        restrictions:
+          items:
+            $ref: '#/components/schemas/ListElemContestGroupRestrictionAdmin'
+          type: array
       required:
-      - contest_id
-      - group_id
-      - restriction
+      - restrictions
       type: object
     ContestIdResponseTaskCreator:
       properties:
@@ -422,23 +411,6 @@ components:
       required:
       - holding_type
       - visibility
-      type: object
-    CreateContestGroupRestrictionAdmin:
-      properties:
-        group_ids:
-          items:
-            type: integer
-          type: array
-        restriction:
-          enum:
-          - ViewMarkAndUserStatus
-          - ViewResponse
-          - EditMark
-          - EditUserStatus
-          type: string
-      required:
-      - group_ids
-      - restriction
       type: object
     CreateMultipleRequestTaskCreator:
       properties:
@@ -640,14 +612,21 @@ components:
         count:
           type: integer
       type: object
-    GetContestGroupRestrictionListAdmin:
+    ListElemContestGroupRestrictionAdmin:
       properties:
-        restrictions:
-          items:
-            $ref: '#/components/schemas/ContestGroupRestriction'
-          type: array
+        group_name:
+          maxLength: 32
+          type: string
+        restriction:
+          enum:
+          - ViewMarkAndUserStatus
+          - ViewResponse
+          - EditMark
+          - EditUserStatus
+          type: string
       required:
-      - restrictions
+      - group_name
+      - restriction
       type: object
     LocationResponseTaskAdmin:
       properties:
@@ -2558,7 +2537,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/CreateContestGroupRestrictionAdmin'
+              $ref: '#/components/schemas/ContestGroupRestrictionListAdmin'
         required: true
       responses:
         '200':
@@ -2582,7 +2561,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/CreateContestGroupRestrictionAdmin'
+              $ref: '#/components/schemas/ContestGroupRestrictionListAdmin'
         required: true
       responses:
         '200':
@@ -2607,7 +2586,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/GetContestGroupRestrictionListAdmin'
+                $ref: '#/components/schemas/ContestGroupRestrictionListAdmin'
           description: OK
         '400':
           description: Bad request

@@ -28,13 +28,13 @@ class CreateRussiaLocationRequestTaskAdminSchema(Schema):
     address = common_fields.FreeDescription(required=True)
 
 
-class CreateContestGroupRestrictionAdminSchema(Schema):
-    group_ids = fields.List(fields.Int(), required=True)
+class ListElemContestGroupRestrictionAdminSchema(Schema):
+    group_name = common_fields.CommonName(required=True)
     restriction = EnumField(ContestGroupRestrictionEnum, by_value=True, required=True)
 
 
-class GetContestGroupRestrictionListAdminSchema(Schema):
-    restrictions = fields.Nested(ContestGroupRestrictionSchema, many=True, required=True)
+class ContestGroupRestrictionListAdminSchema(Schema):
+    restrictions = fields.Nested(ListElemContestGroupRestrictionAdminSchema, many=True, required=True)
 
 # Location
 
