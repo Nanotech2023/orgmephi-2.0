@@ -54,5 +54,6 @@ class DefaultConfiguration:
     ORGMEPHI_MEDIA_ROOT_PATH = 'media'
     ORGMEPHI_MEDIA_STORES = {
         'PROFILE': 'profile',
-        'RESPONSE': 'response'
+        'RESPONSE': 'responses',
+        'TASK': 'tasks'
     }

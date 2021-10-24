@@ -1,7 +1,4 @@
-import io
-
 from flask import request
-from flask import send_file
 
 from common import get_current_module
 from contest.tasks.creator.schemas import *
@@ -781,10 +778,4 @@ def task_image(id_contest, id_variant, id_task):
           description: Olympiad type already in use
     """
     task = get_task_if_possible(id_contest, id_variant, id_task)
-
-    if task.image_of_task is None:
-        raise InsufficientData("task", "image_of_task")
-
-    return send_file(io.BytesIO(task.image_of_task),
-                     attachment_filename='task_image.png',
-                     mimetype='image/jpeg'), 200
+    return app.send_media(task.image_of_task)

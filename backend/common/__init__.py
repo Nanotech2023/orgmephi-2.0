@@ -11,7 +11,7 @@ from typing import Optional, Callable, Any
 
 import os
 
-from .errors import MediaError
+from .errors import MediaError, NotFound
 from .module import OrgMephiModule, OrgMephiArea, org_mephi_area_by_name
 from .password import OrgMephiPassword
 from .access_levels import OrgMephiAccessLevel
@@ -220,7 +220,7 @@ class OrgMephiApp:
         from flask import send_file
         from common import get_current_app
         if media is None:
-            raise MediaError('Media not found')
+            raise NotFound('', 'media')
         with self._store_manager:
             store = media.get_store()
             return send_file(store.open(media.path), media.content_type)

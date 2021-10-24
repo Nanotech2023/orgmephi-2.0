@@ -1,3 +1,5 @@
+import io
+
 from . import *
 
 
@@ -142,9 +144,15 @@ def test_get_all_tasks_self_completed(client, test_simple_contest_with_users_not
 def test_get_task_image_self(client, test_simple_contest_with_users, test_variant, create_plain_task):
     resp = client.get(
         f'/contest/{test_simple_contest_with_users[0].contest_id}/tasks/{test_variant[0].tasks[0].task_id}/image/self')
-    assert resp.status_code == 409
+    assert resp.status_code == 404
 
-    test_variant[0].tasks[0].image_of_task = b'Test'
+    from common.media_types import TaskImage
+    with test_app.store_manager:
+        test_variant[0].tasks[0].image_of_task = TaskImage.create_from(
+                    attachable=io.BytesIO(test_image),
+                    store_id=test_app.get_media_store_id('TASK')
+                )
+        test_app.db.session.commit()
 
     resp = client.get(
         f'/contest/{test_simple_contest_with_users[0].contest_id}/tasks/{test_variant[0].tasks[0].task_id}/image/self')

@@ -238,7 +238,8 @@ class DefaultTestConfiguration:
     ORGMEPHI_MEDIA_ROOT_PATH = 'media'
     ORGMEPHI_MEDIA_STORES = {
         'PROFILE': 'profile',
-        'RESPONSE': 'response'
+        'RESPONSE': 'response',
+        'TASK': 'tasks'
     }
 
 
