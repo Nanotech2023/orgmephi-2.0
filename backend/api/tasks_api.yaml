@@ -1776,6 +1776,53 @@ paths:
       security:
       - JWTAccessToken: []
       - CSRFAccessToken: []
+  /tasks/creator/contest/{contest_id}/restrictions:
+    put:
+      parameters:
+      - description: Id of the contest
+        in: path
+        name: contest_id
+        required: true
+        schema:
+          type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ContestGroupRestrictionListAdmin'
+        required: true
+      responses:
+        '200':
+          description: OK
+        '400':
+          description: Bad request
+        '404':
+          description: Contest or group not found
+      security:
+      - JWTAccessToken: []
+      - CSRFAccessToken: []
+    get:
+      parameters:
+      - description: Id of the contest
+        in: path
+        name: contest_id
+        required: true
+        schema:
+          type: integer
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ContestGroupRestrictionListAdmin'
+          description: OK
+        '400':
+          description: Bad request
+        '404':
+          description: Contest or group not found
+      security:
+      - JWTAccessToken: []
+      - CSRFAccessToken: []
   /tasks/editor/base_olympiad/{id_base_olympiad}/upload_certificate:
     post:
       parameters:
@@ -2521,77 +2568,6 @@ paths:
           description: Olympiad type already in use
         '404':
           description: Olympiad type not found
-      security:
-      - JWTAccessToken: []
-      - CSRFAccessToken: []
-  /tasks/admin/contest/{contest_id}/restrictions:
-    post:
-      parameters:
-      - description: Id of the contest
-        in: path
-        name: contest_id
-        required: true
-        schema:
-          type: integer
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/ContestGroupRestrictionListAdmin'
-        required: true
-      responses:
-        '200':
-          description: OK
-        '400':
-          description: Bad request
-        '404':
-          description: Contest or group not found
-      security:
-      - JWTAccessToken: []
-      - CSRFAccessToken: []
-    patch:
-      parameters:
-      - description: Id of the contest
-        in: path
-        name: contest_id
-        required: true
-        schema:
-          type: integer
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/ContestGroupRestrictionListAdmin'
-        required: true
-      responses:
-        '200':
-          description: OK
-        '400':
-          description: Bad request
-        '404':
-          description: Contest or group not found
-      security:
-      - JWTAccessToken: []
-      - CSRFAccessToken: []
-    get:
-      parameters:
-      - description: Id of the contest
-        in: path
-        name: contest_id
-        required: true
-        schema:
-          type: integer
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ContestGroupRestrictionListAdmin'
-          description: OK
-        '400':
-          description: Bad request
-        '404':
-          description: Contest or group not found
       security:
       - JWTAccessToken: []
       - CSRFAccessToken: []

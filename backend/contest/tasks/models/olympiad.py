@@ -234,6 +234,8 @@ class Contest(db.Model):
     users = db.relationship('UserInContest', lazy='dynamic',
                             backref=db.backref('contest', lazy='joined'))
 
+    group_restrictions = db.relationship('ContestGroupRestriction', lazy='dynamic', cascade="all, delete")
+
     __mapper_args__ = {
         'polymorphic_identity': ContestTypeEnum.Contest,
         'polymorphic_on': composite_type
@@ -311,7 +313,6 @@ class SimpleContest(Contest):
     regulations = db.Column(db.Text, nullable=True)
 
     variants = db.relationship('Variant', backref=db.backref('simple_contest', lazy='joined'), lazy='dynamic')
-    group_restrictions = db.relationship('ContestGroupRestriction', lazy='dynamic', cascade="all, delete")
     next_contests = db.relationship('SimpleContest',
                                     foreign_keys=[previous_contest_id])
 
@@ -417,7 +418,7 @@ class ContestGroupRestriction(db.Model):
     group_id: id of the group
     restriction: restriction for group
     """
-    contest_id = db.Column(db.Integer, db.ForeignKey(SimpleContest.contest_id), primary_key=True)
+    contest_id = db.Column(db.Integer, db.ForeignKey(Contest.contest_id), primary_key=True)
     group_id = db.Column(db.Integer, db.ForeignKey(Group.id), primary_key=True)
     restriction = db.Column(db.Enum(ContestGroupRestrictionEnum))
 

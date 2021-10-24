@@ -1,7 +1,4 @@
 from marshmallow import Schema, fields
-from marshmallow_enum import EnumField
-from contest.tasks.models.olympiad import ContestGroupRestrictionEnum
-from contest.tasks.model_schemas.olympiad import ContestGroupRestrictionSchema
 from common import fields as common_fields
 
 
@@ -27,14 +24,6 @@ class CreateRussiaLocationRequestTaskAdminSchema(Schema):
     region_name = common_fields.CommonName(required=True)
     address = common_fields.FreeDescription(required=True)
 
-
-class ListElemContestGroupRestrictionAdminSchema(Schema):
-    group_name = common_fields.CommonName(required=True)
-    restriction = EnumField(ContestGroupRestrictionEnum, by_value=True, required=True)
-
-
-class ContestGroupRestrictionListAdminSchema(Schema):
-    restrictions = fields.Nested(ListElemContestGroupRestrictionAdminSchema, many=True, required=True)
 
 # Location
 
