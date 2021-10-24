@@ -1,4 +1,7 @@
 # noinspection PyUnresolvedReferences
+import io
+
+from common.media_types import NewsImage
 from .. import *
 from ..tasks import *  # Fixtures
 
@@ -17,7 +20,13 @@ def test_news(test_categories, test_contests):
     from news.models import News
     news = [News(title=f'Test news {i}', body=f'Test news {i}', posted=(i % 2 == 0),
                  category=test_categories[i % len(test_categories)], grade=(i % 4 + 8),
-                 related_contest=test_contests[i % len(test_contests)], image=str.encode(f'{i}')) for i in range(8)]
+                 related_contest=test_contests[i % len(test_contests)]) for i in range(8)]
+    for news_el in news:
+        with test_app.store_manager:
+            news_el.image = NewsImage.create_from(
+                attachable=io.BytesIO(test_image),
+                store_id=test_app.get_media_store_id('NEWS')
+            )
     test_app.db.session.add_all(news)
     test_app.db.session.commit()
     yield news

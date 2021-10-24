@@ -239,7 +239,8 @@ class DefaultTestConfiguration:
     ORGMEPHI_MEDIA_STORES = {
         'PROFILE': 'profile',
         'RESPONSE': 'response',
-        'TASK': 'tasks'
+        'TASK': 'tasks',
+        'NEWS': 'news'
     }
 
 

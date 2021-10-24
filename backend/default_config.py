@@ -55,5 +55,6 @@ class DefaultConfiguration:
     ORGMEPHI_MEDIA_STORES = {
         'PROFILE': 'profile',
         'RESPONSE': 'responses',
-        'TASK': 'tasks'
+        'TASK': 'tasks',
+        'NEWS': 'news'
     }
