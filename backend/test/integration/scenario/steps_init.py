@@ -68,4 +68,11 @@ def step_init_target_classes(client, state):
     state.target_classes = [target_class.target_class_id for target_class in target_classes]
 
 
-steps_init = [step_init_client, step_init_admin, step_init_locations, step_init_target_classes]
+def step_everyone_group(client, state):
+    from user.models.auth import Group
+    everyone_group = Group(name='Everyone')
+    test_app.db.session.add(everyone_group)
+    test_app.db.session.commit()
+
+
+steps_init = [step_init_client, step_init_admin, step_init_locations, step_init_target_classes, step_everyone_group]

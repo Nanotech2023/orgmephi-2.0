@@ -10,25 +10,39 @@ def client(client_creator):
     yield client_creator
 
 
-def test_user_response_creator(client, create_plain_task):
+@pytest.fixture
+def client_admin_response(client_admin):
+    client_admin.set_prefix('contest/responses/creator')
+    yield client_admin
+
+
+def test_user_response_creator(client_admin_response, create_plain_task):
     contest_id = get_contest_id(create_plain_task, DEFAULT_INDEX)
     user_id = get_user_id(create_plain_task, DEFAULT_INDEX)
 
-    resp = client.post(f'/contest/{contest_id}/user/{ERROR_ID}/create')
+    resp = client_admin_response.post(f'/contest/{contest_id}/user/{ERROR_ID}/create')
     assert resp.status_code == 404
 
-    resp = client.post(f'/contest/{ERROR_ID}/user/{user_id}/create')
+    resp = client_admin_response.post(f'/contest/{ERROR_ID}/user/{user_id}/create')
     assert resp.status_code == 404
 
-    resp = client.post(f'/contest/{contest_id}/user/{user_id}/create')
+    resp = client_admin_response.post(f'/contest/{contest_id}/user/{user_id}/create')
     assert resp.status_code == 200
 
-    resp = client.post(f'/contest/{contest_id}/user/{user_id}/create')
+    resp = client_admin_response.post(f'/contest/{contest_id}/user/{user_id}/create')
     assert resp.status_code == 409
 
     from contest.responses.util import get_user_in_contest_work
     response = get_user_in_contest_work(user_id, contest_id)
     assert response.work_status.value == 'InProgress'
+
+
+def test_creator_create_response(client, create_plain_task):
+    contest_id = get_contest_id(create_plain_task, DEFAULT_INDEX)
+    user_id = get_user_id(create_plain_task, DEFAULT_INDEX)
+
+    resp = client.post(f'/contest/{contest_id}/user/{user_id}/create')
+    assert resp.status_code == 403
 
 
 def test_plain_task_text_creator(client, create_two_tasks):
