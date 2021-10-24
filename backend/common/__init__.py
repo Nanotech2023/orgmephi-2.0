@@ -203,18 +203,13 @@ class OrgMephiApp:
         :param cls: Media data class
         """
         from common import get_current_app
-        from sqlalchemy_media.exceptions import AnalyzeError
         from flask import request
         with self._store_manager:
-            try:
-                media = cls.create_from(
-                    attachable=io.BytesIO(request.data),
-                    store_id=self.get_media_store_id(store_key)
-                )
-                setattr(obj, field, media)
-                self._db.session.commit()
-            except AnalyzeError as err:
-                raise MediaError(str(err))
+            media = cls.create_from(
+                attachable=io.BytesIO(request.data),
+                store_id=self.get_media_store_id(store_key)
+            )
+            setattr(obj, field, media)
 
     def send_media(self, media):
         """
@@ -295,7 +290,7 @@ class OrgMephiApp:
         self._mail = Mail(self._app)
 
     def _media_key(self, key):
-        return f'{self.name}_{key}'
+        return f'{self.config["ORGMEPHI_MEDIA_KEY"]}_{key}'
 
     def _init_media(self):
         from sqlalchemy_media import StoreManager, FileSystemStore

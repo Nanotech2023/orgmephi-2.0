@@ -8,11 +8,18 @@ def _catch_request_error(function: Callable) -> Callable:
 
     @wraps(function)
     def wrapper(*args, **kwargs):
+        from sqlalchemy_media.exceptions import AnalyzeError
         try:
             return function(*args, **kwargs)
         except RequestError as err:
             return err.to_response()
         except ValidationError as err:
+            return make_response({
+                "class": err.__class__.__name__,
+                "status": 400,
+                "title": str(err)
+            }, 400)
+        except AnalyzeError as err:
             return make_response({
                 "class": err.__class__.__name__,
                 "status": 400,

@@ -234,9 +234,11 @@ class DefaultTestConfiguration:
     ORGMEPHI_CAPTCHA_LENGTH = 6
     ORGMEPHI_CAPTCHA_EXPIRATION = timedelta(minutes=5)
     RESPONSE_EXTRA_MINUTES = timedelta(seconds=300)
+    ORGMEPHI_MEDIA_KEY = 'ORGMEPHI_TEST'
     ORGMEPHI_MEDIA_ROOT_PATH = 'media'
     ORGMEPHI_MEDIA_STORES = {
-        'PROFILE_IMAGE': 'profile_img'
+        'PROFILE': 'profile',
+        'RESPONSE': 'response'
     }
 
 
