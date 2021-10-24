@@ -269,8 +269,8 @@ def add_simple_contest(db_session,
         previous_participation_condition=previous_participation_condition,
     )
     db_session.add(simple_contest)
-    from common.util import db_get_one_or_none
-    everyone_group: Group = db_get_one_or_none(Group, 'name', 'Everyone')
+    from user.models.auth import get_group_for_everyone
+    everyone_group: Group = get_group_for_everyone()
     add_group_restriction(db_session, simple_contest.contest_id, everyone_group.id,
                           ContestGroupRestrictionEnum.edit_user_status)
     return simple_contest
