@@ -2,7 +2,9 @@ import functools
 import io
 import json
 from sqlalchemy import TypeDecorator, Unicode
-from sqlalchemy_media import StoreManager, Image, ImageAnalyzer, ImageValidator, ImageProcessor, Store
+from sqlalchemy_media import StoreManager, Image, ImageAnalyzer, ImageValidator, ImageProcessor, Store, File, \
+    ContentTypeValidator, MagicAnalyzer
+from sqlalchemy_media.constants import MB
 
 _in_memory_store_dict = dict()
 
@@ -69,3 +71,13 @@ class ProfileImage(Image):
             width=120
         )
     ]
+
+
+class AnswerFile(File):
+    __pre_processors__ = [
+        MagicAnalyzer(),
+        ContentTypeValidator(['application/pdf', 'application/msword', 'application/zip', 'image/jpeg', 'image/png',
+                              'image/gif', 'text/plain'])
+    ]
+
+    __max_length__ = 16 * MB

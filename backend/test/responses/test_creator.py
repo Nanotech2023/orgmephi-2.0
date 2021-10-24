@@ -72,16 +72,15 @@ def test_plain_task_file_creator(client, create_one_task):
     task_id_from_different_contest = get_plain_task_id(create_one_task, 2)
 
     resp = client.post(f'/contest/{contest_id}/task/{task_id_from_different_contest}/user/{user_id}/png',
-                       data=b'Test')
+                       data=test_image)
     assert resp.status_code == 409
 
-    resp = client.post(f'/contest/{contest_id}/task/{task_id}/user/{user_id}/png', data=b'Test')
+    resp = client.post(f'/contest/{contest_id}/task/{task_id}/user/{user_id}/jpeg', data=test_image)
     assert resp.status_code == 200
 
     from contest.responses.util import user_answer_get
     user_answer = user_answer_get(user_id, contest_id, task_id, 'PlainAnswerFile')
-    assert user_answer.answer_file == b'Test'
-    assert user_answer.filetype.value == 'png'
+    assert user_answer.filetype == 'image/jpeg'
 
 
 # noinspection DuplicatedCode
@@ -90,7 +89,7 @@ def test_plain_task_file_failed(client, create_one_task):
     user_id_text = get_user_id(create_one_task, DEFAULT_INDEX)
     task_id_text = get_plain_task_id(create_one_task, DEFAULT_INDEX)
 
-    resp = client.post(f'/contest/{contest_id_text}/task/{task_id_text}/user/{user_id_text}/png', data=b'Test')
+    resp = client.post(f'/contest/{contest_id_text}/task/{task_id_text}/user/{user_id_text}/png', data=test_image)
     assert resp.status_code == 409
 
     index = 1
@@ -104,20 +103,20 @@ def test_plain_task_file_failed(client, create_one_task):
 
 
 def test_plain_task_get_creator(client, create_one_task):
-    contest_id = get_contest_id(create_one_task, DEFAULT_INDEX)
-    user_id = get_user_id(create_one_task, DEFAULT_INDEX)
-    task_id = get_plain_task_id(create_one_task, DEFAULT_INDEX)
+    contest_id = get_contest_id(create_one_task, 1)
+    user_id = get_user_id(create_one_task, 1)
+    task_id = get_plain_task_id(create_one_task, 1)
 
-    from contest.responses.util import user_answer_post_file
-    user_answer_post_file(b'Test', 'png', user_id, contest_id, task_id)
+    resp = client.post(f'/contest/{contest_id}/task/{task_id}/user/{user_id}/plain/file', data=test_image)
+    assert resp.status_code == 200
 
     resp = client.get(f'/contest/{contest_id}/task/{task_id}/user/{user_id}')
     assert resp.status_code == 200
-    assert resp.json['filetype'] == 'png'
+    assert resp.json['filetype'] == 'image/jpeg'
 
     resp = client.get(f'/contest/{contest_id}/task/{task_id}/user/{user_id}/plain/file')
     assert resp.status_code == 200
-    assert resp.data == b'Test'
+    assert resp.content_type == 'image/jpeg'
 
 
 def test_range_task_creator(client, create_two_tasks):

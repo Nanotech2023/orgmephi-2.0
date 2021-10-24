@@ -1,4 +1,5 @@
 from common import get_current_db, get_current_app
+from common.media_types import AnswerFile
 from .model_schemas.schemas import PlainAnswerTextSchema, RangeAnswerSchema
 from datetime import datetime, timedelta
 from common.errors import NotFound, RequestError, AlreadyExists
@@ -8,7 +9,7 @@ from contest.tasks.models import SimpleContest, RangeTask, MultipleChoiceTask, P
 from .models import Response, PlainAnswerText, RangeAnswer, MultipleChoiceAnswer, PlainAnswerFile, BaseAnswer, \
     answer_dict, add_user_response, add_plain_answer_file, add_plain_answer_text, add_range_answer, \
     add_multiple_answer, ResponseStatusEnum
-from ..tasks.util import validate_file_size, is_task_in_contest
+from ..tasks.util import is_task_in_contest
 
 db = get_current_db()
 app = get_current_app()
@@ -246,19 +247,17 @@ def finish_contest(user_work: Response):
     db.session.commit()
 
 
-def user_answer_post_file(answer_file, filetype, user_id, contest_id, task_id):
+def user_answer_post_file(user_id, contest_id, task_id):
     if not is_task_in_contest(task_id, contest_id):
         raise NotFound('contest_id, task_id', f'{contest_id}, {task_id}')
     user_work: Response = get_user_in_contest_work(user_id, contest_id)
     user_work.finish_time = datetime.utcnow()
     check_contest_duration(user_work)
     user_work.finish_time = datetime.utcnow()
-    validate_file_size(answer_file)
     user_answer = user_work.answers.filter(PlainAnswerFile.task_id == task_id).one_or_none()
     if user_answer is None:
-        add_plain_answer_file(user_work.work_id, task_id, filetype=filetype, file=answer_file)
-    else:
-        user_answer.update(answer_new=answer_file, filetype_new=filetype)
+        user_answer = add_plain_answer_file(user_work.work_id, task_id)
+    app.store_media('RESPONSE', user_answer, 'answer_content', AnswerFile)
     db.session.commit()
 
 

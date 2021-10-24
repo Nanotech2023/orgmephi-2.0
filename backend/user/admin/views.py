@@ -492,7 +492,8 @@ def post_photo(user_id):
     """
     from common.media_types import ProfileImage
     user = db_get_or_raise(User, 'id', user_id)
-    app.store_media('PROFILE_IMAGE', user.user_info, 'photo', ProfileImage)
+    app.store_media('PROFILE', user.user_info, 'photo', ProfileImage)
+    db.session.commit()
     return {}, 204
 
 
