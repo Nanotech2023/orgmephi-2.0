@@ -3,11 +3,10 @@ from datetime import datetime, timedelta
 
 from sqlalchemy.ext.associationproxy import association_proxy
 from sqlalchemy.ext.hybrid import hybrid_property
-from user.models.auth import Group
-from contest.tasks.models.contest import Variant
 from sqlalchemy.sql import case
 
 from common import get_current_db
+from user.models.auth import Group
 
 db = get_current_db()
 
