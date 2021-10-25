@@ -1,3 +1,4 @@
+from contest.tasks.models import ContestHoldingTypeEnum
 from . import *
 
 
@@ -113,6 +114,7 @@ def test_change_user_location_in_contest(client, test_simple_contest_with_users,
 
 def test_change_user_supervisor_in_contest(client, test_simple_contest_with_users, test_olympiad_locations,
                                            test_user_for_student_contest):
+    test_simple_contest_with_users[0].holding_type = ContestHoldingTypeEnum.OfflineContest
     resp = client.post(f'/contest/{test_simple_contest_with_users[0].contest_id}/change_supervisor',
                        json={
                            'supervisor': "Username of supervisor"

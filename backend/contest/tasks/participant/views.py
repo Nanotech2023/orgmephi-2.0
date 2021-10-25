@@ -118,8 +118,8 @@ def enroll_in_contest(id_contest):
     location_id = values.get('location_id', None)
     supervisor = values.get('supervisor', None)
 
-    if current_contest.composite_type == ContestTypeEnum.CompositeContest and supervisor is not None:
-        raise InsufficientData("supervisor", "can't be added to Composite contest")
+    if current_contest.holding_type == ContestHoldingTypeEnum.OnLineContest and supervisor is not None:
+        raise InsufficientData("supervisor", "can't be added to online contest")
 
     # Can't add without location
     if location_id is not None:
@@ -250,8 +250,8 @@ def change_user_supervisor_in_contest(id_contest):
     current_contest: SimpleContest = get_contest_if_possible(id_contest)
 
     supervisor = values.get('supervisor', None)
-    if current_contest.composite_type == ContestTypeEnum.CompositeContest and supervisor is not None:
-        raise InsufficientData("supervisor", "can't be added to Composite contest")
+    if current_contest.holding_type == ContestHoldingTypeEnum.OnLineContest and supervisor is not None:
+        raise InsufficientData("supervisor", "can't be added to online contest")
 
     # Can't enroll after deadline
     if datetime.utcnow() > current_contest.end_of_enroll_date:
