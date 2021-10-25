@@ -225,10 +225,6 @@ def olympiad_patch(id_base_olympiad, id_olympiad):
     db_get_or_raise(BaseContest, "base_contest_id", str(id_base_olympiad))
 
     if current_contest.composite_type == ContestTypeEnum.SimpleContest:
-
-        values = request.marshmallow
-        holding_type = values.get('holding_type', None)
-
         SimpleContestSchema(load_instance=True).load(request.json, instance=current_contest, session=db.session,
                                                      partial=True, unknown=EXCLUDE)
     else:

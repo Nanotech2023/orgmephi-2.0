@@ -226,7 +226,7 @@ components:
     ChangeSupervisorRequestTaskParticipant:
       properties:
         supervisor:
-          maxLength: 64
+          maxLength: 32
           type: string
       type: object
     ChangeUsersLocationInContestRequestTaskControlUsers:
@@ -1225,7 +1225,7 @@ components:
         show_results_to_user:
           type: boolean
         supervisor:
-          maxLength: 64
+          maxLength: 32
           type: string
         user_status:
           enum:

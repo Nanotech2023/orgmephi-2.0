@@ -257,11 +257,7 @@ def change_user_supervisor_in_contest(id_contest):
     if datetime.utcnow() > current_contest.end_of_enroll_date:
         raise TimeOver("Time for enrolling is over")
 
-    current_user = current_contest.users.filter_by(
-        **{
-            "user_id": str(user_id)
-        }
-    ).one_or_none()
+    current_user = current_contest.users.filter_by(user_id=user_id).one_or_none()
 
     current_user.supervisor = supervisor
 

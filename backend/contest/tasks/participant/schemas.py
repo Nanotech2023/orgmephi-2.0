@@ -26,7 +26,7 @@ class EnrollRequestTaskParticipantSchema(Schema):
 
 
 class ChangeSupervisorRequestTaskParticipantSchema(Schema):
-    supervisor = common_fields.Username(required=False)
+    supervisor = common_fields.CommonName(required=False)
 
 
 class SimpleContestWithFlagResponseTaskParticipantSchema(Schema):
