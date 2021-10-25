@@ -131,12 +131,8 @@ def olympiad_create_simple(id_base_olympiad):
     holding_type = values.get('holding_type', None)
 
     regulations = values.get('regulations', None)
-    supervisor = values.get('supervisor', None)
 
     validate_contest_values(previous_contest_id, previous_participation_condition)
-
-    if holding_type == ContestHoldingTypeEnum.OnLineContest and supervisor is not None:
-        raise InsufficientData("supervisor", "can't be added to Online contest")
 
     base_contest = db_get_or_raise(BaseContest, "base_contest_id", str(id_base_olympiad))
 
@@ -147,7 +143,6 @@ def olympiad_create_simple(id_base_olympiad):
                                          end_date=end_date,
                                          holding_type=holding_type,
                                          regulations=regulations,
-                                         supervisor=supervisor,
                                          previous_contest_id=previous_contest_id,
                                          previous_participation_condition=previous_participation_condition,
                                          end_of_enroll_date=end_of_enroll_date,

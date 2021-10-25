@@ -228,10 +228,6 @@ def olympiad_patch(id_base_olympiad, id_olympiad):
 
         values = request.marshmallow
         holding_type = values.get('holding_type', None)
-        supervisor = values.get('supervisor', None)
-
-        if holding_type == ContestHoldingTypeEnum.OnLineContest and supervisor is not None:
-            raise InsufficientData("supervisor", "can't be added to Online contest")
 
         SimpleContestSchema(load_instance=True).load(request.json, instance=current_contest, session=db.session,
                                                      partial=True, unknown=EXCLUDE)

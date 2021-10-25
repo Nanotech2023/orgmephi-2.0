@@ -52,7 +52,6 @@ class CreateSimpleContestRequestTaskCreatorSchema(Schema):
     previous_participation_condition = EnumField(UserStatusEnum, required=False, by_value=True)
     holding_type = EnumField(ContestHoldingTypeEnum, required=True, by_value=True)
     regulations = common_fields.Text(required=False)
-    supervisor = common_fields.Username(required=False)
 
 
 class CreateCompositeContestRequestTaskCreatorSchema(Schema):

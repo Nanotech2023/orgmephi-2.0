@@ -101,7 +101,6 @@ class SimpleContestSchema(SQLAlchemySchema):
     start_date = auto_field(column_name='start_date', required=True)
     end_date = auto_field(column_name='end_date', required=True)
     regulations = auto_field(column_name='regulations', validate=text_validator, required=False)
-    supervisor = auto_field(column_name='supervisor', validate=username_validator, required=False)
     status = EnumField(OlympiadStatusEnum, data_key='status', by_value=True)
     total_points = fields.Integer()
     tasks_number = fields.Integer()

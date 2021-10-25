@@ -223,6 +223,12 @@ components:
         winner_3_condition:
           type: number
       type: object
+    ChangeSupervisorRequestTaskParticipant:
+      properties:
+        supervisor:
+          maxLength: 64
+          type: string
+      type: object
     ChangeUsersLocationInContestRequestTaskControlUsers:
       properties:
         location_id:
@@ -550,9 +556,6 @@ components:
         start_date:
           format: date-time
           type: string
-        supervisor:
-          maxLength: 64
-          type: string
         visibility:
           type: boolean
       required:
@@ -851,10 +854,6 @@ components:
           - In progress
           - Finished
           type: string
-        supervisor:
-          maxLength: 64
-          nullable: true
-          type: string
         target_classes:
           items:
             $ref: '#/components/schemas/TargetClass'
@@ -1118,9 +1117,6 @@ components:
         start_date:
           format: date-time
           type: string
-        supervisor:
-          maxLength: 64
-          type: string
         visibility:
           type: boolean
       type: object
@@ -1228,6 +1224,9 @@ components:
           type: integer
         show_results_to_user:
           type: boolean
+        supervisor:
+          maxLength: 64
+          type: string
         user_status:
           enum:
           - Winner 1
@@ -1258,6 +1257,9 @@ components:
         show_results_to_user:
           nullable: true
           type: boolean
+        supervisor:
+          nullable: true
+          type: string
         user_id:
           readOnly: true
           type: integer
@@ -2644,6 +2646,31 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/EnrollRequestTaskParticipant'
+        required: true
+      responses:
+        '200':
+          description: OK
+        '400':
+          description: Bad request
+        '409':
+          description: User already enrolled
+      security:
+      - JWTAccessToken: []
+      - CSRFAccessToken: []
+  /tasks/participant/contest/{id_contest}/change_supervisor:
+    post:
+      parameters:
+      - description: ID of the contest
+        in: path
+        name: id_contest
+        required: true
+        schema:
+          type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChangeSupervisorRequestTaskParticipant'
         required: true
       responses:
         '200':

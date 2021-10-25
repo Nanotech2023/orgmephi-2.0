@@ -27,7 +27,6 @@ class UpdateBaseOlympiadRequestTaskEditorSchema(Schema):
 
 class UpdateContestRequestTaskEditorSchema(Schema):
     regulations = common_fields.Text(required=False)
-    supervisor = common_fields.Username(required=False)
     start_date = fields.DateTime(required=False)
     end_date = fields.DateTime(required=False)
     result_publication_date = fields.DateTime(required=False)
