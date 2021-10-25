@@ -127,7 +127,10 @@ def olympiad_create_simple(id_base_olympiad):
     stage_id = values.get('stage_id', None)
     previous_contest_id = values.get('previous_contest_id', None)
     previous_participation_condition = values.get('previous_participation_condition', None)
+
     holding_type = values.get('holding_type', None)
+
+    regulations = values.get('regulations', None)
 
     validate_contest_values(previous_contest_id, previous_participation_condition)
 
@@ -139,6 +142,7 @@ def olympiad_create_simple(id_base_olympiad):
                                          start_date=start_date,
                                          end_date=end_date,
                                          holding_type=holding_type,
+                                         regulations=regulations,
                                          previous_contest_id=previous_contest_id,
                                          previous_participation_condition=previous_participation_condition,
                                          end_of_enroll_date=end_of_enroll_date,

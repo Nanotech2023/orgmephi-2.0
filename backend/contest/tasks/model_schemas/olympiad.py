@@ -3,7 +3,7 @@ from marshmallow_oneofschema import OneOfSchema
 from marshmallow_sqlalchemy import SQLAlchemySchema, auto_field
 
 from marshmallow import fields
-from common.fields import text_validator, common_name_validator
+from common.fields import text_validator, common_name_validator, username_validator
 from contest.tasks.model_schemas.location import OlympiadLocationSchema
 from contest.tasks.models import *
 from contest.tasks.models.reference import TargetClass

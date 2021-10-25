@@ -1,13 +1,12 @@
 import enum
 from datetime import datetime, timedelta
 
-from sqlalchemy import func, select
-from sqlalchemy.sql import case
 from sqlalchemy.ext.associationproxy import association_proxy
 from sqlalchemy.ext.hybrid import hybrid_property
-from user.models.auth import Group
-from contest.tasks.models.contest import Variant
+from sqlalchemy.sql import case
+
 from common import get_current_db
+from user.models.auth import Group
 
 db = get_current_db()
 
@@ -246,6 +245,7 @@ def add_simple_contest(db_session,
                        visibility,
                        start_date,
                        end_date,
+                       regulations=None,
                        result_publication_date=None,
                        end_of_enroll_date=None,
                        holding_type=None,
@@ -261,6 +261,7 @@ def add_simple_contest(db_session,
         visibility=visibility,
         start_date=start_date,
         end_date=end_date,
+        regulations=regulations,
         holding_type=holding_type,
         contest_duration=contest_duration,
         result_publication_date=result_publication_date,

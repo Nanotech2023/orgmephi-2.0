@@ -25,6 +25,10 @@ class EnrollRequestTaskParticipantSchema(Schema):
     location_id = fields.Int(required=False)
 
 
+class ChangeSupervisorRequestTaskParticipantSchema(Schema):
+    supervisor = common_fields.CommonName(required=False)
+
+
 class SimpleContestWithFlagResponseTaskParticipantSchema(Schema):
     contest = fields.Nested(SimpleContestSchema, required=False, dump_only=True)
     enrolled = fields.Boolean(required=True)

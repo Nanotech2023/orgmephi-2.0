@@ -41,7 +41,6 @@ class BaseOlympiadIdResponseTaskCreatorSchema(Schema):
 
 
 class CreateSimpleContestRequestTaskCreatorSchema(Schema):
-    regulations = common_fields.Text(required=True)
     start_date = fields.DateTime(required=True)
     end_date = fields.DateTime(required=True)
     end_of_enroll_date = fields.DateTime(required=False)
@@ -52,6 +51,7 @@ class CreateSimpleContestRequestTaskCreatorSchema(Schema):
     previous_contest_id = fields.Int(required=False)
     previous_participation_condition = EnumField(UserStatusEnum, required=False, by_value=True)
     holding_type = EnumField(ContestHoldingTypeEnum, required=True, by_value=True)
+    regulations = common_fields.Text(required=False)
 
 
 class CreateCompositeContestRequestTaskCreatorSchema(Schema):
