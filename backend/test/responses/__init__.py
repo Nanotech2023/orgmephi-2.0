@@ -4,17 +4,9 @@ from datetime import datetime, timedelta
 
 
 @pytest.fixture
-def create_target_class():
-    from contest.tasks.models.reference import TargetClass
-    target_class = TargetClass(target_class='student')
-    test_app.db.session.add(target_class)
-    test_app.db.session.commit()
-    yield [target_class]
-
-
-@pytest.fixture
 def create_simple_contest(test_base_contests):
-    from contest.tasks.models.olympiad import SimpleContest, ContestHoldingTypeEnum
+    from contest.tasks.models.olympiad import SimpleContest, ContestHoldingTypeEnum, add_group_restriction, \
+        ContestGroupRestrictionEnum, ContestGroupRestriction
     holding_types = [ContestHoldingTypeEnum.OnLineContest, ContestHoldingTypeEnum.OfflineContest]
     simple_contests = [SimpleContest(base_contest_id=test_base_contests[i],
                                      visibility=True, start_date=datetime.utcnow(),
@@ -24,10 +16,17 @@ def create_simple_contest(test_base_contests):
                                      result_publication_date=datetime.utcnow() + timedelta(hours=2),
                                      end_of_enroll_date=datetime.utcnow() + timedelta(minutes=15))
                        for i in range(8)]
+    from user.models.auth import get_group_for_everyone
+    everyone_group = get_group_for_everyone()
     for i in range(len(simple_contests)):
         base_contest = test_base_contests[i % len(test_base_contests)]
         base_contest.child_contests.extend(simple_contests)
     test_app.db.session.add_all(simple_contests)
+    test_app.db.session.commit()
+    group_restrictions = [ContestGroupRestriction(contest_id=simple_contests[i].contest_id, group_id=everyone_group.id,
+                                                  restriction=ContestGroupRestrictionEnum.edit_user_status)
+                          for i in range(len(simple_contests))]
+    test_app.db.session.add_all(group_restrictions)
     test_app.db.session.commit()
     dict_ = {'contests': simple_contests}
     yield dict_

@@ -2,7 +2,6 @@ import io
 
 from flask import request
 from flask import send_file
-
 from common import get_current_module
 from contest.tasks.creator.schemas import *
 from contest.tasks.util import *
@@ -788,3 +787,87 @@ def task_image(id_contest, id_variant, id_task):
     return send_file(io.BytesIO(task.image_of_task),
                      attachment_filename='task_image.png',
                      mimetype='image/jpeg'), 200
+
+
+# Group Restriction
+
+
+@module.route('/contest/<int:contest_id>/restrictions', methods=['PUT'],
+              input_schema=ContestGroupRestrictionListAdminSchema)
+def contest_restriction_create(contest_id):
+    """
+    Add new restriction
+    ---
+    put:
+      parameters:
+        - in: path
+          description: Id of the contest
+          name: contest_id
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: ContestGroupRestrictionListAdminSchema
+      security:
+        - JWTAccessToken: [ ]
+        - CSRFAccessToken: [ ]
+      responses:
+        '200':
+          description: OK
+        '400':
+          description: Bad request
+        '404':
+          description: Contest or group not found
+    """
+    values = request.marshmallow
+    restrictions = values['restrictions']
+    current_contest: Contest = db_get_or_raise(Contest, 'contest_id', contest_id)
+    for old_restriction in current_contest.group_restrictions.all():
+        db.session.delete(old_restriction)
+    new_restrictions = []
+    for restriction_elem in restrictions:
+        group_name = restriction_elem['group_name']
+        restriction = restriction_elem['restriction']
+        group = db_get_or_raise(Group, 'name', group_name)
+        new_restrictions.append(ContestGroupRestriction(contest_id=contest_id,
+                                                        group_id=group.id,
+                                                        restriction=restriction))
+    current_contest.group_restrictions = new_restrictions
+    db.session.commit()
+    return {}, 200
+
+
+@module.route('/contest/<int:contest_id>/restrictions', methods=['GET'],
+              output_schema=ContestGroupRestrictionListAdminSchema)
+def contest_restriction_get(contest_id):
+    """
+    Get current contest restrictions
+    ---
+    get:
+      parameters:
+        - in: path
+          description: Id of the contest
+          name: contest_id
+          required: true
+          schema:
+            type: integer
+      security:
+        - JWTAccessToken: [ ]
+        - CSRFAccessToken: [ ]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: ContestGroupRestrictionListAdminSchema
+        '400':
+          description: Bad request
+        '404':
+          description: Contest or group not found
+    """
+    current_contest: SimpleContest = db_get_or_raise(SimpleContest, 'contest_id', contest_id)
+    restrictions = current_contest.group_restrictions.all()
+    return {"restrictions": restrictions}, 200

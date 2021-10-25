@@ -5,7 +5,7 @@ from sqlalchemy import func, select
 from sqlalchemy.sql import case
 from sqlalchemy.ext.associationproxy import association_proxy
 from sqlalchemy.ext.hybrid import hybrid_property
-
+from user.models.auth import Group
 from contest.tasks.models.contest import Variant
 from common import get_current_db
 
@@ -234,6 +234,8 @@ class Contest(db.Model):
     users = db.relationship('UserInContest', lazy='dynamic',
                             backref=db.backref('contest', lazy='joined'))
 
+    group_restrictions = db.relationship('ContestGroupRestriction', lazy='dynamic', cascade="all, delete")
+
     __mapper_args__ = {
         'polymorphic_identity': ContestTypeEnum.Contest,
         'polymorphic_on': composite_type
@@ -267,6 +269,10 @@ def add_simple_contest(db_session,
         previous_participation_condition=previous_participation_condition,
     )
     db_session.add(simple_contest)
+    from user.models.auth import get_group_for_everyone
+    everyone_group: Group = get_group_for_everyone()
+    add_group_restriction(db_session, simple_contest.contest_id, everyone_group.id,
+                          ContestGroupRestrictionEnum.edit_user_status)
     return simple_contest
 
 
@@ -307,7 +313,6 @@ class SimpleContest(Contest):
     regulations = db.Column(db.Text, nullable=True)
 
     variants = db.relationship('Variant', backref=db.backref('simple_contest', lazy='joined'), lazy='dynamic')
-
     next_contests = db.relationship('SimpleContest',
                                     foreign_keys=[previous_contest_id])
 
@@ -384,6 +389,41 @@ class SimpleContest(Contest):
         return case([(datetime.utcnow() < cls.start_date, OlympiadStatusEnum.OlympiadSoon.value),
                      (datetime.utcnow() < cls.end_date, OlympiadStatusEnum.OlympiadInProgress.value)],
                     else_=OlympiadStatusEnum.OlympiadFinished.value)
+
+
+def add_group_restriction(db_session, contest_id, group_id, restriction):
+    group_restriction = ContestGroupRestriction(
+        contest_id=contest_id,
+        group_id=group_id,
+        restriction=restriction
+    )
+    db_session.add(group_restriction)
+
+
+class ContestGroupRestrictionEnum(enum.Enum):
+    view_mark_and_user_status = 'ViewMarkAndUserStatus'
+    view_response = 'ViewResponse'
+    edit_mark = 'EditMark'
+    edit_user_status = 'EditUserStatus'
+
+
+restriction_range = {elem.value: i for i, elem in enumerate(ContestGroupRestrictionEnum)}
+
+
+class ContestGroupRestriction(db.Model):
+    """
+    Contest Group Restriction model
+
+    contest_id: id of the contest
+    group_id: id of the group
+    restriction: restriction for group
+    """
+    contest_id = db.Column(db.Integer, db.ForeignKey(Contest.contest_id), primary_key=True)
+    group_id = db.Column(db.Integer, db.ForeignKey(Group.id), primary_key=True)
+    restriction = db.Column(db.Enum(ContestGroupRestrictionEnum))
+
+    group = db.relationship(Group, uselist=False)
+    group_name = association_proxy('group', 'name')
 
 
 def add_composite_contest(db_session, visibility, base_contest_id=None, holding_type=None):

@@ -4,6 +4,15 @@ from ..user import *
 
 
 @pytest.fixture
+def create_group_for_everyone():
+    from user.models.auth import Group
+    everyone_group = Group(name='Everyone')
+    test_app.db.session.add(everyone_group)
+    test_app.db.session.commit()
+    yield everyone_group
+
+
+@pytest.fixture
 def test_target_class():
     from contest.tasks.models.reference import TargetClass
     target_classes = [TargetClass(target_class='8'),
@@ -17,7 +26,7 @@ def test_target_class():
 
 
 @pytest.fixture
-def test_olympiad_types():
+def test_olympiad_types(create_group_for_everyone):
     from contest.tasks.models import OlympiadType
     olympiad_types = [OlympiadType(olympiad_type=f'Test {i}') for i in range(8)]
     test_app.db.session.add_all(olympiad_types)

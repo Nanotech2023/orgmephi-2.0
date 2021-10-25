@@ -2,10 +2,10 @@ from datetime import timedelta
 
 from marshmallow import Schema, fields
 from marshmallow_enum import EnumField
-
 from common import fields as common_fields
 from contest.tasks.model_schemas.contest import VariantSchema
-from contest.tasks.model_schemas.olympiad import ContestSchema, BaseContestSchema, StageSchema
+from contest.tasks.model_schemas.olympiad import ContestSchema, BaseContestSchema, StageSchema, \
+    ContestGroupRestrictionEnum
 from contest.tasks.model_schemas.tasks import TaskSchema
 from contest.tasks.models import OlympiadSubjectEnum, StageConditionEnum, ContestHoldingTypeEnum, \
     UserStatusEnum, OlympiadLevelEnum, TaskAnswerTypeEnum
@@ -177,3 +177,14 @@ class TaskResponseTaskCreatorSchema(Schema):
 
 class TaskIdResponseTaskCreatorSchema(Schema):
     task_id = fields.Int(required=True)
+
+# Restrictions
+
+
+class ListElemContestGroupRestrictionAdminSchema(Schema):
+    group_name = common_fields.CommonName(required=True)
+    restriction = EnumField(ContestGroupRestrictionEnum, by_value=True, required=True)
+
+
+class ContestGroupRestrictionListAdminSchema(Schema):
+    restrictions = fields.Nested(ListElemContestGroupRestrictionAdminSchema, many=True, required=True)
