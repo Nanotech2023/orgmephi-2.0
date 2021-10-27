@@ -253,7 +253,10 @@ def check_contest_restriction(user_id, contest_id, restriction_level):
     contest: Contest = db_get_or_raise(Contest, 'contest_id', contest_id)
     everyone = get_group_for_everyone()
     everyone_restriction = contest.group_restrictions.filter_by(group_id=everyone.id).first()
-    user_restrictions = [restriction_range[everyone_restriction.restriction.value]]
+    if everyone_restriction is None:
+        user_restrictions = [-1]
+    else:
+        user_restrictions = [restriction_range[everyone_restriction.restriction.value]]
     group_names = [group.name for group in user.groups]
     restrictions = contest.group_restrictions.filter(ContestGroupRestriction.group_name.in_(group_names)).all()
     user_restrictions = user_restrictions + [restriction_range[elem.restriction.value] for elem in restrictions]
