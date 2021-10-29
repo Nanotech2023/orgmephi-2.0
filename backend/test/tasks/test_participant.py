@@ -147,12 +147,8 @@ def test_get_task_image_self(client, test_simple_contest_with_users, test_varian
     assert resp.status_code == 404
 
     from common.media_types import TaskImage
-    with test_app.store_manager:
-        test_variant[0].tasks[0].image_of_task = TaskImage.create_from(
-                    attachable=io.BytesIO(test_image),
-                    store_id=test_app.get_media_store_id('TASK')
-                )
-        test_app.db.session.commit()
+    test_app.io_to_media('TASK', test_variant[0].tasks[0], 'image_of_task', io.BytesIO(test_image), TaskImage)
+    test_app.db.session.commit()
 
     resp = client.get(
         f'/contest/{test_simple_contest_with_users[0].contest_id}/tasks/{test_variant[0].tasks[0].task_id}/image/self')

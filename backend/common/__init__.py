@@ -194,22 +194,49 @@ class OrgMephiApp:
         """
         return self._media_key(key)
 
-    def store_media(self, store_key, obj, field, cls):
+    def io_to_media(self, store_key: str, obj: object, field: str, data: io, cls, mimetype: str = None):
         """
-        Store media content from request
+        Convert bytes to a media object
+        :param store_key: Key for media store
+        :param obj: Model object
+        :param field: Field to hold media data
+        :param data: Media bytes
+        :param cls: Media data class
+        :param mimetype: media content type
+        """
+        from common import get_current_app
+        with self._store_manager:
+            media = cls.create_from(
+                attachable=data,
+                store_id=self.get_media_store_id(store_key),
+                content_type=mimetype
+            )
+            setattr(obj, field, media)
+
+    def media_to_io(self, media) -> io:
+        """
+        Convert media object to io
+        :param media: Media object
+        :return: io with media bytes
+        """
+        from common import get_current_app
+        if media is None:
+            raise NotFound('', 'media')
+        with self._store_manager:
+            store = media.get_store()
+            return store.open(media.path)
+
+    def store_media(self, store_key: str, obj: object, field: str, cls):
+        """
+        Store media content from flask request
         :param store_key: Key for media store
         :param obj: Model object
         :param field: Field to hold media data
         :param cls: Media data class
+        :return: Created media object
         """
-        from common import get_current_app
         from flask import request
-        with self._store_manager:
-            media = cls.create_from(
-                attachable=io.BytesIO(request.data),
-                store_id=self.get_media_store_id(store_key)
-            )
-            setattr(obj, field, media)
+        self.io_to_media(store_key, obj, field, io.BytesIO(request.data), cls)
 
     def send_media(self, media):
         """
@@ -218,12 +245,7 @@ class OrgMephiApp:
         :return: Flask response
         """
         from flask import send_file
-        from common import get_current_app
-        if media is None:
-            raise NotFound('', 'media')
-        with self._store_manager:
-            store = media.get_store()
-            return send_file(store.open(media.path), media.content_type)
+        return send_file(self.media_to_io(media), media.content_type)
 
     def _init_app(self, default_config: object = None, test_config: object = None):
         self._app = Flask(__name__, root_path=os.getcwd())

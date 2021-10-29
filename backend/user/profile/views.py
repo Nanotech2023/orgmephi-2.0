@@ -2,7 +2,7 @@ from flask import request
 from marshmallow import EXCLUDE
 
 from common import get_current_app, get_current_module, get_current_db
-from common.errors import NotFound, InsufficientData, WrongType, DataConflict
+from common.errors import NotFound, InsufficientData, WrongType
 from common.jwt_verify import jwt_get_id
 from common.util import db_get_or_raise, send_pdf
 from user.model_schemas.auth import UserSchema

@@ -22,11 +22,7 @@ def test_news(test_categories, test_contests):
                  category=test_categories[i % len(test_categories)], grade=(i % 4 + 8),
                  related_contest=test_contests[i % len(test_contests)]) for i in range(8)]
     for news_el in news:
-        with test_app.store_manager:
-            news_el.image = NewsImage.create_from(
-                attachable=io.BytesIO(test_image),
-                store_id=test_app.get_media_store_id('NEWS')
-            )
+        test_app.io_to_media('NEWS', news_el, 'image', io.BytesIO(test_image), NewsImage)
     test_app.db.session.add_all(news)
     test_app.db.session.commit()
     yield news
