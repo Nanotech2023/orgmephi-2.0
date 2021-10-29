@@ -3,6 +3,7 @@ import { ProfileStore } from '@/profile/profile.store'
 import { Observable } from 'rxjs'
 import { UserInfo, SchoolInfo, DocumentRF, LocationRussia, UserLimitations } from '@api/users/models'
 import { LoadingState } from '@/shared/callState'
+import { UsersService } from '@api/users/users.service'
 
 
 @Component( {
@@ -24,7 +25,7 @@ export class ProfileViewComponent
 
     readonly genders: ( "Male" | "Female" )[] = [ UserInfo.GenderEnum.Male, UserInfo.GenderEnum.Female ]
 
-    constructor( private profileStore: ProfileStore )
+    constructor( private profileStore: ProfileStore, private usersService: UsersService )
     {
         this.profileStore.fetch()
         this.viewModel$ = this.profileStore.viewModel$
@@ -38,5 +39,17 @@ export class ProfileViewComponent
     updateSchoolInfo( schoolInfo: SchoolInfo )
     {
         this.profileStore.updateSchoolInfo( schoolInfo )
+    }
+
+    download()
+    {
+        this.usersService.userProfileCardGet().subscribe( data => this.downloadFile( data ) )
+    }
+
+    downloadFile( data: Blob )
+    {
+        const blob = new Blob( [ data ], { type: 'application/pdf' } )
+        const url = window.URL.createObjectURL( blob )
+        window.open( url )
     }
 }

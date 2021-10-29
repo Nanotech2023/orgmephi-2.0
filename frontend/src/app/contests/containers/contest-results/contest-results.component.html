@@ -1,0 +1,20 @@
+<div class="container_main">
+    <h2 class="pt-1 pb-1">Результаты олимпиады</h2>
+    <div>
+        <div id="table-container" class="ag-theme-material"
+             *ngIf="results$ | async as results" style="min-height: 500px; height: 500px">
+            <ag-grid-angular
+                #table_contest_results
+                pagination="true"
+                id="table_contest_results"
+                [rowData]="results"
+                [rowHeight]="100"
+                [columnDefs]="columnDefs"
+                [getRowNodeId]="getRowNodeId"
+                [rowSelection]="'single'"
+                (rowSelected)="download()"
+            >
+            </ag-grid-angular>
+        </div>
+    </div>
+</div>

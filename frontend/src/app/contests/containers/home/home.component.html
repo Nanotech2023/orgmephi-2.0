@@ -38,7 +38,7 @@
                             <div class="actions_links">
                                 <a routerLink="/profile">Заполнить анкету участника</a>
                                 <a href="#">Оформить пропуск в НИЯУ «МИФИ»</a>
-                                <a href="#">Печать карточки участника</a>
+                                <a (click)="download()">Печать карточки участника</a>
                             </div>
                         </div>
                     </div>
@@ -60,8 +60,7 @@
                             </div>
                             <div class="actions_divider"></div>
                             <div class="actions_links">
-                                <a href="#">Посмотреть результаты</a>
-                                <a href="#">Скачать сертификаты</a>
+                                <a routerLink="/contests/results">Посмотреть результаты</a>
                             </div>
                         </div>
                     </div>

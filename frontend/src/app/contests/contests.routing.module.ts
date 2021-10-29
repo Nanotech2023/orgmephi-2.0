@@ -8,6 +8,7 @@ import { HomeComponent } from '@/contests/containers/home/home.component'
 import { ContestListItemComponent } from '@/contests/components/contest-list-item/contest-list-item.component'
 import { ContestAssignmentComponent } from '@/contests/containers/contest-assignment/contest-assignment.component'
 import { ContestAssignmentItemComponent } from '@/contests/components/contest-assignment-item/contest-assignment-item.component'
+import { ContestResultsComponent } from '@/contests/containers/contest-results/contest-results.component'
 
 
 export const COMPONENTS = [
@@ -17,7 +18,8 @@ export const COMPONENTS = [
     ContestRegistrationComponent,
     ContestAssignmentComponent,
     HomeComponent,
-    ContestAssignmentItemComponent
+    ContestAssignmentItemComponent,
+    ContestResultsComponent
 ]
 
 
@@ -28,6 +30,9 @@ const routes: Routes =
         },
         {
             path: 'contests', component: ContestListComponent, canActivate: [ AuthGuardService ]
+        },
+        {
+            path: 'contests/results', component: ContestResultsComponent, canActivate: [ AuthGuardService ]
         },
         {
             path: 'contests/:contestId', component: ContestDetailsComponent, canActivate: [ AuthGuardService ]

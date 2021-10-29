@@ -10,8 +10,8 @@ import { AppRoutingModule } from '@/app-routing.module'
 import { environment } from '@environments/environment'
 import { AppComponent } from '@/app.component'
 import { UsersService } from '@api/users/users.service'
-import { ManageContestsModule } from '@/manage-contests/manage-contests.module'
-import { ManageUsersModule } from '@/manage-users/manage-users.module'
+import { NewsModule } from '@/news/news.module'
+import { ChatModule } from '@/chat/chat.module'
 import { AuthGuardService } from '@/shared/auth.guard.service'
 import { TasksService } from '@api/tasks/tasks.service'
 import { ResponsesService } from '@api/responses/responses.service'
@@ -29,8 +29,8 @@ import { RootEffects } from '@/app.effects'
         AuthModule,
         ContestsModule,
         ProfileModule,
-        ManageUsersModule,
-        ManageContestsModule,
+        NewsModule,
+        ChatModule,
         AppRoutingModule,
         StoreModule.forRoot( {} ),
         EffectsModule.forRoot( [ RootEffects ] ),
