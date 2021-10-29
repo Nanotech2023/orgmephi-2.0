@@ -50,3 +50,4 @@ class DefaultConfiguration:
     ORGMEPHI_CAPTCHA_LENGTH = 6
     ORGMEPHI_CAPTCHA_EXPIRATION = timedelta(minutes=5)
     RESPONSE_EXTRA_MINUTES = timedelta(seconds=300)
+    ORGMEPHI_WKHTMLTOPDF_PATH = '/usr/bin/wkhtmltopdf'
