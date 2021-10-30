@@ -87,7 +87,7 @@ class TaskImage(Image):
     __pre_processors__ = [
         ImageAnalyzer(),
         ImageValidator(
-            minimum=(80, 80),
+            minimum=(20, 20),
             maximum=(1920, 1080),
             content_types=['image/jpeg', 'image/png']
         )
@@ -98,7 +98,7 @@ class NewsImage(Image):
     __pre_processors__ = [
         ImageAnalyzer(),
         ImageValidator(
-            minimum=(80, 80),
+            minimum=(20, 20),
             maximum=(1920, 1080),
             content_types=['image/jpeg', 'image/png']
         )
