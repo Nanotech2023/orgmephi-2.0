@@ -125,7 +125,10 @@ def olympiad_create_simple(id_base_olympiad):
     stage_id = values.get('stage_id', None)
     previous_contest_id = values.get('previous_contest_id', None)
     previous_participation_condition = values.get('previous_participation_condition', None)
+
     holding_type = values.get('holding_type', None)
+
+    regulations = values.get('regulations', None)
 
     validate_contest_values(previous_contest_id, previous_participation_condition)
 
@@ -137,6 +140,7 @@ def olympiad_create_simple(id_base_olympiad):
                                          start_date=start_date,
                                          end_date=end_date,
                                          holding_type=holding_type,
+                                         regulations=regulations,
                                          previous_contest_id=previous_contest_id,
                                          previous_participation_condition=previous_participation_condition,
                                          end_of_enroll_date=end_of_enroll_date,
@@ -779,3 +783,87 @@ def task_image(id_contest, id_variant, id_task):
     """
     task = get_task_if_possible(id_contest, id_variant, id_task)
     return app.send_media(task.image_of_task)
+
+
+# Group Restriction
+
+
+@module.route('/contest/<int:contest_id>/restrictions', methods=['PUT'],
+              input_schema=ContestGroupRestrictionListAdminSchema)
+def contest_restriction_create(contest_id):
+    """
+    Add new restriction
+    ---
+    put:
+      parameters:
+        - in: path
+          description: Id of the contest
+          name: contest_id
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: ContestGroupRestrictionListAdminSchema
+      security:
+        - JWTAccessToken: [ ]
+        - CSRFAccessToken: [ ]
+      responses:
+        '200':
+          description: OK
+        '400':
+          description: Bad request
+        '404':
+          description: Contest or group not found
+    """
+    values = request.marshmallow
+    restrictions = values['restrictions']
+    current_contest: Contest = db_get_or_raise(Contest, 'contest_id', contest_id)
+    for old_restriction in current_contest.group_restrictions.all():
+        db.session.delete(old_restriction)
+    new_restrictions = []
+    for restriction_elem in restrictions:
+        group_name = restriction_elem['group_name']
+        restriction = restriction_elem['restriction']
+        group = db_get_or_raise(Group, 'name', group_name)
+        new_restrictions.append(ContestGroupRestriction(contest_id=contest_id,
+                                                        group_id=group.id,
+                                                        restriction=restriction))
+    current_contest.group_restrictions = new_restrictions
+    db.session.commit()
+    return {}, 200
+
+
+@module.route('/contest/<int:contest_id>/restrictions', methods=['GET'],
+              output_schema=ContestGroupRestrictionListAdminSchema)
+def contest_restriction_get(contest_id):
+    """
+    Get current contest restrictions
+    ---
+    get:
+      parameters:
+        - in: path
+          description: Id of the contest
+          name: contest_id
+          required: true
+          schema:
+            type: integer
+      security:
+        - JWTAccessToken: [ ]
+        - CSRFAccessToken: [ ]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: ContestGroupRestrictionListAdminSchema
+        '400':
+          description: Bad request
+        '404':
+          description: Contest or group not found
+    """
+    current_contest: SimpleContest = db_get_or_raise(SimpleContest, 'contest_id', contest_id)
+    restrictions = current_contest.group_restrictions.all()
+    return {"restrictions": restrictions}, 200

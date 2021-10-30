@@ -223,6 +223,12 @@ components:
         winner_3_condition:
           type: number
       type: object
+    ChangeSupervisorRequestTaskParticipant:
+      properties:
+        supervisor:
+          maxLength: 32
+          type: string
+      type: object
     ChangeUsersLocationInContestRequestTaskControlUsers:
       properties:
         location_id:
@@ -271,6 +277,15 @@ components:
       oneOf:
       - $ref: '#/components/schemas/SimpleContest'
       - $ref: '#/components/schemas/CompositeContest'
+    ContestGroupRestrictionListAdmin:
+      properties:
+        restrictions:
+          items:
+            $ref: '#/components/schemas/ListElemContestGroupRestrictionAdmin'
+          type: array
+      required:
+      - restrictions
+      type: object
     ContestIdResponseTaskCreator:
       properties:
         contest_id:
@@ -546,7 +561,6 @@ components:
       required:
       - end_date
       - holding_type
-      - regulations
       - start_date
       - visibility
       type: object
@@ -602,6 +616,22 @@ components:
           type: array
         count:
           type: integer
+      type: object
+    ListElemContestGroupRestrictionAdmin:
+      properties:
+        group_name:
+          maxLength: 32
+          type: string
+        restriction:
+          enum:
+          - ViewMarkAndUserStatus
+          - ViewResponse
+          - EditMark
+          - EditUserStatus
+          type: string
+      required:
+      - group_name
+      - restriction
       type: object
     LocationResponseTaskAdmin:
       properties:
@@ -1194,6 +1224,9 @@ components:
           type: integer
         show_results_to_user:
           type: boolean
+        supervisor:
+          maxLength: 32
+          type: string
         user_status:
           enum:
           - Winner 1
@@ -1224,6 +1257,9 @@ components:
         show_results_to_user:
           nullable: true
           type: boolean
+        supervisor:
+          nullable: true
+          type: string
         user_id:
           readOnly: true
           type: integer
@@ -1748,6 +1784,53 @@ paths:
           description: Bad request
         '409':
           description: Olympiad type already in use
+      security:
+      - JWTAccessToken: []
+      - CSRFAccessToken: []
+  /tasks/creator/contest/{contest_id}/restrictions:
+    put:
+      parameters:
+      - description: Id of the contest
+        in: path
+        name: contest_id
+        required: true
+        schema:
+          type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ContestGroupRestrictionListAdmin'
+        required: true
+      responses:
+        '200':
+          description: OK
+        '400':
+          description: Bad request
+        '404':
+          description: Contest or group not found
+      security:
+      - JWTAccessToken: []
+      - CSRFAccessToken: []
+    get:
+      parameters:
+      - description: Id of the contest
+        in: path
+        name: contest_id
+        required: true
+        schema:
+          type: integer
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ContestGroupRestrictionListAdmin'
+          description: OK
+        '400':
+          description: Bad request
+        '404':
+          description: Contest or group not found
       security:
       - JWTAccessToken: []
       - CSRFAccessToken: []
@@ -2563,6 +2646,31 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/EnrollRequestTaskParticipant'
+        required: true
+      responses:
+        '200':
+          description: OK
+        '400':
+          description: Bad request
+        '409':
+          description: User already enrolled
+      security:
+      - JWTAccessToken: []
+      - CSRFAccessToken: []
+  /tasks/participant/contest/{id_contest}/change_supervisor:
+    post:
+      parameters:
+      - description: ID of the contest
+        in: path
+        name: id_contest
+        required: true
+        schema:
+          type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChangeSupervisorRequestTaskParticipant'
         required: true
       responses:
         '200':

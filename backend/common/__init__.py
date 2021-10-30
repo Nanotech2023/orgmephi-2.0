@@ -2,6 +2,7 @@ import functools
 import io
 
 from flask import Flask, Config
+from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
 from flask_jwt_extended import JWTManager
 from flask_cors import CORS
@@ -262,6 +263,7 @@ class OrgMephiApp:
 
     def _init_db(self):
         self._db = SQLAlchemy(self._app)
+        self._migrate = Migrate(self._app, self._db)
 
     def _read_key(self, key_type):
         var_name = 'ORGMEPHI_%s_KEY' % key_type.upper()

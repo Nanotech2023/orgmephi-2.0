@@ -118,6 +118,23 @@ def init_user(username, password_hash, user_role, user_type, user=None):
     return user
 
 
+def get_group_for_everyone():
+    from common.util import db_get_one_or_none
+    return db_get_one_or_none(Group, 'name', 'Everyone')
+
+
+@app.db_prepare_action()
+def add_group_everyone():
+    """
+    Add everyone group after creation
+    """
+    from common.util import db_exists
+    if not db_exists(db.session, Group, 'name', 'Everyone'):
+        everyone_group = Group(name='Everyone')
+        db.session.add(everyone_group)
+        db.session.commit()
+
+
 class Group(db.Model):
     """
         Group ORM class

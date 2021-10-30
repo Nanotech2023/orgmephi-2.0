@@ -3,7 +3,7 @@ from marshmallow_oneofschema import OneOfSchema
 from marshmallow_sqlalchemy import SQLAlchemySchema, auto_field
 
 from marshmallow import fields
-from common.fields import text_validator, common_name_validator
+from common.fields import text_validator, common_name_validator, username_validator
 from contest.tasks.model_schemas.location import OlympiadLocationSchema
 from contest.tasks.models import *
 from contest.tasks.models.reference import TargetClass
@@ -76,6 +76,18 @@ Contest
 """
 Stage
 """
+
+
+class ContestGroupRestrictionSchema(SQLAlchemySchema):
+    class Meta:
+        model = ContestGroupRestriction
+        load_instance = True
+        sqla_session = db.session
+
+    contest_id = auto_field(column_name='contest_id', dump_only=True, required=True)
+    group_id = auto_field(column_name='group_id', dump_only=True, required=True)
+    restriction = EnumField(ContestGroupRestrictionEnum, data_key='restriction', by_value=True, required=True)
+    group_name = auto_field(column_name='group_name', dump_only=True, required=True)
 
 
 class SimpleContestSchema(SQLAlchemySchema):
