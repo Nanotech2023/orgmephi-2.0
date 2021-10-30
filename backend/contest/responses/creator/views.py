@@ -1,5 +1,4 @@
-import io
-from flask import request, send_file
+from flask import request
 from common import get_current_module
 from contest.responses.util import *
 from common.jwt_verify import jwt_get_id
@@ -163,8 +162,7 @@ def user_answer_for_task_by_id_plain_file(contest_id, task_id, user_id):
             image/gif: {schema: {format: binary, type: string}}
             text/plain: {schema: {format: binary, type: string}}
             application/msword: {schema: {format: binary, type: string}}
-            application/vnd.openxmlformats-officedocument.wordprocessingml.document: {schema: {format: binary, type: string}}
-            application/vnd.oasis.opendocument.text: {schema: {format: binary, type: string}}
+            application/zip: {schema: {format: binary, type: string}}
         '403':
           description: Restriction error
         '404':
@@ -173,9 +171,7 @@ def user_answer_for_task_by_id_plain_file(contest_id, task_id, user_id):
     creator_id = jwt_get_id()
     check_contest_restriction(creator_id, contest_id, ContestGroupRestrictionEnum.view_response)
     user_answer = user_answer_get(user_id, contest_id, task_id, 'PlainAnswerFile')
-    return send_file(io.BytesIO(user_answer.answer_file),
-                     attachment_filename=f'userid_{user_id}_taskid_{task_id}.{user_answer.filetype.value}',
-                     mimetype=get_mimetype(user_answer.filetype.value)), 200
+    return app.send_media(user_answer.answer_content)
 
 
 @module.route('/contest/<int:contest_id>/task/<int:task_id>/user/<int:user_id>', methods=['GET'],
@@ -222,12 +218,67 @@ def user_answer_for_task_by_id(contest_id, task_id, user_id):
     return user_answer_get(user_id, contest_id, task_id), 200
 
 
-@module.route('/contest/<int:contest_id>/task/<int:task_id>/user/<int:user_id>/<string:filetype>', methods=['POST'])
-def user_answer_for_task_by_id_post_plain_file(contest_id, task_id, user_id, filetype):
+@module.route('/contest/<int:contest_id>/task/<int:task_id>/user/<int:user_id>/plain/file', methods=['POST'])
+def user_answer_for_task_by_id_post_plain_file(contest_id, task_id, user_id):
     """
     Add user answer for a task
     ---
     post:
+      security:
+        - JWTAccessToken: []
+        - CSRFAccessToken: []
+      parameters:
+        - in: path
+          description: Id of the contest
+          name: contest_id
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the task
+          name: task_id
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the user
+          name: user_id
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        content:
+          image/png: {schema: {format: binary, type: string}}
+          application/pdf: {schema: {format: binary, type: string}}
+          image/jpeg: {schema: {format: binary, type: string}}
+          image/gif: {schema: {format: binary, type: string}}
+          text/plain: {schema: {format: binary, type: string}}
+          application/msword: {schema: {format: binary, type: string}}
+          application/zip: {schema: {format: binary, type: string}}
+      responses:
+        '200':
+          description: OK
+        '403':
+          description: Restriction error
+        '404':
+          description: User, contest or task not found
+        '409':
+          description: Timing error or file is too large
+    """
+    creator_id = jwt_get_id()
+    check_contest_restriction(creator_id, contest_id, ContestGroupRestrictionEnum.edit_user_status)
+    check_task_type(task_id, answer_dict['PlainAnswerFile'])
+    user_answer_post_file(user_id, contest_id, task_id)
+    return {}, 200
+
+
+@module.route('/contest/<int:contest_id>/task/<int:task_id>/user/<int:user_id>/<string:filetype>', methods=['POST'])
+def user_answer_for_task_by_id_post_plain_file_old(contest_id, task_id, user_id, filetype):
+    """
+    Add user answer for a task
+    ---
+    post:
+      deprecated: true
       security:
         - JWTAccessToken: []
         - CSRFAccessToken: []
@@ -272,11 +323,7 @@ def user_answer_for_task_by_id_post_plain_file(contest_id, task_id, user_id, fil
         '409':
           description: Timing error or file is too large
     """
-    creator_id = jwt_get_id()
-    check_contest_restriction(creator_id, contest_id, ContestGroupRestrictionEnum.edit_user_status)
-    check_task_type(task_id, answer_dict['PlainAnswerFile'])
-    user_answer_post_file(request.data, filetype, user_id, contest_id, task_id)
-    return {}, 200
+    return user_answer_for_task_by_id_post_plain_file(contest_id, task_id, user_id)
 
 
 @module.route('/contest/<int:contest_id>/task/<int:task_id>/user/<int:user_id>/plain', methods=['POST'],

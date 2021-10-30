@@ -106,7 +106,7 @@ class PlainAnswerFileSchema(SQLAlchemySchema):
         load_instance = True
         sqla_session = db.session
 
-    filetype = EnumField(ResponseFiletypeEnum, data_key='filetype', by_value=True)
+    filetype = m_f.String()
 
 
 class AnswerSchema(OneOfSchema):

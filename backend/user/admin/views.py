@@ -1,10 +1,9 @@
-import io
 import secrets
 from flask import request
 from marshmallow import EXCLUDE
 import sqlalchemy.exc
 
-from common.errors import NotFound, AlreadyExists, InsufficientData, QuotaExceeded, DataConflict
+from common.errors import NotFound, AlreadyExists
 from common import get_current_app, get_current_module, get_current_db
 from common.util import db_get_or_raise, db_exists
 
@@ -491,13 +490,9 @@ def post_photo(user_id):
           description: File is too big
 
     """
-    file = request.data
-    if file == b'':
-        raise InsufficientData('request', 'image')
-    if len(file) > 4 * 1024 * 1024:
-        raise QuotaExceeded('Image is too large', 4 * 1024 * 1024)
+    from common.media_types import ProfileImage
     user = db_get_or_raise(User, 'id', user_id)
-    user.user_info.photo = file
+    app.store_media('PROFILE', user.user_info, 'photo', ProfileImage)
     db.session.commit()
     return {}, 204
 
@@ -530,8 +525,5 @@ def get_photo(user_id):
         '409':
           description: Photo not attached
     """
-    from flask import send_file
     user = db_get_or_raise(User, 'id', user_id)
-    if user.user_info.photo is None:
-        raise DataConflict('Image not present')
-    return send_file(io.BytesIO(user.user_info.photo), mimetype='image/*')
+    return app.send_media(user.user_info.photo)

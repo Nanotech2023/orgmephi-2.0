@@ -182,15 +182,6 @@ components:
     PlainAnswerFile:
       properties:
         filetype:
-          enum:
-          - txt
-          - pdf
-          - jpg
-          - doc
-          - docx
-          - png
-          - gif
-          - odt
           type: string
       type: object
     PlainAnswerRequest:
@@ -459,11 +450,7 @@ paths:
               schema:
                 format: binary
                 type: string
-            application/vnd.oasis.opendocument.text:
-              schema:
-                format: binary
-                type: string
-            application/vnd.openxmlformats-officedocument.wordprocessingml.document:
+            application/zip:
               schema:
                 format: binary
                 type: string
@@ -490,6 +477,68 @@ paths:
           description: User, contest or task not found
       security:
       - JWTAccessToken: []
+    post:
+      parameters:
+      - description: Id of the contest
+        in: path
+        name: contest_id
+        required: true
+        schema:
+          type: integer
+      - description: Id of the task
+        in: path
+        name: task_id
+        required: true
+        schema:
+          type: integer
+      - description: Id of the user
+        in: path
+        name: user_id
+        required: true
+        schema:
+          type: integer
+      requestBody:
+        content:
+          application/msword:
+            schema:
+              format: binary
+              type: string
+          application/pdf:
+            schema:
+              format: binary
+              type: string
+          application/zip:
+            schema:
+              format: binary
+              type: string
+          image/gif:
+            schema:
+              format: binary
+              type: string
+          image/jpeg:
+            schema:
+              format: binary
+              type: string
+          image/png:
+            schema:
+              format: binary
+              type: string
+          text/plain:
+            schema:
+              format: binary
+              type: string
+      responses:
+        '200':
+          description: OK
+        '403':
+          description: Not enough rights for current user
+        '404':
+          description: User, contest or task not found
+        '409':
+          description: Timing error or file is too large
+      security:
+      - JWTAccessToken: []
+      - CSRFAccessToken: []
   /responses/creator/contest/{contest_id}/task/{task_id}/user/{user_id}:
     get:
       parameters:
@@ -526,6 +575,7 @@ paths:
       - JWTAccessToken: []
   /responses/creator/contest/{contest_id}/task/{task_id}/user/{user_id}/{filetype}:
     post:
+      deprecated: true
       parameters:
       - description: Id of the contest
         in: path
@@ -1079,11 +1129,7 @@ paths:
               schema:
                 format: binary
                 type: string
-            application/vnd.oasis.opendocument.text:
-              schema:
-                format: binary
-                type: string
-            application/vnd.openxmlformats-officedocument.wordprocessingml.document:
+            application/zip:
               schema:
                 format: binary
                 type: string
@@ -1110,6 +1156,62 @@ paths:
           description: User, contest or task not found
       security:
       - JWTAccessToken: []
+    post:
+      parameters:
+      - description: Id of the contest
+        in: path
+        name: contest_id
+        required: true
+        schema:
+          type: integer
+      - description: Id of the task
+        in: path
+        name: task_id
+        required: true
+        schema:
+          type: integer
+      requestBody:
+        content:
+          application/msword:
+            schema:
+              format: binary
+              type: string
+          application/pdf:
+            schema:
+              format: binary
+              type: string
+          application/zip:
+            schema:
+              format: binary
+              type: string
+          image/gif:
+            schema:
+              format: binary
+              type: string
+          image/jpeg:
+            schema:
+              format: binary
+              type: string
+          image/png:
+            schema:
+              format: binary
+              type: string
+          text/plain:
+            schema:
+              format: binary
+              type: string
+      responses:
+        '200':
+          description: OK
+        '403':
+          description: Not enough rights for current user
+        '404':
+          description: User, contest or task not found
+        '409':
+          description: Timing error or file is too large
+      security:
+      - JWTAccessToken: []
+      - CSRFAccessToken: []
   /responses/participant/contest/{contest_id}/task/{task_id}/user/self:
     get:
       parameters:
@@ -1140,6 +1242,7 @@ paths:
       - JWTAccessToken: []
   /responses/participant/contest/{contest_id}/task/{task_id}/user/self/{filetype}:
     post:
+      deprecated: true
       parameters:
       - description: Id of the contest
         in: path

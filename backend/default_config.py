@@ -51,3 +51,11 @@ class DefaultConfiguration:
     ORGMEPHI_CAPTCHA_EXPIRATION = timedelta(minutes=5)
     RESPONSE_EXTRA_MINUTES = timedelta(seconds=300)
     ORGMEPHI_WKHTMLTOPDF_PATH = '/usr/bin/wkhtmltopdf'
+    ORGMEPHI_MEDIA_KEY = 'ORGMEPHI'
+    ORGMEPHI_MEDIA_ROOT_PATH = 'media'
+    ORGMEPHI_MEDIA_STORES = {
+        'PROFILE': 'profile',
+        'RESPONSE': 'responses',
+        'TASK': 'tasks',
+        'NEWS': 'news'
+    }

@@ -213,13 +213,11 @@ def test_generate_card_wrong_type(client_adm, test_user_admin):
 
 
 def test_photo(client):
-    photo = b'test'
     resp = client.get('/photo')
-    assert resp.status_code == 409
+    assert resp.status_code == 404
 
-    resp = client.put('/photo', data=photo)
+    resp = client.put('/photo', data=test_image)
     assert resp.status_code == 204
 
     resp = client.get('/photo')
     assert resp.status_code == 200
-    assert resp.data == photo

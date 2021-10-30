@@ -1,6 +1,4 @@
-import io
-
-from flask import send_file, request
+from flask import request
 
 from common import get_current_module
 from common.errors import AlreadyExists, TimeOver
@@ -347,20 +345,11 @@ def get_task_image_self(id_contest, id_task):
         '409':
           description: Olympiad type already in use
     """
-
     # Contest not in progress or 'not show answers' flag
     if not user_can_view_variants_and_tasks(id_contest):
         raise ContestContentAccessDenied()
-
     task = get_user_task_if_possible(id_contest, id_task)
-
-    if task.image_of_task is None:
-        raise DataConflict("Task does not have image")
-
-    return send_file(io.BytesIO(task.image_of_task),
-                     attachment_filename='task_image.png',
-                     mimetype='image/jpeg'), 200
-
+    return app.send_media(task.image_of_task)
 
 # Certificate
 

@@ -1,6 +1,7 @@
 from datetime import datetime
 
 from common import get_current_db, get_current_app
+from common.media_types import Json, NewsImage
 
 from contest.tasks.models import Contest
 
@@ -19,7 +20,7 @@ class News(db.Model):
     posted = db.Column(db.Boolean, default=False, nullable=False)
 
     title = db.Column(db.String, nullable=False)
-    image = db.Column(db.LargeBinary)
+    image = db.Column(NewsImage.as_mutable(Json))
     body = db.Column(db.String)
 
     related_contest_id = db.Column(db.Integer, db.ForeignKey(Contest.contest_id))

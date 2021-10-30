@@ -143,13 +143,11 @@ def test_user_remove_group_not_exists(client, test_user, test_group):
 
 
 def test_photo(client, test_user_school):
-    photo = b'test'
     resp = client.get(f'/personal/{test_user_school.id}/photo')
-    assert resp.status_code == 409
+    assert resp.status_code == 404
 
-    resp = client.put(f'/personal/{test_user_school.id}/photo', data=photo)
+    resp = client.put(f'/personal/{test_user_school.id}/photo', data=test_image)
     assert resp.status_code == 204
 
     resp = client.get(f'/personal/{test_user_school.id}/photo')
     assert resp.status_code == 200
-    assert resp.data == photo
