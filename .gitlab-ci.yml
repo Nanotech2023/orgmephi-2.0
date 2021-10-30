@@ -35,6 +35,7 @@ stages:
   stage: test
   before_script:
     - pip install -r backend/requirements.txt
+    - apt update && apt install -y libmagic1
   script:
     - cd backend
     - python -m pytest --cov=. --rootdir=.. .
