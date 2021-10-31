@@ -4,9 +4,9 @@ from datetime import datetime, timedelta
 import enum
 from sqlalchemy.ext.associationproxy import association_proxy
 from common import get_current_db
+from common.media_types import AnswerFile, Json
 from contest.tasks.models import UserInContest, Task, MultipleChoiceTask, PlainTask, RangeTask
 from sqlalchemy.ext.hybrid import hybrid_property
-
 
 db = get_current_db()
 
@@ -57,8 +57,8 @@ class Response(db.Model):
     """
 
     work_id = db.Column(db.Integer, autoincrement=True, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey(UserInContest.user_id))
-    contest_id = db.Column(db.Integer, db.ForeignKey(UserInContest.contest_id))
+    user_id = db.Column(db.Integer)
+    contest_id = db.Column(db.Integer)
     start_time = db.Column(db.DateTime, default=datetime.utcnow())
     finish_time = db.Column(db.DateTime, default=datetime.utcnow())
     time_extension = db.Column(db.Interval, default=timedelta(seconds=0))
@@ -95,31 +95,8 @@ class Response(db.Model):
             return self.get_status()
 
 
-class ResponseFiletypeEnum(enum.Enum):
-    """
-    Class enumerating all possible answer filetypes.
-
-    txt: text document
-    pdf: pdf file
-    jpg: jpg picture
-    doc: Microsoft Word format
-    docx: new Microsoft Word format
-    png: png picture
-    gif: gif picture
-    odt: OpenOffice format
-    """
-
-    txt = 'txt'
-    pdf = 'pdf'
-    jpg = 'jpg'
-    doc = 'doc'
-    docx = 'docx'
-    png = 'png'
-    gif = 'gif'
-    odt = 'odt'
-
-
-filetype_dict = {filetype.value: filetype for filetype in ResponseFiletypeEnum}
+db.ForeignKeyConstraint((Response.user_id, Response.contest_id),
+                        (UserInContest.user_id, UserInContest.contest_id), ondelete='cascade')
 
 
 class AnswerEnum(enum.Enum):
@@ -229,14 +206,13 @@ class PlainAnswerText(BaseAnswer):
     }
 
 
-def add_plain_answer_file(work_id, task_id, filetype, file):
+def add_plain_answer_file(work_id, task_id):
     answer = PlainAnswerFile(
         work_id=work_id,
-        task_id=task_id,
-        answer_file=file,
-        filetype=filetype
+        task_id=task_id
     )
     db.session.add(answer)
+    return answer
 
 
 class PlainAnswerFile(BaseAnswer):
@@ -249,19 +225,22 @@ class PlainAnswerFile(BaseAnswer):
     """
 
     answer_id = db.Column(db.Integer, db.ForeignKey(BaseAnswer.answer_id), primary_key=True)
-    answer_file = db.Column(db.LargeBinary)
-    filetype = db.Column(db.Enum(ResponseFiletypeEnum))
+    answer_content = db.Column(AnswerFile.as_mutable(Json))
+
+    @property
+    def filetype(self):
+        if self.answer_content is not None:
+            return self.answer_content.content_type
+
 
     __mapper_args__ = {
         'polymorphic_identity': AnswerEnum.PlainAnswerFile,
         'with_polymorphic': '*'
     }
 
-    def update(self, answer_new=None, filetype_new=None):
+    def update(self, answer_new=None):
         if answer_new is not None:
             self.answer_file = answer_new
-        if filetype_new is not None:
-            self.filetype = filetype_dict[filetype_new]
 
 
 def add_multiple_answer(work_id, task_id, values):

@@ -1,14 +1,15 @@
 from common import get_current_db, get_current_app
+from common.media_types import AnswerFile
 from .model_schemas.schemas import PlainAnswerTextSchema, RangeAnswerSchema
 from datetime import datetime, timedelta
-from common.errors import NotFound, RequestError, AlreadyExists
+from common.errors import NotFound, RequestError, AlreadyExists, PermissionDenied
 from common.util import db_get_one_or_none, db_exists, db_get_or_raise, db_get_list
 from contest.tasks.models import SimpleContest, RangeTask, MultipleChoiceTask, PlainTask, ContestHoldingTypeEnum, \
     UserInContest
 from .models import Response, PlainAnswerText, RangeAnswer, MultipleChoiceAnswer, PlainAnswerFile, BaseAnswer, \
     answer_dict, add_user_response, add_plain_answer_file, add_plain_answer_text, add_range_answer, \
     add_multiple_answer, ResponseStatusEnum
-from ..tasks.util import validate_file_size, is_task_in_contest
+from ..tasks.util import is_task_in_contest
 
 db = get_current_db()
 app = get_current_app()
@@ -47,6 +48,21 @@ class OlympiadError(RequestError):
 
     def get_msg(self) -> str:
         return self.message
+
+
+class RestrictionError(RequestError):
+    """
+    Restriction error
+    """
+
+    def __init__(self):
+        """
+        Create error object
+        """
+        super(RestrictionError, self).__init__(403)
+
+    def get_msg(self) -> str:
+        return "Your group is not allowed to do this"
 
 
 # Dicts
@@ -222,6 +238,33 @@ def check_user_show_results(contest_id, user_id):
         raise OlympiadError("Not allowed to see results")
 
 
+def check_user_role(user_id):
+    from user.models.auth import User, UserRoleEnum
+    user: User = db_get_one_or_none(User, 'id', user_id)
+    if user.role != UserRoleEnum.admin:
+        raise PermissionDenied(['admin'])
+
+
+def check_contest_restriction(user_id, contest_id, restriction_level):
+    from contest.tasks.models.olympiad import restriction_range, ContestGroupRestriction, Contest
+    from user.models.auth import User, UserRoleEnum, get_group_for_everyone
+    user: User = db_get_or_raise(User, 'id', user_id)
+    if user.role == UserRoleEnum.admin:
+        return
+    contest: Contest = db_get_or_raise(Contest, 'contest_id', contest_id)
+    everyone = get_group_for_everyone()
+    everyone_restriction = contest.group_restrictions.filter_by(group_id=everyone.id).first()
+    if everyone_restriction is None:
+        user_restrictions = [-1]
+    else:
+        user_restrictions = [restriction_range[everyone_restriction.restriction.value]]
+    group_names = [group.name for group in user.groups]
+    restrictions = contest.group_restrictions.filter(ContestGroupRestriction.group_name.in_(group_names)).all()
+    user_restrictions = user_restrictions + [restriction_range[elem.restriction.value] for elem in restrictions]
+    if restriction_range[restriction_level.value] > max(user_restrictions):
+        raise RestrictionError()
+
+
 # Other funcs
 
 
@@ -246,19 +289,17 @@ def finish_contest(user_work: Response):
     db.session.commit()
 
 
-def user_answer_post_file(answer_file, filetype, user_id, contest_id, task_id):
+def user_answer_post_file(user_id, contest_id, task_id):
     if not is_task_in_contest(task_id, contest_id):
         raise NotFound('contest_id, task_id', f'{contest_id}, {task_id}')
     user_work: Response = get_user_in_contest_work(user_id, contest_id)
     user_work.finish_time = datetime.utcnow()
     check_contest_duration(user_work)
     user_work.finish_time = datetime.utcnow()
-    validate_file_size(answer_file)
     user_answer = user_work.answers.filter(PlainAnswerFile.task_id == task_id).one_or_none()
     if user_answer is None:
-        add_plain_answer_file(user_work.work_id, task_id, filetype=filetype, file=answer_file)
-    else:
-        user_answer.update(answer_new=answer_file, filetype_new=filetype)
+        user_answer = add_plain_answer_file(user_work.work_id, task_id)
+    app.store_media('RESPONSE', user_answer, 'answer_content', AnswerFile)
     db.session.commit()
 
 
@@ -387,7 +428,7 @@ def get_all_user_responses(user_id):
             dict_['status'] = user_work.status
         except NotFound:
             dict_['mark'] = 0
-            dict_['status'] = 'InProgress'
+            dict_['status'] = ResponseStatusEnum.in_progress
         dict_['user_status'] = user_card.user_status
         contest = db_get_one_or_none(SimpleContest, 'contest_id', user_card.contest_id)
         dict_['contest_info'] = contest

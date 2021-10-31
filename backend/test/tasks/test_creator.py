@@ -1,3 +1,5 @@
+import io
+
 from . import *
 
 
@@ -241,9 +243,12 @@ def test_task_image(client, test_simple_contest, test_variant, create_plain_task
         f'/contest/{test_simple_contest[0].contest_id}/variant/{test_variant[0].variant_id}'
         f'/tasks/{create_plain_task[0].task_id}/image')
 
-    assert resp.status_code == 409
+    assert resp.status_code == 404
 
-    create_plain_task[0].image_of_task = b'Test'
+    from common.media_types import TaskImage
+    test_app.io_to_media('TASK', create_plain_task[0], 'image_of_task', io.BytesIO(test_image), TaskImage)
+    test_app.db.session.commit()
+
     resp = client.get(
         f'/contest/{test_simple_contest[0].contest_id}/variant/{test_variant[0].variant_id}'
         f'/tasks/{create_plain_task[0].task_id}/image')

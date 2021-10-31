@@ -1,6 +1,7 @@
 from marshmallow import Schema, fields
 
 from common import fields as common_fields
+from contest.tasks.model_schemas.contest import VariantSchema
 from contest.tasks.model_schemas.olympiad import SimpleContestSchema
 from contest.tasks.models.tasks import TaskTypeEnum
 from marshmallow_enum import EnumField
@@ -24,9 +25,18 @@ class EnrollRequestTaskParticipantSchema(Schema):
     location_id = fields.Int(required=False)
 
 
+class ChangeSupervisorRequestTaskParticipantSchema(Schema):
+    supervisor = common_fields.CommonName(required=False)
+
+
 class SimpleContestWithFlagResponseTaskParticipantSchema(Schema):
     contest = fields.Nested(SimpleContestSchema, required=False, dump_only=True)
     enrolled = fields.Boolean(required=True)
+
+
+class VariantWithCompletedTasksCountTaskParticipantSchema(Schema):
+    variant = fields.Nested(VariantSchema, required=False)
+    completed_task_count = fields.Int(required=True)
 
 
 # For filter query

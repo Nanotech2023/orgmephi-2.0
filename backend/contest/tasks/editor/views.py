@@ -574,16 +574,9 @@ def task_image_upload(id_contest, id_variant, id_task):
         '409':
           description: Wrong value
     """
-
-    image_of_task = request.data
-
-    validate_file_size(image_of_task)
-
     task = get_task_if_possible(id_contest, id_variant, id_task)
-    task.image_of_task = image_of_task
-
+    app.store_media('TASK', task, 'image_of_task', TaskImage)
     db.session.commit()
-
     return {}, 200
 
 

@@ -2,10 +2,10 @@ from datetime import timedelta
 
 from marshmallow import Schema, fields
 from marshmallow_enum import EnumField
-
 from common import fields as common_fields
 from contest.tasks.model_schemas.contest import VariantSchema
-from contest.tasks.model_schemas.olympiad import ContestSchema, BaseContestSchema, StageSchema
+from contest.tasks.model_schemas.olympiad import ContestSchema, BaseContestSchema, StageSchema, \
+    ContestGroupRestrictionEnum
 from contest.tasks.model_schemas.tasks import TaskSchema
 from contest.tasks.models import OlympiadSubjectEnum, StageConditionEnum, ContestHoldingTypeEnum, \
     UserStatusEnum, OlympiadLevelEnum, TaskAnswerTypeEnum
@@ -41,7 +41,6 @@ class BaseOlympiadIdResponseTaskCreatorSchema(Schema):
 
 
 class CreateSimpleContestRequestTaskCreatorSchema(Schema):
-    regulations = common_fields.Text(required=True)
     start_date = fields.DateTime(required=True)
     end_date = fields.DateTime(required=True)
     end_of_enroll_date = fields.DateTime(required=False)
@@ -52,6 +51,7 @@ class CreateSimpleContestRequestTaskCreatorSchema(Schema):
     previous_contest_id = fields.Int(required=False)
     previous_participation_condition = EnumField(UserStatusEnum, required=False, by_value=True)
     holding_type = EnumField(ContestHoldingTypeEnum, required=True, by_value=True)
+    regulations = common_fields.Text(required=False)
 
 
 class CreateCompositeContestRequestTaskCreatorSchema(Schema):
@@ -177,3 +177,14 @@ class TaskResponseTaskCreatorSchema(Schema):
 
 class TaskIdResponseTaskCreatorSchema(Schema):
     task_id = fields.Int(required=True)
+
+# Restrictions
+
+
+class ListElemContestGroupRestrictionAdminSchema(Schema):
+    group_name = common_fields.CommonName(required=True)
+    restriction = EnumField(ContestGroupRestrictionEnum, by_value=True, required=True)
+
+
+class ContestGroupRestrictionListAdminSchema(Schema):
+    restrictions = fields.Nested(ListElemContestGroupRestrictionAdminSchema, many=True, required=True)

@@ -300,3 +300,58 @@ def generate_card():
     if len(unfilled) > 0:
         raise InsufficientData('user', str(unfilled))
     return send_pdf('participant_card.html', u=user)
+
+
+@module.route('/photo', methods=['PUT'])
+def post_photo():
+    """
+    Edit photo
+    ---
+    put:
+      requestBody:
+        required: true
+        content:
+          image/*:
+            schema:
+              type: string
+              format: binary
+      security:
+        - JWTAccessToken: [ ]
+        - CSRFAccessToken: [ ]
+      responses:
+        '204':
+          description: OK
+        '409':
+          description: File is too big
+
+    """
+    from common.media_types import ProfileImage
+    user = db_get_or_raise(User, 'id', jwt_get_id())
+    app.store_media('PROFILE', user.user_info, 'photo', ProfileImage)
+    db.session.commit()
+    return {}, 204
+
+
+@module.route('/photo', methods=['GET'])
+def get_photo():
+    """
+    Get photo
+    ---
+    get:
+      security:
+        - JWTAccessToken: [ ]
+      responses:
+        '200':
+          description: OK
+          content:
+            image/*:
+              schema:
+                type: string
+                format: binary
+        '404':
+          description: User not found
+        '409':
+          description: Photo not attached
+    """
+    user = db_get_or_raise(User, 'id', jwt_get_id())
+    return app.send_media(user.user_info.photo)

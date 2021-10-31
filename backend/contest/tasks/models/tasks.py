@@ -1,6 +1,7 @@
 import enum
 
 from common import get_current_db
+from common.media_types import TaskImage, Json
 
 db = get_current_db()
 
@@ -31,7 +32,7 @@ class Task(db.Model):
     task_id = db.Column(db.Integer, autoincrement=True, primary_key=True)
     num_of_task = db.Column(db.Integer, nullable=False)
 
-    image_of_task = db.Column(db.LargeBinary, nullable=True)
+    image_of_task = db.Column(TaskImage.as_mutable(Json))
 
     show_answer_after_contest = db.Column(db.Boolean, nullable=True)
     task_points = db.Column(db.Integer, nullable=True)

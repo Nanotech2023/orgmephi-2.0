@@ -8,11 +8,18 @@ def _catch_request_error(function: Callable) -> Callable:
 
     @wraps(function)
     def wrapper(*args, **kwargs):
+        from sqlalchemy_media.exceptions import AnalyzeError
         try:
             return function(*args, **kwargs)
         except RequestError as err:
             return err.to_response()
         except ValidationError as err:
+            return make_response({
+                "class": err.__class__.__name__,
+                "status": 400,
+                "title": str(err)
+            }, 400)
+        except AnalyzeError as err:
             return make_response({
                 "class": err.__class__.__name__,
                 "status": 400,
@@ -248,3 +255,19 @@ class CaptchaError(RequestError):
 
     def get_msg(self) -> str:
         return 'Captcha is wrong'
+
+
+class MediaError(RequestError):
+    """
+    Invalid media attachment
+    """
+    def __init__(self, msg):
+        """
+        Create error object
+        :param msg: Error message
+        """
+        super(MediaError, self).__init__(400)
+        self._msg = msg
+
+    def get_msg(self) -> str:
+        return self._msg

@@ -1,5 +1,6 @@
 import enum
 from common import get_current_db, get_current_app
+from common.media_types import ProfileImage, Json
 from .auth import User
 from .location import Location
 from user.util import get_unfilled
@@ -44,6 +45,7 @@ class UserInfo(db.Model):
     date_of_birth = db.Column(db.Date)
     place_of_birth = db.Column(db.String)
     gender = db.Column(db.Enum(GenderEnum))
+    photo = db.Column(ProfileImage.as_mutable(Json))
 
     user = db.relationship('User', back_populates='user_info', lazy='select')
     dwelling = db.relationship('Location', lazy='select', uselist=False, single_parent=True,

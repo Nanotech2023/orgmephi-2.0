@@ -1,3 +1,6 @@
+import io
+
+from contest.tasks.models import ContestHoldingTypeEnum
 from . import *
 
 
@@ -84,7 +87,7 @@ def test_get_variant_self(client, test_simple_contest_with_users,
                           test_variant):
     resp = client.get(f'/contest/{test_simple_contest_with_users[0].contest_id}/variant/self')
     assert resp.status_code == 200
-    assert test_simple_contest_with_users[0].users.all()[0].variant_id == resp.json['variant_id']
+    assert test_simple_contest_with_users[0].users.all()[0].variant_id == resp.json['variant']['variant_id']
 
     resp = client.get(f'/contest/{test_simple_contest_with_users[1].contest_id}/variant/self')
     assert resp.status_code == 404
@@ -109,6 +112,17 @@ def test_change_user_location_in_contest(client, test_simple_contest_with_users,
                            'location_id': test_olympiad_locations[0].location_id
                        })
     assert resp.status_code == 200
+
+
+def test_change_user_supervisor_in_contest(client, test_simple_contest_with_users, test_olympiad_locations,
+                                           test_user_for_student_contest):
+    test_simple_contest_with_users[0].holding_type = ContestHoldingTypeEnum.OfflineContest
+    resp = client.post(f'/contest/{test_simple_contest_with_users[0].contest_id}/change_supervisor',
+                       json={
+                           'supervisor': "Username of supervisor"
+                       })
+    assert resp.status_code == 200
+    assert test_simple_contest_with_users[0].users[0].supervisor == "Username of supervisor"
 
 
 def test_change_user_location_in_contest_ended(client, test_simple_contest_with_users_ended, test_olympiad_locations,
@@ -142,9 +156,11 @@ def test_get_all_tasks_self_completed(client, test_simple_contest_with_users_not
 def test_get_task_image_self(client, test_simple_contest_with_users, test_variant, create_plain_task):
     resp = client.get(
         f'/contest/{test_simple_contest_with_users[0].contest_id}/tasks/{test_variant[0].tasks[0].task_id}/image/self')
-    assert resp.status_code == 409
+    assert resp.status_code == 404
 
-    test_variant[0].tasks[0].image_of_task = b'Test'
+    from common.media_types import TaskImage
+    test_app.io_to_media('TASK', test_variant[0].tasks[0], 'image_of_task', io.BytesIO(test_image), TaskImage)
+    test_app.db.session.commit()
 
     resp = client.get(
         f'/contest/{test_simple_contest_with_users[0].contest_id}/tasks/{test_variant[0].tasks[0].task_id}/image/self')

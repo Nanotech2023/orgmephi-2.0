@@ -52,8 +52,11 @@ def add_user_to_contest(id_contest):
     show_results_to_user = values['show_results_to_user']
     location_id = values.get('location_id', None)
     check_condition = values.get('check_condition', False)
-
     current_contest = get_contest_if_possible(id_contest)
+
+    supervisor = values.get('supervisor', None)
+    if current_contest.holding_type == ContestHoldingTypeEnum.OnLineContest and supervisor is not None:
+        raise InsufficientData("supervisor", "can't be added to online contest")
 
     # Can't add without location
     if location_id is not None:
@@ -82,6 +85,7 @@ def add_user_to_contest(id_contest):
 
         current_contest.users.append(UserInContest(user_id=user_id,
                                                    show_results_to_user=show_results_to_user,
+                                                   supervisor=supervisor,
                                                    location_id=location_id,
                                                    variant_id=generate_variant(id_contest, user_id),
                                                    user_status=UserStatusEnum.Participant))
@@ -130,8 +134,10 @@ def change_user_to_contest(id_contest):
         db_get_or_raise(OlympiadLocation, "location_id", location_id)
 
     current_contest = get_contest_if_possible(id_contest)
-    current_base_contest = get_base_contest(current_contest)
-    target_classes = current_base_contest.target_classes
+
+    supervisor = values.get('supervisor', None)
+    if current_contest.holding_type == ContestHoldingTypeEnum.OnLineContest and supervisor is not None:
+        raise InsufficientData("supervisor", "can't be added to online contest")
 
     for user_id in user_ids:
         current_user = current_contest.users.filter_by(**{"user_id": str(user_id)}).one_or_none()

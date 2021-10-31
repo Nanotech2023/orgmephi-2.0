@@ -229,7 +229,7 @@ def test_variant_patch(client, test_simple_contest, test_variant):
 def test_task_image_upload(client, test_simple_contest, test_variant, create_plain_task):
     resp = client.post(f'/contest/{test_simple_contest[0].contest_id}/variant'
                        f'/{test_variant[0].variant_id}/task/{create_plain_task[0].task_id}/upload_image',
-                       data=b'Test')
+                       data=test_image)
     assert resp.status_code == 200
 
 
