@@ -428,7 +428,7 @@ def get_all_user_responses(user_id):
             dict_['status'] = user_work.status
         except NotFound:
             dict_['mark'] = 0
-            dict_['status'] = 'InProgress'
+            dict_['status'] = ResponseStatusEnum.in_progress
         dict_['user_status'] = user_card.user_status
         contest = db_get_one_or_none(SimpleContest, 'contest_id', user_card.contest_id)
         dict_['contest_info'] = contest
