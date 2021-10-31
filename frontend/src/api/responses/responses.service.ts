@@ -17,6 +17,7 @@ import { Observable } from 'rxjs'
 import { CustomHttpParameterCodec } from '@api/encoder'
 import { BASE_PATH } from '@api/variables'
 import { Configuration } from '@api/configuration'
+import { environment } from '@environments/environment'
 import {
     AllUserAnswersResponse,
     AllUserMarksResponse,
@@ -30,12 +31,9 @@ import {
     UserResponseStatusResponse,
     UserTimeResponseRequest
 } from '@api/responses/model'
-import { environment } from '@environments/environment'
 
 
-@Injectable( {
-    providedIn: 'root'
-} )
+@Injectable()
 export class ResponsesService
 {
     protected basePath = environment.apiUrl + '/contest'
@@ -201,6 +199,7 @@ export class ResponsesService
      * @param body
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
      * @param reportProgress flag to report request and response progress.
+     * @deprecated
      */
     public responsesCreatorContestContestIdTaskTaskIdUserUserIdFiletypePost( contestId: number, taskId: number, userId: number, filetype: string, body?: Blob, observe?: 'body', reportProgress?: boolean, options?: { httpHeaderAccept?: undefined, context?: HttpContext } ): Observable<any>;
     public responsesCreatorContestContestIdTaskTaskIdUserUserIdFiletypePost( contestId: number, taskId: number, userId: number, filetype: string, body?: Blob, observe?: 'response', reportProgress?: boolean, options?: { httpHeaderAccept?: undefined, context?: HttpContext } ): Observable<HttpResponse<any>>;
@@ -632,10 +631,10 @@ export class ResponsesService
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
      * @param reportProgress flag to report request and response progress.
      */
-    public responsesCreatorContestContestIdTaskTaskIdUserUserIdPlainFileGet( contestId: number, taskId: number, userId: number, observe?: 'body', reportProgress?: boolean, options?: { httpHeaderAccept?: 'application/msword' | 'application/pdf' | 'application/vnd.oasis.opendocument.text' | 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' | 'image/gif' | 'image/jpeg' | 'image/png' | 'text/plain', context?: HttpContext } ): Observable<Blob>;
-    public responsesCreatorContestContestIdTaskTaskIdUserUserIdPlainFileGet( contestId: number, taskId: number, userId: number, observe?: 'response', reportProgress?: boolean, options?: { httpHeaderAccept?: 'application/msword' | 'application/pdf' | 'application/vnd.oasis.opendocument.text' | 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' | 'image/gif' | 'image/jpeg' | 'image/png' | 'text/plain', context?: HttpContext } ): Observable<HttpResponse<Blob>>;
-    public responsesCreatorContestContestIdTaskTaskIdUserUserIdPlainFileGet( contestId: number, taskId: number, userId: number, observe?: 'events', reportProgress?: boolean, options?: { httpHeaderAccept?: 'application/msword' | 'application/pdf' | 'application/vnd.oasis.opendocument.text' | 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' | 'image/gif' | 'image/jpeg' | 'image/png' | 'text/plain', context?: HttpContext } ): Observable<HttpEvent<Blob>>;
-    public responsesCreatorContestContestIdTaskTaskIdUserUserIdPlainFileGet( contestId: number, taskId: number, userId: number, observe: any = 'body', reportProgress: boolean = false, options?: { httpHeaderAccept?: 'application/msword' | 'application/pdf' | 'application/vnd.oasis.opendocument.text' | 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' | 'image/gif' | 'image/jpeg' | 'image/png' | 'text/plain', context?: HttpContext } ): Observable<any>
+    public responsesCreatorContestContestIdTaskTaskIdUserUserIdPlainFileGet( contestId: number, taskId: number, userId: number, observe?: 'body', reportProgress?: boolean, options?: { httpHeaderAccept?: 'application/msword' | 'application/pdf' | 'application/zip' | 'image/gif' | 'image/jpeg' | 'image/png' | 'text/plain', context?: HttpContext } ): Observable<Blob>;
+    public responsesCreatorContestContestIdTaskTaskIdUserUserIdPlainFileGet( contestId: number, taskId: number, userId: number, observe?: 'response', reportProgress?: boolean, options?: { httpHeaderAccept?: 'application/msword' | 'application/pdf' | 'application/zip' | 'image/gif' | 'image/jpeg' | 'image/png' | 'text/plain', context?: HttpContext } ): Observable<HttpResponse<Blob>>;
+    public responsesCreatorContestContestIdTaskTaskIdUserUserIdPlainFileGet( contestId: number, taskId: number, userId: number, observe?: 'events', reportProgress?: boolean, options?: { httpHeaderAccept?: 'application/msword' | 'application/pdf' | 'application/zip' | 'image/gif' | 'image/jpeg' | 'image/png' | 'text/plain', context?: HttpContext } ): Observable<HttpEvent<Blob>>;
+    public responsesCreatorContestContestIdTaskTaskIdUserUserIdPlainFileGet( contestId: number, taskId: number, userId: number, observe: any = 'body', reportProgress: boolean = false, options?: { httpHeaderAccept?: 'application/msword' | 'application/pdf' | 'application/zip' | 'image/gif' | 'image/jpeg' | 'image/png' | 'text/plain', context?: HttpContext } ): Observable<any>
     {
         if ( contestId === null || contestId === undefined )
         {
@@ -666,8 +665,7 @@ export class ResponsesService
             const httpHeaderAccepts: string[] = [
                 'application/msword',
                 'application/pdf',
-                'application/vnd.oasis.opendocument.text',
-                'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+                'application/zip',
                 'image/gif',
                 'image/jpeg',
                 'image/png',
@@ -691,6 +689,102 @@ export class ResponsesService
             {
                 context: localVarHttpContext,
                 responseType: "blob",
+                withCredentials: this.configuration.withCredentials,
+                headers: localVarHeaders,
+                observe: observe,
+                reportProgress: reportProgress
+            }
+        )
+    }
+
+    /**
+     * @param contestId Id of the contest
+     * @param taskId Id of the task
+     * @param userId Id of the user
+     * @param body
+     * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
+     * @param reportProgress flag to report request and response progress.
+     */
+    public responsesCreatorContestContestIdTaskTaskIdUserUserIdPlainFilePost( contestId: number, taskId: number, userId: number, body?: Blob, observe?: 'body', reportProgress?: boolean, options?: { httpHeaderAccept?: undefined, context?: HttpContext } ): Observable<any>;
+    public responsesCreatorContestContestIdTaskTaskIdUserUserIdPlainFilePost( contestId: number, taskId: number, userId: number, body?: Blob, observe?: 'response', reportProgress?: boolean, options?: { httpHeaderAccept?: undefined, context?: HttpContext } ): Observable<HttpResponse<any>>;
+    public responsesCreatorContestContestIdTaskTaskIdUserUserIdPlainFilePost( contestId: number, taskId: number, userId: number, body?: Blob, observe?: 'events', reportProgress?: boolean, options?: { httpHeaderAccept?: undefined, context?: HttpContext } ): Observable<HttpEvent<any>>;
+    public responsesCreatorContestContestIdTaskTaskIdUserUserIdPlainFilePost( contestId: number, taskId: number, userId: number, body?: Blob, observe: any = 'body', reportProgress: boolean = false, options?: { httpHeaderAccept?: undefined, context?: HttpContext } ): Observable<any>
+    {
+        if ( contestId === null || contestId === undefined )
+        {
+            throw new Error( 'Required parameter contestId was null or undefined when calling responsesCreatorContestContestIdTaskTaskIdUserUserIdPlainFilePost.' )
+        }
+        if ( taskId === null || taskId === undefined )
+        {
+            throw new Error( 'Required parameter taskId was null or undefined when calling responsesCreatorContestContestIdTaskTaskIdUserUserIdPlainFilePost.' )
+        }
+        if ( userId === null || userId === undefined )
+        {
+            throw new Error( 'Required parameter userId was null or undefined when calling responsesCreatorContestContestIdTaskTaskIdUserUserIdPlainFilePost.' )
+        }
+
+        let localVarHeaders = this.defaultHeaders
+
+        let localVarCredential: string | undefined
+        // authentication (CSRFAccessToken) required
+        localVarCredential = this.configuration.lookupCredential( 'CSRFAccessToken' )
+        if ( localVarCredential )
+        {
+            localVarHeaders = localVarHeaders.set( 'X-CSRF-TOKEN', localVarCredential )
+        }
+
+        // authentication (JWTAccessToken) required
+        localVarCredential = this.configuration.lookupCredential( 'JWTAccessToken' )
+        if ( localVarCredential )
+        {
+        }
+
+        let localVarHttpHeaderAcceptSelected: string | undefined = options && options.httpHeaderAccept
+        if ( localVarHttpHeaderAcceptSelected === undefined )
+        {
+            // to determine the Accept header
+            const httpHeaderAccepts: string[] = []
+            localVarHttpHeaderAcceptSelected = this.configuration.selectHeaderAccept( httpHeaderAccepts )
+        }
+        if ( localVarHttpHeaderAcceptSelected !== undefined )
+        {
+            localVarHeaders = localVarHeaders.set( 'Accept', localVarHttpHeaderAcceptSelected )
+        }
+
+        let localVarHttpContext: HttpContext | undefined = options && options.context
+        if ( localVarHttpContext === undefined )
+        {
+            localVarHttpContext = new HttpContext()
+        }
+
+
+        // to determine the Content-Type header
+        const consumes: string[] = [
+            'application/msword',
+            'application/pdf',
+            'application/zip',
+            'image/gif',
+            'image/jpeg',
+            'image/png',
+            'text/plain'
+        ]
+        const httpContentTypeSelected: string | undefined = this.configuration.selectHeaderContentType( consumes )
+        if ( httpContentTypeSelected !== undefined )
+        {
+            localVarHeaders = localVarHeaders.set( 'Content-Type', httpContentTypeSelected )
+        }
+
+        let responseType_: 'text' | 'json' = 'json'
+        if ( localVarHttpHeaderAcceptSelected && localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+        {
+            responseType_ = 'text'
+        }
+
+        return this.httpClient.post<any>( `${ this.configuration.basePath }/responses/creator/contest/${ encodeURIComponent( String( contestId ) ) }/task/${ encodeURIComponent( String( taskId ) ) }/user/${ encodeURIComponent( String( userId ) ) }/plain/file`,
+            body,
+            {
+                context: localVarHttpContext,
+                responseType: <any> responseType_,
                 withCredentials: this.configuration.withCredentials,
                 headers: localVarHeaders,
                 observe: observe,
@@ -1637,6 +1731,7 @@ export class ResponsesService
      * @param body
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
      * @param reportProgress flag to report request and response progress.
+     * @deprecated
      */
     public responsesParticipantContestContestIdTaskTaskIdUserSelfFiletypePost( contestId: number, taskId: number, filetype: string, body?: Blob, observe?: 'body', reportProgress?: boolean, options?: { httpHeaderAccept?: undefined, context?: HttpContext } ): Observable<any>;
     public responsesParticipantContestContestIdTaskTaskIdUserSelfFiletypePost( contestId: number, taskId: number, filetype: string, body?: Blob, observe?: 'response', reportProgress?: boolean, options?: { httpHeaderAccept?: undefined, context?: HttpContext } ): Observable<HttpResponse<any>>;
@@ -1954,10 +2049,10 @@ export class ResponsesService
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
      * @param reportProgress flag to report request and response progress.
      */
-    public responsesParticipantContestContestIdTaskTaskIdUserSelfPlainFileGet( contestId: number, taskId: number, observe?: 'body', reportProgress?: boolean, options?: { httpHeaderAccept?: 'application/msword' | 'application/pdf' | 'application/vnd.oasis.opendocument.text' | 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' | 'image/gif' | 'image/jpeg' | 'image/png' | 'text/plain', context?: HttpContext } ): Observable<Blob>;
-    public responsesParticipantContestContestIdTaskTaskIdUserSelfPlainFileGet( contestId: number, taskId: number, observe?: 'response', reportProgress?: boolean, options?: { httpHeaderAccept?: 'application/msword' | 'application/pdf' | 'application/vnd.oasis.opendocument.text' | 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' | 'image/gif' | 'image/jpeg' | 'image/png' | 'text/plain', context?: HttpContext } ): Observable<HttpResponse<Blob>>;
-    public responsesParticipantContestContestIdTaskTaskIdUserSelfPlainFileGet( contestId: number, taskId: number, observe?: 'events', reportProgress?: boolean, options?: { httpHeaderAccept?: 'application/msword' | 'application/pdf' | 'application/vnd.oasis.opendocument.text' | 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' | 'image/gif' | 'image/jpeg' | 'image/png' | 'text/plain', context?: HttpContext } ): Observable<HttpEvent<Blob>>;
-    public responsesParticipantContestContestIdTaskTaskIdUserSelfPlainFileGet( contestId: number, taskId: number, observe: any = 'body', reportProgress: boolean = false, options?: { httpHeaderAccept?: 'application/msword' | 'application/pdf' | 'application/vnd.oasis.opendocument.text' | 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' | 'image/gif' | 'image/jpeg' | 'image/png' | 'text/plain', context?: HttpContext } ): Observable<any>
+    public responsesParticipantContestContestIdTaskTaskIdUserSelfPlainFileGet( contestId: number, taskId: number, observe?: 'body', reportProgress?: boolean, options?: { httpHeaderAccept?: 'application/msword' | 'application/pdf' | 'application/zip' | 'image/gif' | 'image/jpeg' | 'image/png' | 'text/plain', context?: HttpContext } ): Observable<Blob>;
+    public responsesParticipantContestContestIdTaskTaskIdUserSelfPlainFileGet( contestId: number, taskId: number, observe?: 'response', reportProgress?: boolean, options?: { httpHeaderAccept?: 'application/msword' | 'application/pdf' | 'application/zip' | 'image/gif' | 'image/jpeg' | 'image/png' | 'text/plain', context?: HttpContext } ): Observable<HttpResponse<Blob>>;
+    public responsesParticipantContestContestIdTaskTaskIdUserSelfPlainFileGet( contestId: number, taskId: number, observe?: 'events', reportProgress?: boolean, options?: { httpHeaderAccept?: 'application/msword' | 'application/pdf' | 'application/zip' | 'image/gif' | 'image/jpeg' | 'image/png' | 'text/plain', context?: HttpContext } ): Observable<HttpEvent<Blob>>;
+    public responsesParticipantContestContestIdTaskTaskIdUserSelfPlainFileGet( contestId: number, taskId: number, observe: any = 'body', reportProgress: boolean = false, options?: { httpHeaderAccept?: 'application/msword' | 'application/pdf' | 'application/zip' | 'image/gif' | 'image/jpeg' | 'image/png' | 'text/plain', context?: HttpContext } ): Observable<any>
     {
         if ( contestId === null || contestId === undefined )
         {
@@ -1984,8 +2079,7 @@ export class ResponsesService
             const httpHeaderAccepts: string[] = [
                 'application/msword',
                 'application/pdf',
-                'application/vnd.oasis.opendocument.text',
-                'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+                'application/zip',
                 'image/gif',
                 'image/jpeg',
                 'image/png',
@@ -2009,6 +2103,97 @@ export class ResponsesService
             {
                 context: localVarHttpContext,
                 responseType: "blob",
+                withCredentials: this.configuration.withCredentials,
+                headers: localVarHeaders,
+                observe: observe,
+                reportProgress: reportProgress
+            }
+        )
+    }
+
+    /**
+     * @param contestId Id of the contest
+     * @param taskId Id of the task
+     * @param body
+     * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
+     * @param reportProgress flag to report request and response progress.
+     */
+    public responsesParticipantContestContestIdTaskTaskIdUserSelfPlainFilePost( contestId: number, taskId: number, body?: Blob, observe?: 'body', reportProgress?: boolean, options?: { httpHeaderAccept?: undefined, context?: HttpContext } ): Observable<any>;
+    public responsesParticipantContestContestIdTaskTaskIdUserSelfPlainFilePost( contestId: number, taskId: number, body?: Blob, observe?: 'response', reportProgress?: boolean, options?: { httpHeaderAccept?: undefined, context?: HttpContext } ): Observable<HttpResponse<any>>;
+    public responsesParticipantContestContestIdTaskTaskIdUserSelfPlainFilePost( contestId: number, taskId: number, body?: Blob, observe?: 'events', reportProgress?: boolean, options?: { httpHeaderAccept?: undefined, context?: HttpContext } ): Observable<HttpEvent<any>>;
+    public responsesParticipantContestContestIdTaskTaskIdUserSelfPlainFilePost( contestId: number, taskId: number, body?: Blob, observe: any = 'body', reportProgress: boolean = false, options?: { httpHeaderAccept?: undefined, context?: HttpContext } ): Observable<any>
+    {
+        if ( contestId === null || contestId === undefined )
+        {
+            throw new Error( 'Required parameter contestId was null or undefined when calling responsesParticipantContestContestIdTaskTaskIdUserSelfPlainFilePost.' )
+        }
+        if ( taskId === null || taskId === undefined )
+        {
+            throw new Error( 'Required parameter taskId was null or undefined when calling responsesParticipantContestContestIdTaskTaskIdUserSelfPlainFilePost.' )
+        }
+
+        let localVarHeaders = this.defaultHeaders
+
+        let localVarCredential: string | undefined
+        // authentication (CSRFAccessToken) required
+        localVarCredential = this.configuration.lookupCredential( 'CSRFAccessToken' )
+        if ( localVarCredential )
+        {
+            localVarHeaders = localVarHeaders.set( 'X-CSRF-TOKEN', localVarCredential )
+        }
+
+        // authentication (JWTAccessToken) required
+        localVarCredential = this.configuration.lookupCredential( 'JWTAccessToken' )
+        if ( localVarCredential )
+        {
+        }
+
+        let localVarHttpHeaderAcceptSelected: string | undefined = options && options.httpHeaderAccept
+        if ( localVarHttpHeaderAcceptSelected === undefined )
+        {
+            // to determine the Accept header
+            const httpHeaderAccepts: string[] = []
+            localVarHttpHeaderAcceptSelected = this.configuration.selectHeaderAccept( httpHeaderAccepts )
+        }
+        if ( localVarHttpHeaderAcceptSelected !== undefined )
+        {
+            localVarHeaders = localVarHeaders.set( 'Accept', localVarHttpHeaderAcceptSelected )
+        }
+
+        let localVarHttpContext: HttpContext | undefined = options && options.context
+        if ( localVarHttpContext === undefined )
+        {
+            localVarHttpContext = new HttpContext()
+        }
+
+
+        // to determine the Content-Type header
+        const consumes: string[] = [
+            'application/msword',
+            'application/pdf',
+            'application/zip',
+            'image/gif',
+            'image/jpeg',
+            'image/png',
+            'text/plain'
+        ]
+        const httpContentTypeSelected: string | undefined = this.configuration.selectHeaderContentType( consumes )
+        if ( httpContentTypeSelected !== undefined )
+        {
+            localVarHeaders = localVarHeaders.set( 'Content-Type', httpContentTypeSelected )
+        }
+
+        let responseType_: 'text' | 'json' = 'json'
+        if ( localVarHttpHeaderAcceptSelected && localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+        {
+            responseType_ = 'text'
+        }
+
+        return this.httpClient.post<any>( `${ this.configuration.basePath }/responses/participant/contest/${ encodeURIComponent( String( contestId ) ) }/task/${ encodeURIComponent( String( taskId ) ) }/user/self/plain/file`,
+            body,
+            {
+                context: localVarHttpContext,
+                responseType: <any> responseType_,
                 withCredentials: this.configuration.withCredentials,
                 headers: localVarHeaders,
                 observe: observe,
@@ -2655,5 +2840,4 @@ export class ResponsesService
             }
         )
     }
-
 }

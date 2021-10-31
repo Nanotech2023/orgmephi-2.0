@@ -32,7 +32,8 @@
                                         d="M9 0.25C7.26942 0.25 5.57769 0.763179 4.13876 1.72464C2.69983 2.6861 1.57832 4.05267 0.916058 5.65152C0.253791 7.25037 0.080512 9.00971 0.418133 10.707C0.755753 12.4044 1.58911 13.9635 2.81282 15.1872C4.03653 16.4109 5.59563 17.2442 7.29296 17.5819C8.9903 17.9195 10.7496 17.7462 12.3485 17.0839C13.9473 16.4217 15.3139 15.3002 16.2754 13.8612C17.2368 12.4223 17.75 10.7306 17.75 9C17.75 6.67936 16.8281 4.45376 15.1872 2.81282C13.5462 1.17187 11.3206 0.25 9 0.25ZM7.75 12.4942L4.625 9.36925L5.61913 8.375L7.75 10.5058L12.3813 5.875L13.3786 6.86619L7.75 12.4942Z"
                                         fill="#171717"/>
                                 </svg>
-                                <span>Вы ответили на {{ answerCount }} из {{ viewModel.tasks.length }} заданий</span>
+                                <span>Вы ответили на {{ viewModel.variant.completed_task_count }}
+                                    из {{ viewModel.tasks.length }} заданий</span>
                             </li>
                         </ul>
                     </div>
@@ -42,8 +43,8 @@
             <div class="col-md-8">
                 <div class="tasks_list">
                     <ng-container *ngFor="let task of viewModel.tasks">
-                        <app-contest-assignment-item [contestId]="contestId"
-                                                     [task]="task" (answered)="onAnswered($event, viewModel.tasks.length)"></app-contest-assignment-item>
+                        <app-contest-assignment-item [task]="task" [contestId]="contestId">
+                        </app-contest-assignment-item>
                     </ng-container>
                 </div>
             </div>

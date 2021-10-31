@@ -1,10 +1,10 @@
-import { Component, EventEmitter, Input, OnDestroy, OnInit, Output } from '@angular/core'
+import { Component, Input, OnDestroy, OnInit } from '@angular/core'
 import { TaskForUserResponseTaskParticipant } from '@api/tasks/model'
 import { ResponsesService } from '@api/responses/responses.service'
 import { TasksService } from '@api/tasks/tasks.service'
-import { Observable, Subscription } from 'rxjs'
+import { Subscription } from 'rxjs'
 import { DomSanitizer, SafeUrl } from '@angular/platform-browser'
-import { Answer, PlainAnswerRequest, PlainAnswerText } from '@api/responses/model'
+import { PlainAnswerRequest, PlainAnswerText } from '@api/responses/model'
 
 
 @Component( {
@@ -18,7 +18,6 @@ export class ContestAssignmentItemComponent implements OnInit, OnDestroy
     @Input() contestId!: number | null
     imageUrl!: SafeUrl
     private subscription!: Subscription
-    @Output() answered: EventEmitter<number> = new EventEmitter<number>()
     answer!: string
 
     constructor( private tasksService: TasksService, private responsesService: ResponsesService, private sanitizer: DomSanitizer )
@@ -49,7 +48,6 @@ export class ContestAssignmentItemComponent implements OnInit, OnDestroy
         {
             let plainAnswerRequest: PlainAnswerRequest = { answer_text: this.answer }
             this.responsesService.responsesParticipantContestContestIdTaskTaskIdUserSelfPlainPost( this.contestId as number, this.task.task_id, plainAnswerRequest ).subscribe()
-            this.answered.emit( 1 )
         }
     }
 }

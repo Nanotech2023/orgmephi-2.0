@@ -13,6 +13,7 @@
 
 export interface UserInContest { 
     show_results_to_user?: boolean | null;
+    supervisor?: string | null;
     readonly user_id: number;
     user_status: UserInContest.UserStatusEnum;
     readonly variant_id?: number | null;

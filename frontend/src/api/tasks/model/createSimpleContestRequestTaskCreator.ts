@@ -18,7 +18,7 @@ export interface CreateSimpleContestRequestTaskCreator {
     holding_type: CreateSimpleContestRequestTaskCreator.HoldingTypeEnum;
     previous_contest_id?: number;
     previous_participation_condition?: CreateSimpleContestRequestTaskCreator.PreviousParticipationConditionEnum;
-    regulations: string;
+    regulations?: string;
     result_publication_date?: string;
     stage_id?: number;
     start_date: string;

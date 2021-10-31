@@ -1,6 +1,12 @@
 import { Injectable } from '@angular/core'
 import { ComponentStore, tapResponse } from '@ngrx/component-store'
-import { AllTaskResponseTaskParticipant, Contest, TaskForUserResponseTaskParticipant, Variant } from '@api/tasks/model'
+import {
+    AllTaskResponseTaskParticipant,
+    Contest,
+    TaskForUserResponseTaskParticipant,
+    Variant,
+    VariantWithCompletedTasksCountTaskParticipant
+} from '@api/tasks/model'
 import { catchError, switchMap, tap } from 'rxjs/operators'
 import { EMPTY, Observable } from 'rxjs'
 import { CallState, getError, LoadingState } from '@/shared/callState'
@@ -14,7 +20,7 @@ export interface ContestAssignmentState
 {
     callState: CallState,
     contest?: Contest
-    variant?: Variant
+    variant?: VariantWithCompletedTasksCountTaskParticipant
     tasks: Array<TaskForUserResponseTaskParticipant>
     time?: number,
     status?: UserResponseStatusResponse.StatusEnum
@@ -43,12 +49,12 @@ export class ContestAssignmentStore extends ComponentStore<ContestAssignmentStat
     private readonly loading$: Observable<boolean> = this.select( state => state.callState === LoadingState.LOADING )
     private readonly error$: Observable<string | null> = this.select( state => getError( state.callState ) )
     private readonly contest$: Observable<Contest | undefined> = this.select( state => state.contest )
-    private readonly variant$: Observable<Variant | undefined> = this.select( state => state.variant )
+    private readonly variant$: Observable<VariantWithCompletedTasksCountTaskParticipant | undefined> = this.select( state => state.variant )
     private readonly tasks$: Observable<Array<TaskForUserResponseTaskParticipant>> = this.select( state => state.tasks )
     private readonly time$: Observable<number | undefined> = this.select( state => state.time )
     private readonly status$: Observable<UserResponseStatusResponse.StatusEnum | undefined> = this.select( state => state.status )
 
-    readonly viewModel$: Observable<{ loading: boolean; error: string | null, contest: Contest | undefined, variant: Variant | undefined, tasks: Array<TaskForUserResponseTaskParticipant>, time: number | undefined, status: UserResponseStatusResponse.StatusEnum | undefined }> = this.select(
+    readonly viewModel$: Observable<{ loading: boolean; error: string | null, contest: Contest | undefined, variant: VariantWithCompletedTasksCountTaskParticipant | undefined, tasks: Array<TaskForUserResponseTaskParticipant>, time: number | undefined, status: UserResponseStatusResponse.StatusEnum | undefined }> = this.select(
         this.loading$,
         this.error$,
         this.contest$,
@@ -93,7 +99,7 @@ export class ContestAssignmentStore extends ComponentStore<ContestAssignmentStat
             contest: contest
         } ) )
 
-    readonly setVariant = this.updater( ( state: ContestAssignmentState, variant: Variant ) =>
+    readonly setVariant = this.updater( ( state: ContestAssignmentState, variant: VariantWithCompletedTasksCountTaskParticipant ) =>
         ( {
             ...state,
             variant: variant
@@ -150,7 +156,7 @@ export class ContestAssignmentStore extends ComponentStore<ContestAssignmentStat
         return contestId$.pipe( switchMap( ( contest: number ) =>
                 this.tasksService.tasksParticipantContestIdContestVariantSelfGet( contest ).pipe(
                     tapResponse(
-                        ( response: Variant ) => this.setVariant( response ),
+                        ( response: VariantWithCompletedTasksCountTaskParticipant ) => this.setVariant( response ),
                         ( error: string ) => this.updateError( error )
                     )
                 )

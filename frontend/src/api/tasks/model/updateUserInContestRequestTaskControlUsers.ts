@@ -15,6 +15,7 @@ export interface UpdateUserInContestRequestTaskControlUsers {
     check_condition?: boolean;
     location_id?: number;
     show_results_to_user?: boolean;
+    supervisor?: string;
     user_status?: UpdateUserInContestRequestTaskControlUsers.UserStatusEnum;
     users_id: Array<number>;
 }

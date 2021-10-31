@@ -1,10 +1,13 @@
-import { Component, EventEmitter, OnDestroy, OnInit } from '@angular/core'
+import { Component, OnDestroy, OnInit } from '@angular/core'
 import { Observable } from 'rxjs'
-import { Contest, TaskForUserResponseTaskParticipant, Variant } from '@api/tasks/model'
+import {
+    Contest,
+    TaskForUserResponseTaskParticipant,
+    VariantWithCompletedTasksCountTaskParticipant
+} from '@api/tasks/model'
 import { ContestAssignmentStore } from '@/contests/containers/contest-assignment/contest-assignment.store'
-import { ActivatedRoute, Router } from '@angular/router'
+import { ActivatedRoute } from '@angular/router'
 import { UserResponseStatusResponse } from '@api/responses/model'
-import { Document } from '@api/users/models'
 
 
 @Component( {
@@ -16,10 +19,10 @@ import { Document } from '@api/users/models'
 export class ContestAssignmentComponent implements OnInit, OnDestroy
 {
     contestId!: number | null
-    interval!: number
-    viewModel$: Observable<{ loading: boolean; error: string | null; contest: Contest | undefined; variant: Variant | undefined; tasks: Array<TaskForUserResponseTaskParticipant>; time: number | undefined; status: UserResponseStatusResponse.StatusEnum | undefined }>
+    // @ts-ignore
+    interval!
+    viewModel$: Observable<{ loading: boolean; error: string | null; contest: Contest | undefined; variant: VariantWithCompletedTasksCountTaskParticipant | undefined; tasks: Array<TaskForUserResponseTaskParticipant>; time: number | undefined; status: UserResponseStatusResponse.StatusEnum | undefined }>
     timeLeft: number | undefined
-    answerCount: number = 0
 
     constructor( private route: ActivatedRoute, private contestAssignmentStore: ContestAssignmentStore )
     {
@@ -77,11 +80,5 @@ export class ContestAssignmentComponent implements OnInit, OnDestroy
             this.contestAssignmentStore.finish( this.contestId )
             this.contestAssignmentStore.fetchTime( this.contestId )
         }
-    }
-
-    onAnswered( $event: number, length: number )
-    {
-        if ( $event && this.answerCount < length )
-            this.answerCount++
     }
 }

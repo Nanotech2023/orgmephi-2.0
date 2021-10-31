@@ -6,6 +6,7 @@ export * from './documentForeignPassport';
 export * from './documentOther';
 export * from './documentRF';
 export * from './documentRFInternational';
+export * from './documentType';
 export * from './group';
 export * from './groupAddRequestUser';
 export * from './groupListResponseUser';
