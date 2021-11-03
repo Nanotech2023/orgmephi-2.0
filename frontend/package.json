@@ -28,6 +28,8 @@
     "ag-grid-angular": "^25.3.0",
     "ag-grid-community": "^25.3.0",
     "bootstrap": "^5.1.1",
+    "devextreme": "21.2",
+    "devextreme-angular": "21.2",
     "rxjs": "~6.6.0",
     "tslib": "^2.2.0",
     "zone.js": "~0.11.4"

@@ -4655,7 +4655,6 @@ export class TasksService
     public tasksParticipantOlympiadAllGet( offset?: number, limit?: number, baseContestId?: number, locationId?: number, endDate?: string, targetClasses?: '5' | '6' | '7' | '8' | '9' | '10' | '11' | 'student', onlyCount?: boolean, observe?: 'events', reportProgress?: boolean, options?: { httpHeaderAccept?: 'application/json', context?: HttpContext } ): Observable<HttpEvent<FilterSimpleContestResponseTaskParticipant>>;
     public tasksParticipantOlympiadAllGet( offset?: number, limit?: number, baseContestId?: number, locationId?: number, endDate?: string, targetClasses?: '5' | '6' | '7' | '8' | '9' | '10' | '11' | 'student', onlyCount?: boolean, observe: any = 'body', reportProgress: boolean = false, options?: { httpHeaderAccept?: 'application/json', context?: HttpContext } ): Observable<any>
     {
-
         let localVarQueryParameters = new HttpParams( { encoder: this.encoder } )
         if ( offset !== undefined && offset !== null )
         {

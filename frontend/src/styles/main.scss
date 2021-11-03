@@ -62,3 +62,17 @@ input {
   color: #8C8C8C;
   height: 30px;
 }
+
+.video-container-overlay:hover {
+  span {
+    color: white !important;
+    -webkit-transition: color 1s;
+    transition: color 1s;
+  }
+
+  a {
+    -webkit-transition: color 1s;
+    transition: color 1s;
+    color: white !important;
+  }
+}

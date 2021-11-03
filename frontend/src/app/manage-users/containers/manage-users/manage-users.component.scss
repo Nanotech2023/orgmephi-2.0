@@ -1,8 +1,9 @@
 @import "../../../../styles/colors";
 
 .container_main {
+  padding-top: 3%;
   padding-right: 10%;
-  padding-left: 10%;
+  padding-left: 5%;
   margin: auto;
   overflow: auto;
   height: 100%;
@@ -27,31 +28,6 @@
     letter-spacing: 0.1px;
 
     color: #4C4C4C;
-
-    button {
-      height: 50px;
-      width: 50px;
-      float: right;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    #add-user-button {
-      background: linear-gradient(114.44deg, #FB7B00 0%, #FF5000 44.27%, #F83D25 100%);
-    }
-
-    #add-button {
-      background: linear-gradient(114.44deg, #FFD032 0.01%, #FFAC25 100%);
-    }
-
-    #statistics-button {
-      background: #4E73FF;
-    }
-
-    #sertificate-button {
-      background: #012098;
-    }
   }
 }
 

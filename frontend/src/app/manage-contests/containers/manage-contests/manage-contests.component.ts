@@ -1,48 +1,51 @@
 import { Component, OnInit, ViewChild } from '@angular/core'
 import { ManageContestsStore } from '@/manage-contests/manage-contests.store'
 import { Observable } from 'rxjs'
-import { fixedHeight } from '@/shared/consts'
-import { User } from '@api/users/models'
-import { Contest, SimpleContestWithFlagResponseTaskParticipant } from '@api/tasks/model'
-import { AgGridAngular } from 'ag-grid-angular'
+import { SimpleContestWithFlagResponseTaskParticipant } from '@api/tasks/model'
+import { TasksService } from '@api/tasks/tasks.service'
+import { DxDataGridComponent } from 'devextreme-angular'
 
 
 @Component( {
-    selector: 'app-manage-olympiads',
+    selector: 'app-manage-contests',
     templateUrl: './manage-contests.component.html',
     styleUrls: [ './manage-contests.component.scss' ],
     providers: [ ManageContestsStore ]
 } )
 export class ManageContestsComponent implements OnInit
 {
-    minContainerHeight: number = fixedHeight
-    columnDefs = [
-        { field: 'contest_id', sortable: true, filter: true, headerName: 'ID' },
-        { field: 'description', sortable: true, filter: true, headerName: 'Описание' },
-        { field: 'start_time', sortable: true, filter: true, headerName: 'Дата начала' },
-        { field: 'end_time', sortable: true, filter: true, headerName: 'Дата окончания' },
-        { field: 'rules', sortable: true, filter: true, headerName: 'Правила' },
-        { field: 'winning_condition', sortable: true, filter: true, headerName: 'Условия победы' },
-        { field: 'laureate_condition', sortable: true, filter: true, headerName: 'Условия лауреата' },
-        { field: 'certificate_template', sortable: true, filter: true, headerName: 'Шаблон сертификата' },
-        { field: 'visibility', sortable: true, filter: true, headerName: 'Видимость' }
-    ]
-
+    @ViewChild( DxDataGridComponent, { static: false } ) grid!: DxDataGridComponent
     contests$: Observable<SimpleContestWithFlagResponseTaskParticipant[]> = this.store.contests$
-    addModalVisible: boolean = false
-    editModalVisible: boolean = false
-    editing: any = null
-    @ViewChild( 'table_users' ) agGrid!: AgGridAngular
-    
-    constructor( private store: ManageContestsStore ) {}
+    selectedRowIndex = -1
+
+    constructor( private store: ManageContestsStore, private tasksService: TasksService ) {}
 
     ngOnInit(): void
     {
+        //this.tasksService.tasksCreatorCreatePost
         this.store.reload()
     }
 
-    getRowNodeId( data: User ): number | undefined
+    editRow(): void
     {
-        return data.id
+        this.grid.instance.editRow( this.selectedRowIndex )
+        this.grid.instance.deselectAll()
+    }
+
+    deleteRow(): void
+    {
+        this.grid.instance.deleteRow( this.selectedRowIndex )
+        this.grid.instance.deselectAll()
+    }
+
+    addRow(): void
+    {
+        this.grid.instance.addRow()
+        this.grid.instance.deselectAll()
+    }
+
+    selectedChanged( e: any ): void
+    {
+        this.selectedRowIndex = e.component.getRowIndexByKey( e.selectedRowKeys[ 0 ] )
     }
 }

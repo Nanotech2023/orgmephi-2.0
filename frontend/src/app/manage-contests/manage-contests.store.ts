@@ -2,10 +2,8 @@ import { Injectable } from '@angular/core'
 import { ComponentStore, tapResponse } from '@ngrx/component-store'
 import { CallState, getError, LoadingState } from '@/shared/callState'
 import { EMPTY, Observable } from 'rxjs'
-import { catchError, concatMap } from 'rxjs/operators'
+import { catchError } from 'rxjs/operators'
 import {
-    AllOlympiadsResponseTaskUnauthorized,
-    CreateBaseOlympiadRequestTaskCreator,
     FilterSimpleContestResponseTaskParticipant,
     SimpleContestWithFlagResponseTaskParticipant
 } from '@api/tasks/model'
@@ -20,8 +18,8 @@ export interface ManageContestsState
 
 
 const initialState = {
-    callState: LoadingState.INIT,
-    contests: []
+    contests: [],
+    callState: LoadingState.INIT
 }
 
 
@@ -58,14 +56,6 @@ export class ManageContestsStore extends ComponentStore<ManageContestsState>
         } ) )
 
 
-    // readonly updateContests = this.updater( ( state: ManageContestsState, response: AllOlympiadsResponseTaskUnauthorized ) =>
-    //     ( {
-    //         ...state,
-    //         error: "",
-    //         contests: [ ...state.contests, ...response.contest_list ]
-    //     } ) )
-
-
     // EFFECTS
     readonly reload = this.effect( () =>
     {
@@ -82,24 +72,4 @@ export class ManageContestsStore extends ComponentStore<ManageContestsState>
             catchError( () => EMPTY )
         )
     } )
-
-
-    readonly add = this.effect( ( olympiadRequestTaskCreatorObservable: Observable<CreateBaseOlympiadRequestTaskCreator> ) =>
-        olympiadRequestTaskCreatorObservable.pipe(
-            concatMap( ( createBaseOlympiadRequestTask: CreateBaseOlympiadRequestTaskCreator ) =>
-            {
-                this.setLoading()
-                return this.tasksService.tasksCreatorBaseOlympiadCreatePost( createBaseOlympiadRequestTask ).pipe(
-                    tapResponse(
-                        () =>
-                        {
-                            this.setLoaded()
-                            this.reload()
-                        },
-                        ( error: string ) => this.updateError( error )
-                    ),
-                    catchError( () => EMPTY )
-                )
-            } )
-        ) )
 }

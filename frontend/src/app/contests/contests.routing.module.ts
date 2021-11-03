@@ -9,6 +9,7 @@ import { ContestListItemComponent } from '@/contests/components/contest-list-ite
 import { ContestAssignmentComponent } from '@/contests/containers/contest-assignment/contest-assignment.component'
 import { ContestAssignmentItemComponent } from '@/contests/components/contest-assignment-item/contest-assignment-item.component'
 import { ContestResultsComponent } from '@/contests/containers/contest-results/contest-results.component'
+import { VideoContainerComponent } from '@/contests/containers/video-container/video-container.component'
 
 
 export const COMPONENTS = [
@@ -19,7 +20,8 @@ export const COMPONENTS = [
     ContestAssignmentComponent,
     HomeComponent,
     ContestAssignmentItemComponent,
-    ContestResultsComponent
+    ContestResultsComponent,
+    VideoContainerComponent
 ]
 
 
@@ -43,7 +45,9 @@ const routes: Routes =
             canActivate: [ AuthGuardService ]
         },
         {
-            path: 'contests/:contestId/assignment', component: ContestAssignmentComponent, canActivate: [ AuthGuardService ]
+            path: 'contests/:contestId/assignment',
+            component: ContestAssignmentComponent,
+            canActivate: [ AuthGuardService ]
         }
     ]
 

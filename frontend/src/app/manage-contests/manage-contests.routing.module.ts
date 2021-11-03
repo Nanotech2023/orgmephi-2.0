@@ -6,6 +6,9 @@ import { NgModule } from '@angular/core'
 const routes: Routes =
     [
         {
+            path: 'manage', redirectTo: "manage/contests"
+        },
+        {
             path: 'manage/contests', component: ManageContestsComponent
         }
     ]

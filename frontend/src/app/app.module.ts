@@ -17,20 +17,34 @@ import { TasksService } from '@api/tasks/tasks.service'
 import { ResponsesService } from '@api/responses/responses.service'
 import { ProfileModule } from '@/profile/profile.module'
 import { RootEffects } from '@/app.effects'
+import { ManageUsersModule } from '@/manage-users/manage-users.module'
+import { ManageContestsModule } from '@/manage-contests/manage-contests.module'
 
+const COMMON_MODULES = [
+    SharedModule,
+    LayoutModule,
+    AuthModule,
+]
+
+const PARTICIPANT_MODULES = [
+    ContestsModule,
+    ProfileModule,
+    NewsModule,
+    ChatModule
+]
+const ADMIN_MODULES = [
+    ManageUsersModule,
+    ManageContestsModule
+]
 
 @NgModule( {
     declarations: [
         AppComponent
     ],
     imports: [
-        SharedModule,
-        LayoutModule,
-        AuthModule,
-        ContestsModule,
-        ProfileModule,
-        NewsModule,
-        ChatModule,
+        ...COMMON_MODULES,
+        ...PARTICIPANT_MODULES,
+        ...ADMIN_MODULES,
         AppRoutingModule,
         StoreModule.forRoot( {} ),
         EffectsModule.forRoot( [ RootEffects ] ),

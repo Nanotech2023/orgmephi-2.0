@@ -14,15 +14,21 @@ export interface ManageUsersState
 }
 
 
+const initialState = {
+    users: [],
+    callState: LoadingState.INIT
+}
+
+
 @Injectable()
 export class ManageUsersStore extends ComponentStore<ManageUsersState>
 {
     constructor( private authService: UsersService )
     {
-        super( { users: [], callState: LoadingState.INIT } )
+        super( initialState )
     }
 
-    readonly users$: Observable<User[]> = this.select( state => state.users )
+    readonly users$: Observable<UserFull[]> = this.select( state => state.users )
     private readonly loading$: Observable<boolean> = this.select( state => state.callState === LoadingState.LOADING )
     private readonly error$: Observable<string | null> = this.select( state => getError( state.callState ) )
 
@@ -45,20 +51,17 @@ export class ManageUsersStore extends ComponentStore<ManageUsersState>
             callState: LoadingState.LOADED
         } ) )
 
-    readonly updateUsers = this.updater( ( state: ManageUsersState, user: User ) =>
-        ( {
-            ...state,
-            error: "",
-            users: [ ...state.users, user ]
-        } ) )
-
     // EFFECTS
     readonly reload = this.effect( () =>
     {
         this.setLoading()
         return this.authService.userCreatorUserFullAllGet().pipe(
-            tapResponse( ( response: UserFullListResponseUser ) =>
-                    this.setState( { users: response.users, callState: LoadingState.LOADED } ),
+            tapResponse(
+                ( response: UserFullListResponseUser ) =>
+                    this.setState( {
+                        users: response.users ?? [],
+                        callState: LoadingState.LOADED
+                    } ),
                 ( error: string ) => this.updateError( error )
             ),
             catchError( () => EMPTY )

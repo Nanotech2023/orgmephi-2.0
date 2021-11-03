@@ -1,9 +1,9 @@
 import { Component, OnInit, ViewChild } from '@angular/core'
-import { SchoolRegistrationRequestUser, User } from '@api/users/models'
-import { fixedHeight } from '@/shared/consts'
-import { AgGridAngular } from 'ag-grid-angular'
+import { UserFull } from '@api/users/models'
 import { ManageUsersStore } from '@/manage-users/manage-users.store'
 import { Observable } from 'rxjs'
+import { DxDataGridComponent } from 'devextreme-angular'
+import { UsersService } from '@api/users/users.service'
 
 
 @Component( {
@@ -14,57 +14,37 @@ import { Observable } from 'rxjs'
 } )
 export class ManageUsersComponent implements OnInit
 {
-    minContainerHeight: number = fixedHeight
-    columnDefs = [
-        { field: 'id', sortable: true, filter: true, headerName: 'ID' },
-        { field: 'username', sortable: true, filter: true, headerName: 'Имя пользовтаеля' },
-        { field: 'role', sortable: true, filter: true, headerName: 'Роль' },
-        { field: 'type', sortable: true, filter: true, headerName: 'Тип регистрации' }
-    ]
-    addModalVisible: boolean = false
-    editModalVisible: boolean = false
-    editing: any = null
-    users$: Observable<User[]> = this.store.users$
-    @ViewChild( 'table_users' ) agGrid!: AgGridAngular
+    @ViewChild( DxDataGridComponent, { static: false } ) grid!: DxDataGridComponent
+    users$: Observable<UserFull[]> = this.store.users$
+    selectedRowIndex = -1
 
-    constructor( private store: ManageUsersStore ) {}
+    constructor( private store: ManageUsersStore, private usersService: UsersService ) {}
 
     ngOnInit(): void
     {
         this.store.reload()
     }
 
-    onUserAdd( requestRegistration: SchoolRegistrationRequestUser ): void
+    editRow(): void
     {
-        this.store.add( requestRegistration )
+        this.grid.instance.editRow( this.selectedRowIndex )
+        this.grid.instance.deselectAll()
     }
 
-    showEditUserModal(): void
+    deleteRow(): void
     {
-        const selectedRows = this.agGrid.api.getSelectedRows()
-        if ( selectedRows.length !== 0 )
-        {
-            this.editing = selectedRows[ 0 ]
-            this.editModalVisible = true
-        }
+        this.grid.instance.deleteRow( this.selectedRowIndex )
+        this.grid.instance.deselectAll()
     }
 
-    resetEditingUser( $event: boolean ): void
+    addRow(): void
     {
-        if ( $event == false )
-        {
-            this.editing = null
-            this.agGrid.api.deselectAll()
-        }
+        this.grid.instance.addRow()
+        this.grid.instance.deselectAll()
     }
 
-    onUserEdit( user: User ): void
+    selectedChanged( e: any ): void
     {
-        this.store.edit( user )
-    }
-
-    getRowNodeId( data: User ): number | undefined
-    {
-        return data.id
+        this.selectedRowIndex = e.component.getRowIndexByKey( e.selectedRowKeys[ 0 ] )
     }
 }

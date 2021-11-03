@@ -18,51 +18,59 @@
             <div class="actions_list">
                 <div class="row">
                     <div class="col-md-6">
-                        <div class="actions_list_item">
-                            <div class="actions_title">
-                                <span>Поступление в НИЯУ «МИФИ»</span>
+                        <app-video-container>
+                            <div class="video-container-overlay actions_list_item">
+                                <div class="actions_title">
+                                    <span>Поступление в НИЯУ «МИФИ»</span>
+                                </div>
+                                <div class="actions_divider"></div>
+                                <div class="actions_links">
+                                    <a href="#">Поступление в НИЯУ «МИФИ»</a>
+                                    <a href="#">Поступление в предуниверситарий</a>
+                                </div>
                             </div>
-                            <div class="actions_divider"></div>
-                            <div class="actions_links">
-                                <a href="#">Поступление в НИЯУ «МИФИ»</a>
-                                <a href="#">Поступление в предуниверситарий</a>
-                            </div>
-                        </div>
+                        </app-video-container>
                     </div>
                     <div class="col-md-6">
-                        <div class="actions_list_item">
-                            <div class="actions_title">
-                                <span>Сервисы НИЯУ «МИФИ»</span>
+                        <app-video-container>
+                            <div class="video-container-overlay actions_list_item">
+                                <div class="actions_title">
+                                    <span>Сервисы НИЯУ «МИФИ»</span>
+                                </div>
+                                <div class="actions_divider"></div>
+                                <div class="actions_links">
+                                    <a routerLink="/profile">Заполнить анкету участника</a>
+                                    <a href="#">Оформить пропуск в НИЯУ «МИФИ»</a>
+                                    <a (click)="download()">Печать карточки участника</a>
+                                </div>
                             </div>
-                            <div class="actions_divider"></div>
-                            <div class="actions_links">
-                                <a routerLink="/profile">Заполнить анкету участника</a>
-                                <a href="#">Оформить пропуск в НИЯУ «МИФИ»</a>
-                                <a (click)="download()">Печать карточки участника</a>
-                            </div>
-                        </div>
+                        </app-video-container>
                     </div>
                     <div class="col-md-6">
-                        <div class="actions_list_item">
-                            <div class="actions_title">
-                                <span>Конкурсы и олимпиады</span>
+                        <app-video-container>
+                            <div class="video-container-overlay actions_list_item">
+                                <div class="actions_title">
+                                    <span>Конкурсы и олимпиады</span>
+                                </div>
+                                <div class="actions_divider"></div>
+                                <div class="actions_links">
+                                    <a routerLink="/contests">Список конкурсов и олимпиад</a>
+                                </div>
                             </div>
-                            <div class="actions_divider"></div>
-                            <div class="actions_links">
-                                <a routerLink="/contests">Список конкурсов и олимпиад</a>
-                            </div>
-                        </div>
+                        </app-video-container>
                     </div>
                     <div class="col-md-6">
-                        <div class="actions_list_item">
-                            <div class="actions_title">
-                                <span>Результаты участия</span>
+                        <app-video-container>
+                            <div class="video-container-overlay actions_list_item">
+                                <div class="actions_title">
+                                    <span>Результаты участия</span>
+                                </div>
+                                <div class="actions_divider"></div>
+                                <div class="actions_links">
+                                    <a routerLink="/contests/results">Посмотреть результаты</a>
+                                </div>
                             </div>
-                            <div class="actions_divider"></div>
-                            <div class="actions_links">
-                                <a routerLink="/contests/results">Посмотреть результаты</a>
-                            </div>
-                        </div>
+                        </app-video-container>
                     </div>
                 </div>
             </div>
