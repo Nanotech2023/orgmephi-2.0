@@ -757,7 +757,7 @@ def user_by_id_time_left(contest_id, user_id):
               output_schema=UserTimeResponseRequestSchema)
 def get_user_by_id_extra_time(contest_id, user_id):
     """
-    Extend contest duration for user
+    Get extended time for user
     ---
     get:
       security:
