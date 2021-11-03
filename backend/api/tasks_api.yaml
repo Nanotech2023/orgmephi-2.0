@@ -248,6 +248,12 @@ components:
           allOf:
           - $ref: '#/components/schemas/BaseContest'
           readOnly: true
+        composite_type:
+          enum:
+          - Contest
+          - SimpleContest
+          - CompositeContest
+          type: string
         contest_id:
           readOnly: true
           type: integer
@@ -271,6 +277,7 @@ components:
           type: boolean
       required:
       - base_contest
+      - composite_type
       - contest_id
       - holding_type
       - stages
@@ -810,6 +817,12 @@ components:
           allOf:
           - $ref: '#/components/schemas/BaseContest'
           readOnly: true
+        composite_type:
+          enum:
+          - Contest
+          - SimpleContest
+          - CompositeContest
+          type: string
         contest_duration:
           type: integer
           x-unit: seconds
@@ -876,6 +889,7 @@ components:
           type: boolean
       required:
       - base_contest
+      - composite_type
       - contest_duration
       - contest_id
       - end_date

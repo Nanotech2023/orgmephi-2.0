@@ -114,6 +114,9 @@ class SimpleContestSchema(SQLAlchemySchema):
     previous_participation_condition = EnumField(UserStatusEnum,
                                                  data_key='previous_participation_condition',
                                                  by_value=True, required=True)
+    composite_type = EnumField(ContestTypeEnum,
+                               data_key='composite_type',
+                               by_value=True, required=True)
     holding_type = EnumField(ContestHoldingTypeEnum,
                              data_key='holding_type',
                              by_value=True, required=True)
@@ -130,6 +133,9 @@ class ContestInfoSchema(SQLAlchemySchema):
     subject = EnumField(OlympiadSubjectEnum, data_key='subject', by_value=True)
     contest_id = auto_field(column_name='contest_id', dump_only=True)
     academic_year = m_f.Int(required=True)
+    composite_type = EnumField(ContestTypeEnum,
+                               data_key='composite_type',
+                               by_value=True, required=True)
 
 
 class StageSchema(SQLAlchemySchema):
@@ -163,6 +169,9 @@ class CompositeContestSchema(SQLAlchemySchema):
     base_contest = fields.Nested(BaseContestSchema, required=True, dump_only=True)
     status = EnumField(OlympiadStatusEnum, data_key='status', by_value=True)
     academic_year = fields.Integer()
+    composite_type = EnumField(ContestTypeEnum,
+                               data_key='composite_type',
+                               by_value=True, required=True)
 
 
 class ContestSchema(OneOfSchema):
