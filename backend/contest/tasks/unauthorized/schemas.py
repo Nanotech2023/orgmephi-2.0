@@ -60,7 +60,7 @@ class AllTargetClassesRequestTaskUnauthorizedSchema(Schema):
 
 
 class FilterSimpleContestResponseSchema(Schema):
-    contest_list = fields.Nested(nested=SimpleContestSchema, many=True)
+    contest_list = fields.Nested(nested=ContestSchema, many=True)
     count = fields.Integer()
 
 
@@ -69,6 +69,7 @@ class FilterOlympiadAllRequestSchema(Schema):
     location_id = fields.Integer()
     target_classes = fields.Nested(TargetClassSchema, many=True, required=False)
     end_date = fields.DateTime()
+    start_year = fields.Integer()
     only_count = fields.Boolean()
     offset = fields.Integer()
     limit = fields.Integer()

@@ -249,6 +249,8 @@ components:
         contest_id:
           readOnly: true
           type: integer
+        end_year:
+          type: integer
         holding_type:
           enum:
           - OfflineContest
@@ -259,6 +261,14 @@ components:
             $ref: '#/components/schemas/Stage'
           readOnly: true
           type: array
+        start_year:
+          type: integer
+        status:
+          enum:
+          - Will start soon
+          - In progress
+          - Finished
+          type: string
         visibility:
           type: boolean
       required:
@@ -603,7 +613,7 @@ components:
       properties:
         contest_list:
           items:
-            $ref: '#/components/schemas/SimpleContest'
+            $ref: '#/components/schemas/Contest'
           type: array
         count:
           type: integer
@@ -814,6 +824,8 @@ components:
           format: date-time
           nullable: true
           type: string
+        end_year:
+          type: integer
         holding_type:
           enum:
           - OfflineContest
@@ -848,6 +860,8 @@ components:
           format: date-time
           nullable: true
           type: string
+        start_year:
+          type: integer
         status:
           enum:
           - Will start soon
@@ -881,7 +895,7 @@ components:
       properties:
         contest:
           allOf:
-          - $ref: '#/components/schemas/SimpleContest'
+          - $ref: '#/components/schemas/Contest'
           readOnly: true
         enrolled:
           type: boolean
@@ -2818,6 +2832,11 @@ paths:
         schema:
           type: integer
       - in: query
+        name: start_year
+        required: false
+        schema:
+          type: integer
+      - in: query
         name: end_date
         required: false
         schema:
@@ -2884,7 +2903,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Contest'
+                $ref: '#/components/schemas/SimpleContestWithFlagResponseTaskParticipant'
           description: OK
         '400':
           description: Bad request
@@ -2909,7 +2928,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Contest'
+                $ref: '#/components/schemas/SimpleContestWithFlagResponseTaskParticipant'
           description: OK
         '400':
           description: Bad request
@@ -3046,6 +3065,11 @@ paths:
           type: integer
       - in: query
         name: base_contest_id
+        required: false
+        schema:
+          type: integer
+      - in: query
+        name: start_year
         required: false
         schema:
           type: integer

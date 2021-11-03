@@ -215,6 +215,11 @@ def olympiads_all():
           schema:
             type: integer
         - in: query
+          name: start_year
+          required: false
+          schema:
+            type: integer
+        - in: query
           name: location_id
           required: false
           schema:

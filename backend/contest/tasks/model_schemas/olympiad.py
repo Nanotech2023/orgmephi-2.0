@@ -1,14 +1,14 @@
+from marshmallow import fields
+from marshmallow import fields as m_f
 from marshmallow_enum import EnumField
 from marshmallow_oneofschema import OneOfSchema
 from marshmallow_sqlalchemy import SQLAlchemySchema, auto_field
 
-from marshmallow import fields
-from common.fields import text_validator, common_name_validator, username_validator
+from common.fields import text_validator, common_name_validator
 from contest.tasks.model_schemas.location import OlympiadLocationSchema
 from contest.tasks.models import *
 from contest.tasks.models.reference import TargetClass
 from user.models.auth import *
-from marshmallow import fields as m_f
 
 """
 Target class
@@ -102,6 +102,8 @@ class SimpleContestSchema(SQLAlchemySchema):
     end_date = auto_field(column_name='end_date', required=True)
     regulations = auto_field(column_name='regulations', validate=text_validator, required=False)
     status = EnumField(OlympiadStatusEnum, data_key='status', by_value=True)
+    start_year = fields.Integer()
+    end_year = fields.Integer()
     total_points = fields.Integer()
     tasks_number = fields.Integer()
     contest_duration = auto_field(column_name='contest_duration', required=True)
@@ -161,6 +163,9 @@ class CompositeContestSchema(SQLAlchemySchema):
                              by_value=True, required=True)
     stages = fields.Nested(StageSchema, many=True, required=True, dump_only=True)
     base_contest = fields.Nested(BaseContestSchema, required=True, dump_only=True)
+    status = EnumField(OlympiadStatusEnum, data_key='status', by_value=True)
+    start_year = fields.Integer()
+    end_year = fields.Integer()
 
 
 class ContestSchema(OneOfSchema):

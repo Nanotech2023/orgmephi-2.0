@@ -3,6 +3,7 @@ import secrets
 from common.errors import FileTooLarge, DataConflict, InsufficientData, RequestError, NotFound
 from common.jwt_verify import jwt_get_id
 from contest.tasks.models import *
+from contest.tasks.unauthorized.schemas import FilterOlympiadAllRequestSchema
 from user.models import UserTypeEnum
 
 app = get_current_app()
@@ -225,7 +226,7 @@ def is_task_in_contest(task_id, contest_id):
 # Participant module
 
 
-def get_user_contest_if_possible(olympiad_id, stage_id, contest_id):
+def get_contest_for_participant_if_possible(olympiad_id, stage_id, contest_id):
     """
     Get contest for user or raise exception
     :param olympiad_id:
@@ -247,11 +248,24 @@ def get_user_contest_if_possible(olympiad_id, stage_id, contest_id):
     if current_contest not in stage.contests:
         raise DataConflict("Current contest is not in chosen stage")
 
+    return current_contest
+
+
+def get_user_contest_if_possible(olympiad_id, stage_id, contest_id):
+    """
+    Get contest for user or raise exception
+    :param olympiad_id:
+    :param stage_id:
+    :param contest_id:
+    :return: user contest
+    """
+    current_contest = db_get_or_raise(Contest, "contest_id", str(contest_id))
+
     # user is not registered
     if not is_user_in_contest(jwt_get_id(), current_contest):
         raise DataConflict("User is not registered for this olympiad")
 
-    return current_contest
+    return get_contest_for_participant_if_possible(olympiad_id, stage_id, contest_id)
 
 
 def get_user_simple_contest_if_possible(olympiad_id):
@@ -504,6 +518,47 @@ def check_user_unfilled_for_enroll(current_user: User):
     else:
         raise InsufficientData('type', "university or school")
     return grade
+
+
+# Contest filter
+_filter_fields = ['base_contest_id', 'end_date']
+
+
+def get_contest_filtered(args):
+    marshmallow = FilterOlympiadAllRequestSchema().load(args)
+
+    filters = {v: marshmallow[v] for v in _filter_fields if v in marshmallow}
+
+    query = Contest.query.filter_by(**filters)
+
+    location_id = marshmallow.get('location_id', None)
+
+    start_year: datetime = marshmallow.get('start_year', None)
+    if location_id is not None:
+        query = query.filter(SimpleContest.locations.any(location_id=location_id))
+
+    target_class_id = marshmallow.get('target_class', None)
+
+    if target_class_id is not None:
+        query = query.filter(SimpleContest.target_classes.any(target_class_id=target_class_id))
+
+    offset = marshmallow.get('offset', None)
+    limit = marshmallow.get('limit', None)
+
+    query = query.with_polymorphic([SimpleContest]).order_by(SimpleContest.start_date)
+
+    if limit is not None:
+        query = query.limit(limit)
+
+    if offset is not None:
+        query = query.offset(offset)
+
+    contest_list = query.all()
+
+    if start_year is not None:
+        contest_list = [contest_ for contest_ in contest_list if contest_.start_year == start_year]
+
+    return contest_list
 
 
 # Exceptions
