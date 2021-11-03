@@ -178,7 +178,7 @@ class ContestSchema(OneOfSchema):
     type_schemas = {ContestTypeEnum.SimpleContest.value: SimpleContestSchema,
                     ContestTypeEnum.CompositeContest.value: CompositeContestSchema}
     type_field = "composite_type"
-    type_field_remove = True
+    type_field_remove = False
 
     class_types = {SimpleContestSchema: ContestTypeEnum.SimpleContest.value,
                    CompositeContestSchema: ContestTypeEnum.CompositeContest.value}
