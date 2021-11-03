@@ -536,7 +536,6 @@ def user_status_for_response_by_id(contest_id, user_id):
     get:
       security:
         - JWTAccessToken: []
-        - CSRFAccessToken: []
       parameters:
         - in: path
           description: Id of the contest
@@ -671,7 +670,6 @@ def user_answer_task_mark(contest_id, user_id, task_id):
     get:
       security:
         - JWTAccessToken: []
-        - CSRFAccessToken: []
       parameters:
         - in: path
           description: Id of the contest
@@ -720,7 +718,6 @@ def user_by_id_time_left(contest_id, user_id):
     get:
       security:
         - JWTAccessToken: []
-        - CSRFAccessToken: []
       parameters:
         - in: path
           description: Id of the contest
@@ -762,7 +759,6 @@ def get_user_by_id_extra_time(contest_id, user_id):
     get:
       security:
         - JWTAccessToken: []
-        - CSRFAccessToken: []
       parameters:
         - in: path
           description: Id of the contest
@@ -956,7 +952,6 @@ def all_user_results(user_id):
     get:
       security:
         - JWTAccessToken: []
-        - CSRFAccessToken: []
       parameters:
         - in: path
           description: Id of the user

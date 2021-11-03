@@ -423,7 +423,6 @@ def self_user_status_for_response(contest_id):
     get:
       security:
         - JWTAccessToken: []
-        - CSRFAccessToken: []
       parameters:
         - in: path
           description: Id of the contest
@@ -458,7 +457,6 @@ def self_user_answer_task_mark(contest_id, task_id):
     get:
       security:
         - JWTAccessToken: []
-        - CSRFAccessToken: []
       parameters:
         - in: path
           description: Id of the contest
@@ -502,7 +500,6 @@ def self_user_time_left(contest_id):
     get:
       security:
         - JWTAccessToken: []
-        - CSRFAccessToken: []
       parameters:
         - in: path
           description: Id of the contest
@@ -563,7 +560,6 @@ def all_user_results():
     get:
       security:
         - JWTAccessToken: []
-        - CSRFAccessToken: []
       responses:
         '200':
           description: OK

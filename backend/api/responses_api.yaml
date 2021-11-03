@@ -795,7 +795,6 @@ paths:
           description: User or contest not found
       security:
       - JWTAccessToken: []
-      - CSRFAccessToken: []
   /responses/creator/contest/{contest_id}/list:
     get:
       parameters:
@@ -890,7 +889,6 @@ paths:
           description: User or contest not found
       security:
       - JWTAccessToken: []
-      - CSRFAccessToken: []
   /responses/creator/contest/{contest_id}/user/{user_id}/time:
     get:
       parameters:
@@ -919,7 +917,6 @@ paths:
           description: User or contest not found
       security:
       - JWTAccessToken: []
-      - CSRFAccessToken: []
   /responses/creator/contest/{contest_id}/user/{user_id}/time/extra:
     get:
       parameters:
@@ -948,7 +945,6 @@ paths:
           description: User or contest not found
       security:
       - JWTAccessToken: []
-      - CSRFAccessToken: []
     post:
       parameters:
       - description: Id of the contest
@@ -1066,7 +1062,6 @@ paths:
           description: User not found
       security:
       - JWTAccessToken: []
-      - CSRFAccessToken: []
   /responses/participant/contest/{contest_id}/user/self/create:
     post:
       parameters:
@@ -1429,7 +1424,6 @@ paths:
           description: User or contest not found
       security:
       - JWTAccessToken: []
-      - CSRFAccessToken: []
   /responses/participant/contest/{contest_id}/task/{task_id}/user/self/mark:
     get:
       parameters:
@@ -1458,7 +1452,6 @@ paths:
           description: The results have not yet been published
       security:
       - JWTAccessToken: []
-      - CSRFAccessToken: []
   /responses/participant/contest/{contest_id}/user/self/time:
     get:
       parameters:
@@ -1479,7 +1472,6 @@ paths:
           description: User or contest not found
       security:
       - JWTAccessToken: []
-      - CSRFAccessToken: []
   /responses/participant/contest/{contest_id}/user/self/finish:
     post:
       parameters:
@@ -1510,6 +1502,5 @@ paths:
           description: User not found
       security:
       - JWTAccessToken: []
-      - CSRFAccessToken: []
 servers:
 - url: /contest
