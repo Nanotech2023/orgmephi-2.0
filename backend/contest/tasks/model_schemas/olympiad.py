@@ -102,8 +102,7 @@ class SimpleContestSchema(SQLAlchemySchema):
     end_date = auto_field(column_name='end_date', required=True)
     regulations = auto_field(column_name='regulations', validate=text_validator, required=False)
     status = EnumField(OlympiadStatusEnum, data_key='status', by_value=True)
-    start_year = fields.Integer()
-    end_year = fields.Integer()
+    academic_year = fields.Integer()
     total_points = fields.Integer()
     tasks_number = fields.Integer()
     contest_duration = auto_field(column_name='contest_duration', required=True)
@@ -130,8 +129,7 @@ class ContestInfoSchema(SQLAlchemySchema):
     name = auto_field(column_name='name', dump_only=True, required=True)
     subject = EnumField(OlympiadSubjectEnum, data_key='subject', by_value=True)
     contest_id = auto_field(column_name='contest_id', dump_only=True)
-    start_year = m_f.Int(required=True)
-    end_year = m_f.Int(required=True)
+    academic_year = m_f.Int(required=True)
 
 
 class StageSchema(SQLAlchemySchema):
@@ -164,8 +162,7 @@ class CompositeContestSchema(SQLAlchemySchema):
     stages = fields.Nested(StageSchema, many=True, required=True, dump_only=True)
     base_contest = fields.Nested(BaseContestSchema, required=True, dump_only=True)
     status = EnumField(OlympiadStatusEnum, data_key='status', by_value=True)
-    start_year = fields.Integer()
-    end_year = fields.Integer()
+    academic_year = fields.Integer()
 
 
 class ContestSchema(OneOfSchema):

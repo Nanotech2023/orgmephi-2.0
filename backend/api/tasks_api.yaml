@@ -242,14 +242,14 @@ components:
       type: object
     CompositeContest:
       properties:
+        academic_year:
+          type: integer
         base_contest:
           allOf:
           - $ref: '#/components/schemas/BaseContest'
           readOnly: true
         contest_id:
           readOnly: true
-          type: integer
-        end_year:
           type: integer
         holding_type:
           enum:
@@ -261,8 +261,6 @@ components:
             $ref: '#/components/schemas/Stage'
           readOnly: true
           type: array
-        start_year:
-          type: integer
         status:
           enum:
           - Will start soon
@@ -806,6 +804,8 @@ components:
       type: object
     SimpleContest:
       properties:
+        academic_year:
+          type: integer
         base_contest:
           allOf:
           - $ref: '#/components/schemas/BaseContest'
@@ -824,8 +824,6 @@ components:
           format: date-time
           nullable: true
           type: string
-        end_year:
-          type: integer
         holding_type:
           enum:
           - OfflineContest
@@ -860,8 +858,6 @@ components:
           format: date-time
           nullable: true
           type: string
-        start_year:
-          type: integer
         status:
           enum:
           - Will start soon
@@ -2832,7 +2828,7 @@ paths:
         schema:
           type: integer
       - in: query
-        name: start_year
+        name: academic_year
         required: false
         schema:
           type: integer

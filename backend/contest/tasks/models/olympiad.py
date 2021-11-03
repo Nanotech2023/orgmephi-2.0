@@ -329,42 +329,23 @@ class SimpleContest(Contest):
     }
 
     @hybrid_property
-    def start_year(self):
-        if self.start_date.month < 6:
+    def academic_year(self):
+        if self.start_date.month < 9:
             return self.start_date.year - 1
         else:
             return self.start_date.year
 
-    @hybrid_property
-    def end_year(self):
-        if self.start_date.month < 6:
-            return self.start_date.year
-        else:
-            return self.start_date.year + 1
-
-    @start_year.expression
-    def start_year(cls):
+    @academic_year.expression
+    def academic_year(cls):
         return case(
             [
                 (
-                    cls.start_date.month < 6,
+                    cls.start_date.month < 9,
                     cls.start_date.year - 1
                 )
             ],
             else_=cls.start_date.year
-        ).label("start_year")
-
-    @end_year.expression
-    def end_year(cls):
-        return case(
-            [
-                (
-                    cls.start_date.month < 6,
-                    cls.start_date.year
-                )
-            ],
-            else_=cls.start_date.year + 1
-        ).label("end_year")
+        ).label("academic_year")
 
     def change_previous(self, previous_contest_id=None, previous_participation_condition=None):
         if previous_contest_id is not None:
@@ -485,30 +466,17 @@ class CompositeContest(Contest):
     }
 
     @hybrid_property
-    def start_year(self):
+    def academic_year(self):
         if len(self.stages.all()) == 0:
             return None
         stage = self.stages.all()[0]
         if len(stage.contests) == 0:
             return None
         contest = stage.contests[0]
-        if contest.start_date.month < 6:
+        if contest.start_date.month < 9:
             return contest.start_date.year - 1
         else:
             return contest.start_date.year
-
-    @hybrid_property
-    def end_year(self):
-        if len(self.stages.all()) == 0:
-            return None
-        stage = self.stages.all()[0]
-        if len(stage.contests) == 0:
-            return None
-        contest = stage.contests[0]
-        if contest.start_date.month < 6:
-            return contest.start_date.year
-        else:
-            return contest.start_date.year + 1
 
     @hybrid_property
     def status(self):

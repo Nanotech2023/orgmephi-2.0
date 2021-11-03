@@ -69,7 +69,7 @@ class FilterOlympiadAllRequestSchema(Schema):
     location_id = fields.Integer()
     target_classes = fields.Nested(TargetClassSchema, many=True, required=False)
     end_date = fields.DateTime()
-    start_year = fields.Integer()
+    academic_year = fields.Integer()
     only_count = fields.Boolean()
     offset = fields.Integer()
     limit = fields.Integer()

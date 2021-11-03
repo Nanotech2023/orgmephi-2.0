@@ -489,7 +489,7 @@ def get_all_contests_self():
           schema:
             type: integer
         - in: query
-          name: start_year
+          name: academic_year
           required: false
           schema:
             type: integer
