@@ -1,4 +1,4 @@
-from marshmallow import fields
+from marshmallow import fields, validate
 from marshmallow import fields as m_f
 from marshmallow_enum import EnumField
 from marshmallow_oneofschema import OneOfSchema
@@ -116,7 +116,8 @@ class SimpleContestSchema(SQLAlchemySchema):
                                                  by_value=True, required=True)
     composite_type = EnumField(ContestTypeEnum,
                                data_key='composite_type',
-                               by_value=True, required=True)
+                               by_value=True, required=True,
+                               validate=validate.OneOf([ContestTypeEnum.SimpleContest]))
     holding_type = EnumField(ContestHoldingTypeEnum,
                              data_key='holding_type',
                              by_value=True, required=True)
@@ -135,7 +136,8 @@ class ContestInfoSchema(SQLAlchemySchema):
     academic_year = m_f.Int(required=True)
     composite_type = EnumField(ContestTypeEnum,
                                data_key='composite_type',
-                               by_value=True, required=True)
+                               by_value=True, required=True,
+                               validate=validate.OneOf([ContestTypeEnum.SimpleContest]))
 
 
 class StageSchema(SQLAlchemySchema):
@@ -171,7 +173,8 @@ class CompositeContestSchema(SQLAlchemySchema):
     academic_year = fields.Integer()
     composite_type = EnumField(ContestTypeEnum,
                                data_key='composite_type',
-                               by_value=True, required=True)
+                               by_value=True, required=True,
+                               validate=validate.OneOf([ContestTypeEnum.CompositeContest]))
 
 
 class ContestSchema(OneOfSchema):

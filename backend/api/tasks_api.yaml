@@ -250,8 +250,6 @@ components:
           readOnly: true
         composite_type:
           enum:
-          - Contest
-          - SimpleContest
           - CompositeContest
           type: string
         contest_id:
@@ -819,9 +817,7 @@ components:
           readOnly: true
         composite_type:
           enum:
-          - Contest
           - SimpleContest
-          - CompositeContest
           type: string
         contest_duration:
           type: integer
