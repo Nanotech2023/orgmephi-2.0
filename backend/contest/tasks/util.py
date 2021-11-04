@@ -535,8 +535,6 @@ def get_contest_filtered(args):
 
     location_id = marshmallow.get('location_id', None)
 
-    academic_year = marshmallow.get('academic_year', None)
-
     if location_id is not None:
         query = query.filter(SimpleContest.locations.any(location_id=location_id))
 

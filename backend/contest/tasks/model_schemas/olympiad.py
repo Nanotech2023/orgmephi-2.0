@@ -128,7 +128,9 @@ class SimpleContestSchema(SQLAlchemySchema):
     def add_enrolled(self, data, original, many, **kwargs):
         from common.jwt_verify import jwt_get_id
         from contest.tasks.util import is_user_in_contest
-        data['enrolled'] = is_user_in_contest(jwt_get_id(), original)
+        user_id = jwt_get_id()
+        if user_id is not None:
+            data['enrolled'] = is_user_in_contest(user_id, original)
         return data
 
 
