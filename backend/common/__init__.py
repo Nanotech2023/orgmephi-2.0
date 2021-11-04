@@ -268,8 +268,9 @@ class OrgMephiApp:
     def _read_key(self, key_type):
         var_name = 'ORGMEPHI_%s_KEY' % key_type.upper()
         jwt_var_name = 'JWT_%s_KEY' % key_type.upper()
-        if var_name in self._app.config:
-            key_path = _path_to_absolute(self._app.config[var_name])
+        var = self._app.config.get(var_name, None)
+        if var is not None:
+            key_path = _path_to_absolute(var)
             with open(key_path, 'r') as key_file:
                 key = key_file.read()
             self._app.config[jwt_var_name] = key
