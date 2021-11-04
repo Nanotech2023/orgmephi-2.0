@@ -571,7 +571,7 @@ def get_contest_in_stage_self(id_olympiad, id_stage, id_contest):
           description: OK
           content:
             application/json:
-              schema: SimpleContest
+              schema: Contest
         '400':
           description: Bad request
         '409':
@@ -608,7 +608,7 @@ def get_contest_self(id_olympiad):
           description: OK
           content:
             application/json:
-              schema: SimpleContest
+              schema: Contest
         '400':
           description: Bad request
         '409':
