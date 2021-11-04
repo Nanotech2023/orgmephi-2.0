@@ -245,6 +245,11 @@ def test_olympiads_all(client, test_simple_contest, test_contests_composite):
     assert resp.status_code == 200
     assert len(test_contests_composite) == resp.json['count']
 
+    resp = client.get('/olympiad/all?limit=2&composite_type=CompositeContest')
+    print(resp.data)
+    assert resp.status_code == 200
+    assert 2 == resp.json['count']
+
     resp = client.get('/olympiad/all?composite_type=SimpleContest')
     print(resp.data)
     assert resp.status_code == 200
@@ -259,6 +264,16 @@ def test_olympiads_all(client, test_simple_contest, test_contests_composite):
     print(resp.data)
     assert resp.status_code == 200
     assert 1 == resp.json['count']
+
+    resp = client.get('/olympiad/all?base_contest_id=2')
+    print(resp.data)
+    assert resp.status_code == 200
+    assert 1 == resp.json['count']
+
+    resp = client.get('/olympiad/all?location_id=1')
+    print(resp.data)
+    assert resp.status_code == 200
+    assert 0 == resp.json['count']
 
 
 def test_get_contest_self(client, test_base_contests, test_simple_contest, test_simple_contest_with_users):

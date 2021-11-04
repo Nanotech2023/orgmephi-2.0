@@ -523,7 +523,7 @@ def check_user_unfilled_for_enroll(current_user: User):
 
 
 # Contest filter
-_filter_fields = ['base_contest_id', 'end_date', 'composite_type']
+_filter_fields = ['base_contest_id', 'end_date', 'academic_year', 'composite_type']
 
 
 def get_contest_filtered(args):
@@ -549,19 +549,9 @@ def get_contest_filtered(args):
     limit = marshmallow.get('limit', None)
 
     composite_type = marshmallow.get('composite_type', None)
-
-    if composite_type is None:
-        query = query.with_polymorphic([SimpleContest, CompositeContest])
+    academic_year = marshmallow.get('academic_year', None)
 
     query.order_by(SimpleContest.start_date)
-
-    if academic_year is not None:
-        query = query.filter(
-            or_(
-                SimpleContest.academic_year == academic_year,
-                CompositeContest.academic_year == academic_year
-            )
-        )
 
     if limit is not None:
         query = query.limit(limit)

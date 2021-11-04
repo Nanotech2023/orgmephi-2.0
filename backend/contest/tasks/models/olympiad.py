@@ -242,6 +242,29 @@ class Contest(db.Model):
         'polymorphic_on': composite_type
     }
 
+    @hybrid_property
+    def academic_year(self):
+        if self.composite_type == ContestTypeEnum.CompositeContest:
+            return CompositeContest.query.filter_by(contest_id=self.contest_id)
+        else:
+            return SimpleContest.query.filter_by(contest_id=self.contest_id)
+
+    @academic_year.expression
+    def academic_year(cls):
+        return case(
+            [
+                (
+                    cls.composite_type == ContestTypeEnum.CompositeContest,
+                    select(CompositeContest.academic_year).where(
+                        CompositeContest.contest_id == cls.contest_id
+                    ).limit(1).scalar_subquery()
+                )
+            ],
+            else_=select(SimpleContest.academic_year).where(
+                SimpleContest.contest_id == cls.contest_id
+            ).limit(1).scalar_subquery()
+        ).label("academic_year")
+
 
 def add_simple_contest(db_session,
                        visibility,
