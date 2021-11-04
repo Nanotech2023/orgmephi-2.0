@@ -548,8 +548,8 @@ def get_contest_filtered(args):
     offset = marshmallow.get('offset', None)
     limit = marshmallow.get('limit', None)
 
-    composite_type = marshmallow.get('composite_type', None)
-    academic_year = marshmallow.get('academic_year', None)
+    if len(filters.items()) != 0 and location_id is None and target_class_id is not None:
+        query = query.with_polymorphic([SimpleContest])
 
     query.order_by(SimpleContest.start_date)
 

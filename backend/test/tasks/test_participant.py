@@ -220,7 +220,7 @@ def test_get_contest_in_stage_self(client, test_composite_contest_with_users, te
     resp = client.get(f'/olympiad/{test_contests_composite[0].contest_id}'
                       f'/stage/{test_stages[0].stage_id}/contest/{test_simple_contest_in_stage_1[0].contest_id}')
     assert resp.status_code == 200
-    assert test_simple_contest_in_stage_1[0].contest_id == resp.json["contest"]['contest_id']
+    assert test_simple_contest_in_stage_1[0].contest_id == resp.json['contest_id']
 
     resp = client.get(f'/olympiad/{test_contests_composite[0].contest_id}'
                       f'/stage/{test_stages[1].stage_id}/contest/{test_simple_contest_in_stage_1[0].contest_id}')
@@ -280,7 +280,7 @@ def test_get_contest_self(client, test_base_contests, test_simple_contest, test_
     resp = client.get(
         f'/olympiad/{test_simple_contest[0].contest_id}')
     assert resp.status_code == 200
-    assert test_simple_contest[0].contest_id == resp.json["contest"]['contest_id']
+    assert test_simple_contest[0].contest_id == resp.json['contest_id']
 
 
 def test_get_contest_sel_composite(client, test_base_contests, test_contests_composite, test_simple_contest_with_users):

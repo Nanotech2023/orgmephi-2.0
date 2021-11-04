@@ -1,4 +1,4 @@
-from marshmallow import fields, validate
+from marshmallow import fields, validate, post_dump
 from marshmallow import fields as m_f
 from marshmallow_enum import EnumField
 from marshmallow_oneofschema import OneOfSchema
@@ -105,6 +105,7 @@ class SimpleContestSchema(SQLAlchemySchema):
     academic_year = fields.Integer()
     total_points = fields.Integer()
     tasks_number = fields.Integer()
+    enrolled = fields.Boolean(required=False, dump_only=True)
     contest_duration = auto_field(column_name='contest_duration', required=True)
     result_publication_date = auto_field(column_name='result_publication_date', required=True)
     end_of_enroll_date = auto_field(column_name='end_of_enroll_date', required=True)
@@ -122,6 +123,11 @@ class SimpleContestSchema(SQLAlchemySchema):
                              data_key='holding_type',
                              by_value=True, required=True)
     base_contest = fields.Nested(BaseContestSchema, required=True, dump_only=True)
+
+    @post_dump(pass_many=True)
+    def add_enrolled(self, data, many, **kwargs):
+        data['enrolled'] = False
+        return data
 
 
 class ContestInfoSchema(SQLAlchemySchema):

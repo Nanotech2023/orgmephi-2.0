@@ -4,6 +4,7 @@ from common import get_current_module
 from common.errors import AlreadyExists, TimeOver
 from common.util import send_pdf
 from contest.responses.util import get_user_in_contest_work
+from contest.tasks.model_schemas.olympiad import SimpleContestSchema
 from contest.tasks.participant.schemas import *
 from contest.tasks.participant.util import filter_olympiad_query_with_enrolled_flag
 from contest.tasks.unauthorized.schemas import AllOlympiadsResponseTaskUnauthorizedSchema
@@ -537,7 +538,7 @@ def get_all_contests_self():
 
 @module.route(
     '/olympiad/<int:id_olympiad>/stage/<int:id_stage>/contest/<int:id_contest>',
-    methods=['GET'], output_schema=SimpleContestWithFlagResponseTaskParticipantSchema)
+    methods=['GET'])
 def get_contest_in_stage_self(id_olympiad, id_stage, id_contest):
     """
     Get current contest in stage
@@ -579,15 +580,14 @@ def get_contest_in_stage_self(id_olympiad, id_stage, id_contest):
           description: User not found
     """
     current_contest = get_contest_for_participant_if_possible(id_olympiad, id_stage, id_contest)
-    return {
-               "contest": current_contest,
-               "enrolled": is_user_in_contest(jwt_get_id(), current_contest)
-           }, 200
+    current_contest_dict = SimpleContestSchema().dump(current_contest)
+    current_contest_dict['enrolled'] = is_user_in_contest(jwt_get_id(), current_contest)
+    return current_contest_dict, 200
 
 
 @module.route(
     '/olympiad/<int:id_olympiad>',
-    methods=['GET'], output_schema=SimpleContestWithFlagResponseTaskParticipantSchema)
+    methods=['GET'])
 def get_contest_self(id_olympiad):
     """
     Get current contest in stage
@@ -617,7 +617,6 @@ def get_contest_self(id_olympiad):
           description: User not found
     """
     current_contest = get_simple_contest_if_possible(id_olympiad)
-    return {
-               "contest": current_contest,
-               "enrolled": is_user_in_contest(jwt_get_id(), current_contest)
-           }, 200
+    current_contest_dict = SimpleContestSchema().dump(current_contest)
+    current_contest_dict['enrolled'] = is_user_in_contest(jwt_get_id(), current_contest)
+    return current_contest_dict, 200

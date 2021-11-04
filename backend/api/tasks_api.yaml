@@ -833,6 +833,9 @@ components:
           format: date-time
           nullable: true
           type: string
+        enrolled:
+          readOnly: true
+          type: boolean
         holding_type:
           enum:
           - OfflineContest
@@ -2867,6 +2870,14 @@ paths:
         required: false
         schema:
           type: boolean
+      - in: query
+        name: composite_type
+        required: false
+        schema:
+          enum:
+          - SimpleContest
+          - CompositeContest
+          type: string
       responses:
         '200':
           content:
@@ -3075,7 +3086,7 @@ paths:
         schema:
           type: integer
       - in: query
-        name: start_year
+        name: academic_year
         required: false
         schema:
           type: integer
@@ -3100,6 +3111,14 @@ paths:
         required: false
         schema:
           type: boolean
+      - in: query
+        name: composite_type
+        required: false
+        schema:
+          enum:
+          - SimpleContest
+          - CompositeContest
+          type: string
       responses:
         '200':
           content:
