@@ -42,7 +42,7 @@ class OrgMephiModule:
         self._name = name
         self._package = package
         self._blueprint: Optional[Blueprint] = None
-        self._access_level = access_level if access_level is not None else OrgMephiAccessLevel.visitor
+        self._access_level = access_level
         self._area = area
         self._modules: list[OrgMephiModule] = []
         self._parent: Optional[OrgMephiModule] = None
@@ -121,7 +121,7 @@ class OrgMephiModule:
             :param f: function to wrap
             :return: Provided function
             """
-            from .jwt_verify import jwt_required_role
+            from .jwt_verify import jwt_required_role, jwt_required
             from .errors import _catch_request_error
 
             func_wrapped = f
@@ -134,8 +134,10 @@ class OrgMephiModule:
             if input_schema is not None:
                 func_wrapped = self._wrap_marshmallow_input(func_wrapped, input_schema)
 
-            if self._access_level == OrgMephiAccessLevel.visitor:
+            if self._access_level is None:
                 pass
+            elif self._access_level == OrgMephiAccessLevel.visitor:
+                func_wrapped = jwt_required(optional=True)(func_wrapped)
             else:
                 roles = [v.value[1] for v in OrgMephiAccessLevel if v.value[0] >= self._access_level.value[0]]
                 func_wrapped = jwt_required_role(roles=roles, refresh=refresh)(func_wrapped)
