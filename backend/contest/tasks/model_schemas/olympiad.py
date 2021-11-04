@@ -126,7 +126,8 @@ class SimpleContestSchema(SQLAlchemySchema):
 
     @post_dump(pass_many=True)
     def add_enrolled(self, data, many, **kwargs):
-        data['enrolled'] = False
+        if not many:
+            data['enrolled'] = False
         return data
 
 
