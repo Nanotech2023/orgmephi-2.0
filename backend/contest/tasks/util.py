@@ -531,7 +531,7 @@ def get_contest_filtered(args):
 
     filters = {v: marshmallow[v] for v in _filter_fields if v in marshmallow}
 
-    query = Contest.query.filter_by(**filters)
+    query = db.with_polymorphic(Contest, [SimpleContest]).query.filter_by(**filters)
 
     location_id = marshmallow.get('location_id', None)
 
@@ -547,9 +547,6 @@ def get_contest_filtered(args):
 
     offset = marshmallow.get('offset', None)
     limit = marshmallow.get('limit', None)
-
-    if len(filters.items()) != 0 and location_id is None and target_class_id is not None:
-        query = query.with_polymorphic([SimpleContest])
 
     query.order_by(SimpleContest.start_date)
 
