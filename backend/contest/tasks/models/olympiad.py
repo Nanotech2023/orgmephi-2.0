@@ -1,11 +1,13 @@
 import enum
 from datetime import datetime, timedelta
 
+from sqlalchemy import extract, select
 from sqlalchemy.ext.associationproxy import association_proxy
 from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.sql import case
 
 from common import get_current_db
+from contest.tasks.models import Stage, contestsInStage
 from user.models.auth import Group
 
 db = get_current_db()
@@ -340,11 +342,11 @@ class SimpleContest(Contest):
         return case(
             [
                 (
-                    cls.start_date.month < 9,
-                    cls.start_date.year - 1
+                    extract('month', cls.start_date) < 9,
+                    extract('year', cls.start_date) - 1
                 )
             ],
-            else_=cls.start_date.year
+            else_=extract('year', cls.start_date)
         ).label("academic_year")
 
     def change_previous(self, previous_contest_id=None, previous_participation_condition=None):
@@ -477,6 +479,29 @@ class CompositeContest(Contest):
             return contest.start_date.year - 1
         else:
             return contest.start_date.year
+
+    # noinspection PyMethodParameters
+    @academic_year.expression
+    def academic_year(cls):
+        contest_start_date = select(SimpleContest.start_date).where(
+            select(contestsInStage.columns.contest_id)
+            .where(
+                select(Stage.stage_id)
+                .where(
+                    Stage.olympiad_id == cls.contest_id
+                ).limit(1).scalar_subquery() == contestsInStage.columns.stage_id
+            ).limit(1).scalar_subquery() == cls.contest_id
+        ).scalar_subquery()
+
+        return case(
+            [
+                (
+                    extract('month', contest_start_date) < 9,
+                    extract('year', contest_start_date) - 1
+                )
+            ],
+            else_=extract('year', contest_start_date)
+        ).label("academic_year")
 
     @hybrid_property
     def status(self):

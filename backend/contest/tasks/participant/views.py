@@ -510,6 +510,12 @@ def get_all_contests_self():
           required: false
           schema:
             type: boolean
+        - in: query
+          name: composite_type
+          required: false
+          schema:
+            type: string
+            enum: ['SimpleContest', 'CompositeContest']
       security:
         - JWTAccessToken: [ ]
         - CSRFAccessToken: [ ]

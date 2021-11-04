@@ -1,5 +1,7 @@
 import secrets
 
+from sqlalchemy import or_
+
 from common.errors import FileTooLarge, DataConflict, InsufficientData, RequestError, NotFound
 from common.jwt_verify import jwt_get_id
 from contest.tasks.models import *
@@ -521,7 +523,7 @@ def check_user_unfilled_for_enroll(current_user: User):
 
 
 # Contest filter
-_filter_fields = ['base_contest_id', 'end_date']
+_filter_fields = ['base_contest_id', 'end_date', 'composite_type']
 
 
 def get_contest_filtered(args):
@@ -533,7 +535,8 @@ def get_contest_filtered(args):
 
     location_id = marshmallow.get('location_id', None)
 
-    academic_year: datetime = marshmallow.get('academic_year', None)
+    academic_year = marshmallow.get('academic_year', None)
+
     if location_id is not None:
         query = query.filter(SimpleContest.locations.any(location_id=location_id))
 
@@ -545,7 +548,20 @@ def get_contest_filtered(args):
     offset = marshmallow.get('offset', None)
     limit = marshmallow.get('limit', None)
 
-    query = query.with_polymorphic([SimpleContest]).order_by(SimpleContest.start_date)
+    composite_type = marshmallow.get('composite_type', None)
+
+    if composite_type is None:
+        query = query.with_polymorphic([SimpleContest, CompositeContest])
+
+    query.order_by(SimpleContest.start_date)
+
+    if academic_year is not None:
+        query = query.filter(
+            or_(
+                SimpleContest.academic_year == academic_year,
+                CompositeContest.academic_year == academic_year
+            )
+        )
 
     if limit is not None:
         query = query.limit(limit)
@@ -554,14 +570,9 @@ def get_contest_filtered(args):
         query = query.offset(offset)
 
     contest_list = query.all()
-
-    if academic_year is not None:
-        contest_list = [contest_ for contest_ in contest_list if contest_.academic_year == academic_year]
-
     return contest_list
 
-
-# Exceptions
+    # Exceptions
 
 
 class ContestContentAccessDenied(RequestError):
