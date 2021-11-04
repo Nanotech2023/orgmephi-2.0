@@ -26,7 +26,7 @@ def step_create_news(client, state):
         {
             'category': state.news_category_olympiad,
             'title': f'Olympiad {contest.base_contest.name}',
-            'body': f'Olympiad {contest.base_contest.name} of {contest.start_year} starting soon. Participate in '
+            'body': f'Olympiad {contest.base_contest.name} of {contest.academic_year} starting soon. Participate in '
                     f'{contest.base_contest.subject.value} contest on {contest.start_date.isoformat()}!',
             'related_contest': contest.contest_id
         }

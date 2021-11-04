@@ -481,10 +481,8 @@ def test_auto_check_creator(client, create_user_with_answers):
     assert len(results) == 8
     assert contest['subject'] == 'Math'
 
-    start_year = datetime.utcnow().year - 1 if datetime.utcnow().month < 6 else datetime.utcnow().year
-    end_year = datetime.utcnow().year if datetime.utcnow().month < 6 else datetime.utcnow().year + 1
-    assert contest['start_year'] == start_year
-    assert contest['end_year'] == end_year
+    academic_year = datetime.utcnow().year - 1 if datetime.utcnow().month < 9 else datetime.utcnow().year
+    assert contest['academic_year'] == academic_year
     assert results[0]['status'] == 'NoResults'
     assert results[0]['mark'] == 23
     assert results[0]['user_status'] == 'Winner 1'
