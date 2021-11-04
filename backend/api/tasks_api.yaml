@@ -2920,7 +2920,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/SimpleContestWithFlagResponseTaskParticipant'
+                $ref: '#/components/schemas/Contest'
           description: OK
         '400':
           description: Bad request
@@ -2945,7 +2945,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/SimpleContestWithFlagResponseTaskParticipant'
+                $ref: '#/components/schemas/Contest'
           description: OK
         '400':
           description: Bad request
