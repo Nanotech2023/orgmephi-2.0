@@ -124,10 +124,11 @@ class SimpleContestSchema(SQLAlchemySchema):
                              by_value=True, required=True)
     base_contest = fields.Nested(BaseContestSchema, required=True, dump_only=True)
 
-    @post_dump(pass_many=True)
-    def add_enrolled(self, data, many, **kwargs):
-        if not many:
-            data['enrolled'] = False
+    @post_dump(pass_original=True)
+    def add_enrolled(self, data, original, many, **kwargs):
+        from common.jwt_verify import jwt_get_id
+        from contest.tasks.util import is_user_in_contest
+        data['enrolled'] = is_user_in_contest(jwt_get_id(), original)
         return data
 
 

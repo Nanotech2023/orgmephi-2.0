@@ -581,7 +581,6 @@ def get_contest_in_stage_self(id_olympiad, id_stage, id_contest):
     """
     current_contest = get_contest_for_participant_if_possible(id_olympiad, id_stage, id_contest)
     current_contest_dict = SimpleContestSchema().dump(current_contest)
-    current_contest_dict['enrolled'] = is_user_in_contest(jwt_get_id(), current_contest)
     return current_contest_dict, 200
 
 
@@ -618,5 +617,4 @@ def get_contest_self(id_olympiad):
     """
     current_contest = get_simple_contest_if_possible(id_olympiad)
     current_contest_dict = SimpleContestSchema().dump(current_contest)
-    current_contest_dict['enrolled'] = is_user_in_contest(jwt_get_id(), current_contest)
     return current_contest_dict, 200
