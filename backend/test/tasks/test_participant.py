@@ -220,7 +220,7 @@ def test_get_contest_in_stage_self(client, test_composite_contest_with_users, te
     resp = client.get(f'/olympiad/{test_contests_composite[0].contest_id}'
                       f'/stage/{test_stages[0].stage_id}/contest/{test_simple_contest_in_stage_1[0].contest_id}')
     assert resp.status_code == 200
-    assert test_simple_contest_in_stage_1[0].contest_id == resp.json['contest_id']
+    assert test_simple_contest_in_stage_1[0].contest_id == resp.json["contest"]['contest_id']
 
     resp = client.get(f'/olympiad/{test_contests_composite[0].contest_id}'
                       f'/stage/{test_stages[1].stage_id}/contest/{test_simple_contest_in_stage_1[0].contest_id}')
@@ -228,13 +228,6 @@ def test_get_contest_in_stage_self(client, test_composite_contest_with_users, te
 
     resp = client.get(f'/olympiad/{test_contests_composite[1].contest_id}'
                       f'/stage/{test_stages[0].stage_id}/contest/{test_simple_contest_in_stage_1[0].contest_id}')
-    assert resp.status_code == 409
-
-
-def test_get_contest_in_stage_self_error(client, test_composite_contest_with_users, test_simple_contest_in_stage_1,
-                                         test_contests_composite, test_stages):
-    resp = client.get(f'/olympiad/{test_contests_composite[0].contest_id}'
-                      f'/stage/{test_stages[0].stage_id}/contest/{test_simple_contest_in_stage_1[1].contest_id}')
     assert resp.status_code == 409
 
 
@@ -247,21 +240,35 @@ def test_olympiads_all(client, test_simple_contest, test_contests_composite):
     assert resp.status_code == 200
     assert len(test_simple_contest + test_contests_composite) == resp.json['count']
 
+    resp = client.get('/olympiad/all?composite_type=CompositeContest')
+    print(resp.data)
+    assert resp.status_code == 200
+    assert len(test_contests_composite) == resp.json['count']
+
+    resp = client.get('/olympiad/all?composite_type=SimpleContest')
+    print(resp.data)
+    assert resp.status_code == 200
+    assert len(test_simple_contest) == resp.json['count']
+
+    resp = client.get('/olympiad/all?academic_year=2021')
+    print(resp.data)
+    assert resp.status_code == 200
+    assert len(test_simple_contest) - 1 == resp.json['count']
+
+    resp = client.get('/olympiad/all?academic_year=2007')
+    print(resp.data)
+    assert resp.status_code == 200
+    assert 1 == resp.json['count']
+
 
 def test_get_contest_self(client, test_base_contests, test_simple_contest, test_simple_contest_with_users):
     resp = client.get(
         f'/olympiad/{test_simple_contest[0].contest_id}')
     assert resp.status_code == 200
-    assert test_simple_contest[0].contest_id == resp.json['contest_id']
+    assert test_simple_contest[0].contest_id == resp.json["contest"]['contest_id']
 
 
 def test_get_contest_sel_composite(client, test_base_contests, test_contests_composite, test_simple_contest_with_users):
     resp = client.get(
         f'/olympiad/{test_contests_composite[0].contest_id}')
-    assert resp.status_code == 409
-
-
-def test_get_contest_self_not_reg(client, test_base_contests, test_simple_contest):
-    resp = client.get(
-        f'/olympiad/{test_simple_contest[0].contest_id}')
     assert resp.status_code == 409

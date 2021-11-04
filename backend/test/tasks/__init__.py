@@ -129,7 +129,17 @@ def test_simple_contest(test_base_contests_with_target, test_olympiad_locations)
                                      contest_duration=timedelta(minutes=30),
                                      result_publication_date=datetime.utcnow() + timedelta(hours=3),
                                      end_of_enroll_date=datetime.utcnow() + timedelta(minutes=15))
-                       for i in range(8)]
+                       for i in range(7)]
+    simple_contests.append(SimpleContest(
+        base_contest_id=test_base_contests_with_target[7].base_contest_id,
+        visibility=True,
+        start_date=datetime(2007, 10, 6, 16, 29, 43, 79043),
+        end_date=datetime(2007, 12, 6, 16, 29, 43, 79043),
+        holding_type=holding_types[7 % 2],
+        regulations=f'Test {7}',
+        contest_duration=timedelta(minutes=30),
+        result_publication_date=datetime(2007, 12, 6, 16, 29, 43, 79043),
+        end_of_enroll_date=datetime(2007, 11, 6, 16, 29, 43, 79043)))
     simple_contests[3].previous_contest_id = 1
     simple_contests[3].previous_participation_condition = UserStatusEnum.Winner_1
     test_app.db.session.add_all(simple_contests)
