@@ -1,0 +1,80 @@
+<div class="manage-container_main">
+    <div class="row">
+        <div class="col-md-3">
+            <app-manage-navbar></app-manage-navbar>
+        </div>
+        <div class="col-md-9" id="table">
+            <h2 class="pt-1 pb-3">Управление стадиями олимпиады {{ compositeContest?.contest_id }}</h2>
+            <dx-data-grid
+                *ngIf="compositeContest"
+                [dataSource]="compositeContest.stages"
+                width="100%"
+                [showColumnLines]="false"
+                [showRowLines]="true"
+                [showBorders]="true"
+                [columnAutoWidth]="true"
+                [allowColumnReordering]="true"
+                [allowColumnResizing]="true"
+                keyExpr="stage_id"
+                (onSelectionChanged)="selectedChanged($event)">
+
+                <dxi-column dataField="stage_id"></dxi-column>
+                <dxi-column dataField="stage_name"></dxi-column>
+                <dxi-column dataField="stage_num"></dxi-column>
+                <dxi-column dataField="this_stage_condition"></dxi-column>
+                <dxi-column dataField="condition"></dxi-column>
+                <!---TODO enum Stage.ConditionEnum--->
+
+                <dxo-selection mode="single"></dxo-selection>
+                <dxo-grouping [autoExpandAll]="false" [contextMenuEnabled]="true"></dxo-grouping>
+                <dxo-group-panel [visible]="true"></dxo-group-panel>
+
+                <dxo-scrolling mode="standard" [useNative]="true"></dxo-scrolling>
+                <dxo-column-chooser [enabled]="true"></dxo-column-chooser>
+                <dxo-search-panel [visible]="true" [highlightCaseSensitive]="true"></dxo-search-panel>
+                <dxo-editing mode="popup">
+                    <dxo-texts confirmDeleteMessage=""></dxo-texts>
+                </dxo-editing>
+
+                <dxo-export [enabled]="true"></dxo-export>
+                <dxo-paging [pageSize]="25"></dxo-paging>
+                <dxo-pager [showPageSizeSelector]="true" [allowedPageSizes]="[25, 50, 100]"></dxo-pager>
+                <dxo-state-storing [enabled]="true" type="localStorage"
+                                   storageKey="app-manage-contests"></dxo-state-storing>
+            </dx-data-grid>
+
+            <!--            https://js.devexpress.com/Documentation/Guide/UI_Components/Floating_Action_Button/Getting_Started_with_Floating_Action_Button/-->
+            <dx-speed-dial-action
+                icon="add"
+                label="Добавить"
+                [index]="1"
+                [elementAttr]="{ id: 'table' }"
+                (onClick)="addElement()">
+            </dx-speed-dial-action>
+            <dx-speed-dial-action
+                icon="arrowdown"
+                label="Олимпиады"
+                [index]="3"
+                [elementAttr]="{ id: 'table' }"
+                [visible]="selectedRowIndex !== -1"
+                (onClick)="navigateElement()">
+            </dx-speed-dial-action>
+            <dx-speed-dial-action
+                icon="trash"
+                label="Удалить"
+                [index]="2"
+                [elementAttr]="{ id: 'table' }"
+                [visible]="selectedRowIndex !== -1"
+                (onClick)="deleteElement()">
+            </dx-speed-dial-action>
+            <dx-speed-dial-action
+                icon="edit"
+                label="Изменить"
+                [index]="3"
+                [elementAttr]="{ id: 'table' }"
+                [visible]="selectedRowIndex !== -1"
+                (onClick)="editElement()">
+            </dx-speed-dial-action>
+        </div>
+    </div>
+</div>

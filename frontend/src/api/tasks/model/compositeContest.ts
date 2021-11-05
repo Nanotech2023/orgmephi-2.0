@@ -14,17 +14,30 @@ import { BaseContest } from './baseContest';
 
 
 export interface CompositeContest { 
+    academic_year?: number;
     readonly base_contest: BaseContest;
+    composite_type: CompositeContest.CompositeTypeEnum;
     readonly contest_id: number;
     holding_type: CompositeContest.HoldingTypeEnum;
     readonly stages: Array<Stage>;
+    status?: CompositeContest.StatusEnum;
     visibility: boolean;
 }
 export namespace CompositeContest {
+    export type CompositeTypeEnum = 'CompositeContest';
+    export const CompositeTypeEnum = {
+        CompositeContest: 'CompositeContest' as CompositeTypeEnum
+    };
     export type HoldingTypeEnum = 'OfflineContest' | 'OnLineContest';
     export const HoldingTypeEnum = {
         OfflineContest: 'OfflineContest' as HoldingTypeEnum,
         OnLineContest: 'OnLineContest' as HoldingTypeEnum
+    };
+    export type StatusEnum = 'Will start soon' | 'In progress' | 'Finished';
+    export const StatusEnum = {
+        WillStartSoon: 'Will start soon' as StatusEnum,
+        InProgress: 'In progress' as StatusEnum,
+        Finished: 'Finished' as StatusEnum
     };
 }
 

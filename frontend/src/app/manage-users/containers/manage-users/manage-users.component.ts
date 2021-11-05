@@ -3,7 +3,7 @@ import { UserFull } from '@api/users/models'
 import { ManageUsersStore } from '@/manage-users/manage-users.store'
 import { Observable } from 'rxjs'
 import { DxDataGridComponent } from 'devextreme-angular'
-import { UsersService } from '@api/users/users.service'
+import { ActivatedRoute, Router } from '@angular/router'
 
 
 @Component( {
@@ -16,9 +16,10 @@ export class ManageUsersComponent implements OnInit
 {
     @ViewChild( DxDataGridComponent, { static: false } ) grid!: DxDataGridComponent
     users$: Observable<UserFull[]> = this.store.users$
-    selectedRowIndex = -1
+    selectedRowIndex: number = -1
+    selectedRow?: UserFull = undefined
 
-    constructor( private store: ManageUsersStore, private usersService: UsersService ) {}
+    constructor( private route: ActivatedRoute, private router: Router, private store: ManageUsersStore ) {}
 
     ngOnInit(): void
     {
@@ -46,5 +47,11 @@ export class ManageUsersComponent implements OnInit
     selectedChanged( e: any ): void
     {
         this.selectedRowIndex = e.component.getRowIndexByKey( e.selectedRowKeys[ 0 ] )
+    }
+
+    navigateElement(): void
+    {
+        if ( this.selectedRow )
+            this.router.navigate( [ this.selectedRow.id, 'contests' ], { relativeTo: this.route } )
     }
 }

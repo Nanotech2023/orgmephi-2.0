@@ -1,14 +1,13 @@
-import { SimpleContest, TargetClass } from '@api/tasks/model'
+import { Contest, SimpleContest, TargetClass } from '@api/tasks/model'
 
 
-export function getStatusDisplay( contest: SimpleContest | undefined ): string
+export function getStatusDisplay( contest?: Contest ): string
 {
-    let contest1 = contest
-    if ( contest1 === undefined )
+    if ( contest === undefined )
         return ""
 
     let prefix = ""
-    switch ( contest1?.status )
+    switch ( contest?.status )
     {
         case SimpleContest.StatusEnum.WillStartSoon:
             prefix = "Скоро начнётся"
@@ -20,15 +19,17 @@ export function getStatusDisplay( contest: SimpleContest | undefined ): string
             prefix = "Олимпиада завершена"
             break
     }
-    if ( contest1.start_date === null )
-        return prefix
 
-    const year = new Date( contest1.start_date ).getFullYear()
-    return year + ": " + prefix
+    if ( contest.academic_year )
+    {
+        const year = new Date( contest.academic_year ).getFullYear()
+        return year + ": " + prefix
+    }
+    else return prefix
 }
 
 
-export function getClassesForDisplay( contest: SimpleContest | undefined ): string
+export function getClassesForDisplay( contest?: Contest ): string
 {
     let targetClasses = contest?.base_contest?.target_classes as TargetClass[]
     if ( targetClasses && targetClasses.length )

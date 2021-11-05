@@ -2,6 +2,7 @@ export * from './cSRFPairUser';
 export * from './city';
 export * from './country';
 export * from './document';
+export * from './documentBirthCertificate';
 export * from './documentForeignPassport';
 export * from './documentOther';
 export * from './documentRF';

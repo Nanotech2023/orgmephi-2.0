@@ -9,11 +9,11 @@
  * https://openapi-generator.tech
  * Do not edit the class manually.
  */
-import { SimpleContest } from './simpleContest';
+import { Contest } from './contest';
 
 
 export interface SimpleContestWithFlagResponseTaskParticipant { 
-    readonly contest?: SimpleContest;
+    readonly contest?: Contest;
     enrolled: boolean;
 }
 

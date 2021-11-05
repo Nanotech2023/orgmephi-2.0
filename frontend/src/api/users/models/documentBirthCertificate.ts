@@ -12,8 +12,8 @@
 import { DocumentTypeEnum } from "./documentType"
 
 
-export interface DocumentOther { 
-    document_name?: string;
+export interface DocumentBirthCertificate { 
+    readonly document_name?: string;
     document_type: DocumentTypeEnum;
     issue_date?: string;
     issuer?: string;

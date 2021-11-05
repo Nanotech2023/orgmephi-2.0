@@ -35,7 +35,7 @@ export class ContestListItemComponent
 
     getClassesForDisplay(): string
     {
-        return getClassesForDisplay(this.contest.contest)
+        return getClassesForDisplay( this.contest.contest )
     }
 
     getStatusDisplay(): string

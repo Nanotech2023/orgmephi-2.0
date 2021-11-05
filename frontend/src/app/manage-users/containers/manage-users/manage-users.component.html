@@ -1,4 +1,4 @@
-<div class="container_main">
+<div class="manage-container_main">
     <div class="row">
         <div class="col-md-3">
             <app-manage-navbar></app-manage-navbar>
@@ -50,6 +50,13 @@
                     label="Add row"
                     [index]="1"
                     (onClick)="addRow()">
+                </dx-speed-dial-action>
+                <dx-speed-dial-action
+                    icon="arrowdown"
+                    label="Олимпиады"
+                    [index]="3"
+                    [visible]="selectedRowIndex !== -1"
+                    (onClick)="navigateElement()">
                 </dx-speed-dial-action>
                 <dx-speed-dial-action
                     icon="trash"

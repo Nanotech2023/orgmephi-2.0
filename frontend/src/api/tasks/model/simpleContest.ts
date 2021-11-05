@@ -15,11 +15,14 @@ import { BaseContest } from './baseContest';
 
 
 export interface SimpleContest { 
+    academic_year?: number;
     readonly base_contest: BaseContest;
+    composite_type: SimpleContest.CompositeTypeEnum;
     contest_duration: number;
     readonly contest_id: number;
     end_date: string | null;
     end_of_enroll_date: string | null;
+    readonly enrolled?: boolean;
     holding_type: SimpleContest.HoldingTypeEnum;
     locations: Array<OlympiadLocation>;
     previous_contest_id?: number | null;
@@ -34,6 +37,10 @@ export interface SimpleContest {
     visibility: boolean;
 }
 export namespace SimpleContest {
+    export type CompositeTypeEnum = 'SimpleContest';
+    export const CompositeTypeEnum = {
+        SimpleContest: 'SimpleContest' as CompositeTypeEnum
+    };
     export type HoldingTypeEnum = 'OfflineContest' | 'OnLineContest';
     export const HoldingTypeEnum = {
         OfflineContest: 'OfflineContest' as HoldingTypeEnum,

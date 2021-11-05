@@ -4644,17 +4644,20 @@ export class TasksService
      * @param limit
      * @param baseContestId
      * @param locationId
+     * @param academicYear
      * @param endDate
      * @param targetClasses
      * @param onlyCount
+     * @param compositeType
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
      * @param reportProgress flag to report request and response progress.
      */
-    public tasksParticipantOlympiadAllGet( offset?: number, limit?: number, baseContestId?: number, locationId?: number, endDate?: string, targetClasses?: '5' | '6' | '7' | '8' | '9' | '10' | '11' | 'student', onlyCount?: boolean, observe?: 'body', reportProgress?: boolean, options?: { httpHeaderAccept?: 'application/json', context?: HttpContext } ): Observable<FilterSimpleContestResponseTaskParticipant>;
-    public tasksParticipantOlympiadAllGet( offset?: number, limit?: number, baseContestId?: number, locationId?: number, endDate?: string, targetClasses?: '5' | '6' | '7' | '8' | '9' | '10' | '11' | 'student', onlyCount?: boolean, observe?: 'response', reportProgress?: boolean, options?: { httpHeaderAccept?: 'application/json', context?: HttpContext } ): Observable<HttpResponse<FilterSimpleContestResponseTaskParticipant>>;
-    public tasksParticipantOlympiadAllGet( offset?: number, limit?: number, baseContestId?: number, locationId?: number, endDate?: string, targetClasses?: '5' | '6' | '7' | '8' | '9' | '10' | '11' | 'student', onlyCount?: boolean, observe?: 'events', reportProgress?: boolean, options?: { httpHeaderAccept?: 'application/json', context?: HttpContext } ): Observable<HttpEvent<FilterSimpleContestResponseTaskParticipant>>;
-    public tasksParticipantOlympiadAllGet( offset?: number, limit?: number, baseContestId?: number, locationId?: number, endDate?: string, targetClasses?: '5' | '6' | '7' | '8' | '9' | '10' | '11' | 'student', onlyCount?: boolean, observe: any = 'body', reportProgress: boolean = false, options?: { httpHeaderAccept?: 'application/json', context?: HttpContext } ): Observable<any>
+    public tasksParticipantOlympiadAllGet( offset?: number, limit?: number, baseContestId?: number, locationId?: number, academicYear?: number, endDate?: string, targetClasses?: '5' | '6' | '7' | '8' | '9' | '10' | '11' | 'student', onlyCount?: boolean, compositeType?: 'SimpleContest' | 'CompositeContest', observe?: 'body', reportProgress?: boolean, options?: { httpHeaderAccept?: 'application/json', context?: HttpContext } ): Observable<FilterSimpleContestResponseTaskParticipant>;
+    public tasksParticipantOlympiadAllGet( offset?: number, limit?: number, baseContestId?: number, locationId?: number, academicYear?: number, endDate?: string, targetClasses?: '5' | '6' | '7' | '8' | '9' | '10' | '11' | 'student', onlyCount?: boolean, compositeType?: 'SimpleContest' | 'CompositeContest', observe?: 'response', reportProgress?: boolean, options?: { httpHeaderAccept?: 'application/json', context?: HttpContext } ): Observable<HttpResponse<FilterSimpleContestResponseTaskParticipant>>;
+    public tasksParticipantOlympiadAllGet( offset?: number, limit?: number, baseContestId?: number, locationId?: number, academicYear?: number, endDate?: string, targetClasses?: '5' | '6' | '7' | '8' | '9' | '10' | '11' | 'student', onlyCount?: boolean, compositeType?: 'SimpleContest' | 'CompositeContest', observe?: 'events', reportProgress?: boolean, options?: { httpHeaderAccept?: 'application/json', context?: HttpContext } ): Observable<HttpEvent<FilterSimpleContestResponseTaskParticipant>>;
+    public tasksParticipantOlympiadAllGet( offset?: number, limit?: number, baseContestId?: number, locationId?: number, academicYear?: number, endDate?: string, targetClasses?: '5' | '6' | '7' | '8' | '9' | '10' | '11' | 'student', onlyCount?: boolean, compositeType?: 'SimpleContest' | 'CompositeContest', observe: any = 'body', reportProgress: boolean = false, options?: { httpHeaderAccept?: 'application/json', context?: HttpContext } ): Observable<any>
     {
+
         let localVarQueryParameters = new HttpParams( { encoder: this.encoder } )
         if ( offset !== undefined && offset !== null )
         {
@@ -4676,6 +4679,11 @@ export class TasksService
             localVarQueryParameters = this.addToHttpParams( localVarQueryParameters,
                 <any> locationId, 'location_id' )
         }
+        if ( academicYear !== undefined && academicYear !== null )
+        {
+            localVarQueryParameters = this.addToHttpParams( localVarQueryParameters,
+                <any> academicYear, 'academic_year' )
+        }
         if ( endDate !== undefined && endDate !== null )
         {
             localVarQueryParameters = this.addToHttpParams( localVarQueryParameters,
@@ -4690,6 +4698,11 @@ export class TasksService
         {
             localVarQueryParameters = this.addToHttpParams( localVarQueryParameters,
                 <any> onlyCount, 'only_count' )
+        }
+        if ( compositeType !== undefined && compositeType !== null )
+        {
+            localVarQueryParameters = this.addToHttpParams( localVarQueryParameters,
+                <any> compositeType, 'composite_type' )
         }
 
         let localVarHeaders = this.defaultHeaders
@@ -5252,17 +5265,19 @@ export class TasksService
      * @param offset
      * @param limit
      * @param baseContestId
+     * @param academicYear
      * @param locationId
      * @param endDate
      * @param targetClass
      * @param onlyCount
+     * @param compositeType
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
      * @param reportProgress flag to report request and response progress.
      */
-    public tasksUnauthorizedOlympiadAllGet( offset?: number, limit?: number, baseContestId?: number, locationId?: number, endDate?: string, targetClass?: number, onlyCount?: boolean, observe?: 'body', reportProgress?: boolean, options?: { httpHeaderAccept?: 'application/json', context?: HttpContext } ): Observable<FilterSimpleContestResponse>;
-    public tasksUnauthorizedOlympiadAllGet( offset?: number, limit?: number, baseContestId?: number, locationId?: number, endDate?: string, targetClass?: number, onlyCount?: boolean, observe?: 'response', reportProgress?: boolean, options?: { httpHeaderAccept?: 'application/json', context?: HttpContext } ): Observable<HttpResponse<FilterSimpleContestResponse>>;
-    public tasksUnauthorizedOlympiadAllGet( offset?: number, limit?: number, baseContestId?: number, locationId?: number, endDate?: string, targetClass?: number, onlyCount?: boolean, observe?: 'events', reportProgress?: boolean, options?: { httpHeaderAccept?: 'application/json', context?: HttpContext } ): Observable<HttpEvent<FilterSimpleContestResponse>>;
-    public tasksUnauthorizedOlympiadAllGet( offset?: number, limit?: number, baseContestId?: number, locationId?: number, endDate?: string, targetClass?: number, onlyCount?: boolean, observe: any = 'body', reportProgress: boolean = false, options?: { httpHeaderAccept?: 'application/json', context?: HttpContext } ): Observable<any>
+    public tasksUnauthorizedOlympiadAllGet( offset?: number, limit?: number, baseContestId?: number, academicYear?: number, locationId?: number, endDate?: string, targetClass?: number, onlyCount?: boolean, compositeType?: 'SimpleContest' | 'CompositeContest', observe?: 'body', reportProgress?: boolean, options?: { httpHeaderAccept?: 'application/json', context?: HttpContext } ): Observable<FilterSimpleContestResponse>;
+    public tasksUnauthorizedOlympiadAllGet( offset?: number, limit?: number, baseContestId?: number, academicYear?: number, locationId?: number, endDate?: string, targetClass?: number, onlyCount?: boolean, compositeType?: 'SimpleContest' | 'CompositeContest', observe?: 'response', reportProgress?: boolean, options?: { httpHeaderAccept?: 'application/json', context?: HttpContext } ): Observable<HttpResponse<FilterSimpleContestResponse>>;
+    public tasksUnauthorizedOlympiadAllGet( offset?: number, limit?: number, baseContestId?: number, academicYear?: number, locationId?: number, endDate?: string, targetClass?: number, onlyCount?: boolean, compositeType?: 'SimpleContest' | 'CompositeContest', observe?: 'events', reportProgress?: boolean, options?: { httpHeaderAccept?: 'application/json', context?: HttpContext } ): Observable<HttpEvent<FilterSimpleContestResponse>>;
+    public tasksUnauthorizedOlympiadAllGet( offset?: number, limit?: number, baseContestId?: number, academicYear?: number, locationId?: number, endDate?: string, targetClass?: number, onlyCount?: boolean, compositeType?: 'SimpleContest' | 'CompositeContest', observe: any = 'body', reportProgress: boolean = false, options?: { httpHeaderAccept?: 'application/json', context?: HttpContext } ): Observable<any>
     {
 
         let localVarQueryParameters = new HttpParams( { encoder: this.encoder } )
@@ -5280,6 +5295,11 @@ export class TasksService
         {
             localVarQueryParameters = this.addToHttpParams( localVarQueryParameters,
                 <any> baseContestId, 'base_contest_id' )
+        }
+        if ( academicYear !== undefined && academicYear !== null )
+        {
+            localVarQueryParameters = this.addToHttpParams( localVarQueryParameters,
+                <any> academicYear, 'academic_year' )
         }
         if ( locationId !== undefined && locationId !== null )
         {
@@ -5300,6 +5320,11 @@ export class TasksService
         {
             localVarQueryParameters = this.addToHttpParams( localVarQueryParameters,
                 <any> onlyCount, 'only_count' )
+        }
+        if ( compositeType !== undefined && compositeType !== null )
+        {
+            localVarQueryParameters = this.addToHttpParams( localVarQueryParameters,
+                <any> compositeType, 'composite_type' )
         }
 
         let localVarHeaders = this.defaultHeaders
