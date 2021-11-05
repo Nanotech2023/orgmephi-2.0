@@ -276,7 +276,7 @@ def test_time_extend_creator(client, create_one_task):
     contest_id = get_contest_id(create_one_task, DEFAULT_INDEX)
     user_id = get_user_id(create_one_task, DEFAULT_INDEX)
 
-    resp = client.post(f'/contest/{contest_id}/user/{user_id}/time',
+    resp = client.post(f'/contest/{contest_id}/user/{user_id}/time/extra',
                        json={'time': 1800})
     assert resp.status_code == 200
 
@@ -287,6 +287,10 @@ def test_time_extend_creator(client, create_one_task):
     resp = client.get(f'/contest/{contest_id}/user/{user_id}/time')
     assert resp.status_code == 200
     assert resp.json['time'] > 1800
+
+    resp = client.get(f'/contest/{contest_id}/user/{user_id}/time/extra')
+    assert resp.status_code == 200
+    assert resp.json['time'] == 1800
 
 
 def test_finish_contest_creator(client, create_one_task):
@@ -477,10 +481,8 @@ def test_auto_check_creator(client, create_user_with_answers):
     assert len(results) == 8
     assert contest['subject'] == 'Math'
 
-    start_year = datetime.utcnow().year - 1 if datetime.utcnow().month < 6 else datetime.utcnow().year
-    end_year = datetime.utcnow().year if datetime.utcnow().month < 6 else datetime.utcnow().year + 1
-    assert contest['start_year'] == start_year
-    assert contest['end_year'] == end_year
+    academic_year = datetime.utcnow().year - 1 if datetime.utcnow().month < 9 else datetime.utcnow().year
+    assert contest['academic_year'] == academic_year
     assert results[0]['status'] == 'NoResults'
     assert results[0]['mark'] == 23
     assert results[0]['user_status'] == 'Winner 1'

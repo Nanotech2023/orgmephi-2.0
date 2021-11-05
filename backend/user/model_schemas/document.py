@@ -48,6 +48,17 @@ class DocumentForeignPassportSchema(DocumentBaseSchema):
     issue_date = fields.Date()
 
 
+class DocumentBirthCertificateSchema(DocumentBaseSchema):
+    document_type = EnumField(DocumentTypeEnum, by_value=True, required=True,
+                              validate=validate.OneOf([DocumentTypeEnum.birth_certificate]))
+    document_name = common_fields.CommonName(dump_only=True)
+    series = fields.String(validate=validate.Regexp(
+        '^M{0,3}(CM|CD|D?C{0,3})(XC|XL|L?X{0,3})(IX|IV|V?I{0,3})-[\u0410-\u042F]{2}$'), example='III-АИ')
+    number = fields.String(validate=validate.Regexp('^[0-9]{6}$'), example='123456')
+    issuer = common_fields.FreeDescription()
+    issue_date = fields.Date()
+
+
 class DocumentOtherSchema(DocumentBaseSchema):
     document_type = EnumField(DocumentTypeEnum, by_value=True, required=True,
                               validate=validate.OneOf([DocumentTypeEnum.other_document]))
@@ -62,7 +73,8 @@ class DocumentSchema(OneOfSchema):
     type_schemas = {DocumentTypeEnum.rf_passport.value: DocumentRFSchema,
                     DocumentTypeEnum.rf_international_passport.value: DocumentRFInternationalSchema,
                     DocumentTypeEnum.foreign_passport.value: DocumentForeignPassportSchema,
-                    DocumentTypeEnum.other_document.value: DocumentOtherSchema}
+                    DocumentTypeEnum.other_document.value: DocumentOtherSchema,
+                    DocumentTypeEnum.birth_certificate.value: DocumentBirthCertificateSchema}
     type_field = "document_type"
     type_field_remove = False
 

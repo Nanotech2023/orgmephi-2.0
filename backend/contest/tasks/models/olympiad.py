@@ -1,11 +1,13 @@
 import enum
 from datetime import datetime, timedelta
 
+from sqlalchemy import extract, select
 from sqlalchemy.ext.associationproxy import association_proxy
 from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.sql import case
 
 from common import get_current_db
+from contest.tasks.models import Stage, contestsInStage
 from user.models.auth import Group
 
 db = get_current_db()
@@ -240,6 +242,29 @@ class Contest(db.Model):
         'polymorphic_on': composite_type
     }
 
+    @hybrid_property
+    def academic_year(self):
+        if self.composite_type == ContestTypeEnum.CompositeContest:
+            return CompositeContest.query.filter_by(contest_id=self.contest_id)
+        else:
+            return SimpleContest.query.filter_by(contest_id=self.contest_id)
+
+    @academic_year.expression
+    def academic_year(cls):
+        return case(
+            [
+                (
+                    cls.composite_type == ContestTypeEnum.CompositeContest,
+                    select(CompositeContest.academic_year).where(
+                        CompositeContest.contest_id == cls.contest_id
+                    ).limit(1).scalar_subquery()
+                )
+            ],
+            else_=select(SimpleContest.academic_year).where(
+                SimpleContest.contest_id == cls.contest_id
+            ).limit(1).scalar_subquery()
+        ).label("academic_year")
+
 
 def add_simple_contest(db_session,
                        visibility,
@@ -329,18 +354,23 @@ class SimpleContest(Contest):
     }
 
     @hybrid_property
-    def start_year(self):
-        if self.start_date.month < 6:
+    def academic_year(self):
+        if self.start_date.month < 9:
             return self.start_date.year - 1
         else:
             return self.start_date.year
 
-    @hybrid_property
-    def end_year(self):
-        if self.start_date.month < 6:
-            return self.start_date.year
-        else:
-            return self.start_date.year + 1
+    @academic_year.expression
+    def academic_year(cls):
+        return case(
+            [
+                (
+                    extract('month', cls.start_date) < 9,
+                    extract('year', cls.start_date) - 1
+                )
+            ],
+            else_=extract('year', cls.start_date)
+        ).label("academic_year")
 
     def change_previous(self, previous_contest_id=None, previous_participation_condition=None):
         if previous_contest_id is not None:
@@ -459,3 +489,58 @@ class CompositeContest(Contest):
         'polymorphic_identity': ContestTypeEnum.CompositeContest,
         'with_polymorphic': '*'
     }
+
+    @hybrid_property
+    def academic_year(self):
+        if len(self.stages.all()) == 0:
+            return None
+        stage = self.stages.all()[0]
+        if len(stage.contests) == 0:
+            return None
+        contest = stage.contests[0]
+        if contest.start_date.month < 9:
+            return contest.start_date.year - 1
+        else:
+            return contest.start_date.year
+
+    # noinspection PyMethodParameters
+    @academic_year.expression
+    def academic_year(cls):
+        contest_start_date = select(SimpleContest.start_date).where(
+            select(contestsInStage.columns.contest_id)
+            .where(
+                select(Stage.stage_id)
+                .where(
+                    Stage.olympiad_id == cls.contest_id
+                ).limit(1).scalar_subquery() == contestsInStage.columns.stage_id
+            ).limit(1).scalar_subquery() == cls.contest_id
+        ).scalar_subquery()
+
+        return case(
+            [
+                (
+                    extract('month', contest_start_date) < 9,
+                    extract('year', contest_start_date) - 1
+                )
+            ],
+            else_=extract('year', contest_start_date)
+        ).label("academic_year")
+
+    @hybrid_property
+    def status(self):
+        over = 0
+        not_started = 0
+        for stage in self.stages.all():
+            for contest in stage.contests:
+                if datetime.utcnow() < contest.start_date:
+                    not_started += 1
+                elif datetime.utcnow() < contest.end_date:
+                    return OlympiadStatusEnum.OlympiadInProgress
+                else:
+                    over += 1
+        if over == 0:
+            return OlympiadStatusEnum.OlympiadSoon
+        elif not_started == 0:
+            return OlympiadStatusEnum.OlympiadFinished
+        else:
+            return OlympiadStatusEnum.OlympiadInProgress

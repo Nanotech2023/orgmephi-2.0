@@ -242,10 +242,16 @@ components:
       type: object
     CompositeContest:
       properties:
+        academic_year:
+          type: integer
         base_contest:
           allOf:
           - $ref: '#/components/schemas/BaseContest'
           readOnly: true
+        composite_type:
+          enum:
+          - CompositeContest
+          type: string
         contest_id:
           readOnly: true
           type: integer
@@ -259,10 +265,17 @@ components:
             $ref: '#/components/schemas/Stage'
           readOnly: true
           type: array
+        status:
+          enum:
+          - Will start soon
+          - In progress
+          - Finished
+          type: string
         visibility:
           type: boolean
       required:
       - base_contest
+      - composite_type
       - contest_id
       - holding_type
       - stages
@@ -603,7 +616,7 @@ components:
       properties:
         contest_list:
           items:
-            $ref: '#/components/schemas/SimpleContest'
+            $ref: '#/components/schemas/Contest'
           type: array
         count:
           type: integer
@@ -796,10 +809,16 @@ components:
       type: object
     SimpleContest:
       properties:
+        academic_year:
+          type: integer
         base_contest:
           allOf:
           - $ref: '#/components/schemas/BaseContest'
           readOnly: true
+        composite_type:
+          enum:
+          - SimpleContest
+          type: string
         contest_duration:
           type: integer
           x-unit: seconds
@@ -814,6 +833,9 @@ components:
           format: date-time
           nullable: true
           type: string
+        enrolled:
+          readOnly: true
+          type: boolean
         holding_type:
           enum:
           - OfflineContest
@@ -866,6 +888,7 @@ components:
           type: boolean
       required:
       - base_contest
+      - composite_type
       - contest_duration
       - contest_id
       - end_date
@@ -881,7 +904,7 @@ components:
       properties:
         contest:
           allOf:
-          - $ref: '#/components/schemas/SimpleContest'
+          - $ref: '#/components/schemas/Contest'
           readOnly: true
         enrolled:
           type: boolean
@@ -2818,6 +2841,11 @@ paths:
         schema:
           type: integer
       - in: query
+        name: academic_year
+        required: false
+        schema:
+          type: integer
+      - in: query
         name: end_date
         required: false
         schema:
@@ -2842,6 +2870,14 @@ paths:
         required: false
         schema:
           type: boolean
+      - in: query
+        name: composite_type
+        required: false
+        schema:
+          enum:
+          - SimpleContest
+          - CompositeContest
+          type: string
       responses:
         '200':
           content:
@@ -3050,6 +3086,11 @@ paths:
         schema:
           type: integer
       - in: query
+        name: academic_year
+        required: false
+        schema:
+          type: integer
+      - in: query
         name: location_id
         required: false
         schema:
@@ -3070,6 +3111,14 @@ paths:
         required: false
         schema:
           type: boolean
+      - in: query
+        name: composite_type
+        required: false
+        schema:
+          enum:
+          - SimpleContest
+          - CompositeContest
+          type: string
       responses:
         '200':
           content:

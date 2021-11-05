@@ -13,12 +13,14 @@ class DocumentTypeEnum(enum.Enum):
     rf_international_passport = 'RFInternationalPassport'
     foreign_passport = 'ForeignPassport'
     other_document = 'OtherDocument'
+    birth_certificate = 'BirthCertificate'
 
 
 document_names = {
     DocumentTypeEnum.rf_passport: app.config['ORGMEPHI_NATIVE_DOCUMENT'],
     DocumentTypeEnum.rf_international_passport:  app.config['ORGMEPHI_INTERNATIONAL_DOCUMENT'],
-    DocumentTypeEnum.foreign_passport: app.config['ORGMEPHI_FOREIGN_DOCUMENT']
+    DocumentTypeEnum.foreign_passport: app.config['ORGMEPHI_FOREIGN_DOCUMENT'],
+    DocumentTypeEnum.birth_certificate: app.config['ORGMEPHI_BIRTH_CERTIFICATE']
 }
 
 document_names_reverse = {val: key for key, val in document_names.items()}
@@ -62,6 +64,7 @@ class Document(db.Model):
         DocumentTypeEnum.rf_passport: ['series', 'number', 'issuer', 'issue_date', 'rf_code'],
         DocumentTypeEnum.rf_international_passport: ['series', 'number', 'issue_date'],
         DocumentTypeEnum.foreign_passport: ['number', 'issue_date'],
+        DocumentTypeEnum.birth_certificate: ['series', 'number', 'issuer', 'issue_date'],
         DocumentTypeEnum.other_document: ['number', 'other_document_name']
     }
 

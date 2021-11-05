@@ -39,7 +39,7 @@ def jwt_get_id() -> int:
     Get id of the authenticated user
     :return: ID of the current user
     """
-    return get_jwt()['sub']
+    return get_jwt().get('sub', None)
 
 
 def jwt_get_role() -> str:
@@ -47,7 +47,7 @@ def jwt_get_role() -> str:
     Get role of the authenticated user
     :return: Role of the current user
     """
-    return get_jwt()['role']
+    return get_jwt().get('role', None)
 
 
 def jwt_get_username() -> str:
@@ -55,4 +55,4 @@ def jwt_get_username() -> str:
     Get username of the authenticated user
     :return: Username of the current user
     """
-    return get_jwt()['name']
+    return get_jwt().get('name', None)

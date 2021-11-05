@@ -4,7 +4,7 @@ from common import get_current_module
 from common.errors import AlreadyExists, TimeOver
 from common.util import send_pdf
 from contest.responses.util import get_user_in_contest_work
-from contest.tasks.model_schemas.olympiad import ContestSchema
+from contest.tasks.model_schemas.olympiad import SimpleContestSchema
 from contest.tasks.participant.schemas import *
 from contest.tasks.participant.util import filter_olympiad_query_with_enrolled_flag
 from contest.tasks.unauthorized.schemas import AllOlympiadsResponseTaskUnauthorizedSchema
@@ -351,6 +351,7 @@ def get_task_image_self(id_contest, id_task):
     task = get_user_task_if_possible(id_contest, id_task)
     return app.send_media(task.image_of_task)
 
+
 # Certificate
 
 
@@ -489,6 +490,11 @@ def get_all_contests_self():
           schema:
             type: integer
         - in: query
+          name: academic_year
+          required: false
+          schema:
+            type: integer
+        - in: query
           name: end_date
           required: false
           schema:
@@ -505,6 +511,12 @@ def get_all_contests_self():
           required: false
           schema:
             type: boolean
+        - in: query
+          name: composite_type
+          required: false
+          schema:
+            type: string
+            enum: ['SimpleContest', 'CompositeContest']
       security:
         - JWTAccessToken: [ ]
         - CSRFAccessToken: [ ]
@@ -526,7 +538,7 @@ def get_all_contests_self():
 
 @module.route(
     '/olympiad/<int:id_olympiad>/stage/<int:id_stage>/contest/<int:id_contest>',
-    methods=['GET'], output_schema=ContestSchema)
+    methods=['GET'])
 def get_contest_in_stage_self(id_olympiad, id_stage, id_contest):
     """
     Get current contest in stage
@@ -559,7 +571,7 @@ def get_contest_in_stage_self(id_olympiad, id_stage, id_contest):
           description: OK
           content:
             application/json:
-              schema: ContestSchema
+              schema: Contest
         '400':
           description: Bad request
         '409':
@@ -567,13 +579,14 @@ def get_contest_in_stage_self(id_olympiad, id_stage, id_contest):
         '404':
           description: User not found
     """
-    current_contest = get_user_contest_if_possible(id_olympiad, id_stage, id_contest)
-    return current_contest, 200
+    current_contest = get_contest_for_participant_if_possible(id_olympiad, id_stage, id_contest)
+    current_contest_dict = SimpleContestSchema().dump(current_contest)
+    return current_contest_dict, 200
 
 
 @module.route(
     '/olympiad/<int:id_olympiad>',
-    methods=['GET'], output_schema=ContestSchema)
+    methods=['GET'])
 def get_contest_self(id_olympiad):
     """
     Get current contest in stage
@@ -594,7 +607,7 @@ def get_contest_self(id_olympiad):
           description: OK
           content:
             application/json:
-              schema: ContestSchema
+              schema: Contest
         '400':
           description: Bad request
         '409':
@@ -602,5 +615,6 @@ def get_contest_self(id_olympiad):
         '404':
           description: User not found
     """
-    current_contest = get_user_simple_contest_if_possible(id_olympiad)
-    return current_contest, 200
+    current_contest = get_simple_contest_if_possible(id_olympiad)
+    current_contest_dict = SimpleContestSchema().dump(current_contest)
+    return current_contest_dict, 200

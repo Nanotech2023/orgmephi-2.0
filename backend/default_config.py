@@ -27,6 +27,7 @@ class DefaultConfiguration:
     ORGMEPHI_NATIVE_DOCUMENT = 'Паспорт гражданина РФ'
     ORGMEPHI_INTERNATIONAL_DOCUMENT = 'Заграничный паспорт гражданина РФ'
     ORGMEPHI_FOREIGN_DOCUMENT = 'Паспорт гражданина иностранного государства'
+    ORGMEPHI_BIRTH_CERTIFICATE = 'Свидетельство о рождении в РФ'
     ORGMEPHI_AREA = 'both'
     ORGMEPHI_DAILY_THREAD_LIMIT = 5
     ORGMEPHI_DAILY_MESSAGE_LIMIT = 10

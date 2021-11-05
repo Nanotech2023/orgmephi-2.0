@@ -536,7 +536,6 @@ def user_status_for_response_by_id(contest_id, user_id):
     get:
       security:
         - JWTAccessToken: []
-        - CSRFAccessToken: []
       parameters:
         - in: path
           description: Id of the contest
@@ -671,7 +670,6 @@ def user_answer_task_mark(contest_id, user_id, task_id):
     get:
       security:
         - JWTAccessToken: []
-        - CSRFAccessToken: []
       parameters:
         - in: path
           description: Id of the contest
@@ -720,7 +718,6 @@ def user_by_id_time_left(contest_id, user_id):
     get:
       security:
         - JWTAccessToken: []
-        - CSRFAccessToken: []
       parameters:
         - in: path
           description: Id of the contest
@@ -753,9 +750,50 @@ def user_by_id_time_left(contest_id, user_id):
            }, 200
 
 
-@module.route('/contest/<int:contest_id>/user/<int:user_id>/time', methods=['POST'],
+@module.route('/contest/<int:contest_id>/user/<int:user_id>/time/extra', methods=['GET'],
+              output_schema=UserTimeResponseRequestSchema)
+def get_user_by_id_extra_time(contest_id, user_id):
+    """
+    Get extended time for user
+    ---
+    get:
+      security:
+        - JWTAccessToken: []
+      parameters:
+        - in: path
+          description: Id of the contest
+          name: contest_id
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the user
+          name: user_id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: UserTimeResponseRequestSchema
+        '403':
+          description: Restriction error
+        '404':
+          description: User or contest not found
+    """
+    creator_id = jwt_get_id()
+    check_contest_restriction(creator_id, contest_id, ContestGroupRestrictionEnum.view_response)
+    user_work = get_user_in_contest_work(user_id, contest_id)
+    return {
+        "time": user_work.time_extension
+           }, 200
+
+
+@module.route('/contest/<int:contest_id>/user/<int:user_id>/time/extra', methods=['POST'],
               input_schema=UserTimeResponseRequestSchema)
-def user_by_id_extend_time(contest_id, user_id):
+def user_by_id_extra_time(contest_id, user_id):
     """
     Extend contest duration for user
     ---
@@ -914,7 +952,6 @@ def all_user_results(user_id):
     get:
       security:
         - JWTAccessToken: []
-        - CSRFAccessToken: []
       parameters:
         - in: path
           description: Id of the user

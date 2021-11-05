@@ -1,10 +1,10 @@
 from marshmallow import Schema, fields
+from marshmallow_enum import EnumField
 
 from common import fields as common_fields
 from contest.tasks.model_schemas.contest import VariantSchema
-from contest.tasks.model_schemas.olympiad import SimpleContestSchema
+from contest.tasks.model_schemas.olympiad import ContestSchema
 from contest.tasks.models.tasks import TaskTypeEnum
-from marshmallow_enum import EnumField
 
 
 class AnswersInTaskRequestTaskParticipantSchema(Schema):
@@ -30,7 +30,7 @@ class ChangeSupervisorRequestTaskParticipantSchema(Schema):
 
 
 class SimpleContestWithFlagResponseTaskParticipantSchema(Schema):
-    contest = fields.Nested(SimpleContestSchema, required=False, dump_only=True)
+    contest = fields.Nested(ContestSchema, required=False, dump_only=True)
     enrolled = fields.Boolean(required=True)
 
 
