@@ -7,6 +7,8 @@ from contest.tasks.models import OlympiadSubjectEnum, StageConditionEnum, Contes
 
 
 # Base contest
+from contest.tasks.models.certificate import Certificate, CertificateType
+
 
 class UpdateBaseOlympiadRequestTaskEditorSchema(Schema):
     name = common_fields.OlympiadName(required=False)
@@ -106,3 +108,7 @@ class UpdateLocationOfContestRequestTaskEditorSchema(Schema):
 
 class UpdateTargetClassesOfContestRequestTaskEditorSchema(Schema):
     target_classes_ids = fields.List(fields.Int(), required=True)
+
+
+class CertificateGetResponseTaskEditorSchema(Schema):
+    certificate_types = fields.Nested(CertificateType, many=True)

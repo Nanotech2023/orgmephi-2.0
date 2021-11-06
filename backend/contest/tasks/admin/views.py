@@ -1,8 +1,13 @@
 from flask import request
+from marshmallow import EXCLUDE
 
 from common import get_current_module
-from common.util import db_add_if_not_exists
+from common.errors import AlreadyExists
+from common.media_types import CertificateImage
+from common.util import db_add_if_not_exists, db_exists
 from contest.tasks.admin.schemas import *
+from contest.tasks.model_schemas.certificate import CertificateTypeSchema, CertificateSchema
+from contest.tasks.models.certificate import CertificateType, Certificate
 from contest.tasks.util import *
 
 db = get_current_db()
@@ -242,3 +247,230 @@ def location_remove(id_location):
     db.session.commit()
 
     return {}, 200
+
+
+@module.route('/certificate_type', methods=['POST'], output_schema=CertificateTypeSchema)
+def add_certificate_type():
+    """
+    Add certificate type
+    ---
+    post:
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: CertificateTypeSchema
+      security:
+        - JWTAccessToken: [ ]
+        - CSRFAccessToken: [ ]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: CertificateTypeSchema
+    """
+    certificate_type = CertificateTypeSchema().load(request.json, session=db.session, partial=False, unknown=EXCLUDE)
+    db.session.add(certificate_type)
+    db.session.commit()
+    return certificate_type, 200
+
+
+@module.route('/certificate_type/<int:certificate_type_id>', methods=['PATCH'])
+def patch_certificate_type(certificate_type_id):
+    """
+    Patch certificate type
+    ---
+    post:
+      parameters:
+        - in: path
+          description: Id of the certificate type
+          name: certificate_type_id
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: CertificateTypeSchema
+      security:
+        - JWTAccessToken: [ ]
+        - CSRFAccessToken: [ ]
+      responses:
+        '204':
+          description: OK
+        '404':
+          description: Certificate type not found
+    """
+    certificate_type = db_get_or_raise(CertificateType, 'certificate_type_id', certificate_type_id)
+    CertificateTypeSchema(load_instance=True).load(request.json, session=db.session, partial=False, unknown=EXCLUDE,
+                                                   instance=certificate_type)
+    db.session.commit()
+    return {}, 204
+
+
+@module.route('/certificate_type/<int:certificate_type_id>', methods=['DELETE'])
+def delete_certificate_type(certificate_type_id):
+    """
+    Delete certificate type
+    ---
+    post:
+      parameters:
+        - in: path
+          description: Id of the certificate type
+          name: certificate_type_id
+          required: true
+          schema:
+            type: integer
+      security:
+        - JWTAccessToken: [ ]
+        - CSRFAccessToken: [ ]
+      responses:
+        '204':
+          description: OK
+        '404':
+          description: Certificate type not found
+    """
+    certificate_type = db_get_or_raise(CertificateType, 'certificate_type_id', certificate_type_id)
+    db.session.delete(certificate_type)
+    db.session.commit()
+    return {}, 204
+
+
+@module.route('/certificate_type/<int:certificate_id>/certificate', methods=['POST'],
+              output_schema=CertificateSchema)
+def add_certificate(certificate_id):
+    """
+    Add certificate type
+    ---
+    post:
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: CertificateSchema
+      security:
+        - JWTAccessToken: [ ]
+        - CSRFAccessToken: [ ]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: CertificateSchema
+    """
+    certificate_type = db_get_or_raise(CertificateType, 'certificate_type_id', certificate_id)
+    certificate = CertificateSchema().load(request.json, session=db.session, partial=False, unknown=EXCLUDE)
+    category = certificate.certificate_category
+    exists = db_exists(db.session, Certificate, filters={
+        'certificate_type_id': certificate_id,
+        'certificate_category': category
+    })
+    if exists:
+        raise AlreadyExists(f'Certificate type', category.value)
+
+    certificate_type.certificates.append(certificate)
+    db.session.commit()
+    return certificate, 200
+
+
+@module.route('/certificate/<int:certificate_id>', methods=['PATCH'])
+def patch_certificate(certificate_id):
+    """
+    Patch certificate
+    ---
+    post:
+      parameters:
+        - in: path
+          description: Id of the certificate
+          name: certificate_id
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: CertificateSchema
+      security:
+        - JWTAccessToken: [ ]
+        - CSRFAccessToken: [ ]
+      responses:
+        '204':
+          description: OK
+        '404':
+          description: Certificate not found
+    """
+    certificate = db_get_or_raise(Certificate, 'certificate_id', certificate_id)
+    certificate = CertificateSchema(load_instance=True)\
+        .load(request.json, session=db.session, partial=False, unknown=EXCLUDE, instance=certificate)
+
+    category = certificate.certificate_category
+    query = Certificate.query.filter_by(certificate_type_id=certificate.certificate_type_id,
+                                        certificate_category=category).\
+        filter(Certificate.certificate_id != certificate.certificate_id)
+    exists = db.session.query(query.exists()).scalar()
+    if exists:
+        raise AlreadyExists(f'Certificate type', category.value)
+
+    db.session.commit()
+    return {}, 204
+
+
+@module.route('/certificate_type/<int:certificate_id>', methods=['DELETE'])
+def delete_certificate(certificate_id):
+    """
+    Delete certificate
+    ---
+    post:
+      parameters:
+        - in: path
+          description: Id of the certificate
+          name: certificate_id
+          required: true
+          schema:
+            type: integer
+      security:
+        - JWTAccessToken: [ ]
+        - CSRFAccessToken: [ ]
+      responses:
+        '204':
+          description: OK
+        '404':
+          description: Certificate not found
+    """
+    certificate = db_get_or_raise(Certificate, 'certificate_id', certificate_id)
+    db.session.delete(certificate)
+    db.session.commit()
+    return {}, 204
+
+
+@module.route('/certificate/<int:certificate_id>/image', methods=['POST'])
+def post_certificate_image(certificate_id):
+    """
+    Post certificate image
+    ---
+    get:
+      requestBody:
+        required: true
+        content:
+          image/png:
+            schema:
+              type: string
+              format: binary
+          image/jpeg:
+            schema:
+              type: string
+              format: binary
+      security:
+        - JWTAccessToken: [ ]
+        - CSRFAccessToken: [ ]
+      responses:
+        '204':
+          description: OK
+        '404':
+          description: Certificate not found
+    """
+    certificate = db_get_or_raise(Certificate, 'certificate_id', certificate_id)
+    return app.store_media('CERTIFICATE', certificate, 'certificate_image', CertificateImage)

@@ -1,4 +1,5 @@
 from flask import request
+from marshmallow import EXCLUDE
 
 from common import get_current_module
 from contest.tasks.creator.schemas import *
@@ -10,7 +11,6 @@ app = get_current_app()
 
 
 @module.route('/base_olympiad/create', methods=['POST'],
-              input_schema=CreateBaseOlympiadRequestTaskCreatorSchema,
               output_schema=BaseOlympiadIdResponseTaskCreatorSchema)
 def base_olympiad_create():
     """
@@ -21,7 +21,7 @@ def base_olympiad_create():
         required: true
         content:
           application/json:
-            schema: CreateBaseOlympiadRequestTaskCreatorSchema
+            schema: BaseContestSchema
       security:
         - JWTAccessToken: [ ]
         - CSRFAccessToken: [ ]
@@ -36,40 +36,8 @@ def base_olympiad_create():
         '409':
           description: Olympiad type already in use
     """
-
-    values = request.marshmallow
-
-    name = values['name']
-    description = values['description']
-    rules = values['rules']
-    olympiad_type_id = values['olympiad_type_id']
-
-    winner_1_condition = values['winner_1_condition']
-    winner_2_condition = values['winner_2_condition']
-    winner_3_condition = values['winner_3_condition']
-    diploma_1_condition = values['diploma_1_condition']
-    diploma_2_condition = values['diploma_2_condition']
-    diploma_3_condition = values['diploma_3_condition']
-
-    subject = values['subject']
-    level = values['level']
-
-    db_get_or_raise(OlympiadType, "olympiad_type_id", values["olympiad_type_id"])
-    base_contest = add_base_contest(db.session,
-                                    description=description,
-                                    name=name,
-                                    certificate_template=None,
-                                    winner_1_condition=winner_1_condition,
-                                    winner_2_condition=winner_2_condition,
-                                    winner_3_condition=winner_3_condition,
-                                    diploma_1_condition=diploma_1_condition,
-                                    diploma_2_condition=diploma_2_condition,
-                                    diploma_3_condition=diploma_3_condition,
-                                    rules=rules,
-                                    olympiad_type_id=olympiad_type_id,
-                                    subject=subject,
-                                    level=level)
-
+    base_contest = BaseContestSchema().load(request.json, session=db.session, partial=False, unknown=EXCLUDE)
+    db.session.add(base_contest)
     db.session.commit()
 
     return {
