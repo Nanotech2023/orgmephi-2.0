@@ -123,7 +123,7 @@ class BaseContest(db.Model):
     description: description of the contest
     olympiad_type_id: olympiad type id
     subject: subject
-    certificate_template: contest certificate template
+    certificate_type: contest certificate template
     conditions: Diploma 3, Diploma 2, Diploma 1, Winner 3, Winner 2, Winner 1
     target_class: target class
     child_contests: child contests
@@ -139,8 +139,8 @@ class BaseContest(db.Model):
     olympiad_type_id = db.Column(db.Integer, db.ForeignKey('olympiad_type.olympiad_type_id'), nullable=False)
     subject = db.Column(db.Enum(OlympiadSubjectEnum), nullable=False)
     level = db.Column(db.Enum(OlympiadLevelEnum), nullable=False)
-    certificate_template_id = db.Column(db.Integer, db.ForeignKey('CertificateType.certificate_type_id',
-                                                                  ondelete='SET NULL'))
+    certificate_type_id = db.Column(db.Integer, db.ForeignKey('certificate_type.certificate_type_id',
+                                                              ondelete='SET NULL'))
 
     winner_1_condition = db.Column(db.Float, nullable=False)
     winner_2_condition = db.Column(db.Float, nullable=False)
@@ -154,8 +154,6 @@ class BaseContest(db.Model):
 
     child_contests = db.relationship('Contest', lazy='dynamic',
                                      backref=db.backref('base_contest', lazy='joined'), cascade="all, delete-orphan")
-
-    certificate_template = db.relationship('CertificateType', lazy='dynamic')
 
 
 class ContestTypeEnum(enum.Enum):

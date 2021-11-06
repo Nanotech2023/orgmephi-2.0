@@ -10,6 +10,7 @@ from contest.tasks.model_schemas.contest import VariantSchema
 from contest.tasks.model_schemas.olympiad import BaseContestSchema, SimpleContestSchema, CompositeContestSchema, \
     StageSchema
 from contest.tasks.model_schemas.tasks import PlainTaskSchema, RangeTaskSchema, MultipleChoiceTaskSchema
+from contest.tasks.models.certificate import Certificate, CertificateType
 from contest.tasks.util import *
 
 db = get_current_db()
@@ -951,7 +952,17 @@ def remove_target_classes_from_contest(id_base_olympiad):
     return {}, 200
 
 
-@module.route('/certificate_type', methods=['GET'], output_schema=CertificateGetResponseTaskEditorSchema)
+@module.route('/certificate_type', methods=['GET'],
+              output_schema=CertificateTypeSchema(exclude=[
+                  'certificates.text_x',
+                  'certificates.text_y',
+                  'certificates.text_width',
+                  'certificates.text_size',
+                  'certificates.text_style',
+                  'certificates.text_spacing',
+                  'certificates.text_color',
+                  'certificates.certificate_type_id'
+              ]))
 def get_certificate_types():
     """
     Get all certificate types
@@ -966,16 +977,33 @@ def get_certificate_types():
             application/json:
               schema: CertificateGetResponseTaskEditorSchema
     """
-    certificate_types = Certificate.query.all()
+    certificate_types = CertificateType.query.all()
     return {'certificate_types': certificate_types}, 200
 
 
-@module.route('/certificate_type/<int:certificate_type_id>', methods=['GET'], output_schema=CertificateTypeSchema)
+@module.route('/certificate_type/<int:certificate_type_id>', methods=['GET'],
+              output_schema=CertificateTypeSchema(exclude=[
+                  'certificates.text_x',
+                  'certificates.text_y',
+                  'certificates.text_width',
+                  'certificates.text_size',
+                  'certificates.text_style',
+                  'certificates.text_spacing',
+                  'certificates.text_color',
+                  'certificates.certificate_type_id'
+              ]))
 def get_certificate_type_by_id(certificate_type_id):
     """
     Get one certificate type
     ---
     get:
+      parameters:
+        - in: path
+          description: ID of the certificate type
+          name: certificate_type_id
+          required: true
+          schema:
+            type: integer
       security:
         - JWTAccessToken: [ ]
       responses:
@@ -997,6 +1025,13 @@ def get_certificate_by_id(certificate_id):
     Get one certificate
     ---
     get:
+      parameters:
+        - in: path
+          description: ID of the certificate
+          name: certificate_id
+          required: true
+          schema:
+            type: integer
       security:
         - JWTAccessToken: [ ]
       responses:
@@ -1018,6 +1053,13 @@ def get_certificate_image(certificate_id):
     Get certificate image
     ---
     get:
+      parameters:
+        - in: path
+          description: ID of the certificate
+          name: certificate_id
+          required: true
+          schema:
+            type: integer
       security:
         - JWTAccessToken: [ ]
       responses:

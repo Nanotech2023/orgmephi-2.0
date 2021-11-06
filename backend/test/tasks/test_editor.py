@@ -10,12 +10,6 @@ def client(client_creator):
 # Base olympiad
 
 
-def test_base_olympiad_upload(client, test_base_contests):
-    resp = client.post(f'/base_olympiad/{test_base_contests[0].base_contest_id}/upload_certificate',
-                       data=b'Test')
-    assert resp.status_code == 200
-
-
 def test_base_olympiad_remove(client, test_base_contests):
     from contest.tasks.models import BaseContest
     test_base_contests: BaseContest = test_base_contests[1]

@@ -26,7 +26,7 @@ class CreateBaseOlympiadRequestTaskCreatorSchema(Schema):
     olympiad_type_id = fields.Int(required=True)
     subject = EnumField(OlympiadSubjectEnum, required=True, by_value=True)
     level = EnumField(OlympiadLevelEnum, required=True, by_value=True)
-    certificate_template = fields.Int(required=False)
+    certificate_type = fields.Int(required=False)
 
 
 class BaseOlympiadResponseTaskCreatorSchema(BaseContestSchema):

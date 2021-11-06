@@ -281,7 +281,7 @@ def patch_certificate_type(certificate_type_id):
     """
     Patch certificate type
     ---
-    post:
+    patch:
       parameters:
         - in: path
           description: Id of the certificate type
@@ -304,7 +304,7 @@ def patch_certificate_type(certificate_type_id):
           description: Certificate type not found
     """
     certificate_type = db_get_or_raise(CertificateType, 'certificate_type_id', certificate_type_id)
-    CertificateTypeSchema(load_instance=True).load(request.json, session=db.session, partial=False, unknown=EXCLUDE,
+    CertificateTypeSchema(load_instance=True).load(request.json, session=db.session, partial=True, unknown=EXCLUDE,
                                                    instance=certificate_type)
     db.session.commit()
     return {}, 204
@@ -315,7 +315,7 @@ def delete_certificate_type(certificate_type_id):
     """
     Delete certificate type
     ---
-    post:
+    delete:
       parameters:
         - in: path
           description: Id of the certificate type
@@ -338,13 +338,20 @@ def delete_certificate_type(certificate_type_id):
     return {}, 204
 
 
-@module.route('/certificate_type/<int:certificate_id>/certificate', methods=['POST'],
+@module.route('/certificate_type/<int:certificate_type_id>/certificate', methods=['POST'],
               output_schema=CertificateSchema)
-def add_certificate(certificate_id):
+def add_certificate(certificate_type_id):
     """
     Add certificate type
     ---
     post:
+      parameters:
+        - in: path
+          description: Id of the certificate type
+          name: certificate_type_id
+          required: true
+          schema:
+            type: integer
       requestBody:
         required: true
         content:
@@ -360,15 +367,21 @@ def add_certificate(certificate_id):
             application/json:
               schema: CertificateSchema
     """
-    certificate_type = db_get_or_raise(CertificateType, 'certificate_type_id', certificate_id)
+    certificate_type = db_get_or_raise(CertificateType, 'certificate_type_id', certificate_type_id)
     certificate = CertificateSchema().load(request.json, session=db.session, partial=False, unknown=EXCLUDE)
     category = certificate.certificate_category
     exists = db_exists(db.session, Certificate, filters={
-        'certificate_type_id': certificate_id,
+        'certificate_type_id': certificate_type_id,
         'certificate_category': category
     })
     if exists:
         raise AlreadyExists(f'Certificate type', category.value)
+
+    try:
+        from PIL import ImageFont
+        font = ImageFont.truetype(certificate.text_style)
+    except OSError:
+        raise InsufficientData('Font', certificate.text_style)
 
     certificate_type.certificates.append(certificate)
     db.session.commit()
@@ -380,7 +393,7 @@ def patch_certificate(certificate_id):
     """
     Patch certificate
     ---
-    post:
+    patch:
       parameters:
         - in: path
           description: Id of the certificate
@@ -404,7 +417,7 @@ def patch_certificate(certificate_id):
     """
     certificate = db_get_or_raise(Certificate, 'certificate_id', certificate_id)
     certificate = CertificateSchema(load_instance=True)\
-        .load(request.json, session=db.session, partial=False, unknown=EXCLUDE, instance=certificate)
+        .load(request.json, session=db.session, partial=True, unknown=EXCLUDE, instance=certificate)
 
     category = certificate.certificate_category
     query = Certificate.query.filter_by(certificate_type_id=certificate.certificate_type_id,
@@ -423,7 +436,7 @@ def delete_certificate(certificate_id):
     """
     Delete certificate
     ---
-    post:
+    delete:
       parameters:
         - in: path
           description: Id of the certificate
@@ -451,7 +464,14 @@ def post_certificate_image(certificate_id):
     """
     Post certificate image
     ---
-    get:
+    post:
+      parameters:
+        - in: path
+          description: Id of the certificate
+          name: certificate_id
+          required: true
+          schema:
+            type: integer
       requestBody:
         required: true
         content:
@@ -473,4 +493,121 @@ def post_certificate_image(certificate_id):
           description: Certificate not found
     """
     certificate = db_get_or_raise(Certificate, 'certificate_id', certificate_id)
-    return app.store_media('CERTIFICATE', certificate, 'certificate_image', CertificateImage)
+    app.store_media('CERTIFICATE', certificate, 'certificate_image', CertificateImage)
+    db.session.commit()
+    return {}, 204
+
+
+@module.route('/fonts', methods=['GET'], output_schema=FontsResponseTasksAdminSchema)
+def get_fonts():
+    """
+    List available fonts
+    ---
+    get:
+      security:
+        - JWTAccessToken: [ ]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: FontsResponseTasksAdminSchema
+    """
+    import matplotlib.font_manager
+    system_fonts = matplotlib.font_manager.findSystemFonts(fontpaths=None, fontext='ttf')
+    font_names = [font.split('/')[-1].split('.')[0] for font in system_fonts]
+    return {'fonts': font_names}, 200
+
+
+@module.route('/certificate', methods=['GET'])
+def get_certificate():
+    """
+    Get certificate for a user
+    ---
+    get:
+      parameters:
+        - in: query
+          description: Id of the user
+          name: user_id
+          required: true
+          schema:
+            type: integer
+        - in: query
+          description: Id of the contest
+          name: contest_id
+          required: true
+          schema:
+            type: integer
+      security:
+        - JWTAccessToken: [ ]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/pdf:
+              schema:
+                type: string
+                format: binary
+    """
+    args = GetCertificateArgsTasksAdminSchema().load(request.args, partial=False, unknown=EXCLUDE)
+    user_id = args['user_id']
+    contest_id = args['contest_id']
+
+    current_contest = db_get_or_raise(Contest, "contest_id", contest_id)
+    current_user = db_get_or_raise(User, "user_id", user_id)
+
+    certificate = find_certificate(current_user, current_contest)
+    return get_certificate_for_user(current_user.user_info, current_contest.name, certificate)
+
+
+@module.route('/certificate/<int:certificate_id>/test', methods=['GET'])
+def test_certificate(certificate_id):
+    """
+    Test certificate rendering
+    ---
+    get:
+      parameters:
+        - in: path
+          description: Id of the certificate
+          name: certificate_id
+          required: true
+          schema:
+            type: integer
+        - in: query
+          description: User first name
+          name: first_name
+          required: false
+          schema:
+            type: integer
+        - in: query
+          description: User second name
+          name: second_name
+          required: false
+          schema:
+            type: integer
+        - in: query
+          description: User middle name
+          name: middle_name
+          required: false
+          schema:
+            type: integer
+      security:
+        - JWTAccessToken: [ ]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/pdf:
+              schema:
+                type: string
+                format: binary
+    """
+    from user.models import UserInfo
+
+    args = TestCertificateArgsTasksAdminSchema().load(request.args, partial=False, unknown=EXCLUDE)
+    certificate = db_get_or_raise(Certificate, 'certificate_id', certificate_id)
+
+    test_user = UserInfo(first_name=args['first_name'], second_name=args['second_name'],
+                         middle_name=args['middle_name'])
+
+    return get_certificate_for_user(test_user, 'test contest', certificate)

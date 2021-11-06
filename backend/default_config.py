@@ -58,5 +58,6 @@ class DefaultConfiguration:
         'PROFILE': 'profile',
         'RESPONSE': 'responses',
         'TASK': 'tasks',
-        'NEWS': 'news'
+        'NEWS': 'news',
+        'CERTIFICATE': 'certificates'
     }

@@ -70,11 +70,11 @@ class BaseContestSchema(SQLAlchemySchema):
     subject = EnumField(OlympiadSubjectEnum, data_key='subject', by_value=True, required=True)
     level = EnumField(OlympiadLevelEnum, data_key='level', by_value=True, required=True)
     target_classes = fields.Nested(TargetClassSchema, many=True, dump_only=True, required=False)
-    certificate_template = Related(['certificate_template_id'], required=False)
+    certificate_type = Related(['certificate_type_id'], required=False)
 
     @pre_load()
     def check_certificate(self, data, many, **kwargs):
-        return check_related_existence(data, 'certificate_template', 'certificate_template_id',
+        return check_related_existence(data, 'certificate_type', 'certificate_type_id',
                                        CertificateType, 'certificate_type_id')
 
 """

@@ -1,3 +1,4 @@
+from marshmallow import validate
 from marshmallow_sqlalchemy import SQLAlchemySchema, auto_field
 from marshmallow_sqlalchemy.fields import Nested
 from marshmallow_enum import EnumField
@@ -14,8 +15,18 @@ class CertificateSchema(SQLAlchemySchema):
 
     certificate_id = auto_field(dump_only=True)
     certificate_type_id = auto_field(dump_only=True)
-    certificate_category = EnumField(enum=UserStatusEnum, by_value=True, dump_only=True)
-    text_fields = auto_field(required=True)
+    certificate_category = EnumField(enum=UserStatusEnum, by_value=True, required=True)
+
+    text_x = auto_field(required=True, description='Left border of textbox')
+    text_y = auto_field(required=True, description='Bottom border of first line of text')
+    text_width = auto_field(required=True, description='Textbox width')
+    text_size = auto_field(required=False, load_default=14, description='Font size')
+    text_style = auto_field(required=False, validate=common_name_validator,
+                            load_default='DejaVuSans', example='DejaVuSans',
+                            description='Text font, see /contest/tasks/admin/fonts for available fonts')
+    text_spacing = auto_field(required=False, load_default=0, description='Distance between lines')
+    text_color = auto_field(required=False, validate=validate.Regexp('^#[0-9,a-f]{8}$'), load_default='#ffffffff',
+                            example='#ffffffff', description='#rrggbbaa color code')
 
 
 class CertificateTypeSchema(SQLAlchemySchema):

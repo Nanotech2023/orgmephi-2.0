@@ -2,12 +2,12 @@ from marshmallow import Schema, fields
 from marshmallow_enum import EnumField
 
 from common import fields as common_fields
+from contest.tasks.model_schemas.certificate import CertificateTypeSchema
 from contest.tasks.models import OlympiadSubjectEnum, StageConditionEnum, ContestHoldingTypeEnum, \
     UserStatusEnum, OlympiadLevelEnum, TaskAnswerTypeEnum
 
 
 # Base contest
-from contest.tasks.models.certificate import Certificate, CertificateType
 
 
 class UpdateBaseOlympiadRequestTaskEditorSchema(Schema):
@@ -111,4 +111,4 @@ class UpdateTargetClassesOfContestRequestTaskEditorSchema(Schema):
 
 
 class CertificateGetResponseTaskEditorSchema(Schema):
-    certificate_types = fields.Nested(CertificateType, many=True)
+    certificate_types = fields.Nested(CertificateTypeSchema, many=True)
