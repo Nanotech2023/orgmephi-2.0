@@ -5,13 +5,14 @@ from datetime import datetime, timedelta
 
 @pytest.fixture
 def create_simple_contest(test_base_contests):
-    from contest.tasks.models.olympiad import SimpleContest, ContestHoldingTypeEnum, add_group_restriction, \
+    from contest.tasks.models.olympiad import SimpleContest, ContestHoldingTypeEnum, \
         ContestGroupRestrictionEnum, ContestGroupRestriction
-    holding_types = [ContestHoldingTypeEnum.OnLineContest, ContestHoldingTypeEnum.OfflineContest]
+    holding_types = [ContestHoldingTypeEnum.OnLineContest, ContestHoldingTypeEnum.OnLineContest,
+                     ContestHoldingTypeEnum.OfflineContest]
     simple_contests = [SimpleContest(base_contest_id=test_base_contests[i],
                                      visibility=True, start_date=datetime.utcnow(),
                                      end_date=datetime.utcnow() + timedelta(hours=1),
-                                     holding_type=holding_types[i % 2],
+                                     holding_type=holding_types[i % 3],
                                      contest_duration=timedelta(minutes=30),
                                      result_publication_date=datetime.utcnow() + timedelta(hours=2),
                                      end_of_enroll_date=datetime.utcnow() + timedelta(minutes=15))

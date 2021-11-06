@@ -60,7 +60,7 @@ def test_contest_zero_duration(client, create_one_task):
 
 # noinspection DuplicatedCode
 def test_user_response_offline_contest_participant(client, create_plain_task):
-    index = 1
+    index = 2
     contest_id = get_contest_id(create_plain_task, index)
 
     resp = client.post(f'/contest/{contest_id}/user/self/create')

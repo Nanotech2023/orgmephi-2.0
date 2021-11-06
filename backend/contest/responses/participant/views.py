@@ -227,6 +227,7 @@ def self_user_answer_for_task_post_plain_file(contest_id, task_id):
         '409':
           description: Timing error or file is too large
     """
+    check_contest_type(contest_id)
     check_task_type(task_id, answer_dict['PlainAnswerFile'])
     self_user_id = jwt_get_id()
     user_answer_post_file(self_user_id, contest_id, task_id)
@@ -318,6 +319,7 @@ def self_user_answer_for_task_post_plain_text(contest_id, task_id):
         '409':
           description: Timing error
     """
+    check_contest_type(contest_id)
     check_task_type(task_id, answer_dict['PlainAnswerText'])
     values = request.marshmallow
     self_user_id = jwt_get_id()
@@ -362,6 +364,7 @@ def self_user_answer_for_task_range(contest_id, task_id):
         '409':
           description: Timing error
     """
+    check_contest_type(contest_id)
     check_task_type(task_id, answer_dict['RangeAnswer'])
     values = request.marshmallow
     self_user_id = jwt_get_id()
@@ -406,6 +409,7 @@ def self_user_answer_for_task_multiple(contest_id, task_id):
         '409':
           description: Timing error
     """
+    check_contest_type(contest_id)
     check_task_type(task_id, answer_dict['MultipleChoiceAnswer'])
     values = request.marshmallow
     self_user_id = jwt_get_id()
@@ -545,6 +549,7 @@ def self_user_finish_contest(contest_id):
         '404':
           description: User or contest not found
     """
+    check_contest_type(contest_id)
     self_user_id = jwt_get_id()
     user_work = get_user_in_contest_work(self_user_id, contest_id)
     finish_contest(user_work)
