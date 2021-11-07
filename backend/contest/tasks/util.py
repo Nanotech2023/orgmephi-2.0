@@ -638,7 +638,11 @@ def put_text_on_image(img_data, x, y, width, text, size, font, spacing, color):
 
 
 def find_certificate(current_user, current_contest):
-    user_status = db_get_or_raise(UserInContest, 'user_id', current_user.id).user_status
+
+    result = UserInContest.query.filter_by(user_id=current_user.id, contest_id=current_contest.contest_id).one_or_none()
+    if result is None:
+        raise NotFound('UserInContest (user_id, contest_id)', f'({current_user.id}, {current_contest.id})')
+    user_status = result.user_status
 
     certificate_type = current_contest.base_contest.certificate_type
     if certificate_type is None:
