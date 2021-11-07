@@ -1,4 +1,4 @@
-from datetime import date
+from datetime import date, datetime
 
 from flask import request
 from marshmallow import EXCLUDE
@@ -130,7 +130,7 @@ def create_thread():
     values = request.marshmallow
     author = db_get_or_raise(User, 'id', jwt_get_id())
     if thread_limit is not None:
-        cnt = Thread.query.filter(Thread.author_id == author.id, Thread.post_time >= date.today()).count()
+        cnt = Thread.query.filter(Thread.author_id == author.id, Thread.post_time >= datetime.utcnow().date()).count()
         if cnt >= thread_limit:
             raise QuotaExceeded('New threads per day', thread_limit)
 
@@ -219,7 +219,7 @@ def add_message(thread_id):
 
     if message_limit is not None:
         # noinspection PyComparisonWithNone
-        cnt = Message.query.filter(Message.thread_id == thread_id, Message.post_time >= date.today(),
+        cnt = Message.query.filter(Message.thread_id == thread_id, Message.post_time >= datetime.utcnow().date(),
                                    Message.employee_id == None).count()
         if cnt >= message_limit:
             raise QuotaExceeded('New messages per day per thread', message_limit)

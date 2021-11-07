@@ -2,7 +2,6 @@ from flask import request
 
 from common import get_current_module
 from common.errors import AlreadyExists, TimeOver
-from common.util import send_pdf
 from contest.responses.util import get_user_in_contest_work
 from contest.tasks.model_schemas.olympiad import SimpleContestSchema
 from contest.tasks.participant.schemas import *
@@ -397,15 +396,13 @@ def get_user_certificate_self(id_contest):
 
     current_contest = get_contest_if_possible(id_contest)
     current_user = db_get_or_raise(User, 'id', jwt_get_id())
+
     unfilled = current_user.unfilled()
     if len(unfilled) > 0:
         raise InsufficientData('user', str(unfilled))
 
-    mark = get_user_in_contest_work(jwt_get_id(), id_contest).mark
-    user_status = db_get_or_raise(UserInContest, 'user_id', jwt_get_id()).user_status
-
-    return send_pdf('user_certificate.html', u=current_user, mark=mark, user_status=user_status,
-                    back=current_contest)
+    certificate = find_certificate(current_user, current_contest)
+    return get_certificate_for_user(current_user.user_info, current_contest.name, certificate)
 
 
 # Contest

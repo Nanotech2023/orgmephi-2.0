@@ -5,60 +5,17 @@ from common import get_current_module
 from contest.tasks.creator.schemas import BaseOlympiadResponseTaskCreatorSchema, StageResponseTaskCreatorSchema, \
     ContestResponseTaskCreatorSchema, TaskResponseTaskCreatorSchema, VariantResponseTaskCreatorSchema
 from contest.tasks.editor.schemas import *
+from contest.tasks.model_schemas.certificate import CertificateTypeSchema, CertificateSchema
 from contest.tasks.model_schemas.contest import VariantSchema
 from contest.tasks.model_schemas.olympiad import BaseContestSchema, SimpleContestSchema, CompositeContestSchema, \
     StageSchema
 from contest.tasks.model_schemas.tasks import PlainTaskSchema, RangeTaskSchema, MultipleChoiceTaskSchema
+from contest.tasks.models.certificate import Certificate, CertificateType
 from contest.tasks.util import *
 
 db = get_current_db()
 module = get_current_module()
 app = get_current_app()
-
-
-@module.route('/base_olympiad/<int:id_base_olympiad>/upload_certificate', methods=['POST'])
-def base_olympiad_upload(id_base_olympiad):
-    """
-    Upload base olympiad certificate
-    ---
-    post:
-      requestBody:
-        required: true
-        content:
-          application/octet-stream:
-            schema:
-              type: string
-              format: binary
-      parameters:
-        - in: path
-          description: Id of the olympiad
-          name: id_base_olympiad
-          required: true
-          schema:
-            type: integer
-      security:
-        - JWTAccessToken: [ ]
-        - CSRFAccessToken: [ ]
-      responses:
-        '200':
-          description: OK
-        '400':
-          description: Bad request
-        '404':
-          description: Base contest not found
-        '409':
-          description: Wrong value
-    """
-
-    certificate_template = request.data
-
-    validate_file_size(certificate_template)
-
-    base_contest = db_get_or_raise(BaseContest, "base_contest_id", id_base_olympiad)
-    base_contest.certificate_template = certificate_template
-    db.session.commit()
-
-    return {}, 200
 
 
 @module.route('/base_olympiad/<int:id_base_olympiad>/remove', methods=['POST'])
@@ -132,7 +89,7 @@ def base_olympiad_patch(id_base_olympiad):
     db_get_or_raise(OlympiadType, "olympiad_type_id", values["olympiad_type_id"])
 
     BaseContestSchema(load_instance=True).load(request.json, instance=base_contest, session=db.session,
-                                               partial=False, unknown=EXCLUDE)
+                                               partial=True, unknown=EXCLUDE)
 
     db.session.commit()
 
@@ -993,3 +950,132 @@ def remove_target_classes_from_contest(id_base_olympiad):
 
     db.session.commit()
     return {}, 200
+
+
+@module.route('/certificate_type', methods=['GET'],
+              output_schema=CertificateGetResponseTaskEditorSchema(exclude=[
+                  'certificate_types.certificates.text_x',
+                  'certificate_types.certificates.text_y',
+                  'certificate_types.certificates.text_width',
+                  'certificate_types.certificates.text_size',
+                  'certificate_types.certificates.text_style',
+                  'certificate_types.certificates.text_spacing',
+                  'certificate_types.certificates.text_color',
+                  'certificate_types.certificates.certificate_type_id'
+              ]))
+def get_certificate_types():
+    """
+    Get all certificate types
+    ---
+    get:
+      security:
+        - JWTAccessToken: [ ]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: CertificateGetResponseTaskEditorSchema
+    """
+    certificate_types = CertificateType.query.all()
+    return {'certificate_types': certificate_types}, 200
+
+
+@module.route('/certificate_type/<int:certificate_type_id>', methods=['GET'],
+              output_schema=CertificateTypeSchema(exclude=[
+                  'certificates.text_x',
+                  'certificates.text_y',
+                  'certificates.text_width',
+                  'certificates.text_size',
+                  'certificates.text_style',
+                  'certificates.text_spacing',
+                  'certificates.text_color',
+                  'certificates.certificate_type_id'
+              ]))
+def get_certificate_type_by_id(certificate_type_id):
+    """
+    Get one certificate type
+    ---
+    get:
+      parameters:
+        - in: path
+          description: ID of the certificate type
+          name: certificate_type_id
+          required: true
+          schema:
+            type: integer
+      security:
+        - JWTAccessToken: [ ]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: CertificateTypeSchema
+        '404':
+          description: Certificate type not found
+    """
+    certificate_type = db_get_or_raise(CertificateType, 'certificate_type_id', certificate_type_id)
+    return certificate_type, 200
+
+
+@module.route('/certificate/<int:certificate_id>', methods=['GET'], output_schema=CertificateSchema)
+def get_certificate_by_id(certificate_id):
+    """
+    Get one certificate
+    ---
+    get:
+      parameters:
+        - in: path
+          description: ID of the certificate
+          name: certificate_id
+          required: true
+          schema:
+            type: integer
+      security:
+        - JWTAccessToken: [ ]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: CertificateSchema
+        '404':
+          description: Certificate not found
+    """
+    certificate = db_get_or_raise(Certificate, 'certificate_id', certificate_id)
+    return certificate, 200
+
+
+@module.route('/certificate/<int:certificate_id>/image', methods=['GET'])
+def get_certificate_image(certificate_id):
+    """
+    Get certificate image
+    ---
+    get:
+      parameters:
+        - in: path
+          description: ID of the certificate
+          name: certificate_id
+          required: true
+          schema:
+            type: integer
+      security:
+        - JWTAccessToken: [ ]
+      responses:
+        '200':
+          description: OK
+          content:
+            image/png:
+              schema:
+                type: string
+                format: binary
+            image/jpeg:
+              schema:
+                type: string
+                format: binary
+        '404':
+          description: Certificate not found
+    """
+    certificate = db_get_or_raise(Certificate, 'certificate_id', certificate_id)
+    return app.send_media(certificate.certificate_image)

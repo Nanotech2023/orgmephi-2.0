@@ -199,7 +199,7 @@ def test_get_user_certificate_self(client, test_simple_contest_with_users, test_
     resp = client.get(
         f'/contest/{test_simple_contest_with_users[0].contest_id}/certificate/self')
     assert resp.status_code == 200
-
+    assert resp.content_type == 'application/pdf'
 
 # get_contest_in_stage_self
 

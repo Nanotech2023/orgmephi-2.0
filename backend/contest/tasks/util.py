@@ -1,6 +1,5 @@
+import io
 import secrets
-
-from sqlalchemy import or_
 
 from common.errors import FileTooLarge, DataConflict, InsufficientData, RequestError, NotFound
 from common.jwt_verify import jwt_get_id
@@ -588,3 +587,77 @@ class ContestIsStillOnReview(RequestError):
 
     def get_msg(self) -> str:
         return 'Contest is still on review'
+
+
+def split_line(font, text, width):
+    text = text + ' '
+    lines = []
+    while text:
+        index = text.find(' ')
+        last_space = None
+        while index != -1 and font.getsize(text[:index])[0] <= width:
+            last_space = index
+            new_index = text[index+1:].find(' ')
+            if new_index == -1:
+                lines.append(text[:-1])
+                return lines
+            index = index + new_index + 1
+        if last_space is None:
+            last_space = index
+        lines.append(text[:last_space])
+        text = text[last_space + 1:]
+    return lines
+
+
+def put_text_on_image(img_data, x, y, width, text, size, font, spacing, color):
+    from PIL import Image, ImageDraw, ImageFont
+
+    text = " ".join(text.strip().split())
+    font = ImageFont.truetype(font, size)
+    lines = split_line(font, text, width)
+
+    img = Image.open(img_data)
+    draw = ImageDraw.Draw(img)
+
+    mid = x + (width / 2)
+    multiline = "\n".join(lines)
+    draw.multiline_text((mid, y), multiline, color, font, 'ms', spacing, 'center')
+
+    bands = img.getbands()
+    if bands == ('R', 'G', 'B', 'A'):
+        background = Image.new("RGB", img.size, (255, 255, 255))
+        background.paste(img, mask=img.split()[3])
+        img = background
+    elif bands != ('R', 'G', 'B'):
+        raise TypeError(f'Unknown color encoding: {bands}')
+
+    output = io.BytesIO()
+    img.save(output, format='pdf')
+    output.seek(0)
+    return output
+
+
+def find_certificate(current_user, current_contest):
+    user_status = db_get_or_raise(UserInContest, 'user_id', current_user.id).user_status
+
+    certificate_type = current_contest.base_contest.certificate_type
+    if certificate_type is None:
+        raise InsufficientData('contest', 'certificate')
+
+    certificate = certificate_type.certificates.filter_by(certificate_category=user_status).one_or_none()
+    if certificate is None or certificate.certificate_image is None:
+        raise InsufficientData('(contest, user_status)', 'certificate')
+
+    return certificate
+
+
+def get_certificate_for_user(user_info, contest_name, certificate):
+    from flask import send_file
+
+    img_data = app.media_to_io(certificate.certificate_image)
+    user_name = f'{user_info.second_name} {user_info.first_name} {user_info.middle_name}'
+    img = put_text_on_image(img_data, certificate.text_x, certificate.text_y, certificate.text_width, user_name,
+                            certificate.text_size, certificate.text_style, certificate.text_spacing,
+                            certificate.text_color)
+    return send_file(img, mimetype='application/pdf', as_attachment=True,
+                     attachment_filename=f'Сертификат_{contest_name}_{user_name}'.replace(" ", "_"))
