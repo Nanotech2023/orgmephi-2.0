@@ -125,6 +125,8 @@ components:
         base_contest_id:
           readOnly: true
           type: integer
+        certificate_type:
+          type: integer
         description:
           maxLength: 1024
           type: string
@@ -160,6 +162,7 @@ components:
         target_classes:
           items:
             $ref: '#/components/schemas/TargetClass'
+          readOnly: true
           type: array
         winner_1_condition:
           type: number
@@ -167,6 +170,19 @@ components:
           type: number
         winner_3_condition:
           type: number
+      required:
+      - description
+      - diploma_1_condition
+      - diploma_2_condition
+      - diploma_3_condition
+      - level
+      - name
+      - olympiad_type_id
+      - rules
+      - subject
+      - winner_1_condition
+      - winner_2_condition
+      - winner_3_condition
       type: object
     BaseOlympiadIdResponseTaskCreator:
       properties:
@@ -180,6 +196,8 @@ components:
         base_contest_id:
           readOnly: true
           type: integer
+        certificate_type:
+          type: integer
         description:
           maxLength: 1024
           type: string
@@ -215,6 +233,7 @@ components:
         target_classes:
           items:
             $ref: '#/components/schemas/TargetClass'
+          readOnly: true
           type: array
         winner_1_condition:
           type: number
@@ -222,6 +241,102 @@ components:
           type: number
         winner_3_condition:
           type: number
+      required:
+      - description
+      - diploma_1_condition
+      - diploma_2_condition
+      - diploma_3_condition
+      - level
+      - name
+      - olympiad_type_id
+      - rules
+      - subject
+      - winner_1_condition
+      - winner_2_condition
+      - winner_3_condition
+      type: object
+    Certificate:
+      properties:
+        certificate_category:
+          enum:
+          - Winner 1
+          - Winner 2
+          - Winner 3
+          - Diploma 1
+          - Diploma 2
+          - Diploma 3
+          - Participant
+          type: string
+        certificate_id:
+          readOnly: true
+          type: integer
+        certificate_type_id:
+          readOnly: true
+          type: integer
+        text_color:
+          default: '#ffffffff'
+          description: '#rrggbbaa color code'
+          example: '#ffffffff'
+          nullable: true
+          pattern: ^#[0-9,a-f]{8}$
+          type: string
+        text_size:
+          default: 14
+          description: Font size
+          type: integer
+        text_spacing:
+          default: 0
+          description: Distance between lines
+          type: integer
+        text_style:
+          default: DejaVuSans
+          description: Text font, see /contest/tasks/admin/fonts for available fonts
+          example: DejaVuSans
+          maxLength: 32
+          type: string
+        text_width:
+          description: Textbox width
+          type: integer
+        text_x:
+          description: Left border of textbox
+          type: integer
+        text_y:
+          description: Bottom border of first line of text
+          type: integer
+      required:
+      - certificate_category
+      - certificate_type_id
+      - text_width
+      - text_x
+      - text_y
+      type: object
+    CertificateGetResponseTaskEditor:
+      properties:
+        certificate_types:
+          items:
+            $ref: '#/components/schemas/CertificateType'
+          type: array
+      type: object
+    CertificateType:
+      properties:
+        certificate_type_id:
+          readOnly: true
+          type: integer
+        certificates:
+          items:
+            $ref: '#/components/schemas/Certificate'
+          readOnly: true
+          type: array
+        description:
+          maxLength: 1024
+          nullable: true
+          type: string
+        name:
+          maxLength: 32
+          nullable: true
+          type: string
+      required:
+      - name
       type: object
     ChangeSupervisorRequestTaskParticipant:
       properties:
@@ -350,73 +465,6 @@ components:
       required:
       - contest_id
       - visibility
-      type: object
-    CreateBaseOlympiadRequestTaskCreator:
-      properties:
-        description:
-          maxLength: 1024
-          type: string
-        diploma_1_condition:
-          maximum: 1.0
-          minimum: 0.0
-          type: number
-        diploma_2_condition:
-          maximum: 1.0
-          minimum: 0.0
-          type: number
-        diploma_3_condition:
-          maximum: 1.0
-          minimum: 0.0
-          type: number
-        level:
-          enum:
-          - '1'
-          - '2'
-          - '3'
-          - No level
-          type: string
-        name:
-          maxLength: 128
-          type: string
-        olympiad_type_id:
-          type: integer
-        rules:
-          maxLength: 1024
-          type: string
-        subject:
-          enum:
-          - Math
-          - Physics
-          - Informatics
-          - Natural Sciences
-          - Engineering Sciences
-          - Other
-          type: string
-        winner_1_condition:
-          maximum: 1.0
-          minimum: 0.0
-          type: number
-        winner_2_condition:
-          maximum: 1.0
-          minimum: 0.0
-          type: number
-        winner_3_condition:
-          maximum: 1.0
-          minimum: 0.0
-          type: number
-      required:
-      - description
-      - diploma_1_condition
-      - diploma_2_condition
-      - diploma_3_condition
-      - level
-      - name
-      - olympiad_type_id
-      - rules
-      - subject
-      - winner_1_condition
-      - winner_2_condition
-      - winner_3_condition
       type: object
     CreateCompositeContestRequestTaskCreator:
       properties:
@@ -629,6 +677,13 @@ components:
           type: array
         count:
           type: integer
+      type: object
+    FontsResponseTasksAdmin:
+      properties:
+        fonts:
+          items:
+            type: string
+          type: array
       type: object
     ListElemContestGroupRestrictionAdmin:
       properties:
@@ -1392,7 +1447,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/CreateBaseOlympiadRequestTaskCreator'
+              $ref: '#/components/schemas/BaseContest'
         required: true
       responses:
         '200':
@@ -1854,34 +1909,6 @@ paths:
           description: Bad request
         '404':
           description: Contest or group not found
-      security:
-      - JWTAccessToken: []
-      - CSRFAccessToken: []
-  /tasks/editor/base_olympiad/{id_base_olympiad}/upload_certificate:
-    post:
-      parameters:
-      - description: Id of the olympiad
-        in: path
-        name: id_base_olympiad
-        required: true
-        schema:
-          type: integer
-      requestBody:
-        content:
-          application/octet-stream:
-            schema:
-              format: binary
-              type: string
-        required: true
-      responses:
-        '200':
-          description: OK
-        '400':
-          description: Bad request
-        '404':
-          description: Base contest not found
-        '409':
-          description: Wrong value
       security:
       - JWTAccessToken: []
       - CSRFAccessToken: []
@@ -2475,6 +2502,82 @@ paths:
       security:
       - JWTAccessToken: []
       - CSRFAccessToken: []
+  /tasks/editor/certificate_type:
+    get:
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CertificateGetResponseTaskEditor'
+          description: OK
+      security:
+      - JWTAccessToken: []
+  /tasks/editor/certificate_type/{certificate_type_id}:
+    get:
+      parameters:
+      - description: ID of the certificate type
+        in: path
+        name: certificate_type_id
+        required: true
+        schema:
+          type: integer
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CertificateType'
+          description: OK
+        '404':
+          description: Certificate type not found
+      security:
+      - JWTAccessToken: []
+  /tasks/editor/certificate/{certificate_id}:
+    get:
+      parameters:
+      - description: ID of the certificate
+        in: path
+        name: certificate_id
+        required: true
+        schema:
+          type: integer
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Certificate'
+          description: OK
+        '404':
+          description: Certificate not found
+      security:
+      - JWTAccessToken: []
+  /tasks/editor/certificate/{certificate_id}/image:
+    get:
+      parameters:
+      - description: ID of the certificate
+        in: path
+        name: certificate_id
+        required: true
+        schema:
+          type: integer
+      responses:
+        '200':
+          content:
+            image/jpeg:
+              schema:
+                format: binary
+                type: string
+            image/png:
+              schema:
+                format: binary
+                type: string
+          description: OK
+        '404':
+          description: Certificate not found
+      security:
+      - JWTAccessToken: []
   /tasks/admin/olympiad_type/create:
     post:
       requestBody:
@@ -2605,6 +2708,228 @@ paths:
       security:
       - JWTAccessToken: []
       - CSRFAccessToken: []
+  /tasks/admin/certificate_type:
+    post:
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CertificateType'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CertificateType'
+          description: OK
+      security:
+      - JWTAccessToken: []
+      - CSRFAccessToken: []
+  /tasks/admin/certificate_type/{certificate_type_id}:
+    patch:
+      parameters:
+      - description: Id of the certificate type
+        in: path
+        name: certificate_type_id
+        required: true
+        schema:
+          type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CertificateType'
+        required: true
+      responses:
+        '204':
+          description: OK
+        '404':
+          description: Certificate type not found
+      security:
+      - JWTAccessToken: []
+      - CSRFAccessToken: []
+    delete:
+      parameters:
+      - description: Id of the certificate type
+        in: path
+        name: certificate_type_id
+        required: true
+        schema:
+          type: integer
+      responses:
+        '204':
+          description: OK
+        '404':
+          description: Certificate type not found
+      security:
+      - JWTAccessToken: []
+      - CSRFAccessToken: []
+  /tasks/admin/certificate_type/{certificate_type_id}/certificate:
+    post:
+      parameters:
+      - description: Id of the certificate type
+        in: path
+        name: certificate_type_id
+        required: true
+        schema:
+          type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Certificate'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Certificate'
+          description: OK
+      security:
+      - JWTAccessToken: []
+      - CSRFAccessToken: []
+  /tasks/admin/certificate/{certificate_id}:
+    patch:
+      parameters:
+      - description: Id of the certificate
+        in: path
+        name: certificate_id
+        required: true
+        schema:
+          type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Certificate'
+        required: true
+      responses:
+        '204':
+          description: OK
+        '404':
+          description: Certificate not found
+      security:
+      - JWTAccessToken: []
+      - CSRFAccessToken: []
+    delete:
+      parameters:
+      - description: Id of the certificate
+        in: path
+        name: certificate_id
+        required: true
+        schema:
+          type: integer
+      responses:
+        '204':
+          description: OK
+        '404':
+          description: Certificate not found
+      security:
+      - JWTAccessToken: []
+      - CSRFAccessToken: []
+  /tasks/admin/certificate/{certificate_id}/image:
+    post:
+      parameters:
+      - description: Id of the certificate
+        in: path
+        name: certificate_id
+        required: true
+        schema:
+          type: integer
+      requestBody:
+        content:
+          image/jpeg:
+            schema:
+              format: binary
+              type: string
+          image/png:
+            schema:
+              format: binary
+              type: string
+        required: true
+      responses:
+        '204':
+          description: OK
+        '404':
+          description: Certificate not found
+      security:
+      - JWTAccessToken: []
+      - CSRFAccessToken: []
+  /tasks/admin/fonts:
+    get:
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FontsResponseTasksAdmin'
+          description: OK
+      security:
+      - JWTAccessToken: []
+  /tasks/admin/certificate:
+    get:
+      parameters:
+      - description: Id of the user
+        in: query
+        name: user_id
+        required: true
+        schema:
+          type: integer
+      - description: Id of the contest
+        in: query
+        name: contest_id
+        required: true
+        schema:
+          type: integer
+      responses:
+        '200':
+          content:
+            application/pdf:
+              schema:
+                format: binary
+                type: string
+          description: OK
+      security:
+      - JWTAccessToken: []
+  /tasks/admin/certificate/{certificate_id}/test:
+    get:
+      parameters:
+      - description: Id of the certificate
+        in: path
+        name: certificate_id
+        required: true
+        schema:
+          type: integer
+      - description: User first name
+        in: query
+        name: first_name
+        required: false
+        schema:
+          type: integer
+      - description: User second name
+        in: query
+        name: second_name
+        required: false
+        schema:
+          type: integer
+      - description: User middle name
+        in: query
+        name: middle_name
+        required: false
+        schema:
+          type: integer
+      responses:
+        '200':
+          content:
+            application/pdf:
+              schema:
+                format: binary
+                type: string
+          description: OK
+      security:
+      - JWTAccessToken: []
   /tasks/participant/contest/{id_contest}/variant/self:
     get:
       parameters:
