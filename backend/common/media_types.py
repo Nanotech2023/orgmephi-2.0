@@ -110,7 +110,7 @@ class CertificateImage(Image):
         ImageAnalyzer(),
         ImageValidator(
             minimum=(20, 20),
-            maximum=(1920, 1080),
+            maximum=(3840, 2160),
             content_types=['image/jpeg', 'image/png']
         )
     ]
