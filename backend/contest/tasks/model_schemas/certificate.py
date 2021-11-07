@@ -1,7 +1,9 @@
-from marshmallow import validate
+from marshmallow import validate, post_load
 from marshmallow_sqlalchemy import SQLAlchemySchema, auto_field
 from marshmallow_sqlalchemy.fields import Nested
 from marshmallow_enum import EnumField
+
+from common.errors import InsufficientData, AlreadyExists
 from common.fields import text_validator, common_name_validator
 
 from contest.tasks.models.certificate import *
@@ -27,6 +29,15 @@ class CertificateSchema(SQLAlchemySchema):
     text_spacing = auto_field(required=False, load_default=0, description='Distance between lines')
     text_color = auto_field(required=False, validate=validate.Regexp('^#[0-9,a-f]{8}$'), load_default='#ffffffff',
                             example='#ffffffff', description='#rrggbbaa color code')
+
+    @post_load()
+    def test_font(self, data, many, **kwargs):
+        try:
+            from PIL import ImageFont
+            ImageFont.truetype(data.text_style)
+        except OSError:
+            raise InsufficientData('Font', data.text_style)
+        return data
 
 
 class CertificateTypeSchema(SQLAlchemySchema):

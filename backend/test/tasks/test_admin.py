@@ -103,3 +103,284 @@ def test_get_test_certificate_long(client, test_certificate_type):
                       f'&middle_name=very_very_very_very_long_name')
     assert resp.status_code == 200
     assert resp.content_type == 'application/pdf'
+
+
+def test_font_getter(client):
+    resp = client.get(f'/fonts')
+    assert resp.status_code == 200
+    assert 'fonts' in resp.json
+    assert resp.json['fonts']
+
+
+def test_add_certificate_type(client):
+    from contest.tasks.models.certificate import CertificateType
+
+    cert_type_json = {
+        'name': 'test cert type',
+        'description': 'test cert description'
+    }
+
+    resp = client.post(f'/certificate_type', json=cert_type_json)
+
+    assert resp.status_code == 200
+    cert_type_id = resp.json['certificate_type_id']
+
+    cert_type = CertificateType.query.filter_by(certificate_type_id=cert_type_id).one_or_none()
+    assert cert_type is not None
+    assert resp.json['name'] == cert_type_json['name'] == cert_type.name
+    assert resp.json['description'] == cert_type_json['description'] == cert_type.description
+
+
+def test_patch_certificate_type(client):
+    from contest.tasks.models.certificate import CertificateType
+
+    cert_type_json = {
+        'name': 'test cert type',
+        'description': 'test cert description'
+    }
+
+    resp = client.post(f'/certificate_type', json=cert_type_json)
+    cert_type_id = resp.json['certificate_type_id']
+
+    cert_type_json['name'] = 'another test cert type'
+    cert_type_json['description'] = 'another test cert description'
+
+    resp = client.patch(f'/certificate_type/{cert_type_id}', json=cert_type_json)
+    assert resp.status_code == 204
+
+    cert_type = CertificateType.query.filter_by(certificate_type_id=cert_type_id).one_or_none()
+    assert cert_type is not None
+    assert cert_type_json['name'] == cert_type.name
+    assert cert_type_json['description'] == cert_type.description
+
+
+def test_delete_certificate_type(client):
+    from contest.tasks.models.certificate import CertificateType
+
+    cert_type_json = {
+        'name': 'test cert type',
+        'description': 'test cert description'
+    }
+
+    resp = client.post(f'/certificate_type', json=cert_type_json)
+    cert_type_id = resp.json['certificate_type_id']
+
+    resp = client.delete(f'/certificate_type/{cert_type_id}')
+    assert resp.status_code == 204
+
+    cert_type = CertificateType.query.filter_by(certificate_type_id=cert_type_id).one_or_none()
+    assert cert_type is None
+
+
+def test_add_certificate(client):
+    from contest.tasks.models.certificate import Certificate
+    from contest.tasks.models import UserStatusEnum
+
+    cert_type_json = {
+        'name': 'test cert type',
+        'description': 'test cert description'
+    }
+
+    resp = client.post(f'/certificate_type', json=cert_type_json)
+    cert_type_id = resp.json['certificate_type_id']
+
+    cert_json = {
+        'certificate_category': UserStatusEnum.Winner_1.value,
+        'text_x': 0,
+        'text_y': 20,
+        'text_width': 100
+    }
+
+    resp = client.post(f'/certificate_type/{cert_type_id}/certificate', json=cert_json)
+    assert resp.status_code == 200
+    cert_id = resp.json['certificate_id']
+
+    cert = Certificate.query.filter_by(certificate_id=cert_id).one_or_none()
+    assert cert is not None
+    assert cert_json['certificate_category'] == resp.json['certificate_category'] == cert.certificate_category.value
+    assert cert_json['text_x'] == resp.json['text_x'] == cert.text_x
+    assert cert_json['text_y'] == resp.json['text_y'] == cert.text_y
+    assert cert_json['text_width'] == resp.json['text_width'] == cert.text_width
+
+
+def test_add_certificate_twice(client):
+    from contest.tasks.models import UserStatusEnum
+
+    cert_type_json = {
+        'name': 'test cert type',
+        'description': 'test cert description'
+    }
+
+    resp = client.post(f'/certificate_type', json=cert_type_json)
+    cert_type_id = resp.json['certificate_type_id']
+
+    cert_json = {
+        'certificate_category': UserStatusEnum.Winner_1.value,
+        'text_x': 0,
+        'text_y': 20,
+        'text_width': 100
+    }
+
+    resp = client.post(f'/certificate_type/{cert_type_id}/certificate', json=cert_json)
+    assert resp.status_code == 200
+
+    resp = client.post(f'/certificate_type/{cert_type_id}/certificate', json=cert_json)
+    assert resp.status_code == 409
+
+    cert_json['certificate_category'] = UserStatusEnum.Winner_2.value
+
+    resp = client.post(f'/certificate_type/{cert_type_id}/certificate', json=cert_json)
+    assert resp.status_code == 200
+
+
+def test_add_certificate_wrong_font(client):
+    from contest.tasks.models import UserStatusEnum
+
+    cert_type_json = {
+        'name': 'test cert type',
+        'description': 'test cert description'
+    }
+
+    resp = client.post(f'/certificate_type', json=cert_type_json)
+    cert_type_id = resp.json['certificate_type_id']
+
+    cert_json = {
+        'certificate_category': UserStatusEnum.Winner_1.value,
+        'text_x': 0,
+        'text_y': 20,
+        'text_width': 100,
+        'text_style': 'ThisFontTotallyDoesNotExist'
+    }
+
+    resp = client.post(f'/certificate_type/{cert_type_id}/certificate', json=cert_json)
+    assert resp.status_code == 409
+
+
+def test_patch_certificate(client):
+    from contest.tasks.models.certificate import Certificate
+    from contest.tasks.models import UserStatusEnum
+
+    cert_type_json = {
+        'name': 'test cert type',
+        'description': 'test cert description'
+    }
+
+    resp = client.post(f'/certificate_type', json=cert_type_json)
+    cert_type_id = resp.json['certificate_type_id']
+
+    cert_json = {
+        'certificate_category': UserStatusEnum.Winner_1.value,
+        'text_x': 0,
+        'text_y': 20,
+        'text_width': 100
+    }
+
+    resp = client.post(f'/certificate_type/{cert_type_id}/certificate', json=cert_json)
+    cert_id = resp.json['certificate_id']
+
+    cert_json['text_x'] = 10
+    resp = client.patch(f'/certificate/{cert_id}', json=cert_json)
+    assert resp.status_code == 204
+
+    cert = Certificate.query.filter_by(certificate_id=cert_id).one_or_none()
+    assert cert is not None
+    assert cert_json['certificate_category'] == cert.certificate_category.value
+    assert cert_json['text_x'] == cert.text_x
+    assert cert_json['text_y'] == cert.text_y
+    assert cert_json['text_width'] == cert.text_width
+
+    from contest.tasks.models.certificate import Certificate
+    assert Certificate.query.count() == 1
+
+
+def test_add_certificate_used_category(client):
+    from contest.tasks.models import UserStatusEnum
+
+    cert_type_json = {
+        'name': 'test cert type',
+        'description': 'test cert description'
+    }
+
+    resp = client.post(f'/certificate_type', json=cert_type_json)
+    cert_type_id = resp.json['certificate_type_id']
+
+    cert_json = {
+        'certificate_category': UserStatusEnum.Winner_1.value,
+        'text_x': 0,
+        'text_y': 20,
+        'text_width': 100
+    }
+
+    client.post(f'/certificate_type/{cert_type_id}/certificate', json=cert_json)
+    cert_json['certificate_category'] = UserStatusEnum.Winner_2.value
+    resp = client.post(f'/certificate_type/{cert_type_id}/certificate', json=cert_json)
+    cert_id = resp.json['certificate_id']
+
+    cert_json['certificate_category'] = UserStatusEnum.Winner_1.value
+    resp = client.patch(f'/certificate/{cert_id}', json=cert_json)
+    assert resp.status_code == 409
+
+    cert_json['certificate_category'] = UserStatusEnum.Winner_3.value
+    resp = client.patch(f'/certificate/{cert_id}', json=cert_json)
+    assert resp.status_code == 204
+
+    from contest.tasks.models.certificate import Certificate
+    assert Certificate.query.count() == 2
+
+
+def test_delete_certificate(client):
+    from contest.tasks.models.certificate import Certificate
+    from contest.tasks.models import UserStatusEnum
+
+    cert_type_json = {
+        'name': 'test cert type',
+        'description': 'test cert description'
+    }
+
+    resp = client.post(f'/certificate_type', json=cert_type_json)
+    cert_type_id = resp.json['certificate_type_id']
+
+    cert_json = {
+        'certificate_category': UserStatusEnum.Winner_1.value,
+        'text_x': 0,
+        'text_y': 20,
+        'text_width': 100
+    }
+
+    resp = client.post(f'/certificate_type/{cert_type_id}/certificate', json=cert_json)
+    cert_id = resp.json['certificate_id']
+
+    resp = client.delete(f'/certificate/{cert_id}', json=cert_json)
+    assert resp.status_code == 204
+
+    cert = Certificate.query.filter_by(certificate_id=cert_id).one_or_none()
+    assert cert is None
+
+
+def test_certificate_post_image(client):
+    from contest.tasks.models.certificate import Certificate
+    from contest.tasks.models import UserStatusEnum
+
+    cert_type_json = {
+        'name': 'test cert type',
+        'description': 'test cert description'
+    }
+
+    resp = client.post(f'/certificate_type', json=cert_type_json)
+    cert_type_id = resp.json['certificate_type_id']
+
+    cert_json = {
+        'certificate_category': UserStatusEnum.Winner_1.value,
+        'text_x': 0,
+        'text_y': 20,
+        'text_width': 100
+    }
+
+    resp = client.post(f'/certificate_type/{cert_type_id}/certificate', json=cert_json)
+    cert_id = resp.json['certificate_id']
+
+    resp = client.post(f'/certificate/{cert_id}/image', data=test_image)
+    assert resp.status_code == 204
+
+    cert = Certificate.query.filter_by(certificate_id=cert_id).one_or_none()
+    assert cert.certificate_image is not None

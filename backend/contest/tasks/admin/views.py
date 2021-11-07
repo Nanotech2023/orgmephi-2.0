@@ -377,12 +377,6 @@ def add_certificate(certificate_type_id):
     if exists:
         raise AlreadyExists(f'Certificate type', category.value)
 
-    try:
-        from PIL import ImageFont
-        font = ImageFont.truetype(certificate.text_style)
-    except OSError:
-        raise InsufficientData('Font', certificate.text_style)
-
     certificate_type.certificates.append(certificate)
     db.session.commit()
     return certificate, 200
@@ -416,7 +410,9 @@ def patch_certificate(certificate_id):
           description: Certificate not found
     """
     certificate = db_get_or_raise(Certificate, 'certificate_id', certificate_id)
-    certificate = CertificateSchema(load_instance=True)\
+    db.session.expunge(certificate)
+
+    CertificateSchema(load_instance=True)\
         .load(request.json, session=db.session, partial=True, unknown=EXCLUDE, instance=certificate)
 
     category = certificate.certificate_category
@@ -427,11 +423,12 @@ def patch_certificate(certificate_id):
     if exists:
         raise AlreadyExists(f'Certificate type', category.value)
 
+    db.session.add(certificate)
     db.session.commit()
     return {}, 204
 
 
-@module.route('/certificate_type/<int:certificate_id>', methods=['DELETE'])
+@module.route('/certificate/<int:certificate_id>', methods=['DELETE'])
 def delete_certificate(certificate_id):
     """
     Delete certificate
