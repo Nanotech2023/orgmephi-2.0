@@ -1,3 +1,4 @@
+import io
 from datetime import datetime, timedelta
 
 from ..user import *
@@ -56,7 +57,7 @@ def test_olympiad_locations(test_city, test_country_native):
 
 
 @pytest.fixture
-def test_base_contests(test_olympiad_types):
+def test_base_contests(test_olympiad_types, test_certificate_type):
     from contest.tasks.models import BaseContest, OlympiadSubjectEnum, OlympiadLevelEnum
     contests = [BaseContest(name=f'Test {i}', rules=f'Test{i}', description=f'Test {i}',
                             subject=OlympiadSubjectEnum.Math,
@@ -66,7 +67,8 @@ def test_base_contests(test_olympiad_types):
                             winner_3_condition=0.8,
                             diploma_1_condition=0.7,
                             diploma_2_condition=0.6,
-                            diploma_3_condition=0.5) for i in range(8)]
+                            diploma_3_condition=0.5,
+                            certificate_type_id=test_certificate_type.certificate_type_id) for i in range(8)]
     for i in range(len(contests)):
         olympiad_type = test_olympiad_types[i % len(test_olympiad_types)]
         olympiad_type.contests.extend(contests)
@@ -741,3 +743,22 @@ def test_composite_contest_with_users(test_simple_contest_in_stage_1, test_varia
 
     test_app.db.session.commit()
     yield test_simple_contest_in_stage_1
+
+
+@pytest.fixture
+def test_certificate_type():
+    from contest.tasks.models.certificate import CertificateType, Certificate
+    from common.media_types import CertificateImage
+    from contest.tasks.models import UserStatusEnum
+
+    cert_type = CertificateType(name='test', description='test')
+
+    certs = [Certificate(certificate_category=status, text_x=0, text_y=20, text_width=100) for status in UserStatusEnum]
+    for cert in certs:
+        test_app.io_to_media('CERTIFICATE', cert, 'certificate_image', io.BytesIO(test_image), CertificateImage)
+
+    cert_type.certificates = certs
+    test_app.db.session.add(cert_type)
+    test_app.db.session.commit()
+
+    yield cert_type

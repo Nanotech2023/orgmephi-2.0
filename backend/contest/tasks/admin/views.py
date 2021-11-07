@@ -554,7 +554,7 @@ def get_certificate():
     contest_id = args['contest_id']
 
     current_contest = db_get_or_raise(Contest, "contest_id", contest_id)
-    current_user = db_get_or_raise(User, "user_id", user_id)
+    current_user = db_get_or_raise(User, "id", user_id)
 
     certificate = find_certificate(current_user, current_contest)
     return get_certificate_for_user(current_user.user_info, current_contest.name, certificate)

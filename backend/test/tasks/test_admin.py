@@ -79,3 +79,27 @@ def test_location_create_other(client, test_country_native):
     test_location: OlympiadLocation = OlympiadLocation.query.filter_by(
         location_id=resp.json['location_id']).one_or_none()
     assert test_location.location_id == resp.json['location_id']
+
+
+def test_get_user_certificate(client, test_simple_contest_with_users, test_user_for_student_contest, test_variant):
+    test_simple_contest_with_users[0].result_publication_date = datetime.utcnow() - timedelta(hours=150)
+    resp = client.get(
+        f'/certificate?'
+        f'user_id={test_user_for_student_contest.id}&contest_id={test_simple_contest_with_users[0].contest_id}')
+    assert resp.status_code == 200
+    assert resp.content_type == 'application/pdf'
+
+
+def test_get_test_certificate(client, test_certificate_type):
+    resp = client.get(f'/certificate/{test_certificate_type.certificates[0].certificate_id}/test')
+    assert resp.status_code == 200
+    assert resp.content_type == 'application/pdf'
+
+
+def test_get_test_certificate_long(client, test_certificate_type):
+    resp = client.get(f'/certificate/{test_certificate_type.certificates[0].certificate_id}/test'
+                      f'?first_name=very_very_very_very_long_name'
+                      f'&second_name=very_very_very_very_long_name'
+                      f'&middle_name=very_very_very_very_long_name')
+    assert resp.status_code == 200
+    assert resp.content_type == 'application/pdf'

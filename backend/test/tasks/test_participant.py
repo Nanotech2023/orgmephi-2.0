@@ -179,6 +179,28 @@ def test_get_task_image_self_not_in_progress(client, test_simple_contest_with_us
         f'/tasks/{test_variant[0].tasks[0].task_id}/image/self')
     assert resp.status_code == 403
 
+
+def test_get_user_certificate_self_none_user(client, test_simple_contest_with_users_ended, test_variant,
+                                             test_user_for_student_contest_none):
+    resp = client.get(
+        f'/contest/{test_simple_contest_with_users_ended[0].contest_id}/certificate/self')
+    assert resp.status_code == 409
+
+
+def test_get_user_certificate_self_error(client, test_simple_contest_with_users_ended, test_variant):
+    test_simple_contest_with_users_ended[0].result_publication_date = datetime.utcnow() + timedelta(hours=150)
+    resp = client.get(
+        f'/contest/{test_simple_contest_with_users_ended[0].contest_id}/certificate/self')
+    assert resp.status_code == 403
+
+
+def test_get_user_certificate_self(client, test_simple_contest_with_users, test_user_for_student_contest, test_variant):
+    test_simple_contest_with_users[0].result_publication_date = datetime.utcnow() - timedelta(hours=150)
+    resp = client.get(
+        f'/contest/{test_simple_contest_with_users[0].contest_id}/certificate/self')
+    assert resp.status_code == 200
+    assert resp.content_type == 'application/pdf'
+
 # get_contest_in_stage_self
 
 def test_get_all_contests_in_stage_self(client, test_contests_composite,

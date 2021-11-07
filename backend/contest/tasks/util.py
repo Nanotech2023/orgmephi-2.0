@@ -623,11 +623,16 @@ def put_text_on_image(img_data, x, y, width, text, size, font, spacing, color):
     multiline = "\n".join(lines)
     draw.multiline_text((mid, y), multiline, color, font, 'ms', spacing, 'center')
 
-    background = Image.new("RGB", img.size, (255, 255, 255))
-    background.paste(img, mask=img.split()[3])
+    bands = img.getbands()
+    if bands == ('R', 'G', 'B', 'A'):
+        background = Image.new("RGB", img.size, (255, 255, 255))
+        background.paste(img, mask=img.split()[3])
+        img = background
+    elif bands != ('R', 'G', 'B'):
+        raise TypeError(f'Unknown color encoding: {bands}')
 
     output = io.BytesIO()
-    background.save(output, format='pdf')
+    img.save(output, format='pdf')
     output.seek(0)
     return output
 
