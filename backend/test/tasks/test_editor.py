@@ -371,3 +371,48 @@ def test_remove_target_classes_from_contest(client, test_base_contests_with_targ
             'target_classes_ids': [f'{test_target_class[0].target_class_id}']
         })
     assert resp.status_code == 404
+
+
+def cmp_certs(cert_type_obj, cert_type_json):
+    assert cert_type_json['name'] == cert_type_obj.name
+    assert cert_type_json['description'] == cert_type_obj.description
+    json_dict = {v['certificate_id']: v['certificate_category'] for v in cert_type_json['certificates']}
+    obj_dict = {v.certificate_id: v.certificate_category.value for v in cert_type_obj.certificates}
+    assert json_dict == obj_dict
+
+
+def test_get_certificate_types(client, test_certificate_type):
+    resp = client.get('/certificate_type')
+    assert resp.status_code == 200
+    assert len(resp.json['certificate_types']) == 1
+    resp_cert_type = resp.json['certificate_types'][0]
+    cmp_certs(test_certificate_type, resp_cert_type)
+
+
+def test_get_certificate_type_by_id(client, test_certificate_type):
+    resp = client.get(f'/certificate_type/{test_certificate_type.certificate_type_id}')
+    assert resp.status_code == 200
+    cmp_certs(test_certificate_type, resp.json)
+
+
+def test_get_certificate_by_id(client, test_certificate_type):
+    cert = test_certificate_type.certificates[0]
+    resp = client.get(f'/certificate/{cert.certificate_id}')
+    assert resp.status_code == 200
+    assert resp.json['certificate_id'] == cert.certificate_id
+    assert resp.json['certificate_type_id'] == cert.certificate_type_id
+    assert resp.json['certificate_category'] == cert.certificate_category.value
+    assert resp.json['text_x'] == cert.text_x
+    assert resp.json['text_y'] == cert.text_y
+    assert resp.json['text_width'] == cert.text_width
+    assert resp.json['text_size'] == cert.text_size
+    assert resp.json['text_style'] == cert.text_style
+    assert resp.json['text_spacing'] == cert.text_spacing
+    assert resp.json['text_color'] == cert.text_color
+
+
+def test_get_certificate_image(client, test_certificate_type):
+    cert = test_certificate_type.certificates[0]
+    resp = client.get(f'/certificate/{cert.certificate_id}/image')
+    assert resp.status_code == 200
+    assert resp.data

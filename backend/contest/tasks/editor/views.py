@@ -953,15 +953,15 @@ def remove_target_classes_from_contest(id_base_olympiad):
 
 
 @module.route('/certificate_type', methods=['GET'],
-              output_schema=CertificateTypeSchema(exclude=[
-                  'certificates.text_x',
-                  'certificates.text_y',
-                  'certificates.text_width',
-                  'certificates.text_size',
-                  'certificates.text_style',
-                  'certificates.text_spacing',
-                  'certificates.text_color',
-                  'certificates.certificate_type_id'
+              output_schema=CertificateGetResponseTaskEditorSchema(exclude=[
+                  'certificate_types.certificates.text_x',
+                  'certificate_types.certificates.text_y',
+                  'certificate_types.certificates.text_width',
+                  'certificate_types.certificates.text_size',
+                  'certificate_types.certificates.text_style',
+                  'certificate_types.certificates.text_spacing',
+                  'certificate_types.certificates.text_color',
+                  'certificate_types.certificates.certificate_type_id'
               ]))
 def get_certificate_types():
     """
