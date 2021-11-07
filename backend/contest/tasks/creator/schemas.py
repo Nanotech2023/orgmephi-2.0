@@ -13,22 +13,6 @@ from contest.tasks.models import OlympiadSubjectEnum, StageConditionEnum, Contes
 
 # Base contest
 
-class CreateBaseOlympiadRequestTaskCreatorSchema(Schema):
-    name = common_fields.OlympiadName(required=True)
-    description = common_fields.Text(required=True)
-    rules = common_fields.Text(required=True)
-    winner_1_condition = common_fields.FloatCondition(required=True)
-    winner_2_condition = common_fields.FloatCondition(required=True)
-    winner_3_condition = common_fields.FloatCondition(required=True)
-    diploma_1_condition = common_fields.FloatCondition(required=True)
-    diploma_2_condition = common_fields.FloatCondition(required=True)
-    diploma_3_condition = common_fields.FloatCondition(required=True)
-    olympiad_type_id = fields.Int(required=True)
-    subject = EnumField(OlympiadSubjectEnum, required=True, by_value=True)
-    level = EnumField(OlympiadLevelEnum, required=True, by_value=True)
-    certificate_type = fields.Int(required=False)
-
-
 class BaseOlympiadResponseTaskCreatorSchema(BaseContestSchema):
     class Meta(BaseContestSchema.Meta):
         exclude = []
