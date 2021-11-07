@@ -4,22 +4,29 @@ from typing import Callable
 
 
 def _catch_request_error(function: Callable) -> Callable:
-    from marshmallow import ValidationError
+    from marshmallow import ValidationError as MarshmallowValidationError
+    from sqlalchemy_media.exceptions import ValidationError as SqlalchemyMediaValidationError
+    from sqlalchemy_media.exceptions import AnalyzeError
 
     @wraps(function)
     def wrapper(*args, **kwargs):
-        from sqlalchemy_media.exceptions import AnalyzeError
         try:
             return function(*args, **kwargs)
         except RequestError as err:
             return err.to_response()
-        except ValidationError as err:
+        except MarshmallowValidationError as err:
             return make_response({
                 "class": err.__class__.__name__,
                 "status": 400,
                 "title": str(err)
             }, 400)
         except AnalyzeError as err:
+            return make_response({
+                "class": err.__class__.__name__,
+                "status": 400,
+                "title": str(err)
+            }, 400)
+        except SqlalchemyMediaValidationError as err:
             return make_response({
                 "class": err.__class__.__name__,
                 "status": 400,
