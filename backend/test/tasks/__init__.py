@@ -753,7 +753,11 @@ def test_certificate_type():
 
     cert_type = CertificateType(name='test', description='test')
 
-    certs = [Certificate(certificate_category=status, text_x=0, text_y=20, text_width=100, max_lines=2)
+    now = datetime.utcnow()
+    academic_year = now.year if now.month >= 9 else now.year - 1
+
+    certs = [Certificate(certificate_category=status, certificate_year=academic_year, text_x=0, text_y=20,
+                         text_width=100, max_lines=2)
              for status in UserStatusEnum]
     for cert in certs:
         test_app.io_to_media('CERTIFICATE', cert, 'certificate_image', io.BytesIO(test_image), CertificateImage)

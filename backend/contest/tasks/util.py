@@ -659,7 +659,8 @@ def find_certificate(current_user, current_contest):
     if certificate_type is None:
         raise InsufficientData('contest', 'certificate')
 
-    certificate = certificate_type.certificates.filter_by(certificate_category=user_status).one_or_none()
+    certificate = certificate_type.certificates.filter_by(certificate_category=user_status,
+                                                          certificate_year=current_contest.academic_year).one_or_none()
     if certificate is None or certificate.certificate_image is None:
         raise InsufficientData('(contest, user_status)', 'certificate')
 

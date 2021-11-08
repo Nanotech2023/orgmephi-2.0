@@ -16,10 +16,11 @@ class CertificateType(db.Model):
 
 
 class Certificate(db.Model):
-    __table_args__ = (db.UniqueConstraint('certificate_type_id', 'certificate_category'),)
+    __table_args__ = (db.UniqueConstraint('certificate_type_id', 'certificate_category', 'certificate_year'),)
     certificate_id = db.Column(db.Integer, autoincrement=True, primary_key=True)
     certificate_type_id = db.Column(db.Integer, db.ForeignKey(CertificateType.certificate_type_id), nullable=False)
     certificate_category = db.Column(db.Enum(UserStatusEnum), nullable=False)
+    certificate_year = db.Column(db.Integer, nullable=False)
     certificate_image = db.Column(CertificateImage.as_mutable(Json), nullable=False)
 
     text_x = db.Column(db.Integer, nullable=False)

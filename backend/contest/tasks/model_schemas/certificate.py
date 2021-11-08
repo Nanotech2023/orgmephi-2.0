@@ -18,6 +18,7 @@ class CertificateSchema(SQLAlchemySchema):
     certificate_id = auto_field(dump_only=True)
     certificate_type_id = auto_field(dump_only=True)
     certificate_category = EnumField(enum=UserStatusEnum, by_value=True, required=True)
+    certificate_year = auto_field(required=True, description='Academic year of the certificate')
 
     text_x = auto_field(required=True, description='Left border of textbox')
     text_y = auto_field(required=True, description='Bottom border of first line of text')

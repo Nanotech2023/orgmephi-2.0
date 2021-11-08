@@ -372,7 +372,8 @@ def add_certificate(certificate_type_id):
     category = certificate.certificate_category
     exists = db_exists(db.session, Certificate, filters={
         'certificate_type_id': certificate_type_id,
-        'certificate_category': category
+        'certificate_category': category,
+        'certificate_year': certificate.certificate_year
     })
     if exists:
         raise AlreadyExists(f'Certificate type', category.value)
@@ -417,7 +418,8 @@ def patch_certificate(certificate_id):
 
     category = certificate.certificate_category
     query = Certificate.query.filter_by(certificate_type_id=certificate.certificate_type_id,
-                                        certificate_category=category).\
+                                        certificate_category=category,
+                                        certificate_year=certificate.certificate_year).\
         filter(Certificate.certificate_id != certificate.certificate_id)
     exists = db.session.query(query.exists()).scalar()
     if exists:
