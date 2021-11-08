@@ -273,16 +273,25 @@ components:
         certificate_type_id:
           readOnly: true
           type: integer
+        certificate_year:
+          description: Academic year of the certificate
+          type: integer
+        max_lines:
+          default: null
+          description: Maximum amount of lines
+          minimum: 1
+          nullable: true
+          type: integer
         text_color:
           default: '#ffffffff'
           description: '#rrggbbaa color code'
           example: '#ffffffff'
-          nullable: true
           pattern: ^#[0-9,a-f]{8}$
           type: string
         text_size:
           default: 14
           description: Font size
+          minimum: 1
           type: integer
         text_spacing:
           default: 0
@@ -296,6 +305,7 @@ components:
           type: string
         text_width:
           description: Textbox width
+          minimum: 0
           type: integer
         text_x:
           description: Left border of textbox
@@ -306,6 +316,7 @@ components:
       required:
       - certificate_category
       - certificate_type_id
+      - certificate_year
       - text_width
       - text_x
       - text_y
