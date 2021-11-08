@@ -609,12 +609,23 @@ def split_line(font, text, width):
     return lines
 
 
-def put_text_on_image(img_data, x, y, width, text, size, font, spacing, color):
+__size_step = 2
+
+
+def put_text_on_image(img_data, x, y, width, text, size, font_name, spacing, color, max_lines):
     from PIL import Image, ImageDraw, ImageFont
 
     text = " ".join(text.strip().split())
-    font = ImageFont.truetype(font, size)
+    font = ImageFont.truetype(font_name, size)
     lines = split_line(font, text, width)
+
+    if max_lines is not None:
+        while len(lines) > max_lines:
+            size = size - __size_step
+            if size <= 0:
+                raise DataConflict('Name too long to fit')
+            font = ImageFont.truetype(font_name, size)
+            lines = split_line(font, text, width)
 
     img = Image.open(img_data)
     draw = ImageDraw.Draw(img)
@@ -648,7 +659,8 @@ def find_certificate(current_user, current_contest):
     if certificate_type is None:
         raise InsufficientData('contest', 'certificate')
 
-    certificate = certificate_type.certificates.filter_by(certificate_category=user_status).one_or_none()
+    certificate = certificate_type.certificates.filter_by(certificate_category=user_status,
+                                                          certificate_year=current_contest.academic_year).one_or_none()
     if certificate is None or certificate.certificate_image is None:
         raise InsufficientData('(contest, user_status)', 'certificate')
 
@@ -662,6 +674,6 @@ def get_certificate_for_user(user_info, contest_name, certificate):
     user_name = f'{user_info.second_name} {user_info.first_name} {user_info.middle_name}'
     img = put_text_on_image(img_data, certificate.text_x, certificate.text_y, certificate.text_width, user_name,
                             certificate.text_size, certificate.text_style, certificate.text_spacing,
-                            certificate.text_color)
+                            certificate.text_color, certificate.max_lines)
     return send_file(img, mimetype='application/pdf', as_attachment=True,
                      attachment_filename=f'Сертификат_{contest_name}_{user_name}'.replace(" ", "_"))
