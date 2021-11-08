@@ -4,6 +4,7 @@ import { TasksService } from '@api/tasks/tasks.service'
 import { CallState, getError, LoadingState } from '@/shared/callState'
 import { EMPTY, Observable } from 'rxjs'
 import {
+    CompositeContest,
     Contest,
     EnrollRequestTaskParticipant,
     FilterSimpleContestResponseTaskParticipant,
@@ -13,6 +14,7 @@ import {
 } from '@api/tasks/model'
 import { catchError, switchMap } from 'rxjs/operators'
 import { ResponsesService } from '@api/responses/responses.service'
+import CompositeTypeEnum = SimpleContest.CompositeTypeEnum
 
 
 export interface ContestsState
@@ -41,7 +43,7 @@ export class ContestsStore extends ComponentStore<ContestsState>
         super( initialState )
     }
 
-    readonly contests$: Observable<SimpleContestWithFlagResponseTaskParticipant[]> = this.select( state => state.contests.filter( item => item.contest?.academic_year !== undefined ) )
+    readonly contests$: Observable<SimpleContestWithFlagResponseTaskParticipant[]> = this.select( state => state.contests.filter( item => item.contest?.composite_type === CompositeTypeEnum.SimpleContest ) )
     readonly contest$: Observable<SimpleContest | undefined> = this.select( state => state.contest as SimpleContest )
     private readonly loading$: Observable<boolean> = this.select( state => state.callState === LoadingState.LOADING )
     private readonly error$: Observable<string | null> = this.select( state => getError( state.callState ) )

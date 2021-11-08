@@ -21,11 +21,9 @@ export function getStatusDisplay( contest?: Contest ): string
     }
 
     if ( contest.academic_year )
-    {
-        const year = new Date( contest.academic_year ).getFullYear()
-        return year + ": " + prefix
-    }
-    else return prefix
+        return contest.academic_year + ": " + prefix
+
+    return prefix
 }
 
 

@@ -39,13 +39,19 @@ export class ManageContestComponent
     navigateElement(): void
     {
         if ( this.selectedRow )
-            this.router.navigate( [ 'contest', this.selectedRow.contest_id, 'users' ], { relativeTo: this.route } )
+        {
+            const routePath = [ '/manage', 'contests', this.selectedRow.base_contest.base_contest_id, 'contest', this.selectedRow.contest_id, 'users' ]
+            this.router.navigate( routePath )
+        }
     }
 
     navigateElement2(): void
     {
         if ( this.selectedRow )
-            this.router.navigate( [ 'contest', this.selectedRow.contest_id, 'variants' ], { relativeTo: this.route } )
+        {
+            const routePath = [ '/manage', 'contests', this.selectedRow.base_contest.base_contest_id, 'contest', this.selectedRow.contest_id, 'variants' ]
+            this.router.navigate( routePath )
+        }
     }
 
     editElement(): void

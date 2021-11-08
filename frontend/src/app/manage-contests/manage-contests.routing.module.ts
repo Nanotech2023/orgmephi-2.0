@@ -9,6 +9,7 @@ import { ManageContestVariantsComponent } from '@/manage-contests/containers/man
 import { ManageContestVariantTasksComponent } from '@/manage-contests/containers/manage-contest-variant-tasks/manage-contest-variant-tasks.component'
 import { ManageContestUsersComponent } from '@/manage-contests/containers/manage-contest-users-component/manage-contest-users.component'
 import { ManageContestUserAssignmentComponent } from '@/manage-contests/containers/manage-contest-user-assignment/manage-contest-user-assignment.component'
+import { ManageContestsComponent } from '@/manage-contests/containers/manage-contests/manage-contests.component'
 
 
 export const COMPONENTS = [
@@ -19,34 +20,30 @@ export const COMPONENTS = [
     ManageContestUsersComponent,
     ManageContestUserAssignmentComponent,
     ManageContestVariantsComponent,
-    ManageContestVariantTasksComponent
+    ManageContestVariantTasksComponent,
+    ManageContestsComponent
 ]
 
 const routes: Routes =
     [
         {
-            path: 'manage/contests/:baseContestId/composite/:compositeContestId/stages/:stageId/contest/:simpleContestId/variants/:variantId/tasks',
+            path: 'manage/contests/:baseContestId/contest/:simpleContestId/variants/:variantId/tasks',
             component: ManageContestVariantTasksComponent,
             canActivate: [ AuthGuardService ]
         },
         {
-            path: 'manage/contests/:baseContestId/composite/:compositeContestId/stages/:stageId/contest/:simpleContestId/variants',
+            path: 'manage/contests/:baseContestId/contest/:simpleContestId/variants',
             component: ManageContestVariantsComponent,
             canActivate: [ AuthGuardService ]
         },
         {
-            path: 'manage/contests/:baseContestId/composite/:compositeContestId/stages/:stageId/contest/:simpleContestId/users/:userId/assignment',
+            path: 'manage/contests/:baseContestId/contest/:simpleContestId/users/:userId/assignment',
             component: ManageContestUserAssignmentComponent,
             canActivate: [ AuthGuardService ]
         },
         {
-            path: 'manage/contests/:baseContestId/composite/:compositeContestId/stages/:stageId/contest/:simpleContestId/users',
+            path: 'manage/contests/:baseContestId/contest/:simpleContestId/users',
             component: ManageContestUsersComponent,
-            canActivate: [ AuthGuardService ]
-        },
-        {
-            path: 'manage/contests/:baseContestId/composite/:compositeContestId/stages/:stageId',
-            component: ManageContestComponent,
             canActivate: [ AuthGuardService ]
         },
         {
@@ -62,6 +59,11 @@ const routes: Routes =
         {
             path: 'manage/contests/:baseContestId',
             component: ManageCompositeContestsComponent,
+            canActivate: [ AuthGuardService ]
+        },
+        {
+            path: 'manage/allcontests',
+            component: ManageContestsComponent,
             canActivate: [ AuthGuardService ]
         },
         {
