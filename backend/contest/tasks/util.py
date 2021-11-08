@@ -631,8 +631,9 @@ def put_text_on_image(img_data, x, y, width, text, size, font_name, spacing, col
     draw = ImageDraw.Draw(img)
 
     mid = x + (width / 2)
-    multiline = "\n".join(lines)
-    draw.multiline_text((mid, y), multiline, color, font, 'ms', spacing, 'center')
+    for line in lines:
+        draw.text((mid, y), line, color, font, 'ms', spacing)
+        y = y + spacing
 
     bands = img.getbands()
     if bands == ('R', 'G', 'B', 'A'):
