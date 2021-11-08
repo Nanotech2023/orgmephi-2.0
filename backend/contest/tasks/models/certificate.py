@@ -28,6 +28,7 @@ class Certificate(db.Model):
     text_size = db.Column(db.Integer, nullable=False, default=14)
     text_style = db.Column(db.String, nullable=False, default='DejaVuSans')
     text_spacing = db.Column(db.Integer, nullable=False, default=0)
-    text_color = db.Column(db.String, default='#ffffffff')
+    text_color = db.Column(db.String(9), nullable=False, default='#000000ff')
+    max_lines = db.Column(db.Integer, nullable=True, default=1)
 
     certificate_type = db.relationship('CertificateType', lazy='select', back_populates='certificates')

@@ -753,7 +753,8 @@ def test_certificate_type():
 
     cert_type = CertificateType(name='test', description='test')
 
-    certs = [Certificate(certificate_category=status, text_x=0, text_y=20, text_width=100) for status in UserStatusEnum]
+    certs = [Certificate(certificate_category=status, text_x=0, text_y=20, text_width=100, max_lines=2)
+             for status in UserStatusEnum]
     for cert in certs:
         test_app.io_to_media('CERTIFICATE', cert, 'certificate_image', io.BytesIO(test_image), CertificateImage)
 

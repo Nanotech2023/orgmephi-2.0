@@ -21,14 +21,16 @@ class CertificateSchema(SQLAlchemySchema):
 
     text_x = auto_field(required=True, description='Left border of textbox')
     text_y = auto_field(required=True, description='Bottom border of first line of text')
-    text_width = auto_field(required=True, description='Textbox width')
-    text_size = auto_field(required=False, load_default=14, description='Font size')
+    text_width = auto_field(required=True, validate=validate.Range(0), description='Textbox width')
+    text_size = auto_field(required=False, validate=validate.Range(1), load_default=14, description='Font size')
     text_style = auto_field(required=False, validate=common_name_validator,
                             load_default='DejaVuSans', example='DejaVuSans',
                             description='Text font, see /contest/tasks/admin/fonts for available fonts')
     text_spacing = auto_field(required=False, load_default=0, description='Distance between lines')
     text_color = auto_field(required=False, validate=validate.Regexp('^#[0-9,a-f]{8}$'), load_default='#ffffffff',
                             example='#ffffffff', description='#rrggbbaa color code')
+    max_lines = auto_field(required=False, validate=validate.Range(1), load_default=None,
+                           description='Maximum amount of lines')
 
     @post_load()
     def test_font(self, data, many, **kwargs):
