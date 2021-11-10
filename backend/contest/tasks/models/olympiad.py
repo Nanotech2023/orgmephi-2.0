@@ -239,6 +239,7 @@ def add_simple_contest(db_session,
                        regulations=None,
                        result_publication_date=None,
                        end_of_enroll_date=None,
+                       deadline_for_appeal=None,
                        holding_type=None,
                        contest_duration=None,
                        previous_contest_id=None,
@@ -257,6 +258,7 @@ def add_simple_contest(db_session,
         contest_duration=contest_duration,
         result_publication_date=result_publication_date,
         end_of_enroll_date=end_of_enroll_date,
+        deadline_for_appeal=deadline_for_appeal,
         previous_contest_id=previous_contest_id,
         previous_participation_condition=previous_participation_condition,
     )
@@ -276,6 +278,7 @@ class SimpleContest(Contest):
 
     start_date: start date of contest
     end_of_enroll_date: end of enroll date
+    deadline_for_appeal: deadline_for_appeal
     end_date: end date of contest
     result_publication_date: result publication date
 
@@ -297,6 +300,7 @@ class SimpleContest(Contest):
     end_date = db.Column(db.DateTime, index=True, default=datetime.utcnow)
     result_publication_date = db.Column(db.DateTime, nullable=True)
     end_of_enroll_date = db.Column(db.DateTime, nullable=True)
+    deadline_for_appeal = db.Column(db.DateTime, nullable=True)
     contest_duration = db.Column(db.Interval, default=timedelta(seconds=0), nullable=False)
     target_classes = association_proxy('base_contest', 'target_classes')
     previous_contest_id = db.Column(db.Integer, db.ForeignKey('simple_contest.contest_id'), nullable=True)

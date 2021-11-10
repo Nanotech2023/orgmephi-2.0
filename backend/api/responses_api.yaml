@@ -108,16 +108,18 @@ components:
       type: object
     ContestInfo:
       properties:
+        academic_year:
+          type: integer
+        composite_type:
+          enum:
+          - SimpleContest
+          type: string
         contest_id:
           readOnly: true
-          type: integer
-        end_year:
           type: integer
         name:
           readOnly: true
           type: string
-        start_year:
-          type: integer
         subject:
           enum:
           - Math
@@ -128,10 +130,10 @@ components:
           - Other
           type: string
       required:
+      - academic_year
+      - composite_type
       - contest_id
-      - end_year
       - name
-      - start_year
       type: object
     ContestResultSheetResponse:
       properties:
@@ -852,7 +854,7 @@ paths:
         '404':
           description: User or contest not found
         '409':
-          description: Mark Error
+          description: Mark or timing error
       security:
       - JWTAccessToken: []
       - CSRFAccessToken: []

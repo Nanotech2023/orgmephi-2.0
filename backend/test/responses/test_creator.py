@@ -262,6 +262,15 @@ def test_mark_creator(client, create_one_task):
     assert resp.status_code == 200
     assert resp.json['mark'] == 11
 
+    from contest.tasks.util import get_simple_contest_if_possible
+    simple_contest = get_simple_contest_if_possible(contest_id)
+    simple_contest.deadline_for_appeal = datetime.utcnow() - timedelta(minutes=15)
+    test_app.db.session.commit()
+
+    resp = client.post(f'/contest/{contest_id}/task/{ERROR_ID}/user/{user_id}/mark',
+                       json={'mark': 12})
+    assert resp.status_code == 409
+
 
 def test_time_left_creator(client, create_one_task):
     contest_id = get_contest_id(create_one_task, DEFAULT_INDEX)

@@ -439,6 +439,9 @@ components:
           x-unit: seconds
         contest_id:
           type: integer
+        deadline_for_appeal:
+          format: date-time
+          type: string
         end_date:
           format: date-time
           type: string
@@ -594,6 +597,9 @@ components:
         contest_duration:
           type: integer
           x-unit: seconds
+        deadline_for_appeal:
+          format: date-time
+          type: string
         end_date:
           format: date-time
           type: string
@@ -891,6 +897,10 @@ components:
         contest_id:
           readOnly: true
           type: integer
+        deadline_for_appeal:
+          format: date-time
+          nullable: true
+          type: string
         end_date:
           format: date-time
           nullable: true
@@ -957,6 +967,7 @@ components:
       - composite_type
       - contest_duration
       - contest_id
+      - deadline_for_appeal
       - end_date
       - end_of_enroll_date
       - holding_type
@@ -1174,6 +1185,9 @@ components:
         contest_duration:
           type: integer
           x-unit: seconds
+        deadline_for_appeal:
+          format: date-time
+          type: string
         end_date:
           format: date-time
           type: string

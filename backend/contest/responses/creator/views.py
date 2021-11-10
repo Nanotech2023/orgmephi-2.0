@@ -646,10 +646,11 @@ def user_answer_task_mark_post(contest_id, user_id, task_id):
         '404':
           description: User or contest not found
         '409':
-          description: Mark Error
+          description: Mark or timing error
     """
     creator_id = jwt_get_id()
     check_contest_restriction(creator_id, contest_id, ContestGroupRestrictionEnum.edit_mark)
+    check_timing_for_mark_editing(contest_id)
     values = request.marshmallow
     check_mark_for_task(values['mark'], task_id)
     user_work = get_user_in_contest_work(user_id, contest_id)

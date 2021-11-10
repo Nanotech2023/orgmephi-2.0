@@ -265,6 +265,12 @@ def check_contest_restriction(user_id, contest_id, restriction_level):
         raise RestrictionError()
 
 
+def check_timing_for_mark_editing(contest_id):
+    contest: SimpleContest = db_get_or_raise(SimpleContest, 'contest_id', contest_id)
+    if datetime.utcnow() > contest.deadline_for_appeal:
+        raise TimingError("The time for correcting the mark is out")
+
+
 # Other funcs
 
 

@@ -72,6 +72,7 @@ def step_create_simple_contest(client, state):
         'end_date': f'{datetime.utcnow() + timedelta(hours=4)}',
         'regulations': 'Test 0',
         'end_of_enroll_date': f'{datetime.utcnow() + timedelta(hours=1)}',
+        'deadline_for_appeal': f'{datetime.utcnow() + timedelta(hours=3)}',
         'result_publication_date': f'{datetime.utcnow() + timedelta(hours=5)}',
         'stage_id': f'{state.stage["stage_id"]}'}
     resp = client.post(f'contest/tasks/creator'

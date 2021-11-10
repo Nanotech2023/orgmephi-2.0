@@ -130,6 +130,7 @@ def test_simple_contest(test_base_contests_with_target, test_olympiad_locations)
                                      regulations=f'Test {i}',
                                      contest_duration=timedelta(minutes=30),
                                      result_publication_date=datetime.utcnow() + timedelta(hours=3),
+                                     deadline_for_appeal=datetime.utcnow() + timedelta(minutes=45),
                                      end_of_enroll_date=datetime.utcnow() + timedelta(minutes=15))
                        for i in range(7)]
     simple_contests.append(SimpleContest(
@@ -203,6 +204,7 @@ def test_simple_contest_in_stage_1(test_base_contests_with_target, test_stages, 
                                      regulations=f'Test {i}',
                                      contest_duration=timedelta(minutes=30),
                                      result_publication_date=datetime.utcnow() + timedelta(hours=6),
+                                     deadline_for_appeal=datetime.utcnow() + timedelta(hours=2),
                                      end_of_enroll_date=datetime.utcnow() + timedelta(minutes=15))
                        for i in range(2)]
 
@@ -217,6 +219,7 @@ def test_simple_contest_in_stage_1(test_base_contests_with_target, test_stages, 
                                 regulations=f'Test',
                                 contest_duration=timedelta(minutes=30),
                                 result_publication_date=datetime.utcnow() + timedelta(hours=6),
+                                deadline_for_appeal=datetime.utcnow() + timedelta(hours=2),
                                 end_of_enroll_date=datetime.utcnow() + timedelta(minutes=15))
     test_app.db.session.add(other_stage)
 
@@ -263,6 +266,7 @@ def test_simple_contest_in_stage_2_contest_in_stage(test_base_contests_with_targ
                                      regulations=f'Test',
                                      contest_duration=timedelta(minutes=30),
                                      result_publication_date=datetime.utcnow() + timedelta(hours=6),
+                                     deadline_for_appeal=datetime.utcnow() + timedelta(hours=2),
                                      end_of_enroll_date=datetime.utcnow() + timedelta(minutes=15))
                        for i in range(2)]
 
@@ -279,6 +283,7 @@ def test_simple_contest_in_stage_2_contest_in_stage(test_base_contests_with_targ
                                              contest_duration=timedelta(minutes=30),
                                              regulations=f'Test',
                                              result_publication_date=datetime.utcnow() + timedelta(hours=6),
+                                             deadline_for_appeal=datetime.utcnow() + timedelta(hours=2),
                                              end_of_enroll_date=datetime.utcnow() + timedelta(minutes=15))
 
     contest_in_other_stage_2 = SimpleContest(base_contest_id=test_base_contests_with_target[0].base_contest_id,
@@ -290,6 +295,7 @@ def test_simple_contest_in_stage_2_contest_in_stage(test_base_contests_with_targ
                                              contest_duration=timedelta(minutes=30),
                                              regulations=f'Test',
                                              result_publication_date=datetime.utcnow() + timedelta(hours=6),
+                                             deadline_for_appeal=datetime.utcnow() + timedelta(hours=2),
                                              end_of_enroll_date=datetime.utcnow() + timedelta(minutes=15),
                                              previous_contest_id=999,
                                              previous_participation_condition=UserStatusEnum.Participant)
@@ -338,6 +344,7 @@ def test_simple_contest_in_stage_and(test_base_contests_with_target, test_stages
                                      regulations=f'Test',
                                      contest_duration=timedelta(minutes=30),
                                      result_publication_date=datetime.utcnow() + timedelta(hours=6),
+                                     deadline_for_appeal=datetime.utcnow() + timedelta(hours=2),
                                      end_of_enroll_date=datetime.utcnow() + timedelta(minutes=15))
                        for i in range(2)]
 
@@ -349,6 +356,7 @@ def test_simple_contest_in_stage_and(test_base_contests_with_target, test_stages
                                 regulations=f'Test',
                                 contest_duration=timedelta(minutes=30),
                                 result_publication_date=datetime.utcnow() + timedelta(hours=6),
+                                deadline_for_appeal=datetime.utcnow() + timedelta(hours=2),
                                 end_of_enroll_date=datetime.utcnow() + timedelta(minutes=15))
     test_app.db.session.add(other_stage)
 
@@ -401,6 +409,7 @@ def test_simple_contest_in_stage_2(test_base_contests_with_target, test_stages, 
                                      regulations=f'Test',
                                      contest_duration=timedelta(minutes=30),
                                      result_publication_date=datetime.utcnow() + timedelta(hours=6),
+                                     deadline_for_appeal=datetime.utcnow() + timedelta(hours=2),
                                      end_of_enroll_date=datetime.utcnow() + timedelta(minutes=15))
                        for i in range(2)]
 
@@ -415,6 +424,7 @@ def test_simple_contest_in_stage_2(test_base_contests_with_target, test_stages, 
                                 regulations=f'Test',
                                 contest_duration=timedelta(minutes=30),
                                 result_publication_date=datetime.utcnow() + timedelta(hours=6),
+                                deadline_for_appeal=datetime.utcnow() + timedelta(hours=2),
                                 end_of_enroll_date=datetime.utcnow() + timedelta(minutes=15))
     test_app.db.session.add(other_stage)
 
@@ -463,6 +473,7 @@ def test_simple_contest_in_stage_3(test_base_contests_with_target, test_stages, 
                                      regulations=f'Test',
                                      contest_duration=timedelta(minutes=30),
                                      result_publication_date=datetime.utcnow() + timedelta(hours=6),
+                                     deadline_for_appeal=datetime.utcnow() + timedelta(hours=2),
                                      end_of_enroll_date=datetime.utcnow() + timedelta(minutes=15))
                        for i in range(2)]
 
@@ -476,6 +487,7 @@ def test_simple_contest_in_stage_3(test_base_contests_with_target, test_stages, 
                                 regulations=f'Test',
                                 contest_duration=timedelta(minutes=30),
                                 result_publication_date=datetime.utcnow() + timedelta(hours=6),
+                                deadline_for_appeal=datetime.utcnow() + timedelta(hours=2),
                                 end_of_enroll_date=datetime.utcnow() + timedelta(minutes=15))
     test_app.db.session.add(other_stage)
     other_stage.locations.append(test_olympiad_locations[0])
