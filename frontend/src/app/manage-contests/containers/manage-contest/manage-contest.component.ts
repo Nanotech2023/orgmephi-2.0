@@ -1,7 +1,7 @@
-import { Component, OnInit, ViewChild } from '@angular/core'
+import { Component, ViewChild } from '@angular/core'
 import { ActivatedRoute, Router } from '@angular/router'
 import { TasksService } from '@api/tasks/tasks.service'
-import { CompositeContest, SimpleContest, Stage } from '@api/tasks/model'
+import { SimpleContest, Stage } from '@api/tasks/model'
 import { DxDataGridComponent } from 'devextreme-angular'
 
 
@@ -16,7 +16,6 @@ export class ManageContestComponent
     {
         this.route.paramMap.subscribe( paramMap =>
         {
-            const baseContestId = Number( paramMap.get( 'baseContestId' ) )
             const compositeContestId = Number( paramMap.get( 'compositeContestId' ) )
             this.stageId = Number( paramMap.get( 'stageId' ) )
             if ( !!this.stageId )
@@ -35,6 +34,9 @@ export class ManageContestComponent
     @ViewChild( DxDataGridComponent, { static: false } ) grid!: DxDataGridComponent
     selectedRowIndex: number = -1
     selectedRow?: SimpleContest = undefined
+    holdingTypeEnum: ( "OfflineContest" | "OnLineContest" )[] = Object.values( SimpleContest.HoldingTypeEnum )
+    statusEnum: ( "Will start soon" | "In progress" | "Finished" )[] = Object.values( SimpleContest.StatusEnum )
+    previousParticipationConditionEnum: ( "Winner 1" | "Winner 2" | "Winner 3" | "Diploma 1" | "Diploma 2" | "Diploma 3" | "Participant" )[] = Object.values( SimpleContest.PreviousParticipationConditionEnum )
 
     navigateElement(): void
     {

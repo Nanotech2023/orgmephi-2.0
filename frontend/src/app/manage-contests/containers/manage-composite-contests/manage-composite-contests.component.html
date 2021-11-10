@@ -18,10 +18,12 @@
 
                 <dxi-column dataField="contest_id"></dxi-column>
                 <dxi-column dataField="academic_year"></dxi-column>
-                <dxi-column dataField="holding_type"></dxi-column>
-                <!---TODO enum CompositeContest.HoldingTypeEnum--->
-                <dxi-column dataField="status"></dxi-column>
-                <!---TODO enum CompositeContest.StatusEnum--->
+                <dxi-column dataField="holding_type">
+                    <dxo-lookup [dataSource]="holdingTypeEnum"></dxo-lookup>
+                </dxi-column>
+                <dxi-column dataField="status">
+                    <dxo-lookup [dataSource]="statusEnum"></dxo-lookup>
+                </dxi-column>
                 <dxi-column dataField="visibility"></dxi-column>
 
                 <dxo-selection mode="single"></dxo-selection>

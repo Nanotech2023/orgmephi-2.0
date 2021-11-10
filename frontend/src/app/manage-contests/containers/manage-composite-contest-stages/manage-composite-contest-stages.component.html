@@ -22,9 +22,9 @@
                 <dxi-column dataField="stage_name"></dxi-column>
                 <dxi-column dataField="stage_num"></dxi-column>
                 <dxi-column dataField="this_stage_condition"></dxi-column>
-                <dxi-column dataField="condition"></dxi-column>
-                <!---TODO enum Stage.ConditionEnum--->
-
+                <dxi-column dataField="condition">
+                    <dxo-lookup [dataSource]="stageConditionEnum"></dxo-lookup>
+                </dxi-column>
                 <dxo-selection mode="single"></dxo-selection>
                 <dxo-grouping [autoExpandAll]="false" [contextMenuEnabled]="true"></dxo-grouping>
                 <dxo-group-panel [visible]="true"></dxo-group-panel>
@@ -47,33 +47,25 @@
             <dx-speed-dial-action
                 icon="add"
                 label="Добавить"
-                [index]="1"
+                [index]="3"
                 [elementAttr]="{ id: 'table' }"
                 (onClick)="addElement()">
             </dx-speed-dial-action>
             <dx-speed-dial-action
-                icon="arrowdown"
-                label="Олимпиады"
-                [index]="3"
-                [elementAttr]="{ id: 'table' }"
-                [visible]="selectedRowIndex !== -1"
-                (onClick)="navigateElement()">
-            </dx-speed-dial-action>
-            <dx-speed-dial-action
-                icon="trash"
-                label="Удалить"
+                icon="edit"
+                label="Изменить"
                 [index]="2"
                 [elementAttr]="{ id: 'table' }"
                 [visible]="selectedRowIndex !== -1"
-                (onClick)="deleteElement()">
+                (onClick)="editElement()">
             </dx-speed-dial-action>
             <dx-speed-dial-action
-                icon="edit"
-                label="Изменить"
-                [index]="3"
+                icon="arrowdown"
+                label="Олимпиады"
+                [index]="1"
                 [elementAttr]="{ id: 'table' }"
                 [visible]="selectedRowIndex !== -1"
-                (onClick)="editElement()">
+                (onClick)="navigateToSelected()">
             </dx-speed-dial-action>
         </div>
     </div>

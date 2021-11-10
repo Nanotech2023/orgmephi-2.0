@@ -1,9 +1,9 @@
-import { Component, OnInit, ViewChild } from '@angular/core'
+import { Component, ViewChild } from '@angular/core'
 import { ActivatedRoute, Router } from '@angular/router'
 import { TasksService } from '@api/tasks/tasks.service'
-import { BaseContest, CompositeContest } from '@api/tasks/model'
-import CompositeTypeEnum = CompositeContest.CompositeTypeEnum
+import { CompositeContest, SimpleContest } from '@api/tasks/model'
 import { DxDataGridComponent } from 'devextreme-angular'
+import CompositeTypeEnum = CompositeContest.CompositeTypeEnum
 
 
 @Component( {
@@ -34,6 +34,8 @@ export class ManageCompositeContestsComponent
     @ViewChild( DxDataGridComponent, { static: false } ) grid!: DxDataGridComponent
     selectedRowIndex: number = -1
     selectedRow?: CompositeContest = undefined
+    statusEnum: ( "Will start soon" | "In progress" | "Finished" )[] = Object.values( CompositeContest.StatusEnum )
+    holdingTypeEnum: ( "OfflineContest" | "OnLineContest" )[] = Object.values( CompositeContest.HoldingTypeEnum )
 
     navigateElement(): void
     {

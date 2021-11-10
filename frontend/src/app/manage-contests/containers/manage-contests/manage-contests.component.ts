@@ -29,9 +29,9 @@ export class ManageContestsComponent implements OnInit
     @ViewChild( DxDataGridComponent, { static: false } ) grid!: DxDataGridComponent
     selectedRowIndex: number = -1
     selectedRow?: SimpleContest = undefined
-    previousParticipationConditionEnum = Object.values( SimpleContest.PreviousParticipationConditionEnum )
-    holdingTypeEnum = Object.values( CompositeContest.HoldingTypeEnum )
-    statusEnum = Object.values( SimpleContest.StatusEnum )
+    previousParticipationConditionEnum: ( "Winner 1" | "Winner 2" | "Winner 3" | "Diploma 1" | "Diploma 2" | "Diploma 3" | "Participant" )[] = Object.values( SimpleContest.PreviousParticipationConditionEnum )
+    holdingTypeEnum: ( "OfflineContest" | "OnLineContest" )[] = Object.values( SimpleContest.HoldingTypeEnum )
+    statusEnum: ( "Will start soon" | "In progress" | "Finished" )[] = Object.values( SimpleContest.StatusEnum )
 
     navigateElement(): void
     {

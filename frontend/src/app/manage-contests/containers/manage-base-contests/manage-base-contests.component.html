@@ -17,23 +17,25 @@
                 keyExpr="base_contest_id"
                 (onSelectionChanged)="selectedChanged($event)">
 
-                <dxi-column dataField="base_contest_id"></dxi-column>
-                <dxi-column dataField="name"></dxi-column>
-                <dxi-column dataField="description"></dxi-column>
-                <dxi-column dataField="diploma_1_condition"></dxi-column>
-                <dxi-column dataField="diploma_2_condition"></dxi-column>
-                <dxi-column dataField="diploma_3_condition"></dxi-column>
-                <dxi-column dataField="level"></dxi-column>
-                <!---TODO enum BaseContest.LevelEnum--->
-                <dxi-column dataField="olympiad_type_id"></dxi-column>
-                <dxi-column dataField="rules"></dxi-column>
-                <dxi-column dataField="subject"></dxi-column>
-                <!---TODO enum BaseContest.SubjectEnum--->
+                <dxi-column dataField="base_contest_id" caption="ID"></dxi-column>
+                <dxi-column dataField="name" caption="Название"></dxi-column>
+                <dxi-column dataField="description" caption="Описание"></dxi-column>
+                <dxi-column dataField="level" caption="Уровень">
+                    <dxo-lookup [dataSource]="levelEnum"></dxo-lookup>
+                </dxi-column>
+                <dxi-column dataField="olympiad_type_id" caption="ID типа"></dxi-column>
+                <dxi-column dataField="rules" caption="Правила"></dxi-column>
+                <dxi-column dataField="subject" caption="Предмет">
+                    <dxo-lookup [dataSource]="subjectEnum"></dxo-lookup>
+                </dxi-column>
                 <dxi-column dataField="target_classes"></dxi-column>
                 <!---TODO Array<TargetClass>--->
-                <dxi-column dataField="winner_1_condition"></dxi-column>
-                <dxi-column dataField="winner_2_condition"></dxi-column>
-                <dxi-column dataField="winner_3_condition"></dxi-column>
+                <dxi-column dataField="winner_1_condition" caption="Условия на победу 1"></dxi-column>
+                <dxi-column dataField="winner_2_condition" caption="Условия на диплом 2"></dxi-column>
+                <dxi-column dataField="winner_3_condition" caption="Условия на диплом 3"></dxi-column>
+                <dxi-column dataField="diploma_1_condition" caption="Условия на диплом 1"></dxi-column>
+                <dxi-column dataField="diploma_2_condition" caption="Условия на диплом 2"></dxi-column>
+                <dxi-column dataField="diploma_3_condition" caption="Условия на диплом 3"></dxi-column>
 
                 <dxo-selection mode="single"></dxo-selection>
                 <dxo-grouping [autoExpandAll]="false" [contextMenuEnabled]="true"></dxo-grouping>
@@ -50,35 +52,28 @@
                 <dxo-paging [pageSize]="25"></dxo-paging>
                 <dxo-pager [showPageSizeSelector]="true" [allowedPageSizes]="[25, 50, 100]"></dxo-pager>
                 <dxo-state-storing [enabled]="true" type="localStorage"
-                                   storageKey="app-manage-contests"></dxo-state-storing>
+                                   storageKey="app-manage-base-contests"></dxo-state-storing>
             </dx-data-grid>
 
             <dx-speed-dial-action
-                icon="add"
-                label="Добавить"
-                [index]="1"
-                (onClick)="addElement()">
-            </dx-speed-dial-action>
-            <dx-speed-dial-action
                 icon="arrowdown"
-                label="Олимпиады"
-                [index]="3"
+                label="Составные олимпиады"
+                [index]="1"
                 [visible]="selectedRowIndex !== -1"
-                (onClick)="navigateElement()">
-            </dx-speed-dial-action>
-            <dx-speed-dial-action
-                icon="trash"
-                label="Удалить"
-                [index]="2"
-                [visible]="selectedRowIndex !== -1"
-                (onClick)="deleteElement()">
+                (onClick)="navigateToSelectedElement()">
             </dx-speed-dial-action>
             <dx-speed-dial-action
                 icon="edit"
                 label="Изменить"
-                [index]="3"
+                [index]="2"
                 [visible]="selectedRowIndex !== -1"
                 (onClick)="editElement()">
+            </dx-speed-dial-action>
+            <dx-speed-dial-action
+                icon="add"
+                label="Добавить"
+                [index]="3"
+                (onClick)="addElement()">
             </dx-speed-dial-action>
         </div>
     </div>

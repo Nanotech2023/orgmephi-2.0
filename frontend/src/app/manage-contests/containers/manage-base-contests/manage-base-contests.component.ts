@@ -27,8 +27,10 @@ export class ManageBaseContestsComponent implements OnInit
     @ViewChild( DxDataGridComponent, { static: false } ) grid!: DxDataGridComponent
     selectedRowIndex: number = -1
     selectedRow?: BaseContest = undefined
+    levelEnum: ( "1" | "2" | "3" | "No level" )[] = Object.values( BaseContest.LevelEnum )
+    subjectEnum: ( "Math" | "Physics" | "Informatics" | "Natural Sciences" | "Engineering Sciences" | "Other" )[] = Object.values( BaseContest.SubjectEnum )
 
-    navigateElement(): void
+    navigateToSelectedElement(): void
     {
         if ( this.selectedRow )
             this.router.navigate( [ this.selectedRow.base_contest_id ], { relativeTo: this.route } )

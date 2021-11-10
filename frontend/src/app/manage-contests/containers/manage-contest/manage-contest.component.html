@@ -28,17 +28,20 @@
                 <dxi-column dataField="locations"></dxi-column>
                 <!---TODO Array<OlympiadLocation>--->
                 <dxi-column dataField="previous_contest_id"></dxi-column>
-                <dxi-column dataField="previous_participation_condition"></dxi-column>
-                <!---TODO enum SimpleContest.PreviousParticipationConditionEnum--->
+                <dxi-column dataField="previous_participation_condition">
+                    <dxo-lookup [dataSource]="previousParticipationConditionEnum"></dxo-lookup>
+                </dxi-column>
                 <dxi-column dataField="tasks_number"></dxi-column>
                 <dxi-column dataField="total_points"></dxi-column>
                 <dxi-column dataField="regulations"></dxi-column>
                 <dxi-column dataField="target_classes"></dxi-column>
-                <!---TODO enum Array<TargetClass>--->
-                <dxi-column dataField="holding_type"></dxi-column>
-                <!---TODO enum CompositeContest.HoldingTypeEnum--->
-                <dxi-column dataField="status"></dxi-column>
-                <!---TODO enum CompositeContest.StatusEnum--->
+                <!---TODO Array<TargetClass>--->
+                <dxi-column dataField="holding_type">
+                    <dxo-lookup [dataSource]="holdingTypeEnum"></dxo-lookup>
+                </dxi-column>
+                <dxi-column dataField="status">
+                    <dxo-lookup [dataSource]="statusEnum"></dxo-lookup>
+                </dxi-column>
                 <dxi-column dataField="visibility"></dxi-column>
 
                 <dxo-selection mode="single"></dxo-selection>

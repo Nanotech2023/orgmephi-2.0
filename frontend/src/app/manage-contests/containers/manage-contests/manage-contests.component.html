@@ -18,31 +18,30 @@
                 keyExpr="contest_id"
                 (onSelectionChanged)="selectedChanged($event)">
 
-                <dxi-column dataField="contest_id"></dxi-column>
-                <dxi-column dataField="academic_year"></dxi-column>
-                <dxi-column dataField="start_date" dataType="date"></dxi-column>
-                <dxi-column dataField="end_date" dataType="date"></dxi-column>
-                <dxi-column dataField="end_of_enroll_date" dataType="date"></dxi-column>
-                <dxi-column dataField="result_publication_date" dataType="date"></dxi-column>
-                <dxi-column dataField="contest_duration"></dxi-column>
-                <dxi-column dataField="locations"></dxi-column>
+                <dxi-column dataField="contest_id" caption="ID"></dxi-column>
+                <dxi-column dataField="academic_year" caption="Год"></dxi-column>
+                <dxi-column dataField="start_date" dataType="date" caption="Дата начала"></dxi-column>
+                <dxi-column dataField="end_date" dataType="date" caption="Дата окончания"></dxi-column>
+                <dxi-column dataField="end_of_enroll_date" dataType="date" caption="Дата окончания заявок на участие"></dxi-column>
+                <dxi-column dataField="result_publication_date" dataType="date" caption="Дата публикации результатов"></dxi-column>
+                <dxi-column dataField="contest_duration" caption="Длительность в секундах"></dxi-column>
+                <dxi-column dataField="locations" caption="Местоположения"></dxi-column>
                 <!---TODO Array<OlympiadLocation>--->
-                <dxi-column dataField="previous_contest_id"></dxi-column>
-                <dxi-column dataField="previous_participation_condition">
+                <dxi-column dataField="previous_contest_id" caption="ID предыдущей олимпиады"></dxi-column>
+                <dxi-column dataField="previous_participation_condition" caption="Правило перехода предыдущей олимпиады">
                     <dxo-lookup [dataSource]="previousParticipationConditionEnum"></dxo-lookup>
                 </dxi-column>
-                <dxi-column dataField="tasks_number"></dxi-column>
-                <dxi-column dataField="total_points"></dxi-column>
-                <dxi-column dataField="regulations"></dxi-column>
-                <dxi-column dataField="target_classes"></dxi-column>
-                <!---TODO enum Array<TargetClass>--->
-                <dxi-column dataField="holding_type">
+                <dxi-column dataField="tasks_number" caption="Число заданий"></dxi-column>
+                <dxi-column dataField="total_points" caption="Максимальное количество баллов"></dxi-column>
+                <dxi-column dataField="regulations" caption="Правила"></dxi-column>
+                <dxi-column dataField="target_classes" caption="Классы"></dxi-column><!---TODO Array<TargetClass>--->
+                <dxi-column dataField="holding_type" caption="Тип проведения">
                     <dxo-lookup [dataSource]="holdingTypeEnum"></dxo-lookup>
                 </dxi-column>
-                <dxi-column dataField="status">
+                <dxi-column dataField="status" caption="Статус">
                     <dxo-lookup [dataSource]="statusEnum"></dxo-lookup>
                 </dxi-column>
-                <dxi-column dataField="visibility"></dxi-column>
+                <dxi-column dataField="visibility" caption="Видимость для участников"></dxi-column>
 
                 <dxo-selection mode="single"></dxo-selection>
                 <dxo-grouping [autoExpandAll]="false" [contextMenuEnabled]="true"></dxo-grouping>
@@ -63,38 +62,31 @@
             </dx-data-grid>
 
             <dx-speed-dial-action
-                icon="add"
-                label="Добавить"
-                [index]="1"
-                (onClick)="addElement()">
-            </dx-speed-dial-action>
-            <dx-speed-dial-action
                 icon="arrowdown"
                 label="Участники"
-                [index]="2"
+                [index]="1"
                 [visible]="selectedRowIndex !== -1"
                 (onClick)="navigateElement()">
             </dx-speed-dial-action>
             <dx-speed-dial-action
                 icon="arrowdown"
                 label="Варианты"
-                [index]="3"
+                [index]="2"
                 [visible]="selectedRowIndex !== -1"
                 (onClick)="navigateElement2()">
             </dx-speed-dial-action>
             <dx-speed-dial-action
                 icon="edit"
                 label="Изменить"
-                [index]="4"
+                [index]="3"
                 [visible]="selectedRowIndex !== -1"
                 (onClick)="editElement()">
             </dx-speed-dial-action>
             <dx-speed-dial-action
-                icon="trash"
-                label="Удалить"
-                [index]="5"
-                [visible]="selectedRowIndex !== -1"
-                (onClick)="deleteElement()">
+                icon="add"
+                label="Добавить"
+                [index]="4"
+                (onClick)="addElement()">
             </dx-speed-dial-action>
         </div>
     </div>

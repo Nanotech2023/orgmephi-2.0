@@ -18,6 +18,8 @@ export class ManageUsersComponent implements OnInit
     users$: Observable<UserFull[]> = this.store.users$
     selectedRowIndex: number = -1
     selectedRow?: UserFull = undefined
+    userTypeEnum: ( "PreUniversity" | "Enrollee" | "School" | "University" | "Internal" | "PreRegister" )[] = Object.values( UserFull.TypeEnum )
+    userRoleEnum: ( "Unconfirmed" | "Participant" | "Creator" | "Admin" | "System" )[] = Object.values( UserFull.RoleEnum )
 
     constructor( private route: ActivatedRoute, private router: Router, private store: ManageUsersStore ) {}
 

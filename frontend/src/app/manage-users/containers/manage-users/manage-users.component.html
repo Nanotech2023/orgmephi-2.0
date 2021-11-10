@@ -16,8 +16,12 @@
                               (onSelectionChanged)="selectedChanged($event)">
                     <dxi-column dataField="id"></dxi-column>
                     <dxi-column dataField="username"></dxi-column>
-                    <dxi-column dataField="type"></dxi-column> <!---TODO enum UserFull.TypeEnum--->
-                    <dxi-column dataField="role"></dxi-column> <!---TODO enum UserFull.RoleEnum--->
+                    <dxi-column dataField="type">
+                        <dxo-lookup [dataSource]="userTypeEnum"></dxo-lookup>
+                    </dxi-column>
+                    <dxi-column dataField="role">
+                        <dxo-lookup [dataSource]="userRoleEnum"></dxo-lookup>
+                    </dxi-column>
                     <dxi-column dataField="user_info"></dxi-column> <!---TODO UserInfo--->
                     <dxi-column dataField="school_info"></dxi-column> <!---TODO SchoolInfo--->
                     <dxi-column dataField="student_info"></dxi-column> <!---TODO StudentInfo--->
@@ -44,26 +48,11 @@
                                        storageKey="app-manage-contests"></dxo-state-storing>
                 </dx-data-grid>
 
-
                 <dx-speed-dial-action
                     icon="add"
                     label="Add row"
                     [index]="1"
                     (onClick)="addRow()">
-                </dx-speed-dial-action>
-                <dx-speed-dial-action
-                    icon="arrowdown"
-                    label="Олимпиады"
-                    [index]="3"
-                    [visible]="selectedRowIndex !== -1"
-                    (onClick)="navigateElement()">
-                </dx-speed-dial-action>
-                <dx-speed-dial-action
-                    icon="trash"
-                    label="Delete row"
-                    [index]="2"
-                    [visible]="selectedRowIndex !== -1"
-                    (onClick)="deleteRow()">
                 </dx-speed-dial-action>
                 <dx-speed-dial-action
                     icon="edit"

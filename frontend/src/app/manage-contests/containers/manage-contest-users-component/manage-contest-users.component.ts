@@ -33,6 +33,7 @@ export class ManageContestUsersComponent
     @ViewChild( DxDataGridComponent, { static: false } ) grid!: DxDataGridComponent
     selectedRowIndex: number = -1
     selectedRow?: UserInContest = undefined
+    userStatusEnum: ( "Winner 1" | "Winner 2" | "Winner 3" | "Diploma 1" | "Diploma 2" | "Diploma 3" | "Participant" )[] = Object.values( UserInContest.UserStatusEnum )
 
     navigateElement(): void
     {

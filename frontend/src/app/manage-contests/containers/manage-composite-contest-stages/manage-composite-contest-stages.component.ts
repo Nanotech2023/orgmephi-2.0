@@ -34,11 +34,18 @@ export class ManageCompositeContestStagesComponent
     @ViewChild( DxDataGridComponent, { static: false } ) grid!: DxDataGridComponent
     selectedRowIndex: number = -1
     selectedRow?: Stage = undefined
+    stageConditionEnum = Object.values( Stage.ConditionEnum )
 
-    navigateElement(): void
+    navigateToSelected(): void
     {
         if ( this.selectedRow )
             this.router.navigate( [ this.selectedRow.stage_id ], { relativeTo: this.route } )
+    }
+
+    addElement(): void
+    {
+        this.grid.instance.addRow()
+        this.grid.instance.deselectAll()
     }
 
     editElement(): void
@@ -47,17 +54,6 @@ export class ManageCompositeContestStagesComponent
         this.grid.instance.deselectAll()
     }
 
-    deleteElement(): void
-    {
-        this.grid.instance.deleteRow( this.selectedRowIndex )
-        this.grid.instance.deselectAll()
-    }
-
-    addElement(): void
-    {
-        this.grid.instance.addRow()
-        this.grid.instance.deselectAll()
-    }
 
     selectedChanged( $event: any ): void
     {

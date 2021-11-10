@@ -19,7 +19,9 @@
 
                 <dxi-column dataField="user_id"></dxi-column>
                 <dxi-column dataField="variant_id"></dxi-column>
-                <dxi-column dataField="user_status"></dxi-column> <!---TODO enum UserInContest.UserStatusEnum--->
+                <dxi-column dataField="user_status">
+                    <dxo-lookup [dataSource]="userStatusEnum"></dxo-lookup>
+                </dxi-column>
                 <dxi-column dataField="supervisor"></dxi-column>
                 <dxi-column dataField="show_results_to_user"></dxi-column>
 
