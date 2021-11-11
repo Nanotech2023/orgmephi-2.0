@@ -192,6 +192,7 @@ def is_user_in_contest(user_id, current_contest):
 
 
 # Contest content module
+# DEPRECATED
 
 def is_task_in_variant(task_id, variant):
     """
@@ -425,6 +426,7 @@ def get_variant_if_possible_by_number(contest_id, variant_num):
     return variant
 
 
+# DEPRECATED
 def get_tasks_if_possible(contest_id, variant_id):
     """
     Get tasks if possible
@@ -436,6 +438,7 @@ def get_tasks_if_possible(contest_id, variant_id):
     return variant.tasks
 
 
+# DEPRECATED
 def get_task_if_possible(contest_id, variant_id, task_id):
     """
     Get task if possible
@@ -450,6 +453,22 @@ def get_task_if_possible(contest_id, variant_id, task_id):
         return task
     else:
         raise DataConflict('Task not in current variant')
+
+
+def get_task_in_pool_if_possible(id_task_pool, task_id):
+    """
+    Get task if possible
+    :param id_task_pool: task pool id
+    :param task_id: task id
+    :return: task
+    """
+
+    task_pool = db_get_or_raise(TaskPool, "task_pool_id", id_task_pool)
+    task = db_get_or_raise(Task, "task_id", task_id)
+    if task in task_pool.tasks:
+        return task
+    else:
+        raise DataConflict('Task not in current pool')
 
 
 # Validators
@@ -597,7 +616,7 @@ def split_line(font, text, width):
         last_space = None
         while index != -1 and font.getsize(text[:index])[0] <= width:
             last_space = index
-            new_index = text[index+1:].find(' ')
+            new_index = text[index + 1:].find(' ')
             if new_index == -1:
                 lines.append(text[:-1])
                 return lines
@@ -650,7 +669,6 @@ def put_text_on_image(img_data, x, y, width, text, size, font_name, spacing, col
 
 
 def find_certificate(current_user, current_contest):
-
     result = UserInContest.query.filter_by(user_id=current_user.id, contest_id=current_contest.contest_id).one_or_none()
     if result is None:
         raise NotFound('UserInContest (user_id, contest_id)', f'({current_user.id}, {current_contest.id})')

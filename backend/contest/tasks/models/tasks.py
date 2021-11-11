@@ -36,6 +36,8 @@ class TaskPool(db.Model):
     year = db.Column(db.Integer)
     orig_task_points = db.Column(db.Integer)
 
+    tasks = db.relationship('Task', backref=db.backref('task_pool', lazy='joined'), lazy='dynamic')
+
 
 """
 Table describing a Task Pool In Contest Task.

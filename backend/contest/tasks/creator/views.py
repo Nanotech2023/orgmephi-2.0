@@ -548,25 +548,19 @@ def variant_all(id_contest):
 # Task views
 
 @module.route(
-    '/contest/<int:id_contest>/variant/<int:id_variant>/task/create_plain',
+    '/task_pool/<int:id_task_pool>/task/create_plain',
     methods=['POST'],
     input_schema=CreatePlainRequestTaskCreatorSchema,
     output_schema=TaskIdResponseTaskCreatorSchema)
-def task_create_plain(id_contest, id_variant):
+def task_create_plain(id_task_pool):
     """
     Create plain task
     ---
     post:
       parameters:
         - in: path
-          description: ID of the contest
-          name: id_contest
-          required: true
-          schema:
-            type: integer
-        - in: path
-          description: ID of the variant
-          name: id_variant
+          description: ID of the task pool
+          name: id_task_pool
           required: true
           schema:
             type: integer
@@ -595,7 +589,7 @@ def task_create_plain(id_contest, id_variant):
     recommended_answer = values['recommended_answer']
     task_points = values.get('task_points', None)
 
-    variant = get_variant_if_possible(id_contest, id_variant)
+    task_pool = db_get_or_raise(TaskPool, "task_pool_id", id_task_pool)
 
     task = add_plain_task(db.session,
                           num_of_task=num_of_task,
@@ -603,7 +597,7 @@ def task_create_plain(id_contest, id_variant):
                           task_points=task_points,
                           )
 
-    variant.tasks.append(task)
+    task_pool.tasks.append(task)
 
     db.session.commit()
 
@@ -613,24 +607,18 @@ def task_create_plain(id_contest, id_variant):
 
 
 @module.route(
-    '/contest/<int:id_contest>/variant/<int:id_variant>/task/create_range',
+    '/task_pool/<int:id_task_pool>/task/create_range',
     methods=['POST'],
     input_schema=CreateRangeRequestTaskCreatorSchema, output_schema=TaskIdResponseTaskCreatorSchema)
-def task_create_range(id_contest, id_variant):
+def task_create_range(id_task_pool):
     """
     Create range task
     ---
     post:
       parameters:
         - in: path
-          description: ID of the contest
-          name: id_contest
-          required: true
-          schema:
-            type: integer
-        - in: path
-          description: ID of the variant
-          name: id_variant
+          description: ID of the task pool
+          name: id_task_pool
           required: true
           schema:
             type: integer
@@ -659,14 +647,14 @@ def task_create_range(id_contest, id_variant):
     end_value = values['end_value']
     task_points = values.get('task_points', None)
 
-    variant = get_variant_if_possible(id_contest, id_variant)
+    task_pool = db_get_or_raise(TaskPool, "task_pool_id", id_task_pool)
     task = add_range_task(db.session,
                           num_of_task=num_of_task,
                           start_value=start_value,
                           end_value=end_value,
                           task_points=task_points,
                           )
-    variant.tasks.append(task)
+    task_pool.tasks.append(task)
     db.session.commit()
 
     return {
@@ -675,24 +663,18 @@ def task_create_range(id_contest, id_variant):
 
 
 @module.route(
-    '/contest/<int:id_contest>/variant/<int:id_variant>/task/create_multiple',
+    '/task_pool/<int:id_task_pool>/task/create_multiple',
     methods=['POST'],
     input_schema=CreateMultipleRequestTaskCreatorSchema, output_schema=TaskIdResponseTaskCreatorSchema)
-def task_create_multiple(id_contest, id_variant):
+def task_create_multiple(id_task_pool):
     """
     Create multiple task
     ---
     post:
       parameters:
         - in: path
-          description: ID of the contest
-          name: id_contest
-          required: true
-          schema:
-            type: integer
-        - in: path
-          description: ID of the variant
-          name: id_variant
+          description: ID of the task pool
+          name: id_task_pool
           required: true
           schema:
             type: integer
@@ -721,13 +703,13 @@ def task_create_multiple(id_contest, id_variant):
     answers = values['answers']
     task_points = values.get('task_points', None)
 
-    variant = get_variant_if_possible(id_contest, id_variant)
+    task_pool = db_get_or_raise(TaskPool, "task_pool_id", id_task_pool)
 
     task = add_multiple_task(db.session,
                              num_of_task=num_of_task,
                              task_points=task_points,
                              )
-    variant.tasks.append(task)
+    task_pool.tasks.append(task)
 
     task.answers = [
         {
@@ -743,24 +725,18 @@ def task_create_multiple(id_contest, id_variant):
 
 
 @module.route(
-    '/contest/<int:id_contest>/variant/<int:id_variant>/task/<int:id_task>',
+    '/task_pool/<int:id_task_pool>/task/<int:id_task>',
     methods=['GET'],
     output_schema=TaskResponseTaskCreatorSchema)
-def task_get(id_contest, id_variant, id_task):
+def task_get(id_task_pool, id_task):
     """
     Get task
     ---
     get:
       parameters:
         - in: path
-          description: ID of the contest
-          name: id_contest
-          required: true
-          schema:
-            type: integer
-        - in: path
-          description: ID of the variant
-          name: id_variant
+          description: ID of the task pool
+          name: id_task_pool
           required: true
           schema:
             type: integer
@@ -784,29 +760,23 @@ def task_get(id_contest, id_variant, id_task):
         '409':
           description: Olympiad type already in use
     """
-    task = get_task_if_possible(id_contest, id_variant, id_task)
+    task = get_task_in_pool_if_possible(id_task_pool, id_task)
     return task, 200
 
 
 @module.route(
-    '/contest/<int:id_contest>/variant/<int:id_variant>/task/all',
+    '/task_pool/<int:id_task_pool>/task/all',
     methods=['GET'],
     output_schema=AllTasksResponseTaskCreatorSchema)
-def task_all(id_contest, id_variant):
+def task_all(id_task_pool):
     """
     Update multiple task
     ---
     get:
       parameters:
         - in: path
-          description: ID of the contest
-          name: id_contest
-          required: true
-          schema:
-            type: integer
-        - in: path
-          description: ID of the variant
-          name: id_variant
+          description: ID of the task pool
+          name: id_task_pool
           required: true
           schema:
             type: integer
@@ -824,30 +794,26 @@ def task_all(id_contest, id_variant):
         '409':
           description: Olympiad type already in use
     """
-    tasks_list = get_tasks_if_possible(id_contest, id_variant)
+
+    task_pool = db_get_or_raise(TaskPool, "task_pool_id", id_task_pool)
+    tasks_list = task_pool.tasks
     return {
                "tasks_list": tasks_list
            }, 200
 
 
 @module.route(
-    '/contest/<int:id_contest>/variant/<int:id_variant>/tasks/<int:id_task>/image',
+    '/task_pool/<int:id_task_pool>/task/<int:id_task>/image',
     methods=['GET'])
-def task_image(id_contest, id_variant, id_task):
+def task_image(id_task_pool, id_task):
     """
     Get task image
     ---
     get:
       parameters:
         - in: path
-          description: ID of the contest
-          name: id_contest
-          required: true
-          schema:
-            type: integer
-        - in: path
-          description: ID of the variant
-          name: id_variant
+          description: ID of the task pool
+          name: id_task_pool
           required: true
           schema:
             type: integer
@@ -873,7 +839,7 @@ def task_image(id_contest, id_variant, id_task):
         '409':
           description: Olympiad type already in use
     """
-    task = get_task_if_possible(id_contest, id_variant, id_task)
+    task = get_task_in_pool_if_possible(id_task_pool, id_task)
     return app.send_media(task.image_of_task)
 
 

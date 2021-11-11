@@ -579,9 +579,9 @@ def variant_patch(id_contest, variant_num):
 # Task views
 
 
-@module.route('/contest/<int:id_contest>/variant/<int:id_variant>/task/<int:id_task>/upload_image',
+@module.route('/task_pool/<int:id_task_pool>/task/<int:id_task>/upload_image',
               methods=['POST'])
-def task_image_upload(id_contest, id_variant, id_task):
+def task_image_upload(id_task_pool, id_task):
     """
     Upload task image
     ---
@@ -625,16 +625,16 @@ def task_image_upload(id_contest, id_variant, id_task):
         '409':
           description: Wrong value
     """
-    task = get_task_if_possible(id_contest, id_variant, id_task)
+    task = get_task_in_pool_if_possible(id_task_pool, id_task)
     app.store_media('TASK', task, 'image_of_task', TaskImage)
     db.session.commit()
     return {}, 200
 
 
 @module.route(
-    '/contest/<int:id_contest>/variant/<int:id_variant>/task/<int:id_task>/remove',
+    '/task_pool/<int:id_task_pool>/task/<int:id_task>/remove',
     methods=['POST'])
-def task_remove(id_contest, id_variant, id_task):
+def task_remove(id_task_pool, id_task):
     """
     Delete a task
     ---
@@ -670,7 +670,7 @@ def task_remove(id_contest, id_variant, id_task):
           description: Olympiad not found
     """
 
-    task = get_task_if_possible(id_contest, id_variant, id_task)
+    task = get_task_in_pool_if_possible(id_task_pool, id_task)
     db.session.delete(task)
     db.session.commit()
 
@@ -678,10 +678,10 @@ def task_remove(id_contest, id_variant, id_task):
 
 
 @module.route(
-    '/contest/<int:id_contest>/variant/<int:id_variant>/task/<int:id_task>/plain',
+    '/task_pool/<int:id_task_pool>/task/<int:id_task>/plain',
     methods=['PATCH'],
     input_schema=UpdatePlainRequestTaskEditorSchema, output_schema=TaskResponseTaskCreatorSchema)
-def task_patch_plain(id_contest, id_variant, id_task):
+def task_patch_plain(id_task_pool, id_task):
     """
     Update plain task
     ---
@@ -724,7 +724,7 @@ def task_patch_plain(id_contest, id_variant, id_task):
         '409':
           description: Olympiad type already in use
     """
-    task = get_task_if_possible(id_contest, id_variant, id_task)
+    task = get_task_in_pool_if_possible(id_task_pool, id_task)
 
     PlainTaskSchema(load_instance=True).load(request.json, instance=task, session=db.session,
                                              partial=False, unknown=EXCLUDE)
@@ -735,10 +735,10 @@ def task_patch_plain(id_contest, id_variant, id_task):
 
 
 @module.route(
-    '/contest/<int:id_contest>/variant/<int:id_variant>/task/<int:id_task>/range',
+    '/task_pool/<int:id_task_pool>/task/<int:id_task>/range',
     methods=['PATCH'],
     input_schema=UpdateRangeRequestTaskEditorSchema, output_schema=TaskResponseTaskCreatorSchema)
-def task_patch_range(id_contest, id_variant, id_task):
+def task_patch_range(id_task_pool, id_task):
     """
     Update range task
     ---
@@ -781,7 +781,7 @@ def task_patch_range(id_contest, id_variant, id_task):
         '409':
           description: Olympiad type already in use
     """
-    task = get_task_if_possible(id_contest, id_variant, id_task)
+    task = get_task_in_pool_if_possible(id_task_pool, id_task)
 
     RangeTaskSchema(load_instance=True).load(request.json, instance=task, session=db.session,
                                              partial=False, unknown=EXCLUDE)
@@ -792,10 +792,10 @@ def task_patch_range(id_contest, id_variant, id_task):
 
 
 @module.route(
-    '/contest/<int:id_contest>/variant/<int:id_variant>/task/<int:id_task>/multiple',
+    '/task_pool/<int:id_task_pool>/task/<int:id_task>/multiple',
     methods=['PATCH'],
     input_schema=UpdateMultipleRequestTaskEditorSchema, output_schema=TaskResponseTaskCreatorSchema)
-def task_patch_multiple(id_contest, id_variant, id_task):
+def task_patch_multiple(id_task_pool, id_task):
     """
     Update multiple task
     ---
@@ -839,7 +839,7 @@ def task_patch_multiple(id_contest, id_variant, id_task):
           description: Olympiad type already in use
     """
     values = request.marshmallow
-    task = get_task_if_possible(id_contest, id_variant, id_task)
+    task = get_task_in_pool_if_possible(id_task_pool, id_task)
     answers = values['answers']
     del values['answers']
 
