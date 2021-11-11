@@ -465,7 +465,6 @@ def task_create_plain(id_contest, id_variant):
 
     num_of_task = values['num_of_task']
     recommended_answer = values['recommended_answer']
-    show_answer_after_contest = values.get('show_answer_after_contest', None)
     task_points = values.get('task_points', None)
 
     variant = get_variant_if_possible(id_contest, id_variant)
@@ -473,7 +472,6 @@ def task_create_plain(id_contest, id_variant):
     task = add_plain_task(db.session,
                           num_of_task=num_of_task,
                           recommended_answer=recommended_answer,
-                          show_answer_after_contest=show_answer_after_contest,
                           task_points=task_points,
                           )
 
@@ -531,7 +529,6 @@ def task_create_range(id_contest, id_variant):
     num_of_task = values['num_of_task']
     start_value = values['start_value']
     end_value = values['end_value']
-    show_answer_after_contest = values.get('show_answer_after_contest', None)
     task_points = values.get('task_points', None)
 
     variant = get_variant_if_possible(id_contest, id_variant)
@@ -539,7 +536,6 @@ def task_create_range(id_contest, id_variant):
                           num_of_task=num_of_task,
                           start_value=start_value,
                           end_value=end_value,
-                          show_answer_after_contest=show_answer_after_contest,
                           task_points=task_points,
                           )
     variant.tasks.append(task)
@@ -595,14 +591,12 @@ def task_create_multiple(id_contest, id_variant):
 
     num_of_task = values['num_of_task']
     answers = values['answers']
-    show_answer_after_contest = values.get('show_answer_after_contest', None)
     task_points = values.get('task_points', None)
 
     variant = get_variant_if_possible(id_contest, id_variant)
 
     task = add_multiple_task(db.session,
                              num_of_task=num_of_task,
-                             show_answer_after_contest=show_answer_after_contest,
                              task_points=task_points,
                              )
     variant.tasks.append(task)

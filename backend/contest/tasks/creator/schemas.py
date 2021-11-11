@@ -126,7 +126,6 @@ class AllTasksResponseTaskCreatorSchema(Schema):
 class CreatePlainRequestTaskCreatorSchema(Schema):
     num_of_task = fields.Int(required=True)
     recommended_answer = common_fields.Text(required=True)
-    show_answer_after_contest = fields.Boolean(required=False)
     task_points = fields.Integer(required=False)
     answer_type = EnumField(TaskAnswerTypeEnum, required=False, by_value=True)
 
@@ -135,7 +134,6 @@ class CreateRangeRequestTaskCreatorSchema(Schema):
     num_of_task = fields.Int(required=True)
     start_value = fields.Float(required=True)
     end_value = fields.Float(required=True)
-    show_answer_after_contest = fields.Boolean(required=False)
     task_points = fields.Integer(required=False)
 
 
@@ -146,7 +144,6 @@ class AnswersInTaskRequestTaskCreatorSchema(Schema):
 
 class CreateMultipleRequestTaskCreatorSchema(Schema):
     num_of_task = fields.Int(required=True)
-    show_answer_after_contest = fields.Boolean(required=False)
     task_points = fields.Integer(required=False)
     answers = fields.List(fields.Nested(AnswersInTaskRequestTaskCreatorSchema), required=True)
 
@@ -157,7 +154,6 @@ class TaskResponseTaskCreatorSchema(Schema):
     recommended_answer = common_fields.Text(required=False)
     start_value = fields.Float(required=False)
     end_value = fields.Float(required=False)
-    show_answer_after_contest = fields.Boolean(required=False)
     task_points = fields.Integer(required=False)
     answers = fields.List(fields.Nested(AnswersInTaskRequestTaskCreatorSchema), required=False)
 

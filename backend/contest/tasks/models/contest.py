@@ -1,6 +1,7 @@
 import enum
 
 from common import get_current_db
+from contest.tasks.models import contestTaskInVariant
 
 db = get_current_db()
 
@@ -116,5 +117,5 @@ class Variant(db.Model):
     users = db.relationship('UserInContest', lazy='select',
                             backref=db.backref('variant', lazy='joined'))
 
-    tasks = db.relationship('Task', secondary=taskInVariant, lazy='subquery',
-                            backref=db.backref('variant', lazy=True))
+    contest_tasks_in_variant = db.relationship('Task', secondary=contestTaskInVariant, lazy='subquery',
+                                               backref=db.backref('variant', lazy=True))

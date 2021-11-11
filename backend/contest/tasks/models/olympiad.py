@@ -154,6 +154,7 @@ class BaseContest(db.Model):
 
     child_contests = db.relationship('Contest', lazy='dynamic',
                                      backref=db.backref('base_contest', lazy='joined'), cascade="all, delete-orphan")
+    task_pools = db.relationship('TaskPool', backref=db.backref('base_contest', lazy='joined'), lazy='dynamic')
 
 
 class ContestTypeEnum(enum.Enum):
@@ -195,6 +196,7 @@ class Contest(db.Model):
     contest_id = db.Column(db.Integer, autoincrement=True, primary_key=True)
     composite_type = db.Column(db.Enum(ContestTypeEnum))
     holding_type = db.Column(db.Enum(ContestHoldingTypeEnum))
+    show_answer_after_contest = db.Column(db.Boolean, nullable=True)
 
     visibility = db.Column(db.Boolean, default=DEFAULT_VISIBILITY, nullable=False)
 
@@ -202,6 +204,7 @@ class Contest(db.Model):
                             backref=db.backref('contest', lazy='joined'))
 
     group_restrictions = db.relationship('ContestGroupRestriction', lazy='dynamic', cascade="all, delete")
+    contest_tasks = db.relationship('ContestTask', backref=db.backref('contest', lazy='joined'), lazy='dynamic')
 
     __mapper_args__ = {
         'polymorphic_identity': ContestTypeEnum.Contest,

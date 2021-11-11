@@ -20,7 +20,6 @@ class PlainTaskSchema(SQLAlchemySchema):
     task_id = auto_field(column_name='task_id', dump_only=True)
     num_of_task = auto_field(column_name='num_of_task', required=True)
     recommended_answer = auto_field(column_name='recommended_answer', validate=text_validator, required=True)
-    show_answer_after_contest = auto_field(column_name='show_answer_after_contest', required=False)
     task_points = auto_field(column_name='task_points', required=False)
     answer_type = EnumField(TaskAnswerTypeEnum, data_key='answer_type', by_value=True, required=False)
 
@@ -35,7 +34,6 @@ class RangeTaskSchema(SQLAlchemySchema):
     num_of_task = auto_field(column_name='num_of_task', required=True)
     start_value = auto_field(column_name='start_value', required=True)
     end_value = auto_field(column_name='end_value', required=True)
-    show_answer_after_contest = auto_field(column_name='show_answer_after_contest', required=False)
     task_points = auto_field(column_name='task_points', required=False)
 
 
@@ -48,7 +46,6 @@ class MultipleChoiceTaskSchema(SQLAlchemySchema):
     task_id = auto_field(column_name='task_id', dump_only=True)
     num_of_task = auto_field(column_name='num_of_task', required=False)
     answers = auto_field(column_name='answers', many=True, required=False)
-    show_answer_after_contest = auto_field(column_name='show_answer_after_contest', required=False)
     task_points = auto_field(column_name='task_points', required=False)
 
 

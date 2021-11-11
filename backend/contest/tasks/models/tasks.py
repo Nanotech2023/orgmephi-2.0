@@ -18,6 +18,77 @@ class TaskTypeEnum(enum.Enum):
     BaseTask = "BaseTask"
 
 
+class TaskPool(db.Model):
+    """
+    Task pool
+
+    task_pool_id: id of the task pool
+    base_contest_id: id of the base contest
+    name: task pool name
+    year: year of the task pool usage
+    orig_task_points: recommended task points
+    """
+
+    __tablename__ = "task_pool"
+    task_pool_id = db.Column(db.Integer, autoincrement=True, primary_key=True)
+    base_contest_id = db.Column(db.Integer, db.ForeignKey('base_contest.base_contest_id'), nullable=True)
+    name = db.Column(db.Text)
+    year = db.Column(db.Integer)
+    orig_task_points = db.Column(db.Integer)
+
+
+"""
+Table describing a Task Pool In Contest Task.
+
+stage_id: id of the stage
+contest_id: id of contest
+"""
+
+taskPoolInContestTask = db.Table('task_pool_in_contest_task',
+                                 db.Column('task_pool_id', db.Integer, db.ForeignKey('task_pool.task_pool_id'),
+                                           primary_key=True),
+                                 db.Column('contest_task_id', db.Integer, db.ForeignKey('contest_task.contest_task_id'),
+                                           primary_key=True)
+                                 )
+
+
+class ContestTask(db.Model):
+    """
+    Task pool
+
+    contest_task_id: id of the task pool
+    contest_id: id of the contest
+    num: num of the task
+    task_points: task points
+    """
+
+    __tablename__ = "contest_task"
+    contest_task_id = db.Column(db.Integer, autoincrement=True, primary_key=True)
+    contest_id = db.Column(db.Integer, db.ForeignKey('contest.base_contest_id'), nullable=True)
+    num = db.Column(db.Integer)
+    task_points = db.Column(db.Integer)
+
+    task_pools = db.relationship('TaskPool', secondary=taskPoolInContestTask, lazy='subquery',
+                                 backref=db.backref('contest_task', lazy=True))
+
+
+"""
+Table describing a Task Pool In Contest Task.
+
+stage_id: id of the stage
+contest_id: id of contest
+"""
+
+contestTaskInVariant = db.Table('contest_task_in_variant',
+                                db.Column('variant_id', db.Integer, db.ForeignKey('variant.variant_id'),
+                                          primary_key=True),
+                                db.Column('contest_task_id', db.Integer, db.ForeignKey('contest_task.contest_task_id'),
+                                          primary_key=True),
+                                db.Column('base_task_id', db.Integer, db.ForeignKey('base_task.task_id'),
+                                          unique=True)
+                                )
+
+
 class Task(db.Model):
     """
     Class describing a Base Task model.
@@ -34,9 +105,6 @@ class Task(db.Model):
 
     image_of_task = db.Column(TaskImage.as_mutable(Json))
 
-    show_answer_after_contest = db.Column(db.Boolean, nullable=True)
-    task_points = db.Column(db.Integer, nullable=True)
-
     task_type = db.Column(db.Enum(TaskTypeEnum))
 
     __mapper_args__ = {
@@ -46,14 +114,13 @@ class Task(db.Model):
 
 
 def add_plain_task(db_session, num_of_task, recommended_answer, image_of_task=None,
-                   task_points=None, show_answer_after_contest=None, answer_type=TaskAnswerTypeEnum.Text):
+                   task_points=None, answer_type=TaskAnswerTypeEnum.Text):
     """
     Create new plain task object
     """
     task = PlainTask(
         num_of_task=num_of_task,
         image_of_task=image_of_task,
-        show_answer_after_contest=show_answer_after_contest,
         task_points=task_points,
         recommended_answer=recommended_answer,
         answer_type=answer_type,
@@ -83,14 +150,13 @@ class PlainTask(Task):
 
 
 def add_range_task(db_session, num_of_task, start_value, end_value, image_of_task=None,
-                   task_points=None, show_answer_after_contest=None):
+                   task_points=None):
     """
     Create new range task object
     """
     task = RangeTask(
         num_of_task=num_of_task,
         image_of_task=image_of_task,
-        show_answer_after_contest=show_answer_after_contest,
         task_points=task_points,
         start_value=start_value,
         end_value=end_value,
@@ -121,14 +187,13 @@ class RangeTask(Task):
 
 
 def add_multiple_task(db_session, num_of_task, image_of_task=None,
-                      task_points=None, show_answer_after_contest=None):
+                      task_points=None):
     """
     Create new multiple task object
     """
     task = MultipleChoiceTask(
         num_of_task=num_of_task,
         image_of_task=image_of_task,
-        show_answer_after_contest=show_answer_after_contest,
         task_points=task_points,
     )
     db_session.add(task)
@@ -146,7 +211,6 @@ class MultipleChoiceTask(Task):
     __tablename__ = 'multiple_task'
 
     task_id = db.Column(db.Integer, db.ForeignKey('base_task.task_id'), primary_key=True)
-
     answers = db.Column(db.PickleType)
 
     __mapper_args__ = {

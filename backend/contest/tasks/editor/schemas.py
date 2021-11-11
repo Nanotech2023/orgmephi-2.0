@@ -78,7 +78,6 @@ class AnswersInTaskRequestTaskEditorSchema(Schema):
 class UpdatePlainRequestTaskEditorSchema(Schema):
     num_of_task = fields.Int(required=False)
     recommended_answer = common_fields.Text(required=False)
-    show_answer_after_contest = fields.Boolean(required=False)
     task_points = fields.Integer(required=False)
     answer_type = EnumField(TaskAnswerTypeEnum, required=False, by_value=True)
 
@@ -87,14 +86,12 @@ class UpdateRangeRequestTaskEditorSchema(Schema):
     num_of_task = fields.Int(required=False)
     start_value = fields.Float(required=False)
     end_value = fields.Float(required=False)
-    show_answer_after_contest = fields.Boolean(required=False)
     task_points = fields.Integer(required=False)
 
 
 class UpdateMultipleRequestTaskEditorSchema(Schema):
     num_of_task = fields.Int(required=False)
     answers = fields.List(fields.Nested(AnswersInTaskRequestTaskEditorSchema), required=False)
-    show_answer_after_contest = fields.Boolean(required=False)
     task_points = fields.Integer(required=False)
 
 
