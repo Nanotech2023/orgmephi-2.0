@@ -1,3 +1,4 @@
+from marshmallow import fields
 from marshmallow_enum import EnumField
 from marshmallow_oneofschema import OneOfSchema
 from marshmallow_sqlalchemy import SQLAlchemySchema, auto_field
@@ -37,6 +38,7 @@ class ContestTaskSchema(SQLAlchemySchema):
     contest_task_id = auto_field(column_name='contest_task_id', dump_only=True)
     num = auto_field(column_name='num', required=False)
     task_points = auto_field(column_name='task_points', required=False)
+    task_pools = fields.Nested(TaskPoolSchema, many=True, dump_only=True, required=False)
 
 
 """
@@ -51,7 +53,6 @@ class PlainTaskSchema(SQLAlchemySchema):
         sqla_session = db.session
 
     task_id = auto_field(column_name='task_id', dump_only=True)
-    num_of_task = auto_field(column_name='num_of_task', required=True)
     recommended_answer = auto_field(column_name='recommended_answer', validate=text_validator, required=True)
     answer_type = EnumField(TaskAnswerTypeEnum, data_key='answer_type', by_value=True, required=False)
 
@@ -63,7 +64,6 @@ class RangeTaskSchema(SQLAlchemySchema):
         sqla_session = db.session
 
     task_id = auto_field(column_name='task_id', dump_only=True)
-    num_of_task = auto_field(column_name='num_of_task', required=True)
     start_value = auto_field(column_name='start_value', required=True)
     end_value = auto_field(column_name='end_value', required=True)
 
@@ -75,7 +75,6 @@ class MultipleChoiceTaskSchema(SQLAlchemySchema):
         sqla_session = db.session
 
     task_id = auto_field(column_name='task_id', dump_only=True)
-    num_of_task = auto_field(column_name='num_of_task', required=False)
     answers = auto_field(column_name='answers', many=True, required=False)
 
 

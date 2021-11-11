@@ -135,7 +135,7 @@ def task_pool_get(id_base_olympiad, id_task_pool):
 
 @module.route('/base_olympiad/<int:id_base_olympiad>/task_pool/all', methods=['GET'],
               output_schema=AllTaskPoolsResponseTaskCreatorSchema)
-def task_pool_get_all(id_base_olympiad, id_task_pool):
+def task_pool_get_all(id_base_olympiad,):
     """
     Create task pool
     ---
@@ -144,12 +144,6 @@ def task_pool_get_all(id_base_olympiad, id_task_pool):
         - in: path
           description: ID of the base olympiad
           name: id_base_olympiad
-          required: true
-          schema:
-            type: integer
-        - in: path
-          description: ID of the task pool
-          name: id_task_pool
           required: true
           schema:
             type: integer
@@ -456,11 +450,13 @@ def contest_task_create(id_contest):
         raise InsufficientData("task_pool_ids", "contest task should be assigned to at least one pool")
 
     contest_task = ContestTaskSchema().load(data=request.json, partial=True, session=db.session, unknown=EXCLUDE)
+    contest_ = db_get_or_raise(Contest, "contest_id", id_contest)
 
     for task_pool_id in task_pool_ids:
         task_pool = db_get_or_raise(TaskPool, "task_pool_id", task_pool_id)
         contest_task.task_pools.append(task_pool)
 
+    contest_.contest_tasks.append(contest_task)
     db.session.commit()
 
     return {
@@ -725,9 +721,7 @@ def task_create_plain(id_task_pool):
     task_pool = db_get_or_raise(TaskPool, "task_pool_id", id_task_pool)
 
     task = add_plain_task(db.session,
-                          num_of_task=num_of_task,
                           recommended_answer=recommended_answer,
-                          task_points=task_points,
                           )
 
     task_pool.tasks.append(task)
@@ -782,10 +776,8 @@ def task_create_range(id_task_pool):
 
     task_pool = db_get_or_raise(TaskPool, "task_pool_id", id_task_pool)
     task = add_range_task(db.session,
-                          num_of_task=num_of_task,
                           start_value=start_value,
                           end_value=end_value,
-                          task_points=task_points,
                           )
     task_pool.tasks.append(task)
     db.session.commit()
@@ -838,10 +830,7 @@ def task_create_multiple(id_task_pool):
 
     task_pool = db_get_or_raise(TaskPool, "task_pool_id", id_task_pool)
 
-    task = add_multiple_task(db.session,
-                             num_of_task=num_of_task,
-                             task_points=task_points,
-                             )
+    task = add_multiple_task(db.session)
     task_pool.tasks.append(task)
 
     task.answers = [

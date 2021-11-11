@@ -104,7 +104,6 @@ class Task(db.Model):
     __tablename__ = 'base_task'
     task_id = db.Column(db.Integer, autoincrement=True, primary_key=True)
     task_pool_id = db.Column(db.Integer, db.ForeignKey('task_pool.task_pool_id'))
-    num_of_task = db.Column(db.Integer, nullable=False)
 
     image_of_task = db.Column(TaskImage.as_mutable(Json))
 
@@ -116,15 +115,13 @@ class Task(db.Model):
     }
 
 
-def add_plain_task(db_session, num_of_task, recommended_answer, image_of_task=None,
-                   task_points=None, answer_type=TaskAnswerTypeEnum.Text):
+def add_plain_task(db_session, recommended_answer, image_of_task=None,
+                   answer_type=TaskAnswerTypeEnum.Text):
     """
     Create new plain task object
     """
     task = PlainTask(
-        num_of_task=num_of_task,
         image_of_task=image_of_task,
-        task_points=task_points,
         recommended_answer=recommended_answer,
         answer_type=answer_type,
     )
@@ -152,15 +149,12 @@ class PlainTask(Task):
     }
 
 
-def add_range_task(db_session, num_of_task, start_value, end_value, image_of_task=None,
-                   task_points=None):
+def add_range_task(db_session, start_value, end_value, image_of_task=None):
     """
     Create new range task object
     """
     task = RangeTask(
-        num_of_task=num_of_task,
         image_of_task=image_of_task,
-        task_points=task_points,
         start_value=start_value,
         end_value=end_value,
     )
@@ -189,15 +183,12 @@ class RangeTask(Task):
     }
 
 
-def add_multiple_task(db_session, num_of_task, image_of_task=None,
-                      task_points=None):
+def add_multiple_task(db_session, image_of_task=None):
     """
     Create new multiple task object
     """
     task = MultipleChoiceTask(
-        num_of_task=num_of_task,
         image_of_task=image_of_task,
-        task_points=task_points,
     )
     db_session.add(task)
     return task
@@ -220,6 +211,7 @@ class MultipleChoiceTask(Task):
         'polymorphic_identity': TaskTypeEnum.MultipleChoiceTask,
         'with_polymorphic': '*'
     }
+
 
 class Variant(db.Model):
     """
