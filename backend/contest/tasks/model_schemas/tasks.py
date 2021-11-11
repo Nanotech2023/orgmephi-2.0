@@ -24,6 +24,22 @@ class TaskPoolSchema(SQLAlchemySchema):
 
 
 """
+ContestTask
+"""
+
+
+class ContestTaskSchema(SQLAlchemySchema):
+    class Meta:
+        model = ContestTask
+        load_instance = True
+        sqla_session = db.session
+
+    contest_task_id = auto_field(column_name='task_pool_id', dump_only=True)
+    num = auto_field(column_name='num', required=False)
+    task_points = auto_field(column_name='task_points', required=False)
+
+
+"""
 Task
 """
 

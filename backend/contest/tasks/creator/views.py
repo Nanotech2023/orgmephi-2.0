@@ -3,7 +3,7 @@ from marshmallow import EXCLUDE
 
 from common import get_current_module
 from contest.tasks.creator.schemas import *
-from contest.tasks.model_schemas.tasks import TaskPoolSchema
+from contest.tasks.model_schemas.tasks import TaskPoolSchema, ContestTaskSchema
 from contest.tasks.util import *
 
 db = get_current_db()
@@ -408,6 +408,139 @@ def contests_all(id_olympiad, id_stage):
     stage = db_get_or_raise(Stage, "stage_id", str(id_stage))
     return {
                "olympiad_list": stage.contests
+           }, 200
+
+
+# Contest task
+
+
+@module.route('/contest/<int:id_contest>/contest_task/create', methods=['POST'],
+              input_schema=CreateContestTaskRequestTaskCreatorSchema,
+              output_schema=ContestTaskResponseTaskCreatorSchema)
+def contest_task_create(id_contest):
+    """
+    Create contest task
+    ---
+    post:
+      parameters:
+        - in: path
+          description: ID of the contest
+          name: id_contest
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: CreateContestTaskRequestTaskCreatorSchema
+      security:
+        - JWTAccessToken: [ ]
+        - CSRFAccessToken: [ ]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: ContestTaskResponseTaskCreatorSchema
+        '400':
+          description: Bad request
+        '409':
+          description: Olympiad type already in use
+    """
+
+    values = request.marshmallow
+    task_pool_ids = values.pop('task_pool_ids', None)
+
+    if task_pool_ids is None:
+        raise InsufficientData("task_pool_ids", "contest task should be assigned to at least one pool")
+
+    contest_task = ContestTaskSchema().load(data=request.json, partial=True, session=db.session, unknown=EXCLUDE)
+
+    for task_pool_id in task_pool_ids:
+        task_pool = db_get_or_raise(TaskPool, "task_pool_id", task_pool_id)
+        contest_task.task_pools.append(task_pool)
+
+    db.session.commit()
+
+    return {
+               'contest_task_id': contest_task.contest_task_id
+           }, 200
+
+
+@module.route('/contest/<int:id_contest>/contest_task/<int:id_contest_task>', methods=['GET'],
+              output_schema=ContestTaskSchema)
+def contest_task_get(id_contest, id_contest_task):
+    """
+    Create contest task
+    ---
+    get:
+      parameters:
+        - in: path
+          description: ID of the contest
+          name: id_contest
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: ID of the contest task
+          name: id_contest_task
+          required: true
+          schema:
+            type: integer
+      security:
+        - JWTAccessToken: [ ]
+        - CSRFAccessToken: [ ]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: ContestTaskSchema
+        '400':
+          description: Bad request
+        '409':
+          description: Olympiad type already in use
+    """
+
+    contest_task = db_get_or_raise(ContestTask, "contest_task_id", id_contest_task)
+    return contest_task, 200
+
+
+@module.route('/contest/<int:id_contest>/contest_task/all', methods=['GET'],
+              output_schema=AllContestTaskResponseTaskCreatorSchema)
+def contest_task_get_all(id_contest):
+    """
+    Get all contest task
+    ---
+    get:
+      parameters:
+        - in: path
+          description: ID of the contest
+          name: id_contest
+          required: true
+          schema:
+            type: integer
+      security:
+        - JWTAccessToken: [ ]
+        - CSRFAccessToken: [ ]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: AllContestTaskResponseTaskCreatorSchema
+        '400':
+          description: Bad request
+        '404':
+          description: Contest not found
+        '409':
+          description: Olympiad type already in use
+    """
+
+    contest_: Contest = db_get_or_raise(Contest, "contest_id", id_contest)
+    return {
+               "contest_task_list": contest_.contest_tasks
            }, 200
 
 

@@ -4,13 +4,14 @@ from marshmallow import EXCLUDE
 from common import get_current_module
 from contest.tasks.creator.schemas import BaseOlympiadResponseTaskCreatorSchema, StageResponseTaskCreatorSchema, \
     ContestResponseTaskCreatorSchema, TaskResponseTaskCreatorSchema, VariantResponseTaskCreatorSchema, \
-    CreateTaskPoolRequestTaskCreatorSchema
+    CreateTaskPoolRequestTaskCreatorSchema, CreateContestTaskRequestTaskCreatorSchema
 from contest.tasks.editor.schemas import *
 from contest.tasks.model_schemas.certificate import CertificateTypeSchema, CertificateSchema
 from contest.tasks.model_schemas.contest import VariantSchema
 from contest.tasks.model_schemas.olympiad import BaseContestSchema, SimpleContestSchema, CompositeContestSchema, \
     StageSchema
-from contest.tasks.model_schemas.tasks import PlainTaskSchema, RangeTaskSchema, MultipleChoiceTaskSchema, TaskPoolSchema
+from contest.tasks.model_schemas.tasks import PlainTaskSchema, RangeTaskSchema, MultipleChoiceTaskSchema, \
+    TaskPoolSchema, ContestTaskSchema
 from contest.tasks.models.certificate import Certificate, CertificateType
 from contest.tasks.util import *
 
@@ -182,6 +183,103 @@ def task_pool_patch(id_base_olympiad, id_task_pool):
 
     TaskPoolSchema(load_instance=True).load(request.json, instance=task_pool, session=db.session,
                                             partial=False, unknown=EXCLUDE)
+
+    db.session.commit()
+
+    return {}, 200
+
+
+# Contest task
+
+
+@module.route('/contest/<int:id_contest>/contest_task/<int:id_contest_task>/remove',
+              methods=['POST'])
+def contest_task_remove(id_contest, id_contest_task):
+    """
+    Delete a task pool
+    ---
+    post:
+      security:
+        - JWTAccessToken: [ ]
+        - CSRFAccessToken: [ ]
+      parameters:
+        - in: path
+          description: ID of the base olympiad
+          name: id_base_olympiad
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: ID of the contest task
+          name: id_contest_task
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: OK
+        '403':
+          description: Invalid role of current user
+        '404':
+          description: TaskPool not found
+    """
+
+    db_get_or_raise(Contest, "contest_id", id_contest)
+    contest_task = db_get_or_raise(ContestTask, "contest_task_id", id_contest_task)
+    db.session.delete(contest_task)
+    db.session.commit()
+    return {}, 200
+
+
+@module.route('/contest/<int:id_contest>/contest_task/<int:id_contest_task>', methods=['PATCH'],
+              input_schema=CreateContestTaskRequestTaskCreatorSchema)
+def contest_task_edit(id_contest, id_contest_task):
+    """
+    Create contest task
+    ---
+    patch:
+      parameters:
+        - in: path
+          description: ID of the contest
+          name: id_contest
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: ID of the contest task
+          name: id_contest_task
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: CreateContestTaskRequestTaskCreatorSchema
+      security:
+        - JWTAccessToken: [ ]
+        - CSRFAccessToken: [ ]
+      responses:
+        '200':
+          description: OK
+        '400':
+          description: Bad request
+        '409':
+          description: Olympiad type already in use
+    """
+
+    values = request.marshmallow
+    task_pool_ids = values.pop('task_pool_ids', None)
+
+    db_get_or_raise(Contest, "contest_id", id_contest)
+    contest_task = db_get_or_raise(ContestTask, "contest_task_id", id_contest_task)
+    ContestTaskSchema(load_instance=True).load(request.json, instance=contest_task, session=db.session,
+                                               partial=False, unknown=EXCLUDE)
+
+    contest_task.task_pools = []
+    for task_pool_id in task_pool_ids:
+        task_pool = db_get_or_raise(TaskPool, "task_pool_id", task_pool_id)
+        contest_task.task_pools.append(task_pool)
 
     db.session.commit()
 
