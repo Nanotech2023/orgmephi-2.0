@@ -196,7 +196,7 @@ class Contest(db.Model):
     contest_id = db.Column(db.Integer, autoincrement=True, primary_key=True)
     composite_type = db.Column(db.Enum(ContestTypeEnum))
     holding_type = db.Column(db.Enum(ContestHoldingTypeEnum))
-    show_answer_after_contest = db.Column(db.Boolean, nullable=True)
+    show_answer_after_contest = db.Column(db.Boolean, nullable=True, default=False)
 
     visibility = db.Column(db.Boolean, default=DEFAULT_VISIBILITY, nullable=False)
 

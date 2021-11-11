@@ -250,7 +250,6 @@ def test_task_patch_plain(client, test_simple_contest, test_variant, create_plai
         json={
             'num_of_task': '0',
             'recommended_answer': 'TestTest',
-            'show_answer_after_contest': 'true',
             'task_points': '15',
         })
     assert resp.status_code == 200
@@ -259,7 +258,6 @@ def test_task_patch_plain(client, test_simple_contest, test_variant, create_plai
         task_id=resp.json['task_id']).one_or_none()
     assert task.task_id == resp.json['task_id']
     assert task.task_points == 15
-    assert task.show_answer_after_contest is True
     assert task.recommended_answer == "TestTest"
 
 
@@ -272,7 +270,6 @@ def test_task_patch_range(client, test_simple_contest, test_variant, create_rang
             'num_of_task': '0',
             'start_value': '0.2',
             'end_value': '0.9',
-            'show_answer_after_contest': 'true',
             'task_points': '15',
         })
     assert resp.status_code == 200
@@ -281,7 +278,6 @@ def test_task_patch_range(client, test_simple_contest, test_variant, create_rang
         task_id=resp.json['task_id']).one_or_none()
     assert task.task_id == resp.json['task_id']
     assert task.task_points == 15
-    assert task.show_answer_after_contest is True
     assert task.start_value == 0.2
     assert task.end_value == 0.9
 
@@ -303,7 +299,6 @@ def test_task_patch_multiple(client, test_simple_contest, test_variant, create_m
                     'is_right_answer': 'false'
                 }
             ],
-            'show_answer_after_contest': 'true',
             'task_points': '15',
         })
     assert resp.status_code == 200
@@ -312,7 +307,6 @@ def test_task_patch_multiple(client, test_simple_contest, test_variant, create_m
         task_id=resp.json['task_id']).one_or_none()
     assert task.task_id == resp.json['task_id']
     assert task.task_points == 15
-    assert task.show_answer_after_contest is True
     assert len(task.answers) == 2
 
 

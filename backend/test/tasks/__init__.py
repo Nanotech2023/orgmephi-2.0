@@ -536,7 +536,6 @@ def create_plain_task(test_variant):
     from contest.tasks.models.tasks import PlainTask
     plain_tasks = [PlainTask(num_of_task=i,
                              image_of_task=None,
-                             show_answer_after_contest=True,
                              task_points=10 + i,
                              recommended_answer='answer')
                    for i in range(8)]
@@ -556,8 +555,7 @@ def create_range_task(test_variant):
                              image_of_task=None,
                              start_value=0.1,
                              end_value=0.5,
-                             task_points=10 + i,
-                             show_answer_after_contest=True, )
+                             task_points=10 + i)
                    for i in range(8)]
     test_app.db.session.add_all(range_tasks)
     for i in range(8):
@@ -575,8 +573,7 @@ def create_multiple_task(test_variant):
                                              'answer': '0',
                                              'is_right_answer': True
                                          }],
-                                         task_points=10 + i,
-                                         show_answer_after_contest=True, )
+                                         task_points=10 + i )
                       for i in range(8)]
     test_app.db.session.add_all(multiple_tasks)
     for i in range(8):

@@ -176,7 +176,6 @@ def test_task_create_plain(client, test_simple_contest, test_variant):
         json={
             'num_of_task': '0',
             'recommended_answer': 'Test',
-            'show_answer_after_contest': 'false',
             'task_points': '10',
         })
     assert resp.status_code == 200
@@ -194,7 +193,6 @@ def test_task_create_range(client, test_simple_contest, test_variant):
             'num_of_task': '0',
             'start_value': '0.1',
             'end_value': '0.8',
-            'show_answer_after_contest': 'false',
             'task_points': '10',
         })
     assert resp.status_code == 200
@@ -216,7 +214,6 @@ def test_task_create_multiple(client, test_simple_contest, test_variant):
                     'is_right_answer': 'false'
                 }
             ],
-            'show_answer_after_contest': 'false',
             'task_points': '10',
         })
     assert resp.status_code == 200

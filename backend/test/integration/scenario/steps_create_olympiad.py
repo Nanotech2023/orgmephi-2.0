@@ -108,7 +108,6 @@ def step_create_tasks(client, state):
         request = {
             'num_of_task': 1,
             'recommended_answer': f'Test recommendation {str(i)}',
-            'show_answer_after_contest': False,
             'task_points': 10, }
 
         resp = client.post(f'contest/tasks/creator'
@@ -117,7 +116,6 @@ def step_create_tasks(client, state):
         assert resp.status_code == 200
         state.variants[i]['tasks']['plain'] = {
             "task_id": resp.json['task_id'],
-            "show_answer_after_contest": False,
             "task_points": 10,
             "recommended_answer": 'Test recommendation',
         }
@@ -126,7 +124,6 @@ def step_create_tasks(client, state):
             'num_of_task': 2,
             'start_value': 0.1,
             'end_value': 0.8,
-            'show_answer_after_contest': True,
             'task_points': 8,
         }
 
@@ -136,7 +133,6 @@ def step_create_tasks(client, state):
         assert resp.status_code == 200
         state.variants[i]['tasks']['range'] = {
             "task_id": resp.json['task_id'],
-            "show_answer_after_contest": True,
             "task_points": 8,
             "start_value": 0.1,
             "end_value": 0.8,
@@ -164,7 +160,6 @@ def step_create_tasks(client, state):
         request = {
             'num_of_task': 2,
             'answers': answers,
-            'show_answer_after_contest': True,
             'task_points': 15,
         }
 
@@ -174,7 +169,6 @@ def step_create_tasks(client, state):
         assert resp.status_code == 200
         state.variants[i]['tasks']['multiple'] = {
             "task_id": resp.json['task_id'],
-            "show_answer_after_contest": True,
             "task_points": 15,
             "answers": answers
         }

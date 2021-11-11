@@ -135,22 +135,22 @@ class BaseAnswer(db.Model):
 
     @hybrid_property
     def right_answer(self):
+        from contest.tasks.models import Contest
         from common.util import db_get_one_or_none
-        if self.answer_type.value == "PlainAnswerText" or self.answer_type.value == "PlainAnswerFile":
-            task: PlainTask = db_get_one_or_none(PlainTask, 'task_id', self.task_id)
-            if task.show_answer_after_contest:
+        contest: Contest = db_get_one_or_none(Contest, "contest_id", self.response.contest_id)
+        if contest.show_answer_after_contest:
+            if self.answer_type.value == "PlainAnswerText" or self.answer_type.value == "PlainAnswerFile":
+                task: PlainTask = db_get_one_or_none(PlainTask, 'task_id', self.task_id)
                 return {'answer': task.recommended_answer}
-        elif self.answer_type.value == "RangeAnswer":
-            task: RangeTask = db_get_one_or_none(RangeTask, 'task_id', self.task_id)
-            if task.show_answer_after_contest:
+            elif self.answer_type.value == "RangeAnswer":
+                task: RangeTask = db_get_one_or_none(RangeTask, 'task_id', self.task_id)
                 return {
                     'start_value': task.start_value,
                     'end_value': task.end_value,
                 }
-        elif self.answer_type.value == "MultipleChoiceAnswer":
-            task: MultipleChoiceTask = db_get_one_or_none(MultipleChoiceTask, 'task_id', self.task_id)
-            right_answers = [elem['answer'] for elem in task.answers if elem['is_right_answer']]
-            if task.show_answer_after_contest:
+            elif self.answer_type.value == "MultipleChoiceAnswer":
+                task: MultipleChoiceTask = db_get_one_or_none(MultipleChoiceTask, 'task_id', self.task_id)
+                right_answers = [elem['answer'] for elem in task.answers if elem['is_right_answer']]
                 return {'answers': right_answers}
 
 
@@ -231,7 +231,6 @@ class PlainAnswerFile(BaseAnswer):
     def filetype(self):
         if self.answer_content is not None:
             return self.answer_content.content_type
-
 
     __mapper_args__ = {
         'polymorphic_identity': AnswerEnum.PlainAnswerFile,
