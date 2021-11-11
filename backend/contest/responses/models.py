@@ -126,12 +126,27 @@ class BaseAnswer(db.Model):
     mark = db.Column(db.Float, default=0)
 
     task = db.relationship(Task, uselist=False)
-    task_points = association_proxy('task', 'task_points')
 
     __mapper_args__ = {
         'polymorphic_identity': AnswerEnum.BaseAnswer,
         'polymorphic_on': answer_type
     }
+
+    @hybrid_property
+    def task_points(self):
+        # from common.util import db_get_one_or_none, db_get_or_raise
+        # from contest.tasks.models import contestTaskInVariant, ContestTask
+        # resp = db_get_or_raise(Response, "work_id", self.work_id)
+        # user = db_get_one_or_none(UserInContest, "user_id", resp.user_id)
+        # variant_id = user.variant_id
+        #
+        # contest_task_id = contestTaskInVariant.query.filter_by(
+        #    variant_id=variant_id, base_task_id=self.task_id
+        # ).one_or_none().contest_task_id
+        #
+        # contest_task: ContestTask = db_get_one_or_none(ContestTask, "contest_task_id", contest_task_id)
+        # return contest_task.task_points
+        return 0
 
     @hybrid_property
     def right_answer(self):
