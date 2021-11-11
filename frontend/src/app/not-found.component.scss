@@ -1,0 +1,24 @@
+@import "src/styles/colors";
+
+.not-found_subtitle {
+
+  font-family: Inter;
+  font-style: normal;
+  font-weight: normal;
+  font-size: 20px;
+  line-height: 26px;
+
+  /* Gray 7 */
+  color: $grey;
+}
+
+div .org-divider {
+  border-top: 2px solid $black;
+}
+
+.org-button {
+  background: $blue;
+  color: $white;
+  width: 224px;
+  height: 56px;
+}

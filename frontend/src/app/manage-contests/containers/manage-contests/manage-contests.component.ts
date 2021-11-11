@@ -13,7 +13,11 @@ import CompositeTypeEnum = SimpleContest.CompositeTypeEnum
 } )
 export class ManageContestsComponent implements OnInit
 {
-    constructor( private route: ActivatedRoute, private router: Router, private tasksService: TasksService ) { }
+    constructor( private route: ActivatedRoute, private router: Router, private tasksService: TasksService )
+    {
+
+        this.navigateElement3 = this.navigateElement3.bind( this )
+    }
 
     ngOnInit(): void
     {
@@ -40,6 +44,16 @@ export class ManageContestsComponent implements OnInit
             const routePath = [ '/manage', 'contests', this.selectedRow.base_contest.base_contest_id, 'contest', this.selectedRow.contest_id, 'users' ]
             this.router.navigate( routePath )
         }
+    }
+
+
+    navigateElement3( e: any ): void
+    {
+        const simpleContest: SimpleContest = e.row.data
+        console.log( 'navigateElement3', simpleContest )
+        const routePath = [ '/manage', 'contests', simpleContest.base_contest.base_contest_id, 'contest', simpleContest.contest_id, 'users' ]
+        this.router.navigate( routePath )
+        e.event.preventDefault()
     }
 
     navigateElement2(): void

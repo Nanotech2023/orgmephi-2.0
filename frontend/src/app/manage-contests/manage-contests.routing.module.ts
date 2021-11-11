@@ -10,9 +10,11 @@ import { ManageContestVariantTasksComponent } from '@/manage-contests/containers
 import { ManageContestUsersComponent } from '@/manage-contests/containers/manage-contest-users-component/manage-contest-users.component'
 import { ManageContestUserAssignmentComponent } from '@/manage-contests/containers/manage-contest-user-assignment/manage-contest-user-assignment.component'
 import { ManageContestsComponent } from '@/manage-contests/containers/manage-contests/manage-contests.component'
+import { ManageTargetClassesComponent } from '@/manage-contests/components/manage-target-classes/manage-target-classes.component'
 
 
 export const COMPONENTS = [
+    ManageTargetClassesComponent,
     ManageBaseContestsComponent,
     ManageCompositeContestsComponent,
     ManageCompositeContestStagesComponent,

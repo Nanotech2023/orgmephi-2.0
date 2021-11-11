@@ -22,13 +22,23 @@
                 <dxi-column dataField="academic_year" caption="Год"></dxi-column>
                 <dxi-column dataField="start_date" dataType="date" caption="Дата начала"></dxi-column>
                 <dxi-column dataField="end_date" dataType="date" caption="Дата окончания"></dxi-column>
-                <dxi-column dataField="end_of_enroll_date" dataType="date" caption="Дата окончания заявок на участие"></dxi-column>
-                <dxi-column dataField="result_publication_date" dataType="date" caption="Дата публикации результатов"></dxi-column>
-                <dxi-column dataField="contest_duration" caption="Длительность в секундах"></dxi-column>
+                <dxi-column dataField="end_of_enroll_date" dataType="date"
+                            caption="Дата окончания заявок на участие"></dxi-column>
+                <dxi-column dataField="result_publication_date" dataType="date"
+                            caption="Дата публикации результатов"></dxi-column>
+                <dxi-column type="buttons" [width]="110">
+                    <dxi-button
+                        text="Участники"
+                        hint="Участники"
+                        [onClick]="navigateElement3"
+                    ></dxi-button>
+                </dxi-column>
+                <dxi-column dataField="contest_duration" caption="Длительность (в секундах)"></dxi-column>
                 <dxi-column dataField="locations" caption="Местоположения"></dxi-column>
                 <!---TODO Array<OlympiadLocation>--->
                 <dxi-column dataField="previous_contest_id" caption="ID предыдущей олимпиады"></dxi-column>
-                <dxi-column dataField="previous_participation_condition" caption="Правило перехода предыдущей олимпиады">
+                <dxi-column dataField="previous_participation_condition"
+                            caption="Правило перехода предыдущей олимпиады">
                     <dxo-lookup [dataSource]="previousParticipationConditionEnum"></dxo-lookup>
                 </dxi-column>
                 <dxi-column dataField="tasks_number" caption="Число заданий"></dxi-column>

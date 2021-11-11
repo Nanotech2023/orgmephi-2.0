@@ -1,18 +1,11 @@
 import { Injectable } from '@angular/core'
 import { ComponentStore, tapResponse } from '@ngrx/component-store'
-import { EMPTY, Observable, zip } from 'rxjs'
-import {
-    AllTaskResponseTaskParticipant,
-    FilterSimpleContestResponseTaskParticipant,
-    SimpleContestWithFlagResponseTaskParticipant
-} from '@api/tasks/model'
+import { EMPTY, Observable } from 'rxjs'
 import { CallState, getError, LoadingState } from '@/shared/callState'
-import { ManageContestsState } from '@/manage-contests/manage-contests.store'
-import { catchError, finalize, switchMap } from 'rxjs/operators'
-import { ActivatedRoute } from '@angular/router'
+import { catchError, switchMap } from 'rxjs/operators'
 import {
     AllUserAnswersResponse,
-    AllUserMarksResponse,
+    AllUserMarksResponse, AnswerWithoutMark, BaseAnswer,
     UserResponseStatusResponse,
     UserTimeResponseRequest
 } from '@api/responses/model'
@@ -53,16 +46,18 @@ export class ManageContestUserAssignmentStore extends ComponentStore<ManageConte
         super( initialState )
     }
 
-    readonly userResponse$: Observable<AllUserAnswersResponse | undefined> = this.select( state => state.userResponse )
-    readonly userStatus$: Observable<UserResponseStatusResponse | undefined> = this.select( state => state.userStatus )
-    readonly userMark$: Observable<AllUserMarksResponse | undefined> = this.select( state => state.userMark )
-    readonly userTime$: Observable<UserTimeResponseRequest | undefined> = this.select( state => state.userTime )
-    readonly userExtraTime$: Observable<UserTimeResponseRequest | undefined> = this.select( state => state.userExtraTime )
+    readonly userWorkId$: Observable<number | undefined> = this.select( state => state.userResponse?.work_id )
+    readonly userResponse$: Observable<Array<AnswerWithoutMark>> = this.select( state => state.userResponse?.user_answers ?? [] )
+    readonly userStatus$: Observable<UserResponseStatusResponse.StatusEnum | undefined> = this.select( state => state.userStatus?.status )
+    readonly userMark$: Observable<Array<BaseAnswer>> = this.select( state => state.userMark?.user_answers ?? [] )
+    readonly userTime$: Observable<number> = this.select( state => state.userTime?.time ?? 0 )
+    readonly userExtraTime$: Observable<number> = this.select( state => state.userExtraTime?.time ?? 0 )
 
     private readonly loading$: Observable<boolean> = this.select( state => state.callState === LoadingState.LOADING )
     private readonly error$: Observable<string | null> = this.select( state => getError( state.callState ) )
 
     readonly viewModel$ = this.select(
+        this.userWorkId$,
         this.userResponse$,
         this.userStatus$,
         this.userMark$,
@@ -70,7 +65,8 @@ export class ManageContestUserAssignmentStore extends ComponentStore<ManageConte
         this.userExtraTime$,
         this.loading$,
         this.error$,
-        ( userResponse$, userStatus$, userMark$, userTime$, userExtraTime$, loading$, error$ ) => ( {
+        ( userWorkId$, userResponse$, userStatus$, userMark$, userTime$, userExtraTime$, loading$, error$ ) => ( {
+            userWorkId: userWorkId$!,
             userResponse: userResponse$!,
             userStatus: userStatus$!,
             userMark: userMark$!,
