@@ -410,7 +410,7 @@ def choose_status(percent, base_contest):
 
 
 def set_user_statuses(contest_id):
-    from contest.tasks.models.contest import Variant
+    from contest.tasks.models.tasks import Variant
     user_responses = db_get_list(Response, 'contest_id', contest_id)
     contest: SimpleContest = db_get_or_raise(SimpleContest, 'contest_id', contest_id)
     base_contest = contest.base_contest

@@ -19,8 +19,8 @@ class TaskPoolSchema(SQLAlchemySchema):
 
     task_pool_id = auto_field(column_name='task_pool_id', dump_only=True)
     name = auto_field(column_name='name', validate=text_validator, required=True)
-    year = auto_field(column_name='task_points', required=False)
-    orig_task_points = auto_field(column_name='task_points', required=False)
+    year = auto_field(column_name='year', required=False)
+    orig_task_points = auto_field(column_name='orig_task_points', required=False)
 
 
 """
@@ -34,7 +34,7 @@ class ContestTaskSchema(SQLAlchemySchema):
         load_instance = True
         sqla_session = db.session
 
-    contest_task_id = auto_field(column_name='task_pool_id', dump_only=True)
+    contest_task_id = auto_field(column_name='contest_task_id', dump_only=True)
     num = auto_field(column_name='num', required=False)
     task_points = auto_field(column_name='task_points', required=False)
 
@@ -53,7 +53,6 @@ class PlainTaskSchema(SQLAlchemySchema):
     task_id = auto_field(column_name='task_id', dump_only=True)
     num_of_task = auto_field(column_name='num_of_task', required=True)
     recommended_answer = auto_field(column_name='recommended_answer', validate=text_validator, required=True)
-    task_points = auto_field(column_name='task_points', required=False)
     answer_type = EnumField(TaskAnswerTypeEnum, data_key='answer_type', by_value=True, required=False)
 
 
@@ -67,7 +66,6 @@ class RangeTaskSchema(SQLAlchemySchema):
     num_of_task = auto_field(column_name='num_of_task', required=True)
     start_value = auto_field(column_name='start_value', required=True)
     end_value = auto_field(column_name='end_value', required=True)
-    task_points = auto_field(column_name='task_points', required=False)
 
 
 class MultipleChoiceTaskSchema(SQLAlchemySchema):
@@ -79,7 +77,6 @@ class MultipleChoiceTaskSchema(SQLAlchemySchema):
     task_id = auto_field(column_name='task_id', dump_only=True)
     num_of_task = auto_field(column_name='num_of_task', required=False)
     answers = auto_field(column_name='answers', many=True, required=False)
-    task_points = auto_field(column_name='task_points', required=False)
 
 
 class TaskSchema(OneOfSchema):
