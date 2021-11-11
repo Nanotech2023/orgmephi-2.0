@@ -7,6 +7,23 @@ from user.models.auth import *
 from common.fields import text_validator
 
 """
+Task Pool
+"""
+
+
+class TaskPoolSchema(SQLAlchemySchema):
+    class Meta:
+        model = TaskPool
+        load_instance = True
+        sqla_session = db.session
+
+    task_pool_id = auto_field(column_name='task_pool_id', dump_only=True)
+    name = auto_field(column_name='name', validate=text_validator, required=True)
+    year = auto_field(column_name='task_points', required=False)
+    orig_task_points = auto_field(column_name='task_points', required=False)
+
+
+"""
 Task
 """
 

@@ -3,13 +3,14 @@ from marshmallow import EXCLUDE
 
 from common import get_current_module
 from contest.tasks.creator.schemas import BaseOlympiadResponseTaskCreatorSchema, StageResponseTaskCreatorSchema, \
-    ContestResponseTaskCreatorSchema, TaskResponseTaskCreatorSchema, VariantResponseTaskCreatorSchema
+    ContestResponseTaskCreatorSchema, TaskResponseTaskCreatorSchema, VariantResponseTaskCreatorSchema, \
+    CreateTaskPoolRequestTaskCreatorSchema
 from contest.tasks.editor.schemas import *
 from contest.tasks.model_schemas.certificate import CertificateTypeSchema, CertificateSchema
 from contest.tasks.model_schemas.contest import VariantSchema
 from contest.tasks.model_schemas.olympiad import BaseContestSchema, SimpleContestSchema, CompositeContestSchema, \
     StageSchema
-from contest.tasks.model_schemas.tasks import PlainTaskSchema, RangeTaskSchema, MultipleChoiceTaskSchema
+from contest.tasks.model_schemas.tasks import PlainTaskSchema, RangeTaskSchema, MultipleChoiceTaskSchema, TaskPoolSchema
 from contest.tasks.models.certificate import Certificate, CertificateType
 from contest.tasks.util import *
 
@@ -95,6 +96,99 @@ def base_olympiad_patch(id_base_olympiad):
 
     return base_contest, 200
 
+
+# Task Pool
+
+
+@module.route('/base_olympiad/<int:id_base_olympiad>/task_pool/<int:id_task_pool>/remove',
+              methods=['POST'])
+def task_pool_remove(id_base_olympiad, id_task_pool):
+    """
+    Delete a task pool
+    ---
+    post:
+      security:
+        - JWTAccessToken: [ ]
+        - CSRFAccessToken: [ ]
+      parameters:
+        - in: path
+          description: ID of the base olympiad
+          name: id_base_olympiad
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: ID of the task pool
+          name: id_task_pool
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: OK
+        '403':
+          description: Invalid role of current user
+        '404':
+          description: TaskPool not found
+    """
+
+    db_get_or_raise(BaseContest, "base_contest_id", id_base_olympiad)
+    task_pool = db_get_or_raise(TaskPool, "task_pool_id", id_task_pool)
+    db.session.delete(task_pool)
+    db.session.commit()
+    return {}, 200
+
+
+@module.route('/base_olympiad/<int:id_base_olympiad>/task_pool/<int:id_task_pool>',
+              methods=['PATCH'],
+              input_schema=CreateTaskPoolRequestTaskCreatorSchema)
+def task_pool_patch(id_base_olympiad, id_task_pool):
+    """
+    Update task pool
+    ---
+    patch:
+      parameters:
+        - in: path
+          description: ID of the base olympiad
+          name: id_base_olympiad
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: ID of the task pool
+          name: id_task_pool
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: UpdateStageRequestTaskEditorSchema
+      security:
+        - JWTAccessToken: [ ]
+        - CSRFAccessToken: [ ]
+      responses:
+        '200':
+          description: OK
+        '403':
+          description: Invalid role of current user
+        '404':
+          description: TaskPool not found
+    """
+
+    db_get_or_raise(BaseContest, "base_contest_id", id_base_olympiad)
+    task_pool = db_get_or_raise(TaskPool, "task_pool_id", id_task_pool)
+
+    TaskPoolSchema(load_instance=True).load(request.json, instance=task_pool, session=db.session,
+                                            partial=False, unknown=EXCLUDE)
+
+    db.session.commit()
+
+    return {}, 200
+
+
+# Contest views
 
 # Olympiads
 

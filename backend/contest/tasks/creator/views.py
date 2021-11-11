@@ -3,6 +3,7 @@ from marshmallow import EXCLUDE
 
 from common import get_current_module
 from contest.tasks.creator.schemas import *
+from contest.tasks.model_schemas.tasks import TaskPoolSchema
 from contest.tasks.util import *
 
 db = get_current_db()
@@ -42,6 +43,133 @@ def base_olympiad_create():
 
     return {
                'base_contest_id': base_contest.base_contest_id
+           }, 200
+
+
+# Tasks Pool
+
+@module.route('/base_olympiad/<int:id_base_olympiad>/task_pool/create', methods=['POST'],
+              input_schema=CreateTaskPoolRequestTaskCreatorSchema,
+              output_schema=TaskPoolIdResponseTaskCreatorSchema)
+def task_pool_create(id_base_olympiad):
+    """
+    Create task pool
+    ---
+    post:
+      parameters:
+        - in: path
+          description: ID of the base olympiad
+          name: id_base_olympiad
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: CreateTaskPoolRequestTaskCreatorSchema
+      security:
+        - JWTAccessToken: [ ]
+        - CSRFAccessToken: [ ]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: TaskPoolIdResponseTaskCreatorSchema
+        '400':
+          description: Bad request
+        '409':
+          description: Olympiad type already in use
+    """
+    base_contest = db_get_or_raise(BaseContest, "base_contest_id", id_base_olympiad)
+
+    task_pool = TaskPoolSchema().load(data=request.json, partial=True, session=db.session, unknown=EXCLUDE)
+
+    db.session.add(task_pool)
+    base_contest.task_pools.append(task_pool)
+    db.session.commit()
+
+    return {
+               'task_pool_id': task_pool.task_pool_id
+           }, 200
+
+
+@module.route('/base_olympiad/<int:id_base_olympiad>/task_pool/<int:id_task_pool>', methods=['GET'],
+              output_schema=TaskPoolSchema)
+def task_pool_get(id_base_olympiad, id_task_pool):
+    """
+    Create task pool
+    ---
+    get:
+      parameters:
+        - in: path
+          description: ID of the base olympiad
+          name: id_base_olympiad
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: ID of the task pool
+          name: id_task_pool
+          required: true
+          schema:
+            type: integer
+      security:
+        - JWTAccessToken: [ ]
+        - CSRFAccessToken: [ ]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: TaskPoolSchema
+        '400':
+          description: Bad request
+        '409':
+          description: Olympiad type already in use
+    """
+    task_pool = db_get_or_raise(TaskPool, "task_pool_id", id_task_pool)
+    return task_pool, 200
+
+
+@module.route('/base_olympiad/<int:id_base_olympiad>/task_pool/all', methods=['GET'],
+              output_schema=AllTaskPoolsResponseTaskCreatorSchema)
+def task_pool_get_all(id_base_olympiad, id_task_pool):
+    """
+    Create task pool
+    ---
+    get:
+      parameters:
+        - in: path
+          description: ID of the base olympiad
+          name: id_base_olympiad
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: ID of the task pool
+          name: id_task_pool
+          required: true
+          schema:
+            type: integer
+      security:
+        - JWTAccessToken: [ ]
+        - CSRFAccessToken: [ ]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: AllTaskPoolsResponseTaskCreatorSchema
+        '400':
+          description: Bad request
+        '409':
+          description: Olympiad type already in use
+    """
+    base_contest = db_get_or_raise(BaseContest, "base_contest_id", id_base_olympiad)
+    return {
+               "task_pools_list": base_contest.task_pools
            }, 200
 
 

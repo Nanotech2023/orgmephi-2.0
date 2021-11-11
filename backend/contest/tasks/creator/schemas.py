@@ -6,7 +6,7 @@ from common import fields as common_fields
 from contest.tasks.model_schemas.contest import VariantSchema
 from contest.tasks.model_schemas.olympiad import ContestSchema, BaseContestSchema, StageSchema, \
     ContestGroupRestrictionEnum
-from contest.tasks.model_schemas.tasks import TaskSchema
+from contest.tasks.model_schemas.tasks import TaskSchema, TaskPoolSchema
 from contest.tasks.models import OlympiadSubjectEnum, StageConditionEnum, ContestHoldingTypeEnum, \
     UserStatusEnum, OlympiadLevelEnum, TaskAnswerTypeEnum
 
@@ -21,6 +21,21 @@ class BaseOlympiadResponseTaskCreatorSchema(BaseContestSchema):
 class BaseOlympiadIdResponseTaskCreatorSchema(Schema):
     base_contest_id = fields.Int(required=True)
 
+
+# Task pool
+
+class CreateTaskPoolRequestTaskCreatorSchema(Schema):
+    name = common_fields.CommonName(required=False)
+    year = fields.Int(required=False)
+    orig_task_points = fields.Int(required=False)
+
+
+class TaskPoolIdResponseTaskCreatorSchema(Schema):
+    task_pool_id = fields.Int(required=True)
+
+
+class AllTaskPoolsResponseTaskCreatorSchema(Schema):
+    task_pools_list = fields.Nested(TaskPoolSchema, many=True, required=True)
 
 # Contest
 
@@ -160,6 +175,7 @@ class TaskResponseTaskCreatorSchema(Schema):
 
 class TaskIdResponseTaskCreatorSchema(Schema):
     task_id = fields.Int(required=True)
+
 
 # Restrictions
 

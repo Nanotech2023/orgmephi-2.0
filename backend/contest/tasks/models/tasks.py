@@ -101,6 +101,7 @@ class Task(db.Model):
 
     __tablename__ = 'base_task'
     task_id = db.Column(db.Integer, autoincrement=True, primary_key=True)
+    task_pool_id = db.Column(db.Integer, db.ForeignKey('task_pool.task_pool_id'))
     num_of_task = db.Column(db.Integer, nullable=False)
 
     image_of_task = db.Column(TaskImage.as_mutable(Json))
