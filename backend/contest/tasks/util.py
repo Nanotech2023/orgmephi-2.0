@@ -238,7 +238,6 @@ def is_user_in_contest(user_id, current_contest):
 
 
 # Contest content module
-# DEPRECATED
 
 def is_task_in_variant(task_id, variant):
     """
@@ -471,35 +470,6 @@ def get_variant_if_possible_by_number(contest_id, variant_num):
         raise DataConflict('No variants in this contest')
 
     return variant
-
-
-# DEPRECATED
-def get_tasks_if_possible(contest_id, variant_id):
-    """
-    Get tasks if possible
-    :param contest_id: contest id
-    :param variant_id: variant id
-    :return: tasks
-    """
-    variant = get_variant_if_possible(contest_id, variant_id)
-    return variant.tasks
-
-
-# DEPRECATED
-def get_task_if_possible(contest_id, variant_id, task_id):
-    """
-    Get task if possible
-    :param contest_id: contest id
-    :param variant_id: variant id
-    :param task_id: task id
-    :return: task
-    """
-    variant = get_variant_if_possible(contest_id, variant_id)
-    if is_task_in_variant(task_id, variant):
-        task = db_get_or_raise(Task, "task_id", str(task_id))
-        return task
-    else:
-        raise DataConflict('Task not in current variant')
 
 
 def get_task_in_pool_if_possible(id_task_pool, task_id):
