@@ -87,7 +87,6 @@ def add_user_to_contest(id_contest):
                                                    show_results_to_user=show_results_to_user,
                                                    supervisor=supervisor,
                                                    location_id=location_id,
-                                                   variant_id=generate_variant(id_contest, user_id),
                                                    user_status=UserStatusEnum.Participant))
 
     db.session.commit()

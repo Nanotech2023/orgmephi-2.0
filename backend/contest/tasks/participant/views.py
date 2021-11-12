@@ -140,7 +140,6 @@ def enroll_in_contest(id_contest):
 
     current_contest.users.append(UserInContest(user_id=user_id,
                                                show_results_to_user=False,
-                                               variant_id=generate_variant(id_contest, user_id),
                                                location_id=location_id,
                                                supervisor=supervisor,
                                                user_status=UserStatusEnum.Participant))

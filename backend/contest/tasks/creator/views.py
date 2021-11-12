@@ -543,60 +543,60 @@ def contest_task_get_all(id_contest):
 # Variant views
 
 
-@module.route(
-    '/contest/<int:id_contest>/variant/create',
-    methods=['POST'],
-    input_schema=CreateVariantRequestTaskCreatorSchema,
-    output_schema=VariantIdResponseTaskCreatorSchema)
-def variant_create(id_contest):
-    """
-    Variant creation
-    ---
-    post:
-      parameters:
-        - in: path
-          description: ID of the contest
-          name: id_contest
-          required: true
-          schema:
-            type: integer
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema: CreateVariantRequestTaskCreatorSchema
-      security:
-        - JWTAccessToken: [ ]
-        - CSRFAccessToken: [ ]
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema: VariantIdResponseTaskCreatorSchema
-        '400':
-          description: Bad request
-        '409':
-          description: Olympiad type already in use
-    """
-    values = request.marshmallow
-    variant_description = values['variant_description']
-
-    current_contest = get_contest_if_possible(id_contest)
-    last_variant_number = get_last_variant_in_contest(current_contest)
-
-    variant = add_variant(db.session,
-                          variant_number=last_variant_number + 1,
-                          variant_description=variant_description,
-                          )
-    current_contest.variants.append(variant)
-
-    db.session.add(variant)
-    db.session.commit()
-
-    return {
-               "variant_id": variant.variant_id,
-           }, 200
+#@module.route(
+#    '/contest/<int:id_contest>/variant/create',
+#    methods=['POST'],
+#    input_schema=CreateVariantRequestTaskCreatorSchema,
+#    output_schema=VariantIdResponseTaskCreatorSchema)
+#def variant_create(id_contest):
+#    """
+#    Variant creation
+#    ---
+#    post:
+#      parameters:
+#        - in: path
+#          description: ID of the contest
+#          name: id_contest
+#          required: true
+#          schema:
+#            type: integer
+#      requestBody:
+#        required: true
+#        content:
+#          application/json:
+#            schema: CreateVariantRequestTaskCreatorSchema
+#      security:
+#        - JWTAccessToken: [ ]
+#        - CSRFAccessToken: [ ]
+#      responses:
+#        '200':
+#          description: OK
+#          content:
+#            application/json:
+#              schema: VariantIdResponseTaskCreatorSchema
+#        '400':
+#          description: Bad request
+#        '409':
+#          description: Olympiad type already in use
+#    """
+#    values = request.marshmallow
+#    variant_description = values['variant_description']
+#
+#    current_contest = get_contest_if_possible(id_contest)
+#    last_variant_number = get_last_variant_in_contest(current_contest)
+#
+#    variant = add_variant(db.session,
+#                          variant_number=last_variant_number + 1,
+#                          variant_description=variant_description,
+#                          )
+#    current_contest.variants.append(variant)
+#
+#    db.session.add(variant)
+#    db.session.commit()
+#
+#    return {
+#               "variant_id": variant.variant_id,
+#           }, 200
 
 
 @module.route(

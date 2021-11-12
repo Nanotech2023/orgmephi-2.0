@@ -74,21 +74,20 @@ class ContestTask(db.Model):
                                  backref=db.backref('contest_task', lazy=True))
 
 
-"""
-Table describing a Task Pool In Contest Task.
+class ContestTaskInVariant(db.Model):
+    """
+    Contest Task In Variant
 
-stage_id: id of the stage
-contest_id: id of contest
-"""
+    contest_task_id: id of the task pool
+    contest_id: id of the contest
+    num: num of the task
+    task_points: task points
+    """
 
-contestTaskInVariant = db.Table('contest_task_in_variant',
-                                db.Column('variant_id', db.Integer, db.ForeignKey('variant.variant_id'),
-                                          primary_key=True),
-                                db.Column('contest_task_id', db.Integer, db.ForeignKey('contest_task.contest_task_id'),
-                                          primary_key=True),
-                                db.Column('base_task_id', db.Integer, db.ForeignKey('base_task.task_id'),
-                                          unique=True)
-                                )
+    __tablename__ = "contest_task_in_variant"
+    contest_task_id = db.Column(db.Integer, db.ForeignKey('contest_task.contest_task_id'), primary_key=True)
+    variant_id = db.Column(db.Integer, db.ForeignKey('variant.variant_id'), primary_key=True)
+    base_task_id = db.Column(db.Integer, db.ForeignKey('base_task.task_id'))
 
 
 class Task(db.Model):
@@ -233,14 +232,11 @@ class Variant(db.Model):
     variant_number = db.Column(db.Integer)
     variant_description = db.Column(db.Text)
 
-    users = db.relationship('UserInContest', lazy='select',
-                            backref=db.backref('variant', lazy='joined'))
-
-    contest_tasks_in_variant = db.relationship('Task', secondary=contestTaskInVariant, lazy='subquery',
-                                               backref=db.backref('variant', lazy=True))
+    users = db.relationship('UserInContest', lazy='dynamic', backref='variant')
+    contest_tasks_in_variant = db.relationship('ContestTaskInVariant', lazy='dynamic', backref='variant')
 
 
-def add_variant(db_session, variant_number, variant_description, contest_id=None):
+def add_variant(db_session, variant_number=None, variant_description=None, contest_id=None):
     """
     Create new variant object
     """

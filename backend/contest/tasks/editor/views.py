@@ -579,100 +579,100 @@ def contest_add_previous(id_olympiad, id_stage, id_contest):
     return {}, 200
 
 
-# Variant views
-
-
-@module.route(
-    '/contest/<int:id_contest>/variant/<int:id_variant>/remove',
-    methods=['POST'])
-def variant_remove(id_contest, id_variant):
-    """
-    Delete a contest
-    ---
-    post:
-      security:
-        - JWTAccessToken: [ ]
-        - CSRFAccessToken: [ ]
-      parameters:
-        - in: path
-          description: ID of the contest
-          name: id_contest
-          required: true
-          schema:
-            type: integer
-        - in: path
-          description: ID of the variant
-          name: id_variant
-          required: true
-          schema:
-            type: integer
-      responses:
-        '200':
-          description: OK
-        '403':
-          description: Invalid role of current user
-        '404':
-          description: Olympiad not found
-    """
-
-    variant = get_variant_if_possible(id_contest, id_variant)
-    db.session.delete(variant)
-    db.session.commit()
-    return {}, 200
-
-
-@module.route(
-    '/contest/<int:id_contest>/variant/<int:variant_num>',
-    methods=['PATCH'],
-    input_schema=UpdateVariantRequestTaskEditorSchema,
-    output_schema=VariantResponseTaskCreatorSchema)
-def variant_patch(id_contest, variant_num):
-    """
-    Variant patch
-    ---
-    patch:
-      parameters:
-        - in: path
-          description: ID of the contest
-          name: id_contest
-          required: true
-          schema:
-            type: integer
-        - in: path
-          description: Num of the variant
-          name: variant_num
-          required: true
-          schema:
-            type: integer
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema: UpdateVariantRequestTaskEditorSchema
-      security:
-        - JWTAccessToken: [ ]
-        - CSRFAccessToken: [ ]
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema: VariantResponseTaskCreatorSchema
-        '400':
-          description: Bad request
-        '409':
-          description: Olympiad type already in use
-    """
-
-    variant = get_variant_if_possible_by_number(id_contest, variant_num)
-
-    VariantSchema(load_instance=True).load(request.json, instance=variant, session=db.session,
-                                           partial=False, unknown=EXCLUDE)
-
-    db.session.commit()
-
-    return variant, 200
-
+# # Variant views
+#
+#
+# @module.route(
+#     '/contest/<int:id_contest>/variant/<int:id_variant>/remove',
+#     methods=['POST'])
+# def variant_remove(id_contest, id_variant):
+#     """
+#     Delete a contest
+#     ---
+#     post:
+#       security:
+#         - JWTAccessToken: [ ]
+#         - CSRFAccessToken: [ ]
+#       parameters:
+#         - in: path
+#           description: ID of the contest
+#           name: id_contest
+#           required: true
+#           schema:
+#             type: integer
+#         - in: path
+#           description: ID of the variant
+#           name: id_variant
+#           required: true
+#           schema:
+#             type: integer
+#       responses:
+#         '200':
+#           description: OK
+#         '403':
+#           description: Invalid role of current user
+#         '404':
+#           description: Olympiad not found
+#     """
+#
+#     variant = get_variant_if_possible(id_contest, id_variant)
+#     db.session.delete(variant)
+#     db.session.commit()
+#     return {}, 200
+#
+#
+# @module.route(
+#     '/contest/<int:id_contest>/variant/<int:variant_num>',
+#     methods=['PATCH'],
+#     input_schema=UpdateVariantRequestTaskEditorSchema,
+#     output_schema=VariantResponseTaskCreatorSchema)
+# def variant_patch(id_contest, variant_num):
+#     """
+#     Variant patch
+#     ---
+#     patch:
+#       parameters:
+#         - in: path
+#           description: ID of the contest
+#           name: id_contest
+#           required: true
+#           schema:
+#             type: integer
+#         - in: path
+#           description: Num of the variant
+#           name: variant_num
+#           required: true
+#           schema:
+#             type: integer
+#       requestBody:
+#         required: true
+#         content:
+#           application/json:
+#             schema: UpdateVariantRequestTaskEditorSchema
+#       security:
+#         - JWTAccessToken: [ ]
+#         - CSRFAccessToken: [ ]
+#       responses:
+#         '200':
+#           description: OK
+#           content:
+#             application/json:
+#               schema: VariantResponseTaskCreatorSchema
+#         '400':
+#           description: Bad request
+#         '409':
+#           description: Olympiad type already in use
+#     """
+#
+#     variant = get_variant_if_possible_by_number(id_contest, variant_num)
+#
+#     VariantSchema(load_instance=True).load(request.json, instance=variant, session=db.session,
+#                                            partial=False, unknown=EXCLUDE)
+#
+#     db.session.commit()
+#
+#     return variant, 200
+#
 
 # Task views
 
