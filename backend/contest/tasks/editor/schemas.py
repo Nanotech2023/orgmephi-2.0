@@ -60,12 +60,10 @@ class UpdateStageRequestTaskEditorSchema(Schema):
 class VariantResponseTaskEditorSchema(Schema):
     variant_id = fields.Int(required=True)
     variant_number = fields.Int(required=True)
-    variant_description = common_fields.Text(required=True)
 
 
 class UpdateVariantRequestTaskEditorSchema(Schema):
     variant_number = fields.Int(required=False)
-    variant_description = common_fields.Text(required=False)
 
 
 # Tasks

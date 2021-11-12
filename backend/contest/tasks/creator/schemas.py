@@ -136,10 +136,6 @@ class AllVariantsResponseTaskCreatorSchema(Schema):
 # Variant
 
 
-class CreateVariantRequestTaskCreatorSchema(Schema):
-    variant_description = common_fields.Text(required=True)
-
-
 class VariantResponseTaskCreatorSchema(VariantSchema):
     class Meta(VariantSchema.Meta):
         exclude = ['contest_id']

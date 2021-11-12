@@ -832,7 +832,6 @@ def task_create_multiple(id_task_pool):
     name = values.get('name', None)
 
     task_pool = db_get_or_raise(TaskPool, "task_pool_id", id_task_pool)
-
     task = add_multiple_task(db.session,
                              name=name)
     task_pool.tasks.append(task)

@@ -223,7 +223,6 @@ class Variant(db.Model):
     variant_id: id of the variant
     contest_id: id of contest
     variant_number: id of the variant number
-    variant_description: description of the variant
 
     users: users
     tasks: tasks
@@ -234,20 +233,18 @@ class Variant(db.Model):
     variant_id = db.Column(db.Integer, autoincrement=True, primary_key=True)
     contest_id = db.Column(db.Integer, db.ForeignKey('simple_contest.contest_id'))
     variant_number = db.Column(db.Integer)
-    variant_description = db.Column(db.Text)
 
     users = db.relationship('UserInContest', lazy='dynamic', backref='variant')
     contest_tasks_in_variant = db.relationship('ContestTaskInVariant', lazy='dynamic', backref='variant')
 
 
-def add_variant(db_session, variant_number=None, variant_description=None, contest_id=None):
+def add_variant(db_session, variant_number=None, contest_id=None):
     """
     Create new variant object
     """
     variant = Variant(
         contest_id=contest_id,
-        variant_number=variant_number,
-        variant_description=variant_description,
+        variant_number=variant_number
     )
     db_session.add(variant)
     return variant
