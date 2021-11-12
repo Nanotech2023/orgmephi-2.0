@@ -51,42 +51,26 @@ def create_olympiad_location(create_simple_contest):
 
 
 @pytest.fixture
-def create_variant(create_olympiad_location):
-    from contest.tasks.models.contest import Variant
-    variants = [Variant(contest_id=create_olympiad_location.get('contests')[i].contest_id,
-                        variant_number=i,
-                        variant_description='description')
-                for i in range(8)]
-    test_app.db.session.add_all(variants)
-    test_app.db.session.commit()
-    create_olympiad_location['variants'] = variants
-    yield create_olympiad_location
-
-
-@pytest.fixture
-def create_user_in_contest(create_variant, test_user_university):
+def create_user_in_contest(create_olympiad_location, test_user_university):
     from contest.tasks.models.user import UserInContest, UserStatusEnum
     user_id = test_user_university.id
     users_in_contests = [UserInContest(user_id=user_id,
-                                       contest_id=create_variant.get('contests')[i].contest_id,
+                                       contest_id=create_olympiad_location.get('contests')[i].contest_id,
                                        show_results_to_user=False,
                                        user_status=UserStatusEnum.Participant,
-                                       variant_id=get_variant_id(create_variant, i),
-                                       location_id=get_location_id(create_variant))
+                                       location_id=get_location_id(create_olympiad_location))
                          for i in range(8)]
     test_app.db.session.add_all(users_in_contests)
     test_app.db.session.commit()
-    create_variant['users'] = users_in_contests
-    yield create_variant
+    create_olympiad_location['users'] = users_in_contests
+    yield create_olympiad_location
 
 
 # noinspection DuplicatedCode
 @pytest.fixture
 def create_plain_task(create_user_in_contest):
     from contest.tasks.models.tasks import PlainTask
-    plain_tasks = [PlainTask(num_of_task=1,
-                             image_of_task=None,
-                             task_points=11,
+    plain_tasks = [PlainTask(image_of_task=None,
                              recommended_answer='answer')
                    for i in range(8)]
     test_app.db.session.add_all(plain_tasks)
@@ -114,9 +98,7 @@ def create_user_response(create_user_in_contest):
 def create_one_task(create_user_response):
     from contest.tasks.models.tasks import PlainTask, TaskAnswerTypeEnum
     types = [TaskAnswerTypeEnum.Text, TaskAnswerTypeEnum.File]
-    plain_tasks = [PlainTask(num_of_task=1,
-                             image_of_task=None,
-                             task_points=11,
+    plain_tasks = [PlainTask(image_of_task=None,
                              recommended_answer='answer',
                              answer_type=types[i % 2])
                    for i in range(8)]
@@ -131,9 +113,7 @@ def create_one_task(create_user_response):
 @pytest.fixture
 def create_two_tasks(create_one_task):
     from contest.tasks.models.tasks import RangeTask
-    range_tasks = [RangeTask(num_of_task=2,
-                             image_of_task=None,
-                             task_points=5,
+    range_tasks = [RangeTask(image_of_task=None,
                              start_value=0.5,
                              end_value=0.7)
                    for _ in range(8)]
@@ -148,9 +128,7 @@ def create_two_tasks(create_one_task):
 @pytest.fixture
 def create_three_tasks(create_two_tasks):
     from contest.tasks.models.tasks import MultipleChoiceTask
-    multiple_tasks = [MultipleChoiceTask(num_of_task=3,
-                                         image_of_task=None,
-                                         task_points=7)
+    multiple_tasks = [MultipleChoiceTask(image_of_task=None)
                       for _ in range(8)]
     answers = [
         {
