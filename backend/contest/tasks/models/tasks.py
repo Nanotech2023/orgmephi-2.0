@@ -36,7 +36,7 @@ class TaskPool(db.Model):
     year = db.Column(db.Integer)
     orig_task_points = db.Column(db.Integer)
 
-    tasks = db.relationship('Task', backref=db.backref('task_pool', lazy='joined'), lazy='dynamic')
+    tasks = db.relationship('Task', backref='task_pool', lazy='dynamic')
 
 
 """

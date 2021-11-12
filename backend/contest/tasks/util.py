@@ -181,33 +181,33 @@ def generate_or_get_variant(contest_id, user_id):
     for contest_task in contest_tasks:
         task_pools = contest_task.task_pools
         task_pool: TaskPool = secrets.choice(task_pools)
-        tasks_list = task_pool.tasks
+        tasks_list = task_pool.tasks.all()
         base_task: Task = secrets.choice(tasks_list)
-
-        contest_task_in_variant = ContestTaskInVariant(
-            contest_task_id=contest_task.contest_task_id,
-            base_task_id=base_task.task_id
-        )
-
-        contest_tasks_in_variant.append(contest_task_in_variant)
         base_tasks_ids_in_variant.append(base_task.task_id)
 
-    db.session.add_all(contest_tasks_in_variant)
-    variant_number = hash(base_tasks_ids_in_variant)
+    variant_number = abs(hash(tuple(base_tasks_ids_in_variant)))
     variant = Variant.query.filter_by(contest_id=current_contest.contest_id,
                                       variant_number=variant_number).one_or_none()
     if variant is None:
-        variant = add_variant(db.session,
-                              variant_number=variant_number)
+        variant = add_variant(db.session, variant_number=variant_number)
         db.session.add(variant)
         current_contest.variants.append(variant)
 
+    db.session.flush()
+
+    for contest_task, base_task_id in zip(contest_tasks, base_tasks_ids_in_variant):
+        contest_task_in_variant = ContestTaskInVariant(
+            contest_task_id=contest_task.contest_task_id,
+            variant_id=variant.variant_id,
+            base_task_id=base_task_id
+        )
+        contest_tasks_in_variant.append(contest_task_in_variant)
+
+    db.session.add_all(contest_tasks_in_variant)
     variant.contest_tasks_in_variant.extend(contest_tasks_in_variant)
 
     current_user = UserInContest.query.filter_by(user_id=user_id,
-                                                 contest_id=contest_id)
-    db.session.flush()
-
+                                                 contest_id=contest_id).one_or_none()
     current_user.variant_id = variant.variant_id
 
     db.session.commit()
@@ -243,8 +243,8 @@ def is_task_in_variant(task_id, variant):
     :param variant: current variant
     :return: boolean value if task in current variant
     """
-    task = db_get_or_raise(Task, "task_id", task_id)
-    return task in variant.tasks
+    return ContestTaskInVariant.query.filter_by(variant_id=variant.variant_id,
+                                                base_task_id=task_id).one_or_none() is not None
 
 
 def is_task_in_contest(task_id, contest_id):
@@ -371,7 +371,11 @@ def get_user_tasks_if_possible(contest_id):
 
     variant = get_user_variant_if_possible(contest_id)
 
-    tasks_list = variant.tasks[:]
+    contest_tasks = variant.contest_tasks_in_variant[:]
+    tasks_list = []
+
+    for contest_task in contest_tasks:
+        tasks_list.append(db_get_or_raise(Task, "task_id", contest_task.base_task_id))
 
     for task in tasks_list:
         if task.task_type == TaskTypeEnum.MultipleChoiceTask:

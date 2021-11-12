@@ -65,6 +65,42 @@ def get_variant_self(id_contest):
            }, 200
 
 
+# Generate variant TEST
+
+@module.route(
+    '/contest/<int:id_contest>/variant/generate_TEST',
+    methods=['POST'])
+def generate_TEST_variant_self(id_contest):
+    """
+    Get variant for user in current contest
+    ---
+    post:
+      parameters:
+        - in: path
+          description: Id of the contest
+          name: id_contest
+          required: true
+          schema:
+            type: integer
+      security:
+        - JWTAccessToken: [ ]
+        - CSRFAccessToken: [ ]
+      responses:
+        '200':
+          description: OK
+        '400':
+          description: Bad request
+        '409':
+          description: Olympiad type already in use
+        '404':
+          description: User not found
+    """
+
+    generate_or_get_variant(id_contest, jwt_get_id())
+
+    return {}, 200
+
+
 # Enroll in Contest
 
 
