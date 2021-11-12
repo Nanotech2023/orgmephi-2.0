@@ -214,7 +214,7 @@ def generate_or_get_variant(contest_id, user_id):
     variant.contest_tasks_in_variant.extend(contest_tasks_in_variant)
     current_user.variant_id = variant.variant_id
 
-    db.session.commit()
+    db.session.flush()
 
 
 # User module

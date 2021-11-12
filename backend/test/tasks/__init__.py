@@ -77,6 +77,7 @@ def test_base_contests(test_olympiad_types, test_certificate_type):
     yield contests
 
 
+# noinspection DuplicatedCode
 @pytest.fixture
 def test_create_tasks_pool(test_base_contests):
     from contest.tasks.models import TaskPool
@@ -94,9 +95,10 @@ def test_create_tasks_pool(test_base_contests):
 def test_create_contest_tasks(test_simple_contest, test_create_tasks_pool):
     from contest.tasks.models import ContestTask
     contest_tasks = [ContestTask(num=i,
-                                 task_points=14,
-                                 task_pool_ids=[test_create_tasks_pool[i].task_pool_id]
+                                 task_points=14
                                  ) for i in range(3)]
+    for i in range(3):
+        contest_tasks[i].task_pools = [test_create_tasks_pool[i]]
     test_simple_contest.contest_tasks = contest_tasks
 
     test_app.db.session.add_all(contest_tasks)

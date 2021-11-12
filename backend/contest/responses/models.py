@@ -137,7 +137,8 @@ class BaseAnswer(db.Model):
         from common.util import db_get_one_or_none, db_get_or_raise
         from contest.tasks.models import ContestTaskInVariant, ContestTask
         resp = db_get_or_raise(Response, "work_id", self.work_id)
-        user = db_get_one_or_none(UserInContest, "user_id", resp.user_id)
+        user = UserInContest.query.filter_by(user_id=resp.user_id,
+                                             contest_id=resp.contest_id).one_or_none()
         variant_id = user.variant_id
 
         contest_task_id = ContestTaskInVariant.query.filter_by(
