@@ -1,5 +1,6 @@
 from marshmallow import Schema, fields
 from common import fields as common_fields
+from contest.tasks.model_schemas.olympiad import ContestSchema
 
 
 class CreateOlympiadTypeRequestTaskAdminSchema(Schema):
@@ -47,3 +48,18 @@ class TestCertificateArgsTasksAdminSchema(Schema):
     first_name = common_fields.CommonName(required=False, load_default='Ivan')
     second_name = common_fields.CommonName(required=False, load_default='Ivanov')
     middle_name = common_fields.CommonName(required=False, load_default='Ivanovich')
+
+
+# Contests with user count
+
+class IncludeComplexQuerySchema(Schema):
+    include_complex = fields.Boolean()
+
+
+class ContestWithUserCountElemSchema(Schema):
+    contest_info = fields.Nested(nested=ContestSchema, required=True)
+    user_count = fields.Int(required=True)
+
+
+class ListContestsWithUserCountRequestSchema(Schema):
+    contests = fields.List(fields.Nested(ContestWithUserCountElemSchema), required=True)
