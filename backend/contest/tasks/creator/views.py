@@ -450,10 +450,14 @@ def contest_task_create(id_contest):
         raise InsufficientData("task_pool_ids", "contest task should be assigned to at least one pool")
 
     contest_task = ContestTaskSchema().load(data=request.json, partial=True, session=db.session, unknown=EXCLUDE)
-    contest_ = db_get_or_raise(Contest, "contest_id", id_contest)
+    contest_: Contest = db_get_or_raise(Contest, "contest_id", id_contest)
+
+    previous_pools = [task_pool_ for contest_task_ in contest_.contest_tasks for task_pool_ in contest_task_.task_pools]
 
     for task_pool_id in task_pool_ids:
         task_pool = db_get_or_raise(TaskPool, "task_pool_id", task_pool_id)
+        if task_pool in previous_pools:
+            raise InsufficientData("task_pool", "already exists")
         contest_task.task_pools.append(task_pool)
 
     contest_.contest_tasks.append(contest_task)
@@ -542,7 +546,7 @@ def contest_task_get_all(id_contest):
 
 # Variant views
 
-
+# DEPRECATED
 #@module.route(
 #    '/contest/<int:id_contest>/variant/create',
 #    methods=['POST'],

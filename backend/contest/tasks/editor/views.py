@@ -271,14 +271,17 @@ def contest_task_edit(id_contest, id_contest_task):
     values = request.marshmallow
     task_pool_ids = values.pop('task_pool_ids', None)
 
-    db_get_or_raise(Contest, "contest_id", id_contest)
+    contest_ = db_get_or_raise(Contest, "contest_id", id_contest)
     contest_task = db_get_or_raise(ContestTask, "contest_task_id", id_contest_task)
     ContestTaskSchema(load_instance=True).load(request.json, instance=contest_task, session=db.session,
                                                partial=False, unknown=EXCLUDE)
 
+    previous_pools = [task_pool_ for contest_task_ in contest_.contest_tasks for task_pool_ in contest_task_.task_pools]
     contest_task.task_pools = []
     for task_pool_id in task_pool_ids:
         task_pool = db_get_or_raise(TaskPool, "task_pool_id", task_pool_id)
+        if task_pool in previous_pools:
+            raise InsufficientData("task_pool", "already exists")
         contest_task.task_pools.append(task_pool)
 
     db.session.commit()
@@ -578,7 +581,7 @@ def contest_add_previous(id_olympiad, id_stage, id_contest):
 
     return {}, 200
 
-
+# DEPRECATED
 # # Variant views
 #
 #
