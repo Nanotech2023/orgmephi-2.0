@@ -100,6 +100,7 @@ class OlympiadType(db.Model):
     contests = db.relationship('BaseContest', lazy='select',
                                backref=db.backref('olympiad_type', lazy='joined'))
 
+
 # Contest models
 
 
@@ -241,6 +242,7 @@ def add_simple_contest(db_session,
                        end_date,
                        regulations=None,
                        result_publication_date=None,
+                       show_answer_after_contest=False,
                        end_of_enroll_date=None,
                        deadline_for_appeal=None,
                        holding_type=None,
@@ -256,6 +258,7 @@ def add_simple_contest(db_session,
         visibility=visibility,
         start_date=start_date,
         end_date=end_date,
+        show_answer_after_contest=show_answer_after_contest,
         regulations=regulations,
         holding_type=holding_type,
         contest_duration=contest_duration,

@@ -65,6 +65,7 @@ class CreateSimpleContestRequestTaskCreatorSchema(Schema):
     contest_duration = fields.TimeDelta(required=False, default=timedelta(seconds=0))
     result_publication_date = fields.DateTime(required=False)
     visibility = fields.Boolean(required=True)
+    show_answer_after_contest = fields.Boolean(required=True)
     stage_id = fields.Int(required=False)
     previous_contest_id = fields.Int(required=False)
     previous_participation_condition = EnumField(UserStatusEnum, required=False, by_value=True)

@@ -5,7 +5,7 @@ from datetime import datetime, timedelta
 from common.errors import NotFound, RequestError, AlreadyExists, PermissionDenied
 from common.util import db_get_one_or_none, db_exists, db_get_or_raise, db_get_list
 from contest.tasks.models import SimpleContest, RangeTask, MultipleChoiceTask, PlainTask, ContestHoldingTypeEnum, \
-    UserInContest
+    UserInContest, ContestTask
 from .models import Response, PlainAnswerText, RangeAnswer, MultipleChoiceAnswer, PlainAnswerFile, BaseAnswer, \
     answer_dict, add_user_response, add_plain_answer_file, add_plain_answer_text, add_range_answer, \
     add_multiple_answer, ResponseStatusEnum
@@ -215,11 +215,9 @@ def check_contest_type(contest_id):
         raise OlympiadError("Olympiad is offline type")
 
 
-def check_mark_for_task(mark, task_id):
-    from contest.tasks.models.tasks import Task
-    task: Task = db_get_or_raise(Task, 'task_id', task_id)
-    if mark > task.task_points:
-        raise OlympiadError(f"Incorrect mark, max points is - {task.task_points}")
+def check_mark_for_task(mark, answer):
+    if mark > answer.task_points:
+        raise OlympiadError(f"Incorrect mark, max points is - {answer.task_points}")
 
 
 def check_user_multiple_answers(answers, task_id):
@@ -355,7 +353,7 @@ def range_answer_check(answer: BaseAnswer):
     range_answer: RangeAnswer = db_get_one_or_none(RangeAnswer, 'answer_id', answer.answer_id)
     range_task: RangeTask = db_get_one_or_none(RangeTask, 'task_id', answer.task_id)
     if range_task.start_value <= range_answer.answer <= range_task.end_value:
-        range_answer.mark = range_task.task_points
+        range_answer.mark = range_answer.task_points
     else:
         range_answer.mark = 0
 
@@ -373,7 +371,7 @@ def multiple_answer_check(answer: BaseAnswer):
         else:
             count -= 1
     if count == len(right_answers):
-        multiple_answer.mark = multiple_task.task_points
+        multiple_answer.mark = multiple_answer.task_points
     else:
         multiple_answer.mark = 0
 
@@ -421,8 +419,11 @@ def set_user_statuses(contest_id):
                                                                        user_id=user_work.user_id).one_or_none()
         variant: Variant = db_get_or_raise(Variant, 'variant_id', user_in_contest.variant_id)
         all_points = 0
-        for task in variant.tasks:
-            all_points += task.task_points
+        for contest_task_in_variant in variant.contest_tasks_in_variant:
+            contest_task: ContestTask = db_get_or_raise(ContestTask,
+                                                        'contest_task_id',
+                                                        contest_task_in_variant.contest_task_id)
+            all_points += contest_task.task_points
         percent = user_work.mark / all_points
         user_in_contest.user_status = choose_status(percent, base_contest)
     db.session.commit()

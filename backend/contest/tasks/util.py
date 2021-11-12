@@ -172,6 +172,13 @@ def get_last_variant_in_contest(current_contest):
 
 
 def generate_or_get_variant(contest_id, user_id):
+    current_user = UserInContest.query.filter_by(user_id=user_id,
+                                                 contest_id=contest_id).one_or_none()
+    if current_user is None:
+        raise DataConflict("current_user is not enrolled for this contest")
+    if current_user.variant_id is not None:
+        raise DataConflict("variant_id is already exists")
+
     current_contest: SimpleContest = db_get_or_raise(Contest, "contest_id", contest_id)
     contest_tasks = current_contest.contest_tasks
 
@@ -205,9 +212,6 @@ def generate_or_get_variant(contest_id, user_id):
 
     db.session.add_all(contest_tasks_in_variant)
     variant.contest_tasks_in_variant.extend(contest_tasks_in_variant)
-
-    current_user = UserInContest.query.filter_by(user_id=user_id,
-                                                 contest_id=contest_id).one_or_none()
     current_user.variant_id = variant.variant_id
 
     db.session.commit()
@@ -255,16 +259,13 @@ def is_task_in_contest(task_id, contest_id):
     :return: boolean value if task in contest
     """
 
-    current_contest = db_get_or_raise(Contest, "contest_id", contest_id)
-    task = db_get_or_raise(Task, "task_id", task_id)
-    task_variant = task.variant
-    if task_variant is None:
-        raise DataConflict("Task variant is missing")
-    contest_variants = current_contest.variants.all()
-    for var in task_variant:
-        if var in contest_variants:
-            return True
-    return False
+    current_contest: Contest = db_get_or_raise(Contest, "contest_id", contest_id)
+    contest_tasks = current_contest.contest_tasks.all()
+    if len(contest_tasks) == 0:
+        return False
+    return next(contest_task.contest_task_id for contest_task in contest_tasks if
+                ContestTaskInVariant.query.filter_by(contest_task_id=contest_task.contest_task_id,
+                                                     base_task_id=task_id).all() is not None) is not None
 
 
 # Participant module

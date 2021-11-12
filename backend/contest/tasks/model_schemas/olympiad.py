@@ -114,6 +114,7 @@ class SimpleContestSchema(SQLAlchemySchema):
     total_points = fields.Integer()
     tasks_number = fields.Integer()
     enrolled = fields.Boolean(required=False, dump_only=True)
+    show_answer_after_contest = fields.Boolean(required=False, dump_only=True)
     contest_duration = auto_field(column_name='contest_duration', required=True)
     result_publication_date = auto_field(column_name='result_publication_date', required=True)
     end_of_enroll_date = auto_field(column_name='end_of_enroll_date', required=True)
