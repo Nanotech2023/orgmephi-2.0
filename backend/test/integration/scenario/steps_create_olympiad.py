@@ -2,7 +2,8 @@ from datetime import datetime, timedelta
 
 from . import *
 
-GENERATE_VARIANTS_NUMBER = 5
+GENERATE_TASKS_NUMBER = 3
+GENERATE_TASK_POOLS = 3
 
 
 def step_creator_login(client, state):
@@ -74,6 +75,7 @@ def step_create_simple_contest(client, state):
         'end_of_enroll_date': f'{datetime.utcnow() + timedelta(hours=1)}',
         'deadline_for_appeal': f'{datetime.utcnow() + timedelta(hours=3)}',
         'result_publication_date': f'{datetime.utcnow() + timedelta(hours=5)}',
+        'show_answer_after_contest': True,
         'stage_id': f'{state.stage["stage_id"]}'}
     resp = client.post(f'contest/tasks/creator'
                        f'/base_olympiad/{state.base_olympiad["base_contest_id"]}/olympiad/create_simple', json=request)
@@ -89,54 +91,74 @@ def step_create_simple_contest(client, state):
     assert resp.status_code == 200
 
 
-def step_create_variants(client, state):
+def step_create_tasks_pool(client, state):
     request = {
-        'variant_description': 'Test variant description'}
-    state.variants = []
-    for _ in range(GENERATE_VARIANTS_NUMBER):
+        'name': 'Test tasks pool 1',
+        'year': 2021,
+        'orig_task_points': 20
+    }
+    state.tasks_pools = []
+    for _ in range(GENERATE_TASK_POOLS):
         resp = client.post(f'contest/tasks/creator'
-                           f'/contest/{state.contest["contest_id"]}/variant/create', json=request)
+                           f'/base_olympiad/{state.base_olympiad["base_contest_id"]}/task_pool/create',
+                           json=request)
         assert resp.status_code == 200
-        state.variants.append({
-            "variant_id": resp.json['variant_id'],
-            "tasks": dict()
-        })
+        state.tasks_pools.append(
+            {
+                'task_pool_id': resp.json['task_pool_id'],
+                'tasks': list()
+            }
+        )
+
+
+def step_create_contest_tasks(client, state):
+    state.contest_tasks = []
+    for i in range(GENERATE_TASKS_NUMBER):
+        request = {
+            'num': i,
+            'task_points': 15,
+            'task_pool_ids': [state.tasks_pools[i]['task_pool_id']]
+        }
+        if i == 1:
+            request['task_points'] = 8
+        resp = client.post(f'contest/tasks/creator'
+                           f'/contest/{state.contest["contest_id"]}/contest_task/create',
+                           json=request)
+        assert resp.status_code == 200
+        state.contest_tasks.append(resp.json['contest_task_id'])
 
 
 def step_create_tasks(client, state):
-    for i in range(GENERATE_VARIANTS_NUMBER):
+    for i in range(GENERATE_TASK_POOLS):
         request = {
-            'num_of_task': 1,
-            'recommended_answer': f'Test recommendation {str(i)}',
-            'task_points': 10, }
-
-        resp = client.post(f'contest/tasks/creator'
-                           f'/contest/{state.contest["contest_id"]}/variant/{state.variants[i]["variant_id"]}'
-                           f'/task/create_plain', json=request)
-        assert resp.status_code == 200
-        state.variants[i]['tasks']['plain'] = {
-            "task_id": resp.json['task_id'],
-            "task_points": 10,
-            "recommended_answer": 'Test recommendation',
+            'name': f'Test tasks pool 1 - {i}',
+            'recommended_answer': f'Test recommendation {str(i)}'
         }
 
+        resp = client.post(f'contest/tasks/creator'
+                           f'/task_pool/{state.tasks_pools[0]["task_pool_id"]}/task/create_plain', json=request)
+        assert resp.status_code == 200
+        state.tasks_pools[i]['tasks'].append({
+            "task_id": resp.json['task_id'],
+            "name": f'Test tasks pool 1 - {i}',
+            "recommended_answer": f'Test recommendation {i}',
+        })
+
         request = {
-            'num_of_task': 2,
+            'name': f'Test tasks pool 2 - {i}',
             'start_value': 0.1,
             'end_value': 0.8,
-            'task_points': 8,
         }
 
         resp = client.post(f'contest/tasks/creator'
-                           f'/contest/{state.contest["contest_id"]}/variant/{state.variants[i]["variant_id"]}'
-                           f'/task/create_range', json=request)
+                           f'/task_pool/{state.tasks_pools[1]["task_pool_id"]}/task/create_range', json=request)
         assert resp.status_code == 200
-        state.variants[i]['tasks']['range'] = {
+        state.tasks_pools[i]['tasks'].append({
             "task_id": resp.json['task_id'],
-            "task_points": 8,
+            "name": f'Test tasks pool 2 - {i}',
             "start_value": 0.1,
             "end_value": 0.8,
-        }
+        })
 
         answers = [
             {
@@ -158,20 +180,18 @@ def step_create_tasks(client, state):
         ]
 
         request = {
-            'num_of_task': 2,
-            'answers': answers,
-            'task_points': 15,
+            'name': f'Test tasks pool 3 - {i}',
+            'answers': answers
         }
 
         resp = client.post(f'contest/tasks/creator'
-                           f'/contest/{state.contest["contest_id"]}/variant/{state.variants[i]["variant_id"]}'
-                           f'/task/create_multiple', json=request)
+                           f'/task_pool/{state.tasks_pools[2]["task_pool_id"]}/task/create_multiple', json=request)
         assert resp.status_code == 200
-        state.variants[i]['tasks']['multiple'] = {
+        state.tasks_pools[i]['tasks'].append({
             "task_id": resp.json['task_id'],
-            "task_points": 15,
+            "name": f'Test tasks pool 3 - {i}',
             "answers": answers
-        }
+        })
 
 
 def step_creator_logout(client, state):
@@ -180,5 +200,6 @@ def step_creator_logout(client, state):
 
 
 steps_create_olympiad = [step_creator_login, step_create_base_olympiad, step_create_olympiad_composite,
-                         step_create_stage, step_create_simple_contest, step_create_variants,
-                         step_create_tasks, step_creator_logout]
+                         step_create_stage, step_create_simple_contest,
+                         step_create_tasks_pool, step_create_contest_tasks, step_create_tasks,
+                         step_creator_logout]
