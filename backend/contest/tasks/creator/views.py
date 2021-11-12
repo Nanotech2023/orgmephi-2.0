@@ -135,7 +135,7 @@ def task_pool_get(id_base_olympiad, id_task_pool):
 
 @module.route('/base_olympiad/<int:id_base_olympiad>/task_pool/all', methods=['GET'],
               output_schema=AllTaskPoolsResponseTaskCreatorSchema)
-def task_pool_get_all(id_base_olympiad,):
+def task_pool_get_all(id_base_olympiad, ):
     """
     Create task pool
     ---
@@ -547,12 +547,12 @@ def contest_task_get_all(id_contest):
 # Variant views
 
 # DEPRECATED
-#@module.route(
+# @module.route(
 #    '/contest/<int:id_contest>/variant/create',
 #    methods=['POST'],
 #    input_schema=CreateVariantRequestTaskCreatorSchema,
 #    output_schema=VariantIdResponseTaskCreatorSchema)
-#def variant_create(id_contest):
+# def variant_create(id_contest):
 #    """
 #    Variant creation
 #    ---
@@ -718,13 +718,13 @@ def task_create_plain(id_task_pool):
     """
     values = request.marshmallow
 
-    num_of_task = values['num_of_task']
+    name = values['name']
     recommended_answer = values['recommended_answer']
-    task_points = values.get('task_points', None)
 
     task_pool = db_get_or_raise(TaskPool, "task_pool_id", id_task_pool)
 
     task = add_plain_task(db.session,
+                          name=name,
                           recommended_answer=recommended_answer,
                           )
 
@@ -773,13 +773,13 @@ def task_create_range(id_task_pool):
           description: Olympiad type already in use
     """
     values = request.marshmallow
-    num_of_task = values['num_of_task']
     start_value = values['start_value']
     end_value = values['end_value']
-    task_points = values.get('task_points', None)
+    name = values['name']
 
     task_pool = db_get_or_raise(TaskPool, "task_pool_id", id_task_pool)
     task = add_range_task(db.session,
+                          name=name,
                           start_value=start_value,
                           end_value=end_value,
                           )
@@ -828,19 +828,20 @@ def task_create_multiple(id_task_pool):
     """
     values = request.marshmallow
 
-    num_of_task = values['num_of_task']
     answers = values['answers']
-    task_points = values.get('task_points', None)
+    name = values.get('name', None)
 
     task_pool = db_get_or_raise(TaskPool, "task_pool_id", id_task_pool)
 
-    task = add_multiple_task(db.session)
+    task = add_multiple_task(db.session,
+                             name=name)
     task_pool.tasks.append(task)
 
     task.answers = [
         {
             "answer": answer['answer'],
-            "is_right_answer": answer['is_right_answer']}
+            "is_right_answer": answer['is_right_answer']
+        }
         for answer in answers]
 
     db.session.commit()

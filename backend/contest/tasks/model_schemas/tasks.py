@@ -53,6 +53,7 @@ class PlainTaskSchema(SQLAlchemySchema):
         sqla_session = db.session
 
     task_id = auto_field(column_name='task_id', dump_only=True)
+    name = auto_field(column_name='name')
     recommended_answer = auto_field(column_name='recommended_answer', validate=text_validator, required=True)
     answer_type = EnumField(TaskAnswerTypeEnum, data_key='answer_type', by_value=True, required=False)
 
@@ -64,6 +65,7 @@ class RangeTaskSchema(SQLAlchemySchema):
         sqla_session = db.session
 
     task_id = auto_field(column_name='task_id', dump_only=True)
+    name = auto_field(column_name='name')
     start_value = auto_field(column_name='start_value', required=True)
     end_value = auto_field(column_name='end_value', required=True)
 
@@ -75,6 +77,7 @@ class MultipleChoiceTaskSchema(SQLAlchemySchema):
         sqla_session = db.session
 
     task_id = auto_field(column_name='task_id', dump_only=True)
+    name = auto_field(column_name='name')
     answers = auto_field(column_name='answers', many=True, required=False)
 
 

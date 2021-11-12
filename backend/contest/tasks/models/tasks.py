@@ -103,6 +103,7 @@ class Task(db.Model):
     __tablename__ = 'base_task'
     task_id = db.Column(db.Integer, autoincrement=True, primary_key=True)
     task_pool_id = db.Column(db.Integer, db.ForeignKey('task_pool.task_pool_id'))
+    name = db.Column(db.Text)
 
     image_of_task = db.Column(TaskImage.as_mutable(Json))
 
@@ -114,13 +115,14 @@ class Task(db.Model):
     }
 
 
-def add_plain_task(db_session, recommended_answer, image_of_task=None,
+def add_plain_task(db_session, recommended_answer, name, image_of_task=None,
                    answer_type=TaskAnswerTypeEnum.Text):
     """
     Create new plain task object
     """
     task = PlainTask(
         image_of_task=image_of_task,
+        name=name,
         recommended_answer=recommended_answer,
         answer_type=answer_type,
     )
@@ -148,12 +150,13 @@ class PlainTask(Task):
     }
 
 
-def add_range_task(db_session, start_value, end_value, image_of_task=None):
+def add_range_task(db_session, start_value, end_value, name, image_of_task=None):
     """
     Create new range task object
     """
     task = RangeTask(
         image_of_task=image_of_task,
+        name=name,
         start_value=start_value,
         end_value=end_value,
     )
@@ -182,11 +185,12 @@ class RangeTask(Task):
     }
 
 
-def add_multiple_task(db_session, image_of_task=None):
+def add_multiple_task(db_session, name, image_of_task=None):
     """
     Create new multiple task object
     """
     task = MultipleChoiceTask(
+        name=name,
         image_of_task=image_of_task,
     )
     db_session.add(task)

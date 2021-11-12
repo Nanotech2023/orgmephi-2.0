@@ -76,19 +76,19 @@ class AnswersInTaskRequestTaskEditorSchema(Schema):
 
 
 class UpdatePlainRequestTaskEditorSchema(Schema):
-    num_of_task = fields.Int(required=False)
+    name = common_fields.CommonName(required=True)
     recommended_answer = common_fields.Text(required=False)
     answer_type = EnumField(TaskAnswerTypeEnum, required=False, by_value=True)
 
 
 class UpdateRangeRequestTaskEditorSchema(Schema):
-    num_of_task = fields.Int(required=False)
+    name = common_fields.CommonName(required=True)
     start_value = fields.Float(required=False)
     end_value = fields.Float(required=False)
 
 
 class UpdateMultipleRequestTaskEditorSchema(Schema):
-    num_of_task = fields.Int(required=False)
+    name = common_fields.CommonName(required=True)
     answers = fields.List(fields.Nested(AnswersInTaskRequestTaskEditorSchema), required=False)
 
 
