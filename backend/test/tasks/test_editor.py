@@ -189,52 +189,21 @@ def test_contest_add_previous(client, test_contests_composite, test_stages, test
 
 # Variant
 
-
-# noinspection DuplicatedCode
-def test_variant_remove(client, test_simple_contest, test_variant):
-    from contest.tasks.models import Variant
-    variant: Variant = test_variant[1]
-    resp = client.post(
-        f'/contest/{test_simple_contest[0].contest_id}/variant/{variant.variant_id}/remove')
-    assert resp.status_code == 200
-
-    assert not test_app.db.session.query(
-        Variant.query.filter_by(variant_id=f'{variant.variant_id}').exists()
-    ).scalar()
-
-
-def test_variant_patch(client, test_simple_contest, test_variant):
-    from contest.tasks.models import Variant
-    resp = client.patch(f'/contest/{test_simple_contest[0].contest_id}'
-                        f'/variant/{test_variant[0].variant_number}',
-                        json={
-                            'variant_description': 'Test2',
-                            'variant_number': '5',
-                        })
-    assert resp.status_code == 200
-
-    variant: Variant = Variant.query.filter_by(
-        variant_id=resp.json['variant_id']).one_or_none()
-    assert variant.variant_id == resp.json['variant_id']
-    assert variant.variant_number == 5
-    assert variant.variant_description == 'Test2'
-
-
 # Task
 
 
-def test_task_image_upload(client, test_simple_contest, test_variant, create_plain_task):
-    resp = client.post(f'/contest/{test_simple_contest[0].contest_id}/variant'
-                       f'/{test_variant[0].variant_id}/task/{create_plain_task[0].task_id}/upload_image',
+def test_task_image_upload(client, test_simple_contest, create_plain_task):
+    resp = client.post(f'/task_pool/{create_plain_task[0].task_pool_id}'
+                       f'/task/{create_plain_task[0].task_id}/upload_image',
                        data=test_image)
     assert resp.status_code == 200
 
 
-def test_task_remove(client, test_simple_contest, test_variant, create_plain_task):
+def test_task_remove(client, test_simple_contest, create_plain_task):
     from contest.tasks.models import Task
     task: Task = create_plain_task[1]
-    resp = client.post(f'/contest/{test_simple_contest[0].contest_id}/variant'
-                       f'/{test_variant[0].variant_id}/task/{task.task_id}/remove')
+    resp = client.post(f'/task_pool/{create_plain_task[0].task_pool_id}'
+                       f'/task/{task.task_id}/remove')
     assert resp.status_code == 200
 
     assert not test_app.db.session.query(
@@ -242,53 +211,46 @@ def test_task_remove(client, test_simple_contest, test_variant, create_plain_tas
     ).scalar()
 
 
-def test_task_patch_plain(client, test_simple_contest, test_variant, create_plain_task):
+def test_task_patch_plain(client, test_simple_contest, create_plain_task):
     from contest.tasks.models import PlainTask
     resp = client.patch(
-        f'/contest/{test_simple_contest[0].contest_id}/variant/{test_variant[0].variant_id}'
+        f'/task_pool/{create_plain_task[0].task_pool_id}'
         f'/task/{create_plain_task[0].task_id}/plain',
         json={
-            'num_of_task': '0',
             'recommended_answer': 'TestTest',
-            'task_points': '15',
         })
     assert resp.status_code == 200
 
     task: PlainTask = PlainTask.query.filter_by(
         task_id=resp.json['task_id']).one_or_none()
     assert task.task_id == resp.json['task_id']
-    assert task.task_points == 15
     assert task.recommended_answer == "TestTest"
 
 
-def test_task_patch_range(client, test_simple_contest, test_variant, create_range_task):
+def test_task_patch_range(client, test_simple_contest, create_range_task):
     from contest.tasks.models import RangeTask
     resp = client.patch(
-        f'/contest/{test_simple_contest[0].contest_id}/variant/{test_variant[0].variant_id}'
+        f'/task_pool/{create_range_task[0].task_pool_id}'
         f'/task/{create_range_task[0].task_id}/range',
         json={
-            'num_of_task': '0',
             'start_value': '0.2',
-            'end_value': '0.9',
-            'task_points': '15',
+            'end_value': '0.9'
         })
     assert resp.status_code == 200
 
     task: RangeTask = RangeTask.query.filter_by(
         task_id=resp.json['task_id']).one_or_none()
     assert task.task_id == resp.json['task_id']
-    assert task.task_points == 15
     assert task.start_value == 0.2
     assert task.end_value == 0.9
 
 
-def test_task_patch_multiple(client, test_simple_contest, test_variant, create_multiple_task):
+def test_task_patch_multiple(client, test_simple_contest, create_multiple_task):
     from contest.tasks.models import MultipleChoiceTask
     resp = client.patch(
-        f'/contest/{test_simple_contest[0].contest_id}/variant/{test_variant[0].variant_id}'
+        f'/task_pool/{create_multiple_task[0].task_pool_id}'
         f'/task/{create_multiple_task[0].task_id}/multiple',
         json={
-            'num_of_task': '0',
             'answers': [
                 {
                     'answer': 'test',
@@ -298,15 +260,13 @@ def test_task_patch_multiple(client, test_simple_contest, test_variant, create_m
                     'answer': 'test2',
                     'is_right_answer': 'false'
                 }
-            ],
-            'task_points': '15',
+            ]
         })
     assert resp.status_code == 200
 
     task: MultipleChoiceTask = MultipleChoiceTask.query.filter_by(
         task_id=resp.json['task_id']).one_or_none()
     assert task.task_id == resp.json['task_id']
-    assert task.task_points == 15
     assert len(task.answers) == 2
 
 

@@ -81,7 +81,7 @@ def test_location_create_other(client, test_country_native):
     assert test_location.location_id == resp.json['location_id']
 
 
-def test_get_user_certificate(client, test_simple_contest_with_users, test_user_for_student_contest, test_variant):
+def test_get_user_certificate(client, test_simple_contest_with_users, test_user_for_student_contest):
     test_simple_contest_with_users[0].result_publication_date = datetime.utcnow() - timedelta(hours=150)
     resp = client.get(
         f'/certificate?'
