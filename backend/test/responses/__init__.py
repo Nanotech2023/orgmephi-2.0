@@ -51,19 +51,6 @@ def create_olympiad_location(create_simple_contest):
 
 
 @pytest.fixture
-def create_variant(create_olympiad_location):
-    from contest.tasks.models.contest import Variant
-    variants = [Variant(contest_id=create_olympiad_location.get('contests')[i].contest_id,
-                        variant_number=i,
-                        variant_description='description')
-                for i in range(8)]
-    test_app.db.session.add_all(variants)
-    test_app.db.session.commit()
-    create_olympiad_location['variants'] = variants
-    yield create_olympiad_location
-
-
-@pytest.fixture
 def create_user_in_contest(create_variant, test_user_university):
     from contest.tasks.models.user import UserInContest, UserStatusEnum
     user_id = test_user_university.id

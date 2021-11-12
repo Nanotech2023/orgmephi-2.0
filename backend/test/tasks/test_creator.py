@@ -43,6 +43,7 @@ def test_olympiad_create_simple(client, test_base_contests, test_stages):
                            'end_of_enroll_date': f'{datetime.utcnow() + timedelta(hours=1)}',
                            'deadline_for_appeal': f'{datetime.utcnow() + timedelta(hours=2)}',
                            'result_publication_date': f'{datetime.utcnow() + timedelta(hours=6)}',
+                           'show_answer_after_contest': True,
                            'visibility': 'false',
                            'holding_type': f'{ContestHoldingTypeEnum.OfflineContest.value}',
                        })
@@ -62,6 +63,7 @@ def test_olympiad_create_simple(client, test_base_contests, test_stages):
                            'result_publication_date': f'{datetime.utcnow() + timedelta(hours=6)}',
                            'previous_contest_id': f'{simple_contest.contest_id}',
                            'previous_participation_condition': f'{UserStatusEnum.Winner_1.value}',
+                           'show_answer_after_contest': True,
                            'stage_id': '2',
                            'visibility': 'false',
                            'holding_type': f'{ContestHoldingTypeEnum.OfflineContest.value}',
@@ -76,6 +78,7 @@ def test_olympiad_create_simple(client, test_base_contests, test_stages):
                            'end_of_enroll_date': f'{datetime.utcnow() + timedelta(hours=1)}',
                            'deadline_for_appeal': f'{datetime.utcnow() + timedelta(hours=2)}',
                            'result_publication_date': f'{datetime.utcnow() + timedelta(hours=6)}',
+                           'show_answer_after_contest': True,
                            'previous_contest_id': f'{simple_contest.contest_id}',
                            'stage_id': '2',
                            'visibility': 'false',
@@ -134,50 +137,13 @@ def test_contests_all(client, test_contests_composite, test_stages, test_simple_
     assert len(test_simple_contest_in_stage_1) - 1 == len(list(resp.json['olympiad_list']))
 
 
-def test_variant_create(client, test_simple_contest):
-    from contest.tasks.models import Variant
-    resp = client.post(f'/contest/{test_simple_contest[0].contest_id}/variant/create',
-                       json={
-                           'variant_description': 'Test',
-                       })
-    assert resp.status_code == 200
-
-    variant: Variant = Variant.query.filter_by(
-        variant_id=resp.json['variant_id']).one_or_none()
-
-    assert variant.variant_id == resp.json['variant_id']
-
-    resp = client.post(f'/contest/{test_simple_contest[0].contest_id}/variant/create',
-                       json={
-                           'variant_description': 'Test',
-                       })
-    assert resp.status_code == 200
-
-
-def test_variant_get(client, test_simple_contest, test_variant):
-    resp = client.get(f'/contest/{test_simple_contest[0].contest_id}/variant/{test_variant[0].variant_number}')
-    assert resp.status_code == 200
-    assert 1 == len(list(resp.response))
-
-    resp = client.get(f'/contest/{test_simple_contest[1].contest_id}/variant/{test_variant[0].variant_number}')
-    assert resp.status_code == 409
-
-
-def test_variant_all(client, test_simple_contest, test_variant):
-    resp = client.get(f'/contest/{test_simple_contest[0].contest_id}/variant/all')
-    assert resp.status_code == 200
-    assert len(test_simple_contest[0].variants.all()) == len(list(resp.json['variants_list']))
-
-
-def test_task_create_plain(client, test_simple_contest, test_variant):
+def test_task_create_plain(client, test_simple_contest, test_create_tasks_pool):
     from contest.tasks.models import PlainTask
-    resp = client.post(
-        f'/contest/{test_simple_contest[0].contest_id}/variant/{test_variant[0].variant_id}/task/create_plain',
-        json={
-            'num_of_task': '0',
-            'recommended_answer': 'Test',
-            'task_points': '10',
-        })
+    resp = client.post(f'/task_pool/{test_create_tasks_pool[0].task_pool_id}/task/create_plain',
+                       json={
+                           'name': 'Test name',
+                           'recommended_answer': 'Test',
+                       })
     assert resp.status_code == 200
 
     task: PlainTask = PlainTask.query.filter_by(
@@ -185,15 +151,14 @@ def test_task_create_plain(client, test_simple_contest, test_variant):
     assert task.task_id == resp.json['task_id']
 
 
-def test_task_create_range(client, test_simple_contest, test_variant):
+def test_task_create_range(client, test_simple_contest, test_create_tasks_pool):
     from contest.tasks.models import RangeTask
     resp = client.post(
-        f'/contest/{test_simple_contest[0].contest_id}/variant/{test_variant[0].variant_id}/task/create_range',
+        f'/task_pool/{test_create_tasks_pool[1].task_pool_id}/task/create_range',
         json={
-            'num_of_task': '0',
+            'name': 'Test name',
             'start_value': '0.1',
             'end_value': '0.8',
-            'task_points': '10',
         })
     assert resp.status_code == 200
 
@@ -202,19 +167,18 @@ def test_task_create_range(client, test_simple_contest, test_variant):
     assert task.task_id == resp.json['task_id']
 
 
-def test_task_create_multiple(client, test_simple_contest, test_variant):
+def test_task_create_multiple(client, test_simple_contest, test_create_tasks_pool):
     from contest.tasks.models import MultipleChoiceTask
     resp = client.post(
-        f'/contest/{test_simple_contest[0].contest_id}/variant/{test_variant[0].variant_id}/task/create_multiple',
+        f'/task_pool/{test_create_tasks_pool[2].task_pool_id}/task/create_multiple',
         json={
-            'num_of_task': '0',
+            'name': 'Test name',
             'answers': [
                 {
                     'answer': 'test',
                     'is_right_answer': 'false'
                 }
-            ],
-            'task_points': '10',
+            ]
         })
     assert resp.status_code == 200
 
@@ -223,25 +187,19 @@ def test_task_create_multiple(client, test_simple_contest, test_variant):
     assert task.task_id == resp.json['task_id']
 
 
-def test_task_get(client, test_simple_contest, test_variant, create_plain_task):
-    resp = client.get(
-        f'/contest/{test_simple_contest[0].contest_id}/variant/{test_variant[0].variant_id}'
-        f'/task/{create_plain_task[0].task_id}')
+def test_task_get(client, test_simple_contest, test_create_tasks_pool, create_plain_task):
+    resp = client.get(f'/task_pool/{test_create_tasks_pool[0].task_pool_id}/task/{create_plain_task[0].task_id}')
 
     assert resp.status_code == 200
     assert 1 == len(list(resp.response))
 
-    resp = client.get(
-        f'/contest/{test_simple_contest[0].contest_id}/variant/{test_variant[1].variant_id}'
-        f'/task/{create_plain_task[0].task_id}')
+    resp = client.get(f'/task_pool/{test_create_tasks_pool[1].task_pool_id}/task/{create_plain_task[0].task_id}')
 
     assert resp.status_code == 409
 
 
-def test_task_image(client, test_simple_contest, test_variant, create_plain_task):
-    resp = client.get(
-        f'/contest/{test_simple_contest[0].contest_id}/variant/{test_variant[0].variant_id}'
-        f'/tasks/{create_plain_task[0].task_id}/image')
+def test_task_image(client, test_simple_contest, create_plain_task):
+    resp = client.get(f'/task_pool/{create_plain_task[0].task_pool_id}/task/{create_plain_task[0].task_id}/image')
 
     assert resp.status_code == 404
 
@@ -249,16 +207,11 @@ def test_task_image(client, test_simple_contest, test_variant, create_plain_task
     test_app.io_to_media('TASK', create_plain_task[0], 'image_of_task', io.BytesIO(test_image), TaskImage)
     test_app.db.session.commit()
 
-    resp = client.get(
-        f'/contest/{test_simple_contest[0].contest_id}/variant/{test_variant[0].variant_id}'
-        f'/tasks/{create_plain_task[0].task_id}/image')
-
+    resp = client.get(f'/task_pool/{create_plain_task[0].task_pool_id}/task/{create_plain_task[0].task_id}/image')
     assert resp.status_code == 200
 
 
-def test_task_all(client, test_simple_contest, test_variant):
-    resp = client.get(
-        f'/contest/{test_simple_contest[0].contest_id}/variant/{test_variant[0].variant_id}'
-        f'/task/all')
+def test_task_all(client, test_simple_contest, test_create_tasks_pool):
+    resp = client.get(f'/task_pool/{test_create_tasks_pool[0].task_pool_id}/task/all')
     assert resp.status_code == 200
-    assert len(test_variant[0].tasks) == len(list(resp.json['tasks_list']))
+    assert len(test_create_tasks_pool[0].tasks.all()) == len(list(resp.json['tasks_list']))
