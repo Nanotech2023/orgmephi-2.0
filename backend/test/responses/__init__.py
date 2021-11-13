@@ -15,6 +15,7 @@ def create_simple_contest(test_base_contests):
                                      holding_type=holding_types[i % 3],
                                      contest_duration=timedelta(minutes=30),
                                      result_publication_date=datetime.utcnow() + timedelta(hours=2),
+                                     deadline_for_appeal=datetime.utcnow() + timedelta(minutes=45),
                                      end_of_enroll_date=datetime.utcnow() + timedelta(minutes=15))
                        for i in range(8)]
     from user.models.auth import get_group_for_everyone

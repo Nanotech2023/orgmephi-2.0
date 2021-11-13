@@ -145,6 +145,25 @@ def test_create_thread(client, test_thread_categories, create_user_response):
     assert thr.messages[0].message == 'Test'
 
 
+# noinspection DuplicatedCode
+def test_create_thread_after_appeal_time(client, test_thread_categories, create_user_response):
+    work = create_user_response['responses'][0]
+    from contest.tasks.util import get_simple_contest_if_possible
+    contest = get_simple_contest_if_possible(work.contest_id)
+    contest.deadline_for_appeal = datetime.utcnow() - timedelta(minutes=15)
+    test_app.db.session.commit()
+
+    request = {
+        "category": test_thread_categories[0].name,
+        "message": "Test",
+        "related_contest": work.contest_id,
+        "thread_type": "Appeal",
+        "topic": "string"
+    }
+    resp = client.post('/thread', json=request)
+    assert resp.status_code == 409
+
+
 def test_create_thread_missing_contest(client, test_thread_categories, create_user_response):
     work = create_user_response['responses'][0]
     request = {

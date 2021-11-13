@@ -74,6 +74,7 @@ def test_olympiad_patch(client, test_base_contests, test_simple_contest, test_co
     new_start_date = datetime.utcnow()
     new_end_date = datetime.utcnow() + timedelta(hours=4)
     new_end_of_enroll_date = datetime.utcnow() + timedelta(hours=1)
+    new_deadline_for_appeal = datetime.utcnow() + timedelta(hours=4)
     new_result_publication_date = datetime.utcnow() + timedelta(hours=6)
     resp = client.patch(
         f'/base_olympiad/{test_base_contests[0].base_contest_id}/olympiad/{test_simple_contest[0].contest_id}',
@@ -82,6 +83,7 @@ def test_olympiad_patch(client, test_base_contests, test_simple_contest, test_co
             'end_date': f'{new_end_date}',
             'regulations': 'Test 0',
             'end_of_enroll_date': f'{new_end_of_enroll_date}',
+            'deadline_for_appeal': f'{new_deadline_for_appeal}',
             'result_publication_date': f'{new_result_publication_date}',
             'visibility': 'true',
             'holding_type': f'{ContestHoldingTypeEnum.OfflineContest.value}',
@@ -95,6 +97,7 @@ def test_olympiad_patch(client, test_base_contests, test_simple_contest, test_co
     assert simple_contest.start_date == new_start_date
     assert simple_contest.end_date == new_end_date
     assert simple_contest.end_of_enroll_date == new_end_of_enroll_date
+    assert simple_contest.deadline_for_appeal == new_deadline_for_appeal
     assert simple_contest.result_publication_date == new_result_publication_date
 
     resp = client.patch(

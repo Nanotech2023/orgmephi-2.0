@@ -265,6 +265,15 @@ def check_contest_restriction(user_id, contest_id, restriction_level):
         raise RestrictionError()
 
 
+def check_timing_for_mark_editing_and_appeal(contest_id, user_role):
+    from user.models import UserRoleEnum
+    contest: SimpleContest = db_get_or_raise(SimpleContest, 'contest_id', contest_id)
+    if user_role == UserRoleEnum.admin.value:
+        return
+    if datetime.utcnow() > contest.deadline_for_appeal:
+        raise TimingError("The time for correcting the mark is out")
+
+
 # Other funcs
 
 

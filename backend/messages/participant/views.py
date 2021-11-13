@@ -11,7 +11,7 @@ from common.jwt_verify import jwt_get_id
 from .schemas import ListCategoriesMessagesResponseSchema, CreateThreadMessagesRequestSchema, \
     CreateMessageMessagesRequestSchema
 from messages.model_schemas import ThreadSchema, MessageSchema
-from messages.models import ThreadCategory, Thread, Message
+from messages.models import ThreadCategory, Thread, Message, ThreadType
 from messages.util import filter_threads_query, FilterThreadsMessagesResponseSchema
 
 from user.models import User
@@ -136,6 +136,9 @@ def create_thread():
 
     thread = ThreadSchema(load_instance=True).load(request.json, unknown=EXCLUDE)
 
+    from contest.responses.util import check_timing_for_mark_editing_and_appeal
+    if thread.thread_type == ThreadType.appeal:
+        check_timing_for_mark_editing_and_appeal(thread.related_contest.contest_id, jwt_get_id())
     thread.author = author
     thread.messages.append(Message(message=values['message']))
 

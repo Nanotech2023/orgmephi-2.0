@@ -117,6 +117,7 @@ class SimpleContestSchema(SQLAlchemySchema):
     contest_duration = auto_field(column_name='contest_duration', required=True)
     result_publication_date = auto_field(column_name='result_publication_date', required=True)
     end_of_enroll_date = auto_field(column_name='end_of_enroll_date', required=True)
+    deadline_for_appeal = auto_field(column_name='deadline_for_appeal', required=True)
     previous_contest_id = auto_field(column_name='previous_contest_id', allow_none=True)
     locations = fields.Nested(OlympiadLocationSchema, many=True, required=True)
     target_classes = fields.Nested(TargetClassSchema, many=True, required=False)

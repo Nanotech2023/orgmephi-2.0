@@ -1,7 +1,7 @@
 from flask import request
 from common import get_current_module
 from contest.responses.util import *
-from common.jwt_verify import jwt_get_id
+from common.jwt_verify import jwt_get_id, jwt_get_role
 from contest.responses.model_schemas.schemas import AnswerSchema
 from .schemas import *
 from contest.tasks.models.olympiad import ContestGroupRestrictionEnum
@@ -646,10 +646,11 @@ def user_answer_task_mark_post(contest_id, user_id, task_id):
         '404':
           description: User or contest not found
         '409':
-          description: Mark Error
+          description: Mark or timing error
     """
     creator_id = jwt_get_id()
     check_contest_restriction(creator_id, contest_id, ContestGroupRestrictionEnum.edit_mark)
+    check_timing_for_mark_editing_and_appeal(contest_id, jwt_get_role())
     values = request.marshmallow
     check_mark_for_task(values['mark'], task_id)
     user_work = get_user_in_contest_work(user_id, contest_id)
