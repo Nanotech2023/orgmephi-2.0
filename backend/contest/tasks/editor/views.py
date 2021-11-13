@@ -3,11 +3,10 @@ from marshmallow import EXCLUDE
 
 from common import get_current_module
 from contest.tasks.creator.schemas import BaseOlympiadResponseTaskCreatorSchema, StageResponseTaskCreatorSchema, \
-    ContestResponseTaskCreatorSchema, TaskResponseTaskCreatorSchema, VariantResponseTaskCreatorSchema, \
-    CreateTaskPoolRequestTaskCreatorSchema, CreateContestTaskRequestTaskCreatorSchema
+    ContestResponseTaskCreatorSchema, TaskResponseTaskCreatorSchema, CreateTaskPoolRequestTaskCreatorSchema, \
+    CreateContestTaskRequestTaskCreatorSchema
 from contest.tasks.editor.schemas import *
 from contest.tasks.model_schemas.certificate import CertificateTypeSchema, CertificateSchema
-from contest.tasks.model_schemas.contest import VariantSchema
 from contest.tasks.model_schemas.olympiad import BaseContestSchema, SimpleContestSchema, CompositeContestSchema, \
     StageSchema
 from contest.tasks.model_schemas.tasks import PlainTaskSchema, RangeTaskSchema, MultipleChoiceTaskSchema, \
@@ -91,7 +90,7 @@ def base_olympiad_patch(id_base_olympiad):
     db_get_or_raise(OlympiadType, "olympiad_type_id", values["olympiad_type_id"])
 
     BaseContestSchema(load_instance=True).load(request.json, instance=base_contest, session=db.session,
-                                               partial=True, unknown=EXCLUDE)
+                                               partial=False, unknown=EXCLUDE)
 
     db.session.commit()
 
@@ -276,13 +275,14 @@ def contest_task_edit(id_contest, id_contest_task):
     ContestTaskSchema(load_instance=True).load(request.json, instance=contest_task, session=db.session,
                                                partial=False, unknown=EXCLUDE)
 
-    previous_pools = [task_pool_ for contest_task_ in contest_.contest_tasks for task_pool_ in contest_task_.task_pools]
-    contest_task.task_pools = []
-    for task_pool_id in task_pool_ids:
-        task_pool = db_get_or_raise(TaskPool, "task_pool_id", task_pool_id)
-        if task_pool in previous_pools:
-            raise InsufficientData("task_pool", "already exists")
-        contest_task.task_pools.append(task_pool)
+    if task_pool_ids is not None:
+        previous_pools = [task_pool_ for contest_task_ in contest_.contest_tasks for task_pool_ in contest_task_.task_pools]
+        contest_task.task_pools = []
+        for task_pool_id in task_pool_ids:
+            task_pool = db_get_or_raise(TaskPool, "task_pool_id", task_pool_id)
+            if task_pool in previous_pools:
+                raise InsufficientData("task_pool", "already exists")
+            contest_task.task_pools.append(task_pool)
 
     db.session.commit()
 
@@ -378,10 +378,10 @@ def olympiad_patch(id_base_olympiad, id_olympiad):
 
     if current_contest.composite_type == ContestTypeEnum.SimpleContest:
         SimpleContestSchema(load_instance=True).load(request.json, instance=current_contest, session=db.session,
-                                                     partial=True, unknown=EXCLUDE)
+                                                     partial=False, unknown=EXCLUDE)
     else:
         CompositeContestSchema(load_instance=True).load(request.json, instance=current_contest, session=db.session,
-                                                        partial=True, unknown=EXCLUDE)
+                                                        partial=False, unknown=EXCLUDE)
 
     db.session.commit()
     return current_contest, 200

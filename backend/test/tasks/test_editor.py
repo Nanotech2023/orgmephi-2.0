@@ -199,6 +199,57 @@ def test_task_image_upload(client, test_simple_contest, create_plain_task):
     assert resp.status_code == 200
 
 
+def test_task_pool_patch(client, test_create_tasks_pool):
+    from contest.tasks.models import TaskPool
+    task_pool: TaskPool = test_create_tasks_pool[0]
+    resp = client.patch(f'/base_olympiad/{test_create_tasks_pool[0].base_contest.base_contest_id}'
+                        f'/task_pool/{task_pool.task_pool_id}',
+                        json={
+                            'name': "renamed"
+                        })
+    assert resp.status_code == 200
+    task_pool: TaskPool = TaskPool.query.filter_by(
+        task_pool_id=task_pool.task_pool_id).one_or_none()
+    assert task_pool.name == "renamed"
+
+
+def test_task_pool_remove(client, test_create_tasks_pool):
+    from contest.tasks.models import TaskPool
+    task_pool: TaskPool = test_create_tasks_pool[0]
+    resp = client.post(f'/base_olympiad/{test_create_tasks_pool[0].base_contest.base_contest_id}'
+                       f'/task_pool/{task_pool.task_pool_id}/remove')
+    assert resp.status_code == 200
+
+    assert not test_app.db.session.query(
+        TaskPool.query.filter_by(task_pool_id=f'{task_pool.task_pool_id}').exists()
+    ).scalar()
+
+
+def test_contest_task_patch(client, test_create_contest_tasks):
+    from contest.tasks.models import ContestTask
+    resp = client.patch(f'/contest/{test_create_contest_tasks[0].contest.contest_id}'
+                        f'/contest_task/{test_create_contest_tasks[0].contest_task_id}',
+                        json={
+                            'num': 20
+                        })
+    assert resp.status_code == 200
+    contest_task: ContestTask = ContestTask.query.filter_by(
+        contest_task_id=test_create_contest_tasks[0].contest_task_id).one_or_none()
+    assert contest_task.num == 20
+
+
+def test_contest_task_remove(client, test_create_contest_tasks):
+    from contest.tasks.models import ContestTask
+    contest_task: ContestTask = test_create_contest_tasks[0]
+    resp = client.post(f'/contest/{test_create_contest_tasks[0].contest.contest_id}'
+                       f'/contest_task/{test_create_contest_tasks[0].contest_task_id}/remove')
+    assert resp.status_code == 200
+
+    assert not test_app.db.session.query(
+        ContestTask.query.filter_by(contest_task_id=f'{contest_task.contest_task_id}').exists()
+    ).scalar()
+
+
 def test_task_remove(client, test_simple_contest, create_plain_task):
     from contest.tasks.models import Task
     task: Task = create_plain_task[1]

@@ -37,7 +37,7 @@ def base_olympiad_create():
         '409':
           description: Olympiad type already in use
     """
-    base_contest = BaseContestSchema().load(request.json, session=db.session, partial=False, unknown=EXCLUDE)
+    base_contest = BaseContestSchema().load(request.json, session=db.session, partial=True, unknown=EXCLUDE)
     db.session.add(base_contest)
     db.session.commit()
 
@@ -449,6 +449,9 @@ def contest_task_create(id_contest):
     task_pool_ids = values.pop('task_pool_ids', None)
 
     if task_pool_ids is None:
+        raise InsufficientData("task_pool_ids", "contest task should be assigned to at least one pool")
+
+    if len(task_pool_ids) == 0:
         raise InsufficientData("task_pool_ids", "contest task should be assigned to at least one pool")
 
     contest_task = ContestTaskSchema().load(data=request.json, partial=True, session=db.session, unknown=EXCLUDE)

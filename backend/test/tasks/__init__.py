@@ -99,7 +99,7 @@ def test_create_contest_tasks(test_simple_contest, test_create_tasks_pool):
                                  ) for i in range(3)]
     for i in range(3):
         contest_tasks[i].task_pools = [test_create_tasks_pool[i]]
-    test_simple_contest.contest_tasks = contest_tasks
+    test_simple_contest[0].contest_tasks = contest_tasks
 
     test_app.db.session.add_all(contest_tasks)
     test_app.db.session.commit()

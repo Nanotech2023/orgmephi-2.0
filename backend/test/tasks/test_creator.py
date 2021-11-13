@@ -1,5 +1,6 @@
 import io
 
+from contest.tasks.models import ContestTask
 from . import *
 
 
@@ -185,6 +186,74 @@ def test_task_create_multiple(client, test_simple_contest, test_create_tasks_poo
     task: MultipleChoiceTask = MultipleChoiceTask.query.filter_by(
         task_id=resp.json['task_id']).one_or_none()
     assert task.task_id == resp.json['task_id']
+
+
+def test_tasks_pool_get(client, test_create_tasks_pool):
+    resp = client.get(f'/base_olympiad/{test_create_tasks_pool[0].base_contest.base_contest_id}'
+                      f'/task_pool/all')
+
+    assert resp.status_code == 200
+    assert len(test_create_tasks_pool) == len(resp.json['task_pools_list'])
+
+
+def test_tasks_pool_get_all(client, test_create_tasks_pool):
+    resp = client.get(f'/base_olympiad/{test_create_tasks_pool[0].base_contest.base_contest_id}'
+                      f'/task_pool/{test_create_tasks_pool[0].task_pool_id}')
+
+    assert resp.status_code == 200
+    assert test_create_tasks_pool[0].task_pool_id == resp.json['task_pool_id']
+
+
+def test_contest_task_create(client, test_simple_contest, test_create_tasks_pool):
+    resp = client.post(f'/contest/{test_simple_contest[0].contest_id}/contest_task/create',
+                       json={
+                           'num': 1,
+                           'task_points': 15,
+                           'task_pool_ids': [test_create_tasks_pool[0].task_pool_id]
+                       })
+    assert resp.status_code == 200
+    contest_task: ContestTask = ContestTask.query.filter_by(
+        contest_task_id=resp.json['contest_task_id']).one_or_none()
+    assert contest_task.contest_task_id == resp.json['contest_task_id']
+
+    resp = client.post(f'/contest/{test_simple_contest[0].contest_id}/contest_task/create',
+                       json={
+                           'num': 2,
+                           'task_points': 15,
+                           'task_pool_ids': []
+                       })
+    assert resp.status_code == 409
+
+    resp = client.post(f'/contest/{test_simple_contest[0].contest_id}/contest_task/create',
+                       json={
+                           'num': 2,
+                           'task_points': 15
+                       })
+    assert resp.status_code == 409
+
+    resp = client.post(f'/contest/{test_simple_contest[0].contest_id}/contest_task/create',
+                       json={
+                           'num': 2,
+                           'task_points': 15,
+                           'task_pool_ids': [test_create_tasks_pool[0].task_pool_id]
+                       })
+    assert resp.status_code == 409
+
+
+def test_contest_task_get_all(client, test_create_contest_tasks):
+    resp = client.get(f'/contest/{test_create_contest_tasks[0].contest.contest_id}'
+                      f'/contest_task/all')
+
+    assert resp.status_code == 200
+    assert len(test_create_contest_tasks) == len(resp.json['contest_task_list'])
+
+
+def test_contest_task_pool_get(client, test_create_contest_tasks):
+    resp = client.get(f'/contest/{test_create_contest_tasks[0].contest.contest_id}'
+                      f'/contest_task/{test_create_contest_tasks[0].contest_task_id}')
+
+    assert resp.status_code == 200
+    assert test_create_contest_tasks[0].contest_task_id == resp.json['contest_task_id']
 
 
 def test_task_get(client, test_simple_contest, test_create_tasks_pool, create_plain_task):
