@@ -167,9 +167,9 @@ def create_user_response(create_three_tasks):
                  for i in range(8)]
     test_app.db.session.add_all(responses)
     test_app.db.session.commit()
-    from contest.tasks.util import generate_or_get_variant
+    from contest.tasks.util import try_to_generate_variant
     for i in range(8):
-        generate_or_get_variant(contest_id=get_contest_id(create_three_tasks, i),
+        try_to_generate_variant(contest_id=get_contest_id(create_three_tasks, i),
                                 user_id=get_user_id(create_three_tasks, i))
     create_three_tasks['responses'] = responses
     test_app.db.session.commit()

@@ -66,7 +66,7 @@ def get_variant_self(id_contest):
 
 
 # Generate variant TEST
-
+# DELETE ME
 @module.route(
     '/contest/<int:id_contest>/variant/generate_TEST',
     methods=['POST'])
@@ -96,8 +96,8 @@ def generate_TEST_variant_self(id_contest):
           description: User not found
     """
 
-    generate_or_get_variant(id_contest, jwt_get_id())
-
+    try_to_generate_variant(id_contest, jwt_get_id())
+    db.session.commit()
     return {}, 200
 
 

@@ -154,24 +154,7 @@ def get_last_variant_in_contest(current_contest):
         return 0
 
 
-# def generate_variant(contest_id, user_id):
-#     """
-#     Generate random variant number for user
-#     :param contest_id: contest id
-#     :param user_id: user id
-#     :return: final variant number
-#     """
-#     current_contest = db_get_or_raise(Contest, "contest_id", contest_id)
-#     variant_id_list = [variant.variant_id for variant in current_contest.variants.all()]
-#     variants_amount = len(variant_id_list)
-#     if variants_amount == 0:
-#         raise DataConflict('No variants found in current contest')
-#     random_number = secrets.randbelow(variants_amount * 420)
-#     final_variant_number = variant_id_list[(user_id + random_number) % variants_amount]
-#     return final_variant_number
-
-
-def generate_or_get_variant(contest_id, user_id):
+def try_to_generate_variant(contest_id, user_id):
     current_user = UserInContest.query.filter_by(user_id=user_id,
                                                  contest_id=contest_id).one_or_none()
     if current_user is None:
@@ -200,18 +183,19 @@ def generate_or_get_variant(contest_id, user_id):
         db.session.add(variant)
         current_contest.variants.append(variant)
 
-    db.session.flush()
+        db.session.flush()
 
-    for contest_task, base_task_id in zip(contest_tasks, base_tasks_ids_in_variant):
-        contest_task_in_variant = ContestTaskInVariant(
-            contest_task_id=contest_task.contest_task_id,
-            variant_id=variant.variant_id,
-            base_task_id=base_task_id
-        )
-        contest_tasks_in_variant.append(contest_task_in_variant)
+        for contest_task, base_task_id in zip(contest_tasks, base_tasks_ids_in_variant):
+            contest_task_in_variant = ContestTaskInVariant(
+                contest_task_id=contest_task.contest_task_id,
+                variant_id=variant.variant_id,
+                base_task_id=base_task_id
+            )
+            contest_tasks_in_variant.append(contest_task_in_variant)
 
-    db.session.add_all(contest_tasks_in_variant)
-    variant.contest_tasks_in_variant.extend(contest_tasks_in_variant)
+        db.session.add_all(contest_tasks_in_variant)
+        variant.contest_tasks_in_variant.extend(contest_tasks_in_variant)
+
     current_user.variant_id = variant.variant_id
 
     db.session.flush()

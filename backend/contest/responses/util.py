@@ -9,7 +9,7 @@ from contest.tasks.models import SimpleContest, RangeTask, MultipleChoiceTask, P
 from .models import Response, PlainAnswerText, RangeAnswer, MultipleChoiceAnswer, PlainAnswerFile, BaseAnswer, \
     answer_dict, add_user_response, add_plain_answer_file, add_plain_answer_text, add_range_answer, \
     add_multiple_answer, ResponseStatusEnum
-from ..tasks.util import generate_or_get_variant
+from ..tasks.util import try_to_generate_variant
 
 db = get_current_db()
 app = get_current_app()
@@ -296,7 +296,7 @@ def check_timing_for_mark_editing_and_appeal(contest_id, user_role):
 
 
 def create_user_response(contest_id, user_id):
-    generate_or_get_variant(contest_id, user_id)
+    try_to_generate_variant(contest_id, user_id)
 
     check_contest_time_left(contest_id)
     if not db_exists(db.session, UserInContest, filters={"contest_id": contest_id, "user_id": user_id}):
