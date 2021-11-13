@@ -1,7 +1,7 @@
 from flask import request
 
 from common import get_current_module
-from common.errors import AlreadyExists, TimeOver
+from common.errors import TimeOver
 from contest.responses.util import get_user_in_contest_work
 from contest.tasks.model_schemas.olympiad import SimpleContestSchema
 from contest.tasks.participant.schemas import *
@@ -63,41 +63,6 @@ def get_variant_self(id_contest):
                'variant': variant,
                'completed_task_count': count_of_completed_tasks
            }, 200
-
-
-# TODO DELETE ME
-@module.route(
-    '/contest/<int:id_contest>/variant/generate_TEST',
-    methods=['POST'])
-def generate_TEST_variant_self(id_contest):
-    """
-    Get variant for user in current contest
-    ---
-    post:
-      parameters:
-        - in: path
-          description: Id of the contest
-          name: id_contest
-          required: true
-          schema:
-            type: integer
-      security:
-        - JWTAccessToken: [ ]
-        - CSRFAccessToken: [ ]
-      responses:
-        '200':
-          description: OK
-        '400':
-          description: Bad request
-        '409':
-          description: Olympiad type already in use
-        '404':
-          description: User not found
-    """
-
-    try_to_generate_variant(id_contest, jwt_get_id())
-    db.session.commit()
-    return {}, 200
 
 
 # Enroll in Contest

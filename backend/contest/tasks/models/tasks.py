@@ -115,21 +115,6 @@ class Task(db.Model):
     }
 
 
-def add_plain_task(db_session, recommended_answer, name, image_of_task=None,
-                   answer_type=TaskAnswerTypeEnum.Text):
-    """
-    Create new plain task object
-    """
-    task = PlainTask(
-        image_of_task=image_of_task,
-        name=name,
-        recommended_answer=recommended_answer,
-        answer_type=answer_type,
-    )
-    db_session.add(task)
-    return task
-
-
 class PlainTask(Task):
     """
     Class describing a Task with plain text model.
@@ -148,20 +133,6 @@ class PlainTask(Task):
         'polymorphic_identity': TaskTypeEnum.PlainTask,
         'with_polymorphic': '*'
     }
-
-
-def add_range_task(db_session, start_value, end_value, name, image_of_task=None):
-    """
-    Create new range task object
-    """
-    task = RangeTask(
-        image_of_task=image_of_task,
-        name=name,
-        start_value=start_value,
-        end_value=end_value,
-    )
-    db_session.add(task)
-    return task
 
 
 class RangeTask(Task):
@@ -183,18 +154,6 @@ class RangeTask(Task):
         'polymorphic_identity': TaskTypeEnum.RangeTask,
         'with_polymorphic': '*'
     }
-
-
-def add_multiple_task(db_session, name, image_of_task=None):
-    """
-    Create new multiple task object
-    """
-    task = MultipleChoiceTask(
-        name=name,
-        image_of_task=image_of_task,
-    )
-    db_session.add(task)
-    return task
 
 
 class MultipleChoiceTask(Task):
