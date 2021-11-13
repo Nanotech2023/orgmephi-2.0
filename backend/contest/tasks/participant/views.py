@@ -65,8 +65,7 @@ def get_variant_self(id_contest):
            }, 200
 
 
-# Generate variant TEST
-# DELETE ME
+# TODO DELETE ME
 @module.route(
     '/contest/<int:id_contest>/variant/generate_TEST',
     methods=['POST'])

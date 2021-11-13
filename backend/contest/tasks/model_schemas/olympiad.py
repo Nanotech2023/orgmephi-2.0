@@ -55,22 +55,22 @@ class BaseContestSchema(SQLAlchemySchema):
         sqla_session = db.session
 
     base_contest_id = auto_field(column_name='base_contest_id', dump_only=True)
-    name = auto_field(column_name='name')
-    description = auto_field(column_name='description', validate=text_validator)
-    rules = auto_field(column_name='rules', validate=text_validator)
+    name = auto_field(column_name='name', required=True)
+    description = auto_field(column_name='description', validate=text_validator, required=True)
+    rules = auto_field(column_name='rules', validate=text_validator, required=True)
 
-    winner_1_condition = auto_field(column_name='winner_1_condition')
-    winner_2_condition = auto_field(column_name='winner_2_condition')
-    winner_3_condition = auto_field(column_name='winner_3_condition')
-    diploma_1_condition = auto_field(column_name='diploma_1_condition')
-    diploma_2_condition = auto_field(column_name='diploma_2_condition')
-    diploma_3_condition = auto_field(column_name='diploma_3_condition')
+    winner_1_condition = auto_field(column_name='winner_1_condition', required=True)
+    winner_2_condition = auto_field(column_name='winner_2_condition', required=True)
+    winner_3_condition = auto_field(column_name='winner_3_condition', required=True)
+    diploma_1_condition = auto_field(column_name='diploma_1_condition', required=True)
+    diploma_2_condition = auto_field(column_name='diploma_2_condition', required=True)
+    diploma_3_condition = auto_field(column_name='diploma_3_condition', required=True)
 
-    olympiad_type_id = auto_field(column_name='olympiad_type_id')
-    subject = EnumField(OlympiadSubjectEnum, data_key='subject', by_value=True)
-    level = EnumField(OlympiadLevelEnum, data_key='level', by_value=True)
-    target_classes = fields.Nested(TargetClassSchema, many=True, dump_only=True)
-    certificate_type = Related(['certificate_type_id'])
+    olympiad_type_id = auto_field(column_name='olympiad_type_id', required=True)
+    subject = EnumField(OlympiadSubjectEnum, data_key='subject', by_value=True, required=True)
+    level = EnumField(OlympiadLevelEnum, data_key='level', by_value=True, required=True)
+    target_classes = fields.Nested(TargetClassSchema, many=True, dump_only=True, required=False)
+    certificate_type = Related(['certificate_type_id'], required=False)
 
     @pre_load()
     def check_certificate(self, data, many, **kwargs):
@@ -105,9 +105,9 @@ class SimpleContestSchema(SQLAlchemySchema):
         sqla_session = db.session
 
     contest_id = auto_field(column_name='contest_id', dump_only=True)
-    visibility = auto_field(column_name='visibility', required=False)
-    start_date = auto_field(column_name='start_date', required=False)
-    end_date = auto_field(column_name='end_date', required=False)
+    visibility = auto_field(column_name='visibility', required=True)
+    start_date = auto_field(column_name='start_date', required=True)
+    end_date = auto_field(column_name='end_date', required=True)
     regulations = auto_field(column_name='regulations', validate=text_validator, required=False)
     status = EnumField(OlympiadStatusEnum, data_key='status', by_value=True)
     academic_year = fields.Integer()
@@ -120,19 +120,19 @@ class SimpleContestSchema(SQLAlchemySchema):
     result_publication_date = auto_field(column_name='result_publication_date', required=False)
     end_of_enroll_date = auto_field(column_name='end_of_enroll_date', required=False)
     previous_contest_id = auto_field(column_name='previous_contest_id', allow_none=True)
-    locations = fields.Nested(OlympiadLocationSchema, many=True, required=False)
+    locations = fields.Nested(OlympiadLocationSchema, many=True, required=True)
     target_classes = fields.Nested(TargetClassSchema, many=True, required=False)
     previous_participation_condition = EnumField(UserStatusEnum,
                                                  data_key='previous_participation_condition',
-                                                 by_value=True, required=False)
+                                                 by_value=True, required=True)
     composite_type = EnumField(ContestTypeEnum,
                                data_key='composite_type',
-                               by_value=True, required=False,
+                               by_value=True, required=True,
                                validate=validate.OneOf([ContestTypeEnum.SimpleContest]))
     holding_type = EnumField(ContestHoldingTypeEnum,
                              data_key='holding_type',
-                             by_value=True, required=False)
-    base_contest = fields.Nested(BaseContestSchema, required=False, dump_only=True)
+                             by_value=True, required=True)
+    base_contest = fields.Nested(BaseContestSchema, required=True, dump_only=True)
 
     @post_dump(pass_original=True)
     def add_enrolled(self, data, original, many, **kwargs):
@@ -183,17 +183,17 @@ class CompositeContestSchema(SQLAlchemySchema):
         sqla_session = db.session
 
     contest_id = auto_field(column_name='contest_id', dump_only=True)
-    visibility = auto_field(column_name='visibility', required=False)
+    visibility = auto_field(column_name='visibility', required=True)
     holding_type = EnumField(ContestHoldingTypeEnum,
                              data_key='holding_type',
                              by_value=True, required=True)
-    stages = fields.Nested(StageSchema, many=True, required=False, dump_only=True)
-    base_contest = fields.Nested(BaseContestSchema, required=False, dump_only=True)
+    stages = fields.Nested(StageSchema, many=True, required=True, dump_only=True)
+    base_contest = fields.Nested(BaseContestSchema, required=True, dump_only=True)
     status = EnumField(OlympiadStatusEnum, data_key='status', by_value=True)
     academic_year = fields.Integer()
     composite_type = EnumField(ContestTypeEnum,
                                data_key='composite_type',
-                               by_value=True, required=False,
+                               by_value=True, required=True,
                                validate=validate.OneOf([ContestTypeEnum.CompositeContest]))
 
 

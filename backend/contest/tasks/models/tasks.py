@@ -236,15 +236,3 @@ class Variant(db.Model):
 
     users = db.relationship('UserInContest', lazy='dynamic', backref='variant')
     contest_tasks_in_variant = db.relationship('ContestTaskInVariant', lazy='dynamic', backref='variant')
-
-
-def add_variant(db_session, variant_number=None, contest_id=None):
-    """
-    Create new variant object
-    """
-    variant = Variant(
-        contest_id=contest_id,
-        variant_number=variant_number
-    )
-    db_session.add(variant)
-    return variant

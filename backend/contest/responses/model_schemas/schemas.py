@@ -64,7 +64,7 @@ class BaseAnswerSchema(SQLAlchemySchema):
     answer_type = EnumField(AnswerEnum, data_key='answer_type', by_value=True)
     task_id = auto_field(column_name='task_id', dump_only=True)
     mark = auto_field(column_name='mark', dump_only=True)
-    task_points = m_f.Integer()
+    task_points = m_f.Integer(dump_only=True)
     right_answer = fields.Nested(nested=RightAnswerSchema, required=True)
 
 

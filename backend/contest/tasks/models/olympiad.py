@@ -98,7 +98,7 @@ class OlympiadType(db.Model):
     olympiad_type = db.Column(db.Text, nullable=False, unique=True)
 
     contests = db.relationship('BaseContest', lazy='select',
-                               backref=db.backref('olympiad_type', lazy='joined'))
+                               backref='olympiad_type')
 
 
 # Contest models
@@ -154,8 +154,8 @@ class BaseContest(db.Model):
                                      backref=db.backref('base_contest', lazy=True))
 
     child_contests = db.relationship('Contest', lazy='dynamic',
-                                     backref=db.backref('base_contest', lazy='joined'), cascade="all, delete-orphan")
-    task_pools = db.relationship('TaskPool', backref=db.backref('base_contest', lazy='joined'), lazy='dynamic')
+                                     backref='base_contest', cascade="all, delete-orphan")
+    task_pools = db.relationship('TaskPool', backref='base_contest', lazy='dynamic')
 
 
 class ContestTypeEnum(enum.Enum):
@@ -202,10 +202,10 @@ class Contest(db.Model):
     visibility = db.Column(db.Boolean, default=DEFAULT_VISIBILITY, nullable=False)
 
     users = db.relationship('UserInContest', lazy='dynamic',
-                            backref=db.backref('contest', lazy='joined'))
+                            backref='contest')
 
     group_restrictions = db.relationship('ContestGroupRestriction', lazy='dynamic', cascade="all, delete")
-    contest_tasks = db.relationship('ContestTask', backref=db.backref('contest', lazy='joined'), lazy='dynamic')
+    contest_tasks = db.relationship('ContestTask', backref='contest', lazy='dynamic')
 
     __mapper_args__ = {
         'polymorphic_identity': ContestTypeEnum.Contest,
@@ -314,7 +314,7 @@ class SimpleContest(Contest):
 
     regulations = db.Column(db.Text, nullable=True)
 
-    variants = db.relationship('Variant', backref=db.backref('simple_contest', lazy='joined'), lazy='dynamic')
+    variants = db.relationship('Variant', backref='simple_contest', lazy='dynamic')
     next_contests = db.relationship('SimpleContest',
                                     foreign_keys=[previous_contest_id])
 
@@ -459,7 +459,7 @@ class CompositeContest(Contest):
     contest_id = db.Column(db.Integer, db.ForeignKey('contest.contest_id'), primary_key=True)
 
     stages = db.relationship('Stage', lazy='dynamic',
-                             backref=db.backref('composite_contest', lazy='joined'))
+                             backref='composite_contest')
 
     __mapper_args__ = {
         'polymorphic_identity': ContestTypeEnum.CompositeContest,

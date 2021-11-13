@@ -1,7 +1,6 @@
-from marshmallow import fields
 from marshmallow_enum import EnumField
 from marshmallow_oneofschema import OneOfSchema
-from marshmallow_sqlalchemy import SQLAlchemySchema, auto_field
+from marshmallow_sqlalchemy import SQLAlchemySchema, auto_field, fields
 
 from contest.tasks.models import *
 from user.models.auth import *
@@ -20,8 +19,8 @@ class TaskPoolSchema(SQLAlchemySchema):
 
     task_pool_id = auto_field(column_name='task_pool_id', dump_only=True)
     name = auto_field(column_name='name', validate=text_validator, required=True)
-    year = auto_field(column_name='year', required=False)
-    orig_task_points = auto_field(column_name='orig_task_points', required=False)
+    year = auto_field(column_name='year', required=True)
+    orig_task_points = auto_field(column_name='orig_task_points', required=True)
 
 
 """
@@ -36,9 +35,9 @@ class ContestTaskSchema(SQLAlchemySchema):
         sqla_session = db.session
 
     contest_task_id = auto_field(column_name='contest_task_id', dump_only=True)
-    num = auto_field(column_name='num', required=False)
-    task_points = auto_field(column_name='task_points', required=False)
-    task_pools = fields.Nested(TaskPoolSchema, many=True, dump_only=True, required=False)
+    num = auto_field(column_name='num', required=True)
+    task_points = auto_field(column_name='task_points', required=True)
+    task_pools = fields.Nested(nested=TaskPoolSchema, many=True, dump_only=True, required=True)
 
 
 """

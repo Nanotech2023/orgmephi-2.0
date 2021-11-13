@@ -3,7 +3,8 @@ from marshmallow import EXCLUDE
 
 from common import get_current_module
 from contest.tasks.creator.schemas import *
-from contest.tasks.model_schemas.tasks import TaskPoolSchema, ContestTaskSchema
+from contest.tasks.model_schemas.tasks import TaskPoolSchema, ContestTaskSchema, PlainTaskSchema, RangeTaskSchema, \
+    MultipleChoiceTaskSchema
 from contest.tasks.util import *
 
 db = get_current_db()
@@ -37,7 +38,7 @@ def base_olympiad_create():
         '409':
           description: Olympiad type already in use
     """
-    base_contest = BaseContestSchema().load(request.json, session=db.session, partial=True, unknown=EXCLUDE)
+    base_contest = BaseContestSchema().load(request.json, session=db.session, partial=False, unknown=EXCLUDE)
     db.session.add(base_contest)
     db.session.commit()
 
@@ -49,7 +50,6 @@ def base_olympiad_create():
 # Tasks Pool
 
 @module.route('/base_olympiad/<int:id_base_olympiad>/task_pool/create', methods=['POST'],
-              input_schema=CreateTaskPoolRequestTaskCreatorSchema,
               output_schema=TaskPoolIdResponseTaskCreatorSchema)
 def task_pool_create(id_base_olympiad):
     """
@@ -67,7 +67,7 @@ def task_pool_create(id_base_olympiad):
         required: true
         content:
           application/json:
-            schema: CreateTaskPoolRequestTaskCreatorSchema
+            schema: TaskPoolSchema
       security:
         - JWTAccessToken: [ ]
         - CSRFAccessToken: [ ]
@@ -84,7 +84,7 @@ def task_pool_create(id_base_olympiad):
     """
     base_contest = db_get_or_raise(BaseContest, "base_contest_id", id_base_olympiad)
 
-    task_pool = TaskPoolSchema().load(data=request.json, partial=True, session=db.session, unknown=EXCLUDE)
+    task_pool = TaskPoolSchema().load(data=request.json, partial=False, session=db.session, unknown=EXCLUDE)
 
     db.session.add(task_pool)
     base_contest.task_pools.append(task_pool)
@@ -411,13 +411,17 @@ def contests_all(id_olympiad, id_stage):
 
 
 @module.route('/contest/<int:id_contest>/contest_task/create', methods=['POST'],
-              input_schema=CreateContestTaskRequestTaskCreatorSchema,
               output_schema=ContestTaskResponseTaskCreatorSchema)
 def contest_task_create(id_contest):
     """
     Create contest task
     ---
     post:
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: ContestTaskSchema
       parameters:
         - in: path
           description: ID of the contest
@@ -425,11 +429,6 @@ def contest_task_create(id_contest):
           required: true
           schema:
             type: integer
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema: CreateContestTaskRequestTaskCreatorSchema
       security:
         - JWTAccessToken: [ ]
         - CSRFAccessToken: [ ]
@@ -445,7 +444,7 @@ def contest_task_create(id_contest):
           description: Olympiad type already in use
     """
 
-    values = request.marshmallow
+    values = request.json
     task_pool_ids = values.pop('task_pool_ids', None)
 
     if task_pool_ids is None:
@@ -454,7 +453,7 @@ def contest_task_create(id_contest):
     if len(task_pool_ids) == 0:
         raise InsufficientData("task_pool_ids", "contest task should be assigned to at least one pool")
 
-    contest_task = ContestTaskSchema().load(data=request.json, partial=True, session=db.session, unknown=EXCLUDE)
+    contest_task = ContestTaskSchema().load(data=request.json, partial=False, session=db.session, unknown=EXCLUDE)
     contest_: Contest = db_get_or_raise(Contest, "contest_id", id_contest)
 
     previous_pools = [task_pool_ for contest_task_ in contest_.contest_tasks for task_pool_ in contest_task_.task_pools]
@@ -462,7 +461,7 @@ def contest_task_create(id_contest):
     for task_pool_id in task_pool_ids:
         task_pool = db_get_or_raise(TaskPool, "task_pool_id", task_pool_id)
         if task_pool in previous_pools:
-            raise InsufficientData("task_pool", "already exists")
+            raise AlreadyExists("task_pool", task_pool_id)
         contest_task.task_pools.append(task_pool)
 
     contest_.contest_tasks.append(contest_task)
@@ -629,7 +628,6 @@ def variant_all(id_contest):
 @module.route(
     '/task_pool/<int:id_task_pool>/task/create_plain',
     methods=['POST'],
-    input_schema=CreatePlainRequestTaskCreatorSchema,
     output_schema=TaskIdResponseTaskCreatorSchema)
 def task_create_plain(id_task_pool):
     """
@@ -647,7 +645,7 @@ def task_create_plain(id_task_pool):
         required: true
         content:
           application/json:
-            schema: CreatePlainRequestTaskCreatorSchema
+            schema: PlainTaskSchema
       security:
         - JWTAccessToken: [ ]
         - CSRFAccessToken: [ ]
@@ -662,17 +660,10 @@ def task_create_plain(id_task_pool):
         '409':
           description: Olympiad type already in use
     """
-    values = request.marshmallow
-
-    name = values['name']
-    recommended_answer = values['recommended_answer']
-
     task_pool = db_get_or_raise(TaskPool, "task_pool_id", id_task_pool)
 
-    task = add_plain_task(db.session,
-                          name=name,
-                          recommended_answer=recommended_answer,
-                          )
+    task = PlainTaskSchema().load(request.json, session=db.session, partial=False, unknown=EXCLUDE)
+    db.session.add(task)
 
     task_pool.tasks.append(task)
 
@@ -686,7 +677,7 @@ def task_create_plain(id_task_pool):
 @module.route(
     '/task_pool/<int:id_task_pool>/task/create_range',
     methods=['POST'],
-    input_schema=CreateRangeRequestTaskCreatorSchema, output_schema=TaskIdResponseTaskCreatorSchema)
+    output_schema=TaskIdResponseTaskCreatorSchema)
 def task_create_range(id_task_pool):
     """
     Create range task
@@ -703,7 +694,7 @@ def task_create_range(id_task_pool):
         required: true
         content:
           application/json:
-            schema: CreateRangeRequestTaskCreatorSchema
+            schema: RangeTaskSchema
       security:
         - JWTAccessToken: [ ]
         - CSRFAccessToken: [ ]
@@ -718,17 +709,10 @@ def task_create_range(id_task_pool):
         '409':
           description: Olympiad type already in use
     """
-    values = request.marshmallow
-    start_value = values['start_value']
-    end_value = values['end_value']
-    name = values['name']
-
     task_pool = db_get_or_raise(TaskPool, "task_pool_id", id_task_pool)
-    task = add_range_task(db.session,
-                          name=name,
-                          start_value=start_value,
-                          end_value=end_value,
-                          )
+    task = RangeTaskSchema().load(request.json, session=db.session, partial=False, unknown=EXCLUDE)
+    db.session.add(task)
+
     task_pool.tasks.append(task)
     db.session.commit()
 
@@ -740,7 +724,7 @@ def task_create_range(id_task_pool):
 @module.route(
     '/task_pool/<int:id_task_pool>/task/create_multiple',
     methods=['POST'],
-    input_schema=CreateMultipleRequestTaskCreatorSchema, output_schema=TaskIdResponseTaskCreatorSchema)
+    output_schema=TaskIdResponseTaskCreatorSchema)
 def task_create_multiple(id_task_pool):
     """
     Create multiple task
@@ -757,7 +741,7 @@ def task_create_multiple(id_task_pool):
         required: true
         content:
           application/json:
-            schema: CreateMultipleRequestTaskCreatorSchema
+            schema: MultipleChoiceTaskSchema
       security:
         - JWTAccessToken: [ ]
         - CSRFAccessToken: [ ]
@@ -772,14 +756,13 @@ def task_create_multiple(id_task_pool):
         '409':
           description: Olympiad type already in use
     """
-    values = request.marshmallow
+    values = request.json
 
-    answers = values['answers']
-    name = values.get('name', None)
+    answers = values.pop('answers', None)
 
     task_pool = db_get_or_raise(TaskPool, "task_pool_id", id_task_pool)
-    task = add_multiple_task(db.session,
-                             name=name)
+    task = MultipleChoiceTaskSchema().load(request.json, session=db.session, partial=False, unknown=EXCLUDE)
+    db.session.add(task)
     task_pool.tasks.append(task)
 
     task.answers = [

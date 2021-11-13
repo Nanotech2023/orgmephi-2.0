@@ -24,11 +24,6 @@ class BaseOlympiadIdResponseTaskCreatorSchema(Schema):
 
 # Task pool
 
-class CreateTaskPoolRequestTaskCreatorSchema(Schema):
-    name = common_fields.CommonName(required=False)
-    year = fields.Int(required=False)
-    orig_task_points = fields.Int(required=False)
-
 
 class TaskPoolIdResponseTaskCreatorSchema(Schema):
     task_pool_id = fields.Int(required=True)
@@ -39,12 +34,6 @@ class AllTaskPoolsResponseTaskCreatorSchema(Schema):
 
 
 # Contest Task
-
-
-class CreateContestTaskRequestTaskCreatorSchema(Schema):
-    num = fields.Int(required=False)
-    task_points = fields.Int(required=False)
-    task_pool_ids = fields.List(fields.Int(), required=False)
 
 
 class ContestTaskResponseTaskCreatorSchema(Schema):
@@ -152,26 +141,9 @@ class AllTasksResponseTaskCreatorSchema(Schema):
 
 # Tasks
 
-class CreatePlainRequestTaskCreatorSchema(Schema):
-    name = common_fields.CommonName(required=True)
-    recommended_answer = common_fields.Text(required=True)
-    answer_type = EnumField(TaskAnswerTypeEnum, required=False, by_value=True)
-
-
-class CreateRangeRequestTaskCreatorSchema(Schema):
-    name = common_fields.CommonName(required=True)
-    start_value = fields.Float(required=True)
-    end_value = fields.Float(required=True)
-
-
 class AnswersInTaskRequestTaskCreatorSchema(Schema):
     answer = common_fields.Text(required=True)
     is_right_answer = fields.Boolean(required=True)
-
-
-class CreateMultipleRequestTaskCreatorSchema(Schema):
-    name = common_fields.CommonName(required=True)
-    answers = fields.List(fields.Nested(AnswersInTaskRequestTaskCreatorSchema), required=True)
 
 
 class TaskResponseTaskCreatorSchema(Schema):

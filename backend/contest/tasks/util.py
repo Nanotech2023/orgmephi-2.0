@@ -1,7 +1,7 @@
 import io
 import secrets
 
-from common.errors import FileTooLarge, DataConflict, InsufficientData, RequestError, NotFound
+from common.errors import FileTooLarge, DataConflict, InsufficientData, RequestError, NotFound, AlreadyExists
 from common.jwt_verify import jwt_get_id
 from contest.tasks.models import *
 from contest.tasks.unauthorized.schemas import FilterOlympiadAllRequestSchema
@@ -146,7 +146,7 @@ def try_to_generate_variant(contest_id, user_id):
     if current_user is None:
         raise DataConflict("current_user is not enrolled for this contest")
     if current_user.variant_id is not None:
-        raise DataConflict("variant_id is already exists")
+        raise AlreadyExists("variant_id", current_user.variant_id)
 
     current_contest: SimpleContest = db_get_or_raise(Contest, "contest_id", contest_id)
     contest_tasks = current_contest.contest_tasks
@@ -161,11 +161,13 @@ def try_to_generate_variant(contest_id, user_id):
         base_task: Task = secrets.choice(tasks_list)
         base_tasks_ids_in_variant.append(base_task.task_id)
 
-    variant_number = abs(hash(tuple(base_tasks_ids_in_variant)))
+    variant_number = abs(hash(tuple(base_tasks_ids_in_variant))) % 10000
     variant = Variant.query.filter_by(contest_id=current_contest.contest_id,
                                       variant_number=variant_number).one_or_none()
     if variant is None:
-        variant = add_variant(db.session, variant_number=variant_number)
+        variant = Variant(
+            variant_number=variant_number
+        )
         db.session.add(variant)
         current_contest.variants.append(variant)
 
@@ -293,10 +295,8 @@ def get_user_tasks_if_possible(contest_id):
     variant = get_user_variant_if_possible(contest_id)
 
     contest_tasks = variant.contest_tasks_in_variant[:]
-    tasks_list = []
 
-    for contest_task in contest_tasks:
-        tasks_list.append(db_get_or_raise(Task, "task_id", contest_task.base_task_id))
+    tasks_list = [db_get_or_raise(Task, "task_id", contest_task.base_task_id) for contest_task in contest_tasks]
 
     for task in tasks_list:
         if task.task_type == TaskTypeEnum.MultipleChoiceTask:
@@ -387,9 +387,8 @@ def get_task_in_pool_if_possible(id_task_pool, task_id):
     :return: task
     """
 
-    task_pool = db_get_or_raise(TaskPool, "task_pool_id", id_task_pool)
     task = db_get_or_raise(Task, "task_id", task_id)
-    if task in task_pool.tasks:
+    if task.task_pool.task_pool_id == id_task_pool:
         return task
     else:
         raise DataConflict('Task not in current pool')

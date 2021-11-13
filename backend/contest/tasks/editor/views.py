@@ -3,8 +3,7 @@ from marshmallow import EXCLUDE
 
 from common import get_current_module
 from contest.tasks.creator.schemas import BaseOlympiadResponseTaskCreatorSchema, StageResponseTaskCreatorSchema, \
-    ContestResponseTaskCreatorSchema, TaskResponseTaskCreatorSchema, CreateTaskPoolRequestTaskCreatorSchema, \
-    CreateContestTaskRequestTaskCreatorSchema
+    ContestResponseTaskCreatorSchema, TaskResponseTaskCreatorSchema
 from contest.tasks.editor.schemas import *
 from contest.tasks.model_schemas.certificate import CertificateTypeSchema, CertificateSchema
 from contest.tasks.model_schemas.olympiad import BaseContestSchema, SimpleContestSchema, CompositeContestSchema, \
@@ -90,7 +89,7 @@ def base_olympiad_patch(id_base_olympiad):
     db_get_or_raise(OlympiadType, "olympiad_type_id", values["olympiad_type_id"])
 
     BaseContestSchema(load_instance=True).load(request.json, instance=base_contest, session=db.session,
-                                               partial=False, unknown=EXCLUDE)
+                                               partial=True, unknown=EXCLUDE)
 
     db.session.commit()
 
@@ -140,8 +139,7 @@ def task_pool_remove(id_base_olympiad, id_task_pool):
 
 
 @module.route('/base_olympiad/<int:id_base_olympiad>/task_pool/<int:id_task_pool>',
-              methods=['PATCH'],
-              input_schema=CreateTaskPoolRequestTaskCreatorSchema)
+              methods=['PATCH'])
 def task_pool_patch(id_base_olympiad, id_task_pool):
     """
     Update task pool
@@ -164,7 +162,7 @@ def task_pool_patch(id_base_olympiad, id_task_pool):
         required: true
         content:
           application/json:
-            schema: UpdateStageRequestTaskEditorSchema
+            schema: TaskPoolSchema
       security:
         - JWTAccessToken: [ ]
         - CSRFAccessToken: [ ]
@@ -181,7 +179,7 @@ def task_pool_patch(id_base_olympiad, id_task_pool):
     task_pool = db_get_or_raise(TaskPool, "task_pool_id", id_task_pool)
 
     TaskPoolSchema(load_instance=True).load(request.json, instance=task_pool, session=db.session,
-                                            partial=False, unknown=EXCLUDE)
+                                            partial=True, unknown=EXCLUDE)
 
     db.session.commit()
 
@@ -230,8 +228,7 @@ def contest_task_remove(id_contest, id_contest_task):
     return {}, 200
 
 
-@module.route('/contest/<int:id_contest>/contest_task/<int:id_contest_task>', methods=['PATCH'],
-              input_schema=CreateContestTaskRequestTaskCreatorSchema)
+@module.route('/contest/<int:id_contest>/contest_task/<int:id_contest_task>', methods=['PATCH'])
 def contest_task_edit(id_contest, id_contest_task):
     """
     Create contest task
@@ -254,7 +251,7 @@ def contest_task_edit(id_contest, id_contest_task):
         required: true
         content:
           application/json:
-            schema: CreateContestTaskRequestTaskCreatorSchema
+            schema: ContestTaskSchema
       security:
         - JWTAccessToken: [ ]
         - CSRFAccessToken: [ ]
@@ -267,21 +264,25 @@ def contest_task_edit(id_contest, id_contest_task):
           description: Olympiad type already in use
     """
 
-    values = request.marshmallow
+    values = request.json
     task_pool_ids = values.pop('task_pool_ids', None)
 
     contest_ = db_get_or_raise(Contest, "contest_id", id_contest)
     contest_task = db_get_or_raise(ContestTask, "contest_task_id", id_contest_task)
     ContestTaskSchema(load_instance=True).load(request.json, instance=contest_task, session=db.session,
-                                               partial=False, unknown=EXCLUDE)
+                                               partial=True, unknown=EXCLUDE)
 
     if task_pool_ids is not None:
-        previous_pools = [task_pool_ for contest_task_ in contest_.contest_tasks for task_pool_ in contest_task_.task_pools]
+        previous_pools = set(
+            [task_pool_
+             for contest_task_ in contest_.contest_tasks
+             for task_pool_ in contest_task_.task_pools]
+        )
         contest_task.task_pools = []
         for task_pool_id in task_pool_ids:
             task_pool = db_get_or_raise(TaskPool, "task_pool_id", task_pool_id)
             if task_pool in previous_pools:
-                raise InsufficientData("task_pool", "already exists")
+                raise AlreadyExists("task_pool", task_pool_id)
             contest_task.task_pools.append(task_pool)
 
     db.session.commit()
@@ -378,10 +379,10 @@ def olympiad_patch(id_base_olympiad, id_olympiad):
 
     if current_contest.composite_type == ContestTypeEnum.SimpleContest:
         SimpleContestSchema(load_instance=True).load(request.json, instance=current_contest, session=db.session,
-                                                     partial=False, unknown=EXCLUDE)
+                                                     partial=True, unknown=EXCLUDE)
     else:
         CompositeContestSchema(load_instance=True).load(request.json, instance=current_contest, session=db.session,
-                                                        partial=False, unknown=EXCLUDE)
+                                                        partial=True, unknown=EXCLUDE)
 
     db.session.commit()
     return current_contest, 200
@@ -475,7 +476,7 @@ def stage_patch(id_olympiad, id_stage):
     db_get_or_raise(Contest, "contest_id", str(id_olympiad))
 
     StageSchema(load_instance=True).load(request.json, instance=stage, session=db.session,
-                                         partial=False, unknown=EXCLUDE)
+                                         partial=True, unknown=EXCLUDE)
 
     db.session.commit()
 
@@ -682,8 +683,7 @@ def task_remove(id_task_pool, id_task):
 
 @module.route(
     '/task_pool/<int:id_task_pool>/task/<int:id_task>/plain',
-    methods=['PATCH'],
-    input_schema=UpdatePlainRequestTaskEditorSchema, output_schema=TaskResponseTaskCreatorSchema)
+    methods=['PATCH'], output_schema=TaskResponseTaskCreatorSchema)
 def task_patch_plain(id_task_pool, id_task):
     """
     Update plain task
@@ -712,7 +712,7 @@ def task_patch_plain(id_task_pool, id_task):
         required: true
         content:
           application/json:
-            schema: UpdatePlainRequestTaskEditorSchema
+            schema: PlainTaskSchema
       security:
         - JWTAccessToken: [ ]
         - CSRFAccessToken: [ ]
@@ -730,7 +730,7 @@ def task_patch_plain(id_task_pool, id_task):
     task = get_task_in_pool_if_possible(id_task_pool, id_task)
 
     PlainTaskSchema(load_instance=True).load(request.json, instance=task, session=db.session,
-                                             partial=False, unknown=EXCLUDE)
+                                             partial=True, unknown=EXCLUDE)
 
     db.session.commit()
 
@@ -739,8 +739,7 @@ def task_patch_plain(id_task_pool, id_task):
 
 @module.route(
     '/task_pool/<int:id_task_pool>/task/<int:id_task>/range',
-    methods=['PATCH'],
-    input_schema=UpdateRangeRequestTaskEditorSchema, output_schema=TaskResponseTaskCreatorSchema)
+    methods=['PATCH'], output_schema=TaskResponseTaskCreatorSchema)
 def task_patch_range(id_task_pool, id_task):
     """
     Update range task
@@ -769,7 +768,7 @@ def task_patch_range(id_task_pool, id_task):
         required: true
         content:
           application/json:
-            schema: UpdateRangeRequestTaskEditorSchema
+            schema: RangeTaskSchema
       security:
         - JWTAccessToken: [ ]
         - CSRFAccessToken: [ ]
@@ -787,7 +786,7 @@ def task_patch_range(id_task_pool, id_task):
     task = get_task_in_pool_if_possible(id_task_pool, id_task)
 
     RangeTaskSchema(load_instance=True).load(request.json, instance=task, session=db.session,
-                                             partial=False, unknown=EXCLUDE)
+                                             partial=True, unknown=EXCLUDE)
 
     db.session.commit()
 
@@ -796,8 +795,7 @@ def task_patch_range(id_task_pool, id_task):
 
 @module.route(
     '/task_pool/<int:id_task_pool>/task/<int:id_task>/multiple',
-    methods=['PATCH'],
-    input_schema=UpdateMultipleRequestTaskEditorSchema, output_schema=TaskResponseTaskCreatorSchema)
+    methods=['PATCH'], output_schema=TaskResponseTaskCreatorSchema)
 def task_patch_multiple(id_task_pool, id_task):
     """
     Update multiple task
@@ -826,7 +824,7 @@ def task_patch_multiple(id_task_pool, id_task):
         required: true
         content:
           application/json:
-            schema: UpdateMultipleRequestTaskEditorSchema
+            schema: MultipleChoiceTaskSchema
       security:
         - JWTAccessToken: [ ]
         - CSRFAccessToken: [ ]
@@ -841,13 +839,12 @@ def task_patch_multiple(id_task_pool, id_task):
         '409':
           description: Olympiad type already in use
     """
-    values = request.marshmallow
+    values = request.json
     task = get_task_in_pool_if_possible(id_task_pool, id_task)
-    answers = values['answers']
-    del values['answers']
+    answers = values.pop('answers', None)
 
     MultipleChoiceTaskSchema(load_instance=True).load(values, instance=task, session=db.session,
-                                                      partial=False, unknown=EXCLUDE)
+                                                      partial=True, unknown=EXCLUDE)
     task.answers = [
         {
             "answer": answer['answer'],
