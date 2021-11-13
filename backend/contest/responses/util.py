@@ -9,7 +9,7 @@ from contest.tasks.models import SimpleContest, RangeTask, MultipleChoiceTask, P
 from .models import Response, PlainAnswerText, RangeAnswer, MultipleChoiceAnswer, PlainAnswerFile, BaseAnswer, \
     answer_dict, add_user_response, add_plain_answer_file, add_plain_answer_text, add_range_answer, \
     add_multiple_answer, ResponseStatusEnum
-from ..tasks.util import is_task_in_contest, generate_or_get_variant
+from ..tasks.util import generate_or_get_variant
 
 db = get_current_db()
 app = get_current_app()
@@ -144,6 +144,14 @@ def get_mimetype(filetype):
     return mimetypes.get(filetype)
 
 
+def get_variant_by_contest_and_user_id(contest_id, user_id):
+    user_in_contest = UserInContest.query.filter_by(user_id=user_id,
+                                                    contest_id=contest_id).one_or_none()
+    if user_in_contest is None:
+        raise NotFound("user_id, contest_id", f'{user_id}, {contest_id}')
+    return user_in_contest.variant_id
+
+
 # Checkers
 
 def check_task_type(task_id, task_type):
@@ -263,6 +271,18 @@ def check_contest_restriction(user_id, contest_id, restriction_level):
         raise RestrictionError()
 
 
+def is_task_in_variant_by_number(task_id, variant_id):
+    """
+    Check if task in variant
+    :param task_id: task id
+    :param variant_id: id of current variant
+    :return: boolean value if task in current variant
+    """
+    from contest.tasks.models import ContestTaskInVariant
+    return ContestTaskInVariant.query.filter_by(variant_id=variant_id,
+                                                base_task_id=task_id).one_or_none() is not None
+
+
 def check_timing_for_mark_editing_and_appeal(contest_id, user_role):
     from user.models import UserRoleEnum
     contest: SimpleContest = db_get_or_raise(SimpleContest, 'contest_id', contest_id)
@@ -298,8 +318,9 @@ def finish_contest(user_work: Response):
     db.session.commit()
 
 
+# noinspection DuplicatedCode
 def user_answer_post_file(user_id, contest_id, task_id):
-    if not is_task_in_contest(task_id, contest_id):
+    if not is_task_in_variant_by_number(task_id, get_variant_by_contest_and_user_id(contest_id, user_id)):
         raise NotFound('contest_id, task_id', f'{contest_id}, {task_id}')
     user_work: Response = get_user_in_contest_work(user_id, contest_id)
     user_work.finish_time = datetime.utcnow()
@@ -312,8 +333,9 @@ def user_answer_post_file(user_id, contest_id, task_id):
     db.session.commit()
 
 
+# noinspection DuplicatedCode
 def user_answer_post(user_id, contest_id, task_id, values, answer_type):
-    if not is_task_in_contest(task_id, contest_id):
+    if not is_task_in_variant_by_number(task_id, get_variant_by_contest_and_user_id(contest_id, user_id)):
         raise NotFound('contest_id, task_id', f'{contest_id}, {task_id}')
     user_work: Response = get_user_in_contest_work(user_id, contest_id)
     user_work.finish_time = datetime.utcnow()

@@ -45,11 +45,23 @@ def test_creator_create_response(client, create_three_tasks):
     assert resp.status_code == 403
 
 
+# noinspection DuplicatedCode
 def test_plain_task_text_creator(client, create_user_response):
     contest_id = get_contest_id(create_user_response, DEFAULT_INDEX)
     user_id = get_user_id(create_user_response, DEFAULT_INDEX)
-    from contest.tasks.models.tasks import TaskTypeEnum
+    from contest.tasks.models.tasks import TaskTypeEnum, PlainTask, TaskAnswerTypeEnum
     task_id = get_task_id_by_variant_and_type(contest_id, user_id, TaskTypeEnum.PlainTask)
+    from common.util import db_get_one_or_none
+    task: PlainTask = db_get_one_or_none(PlainTask, 'task_id', task_id)
+    task.answer_type = TaskAnswerTypeEnum.Text
+    wrong_task_id = 1 if task_id + 1 > 8 else task_id + 1
+    task: PlainTask = db_get_one_or_none(PlainTask, 'task_id', wrong_task_id)
+    task.answer_type = TaskAnswerTypeEnum.Text
+    test_app.db.session.commit()
+
+    resp = client.post(f'/contest/{contest_id}/task/{wrong_task_id}/user/{user_id}/plain',
+                       json={'answer_text': 'answer'})
+    assert resp.status_code == 404
 
     resp = client.post(f'/contest/{contest_id}/task/{task_id}/user/{user_id}/plain',
                        json={'answer_text': 'answer'})
@@ -84,7 +96,13 @@ def test_plain_task_file_creator(client, create_user_response):
     from common.util import db_get_one_or_none
     task: PlainTask = db_get_one_or_none(PlainTask, 'task_id', task_id)
     task.answer_type = TaskAnswerTypeEnum.File
+    wrong_task_id = 1 if task_id + 1 > 8 else task_id + 1
+    task: PlainTask = db_get_one_or_none(PlainTask, 'task_id', wrong_task_id)
+    task.answer_type = TaskAnswerTypeEnum.File
     test_app.db.session.commit()
+
+    resp = client.post(f'/contest/{contest_id}/task/{wrong_task_id}/user/{user_id}/jpeg', data=test_image)
+    assert resp.status_code == 404
 
     resp = client.post(f'/contest/{contest_id}/task/{task_id}/user/{user_id}/jpeg', data=test_image)
     assert resp.status_code == 200
@@ -137,6 +155,11 @@ def test_range_task_creator(client, create_user_response):
     user_id = get_user_id(create_user_response, DEFAULT_INDEX)
     from contest.tasks.models.tasks import TaskTypeEnum
     task_id = get_task_id_by_variant_and_type(contest_id, user_id, TaskTypeEnum.RangeTask)
+    wrong_task_id = 9 if task_id + 1 > 16 else task_id + 1
+
+    resp = client.post(f'/contest/{contest_id}/task/{wrong_task_id}/user/{user_id}/range',
+                       json={'answer': 0.6})
+    assert resp.status_code == 404
 
     resp = client.post(f'/contest/{contest_id}/task/{task_id}/user/{user_id}/range',
                        json={'answer': 0.6})
@@ -166,10 +189,15 @@ def test_multiple_task_creator(client, create_user_response):
     user_id = get_user_id(create_user_response, DEFAULT_INDEX)
     from contest.tasks.models.tasks import TaskTypeEnum
     task_id = get_task_id_by_variant_and_type(contest_id, user_id, TaskTypeEnum.MultipleChoiceTask)
+    wrong_task_id = 17 if task_id + 1 > 24 else task_id + 1
 
     resp = client.post(f'/contest/{contest_id}/task/{task_id}/user/{user_id}/multiple',
                        json={"answers": [{"answer": "1"}, {"answer": "4"}]})
     assert resp.status_code == 409
+
+    resp = client.post(f'/contest/{contest_id}/task/{wrong_task_id}/user/{user_id}/multiple',
+                       json={"answers": [{"answer": "1"}, {"answer": "3"}]})
+    assert resp.status_code == 404
 
     resp = client.post(f'/contest/{contest_id}/task/{task_id}/user/{user_id}/multiple',
                        json={"answers": [{"answer": "1"}, {"answer": "3"}]})
