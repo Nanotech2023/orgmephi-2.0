@@ -11,6 +11,12 @@ def client(client_creator):
 
 
 @pytest.fixture
+def client_tasks(client_creator):
+    client_creator.set_prefix('contest/tasks/creator')
+    yield client_creator
+
+
+@pytest.fixture
 def client_admin_response(client_admin):
     client_admin.set_prefix('contest/responses/creator')
     yield client_admin
@@ -84,6 +90,20 @@ def test_plain_task_text_creator(client, create_user_response):
     assert resp.status_code == 200
     assert resp.json['answer_type'] == 'PlainAnswerText'
     assert resp.json['answer_text'] == 'answer'
+
+
+# noinspection DuplicatedCode
+def test_get_variant_by_number(client_tasks, create_user_response):
+    index = 1
+    contest_id = get_contest_id(create_user_response, index)
+    user_id = get_user_id(create_user_response, index)
+    variant = get_variant_by_num(contest_id, user_id)
+    resp = client_tasks.get(f'/contest/{contest_id}/variant/{variant.variant_number}', data=test_image)
+    assert resp.status_code == 200
+    assert resp.json['variant_id'] == variant.variant_id
+
+    resp = client_tasks.get(f'/contest/{contest_id}/variant/{variant.variant_number+1}', data=test_image)
+    assert resp.status_code == 409
 
 
 # noinspection DuplicatedCode

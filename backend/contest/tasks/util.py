@@ -220,23 +220,6 @@ def is_task_in_variant(task_id, variant):
                                                 base_task_id=task_id).one_or_none() is not None
 
 
-def is_task_in_contest(task_id, contest_id):
-    """
-    Check if task in contest
-    :param task_id: task id
-    :param contest_id: contest id
-    :return: boolean value if task in contest
-    """
-
-    current_contest: Contest = db_get_or_raise(Contest, "contest_id", contest_id)
-    contest_tasks = current_contest.contest_tasks.all()
-    if len(contest_tasks) == 0:
-        return False
-    return next(contest_task.contest_task_id for contest_task in contest_tasks if
-                ContestTaskInVariant.query.filter_by(contest_task_id=contest_task.contest_task_id,
-                                                     base_task_id=task_id).all() is not None) is not None
-
-
 # Participant module
 
 
@@ -263,38 +246,6 @@ def get_contest_for_participant_if_possible(olympiad_id, stage_id, contest_id):
         raise DataConflict("Current contest is not in chosen stage")
 
     return current_contest
-
-
-def get_user_contest_if_possible(olympiad_id, stage_id, contest_id):
-    """
-    Get contest for user or raise exception
-    :param olympiad_id:
-    :param stage_id:
-    :param contest_id:
-    :return: user contest
-    """
-    current_contest = db_get_or_raise(Contest, "contest_id", str(contest_id))
-
-    # user is not registered
-    if not is_user_in_contest(jwt_get_id(), current_contest):
-        raise DataConflict("User is not registered for this olympiad")
-
-    return get_contest_for_participant_if_possible(olympiad_id, stage_id, contest_id)
-
-
-def get_user_simple_contest_if_possible(olympiad_id):
-    """
-    Get contest for user or raise exception
-    :param olympiad_id:
-    :return: user contest
-    """
-    current_olympiad = get_simple_contest_if_possible(olympiad_id)
-
-    # user is not registered
-    if not is_user_in_contest(jwt_get_id(), current_olympiad):
-        raise DataConflict("User is not registered for this olympiad")
-
-    return current_olympiad
 
 
 def get_user_in_contest_by_id_if_possible(contest_id, user_id) -> UserInContest:
@@ -480,16 +431,6 @@ def user_can_view_variants_and_tasks(id_contest):
 
 
 # Schema
-
-
-def validate_file_size(binary_file):
-    """
-    Check size of binary file
-    :param binary_file:  file
-    :return: size
-    """
-    if len(binary_file) > app.config['ORGMEPHI_MAX_FILE_SIZE']:
-        raise FileTooLarge()
 
 
 def check_user_unfilled_for_enroll(current_user: User):

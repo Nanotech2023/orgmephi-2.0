@@ -254,3 +254,12 @@ def get_task_id_by_variant_and_type(contest_id, user_id, task_type):
         task = db_get_one_or_none(Task, 'task_id', task_id)
         if task.task_type == task_type:
             return task.task_id
+
+
+def get_variant_by_num(contest_id, user_id):
+    from contest.tasks.models import UserInContest, Variant
+    from common.util import db_get_one_or_none
+    variant_id = UserInContest.query.filter_by(user_id=user_id,
+                                               contest_id=contest_id).one_or_none().variant_id
+    variant = db_get_one_or_none(Variant, "variant_id", variant_id)
+    return variant
