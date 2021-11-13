@@ -140,20 +140,6 @@ def get_composite_contest_if_possible(contest_id):
 
 # Generators
 
-
-def get_last_variant_in_contest(current_contest):
-    """
-    Get last variant number in current contest
-    :param current_contest: current contest
-    :return: max number of the variant
-    """
-    variants = current_contest.variants.all()
-    if len(variants) > 0:
-        return max(variant.variant_number for variant in variants)
-    else:
-        return 0
-
-
 def try_to_generate_variant(contest_id, user_id):
     current_user = UserInContest.query.filter_by(user_id=user_id,
                                                  contest_id=contest_id).one_or_none()
@@ -425,20 +411,6 @@ def get_base_contest(current_contest):
     return current_olympiad.base_contest
 
 
-def get_variant_if_possible(contest_id, variant_id):
-    """
-    Get variant by id
-    :param contest_id: Simple contest
-    :param variant_id:id variant
-    :return:
-    """
-    current_contest = get_simple_contest_if_possible(contest_id)
-
-    variant = current_contest.variants.filter_by(variant_id=str(variant_id)).one_or_none()
-
-    return variant
-
-
 def get_variant_if_possible_by_number(contest_id, variant_num):
     """
     Get variant by num
@@ -448,7 +420,7 @@ def get_variant_if_possible_by_number(contest_id, variant_num):
     """
     current_contest = get_simple_contest_if_possible(contest_id)
 
-    variant = current_contest.variants.filter_by(variant_number=str(variant_num)).one_or_none()
+    variant = current_contest.variants.filter_by(variant_number=variant_num).one_or_none()
 
     if variant is None:
         raise DataConflict('No variants in this contest')
