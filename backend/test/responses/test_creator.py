@@ -107,6 +107,19 @@ def test_get_variant_by_number(client_tasks, create_user_response):
 
 
 # noinspection DuplicatedCode
+def test_get_variants_all(client_tasks, create_user_response):
+    index = 1
+    contest_id = get_contest_id(create_user_response, index)
+    from contest.tasks.models.olympiad import SimpleContest
+    from common.util import db_get_one_or_none
+    contest: SimpleContest = db_get_one_or_none(SimpleContest, 'contest_id', contest_id)
+    user_id = get_user_id(create_user_response, index)
+    resp = client_tasks.get(f'/contest/{contest_id}/variant/all')
+    assert resp.status_code == 200
+    assert len(resp.json['variants_list']) == len(contest.variants.all())
+
+
+# noinspection DuplicatedCode
 def test_plain_task_file_creator(client, create_user_response):
     index = 1
     contest_id = get_contest_id(create_user_response, index)

@@ -10,6 +10,12 @@ def client(client_university):
     yield client_university
 
 
+@pytest.fixture
+def client_tasks(client_university):
+    client_university.set_prefix('contest/tasks/participant')
+    yield client_university
+
+
 # noinspection DuplicatedCode
 def test_user_response_participant(client, create_three_tasks):
     contest_id = get_contest_id(create_three_tasks, DEFAULT_INDEX)
@@ -66,6 +72,26 @@ def test_user_response_offline_contest_participant(client, create_three_tasks):
 
     resp = client.post(f'/contest/{contest_id}/user/self/create')
     assert resp.status_code == 409
+
+
+# noinspection DuplicatedCode
+def test_get_user_task_participant(client_tasks, create_user_response):
+    contest_id = get_contest_id(create_user_response, DEFAULT_INDEX)
+    user_id = get_user_id(create_user_response, DEFAULT_INDEX)
+    from contest.tasks.models.tasks import TaskTypeEnum, Task
+    task_id = get_task_id_by_variant_and_type(contest_id, user_id, TaskTypeEnum.PlainTask)
+    from common.util import db_get_one_or_none
+    task = db_get_one_or_none(Task, "task_id", task_id)
+
+    resp = client_tasks.get(f'/contest/{contest_id}/tasks/{task_id}/image/self')
+    assert resp.status_code == 404
+
+    from common.media_types import TaskImage
+    test_app.io_to_media('TASK', task, 'image_of_task', io.BytesIO(test_image), TaskImage)
+    test_app.db.session.commit()
+
+    resp = client_tasks.get(f'/contest/{contest_id}/tasks/{task_id}/image/self')
+    assert resp.status_code == 200
 
 
 # noinspection DuplicatedCode
