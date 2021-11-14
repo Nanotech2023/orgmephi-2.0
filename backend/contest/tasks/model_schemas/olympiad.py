@@ -1,4 +1,4 @@
-from marshmallow import fields, validate, post_dump, pre_load, post_load
+from marshmallow import fields, validate, post_dump, pre_load
 from marshmallow import fields as m_f
 from marshmallow_enum import EnumField
 from marshmallow_oneofschema import OneOfSchema

@@ -48,13 +48,3 @@ class TestCertificateArgsTasksAdminSchema(Schema):
     first_name = common_fields.CommonName(required=False, load_default='Ivan')
     second_name = common_fields.CommonName(required=False, load_default='Ivanov')
     middle_name = common_fields.CommonName(required=False, load_default='Ivanovich')
-
-
-# Contests with user count
-
-class IncludeComplexQuerySchema(Schema):
-    include_complex = fields.Boolean()
-
-
-class ListContestsWithUserCountRequestSchema(Schema):
-    contests = fields.List(fields.Nested(ContestSchema), required=True)
