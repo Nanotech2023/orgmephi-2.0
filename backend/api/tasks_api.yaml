@@ -415,6 +415,9 @@ components:
           - In progress
           - Finished
           type: string
+        user_count:
+          readOnly: true
+          type: integer
         visibility:
           type: boolean
       required:
@@ -513,9 +516,10 @@ components:
           type: integer
         task_pools:
           items:
-            $ref: '#/components/schemas/TaskPool'
-          readOnly: true
+            type: integer
+          minItems: 1
           type: array
+          writeOnly: true
       required:
       - num
       - task_points
@@ -939,6 +943,9 @@ components:
         tasks_number:
           type: integer
         total_points:
+          type: integer
+        user_count:
+          readOnly: true
           type: integer
         visibility:
           type: boolean

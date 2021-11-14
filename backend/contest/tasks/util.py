@@ -610,33 +610,3 @@ def get_certificate_for_user(user_info, contest_name, certificate):
                             certificate.text_color, certificate.max_lines)
     return send_file(img, mimetype='application/pdf', as_attachment=True,
                      attachment_filename=f'Сертификат_{contest_name}_{user_name}'.replace(" ", "_"))
-
-
-def get_contests_with_users_count(include_complex):
-    contests = SimpleContest.query.all()
-    data = [
-        {
-            'contest_info': contest_elem,
-            'user_count': UserInContest.query.filter_by(contest_id=contest_elem.contest_id).count()
-        }
-        for contest_elem in contests
-    ]
-    composite_data = []
-    if include_complex:
-        for composite_contest in CompositeContest.query.all():
-            stages = [stage for stage in composite_contest.stages.all()]
-            staged_contests = []
-            for stage in stages:
-                staged_contests.extend([contest_s for contest_s in stage.contests])
-            users = [UserInContest.query.filter_by(contest_id=composite_elem.contest_id).count()
-                     for composite_elem in staged_contests]
-            composite_data.append(
-                {
-                    'contest_info': composite_contest,
-                    'user_count': sum(users)
-                }
-            )
-    data.extend(composite_data)
-    return {
-        'contests': data
-    }

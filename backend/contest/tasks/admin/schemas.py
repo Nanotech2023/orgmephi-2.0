@@ -56,10 +56,5 @@ class IncludeComplexQuerySchema(Schema):
     include_complex = fields.Boolean()
 
 
-class ContestWithUserCountElemSchema(Schema):
-    contest_info = fields.Nested(nested=ContestSchema, required=True)
-    user_count = fields.Int(required=True)
-
-
 class ListContestsWithUserCountRequestSchema(Schema):
-    contests = fields.List(fields.Nested(ContestWithUserCountElemSchema), required=True)
+    contests = fields.List(fields.Nested(ContestSchema), required=True)
