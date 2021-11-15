@@ -3,6 +3,7 @@ from marshmallow_enum import EnumField
 from marshmallow_oneofschema import OneOfSchema
 from marshmallow_sqlalchemy import SQLAlchemySchema, auto_field, fields
 from marshmallow import fields as m_f
+from marshmallow_sqlalchemy.fields import Related
 
 from common.errors import InsufficientData
 from contest.tasks.models import *
@@ -45,29 +46,19 @@ class ContestTaskSchema(SQLAlchemySchema):
         sqla_session = db.session
 
     contest_task_id = auto_field(column_name='contest_task_id', dump_only=True)
-    task_pool_ids = m_f.List(m_f.Int, column_name='task_pool_ids', load_only=True)
+    task_pools = fields.RelatedList(Related('task_pool_id'), attribute='task_pools', load_only=True)
     num = auto_field(column_name='num',
                      validate=sequential_number_validator,
                      required=True)
     task_points = auto_field(column_name='task_points',
                              validate=points_validator,
                              required=True)
-    task_pools = fields.Nested(nested=TaskPoolSchema,
-                               many=True,
-                               dump_only=True,
-                               required=True,
-                               validate=validate.Length(min=1)
-                               )
-
-    @post_load()
-    def test_task_pool_ids(self, data, many, **kwargs):
-        if not isinstance(data.task_pool_ids, list):
-            raise InsufficientData('task_pool_ids', "not valid values")
-
-        if any(not isinstance(i, int) for i in data.task_pool_ids):
-            raise InsufficientData('task_pool_ids', "not valid values")
-
-        return data
+    task_pools_values = fields.Nested(nested=TaskPoolSchema,
+                                      many=True,
+                                      dump_only=True,
+                                      required=True,
+                                      validate=validate.Length(min=1)
+                                      )
 
 
 """

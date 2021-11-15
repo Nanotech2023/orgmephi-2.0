@@ -510,12 +510,12 @@ components:
           minimum: 0
           nullable: true
           type: integer
-        task_pool_ids:
+        task_pools:
           items:
             type: integer
           type: array
           writeOnly: true
-        task_pools:
+        task_pools_values:
           items:
             $ref: '#/components/schemas/TaskPool'
           minItems: 1
@@ -524,7 +524,7 @@ components:
       required:
       - num
       - task_points
-      - task_pools
+      - task_pools_values
       type: object
     ContestTaskResponseTaskCreator:
       properties:

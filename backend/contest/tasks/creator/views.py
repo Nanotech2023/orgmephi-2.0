@@ -451,11 +451,11 @@ def contest_task_create(id_contest):
     contest_: Contest = db_get_or_raise(Contest, "contest_id", id_contest)
 
     previous_pools = {
-        task_pool_
+        task_pool_.task_pool_id
         for contest_task_ in contest_.contest_tasks
         for task_pool_ in contest_task_.task_pools}
 
-    if previous_pools & task_pool_ids:
+    if previous_pools & set(task_pool_ids):
         raise AlreadyExists("task_pool", "task_pool_id")
 
     contest_task.task_pools.extend(
