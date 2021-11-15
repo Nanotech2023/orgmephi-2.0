@@ -513,18 +513,13 @@ components:
         task_pools:
           items:
             type: integer
+          minItems: 1
           type: array
           writeOnly: true
-        task_pools_values:
-          items:
-            $ref: '#/components/schemas/TaskPool'
-          minItems: 1
-          readOnly: true
-          type: array
       required:
       - num
       - task_points
-      - task_pools_values
+      - task_pools
       type: object
     ContestTaskResponseTaskCreator:
       properties:

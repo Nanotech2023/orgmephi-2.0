@@ -265,7 +265,7 @@ def contest_task_edit(id_contest, id_contest_task):
     """
 
     values = request.json
-    task_pool_ids = values.pop('task_pool_ids', None)
+    task_pool_ids = values.pop('task_pools', None)
 
     contest_ = db_get_or_raise(Contest, "contest_id", id_contest)
     contest_task = db_get_or_raise(ContestTask, "contest_task_id", id_contest_task)
@@ -278,8 +278,10 @@ def contest_task_edit(id_contest, id_contest_task):
              for contest_task_ in contest_.contest_tasks
              for task_pool_ in contest_task_.task_pools]
         )
-        if previous_pools & set(task_pool_ids):
-            raise AlreadyExists("task_pool", "task_pool_id")
+
+        if len(previous_pools) != 0:
+            if previous_pools & set(task_pool_ids):
+                raise AlreadyExists("task_pool", "task_pool_id")
 
         contest_task.task_pools = []
 

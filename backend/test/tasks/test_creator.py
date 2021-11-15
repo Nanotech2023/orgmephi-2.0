@@ -209,7 +209,7 @@ def test_contest_task_create(client, test_simple_contest, test_create_tasks_pool
                        json={
                            'num': 1,
                            'task_points': 15,
-                           'task_pool_ids': [test_create_tasks_pool[0].task_pool_id]
+                           'task_pools': [test_create_tasks_pool[0].task_pool_id]
                        })
     assert resp.status_code == 200
     contest_task: ContestTask = ContestTask.query.filter_by(
@@ -221,7 +221,7 @@ def test_contest_task_create(client, test_simple_contest, test_create_tasks_pool
                        json={
                            'num': 2,
                            'task_points': 15,
-                           'task_pool_ids': [test_create_tasks_pool[0].task_pool_id]
+                           'task_pools': [test_create_tasks_pool[0].task_pool_id]
                        })
     assert resp.status_code == 409
 

@@ -46,7 +46,10 @@ class ContestTaskSchema(SQLAlchemySchema):
         sqla_session = db.session
 
     contest_task_id = auto_field(column_name='contest_task_id', dump_only=True)
-    task_pools = fields.RelatedList(Related('task_pool_id'), attribute='task_pools', load_only=True)
+    task_pools = fields.RelatedList(Related('task_pool_id'),
+                                    attribute='task_pools',
+                                    load_only=True,
+                                    validate=validate.Length(min=1))
     num = auto_field(column_name='num',
                      validate=sequential_number_validator,
                      required=True)
@@ -54,10 +57,11 @@ class ContestTaskSchema(SQLAlchemySchema):
                              validate=points_validator,
                              required=True)
     task_pools_values = fields.Nested(nested=TaskPoolSchema,
+                                      data_key='task_pools',
+                                      attribute='task_pools',
                                       many=True,
                                       dump_only=True,
-                                      required=True,
-                                      validate=validate.Length(min=1)
+                                      required=True
                                       )
 
 

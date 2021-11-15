@@ -117,7 +117,7 @@ def step_create_contest_tasks(client, state):
         request = {
             'num': i + 1,
             'task_points': 15,
-            'task_pool_ids': [state.tasks_pools[i]['task_pool_id']]
+            'task_pools': [state.tasks_pools[i]['task_pool_id']]
         }
         if i == 1:
             request['task_points'] = 8
