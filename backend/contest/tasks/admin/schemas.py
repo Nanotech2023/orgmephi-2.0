@@ -26,6 +26,8 @@ class CreateRussiaLocationRequestTaskAdminSchema(Schema):
 
 
 # Location
+class VariantIdResponseTaskAdminSchema(Schema):
+    variant_id = fields.Int(required=True)
 
 
 class LocationResponseTaskAdminSchema(Schema):

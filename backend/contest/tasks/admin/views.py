@@ -413,13 +413,13 @@ def patch_certificate(certificate_id):
     certificate = db_get_or_raise(Certificate, 'certificate_id', certificate_id)
     db.session.expunge(certificate)
 
-    CertificateSchema(load_instance=True)\
+    CertificateSchema(load_instance=True) \
         .load(request.json, session=db.session, partial=True, unknown=EXCLUDE, instance=certificate)
 
     category = certificate.certificate_category
     query = Certificate.query.filter_by(certificate_type_id=certificate.certificate_type_id,
                                         certificate_category=category,
-                                        certificate_year=certificate.certificate_year).\
+                                        certificate_year=certificate.certificate_year). \
         filter(Certificate.certificate_id != certificate.certificate_id)
     exists = db.session.query(query.exists()).scalar()
     if exists:
@@ -614,6 +614,7 @@ def test_certificate(certificate_id):
 
 @module.route(
     '/contest/<int:id_contest>/user/<int:id_user>/variant/generate',
+    output_schema=VariantIdResponseTaskAdminSchema,
     methods=['POST'])
 def generate_variant_in_contest(id_contest, id_user):
     """
@@ -636,9 +637,13 @@ def generate_variant_in_contest(id_contest, id_user):
       security:
         - JWTAccessToken: [ ]
         - CSRFAccessToken: [ ]
+
       responses:
         '200':
           description: OK
+          content:
+            application/json:
+              schema: VariantIdResponseTaskAdminSchema
         '400':
           description: Bad request
         '409':
@@ -647,6 +652,8 @@ def generate_variant_in_contest(id_contest, id_user):
           description: User not found
     """
 
-    try_to_generate_variant(id_contest, id_user)
+    variant_id = try_to_generate_variant(id_contest, id_user)
     db.session.commit()
-    return {}, 200
+    return {
+               "variant_id": variant_id
+           }, 200

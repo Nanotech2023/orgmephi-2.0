@@ -1,12 +1,13 @@
-from marshmallow import validate, Schema
+from marshmallow import validate, Schema, post_load
 from marshmallow_enum import EnumField
 from marshmallow_oneofschema import OneOfSchema
 from marshmallow_sqlalchemy import SQLAlchemySchema, auto_field, fields
 from marshmallow import fields as m_f
 
+from common.errors import InsufficientData
 from contest.tasks.models import *
 from user.models.auth import *
-from common.fields import text_validator, common_name_validator, points_validator, sequential_number_validator
+from common.fields import text_validator, common_name_validator, sequential_number_validator, points_validator
 
 """
 Task Pool
@@ -57,6 +58,16 @@ class ContestTaskSchema(SQLAlchemySchema):
                                required=True,
                                validate=validate.Length(min=1)
                                )
+
+    @post_load()
+    def test_task_pool_ids(self, data, many, **kwargs):
+        if not isinstance(data.task_pool_ids, list):
+            raise InsufficientData('task_pool_ids', "not valid values")
+
+        if any(not isinstance(i, int) for i in data.task_pool_ids):
+            raise InsufficientData('task_pool_ids', "not valid values")
+
+        return data
 
 
 """
@@ -112,6 +123,7 @@ class MultipleChoiceTaskSchema(SQLAlchemySchema):
     name = auto_field(column_name='name',
                       validate=common_name_validator)
     answers = m_f.Nested(AnswerSchema, many=True, required=False)
+    # answers = auto_field(column_name='answers', many=True, required=False)
 
 
 class TaskSchema(OneOfSchema):

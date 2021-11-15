@@ -455,11 +455,12 @@ def contest_task_create(id_contest):
         for contest_task_ in contest_.contest_tasks
         for task_pool_ in contest_task_.task_pools}
 
-    for task_pool_id in task_pool_ids:
-        task_pool = db_get_or_raise(TaskPool, "task_pool_id", task_pool_id)
-        if task_pool in previous_pools:
-            raise AlreadyExists("task_pool", task_pool_id)
-        contest_task.task_pools.append(task_pool)
+    if previous_pools & task_pool_ids:
+        raise AlreadyExists("task_pool", "task_pool_id")
+
+    contest_task.task_pools.extend(
+        [db_get_or_raise(TaskPool, "task_pool_id", task_pool_id) for task_pool_id in task_pool_ids]
+    )
 
     contest_.contest_tasks.append(contest_task)
     db.session.commit()
@@ -762,12 +763,7 @@ def task_create_multiple(id_task_pool):
     db.session.add(task)
     task_pool.tasks.append(task)
 
-    task.answers = [
-        {
-            "answer": answer['answer'],
-            "is_right_answer": answer['is_right_answer']
-        }
-        for answer in answers]
+    task.answers = answers
 
     db.session.commit()
 

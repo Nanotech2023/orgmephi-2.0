@@ -187,6 +187,7 @@ def try_to_generate_variant(contest_id, user_id):
     current_user.variant_id = variant.variant_id
 
     db.session.flush()
+    return variant.variant_id
 
 
 # User module

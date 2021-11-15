@@ -1374,6 +1374,13 @@ components:
       required:
       - variant_number
       type: object
+    VariantIdResponseTaskAdmin:
+      properties:
+        variant_id:
+          type: integer
+      required:
+      - variant_id
+      type: object
     VariantResponseTaskCreator:
       properties:
         variant_id:
@@ -3073,6 +3080,10 @@ paths:
           type: integer
       responses:
         '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VariantIdResponseTaskAdmin'
           description: OK
         '400':
           description: Bad request
