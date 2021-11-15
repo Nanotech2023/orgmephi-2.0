@@ -108,6 +108,16 @@ components:
       required:
       - variants_list
       type: object
+    Answer:
+      properties:
+        answer:
+          type: string
+        is_right_answer:
+          type: boolean
+      required:
+      - answer
+      - is_right_answer
+      type: object
     AnswersInTaskRequestTaskCreator:
       properties:
         answer:
@@ -493,14 +503,22 @@ components:
           readOnly: true
           type: integer
         num:
+          minimum: 1
           nullable: true
           type: integer
         task_points:
+          minimum: 0
           nullable: true
           type: integer
+        task_pool_ids:
+          items:
+            type: integer
+          type: array
+          writeOnly: true
         task_pools:
           items:
             $ref: '#/components/schemas/TaskPool'
+          minItems: 1
           readOnly: true
           type: array
       required:
@@ -705,9 +723,11 @@ components:
     MultipleChoiceTask:
       properties:
         answers:
-          nullable: true
-          type: string
+          items:
+            $ref: '#/components/schemas/Answer'
+          type: array
         name:
+          maxLength: 32
           nullable: true
           type: string
         task_id:
@@ -781,6 +801,7 @@ components:
           - Text
           type: string
         name:
+          maxLength: 32
           nullable: true
           type: string
         recommended_answer:
@@ -798,6 +819,7 @@ components:
         end_value:
           type: number
         name:
+          maxLength: 32
           nullable: true
           type: string
         start_value:
@@ -1071,12 +1093,14 @@ components:
           nullable: true
           type: string
         orig_task_points:
+          minimum: 0
           nullable: true
           type: integer
         task_pool_id:
           readOnly: true
           type: integer
         year:
+          minimum: 2000
           nullable: true
           type: integer
       required:
@@ -3032,6 +3056,33 @@ paths:
           description: OK
       security:
       - JWTAccessToken: []
+  /tasks/admin/contest/{id_contest}/user/{id_user}/variant/generate:
+    post:
+      parameters:
+      - description: Id of the contest
+        in: path
+        name: id_contest
+        required: true
+        schema:
+          type: integer
+      - description: Id of the user
+        in: path
+        name: id_user
+        required: true
+        schema:
+          type: integer
+      responses:
+        '200':
+          description: OK
+        '400':
+          description: Bad request
+        '409':
+          description: Olympiad type already in use
+        '404':
+          description: User not found
+      security:
+      - JWTAccessToken: []
+      - CSRFAccessToken: []
   /tasks/participant/contest/{id_contest}/variant/self:
     get:
       parameters:
