@@ -149,7 +149,7 @@ class SimpleContestSchema(SQLAlchemySchema):
         from common.jwt_verify import jwt_get_role
         from user.models import UserRoleEnum
         role = jwt_get_role()
-        if role is None or role == UserRoleEnum.participant.value:
+        if role != UserRoleEnum.admin.value and role != UserRoleEnum.creator.value:
             del data['user_count']
         return data
 
@@ -212,7 +212,7 @@ class CompositeContestSchema(SQLAlchemySchema):
         from common.jwt_verify import jwt_get_role
         from user.models import UserRoleEnum
         role = jwt_get_role()
-        if role is None or role == UserRoleEnum.participant.value:
+        if role != UserRoleEnum.admin.value and role != UserRoleEnum.creator.value:
             del data['user_count']
         return data
 
@@ -226,8 +226,6 @@ class ContestSchema(OneOfSchema):
     class_types = {SimpleContestSchema: ContestTypeEnum.SimpleContest.value,
                    CompositeContestSchema: ContestTypeEnum.CompositeContest.value}
 
-    user_count = fields.Integer(required=False, dump_only=True)
-
     def get_obj_type(self, obj):
         obj_type = obj.composite_type
         if obj_type is None:
@@ -239,12 +237,3 @@ class ContestSchema(OneOfSchema):
         if location is not None:
             return ContestTypeEnum.SimpleContest.value
         return ContestTypeEnum.CompositeContest.value
-
-    @post_dump
-    def delete_user_count(self, data, many, **kwargs):
-        from common.jwt_verify import jwt_get_role
-        from user.models import UserRoleEnum
-        role = jwt_get_role()
-        if role is None or role == UserRoleEnum.participant.value:
-            del data['user_count']
-        return data

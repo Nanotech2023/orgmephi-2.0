@@ -215,9 +215,9 @@ class Contest(db.Model):
     @hybrid_property
     def academic_year(self):
         if self.composite_type == ContestTypeEnum.CompositeContest:
-            return CompositeContest.query.filter_by(contest_id=self.contest_id)
+            return CompositeContest.query.filter_by(contest_id=self.contest_id).one_or_none().academic_year
         else:
-            return SimpleContest.query.filter_by(contest_id=self.contest_id)
+            return SimpleContest.query.filter_by(contest_id=self.contest_id).one_or_none().academic_year
 
     @academic_year.expression
     def academic_year(cls):
@@ -238,9 +238,9 @@ class Contest(db.Model):
     @hybrid_property
     def user_count(self):
         if self.composite_type == ContestTypeEnum.CompositeContest:
-            return CompositeContest.query.filter_by(contest_id=self.contest_id)
+            return CompositeContest.query.filter_by(contest_id=self.contest_id).one_or_none().user_count
         else:
-            return SimpleContest.query.filter_by(contest_id=self.contest_id)
+            return SimpleContest.query.filter_by(contest_id=self.contest_id).one_or_none().user_count
 
 
 def add_simple_contest(db_session,
