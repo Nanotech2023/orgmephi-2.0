@@ -4,7 +4,7 @@ from marshmallow_enum import EnumField
 from common import fields as common_fields
 from contest.tasks.model_schemas.certificate import CertificateTypeSchema
 from contest.tasks.models import OlympiadSubjectEnum, StageConditionEnum, ContestHoldingTypeEnum, \
-    UserStatusEnum, OlympiadLevelEnum, TaskAnswerTypeEnum
+    UserStatusEnum, OlympiadLevelEnum
 
 
 # Base contest

@@ -115,7 +115,7 @@ def step_create_contest_tasks(client, state):
     state.contest_tasks = []
     for i in range(GENERATE_TASKS_NUMBER):
         request = {
-            'num': i,
+            'num': i + 1,
             'task_points': 15,
             'task_pool_ids': [state.tasks_pools[i]['task_pool_id']]
         }

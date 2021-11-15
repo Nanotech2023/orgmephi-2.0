@@ -6,7 +6,7 @@ from marshmallow import fields as m_f
 
 from contest.tasks.models import *
 from user.models.auth import *
-from common.fields import text_validator, common_name_validator
+from common.fields import text_validator, common_name_validator, points_validator, sequential_number_validator
 
 """
 Task Pool
@@ -25,10 +25,10 @@ class TaskPoolSchema(SQLAlchemySchema):
                       validate=text_validator,
                       required=True)
     year = auto_field(column_name='year',
-                      validate=validate.Regexp('^[0-9]{4}$'),
+                      validate=validate.Range(min=2000),
                       required=True)
     orig_task_points = auto_field(column_name='orig_task_points',
-                                  validate=validate.Regexp('^[0-9]{4}$'),
+                                  validate=points_validator,
                                   required=True)
 
 
@@ -44,11 +44,12 @@ class ContestTaskSchema(SQLAlchemySchema):
         sqla_session = db.session
 
     contest_task_id = auto_field(column_name='contest_task_id', dump_only=True)
+    task_pool_ids = m_f.List(m_f.Int, column_name='task_pool_ids', load_only=True)
     num = auto_field(column_name='num',
-                     validate=validate.Regexp('^[0-9]{3}$'),
+                     validate=sequential_number_validator,
                      required=True)
     task_points = auto_field(column_name='task_points',
-                             validate=validate.Regexp('^[0-9]{4}$'),
+                             validate=points_validator,
                              required=True)
     task_pools = fields.Nested(nested=TaskPoolSchema,
                                many=True,
@@ -111,7 +112,6 @@ class MultipleChoiceTaskSchema(SQLAlchemySchema):
     name = auto_field(column_name='name',
                       validate=common_name_validator)
     answers = m_f.Nested(AnswerSchema, many=True, required=False)
-    #answers = auto_field(column_name='answers', many=True, required=False)
 
 
 class TaskSchema(OneOfSchema):

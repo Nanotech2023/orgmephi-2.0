@@ -216,20 +216,6 @@ def test_contest_task_create(client, test_simple_contest, test_create_tasks_pool
         contest_task_id=resp.json['contest_task_id']).one_or_none()
     assert contest_task.contest_task_id == resp.json['contest_task_id']
 
-    resp = client.post(f'/contest/{test_simple_contest[0].contest_id}/contest_task/create',
-                       json={
-                           'num': 2,
-                           'task_points': 15,
-                           'task_pool_ids': []
-                       })
-    assert resp.status_code == 409
-
-    resp = client.post(f'/contest/{test_simple_contest[0].contest_id}/contest_task/create',
-                       json={
-                           'num': 2,
-                           'task_points': 15
-                       })
-    assert resp.status_code == 409
 
     resp = client.post(f'/contest/{test_simple_contest[0].contest_id}/contest_task/create',
                        json={
