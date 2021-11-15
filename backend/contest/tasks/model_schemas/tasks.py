@@ -1,10 +1,12 @@
+from marshmallow import validate, Schema
 from marshmallow_enum import EnumField
 from marshmallow_oneofschema import OneOfSchema
 from marshmallow_sqlalchemy import SQLAlchemySchema, auto_field, fields
+from marshmallow import fields as m_f
 
 from contest.tasks.models import *
 from user.models.auth import *
-from common.fields import text_validator
+from common.fields import text_validator, common_name_validator
 
 """
 Task Pool
@@ -17,10 +19,17 @@ class TaskPoolSchema(SQLAlchemySchema):
         load_instance = True
         sqla_session = db.session
 
-    task_pool_id = auto_field(column_name='task_pool_id', dump_only=True)
-    name = auto_field(column_name='name', validate=text_validator, required=True)
-    year = auto_field(column_name='year', required=True)
-    orig_task_points = auto_field(column_name='orig_task_points', required=True)
+    task_pool_id = auto_field(column_name='task_pool_id',
+                              dump_only=True)
+    name = auto_field(column_name='name',
+                      validate=text_validator,
+                      required=True)
+    year = auto_field(column_name='year',
+                      validate=validate.Regexp('^[0-9]{4}$'),
+                      required=True)
+    orig_task_points = auto_field(column_name='orig_task_points',
+                                  validate=validate.Regexp('^[0-9]{4}$'),
+                                  required=True)
 
 
 """
@@ -35,9 +44,18 @@ class ContestTaskSchema(SQLAlchemySchema):
         sqla_session = db.session
 
     contest_task_id = auto_field(column_name='contest_task_id', dump_only=True)
-    num = auto_field(column_name='num', required=True)
-    task_points = auto_field(column_name='task_points', required=True)
-    task_pools = fields.Nested(nested=TaskPoolSchema, many=True, dump_only=True, required=True)
+    num = auto_field(column_name='num',
+                     validate=validate.Regexp('^[0-9]{3}$'),
+                     required=True)
+    task_points = auto_field(column_name='task_points',
+                             validate=validate.Regexp('^[0-9]{4}$'),
+                             required=True)
+    task_pools = fields.Nested(nested=TaskPoolSchema,
+                               many=True,
+                               dump_only=True,
+                               required=True,
+                               validate=validate.Length(min=1)
+                               )
 
 
 """
@@ -52,9 +70,15 @@ class PlainTaskSchema(SQLAlchemySchema):
         sqla_session = db.session
 
     task_id = auto_field(column_name='task_id', dump_only=True)
-    name = auto_field(column_name='name')
-    recommended_answer = auto_field(column_name='recommended_answer', validate=text_validator, required=True)
-    answer_type = EnumField(TaskAnswerTypeEnum, data_key='answer_type', by_value=True, required=False)
+    name = auto_field(column_name='name',
+                      validate=common_name_validator
+                      )
+    recommended_answer = auto_field(column_name='recommended_answer',
+                                    validate=text_validator, required=True)
+    answer_type = EnumField(TaskAnswerTypeEnum,
+                            data_key='answer_type',
+                            by_value=True,
+                            required=False)
 
 
 class RangeTaskSchema(SQLAlchemySchema):
@@ -64,9 +88,17 @@ class RangeTaskSchema(SQLAlchemySchema):
         sqla_session = db.session
 
     task_id = auto_field(column_name='task_id', dump_only=True)
-    name = auto_field(column_name='name')
-    start_value = auto_field(column_name='start_value', required=True)
-    end_value = auto_field(column_name='end_value', required=True)
+    name = auto_field(column_name='name',
+                      validate=common_name_validator)
+    start_value = auto_field(column_name='start_value',
+                             required=True)
+    end_value = auto_field(column_name='end_value',
+                           required=True)
+
+
+class AnswerSchema(Schema):
+    answer = m_f.String(required=True)
+    is_right_answer = m_f.Boolean(required=True)
 
 
 class MultipleChoiceTaskSchema(SQLAlchemySchema):
@@ -76,8 +108,10 @@ class MultipleChoiceTaskSchema(SQLAlchemySchema):
         sqla_session = db.session
 
     task_id = auto_field(column_name='task_id', dump_only=True)
-    name = auto_field(column_name='name')
-    answers = auto_field(column_name='answers', many=True, required=False)
+    name = auto_field(column_name='name',
+                      validate=common_name_validator)
+    answers = m_f.Nested(AnswerSchema, many=True, required=False)
+    #answers = auto_field(column_name='answers', many=True, required=False)
 
 
 class TaskSchema(OneOfSchema):

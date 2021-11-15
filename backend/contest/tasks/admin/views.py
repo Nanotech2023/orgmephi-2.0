@@ -610,3 +610,43 @@ def test_certificate(certificate_id):
                          middle_name=args['middle_name'])
 
     return get_certificate_for_user(test_user, 'test contest', certificate)
+
+
+@module.route(
+    '/contest/<int:id_contest>/user/<int:id_user>/variant/generate',
+    methods=['POST'])
+def generate_variant_in_contest(id_contest, id_user):
+    """
+    Get variant for user in current contest (only for test)
+    ---
+    post:
+      parameters:
+        - in: path
+          description: Id of the contest
+          name: id_contest
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the user
+          name: id_user
+          required: true
+          schema:
+            type: integer
+      security:
+        - JWTAccessToken: [ ]
+        - CSRFAccessToken: [ ]
+      responses:
+        '200':
+          description: OK
+        '400':
+          description: Bad request
+        '409':
+          description: Olympiad type already in use
+        '404':
+          description: User not found
+    """
+
+    try_to_generate_variant(id_contest, id_user)
+    db.session.commit()
+    return {}, 200

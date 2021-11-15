@@ -447,16 +447,13 @@ def contest_task_create(id_contest):
     values = request.json
     task_pool_ids = values.pop('task_pool_ids', None)
 
-    if task_pool_ids is None:
-        raise InsufficientData("task_pool_ids", "contest task should be assigned to at least one pool")
-
-    if len(task_pool_ids) == 0:
-        raise InsufficientData("task_pool_ids", "contest task should be assigned to at least one pool")
-
     contest_task = ContestTaskSchema().load(data=request.json, partial=False, session=db.session, unknown=EXCLUDE)
     contest_: Contest = db_get_or_raise(Contest, "contest_id", id_contest)
 
-    previous_pools = [task_pool_ for contest_task_ in contest_.contest_tasks for task_pool_ in contest_task_.task_pools]
+    previous_pools = {
+        task_pool_
+        for contest_task_ in contest_.contest_tasks
+        for task_pool_ in contest_task_.task_pools}
 
     for task_pool_id in task_pool_ids:
         task_pool = db_get_or_raise(TaskPool, "task_pool_id", task_pool_id)
