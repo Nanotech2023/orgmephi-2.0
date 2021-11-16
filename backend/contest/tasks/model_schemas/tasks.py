@@ -5,7 +5,7 @@ from marshmallow_sqlalchemy import SQLAlchemySchema, auto_field, fields
 from marshmallow import fields as m_f
 from marshmallow_sqlalchemy.fields import Related
 
-from common.errors import InsufficientData
+from common.errors import InsufficientData, AlreadyExists
 from contest.tasks.models import *
 from user.models.auth import *
 from common.fields import text_validator, common_name_validator, sequential_number_validator, points_validator
@@ -118,7 +118,6 @@ class MultipleChoiceTaskSchema(SQLAlchemySchema):
     name = auto_field(column_name='name',
                       validate=common_name_validator)
     answers = m_f.Nested(AnswerSchema, many=True, required=False)
-    # answers = auto_field(column_name='answers', many=True, required=False)
 
 
 class TaskSchema(OneOfSchema):

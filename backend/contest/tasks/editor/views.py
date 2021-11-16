@@ -265,7 +265,7 @@ def contest_task_edit(id_contest, id_contest_task):
     """
 
     values = request.json
-    task_pool_ids = values.pop('task_pools', None)
+    task_pool_ids = values.get('task_pools', None)
 
     contest_ = db_get_or_raise(Contest, "contest_id", id_contest)
     contest_task = db_get_or_raise(ContestTask, "contest_task_id", id_contest_task)
@@ -282,11 +282,6 @@ def contest_task_edit(id_contest, id_contest_task):
         if len(previous_pools) != 0:
             if previous_pools & set(task_pool_ids):
                 raise AlreadyExists("task_pool", "task_pool_id")
-
-        contest_task.task_pools = []
-
-        contest_task.task_pools = [db_get_or_raise(TaskPool, "task_pool_id", task_pool_id) for task_pool_id in
-                                   task_pool_ids]
 
     db.session.commit()
 
@@ -844,12 +839,8 @@ def task_patch_multiple(id_task_pool, id_task):
     """
     values = request.json
     task = get_task_in_pool_if_possible(id_task_pool, id_task)
-    answers = values.pop('answers', None)
-
     MultipleChoiceTaskSchema(load_instance=True).load(values, instance=task, session=db.session,
                                                       partial=True, unknown=EXCLUDE)
-    task.answers = answers
-
     db.session.commit()
 
     return task, 200

@@ -445,7 +445,7 @@ def contest_task_create(id_contest):
     """
 
     values = request.json
-    task_pool_ids = values.pop('task_pools', None)
+    task_pool_ids = values['task_pools']
 
     contest_task = ContestTaskSchema().load(data=request.json, partial=False, session=db.session, unknown=EXCLUDE)
     contest_: Contest = db_get_or_raise(Contest, "contest_id", id_contest)
@@ -458,10 +458,6 @@ def contest_task_create(id_contest):
     if len(previous_pools) != 0:
         if previous_pools & set(task_pool_ids):
             raise AlreadyExists("task_pool", "task_pool_id")
-
-    contest_task.task_pools.extend(
-        [db_get_or_raise(TaskPool, "task_pool_id", task_pool_id) for task_pool_id in task_pool_ids]
-    )
 
     contest_.contest_tasks.append(contest_task)
     db.session.commit()
@@ -756,16 +752,10 @@ def task_create_multiple(id_task_pool):
           description: Olympiad type already in use
     """
     values = request.json
-
-    answers = values.pop('answers', None)
-
     task_pool = db_get_or_raise(TaskPool, "task_pool_id", id_task_pool)
     task = MultipleChoiceTaskSchema().load(request.json, session=db.session, partial=False, unknown=EXCLUDE)
     db.session.add(task)
     task_pool.tasks.append(task)
-
-    task.answers = answers
-
     db.session.commit()
 
     return {
