@@ -54,15 +54,14 @@ def create_simple_contest(create_tasks_pool_for_responses):
 @pytest.fixture
 def create_contest_tasks_for_responses(create_simple_contest):
     from contest.tasks.models import ContestTask
-    contest_tasks = [ContestTask(num=i,
-                                 task_points=14
-                                 ) for i in range(3)]
-    for i in range(3):
-        contest_tasks[i].task_pools = [create_simple_contest['task_pools'][i]]
     for i in range(8):
+        contest_tasks = [ContestTask(num=i,
+                                     task_points=14
+                                     ) for i in range(3)]
+        for j in range(3):
+            contest_tasks[j].task_pools = [create_simple_contest['task_pools'][j]]
         create_simple_contest['contests'][i].contest_tasks = contest_tasks
-
-    test_app.db.session.add_all(contest_tasks)
+        test_app.db.session.add_all(contest_tasks)
     test_app.db.session.commit()
     yield create_simple_contest
 
@@ -250,8 +249,12 @@ def get_task_id_by_variant_and_type(contest_id, user_id, task_type):
     variant_id = UserInContest.query.filter_by(user_id=user_id,
                                                contest_id=contest_id).one_or_none().variant_id
     tasks = [task.base_task_id for task in ContestTaskInVariant.query.filter_by(variant_id=variant_id).all()]
+    print(ContestTaskInVariant.query.all())
+    print(tasks)
     for task_id in tasks:
         task = db_get_one_or_none(Task, 'task_id', task_id)
+        print(task)
+        print(task.task_type)
         if task.task_type == task_type:
             return task.task_id
 
