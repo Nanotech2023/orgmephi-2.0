@@ -66,7 +66,7 @@ class ContestTask(db.Model):
 
     __tablename__ = "contest_task"
     contest_task_id = db.Column(db.Integer, autoincrement=True, primary_key=True)
-    contest_id = db.Column(db.Integer, db.ForeignKey('contest.base_contest_id'), nullable=True)
+    contest_id = db.Column(db.Integer, db.ForeignKey('contest.contest_id'), nullable=True)
     num = db.Column(db.Integer)
     task_points = db.Column(db.Integer)
 
