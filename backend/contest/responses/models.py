@@ -142,7 +142,7 @@ class BaseAnswer(db.Model):
         variant_id = user.variant_id
 
         contest_task_id = ContestTaskInVariant.query.filter_by(
-           variant_id=variant_id, base_task_id=self.task_id
+           variant_id=variant_id, task_id=self.task_id
         ).one_or_none().contest_task_id
 
         contest_task: ContestTask = db_get_one_or_none(ContestTask, "contest_task_id", contest_task_id)

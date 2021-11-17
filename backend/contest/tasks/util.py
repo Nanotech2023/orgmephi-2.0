@@ -177,7 +177,7 @@ def try_to_generate_variant(contest_id, user_id):
             contest_task_in_variant = ContestTaskInVariant(
                 contest_task_id=contest_task.contest_task_id,
                 variant_id=variant.variant_id,
-                base_task_id=base_task_id
+                task_id=base_task_id
             )
             contest_tasks_in_variant.append(contest_task_in_variant)
 
@@ -220,7 +220,7 @@ def is_task_in_variant(task_id, variant):
     :return: boolean value if task in current variant
     """
     return ContestTaskInVariant.query.filter_by(variant_id=variant.variant_id,
-                                                base_task_id=task_id).one_or_none() is not None
+                                                task_id=task_id).one_or_none() is not None
 
 
 # Participant module
@@ -297,7 +297,7 @@ def get_user_tasks_if_possible(contest_id):
 
     contest_tasks = variant.contest_tasks_in_variant[:]
 
-    tasks_list = [db_get_or_raise(Task, "task_id", contest_task.base_task_id) for contest_task in contest_tasks]
+    tasks_list = [db_get_or_raise(Task, "task_id", contest_task.task_id) for contest_task in contest_tasks]
 
     for task in tasks_list:
         if task.task_type == TaskTypeEnum.MultipleChoiceTask:

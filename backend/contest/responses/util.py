@@ -280,7 +280,7 @@ def is_task_in_variant_by_number(task_id, variant_id):
     """
     from contest.tasks.models import ContestTaskInVariant
     return ContestTaskInVariant.query.filter_by(variant_id=variant_id,
-                                                base_task_id=task_id).one_or_none() is not None
+                                                task_id=task_id).one_or_none() is not None
 
 
 def check_timing_for_mark_editing_and_appeal(contest_id, user_role):

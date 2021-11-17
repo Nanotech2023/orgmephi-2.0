@@ -248,7 +248,7 @@ def get_task_id_by_variant_and_type(contest_id, user_id, task_type):
     from common.util import db_get_one_or_none
     variant_id = UserInContest.query.filter_by(user_id=user_id,
                                                contest_id=contest_id).one_or_none().variant_id
-    tasks = [task.base_task_id for task in ContestTaskInVariant.query.filter_by(variant_id=variant_id).all()]
+    tasks = [task.task_id for task in ContestTaskInVariant.query.filter_by(variant_id=variant_id).all()]
     for task_id in tasks:
         task = db_get_one_or_none(Task, 'task_id', task_id)
         if task.task_type == task_type:

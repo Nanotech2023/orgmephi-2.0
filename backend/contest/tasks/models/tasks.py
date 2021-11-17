@@ -87,7 +87,10 @@ class ContestTaskInVariant(db.Model):
     __tablename__ = "contest_task_in_variant"
     contest_task_id = db.Column(db.Integer, db.ForeignKey('contest_task.contest_task_id'), primary_key=True)
     variant_id = db.Column(db.Integer, db.ForeignKey('variant.variant_id'), primary_key=True)
-    base_task_id = db.Column(db.Integer, db.ForeignKey('base_task.task_id'))
+    task_id = db.Column(db.Integer, db.ForeignKey('base_task.task_id'))
+
+    task = db.relationship('Task')
+    contest_task = db.relationship('ContestTask')
 
 
 class Task(db.Model):

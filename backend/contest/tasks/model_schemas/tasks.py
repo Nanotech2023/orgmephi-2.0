@@ -87,6 +87,11 @@ class PlainTaskSchema(SQLAlchemySchema):
                             required=False)
 
 
+class PlainTaskSchemaForUser(PlainTaskSchema):
+    class Meta(PlainTaskSchema.Meta):
+        exclude = ['recommended_answer']
+
+
 class RangeTaskSchema(SQLAlchemySchema):
     class Meta:
         model = RangeTask
@@ -102,9 +107,18 @@ class RangeTaskSchema(SQLAlchemySchema):
                            required=True)
 
 
+class RangeTaskSchemaForUser(RangeTaskSchema):
+    class Meta(RangeTaskSchema.Meta):
+        exclude = ['start_value', 'end_value']
+
+
 class AnswerSchema(Schema):
     answer = m_f.String(required=True, validate=text_validator)
     is_right_answer = m_f.Boolean(required=True)
+
+
+class AnswerSchemaForUser(Schema):
+    answer = m_f.String(required=True, validate=text_validator)
 
 
 class MultipleChoiceTaskSchema(SQLAlchemySchema):
@@ -117,6 +131,18 @@ class MultipleChoiceTaskSchema(SQLAlchemySchema):
     name = auto_field(column_name='name',
                       validate=common_name_validator)
     answers = m_f.Nested(AnswerSchema, many=True, required=False)
+
+
+class MultipleChoiceTaskSchemaForUser(SQLAlchemySchema):
+    class Meta:
+        model = MultipleChoiceTask
+        load_instance = True
+        sqla_session = db.session
+
+    task_id = auto_field(column_name='task_id', dump_only=True)
+    name = auto_field(column_name='name',
+                      validate=common_name_validator)
+    answers = m_f.Nested(AnswerSchemaForUser, many=True, required=False)
 
 
 class TaskSchema(OneOfSchema):
@@ -142,13 +168,38 @@ class TaskSchema(OneOfSchema):
         return obj_type.value
 
 
+class TaskSchemaForUser(OneOfSchema):
+    type_schemas = {
+        TaskTypeEnum.PlainTask.value: PlainTaskSchemaForUser,
+        TaskTypeEnum.RangeTask.value: RangeTaskSchemaForUser,
+        TaskTypeEnum.MultipleChoiceTask.value: MultipleChoiceTaskSchemaForUser
+    }
+
+    type_field = "task_type"
+    type_field_remove = True
+
+    class_types = {
+        PlainTaskSchemaForUser: TaskTypeEnum.PlainTask.value,
+        RangeTaskSchemaForUser: TaskTypeEnum.RangeTask.value,
+        MultipleChoiceTaskSchemaForUser: TaskTypeEnum.MultipleChoiceTask.value
+    }
+
+    def get_obj_type(self, obj):
+        obj_type = obj.task_type
+        if obj_type is None:
+            raise TypeError(f'Unknown object type: {obj.__class__.__name__}')
+        return obj_type.value
+
+
 class ContestTaskInVariantSchema(SQLAlchemySchema):
     class Meta:
         model = ContestTaskInVariant
         load_instance = True
         sqla_session = db.session
 
-    contest_task_id = auto_field(column_name='contest_task_id', dump_only=True)
-    variant_id = auto_field(column_name='contest_task_id', dump_only=True)
-    task = fields.Nested(TaskSchema,
+    task = fields.Nested(TaskSchemaForUser,
+                         data_key='task_id',
                          dump_only=True)
+    contest_task = fields.Nested(ContestTaskSchema,
+                                 data_key='contest_task_id',
+                                 dump_only=True)

@@ -280,7 +280,7 @@ def contest_task_edit(id_contest, id_contest_task):
         )
 
         if len(previous_pools) != 0:
-            if previous_pools & set(contest_task.task_pool_ids):
+            if previous_pools & set(contest_task.task_pools):
                 raise AlreadyExists("task_pool", "task_pool_id")
 
     db.session.commit()

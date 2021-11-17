@@ -463,7 +463,7 @@ def contest_task_create(id_contest):
         for task_pool_ in contest_task_.task_pools}
 
     if len(previous_pools) != 0:
-        if previous_pools & set(contest_task.task_pool_ids):
+        if previous_pools & set(contest_task.task_pools):
             raise AlreadyExists("task_pool", "task_pool_id")
 
     contest_.contest_tasks.append(contest_task)
