@@ -111,6 +111,7 @@ components:
     Answer:
       properties:
         answer:
+          maxLength: 1024
           type: string
         is_right_answer:
           type: boolean
@@ -512,9 +513,10 @@ components:
           type: integer
         task_pools:
           items:
-            $ref: '#/components/schemas/TaskPool'
-          readOnly: true
+            type: integer
+          minItems: 1
           type: array
+          writeOnly: true
       required:
       - num
       - task_points
@@ -1359,6 +1361,11 @@ components:
         contest_id:
           nullable: true
           type: integer
+        contest_tasks_in_variant:
+          items:
+            $ref: '#/components/schemas/ContestTask'
+          readOnly: true
+          type: array
         variant_id:
           readOnly: true
           type: integer
@@ -1377,6 +1384,11 @@ components:
       type: object
     VariantResponseTaskCreator:
       properties:
+        contest_tasks_in_variant:
+          items:
+            $ref: '#/components/schemas/ContestTask'
+          readOnly: true
+          type: array
         variant_id:
           readOnly: true
           type: integer
@@ -1497,13 +1509,12 @@ paths:
       security:
       - JWTAccessToken: []
       - CSRFAccessToken: []
-  /tasks/creator/base_olympiad/{id_base_olympiad}/task_pool/all:
+  /tasks/creator/task_pool/all:
     get:
       parameters:
-      - description: ID of the base olympiad
-        in: path
-        name: id_base_olympiad
-        required: true
+      - in: query
+        name: base_contest_id
+        required: false
         schema:
           type: integer
       responses:

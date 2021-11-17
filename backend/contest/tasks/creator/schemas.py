@@ -29,6 +29,10 @@ class TaskPoolIdResponseTaskCreatorSchema(Schema):
     task_pool_id = fields.Int(required=True)
 
 
+class FilterTaskPoolAllRequestSchema(Schema):
+    base_contest_id = fields.Integer()
+
+
 class AllTaskPoolsResponseTaskCreatorSchema(Schema):
     task_pools_list = fields.Nested(TaskPoolSchema, many=True, required=True)
 

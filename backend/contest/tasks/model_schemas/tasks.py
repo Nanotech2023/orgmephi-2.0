@@ -1,14 +1,13 @@
-from marshmallow import validate, Schema, post_load
+from marshmallow import fields as m_f
+from marshmallow import validate, Schema
 from marshmallow_enum import EnumField
 from marshmallow_oneofschema import OneOfSchema
 from marshmallow_sqlalchemy import SQLAlchemySchema, auto_field, fields
-from marshmallow import fields as m_f
 from marshmallow_sqlalchemy.fields import Related
 
-from common.errors import InsufficientData, AlreadyExists
+from common.fields import text_validator, common_name_validator, sequential_number_validator, points_validator
 from contest.tasks.models import *
 from user.models.auth import *
-from common.fields import text_validator, common_name_validator, sequential_number_validator, points_validator
 
 """
 Task Pool
@@ -104,7 +103,7 @@ class RangeTaskSchema(SQLAlchemySchema):
 
 
 class AnswerSchema(Schema):
-    answer = m_f.String(required=True)
+    answer = m_f.String(required=True, validate=text_validator)
     is_right_answer = m_f.Boolean(required=True)
 
 
@@ -141,3 +140,15 @@ class TaskSchema(OneOfSchema):
         if obj_type is None:
             raise TypeError(f'Unknown object type: {obj.__class__.__name__}')
         return obj_type.value
+
+
+class ContestTaskInVariantSchema(SQLAlchemySchema):
+    class Meta:
+        model = ContestTaskInVariant
+        load_instance = True
+        sqla_session = db.session
+
+    contest_task_id = auto_field(column_name='contest_task_id', dump_only=True)
+    variant_id = auto_field(column_name='contest_task_id', dump_only=True)
+    task = fields.Nested(TaskSchema,
+                         dump_only=True)

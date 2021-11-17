@@ -6,6 +6,7 @@ from contest.tasks.creator.schemas import *
 from contest.tasks.model_schemas.tasks import TaskPoolSchema, ContestTaskSchema, PlainTaskSchema, RangeTaskSchema, \
     MultipleChoiceTaskSchema
 from contest.tasks.util import *
+from common.util import db_get_all
 
 db = get_current_db()
 module = get_current_module()
@@ -133,18 +134,17 @@ def task_pool_get(id_base_olympiad, id_task_pool):
     return task_pool, 200
 
 
-@module.route('/base_olympiad/<int:id_base_olympiad>/task_pool/all', methods=['GET'],
+@module.route('/task_pool/all', methods=['GET'],
               output_schema=AllTaskPoolsResponseTaskCreatorSchema)
-def task_pool_get_all(id_base_olympiad, ):
+def task_pool_get_all():
     """
     Create task pool
     ---
     get:
       parameters:
-        - in: path
-          description: ID of the base olympiad
-          name: id_base_olympiad
-          required: true
+        - in: query
+          name: base_contest_id
+          required: false
           schema:
             type: integer
       security:
@@ -161,9 +161,16 @@ def task_pool_get_all(id_base_olympiad, ):
         '409':
           description: Olympiad type already in use
     """
-    base_contest = db_get_or_raise(BaseContest, "base_contest_id", id_base_olympiad)
+    args = request.args
+    marshmallow = FilterTaskPoolAllRequestSchema().load(args)
+    base_contest_id = marshmallow.get('base_contest_id', None)
+    if base_contest_id is not None:
+        base_contest = db_get_or_raise(BaseContest, "base_contest_id", base_contest_id)
+        task_pools = base_contest.task_pools
+    else:
+        task_pools = db_get_all(TaskPool)
     return {
-               "task_pools_list": base_contest.task_pools
+               "task_pools_list": task_pools
            }, 200
 
 
@@ -456,7 +463,7 @@ def contest_task_create(id_contest):
         for task_pool_ in contest_task_.task_pools}
 
     if len(previous_pools) != 0:
-        if previous_pools & set(task_pool_ids):
+        if previous_pools & set(contest_task.task_pool_ids):
             raise AlreadyExists("task_pool", "task_pool_id")
 
     contest_.contest_tasks.append(contest_task)
