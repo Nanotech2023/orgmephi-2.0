@@ -265,17 +265,17 @@ def contest_task_edit(id_contest, id_contest_task):
     """
 
     values = request.json
-    task_pool_ids = values.get('task_pools', None)
+    pool_changed = values.get('task_pools', None) is not None
 
     contest_ = db_get_or_raise(Contest, "contest_id", id_contest)
     contest_task = db_get_or_raise(ContestTask, "contest_task_id", id_contest_task)
     ContestTaskSchema(load_instance=True).load(request.json, instance=contest_task, session=db.session,
                                                partial=True, unknown=EXCLUDE)
 
-    if task_pool_ids is not None:
+    if pool_changed:
         previous_pools = set(
             [task_pool_
-             for contest_task_ in contest_.contest_tasks
+             for contest_task_ in contest_.contest_tasks.all()
              for task_pool_ in contest_task_.task_pools]
         )
 

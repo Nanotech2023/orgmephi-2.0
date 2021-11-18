@@ -189,17 +189,3 @@ class TaskSchemaForUser(OneOfSchema):
         if obj_type is None:
             raise TypeError(f'Unknown object type: {obj.__class__.__name__}')
         return obj_type.value
-
-
-class ContestTaskInVariantSchema(SQLAlchemySchema):
-    class Meta:
-        model = ContestTaskInVariant
-        load_instance = True
-        sqla_session = db.session
-
-    task = fields.Nested(TaskSchemaForUser,
-                         data_key='task_id',
-                         dump_only=True)
-    contest_task = fields.Nested(ContestTaskSchema,
-                                 data_key='contest_task_id',
-                                 dump_only=True)

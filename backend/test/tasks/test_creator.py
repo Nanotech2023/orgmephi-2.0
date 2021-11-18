@@ -189,8 +189,12 @@ def test_task_create_multiple(client, test_simple_contest, test_create_tasks_poo
 
 
 def test_tasks_pool_get(client, test_create_tasks_pool):
-    resp = client.get(f'/base_olympiad/{test_create_tasks_pool[0].base_contest.base_contest_id}'
-                      f'/task_pool/all')
+    resp = client.get('/task_pool/all')
+
+    assert resp.status_code == 200
+    assert len(test_create_tasks_pool) == len(resp.json['task_pools_list'])
+
+    resp = client.get(f'/task_pool/all?base_contest_id={test_create_tasks_pool[0].base_contest.base_contest_id}')
 
     assert resp.status_code == 200
     assert len(test_create_tasks_pool) == len(resp.json['task_pools_list'])
@@ -215,7 +219,6 @@ def test_contest_task_create(client, test_simple_contest, test_create_tasks_pool
     contest_task: ContestTask = ContestTask.query.filter_by(
         contest_task_id=resp.json['contest_task_id']).one_or_none()
     assert contest_task.contest_task_id == resp.json['contest_task_id']
-
 
     resp = client.post(f'/contest/{test_simple_contest[0].contest_id}/contest_task/create',
                        json={

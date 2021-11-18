@@ -450,16 +450,12 @@ def contest_task_create(id_contest):
         '409':
           description: Olympiad type already in use
     """
-
-    values = request.json
-    task_pool_ids = values['task_pools']
-
     contest_task = ContestTaskSchema().load(data=request.json, partial=False, session=db.session, unknown=EXCLUDE)
     contest_: Contest = db_get_or_raise(Contest, "contest_id", id_contest)
 
     previous_pools = {
-        task_pool_.task_pool_id
-        for contest_task_ in contest_.contest_tasks
+        task_pool_
+        for contest_task_ in contest_.contest_tasks.all()
         for task_pool_ in contest_task_.task_pools}
 
     if len(previous_pools) != 0:
