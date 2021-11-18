@@ -232,7 +232,6 @@ def test_contest_task_patch(client, test_create_contest_tasks):
                         json={
                             'num': 20
                         })
-    print(resp.data)
     assert resp.status_code == 200
     contest_task: ContestTask = ContestTask.query.filter_by(
         contest_task_id=test_create_contest_tasks[0].contest_task_id).one_or_none()

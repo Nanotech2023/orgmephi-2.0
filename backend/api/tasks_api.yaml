@@ -119,14 +119,6 @@ components:
       - answer
       - is_right_answer
       type: object
-    AnswerSchemaForUser:
-      properties:
-        answer:
-          maxLength: 1024
-          type: string
-      required:
-      - answer
-      type: object
     AnswersInTaskRequestTaskCreator:
       properties:
         answer:
@@ -530,17 +522,6 @@ components:
       - task_points
       - task_pools
       type: object
-    ContestTaskInVariant:
-      properties:
-        contest_task_id:
-          allOf:
-          - $ref: '#/components/schemas/ContestTask'
-          readOnly: true
-        task_id:
-          allOf:
-          - $ref: '#/components/schemas/TaskSchemaForUser'
-          readOnly: true
-      type: object
     ContestTaskResponseTaskCreator:
       properties:
         contest_task_id:
@@ -751,22 +732,6 @@ components:
       required:
       - task_id
       type: object
-    MultipleChoiceTaskSchemaForUser:
-      properties:
-        answers:
-          items:
-            $ref: '#/components/schemas/AnswerSchemaForUser'
-          type: array
-        name:
-          maxLength: 32
-          nullable: true
-          type: string
-        task_id:
-          readOnly: true
-          type: integer
-      required:
-      - task_id
-      type: object
     OlympiadLocation:
       discriminator:
         mapping:
@@ -845,23 +810,6 @@ components:
       - recommended_answer
       - task_id
       type: object
-    PlainTaskSchemaForUser:
-      properties:
-        answer_type:
-          enum:
-          - File
-          - Text
-          type: string
-        name:
-          maxLength: 32
-          nullable: true
-          type: string
-        task_id:
-          readOnly: true
-          type: integer
-      required:
-      - task_id
-      type: object
     RangeTask:
       properties:
         end_value:
@@ -878,18 +826,6 @@ components:
       required:
       - end_value
       - start_value
-      - task_id
-      type: object
-    RangeTaskSchemaForUser:
-      properties:
-        name:
-          maxLength: 32
-          nullable: true
-          type: string
-        task_id:
-          readOnly: true
-          type: integer
-      required:
       - task_id
       type: object
     RussiaOlympiadLocation:
@@ -1202,17 +1138,6 @@ components:
       - num_of_task
       - task_id
       type: object
-    TaskSchemaForUser:
-      discriminator:
-        mapping:
-          MultipleChoiceTask: '#/components/schemas/MultipleChoiceTaskSchemaForUser'
-          PlainTask: '#/components/schemas/PlainTaskSchemaForUser'
-          RangeTask: '#/components/schemas/RangeTaskSchemaForUser'
-        propertyName: task_type
-      oneOf:
-      - $ref: '#/components/schemas/PlainTaskSchemaForUser'
-      - $ref: '#/components/schemas/RangeTaskSchemaForUser'
-      - $ref: '#/components/schemas/MultipleChoiceTaskSchemaForUser'
     UpdateBaseOlympiadRequestTaskEditor:
       properties:
         description:
@@ -1436,11 +1361,6 @@ components:
         contest_id:
           nullable: true
           type: integer
-        contest_tasks_in_variant:
-          items:
-            $ref: '#/components/schemas/ContestTaskInVariant'
-          readOnly: true
-          type: array
         variant_id:
           readOnly: true
           type: integer
@@ -1459,11 +1379,6 @@ components:
       type: object
     VariantResponseTaskCreator:
       properties:
-        contest_tasks_in_variant:
-          items:
-            $ref: '#/components/schemas/ContestTaskInVariant'
-          readOnly: true
-          type: array
         variant_id:
           readOnly: true
           type: integer
