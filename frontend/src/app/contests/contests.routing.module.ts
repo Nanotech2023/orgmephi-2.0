@@ -28,16 +28,24 @@ export const COMPONENTS = [
 const routes: Routes =
     [
         {
-            path: 'home', component: HomeComponent, canActivate: [ AuthGuardService ]
+            path: 'home',
+            component: HomeComponent,
+            canActivate: [ AuthGuardService ]
         },
         {
-            path: 'contests', component: ContestListComponent, canActivate: [ AuthGuardService ]
+            path: 'contests',
+            component: ContestListComponent,
+            canActivate: [ AuthGuardService ]
         },
         {
-            path: 'contests/results', component: ContestResultsComponent, canActivate: [ AuthGuardService ]
+            path: 'contests/results',
+            component: ContestResultsComponent,
+            canActivate: [ AuthGuardService ]
         },
         {
-            path: 'contests/:contestId', component: ContestDetailsComponent, canActivate: [ AuthGuardService ]
+            path: 'contests/:contestId',
+            component: ContestDetailsComponent,
+            canActivate: [ AuthGuardService ]
         },
         {
             path: 'contests/:contestId/registration',

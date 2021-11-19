@@ -8,10 +8,7 @@ const routes: Routes =
     [
         {
             path: 'profile', component: ProfileViewComponent, canActivate: [ AuthGuardService ]
-        },
-        // {
-        //     path: 'profile/edit', component: ProfileEditComponent, canActivate: [ AuthGuardService ]
-        // }
+        }
     ]
 
 

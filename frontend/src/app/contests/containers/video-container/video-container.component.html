@@ -1,5 +1,5 @@
-<div class="video-container" (mouseover)="onMouseOver()" (mouseout)="onMouseOut()">
-    <img *ngIf="showVideo" [src]="videoSrc">
+<div class="video-container">
+    <img [src]="videoSrc">
     <div class="video-overlay">
         <ng-content></ng-content>
     </div>

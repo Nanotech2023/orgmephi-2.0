@@ -63,7 +63,28 @@ input {
   height: 30px;
 }
 
+.video-container {
+
+  img {
+    visibility: hidden;
+    opacity: 0;
+    transition: visibility 1s, opacity 1s linear;
+  }
+
+}
+
+.video-container:hover {
+
+  img {
+    visibility: visible;
+    opacity: 1;
+    transition: visibility 1s, opacity 1s linear;
+  }
+
+}
+
 .video-container-overlay:hover {
+
   span {
     color: white !important;
     -webkit-transition: color 1s;
@@ -75,6 +96,19 @@ input {
     transition: color 1s;
     color: white !important;
   }
+
+  p {
+    -webkit-transition: color 1s;
+    transition: color 1s;
+    color: white !important;
+  }
+
+  svg {
+    -webkit-transition: color 1s;
+    transition: color 1s;
+    color: white !important;
+  }
+
 }
 
 .manage-container_main {
@@ -84,4 +118,10 @@ input {
   margin: auto;
   overflow: auto;
   height: 100%;
+}
+
+.org-divider {
+  background: $black;
+  height: 2px;
+  width: 100%;
 }

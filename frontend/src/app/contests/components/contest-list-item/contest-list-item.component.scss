@@ -14,7 +14,7 @@
     font-weight: normal;
     font-size: 42px;
     line-height: 50px;
-    color: #171717;
+    color: $black;
   }
 
   .olymp_subtitle {
@@ -23,98 +23,15 @@
     font-weight: normal;
     font-size: 16px;
     line-height: 24px;
-    color: #565656;
-  }
-}
-
-.olymp_list {
-  .col-md-6:not(:nth-child(-1n+2)) {
-    margin-top: 3%;
-  }
-
-  .col-md-6:nth-child(-1n+2) {
-    border-top: 2px solid #171717;
-  }
-
-  .olymp_list_item {
-    border-bottom: 2px solid #171717;
-    padding-top: 8%;
-    padding-bottom: 8%;
-    width: 100%;
-
-
-    .olymp_status {
-      display: flex;
-      flex-direction: row;
-      align-items: flex-start;
-      padding: 8px 12px;
-      width: 142px;
-      height: 32px;
-      background: #171717;
-      border-radius: 18px;
-
-
-      span {
-        font-style: normal;
-        font-weight: normal;
-        font-size: 12px;
-        line-height: 16px;
-        display: flex;
-        align-items: center;
-        letter-spacing: 0.32px;
-        color: #FFFFFF;
-        flex: none;
-        order: 1;
-        flex-grow: 0;
-        margin: 0px 4px;
-      }
-    }
-
-    .olymp_subtitle {
-      display: flex;
-      flex-direction: row;
-      align-items: center;
-      padding-top: 10%;
-
-      span {
-        font-style: normal;
-        font-weight: normal;
-        font-size: 16px;
-        line-height: 24px;
-        color: #565656;
-        flex: none;
-        order: 0;
-        flex-grow: 0;
-      }
-
-      span:not(:first-child) {
-        margin: 0 16px;
-      }
-    }
-
-    .olymp_title {
-      font-style: normal;
-      font-weight: 500;
-      font-size: 28px;
-      line-height: 36px;
-      color: #171717;
-      padding-top: 10%;
-    }
-
-    .olymp_link {
-      padding-top: 10%;
-    }
+    color: $grey;
   }
 }
 
 .olymp_list_item {
-  border-bottom: 2px solid #171717;
   padding-top: 8%;
   padding-bottom: 8%;
-  padding-left: 1%;
   padding-left: 2%;
   height: 400px;
-
 
   .olymp_status {
     display: flex;
@@ -123,9 +40,8 @@
     padding: 8px 12px;
     width: fit-content;
     height: 32px;
-    background: #171717;
+    background: $black;
     border-radius: 18px;
-
 
     span {
       font-style: normal;
@@ -135,11 +51,11 @@
       display: flex;
       align-items: center;
       letter-spacing: 0.32px;
-      color: #FFFFFF;
+      color: $white;
       flex: none;
       order: 1;
       flex-grow: 0;
-      margin: 0px 4px;
+      margin: 0 4px;
     }
   }
 
@@ -154,7 +70,7 @@
       font-weight: normal;
       font-size: 16px;
       line-height: 24px;
-      color: #565656;
+      color: $grey;
       flex: none;
       order: 0;
       flex-grow: 0;
@@ -170,31 +86,11 @@
     font-weight: 500;
     font-size: 28px;
     line-height: 36px;
-    color: #171717;
+    color: $black;
     padding-top: 10%;
   }
 
   .olymp_link {
-    padding-top: 10%;
-  }
-}
-
-.olymp_list_item:hover {
-  border: none;
-  transform: scale(1.03);
-  transition: all 500ms ease;
-  background: linear-gradient(0deg, rgba($blue, 0.99), rgba($blue, 1)), url("~src/assets/Pryon AI_loading_by_gleb 1.png");
-  background-blend-mode: multiply;
-
-  .olymp_status, .olymp_title, span, .olymp_subtitle span {
-    color: #FFFFFFFF;
-  }
-
-  .olymp_link {
-    svg, path {
-      color: #FFFFFFFF;
-      fill: #FFFFFFFF;
-      stroke: #FFFFFFFF;;
-    }
+    padding-top: 4%;
   }
 }

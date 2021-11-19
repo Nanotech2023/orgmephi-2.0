@@ -1,5 +1,6 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core'
-import { Document, DocumentRF } from '@api/users/models'
+import { Document, DocumentTypeEnum } from '@api/users/models'
+import { getDocumentDisplay } from '@/shared/displayUtils'
 
 
 @Component( {
@@ -9,8 +10,21 @@ import { Document, DocumentRF } from '@api/users/models'
 } )
 export class ProfileEditDocumentComponent
 {
-    @Input() model!: DocumentRF
+    @Input() model!: Document
     @Output() modelChange = new EventEmitter<Document>()
+
+    readonly documentTypes: DocumentTypeEnum[] = [
+        DocumentTypeEnum.RfPassport,
+        DocumentTypeEnum.RfInternationalPassport,
+        DocumentTypeEnum.BirthCertificate,
+        DocumentTypeEnum.ForeignPassport,
+        DocumentTypeEnum.OtherDocument
+    ]
+
+    getDocumentDisplay( documentType: DocumentTypeEnum ): string
+    {
+        return getDocumentDisplay( documentType )
+    }
 
     onModelChange(): void
     {

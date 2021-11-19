@@ -1,5 +1,6 @@
+import { getSchoolTypeDisplay } from '@/shared/displayUtils'
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core'
-import { LocationRussia, SchoolInfo } from '@api/users/models'
+import { LocationRussia, SchoolInfo, SchoolTypeEnum } from '@api/users/models'
 
 
 @Component( {
@@ -11,6 +12,21 @@ export class ProfileEditSchoolComponent
 {
     @Input() model!: SchoolInfo
     @Output() modelChange = new EventEmitter<SchoolInfo>()
+    schoolTypes: SchoolTypeEnum[] = [
+        SchoolTypeEnum.School,
+        SchoolTypeEnum.Lyceum,
+        SchoolTypeEnum.Gymnasium,
+        SchoolTypeEnum.EducationCenter,
+        SchoolTypeEnum.NightSchool,
+        SchoolTypeEnum.Technical,
+        SchoolTypeEnum.External,
+        SchoolTypeEnum.Collage,
+        SchoolTypeEnum.ProfTech,
+        SchoolTypeEnum.University,
+        SchoolTypeEnum.Correctional,
+        SchoolTypeEnum.Other
+    ]
+
 
     get schoolLocation(): LocationRussia
     {
@@ -25,5 +41,10 @@ export class ProfileEditSchoolComponent
     onModelChange(): void
     {
         this.modelChange.emit( this.model )
+    }
+
+    getSchoolTypeDisplay( schoolType: SchoolTypeEnum ): string
+    {
+        return getSchoolTypeDisplay(schoolType)
     }
 }

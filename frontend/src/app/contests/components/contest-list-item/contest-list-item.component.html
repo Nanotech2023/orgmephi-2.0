@@ -3,13 +3,15 @@
         <span>{{ getStatusDisplay() }}</span>
     </div>
     <div class="olymp_subtitle">
-        <span>{{ getClassesForDisplay() }} классы</span>
-        <span>{{ contest.contest?.base_contest?.subject }}</span>
-        <span>Уровень {{ contest.contest?.base_contest?.level }}</span>
+        <p>
+            <span>{{ getClassesForDisplay() }} классы</span>
+            <span>{{ contest.contest?.base_contest?.subject }}</span>
+            <span>Уровень {{ contest.contest?.base_contest?.level }}</span>
+        </p>
     </div>
 
     <div class="olymp_title">
-        {{contest.contest?.contest_id}}. {{ contest.contest?.base_contest?.name }}
+        <p>{{contest.contest?.contest_id}}. {{ contest.contest?.base_contest?.name }}</p>
     </div>
 
     <div class="olymp_link">
@@ -20,3 +22,4 @@
         </a>
     </div>
 </div>
+<div class="org-divider"></div>

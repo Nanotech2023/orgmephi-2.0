@@ -28,7 +28,6 @@ export class RegisterComponent
             auth_info: { email: '', password: '' },
             register_type: this.registerTypes[ 0 ],
             personal_info: { first_name: '', second_name: '', middle_name: '', date_of_birth: '' },
-            // register_confirm: { registration_number: 0, password: '' }
         }
         this.isRegistered = false
         this.agreementAccepted = false

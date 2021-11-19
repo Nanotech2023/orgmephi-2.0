@@ -8,7 +8,6 @@ import { Component } from '@angular/core'
 } )
 export class VideoContainerComponent
 {
-    showVideo: boolean = false
     videoSrc: string
 
     constructor()
@@ -23,16 +22,5 @@ export class VideoContainerComponent
             "/assets/gifs/trails_v02_compr.gif"
         ]
         this.videoSrc = videoArray[ Math.floor( Math.random() * videoArray.length ) ]
-    }
-
-
-    onMouseOver()
-    {
-        this.showVideo = true
-    }
-
-    onMouseOut()
-    {
-        this.showVideo = false
     }
 }

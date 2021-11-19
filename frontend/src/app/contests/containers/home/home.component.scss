@@ -28,18 +28,9 @@
 }
 
 .actions_list {
-  .col-md-6:not(:nth-child(-1n+2)) {
-    margin-top: 3%;
-  }
-
-  .col-md-6:nth-child(-1n+2) {
-    border-top: 2px solid #171717;
-  }
 
   .actions_list_item {
-    border-bottom: 2px solid #171717;
-    padding-top: 8%;
-    padding-bottom: 8%;
+    padding: 8% 4%;
     height: 300px;
     display: flex;
     flex-direction: column;
@@ -49,7 +40,7 @@
       font-weight: 500;
       font-size: 28px;
       line-height: 36px;
-      color: #171717;
+      color: $black;
     }
 
     .actions_divider {
@@ -62,7 +53,7 @@
       justify-items: start;
 
       a {
-        color: #0055BB;
+        color: $blue;
         text-decoration: none;
       }
     }

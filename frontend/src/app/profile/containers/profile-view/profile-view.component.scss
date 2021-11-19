@@ -1,4 +1,4 @@
-@import "../../../../styles/colors";
+@import "src/styles/colors";
 
 .profile_title_container, .actions_list {
   width: 100%;
@@ -22,7 +22,7 @@
   letter-spacing: 0.16px;
 
   /* Black */
-  color: #171717;
+  color: $black;
 
 
   /* Inside Auto Layout */
@@ -33,13 +33,11 @@
 }
 
 .profile_menu-divider-active {
-  /* Blue Brand */
-  background: #0055BB;
+  background: $blue;
 }
 
 .profile_menu-item-active {
-  /* Blue Brand */
-  color: #0055BB;
+  color: $blue;
 }
 
 .profile_menu-divider {
@@ -54,14 +52,11 @@
   width: 2px;
   height: 48px;
 
-  /* Grey 5 */
-  background: #DCDCDC;
-
   /* Inside Auto Layout */
   flex: none;
   order: 0;
   flex-grow: 0;
-  margin: 0px 16px;
+  margin: 0 16px;
 }
 
 .profile_title_container {
@@ -96,7 +91,6 @@
     align-items: flex-start;
     justify-content: center;
     justify-items: center;
-    border-bottom: 2px solid $black;
     height: 150px;
 
     img {
@@ -135,7 +129,7 @@
       font-size: 14px;
       line-height: 18px;
       letter-spacing: 0.16px;
-      color: #FFFFFF;
+      color: $white;
       background-color: $black;
     }
   }
@@ -153,8 +147,9 @@
         font-size: 12px;
         line-height: 16px;
         letter-spacing: 0.32px;
-        color: $grey;
+        color: $black;
       }
+
 
       .form_input {
         border-bottom: 2px solid $black;
@@ -163,6 +158,21 @@
         border-top: none;
         width: 100%;
         background-color: transparent;
+        color: $black
+      }
+
+    }
+
+    .form_item-disabled {
+
+      color: $grey-disabled;
+
+      .form_label {
+        color: $grey-disabled;
+      }
+
+      .form_input {
+        color: $grey-disabled;
       }
     }
 
@@ -175,7 +185,7 @@
       font-size: 14px;
       line-height: 18px;
       letter-spacing: 0.16px;
-      color: #FFFFFF;
+      color: $white;
     }
 
     button.save {
@@ -186,4 +196,31 @@
       background-color: black;
     }
   }
+}
+
+.form_container_title {
+  /* Heading 4 */
+  font-family: Inter;
+  font-style: normal;
+  font-weight: 500;
+  font-size: 28px;
+  line-height: 36px;
+  /* identical to box height, or 129% */
+
+  /* Black */
+  color: $black;
+
+}
+
+.form_container_subtitle {
+  /* Body 1 */
+  font-family: Inter;
+  font-style: normal;
+  font-weight: normal;
+  font-size: 16px;
+  line-height: 24px;
+  /* identical to box height, or 150% */
+
+  /* Gray 7 */
+  color: $grey;
 }

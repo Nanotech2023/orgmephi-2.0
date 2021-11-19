@@ -1,9 +1,17 @@
 import { Component } from '@angular/core'
 import { ProfileStore } from '@/profile/profile.store'
 import { Observable } from 'rxjs'
-import { UserInfo, SchoolInfo, DocumentRF, LocationRussia, UserLimitations } from '@api/users/models'
-import { LoadingState } from '@/shared/callState'
+import {
+    UserInfo,
+    SchoolInfo,
+    DocumentRF,
+    LocationRussia,
+    UserLimitations,
+    GenderEnum,
+    DocumentTypeEnum
+} from '@api/users/models'
 import { UsersService } from '@api/users/users.service'
+import { getDocumentDisplay, getGenderDisplay } from '@/shared/displayUtils'
 
 
 @Component( {
@@ -23,7 +31,9 @@ export class ProfileViewComponent
         schoolInfo: SchoolInfo
     }>
 
-    readonly genders: ( "Male" | "Female" )[] = [ UserInfo.GenderEnum.Male, UserInfo.GenderEnum.Female ]
+
+    readonly genders: GenderEnum[] = [ GenderEnum.Male, GenderEnum.Female ]
+    mobNumberPattern = "^((\\+91-?)|0)?[0-9]{10}$"
 
     constructor( private profileStore: ProfileStore, private usersService: UsersService )
     {
@@ -31,25 +41,31 @@ export class ProfileViewComponent
         this.viewModel$ = this.profileStore.viewModel$
     }
 
-    updateUserInfo( userInfo: UserInfo )
+    updateUserInfo( userInfo: UserInfo ): void
     {
         this.profileStore.updateUserInfo( userInfo )
     }
 
-    updateSchoolInfo( schoolInfo: SchoolInfo )
+    updateSchoolInfo( schoolInfo: SchoolInfo ): void
     {
         this.profileStore.updateSchoolInfo( schoolInfo )
     }
 
-    download()
+    download(): void
     {
         this.usersService.userProfileCardGet().subscribe( data => this.downloadFile( data ) )
     }
 
-    downloadFile( data: Blob )
+    getGenderDisplay( genderEnum: GenderEnum ): string
+    {
+        return getGenderDisplay( genderEnum )
+    }
+
+    downloadFile( data: Blob ): void
     {
         const blob = new Blob( [ data ], { type: 'application/pdf' } )
         const url = window.URL.createObjectURL( blob )
         window.open( url )
     }
+
 }

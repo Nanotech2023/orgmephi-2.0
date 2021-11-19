@@ -7,14 +7,30 @@
                         Профиль пользователя
                     </div>
                     <div class="profile_subtitle">
-                        <div class="profile_menu-divider profile_menu-divider-active"><div class="profile_menu-item profile_menu-item-active">Основная информация</div></div>
-                        <div class="profile_menu-divider"><div class="profile_menu-item">Пароль</div></div>
-                        <div class="profile_menu-divider" (click)="download()"><div class="profile_menu-item">Анкета участника олимпиады</div></div>
+                        <div class="profile_menu-divider profile_menu-divider-active">
+                            <div class="profile_menu-item profile_menu-item-active">Основная информация</div>
+                        </div>
+                        <div class="profile_menu-divider">
+                            <div class="profile_menu-item">Пароль</div>
+                        </div>
+                        <div class="profile_menu-divider" (click)="download()">
+                            <div class="profile_menu-item">Анкета участника олимпиады</div>
+                        </div>
                     </div>
                 </div>
             </div>
             <div class="col-md-8">
                 <div class="profile_container">
+                    <div class="row">
+                        <div class="col-md-8">
+                            <p class="form_container_title">Анкета абитуриента</p>
+                            <p class="form_container_subtitle">Пожалуйста заполните все поля вашего анкеты абитуриента.</p>
+                        </div>
+                        <div class="col-md-4">
+                            <button class="btn btn-link">Выйти</button>
+                        </div>
+                    </div>
+                    <div class="mt-4 mb-4 org-divider"></div>
                     <div class="photo_container">
                         <div class="row">
                             <div class="col-md-3">
@@ -29,36 +45,44 @@
                     </div>
                     <div class="form_container">
                         <div class="profile_subtitle">Основная информация</div>
-                        <div class="form_item">
+                        <div class="form_item form_item-disabled">
                             <p class="form_label">Фамилия</p>
                             <input class="form_input" placeholder="Введите фамилию" type="text"
-                                   [(ngModel)]="viewModel.userInfo.second_name">
+                                   [(ngModel)]="viewModel.userInfo.second_name" disabled>
                         </div>
-                        <div class="form_item">
+                        <div class="form_item form_item-disabled">
                             <p class="form_label">Имя</p>
                             <input class="form_input" placeholder="Введите имя" type="text"
-                                   [(ngModel)]="viewModel.userInfo.first_name">
+                                   [(ngModel)]="viewModel.userInfo.first_name" disabled>
                         </div>
-                        <div class="form_item">
+                        <div class="form_item form_item-disabled">
                             <p class="form_label">Отчество</p>
                             <input class="form_input" placeholder="Введите отчество" type="text"
-                                   [(ngModel)]="viewModel.userInfo.middle_name">
+                                   [(ngModel)]="viewModel.userInfo.middle_name" disabled>
                         </div>
-                        <div class="form_item">
+                        <div class="form_item form_item-disabled">
                             <p class="form_label">Email</p>
-                            <input class="form_input" placeholder="Введите email" type="email"
-                                   [(ngModel)]="viewModel.userInfo.email">
+                            <input class="form_input" placeholder="Введитеemail" type="email"
+                                   [(ngModel)]="viewModel.userInfo.email" disabled>
                         </div>
                         <div class="form_item">
                             <p class="form_label">Номер телефона</p>
-                            <input class="form_input" placeholder="Введите номер телефона" type="text"
-                                   [(ngModel)]="viewModel.userInfo.phone">
+                            <input class="form_input" placeholder="Введите номер телефона" type="tel"
+                                   name="mobileNumber" #mobileNumber="ngModel" [(ngModel)]="viewModel.userInfo.phone"
+                                   [pattern]="mobNumberPattern">
+                            <div *ngIf="mobileNumber.invalid && ( mobileNumber.dirty || mobileNumber.touched )"
+                                 class="input_error">
+                                <div *ngIf="mobileNumber.errors?.required">
+                                    Поле обязательно для заполнения
+                                </div>
+                            </div>
                         </div>
                         <div class="profile_subtitle">Личные данные</div>
                         <div class="form_item">
                             <p class="form_label">Пол</p>
                             <select class="form_input" [(ngModel)]="viewModel.userInfo.gender">
-                                <option *ngFor="let gender of genders" [ngValue]="gender">{{gender}}</option>
+                                <option *ngFor="let gender of genders"
+                                        [ngValue]="gender">{{ getGenderDisplay( gender ) }}</option>
                             </select>
                         </div>
                         <div class="form_item">
@@ -73,8 +97,7 @@
                         </div>
                     </div>
                     <div class="profile_subtitle">Паспортные данные</div>
-                    <app-profile-edit-document [(model)]="viewModel.userInfoDocument">
-                    </app-profile-edit-document>
+                    <app-profile-edit-document [(model)]="viewModel.userInfoDocument"></app-profile-edit-document>
                     <div class="profile_subtitle">Место регистрации</div>
                     <app-profile-edit-dwelling [(model)]="viewModel.userInfoDwelling">
                     </app-profile-edit-dwelling>

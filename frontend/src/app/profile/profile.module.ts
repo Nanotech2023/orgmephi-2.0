@@ -8,6 +8,11 @@ import { ProfileEditLimitationsComponent } from '@/profile/components/profile-ed
 import { ProfileEditDwellingComponent } from '@/profile/components/profile-edit-dwelling/profile-edit-dwelling.component'
 import { ProfileEditSchoolComponent } from '@/profile/components/profile-edit-school/profile-edit-school.component'
 import { YesNoComponentComponent } from '@/profile/components/yes-no-component/yes-no-component.component'
+import { ProfileEditDocumentRfinternationalpassportComponent } from '@/profile/components/profile-edit-document-rfinternationalpassport/profile-edit-document-rfinternationalpassport.component'
+import { ProfileEditDocumentBirthcertificateComponent } from '@/profile/components/profile-edit-document-birthcertificate/profile-edit-document-birthcertificate.component'
+import { ProfileEditDocumentForeignpassportComponent } from '@/profile/components/profile-edit-document-foreignpassport/profile-edit-document-foreignpassport.component'
+import { ProfileEditDocumentOtherdocumentComponent } from '@/profile/components/profile-edit-document-otherdocument/profile-edit-document-otherdocument.component'
+import { ProfileEditDocumentRfpassportComponent } from '@/profile/components/profile-edit-document-rfpassport/profile-edit-document-rfpassport.component'
 
 
 const COMPONENTS = [
@@ -17,7 +22,12 @@ const COMPONENTS = [
     ProfileEditDwellingComponent,
     ProfileEditLimitationsComponent,
     ProfileEditSchoolComponent,
-    YesNoComponentComponent
+    YesNoComponentComponent,
+    ProfileEditDocumentRfpassportComponent,
+    ProfileEditDocumentRfinternationalpassportComponent,
+    ProfileEditDocumentBirthcertificateComponent,
+    ProfileEditDocumentForeignpassportComponent,
+    ProfileEditDocumentOtherdocumentComponent
 ]
 
 

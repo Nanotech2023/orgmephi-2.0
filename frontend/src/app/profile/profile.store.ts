@@ -7,13 +7,13 @@ import {
     LocationRussia,
     SchoolInfo,
     UserInfo,
-    UserLimitations
+    UserLimitations,
+    DocumentTypeEnum, SchoolTypeEnum
 } from '@api/users/models'
 import { UsersService } from '@api/users/users.service'
 import { EMPTY, Observable, zip } from 'rxjs'
 import { CallState, getError, LoadingState } from '@/shared/callState'
 import { catchError, finalize, switchMap } from 'rxjs/operators'
-import { DocumentTypeEnum } from '@api/users/models/documentType'
 
 
 export interface ProfileState
@@ -123,7 +123,7 @@ export class ProfileStore extends ComponentStore<ProfileState>
             grade: undefined,
             number: undefined,
             user_id: undefined,
-            school_type: SchoolInfo.SchoolTypeEnum.School,
+            school_type: SchoolTypeEnum.School,
             name: undefined,
             location: this.getEmptyLocation()
         }

@@ -50,7 +50,6 @@ export class ManageContestsComponent implements OnInit
     navigateElement3( e: any ): void
     {
         const simpleContest: SimpleContest = e.row.data
-        console.log( 'navigateElement3', simpleContest )
         const routePath = [ '/manage', 'contests', simpleContest.base_contest.base_contest_id, 'contest', simpleContest.contest_id, 'users' ]
         this.router.navigate( routePath )
         e.event.preventDefault()
