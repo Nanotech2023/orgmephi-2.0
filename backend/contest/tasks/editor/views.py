@@ -3,13 +3,13 @@ from marshmallow import EXCLUDE
 
 from common import get_current_module
 from contest.tasks.creator.schemas import BaseOlympiadResponseTaskCreatorSchema, StageResponseTaskCreatorSchema, \
-    ContestResponseTaskCreatorSchema, TaskResponseTaskCreatorSchema, VariantResponseTaskCreatorSchema
+    ContestResponseTaskCreatorSchema, TaskResponseTaskCreatorSchema
 from contest.tasks.editor.schemas import *
 from contest.tasks.model_schemas.certificate import CertificateTypeSchema, CertificateSchema
-from contest.tasks.model_schemas.contest import VariantSchema
 from contest.tasks.model_schemas.olympiad import BaseContestSchema, SimpleContestSchema, CompositeContestSchema, \
     StageSchema
-from contest.tasks.model_schemas.tasks import PlainTaskSchema, RangeTaskSchema, MultipleChoiceTaskSchema
+from contest.tasks.model_schemas.tasks import PlainTaskSchema, RangeTaskSchema, MultipleChoiceTaskSchema, \
+    TaskPoolSchema, ContestTaskSchema
 from contest.tasks.models.certificate import Certificate, CertificateType
 from contest.tasks.util import *
 
@@ -95,6 +95,200 @@ def base_olympiad_patch(id_base_olympiad):
 
     return base_contest, 200
 
+
+# Task Pool
+
+
+@module.route('/base_olympiad/<int:id_base_olympiad>/task_pool/<int:id_task_pool>/remove',
+              methods=['POST'])
+def task_pool_remove(id_base_olympiad, id_task_pool):
+    """
+    Delete a task pool
+    ---
+    post:
+      security:
+        - JWTAccessToken: [ ]
+        - CSRFAccessToken: [ ]
+      parameters:
+        - in: path
+          description: ID of the base olympiad
+          name: id_base_olympiad
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: ID of the task pool
+          name: id_task_pool
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: OK
+        '403':
+          description: Invalid role of current user
+        '404':
+          description: TaskPool not found
+    """
+
+    db_get_or_raise(BaseContest, "base_contest_id", id_base_olympiad)
+    task_pool = db_get_or_raise(TaskPool, "task_pool_id", id_task_pool)
+    db.session.delete(task_pool)
+    db.session.commit()
+    return {}, 200
+
+
+@module.route('/base_olympiad/<int:id_base_olympiad>/task_pool/<int:id_task_pool>',
+              methods=['PATCH'])
+def task_pool_patch(id_base_olympiad, id_task_pool):
+    """
+    Update task pool
+    ---
+    patch:
+      parameters:
+        - in: path
+          description: ID of the base olympiad
+          name: id_base_olympiad
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: ID of the task pool
+          name: id_task_pool
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: TaskPoolSchema
+      security:
+        - JWTAccessToken: [ ]
+        - CSRFAccessToken: [ ]
+      responses:
+        '200':
+          description: OK
+        '403':
+          description: Invalid role of current user
+        '404':
+          description: TaskPool not found
+    """
+
+    db_get_or_raise(BaseContest, "base_contest_id", id_base_olympiad)
+    task_pool = db_get_or_raise(TaskPool, "task_pool_id", id_task_pool)
+
+    TaskPoolSchema(load_instance=True).load(request.json, instance=task_pool, session=db.session,
+                                            partial=True, unknown=EXCLUDE)
+
+    db.session.commit()
+
+    return {}, 200
+
+
+# Contest task
+
+
+@module.route('/contest/<int:id_contest>/contest_task/<int:id_contest_task>/remove',
+              methods=['POST'])
+def contest_task_remove(id_contest, id_contest_task):
+    """
+    Delete a task pool
+    ---
+    post:
+      security:
+        - JWTAccessToken: [ ]
+        - CSRFAccessToken: [ ]
+      parameters:
+        - in: path
+          description: ID of the base olympiad
+          name: id_base_olympiad
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: ID of the contest task
+          name: id_contest_task
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: OK
+        '403':
+          description: Invalid role of current user
+        '404':
+          description: TaskPool not found
+    """
+
+    db_get_or_raise(Contest, "contest_id", id_contest)
+    contest_task = db_get_or_raise(ContestTask, "contest_task_id", id_contest_task)
+    db.session.delete(contest_task)
+    db.session.commit()
+    return {}, 200
+
+
+@module.route('/contest/<int:id_contest>/contest_task/<int:id_contest_task>', methods=['PATCH'])
+def contest_task_edit(id_contest, id_contest_task):
+    """
+    Create contest task
+    ---
+    patch:
+      parameters:
+        - in: path
+          description: ID of the contest
+          name: id_contest
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: ID of the contest task
+          name: id_contest_task
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: ContestTaskSchema
+      security:
+        - JWTAccessToken: [ ]
+        - CSRFAccessToken: [ ]
+      responses:
+        '200':
+          description: OK
+        '400':
+          description: Bad request
+        '409':
+          description: Olympiad type already in use
+    """
+
+    values = request.json
+    pool_changed = values.get('task_pools', None) is not None
+
+    contest_ = db_get_or_raise(Contest, "contest_id", id_contest)
+    contest_task = db_get_or_raise(ContestTask, "contest_task_id", id_contest_task)
+    ContestTaskSchema(load_instance=True).load(request.json, instance=contest_task, session=db.session,
+                                               partial=True, unknown=EXCLUDE)
+
+    if pool_changed:
+        previous_pools = set(
+            [task_pool_
+             for contest_task_ in contest_.contest_tasks.all()
+             for task_pool_ in contest_task_.task_pools]
+        )
+
+        if len(previous_pools) != 0:
+            if previous_pools & set(contest_task.task_pools):
+                raise AlreadyExists("task_pool", "task_pool_id")
+
+    db.session.commit()
+
+    return {}, 200
+
+
+# Contest views
 
 # Olympiads
 
@@ -280,7 +474,7 @@ def stage_patch(id_olympiad, id_stage):
     db_get_or_raise(Contest, "contest_id", str(id_olympiad))
 
     StageSchema(load_instance=True).load(request.json, instance=stage, session=db.session,
-                                         partial=False, unknown=EXCLUDE)
+                                         partial=True, unknown=EXCLUDE)
 
     db.session.commit()
 
@@ -387,107 +581,9 @@ def contest_add_previous(id_olympiad, id_stage, id_contest):
     return {}, 200
 
 
-# Variant views
-
-
-@module.route(
-    '/contest/<int:id_contest>/variant/<int:id_variant>/remove',
-    methods=['POST'])
-def variant_remove(id_contest, id_variant):
-    """
-    Delete a contest
-    ---
-    post:
-      security:
-        - JWTAccessToken: [ ]
-        - CSRFAccessToken: [ ]
-      parameters:
-        - in: path
-          description: ID of the contest
-          name: id_contest
-          required: true
-          schema:
-            type: integer
-        - in: path
-          description: ID of the variant
-          name: id_variant
-          required: true
-          schema:
-            type: integer
-      responses:
-        '200':
-          description: OK
-        '403':
-          description: Invalid role of current user
-        '404':
-          description: Olympiad not found
-    """
-
-    variant = get_variant_if_possible(id_contest, id_variant)
-    db.session.delete(variant)
-    db.session.commit()
-    return {}, 200
-
-
-@module.route(
-    '/contest/<int:id_contest>/variant/<int:variant_num>',
-    methods=['PATCH'],
-    input_schema=UpdateVariantRequestTaskEditorSchema,
-    output_schema=VariantResponseTaskCreatorSchema)
-def variant_patch(id_contest, variant_num):
-    """
-    Variant patch
-    ---
-    patch:
-      parameters:
-        - in: path
-          description: ID of the contest
-          name: id_contest
-          required: true
-          schema:
-            type: integer
-        - in: path
-          description: Num of the variant
-          name: variant_num
-          required: true
-          schema:
-            type: integer
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema: UpdateVariantRequestTaskEditorSchema
-      security:
-        - JWTAccessToken: [ ]
-        - CSRFAccessToken: [ ]
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema: VariantResponseTaskCreatorSchema
-        '400':
-          description: Bad request
-        '409':
-          description: Olympiad type already in use
-    """
-
-    variant = get_variant_if_possible_by_number(id_contest, variant_num)
-
-    VariantSchema(load_instance=True).load(request.json, instance=variant, session=db.session,
-                                           partial=False, unknown=EXCLUDE)
-
-    db.session.commit()
-
-    return variant, 200
-
-
-# Task views
-
-
-@module.route('/contest/<int:id_contest>/variant/<int:id_variant>/task/<int:id_task>/upload_image',
+@module.route('/task_pool/<int:id_task_pool>/task/<int:id_task>/upload_image',
               methods=['POST'])
-def task_image_upload(id_contest, id_variant, id_task):
+def task_image_upload(id_task_pool, id_task):
     """
     Upload task image
     ---
@@ -531,16 +627,16 @@ def task_image_upload(id_contest, id_variant, id_task):
         '409':
           description: Wrong value
     """
-    task = get_task_if_possible(id_contest, id_variant, id_task)
+    task = get_task_in_pool_if_possible(id_task_pool, id_task)
     app.store_media('TASK', task, 'image_of_task', TaskImage)
     db.session.commit()
     return {}, 200
 
 
 @module.route(
-    '/contest/<int:id_contest>/variant/<int:id_variant>/task/<int:id_task>/remove',
+    '/task_pool/<int:id_task_pool>/task/<int:id_task>/remove',
     methods=['POST'])
-def task_remove(id_contest, id_variant, id_task):
+def task_remove(id_task_pool, id_task):
     """
     Delete a task
     ---
@@ -576,7 +672,7 @@ def task_remove(id_contest, id_variant, id_task):
           description: Olympiad not found
     """
 
-    task = get_task_if_possible(id_contest, id_variant, id_task)
+    task = get_task_in_pool_if_possible(id_task_pool, id_task)
     db.session.delete(task)
     db.session.commit()
 
@@ -584,10 +680,9 @@ def task_remove(id_contest, id_variant, id_task):
 
 
 @module.route(
-    '/contest/<int:id_contest>/variant/<int:id_variant>/task/<int:id_task>/plain',
-    methods=['PATCH'],
-    input_schema=UpdatePlainRequestTaskEditorSchema, output_schema=TaskResponseTaskCreatorSchema)
-def task_patch_plain(id_contest, id_variant, id_task):
+    '/task_pool/<int:id_task_pool>/task/<int:id_task>/plain',
+    methods=['PATCH'], output_schema=TaskResponseTaskCreatorSchema)
+def task_patch_plain(id_task_pool, id_task):
     """
     Update plain task
     ---
@@ -615,7 +710,7 @@ def task_patch_plain(id_contest, id_variant, id_task):
         required: true
         content:
           application/json:
-            schema: UpdatePlainRequestTaskEditorSchema
+            schema: PlainTaskSchema
       security:
         - JWTAccessToken: [ ]
         - CSRFAccessToken: [ ]
@@ -630,10 +725,10 @@ def task_patch_plain(id_contest, id_variant, id_task):
         '409':
           description: Olympiad type already in use
     """
-    task = get_task_if_possible(id_contest, id_variant, id_task)
+    task = get_task_in_pool_if_possible(id_task_pool, id_task)
 
     PlainTaskSchema(load_instance=True).load(request.json, instance=task, session=db.session,
-                                             partial=False, unknown=EXCLUDE)
+                                             partial=True, unknown=EXCLUDE)
 
     db.session.commit()
 
@@ -641,10 +736,9 @@ def task_patch_plain(id_contest, id_variant, id_task):
 
 
 @module.route(
-    '/contest/<int:id_contest>/variant/<int:id_variant>/task/<int:id_task>/range',
-    methods=['PATCH'],
-    input_schema=UpdateRangeRequestTaskEditorSchema, output_schema=TaskResponseTaskCreatorSchema)
-def task_patch_range(id_contest, id_variant, id_task):
+    '/task_pool/<int:id_task_pool>/task/<int:id_task>/range',
+    methods=['PATCH'], output_schema=TaskResponseTaskCreatorSchema)
+def task_patch_range(id_task_pool, id_task):
     """
     Update range task
     ---
@@ -672,7 +766,7 @@ def task_patch_range(id_contest, id_variant, id_task):
         required: true
         content:
           application/json:
-            schema: UpdateRangeRequestTaskEditorSchema
+            schema: RangeTaskSchema
       security:
         - JWTAccessToken: [ ]
         - CSRFAccessToken: [ ]
@@ -687,10 +781,10 @@ def task_patch_range(id_contest, id_variant, id_task):
         '409':
           description: Olympiad type already in use
     """
-    task = get_task_if_possible(id_contest, id_variant, id_task)
+    task = get_task_in_pool_if_possible(id_task_pool, id_task)
 
     RangeTaskSchema(load_instance=True).load(request.json, instance=task, session=db.session,
-                                             partial=False, unknown=EXCLUDE)
+                                             partial=True, unknown=EXCLUDE)
 
     db.session.commit()
 
@@ -698,10 +792,9 @@ def task_patch_range(id_contest, id_variant, id_task):
 
 
 @module.route(
-    '/contest/<int:id_contest>/variant/<int:id_variant>/task/<int:id_task>/multiple',
-    methods=['PATCH'],
-    input_schema=UpdateMultipleRequestTaskEditorSchema, output_schema=TaskResponseTaskCreatorSchema)
-def task_patch_multiple(id_contest, id_variant, id_task):
+    '/task_pool/<int:id_task_pool>/task/<int:id_task>/multiple',
+    methods=['PATCH'], output_schema=TaskResponseTaskCreatorSchema)
+def task_patch_multiple(id_task_pool, id_task):
     """
     Update multiple task
     ---
@@ -729,7 +822,7 @@ def task_patch_multiple(id_contest, id_variant, id_task):
         required: true
         content:
           application/json:
-            schema: UpdateMultipleRequestTaskEditorSchema
+            schema: MultipleChoiceTaskSchema
       security:
         - JWTAccessToken: [ ]
         - CSRFAccessToken: [ ]
@@ -744,19 +837,10 @@ def task_patch_multiple(id_contest, id_variant, id_task):
         '409':
           description: Olympiad type already in use
     """
-    values = request.marshmallow
-    task = get_task_if_possible(id_contest, id_variant, id_task)
-    answers = values['answers']
-    del values['answers']
-
+    values = request.json
+    task = get_task_in_pool_if_possible(id_task_pool, id_task)
     MultipleChoiceTaskSchema(load_instance=True).load(values, instance=task, session=db.session,
-                                                      partial=False, unknown=EXCLUDE)
-    task.answers = [
-        {
-            "answer": answer['answer'],
-            "is_right_answer": answer['is_right_answer']}
-        for answer in answers]
-
+                                                      partial=True, unknown=EXCLUDE)
     db.session.commit()
 
     return task, 200

@@ -413,13 +413,13 @@ def patch_certificate(certificate_id):
     certificate = db_get_or_raise(Certificate, 'certificate_id', certificate_id)
     db.session.expunge(certificate)
 
-    CertificateSchema(load_instance=True)\
+    CertificateSchema(load_instance=True) \
         .load(request.json, session=db.session, partial=True, unknown=EXCLUDE, instance=certificate)
 
     category = certificate.certificate_category
     query = Certificate.query.filter_by(certificate_type_id=certificate.certificate_type_id,
                                         certificate_category=category,
-                                        certificate_year=certificate.certificate_year).\
+                                        certificate_year=certificate.certificate_year). \
         filter(Certificate.certificate_id != certificate.certificate_id)
     exists = db.session.query(query.exists()).scalar()
     if exists:
@@ -610,3 +610,50 @@ def test_certificate(certificate_id):
                          middle_name=args['middle_name'])
 
     return get_certificate_for_user(test_user, 'test contest', certificate)
+
+
+@module.route(
+    '/contest/<int:id_contest>/user/<int:id_user>/variant/generate',
+    output_schema=VariantIdResponseTaskAdminSchema,
+    methods=['POST'])
+def generate_variant_in_contest(id_contest, id_user):
+    """
+    Get variant for user in current contest (only for test)
+    ---
+    post:
+      parameters:
+        - in: path
+          description: Id of the contest
+          name: id_contest
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the user
+          name: id_user
+          required: true
+          schema:
+            type: integer
+      security:
+        - JWTAccessToken: [ ]
+        - CSRFAccessToken: [ ]
+
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: VariantIdResponseTaskAdminSchema
+        '400':
+          description: Bad request
+        '409':
+          description: Olympiad type already in use
+        '404':
+          description: User not found
+    """
+
+    variant_id = try_to_generate_variant(id_contest, id_user)
+    db.session.commit()
+    return {
+               "variant_id": variant_id
+           }, 200

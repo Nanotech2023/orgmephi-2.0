@@ -1,7 +1,7 @@
 from flask import request
 
 from common import get_current_module
-from common.errors import AlreadyExists, TimeOver
+from common.errors import TimeOver
 from contest.responses.util import get_user_in_contest_work
 from contest.tasks.model_schemas.olympiad import SimpleContestSchema
 from contest.tasks.participant.schemas import *
@@ -140,7 +140,6 @@ def enroll_in_contest(id_contest):
 
     current_contest.users.append(UserInContest(user_id=user_id,
                                                show_results_to_user=False,
-                                               variant_id=generate_variant(id_contest, user_id),
                                                location_id=location_id,
                                                supervisor=supervisor,
                                                user_status=UserStatusEnum.Participant))
