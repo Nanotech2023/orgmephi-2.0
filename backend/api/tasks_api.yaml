@@ -415,6 +415,9 @@ components:
           - In progress
           - Finished
           type: string
+        user_count:
+          readOnly: true
+          type: integer
         visibility:
           type: boolean
       required:
@@ -941,20 +944,20 @@ components:
           type: integer
         total_points:
           type: integer
+        user_count:
+          readOnly: true
+          type: integer
         visibility:
           type: boolean
       required:
       - base_contest
       - composite_type
-      - contest_duration
       - contest_id
       - deadline_for_appeal
       - end_date
-      - end_of_enroll_date
       - holding_type
       - locations
       - previous_participation_condition
-      - result_publication_date
       - start_date
       - visibility
       type: object

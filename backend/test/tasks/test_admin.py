@@ -318,3 +318,21 @@ def test_certificate_post_image(client):
 
     cert = Certificate.query.filter_by(certificate_id=cert_id).one_or_none()
     assert cert.certificate_image is not None
+
+
+def test_user_count(client, simple_contests_in_stage_for_user_count):
+    contest_id_1 = simple_contests_in_stage_for_user_count['composite_contests'][0].contest_id
+    contest_id_2 = simple_contests_in_stage_for_user_count['simple_contests'][0].contest_id
+    base_contest_id = simple_contests_in_stage_for_user_count['base_contests'][0].base_contest_id
+    client.set_prefix('contest/tasks/unauthorized')
+
+    resp = client.get(f'/base_olympiad/{base_contest_id}/olympiad/{contest_id_2}')
+    assert resp.status_code == 200
+    response = resp.json
+    assert response['user_count'] == 4
+
+    resp = client.get(f'/base_olympiad/{base_contest_id}/olympiad/{contest_id_1}')
+    assert resp.status_code == 200
+    response = resp.json
+    assert response['user_count'] == 8
+    assert response['stages'][0]['contests'][0]['user_count'] == 4

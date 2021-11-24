@@ -215,9 +215,9 @@ class Contest(db.Model):
     @hybrid_property
     def academic_year(self):
         if self.composite_type == ContestTypeEnum.CompositeContest:
-            return CompositeContest.query.filter_by(contest_id=self.contest_id)
+            return CompositeContest.query.filter_by(contest_id=self.contest_id).one_or_none().academic_year
         else:
-            return SimpleContest.query.filter_by(contest_id=self.contest_id)
+            return SimpleContest.query.filter_by(contest_id=self.contest_id).one_or_none().academic_year
 
     @academic_year.expression
     def academic_year(cls):
@@ -234,6 +234,13 @@ class Contest(db.Model):
                 SimpleContest.contest_id == cls.contest_id
             ).limit(1).scalar_subquery()
         ).label("academic_year")
+
+    @hybrid_property
+    def user_count(self):
+        if self.composite_type == ContestTypeEnum.CompositeContest:
+            return CompositeContest.query.filter_by(contest_id=self.contest_id).one_or_none().user_count
+        else:
+            return SimpleContest.query.filter_by(contest_id=self.contest_id).one_or_none().user_count
 
 
 def add_simple_contest(db_session,
@@ -397,6 +404,11 @@ class SimpleContest(Contest):
                      (datetime.utcnow() < cls.end_date, OlympiadStatusEnum.OlympiadInProgress.value)],
                     else_=OlympiadStatusEnum.OlympiadFinished.value)
 
+    @hybrid_property
+    def user_count(self):
+        from contest.tasks.models import UserInContest
+        return UserInContest.query.filter_by(contest_id=self.contest_id).count()
+
 
 def add_group_restriction(db_session, contest_id, group_id, restriction):
     group_restriction = ContestGroupRestriction(
@@ -520,3 +532,14 @@ class CompositeContest(Contest):
             return OlympiadStatusEnum.OlympiadFinished
         else:
             return OlympiadStatusEnum.OlympiadInProgress
+
+    @hybrid_property
+    def user_count(self):
+        from contest.tasks.models import UserInContest
+        stages = [stage for stage in self.stages.all()]
+        staged_contests = []
+        for stage in stages:
+            staged_contests.extend([contest_s for contest_s in stage.contests])
+        users = [UserInContest.query.filter_by(contest_id=composite_elem.contest_id).count()
+                 for composite_elem in staged_contests]
+        return sum(users)

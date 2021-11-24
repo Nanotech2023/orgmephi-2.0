@@ -1,6 +1,8 @@
 import io
 from datetime import datetime, timedelta
 
+import pytest
+
 from ..user import *
 
 
@@ -774,3 +776,101 @@ def test_certificate_type():
     test_app.db.session.commit()
 
     yield cert_type
+
+
+@pytest.fixture
+def test_generate_users_for_user_count():
+    from user.models import UserTypeEnum, UserRoleEnum
+    from .. import _generate_user
+    users = []
+    for i in range(8):
+        user = _generate_user()
+        user.username = f'university_{i}'
+        user.role = UserRoleEnum.participant
+        user.type = UserTypeEnum.university
+        user.user_info.email = f'university_{i}@example.org'
+        users.append(user)
+    test_app.db.session.commit()
+    yield users
+
+
+# noinspection DuplicatedCode
+@pytest.fixture
+def stages_for_user_count(test_contests_composite):
+    from contest.tasks.models import Stage, StageConditionEnum
+
+    stages = [Stage(stage_name=f'Test {i}', stage_num=i,
+                    condition=StageConditionEnum.And, this_stage_condition='Test')
+              for i in range(8)]
+    for i in range(len(stages)):
+        test_contests_composite[0].stages.append(stages[i])
+    test_app.db.session.add_all(stages)
+    test_app.db.session.commit()
+    dict_ = {
+        'composite_contests': test_contests_composite,
+        'stages': stages
+    }
+    yield dict_
+
+
+# noinspection DuplicatedCode
+@pytest.fixture
+def simple_contests_in_stage_for_user_count(test_base_contests_with_target, stages_for_user_count,
+                                            test_olympiad_locations, test_generate_users_for_user_count):
+    from contest.tasks.models import Variant
+    from contest.tasks.models.user import UserStatusEnum
+    from contest.tasks.models.olympiad import SimpleContest, ContestHoldingTypeEnum
+    from contest.tasks.models import UserInContest
+    simple_contest = SimpleContest(base_contest_id=test_base_contests_with_target[0].base_contest_id,
+                                   visibility=True,
+                                   start_date=datetime.utcnow(),
+                                   end_date=datetime.utcnow() + timedelta(hours=4),
+                                   holding_type=ContestHoldingTypeEnum.OnLineContest,
+                                   regulations=f'Test',
+                                   contest_duration=timedelta(minutes=30),
+                                   result_publication_date=datetime.utcnow() + timedelta(hours=6),
+                                   end_of_enroll_date=datetime.utcnow() + timedelta(minutes=15))
+
+    other_stage = SimpleContest(base_contest_id=test_base_contests_with_target[0].base_contest_id,
+                                visibility=True,
+                                start_date=datetime.utcnow(),
+                                end_date=datetime.utcnow() + timedelta(hours=4),
+                                holding_type=ContestHoldingTypeEnum.OnLineContest,
+                                regulations=f'Test',
+                                contest_duration=timedelta(minutes=30),
+                                result_publication_date=datetime.utcnow() + timedelta(hours=6),
+                                end_of_enroll_date=datetime.utcnow() + timedelta(minutes=15))
+    test_app.db.session.add(other_stage)
+    test_app.db.session.add(simple_contest)
+
+    test_app.db.session.flush()
+    simple_contest.locations.append(test_olympiad_locations[0])
+    other_stage.locations.append(test_olympiad_locations[0])
+
+    simple_contest.previous_contest_id = other_stage.contest_id
+    simple_contest.previous_participation_condition = UserStatusEnum.Participant
+
+    simple_contest.variants.append(Variant(variant_number=1))
+    stages_for_user_count['base_contests'] = test_base_contests_with_target
+    stages_for_user_count['stages'][0].contests.append(simple_contest)
+    stages_for_user_count['stages'][1].contests.append(other_stage)
+
+    test_app.db.session.commit()
+
+    stages_for_user_count['simple_contests'] = [simple_contest, other_stage]
+
+    uic = [UserInContest(user_id=test_generate_users_for_user_count[i].id,
+                         show_results_to_user=True,
+                         location_id=1,
+                         variant_id=1,
+                         user_status=UserStatusEnum.Participant,
+                         completed_the_contest=False,
+                         contest_id=stages_for_user_count['simple_contests'][i % 2].contest_id)
+           for i in range(8)]
+    test_app.db.session.add_all(uic)
+
+    test_app.db.session.commit()
+
+    stages_for_user_count['users'] = test_generate_users_for_user_count
+
+    yield stages_for_user_count

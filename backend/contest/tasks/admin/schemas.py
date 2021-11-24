@@ -1,5 +1,6 @@
 from marshmallow import Schema, fields
 from common import fields as common_fields
+from contest.tasks.model_schemas.olympiad import ContestSchema
 
 
 class CreateOlympiadTypeRequestTaskAdminSchema(Schema):

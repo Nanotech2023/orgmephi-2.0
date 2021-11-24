@@ -113,6 +113,7 @@ class SimpleContestSchema(SQLAlchemySchema):
     academic_year = fields.Integer()
     total_points = fields.Integer()
     tasks_number = fields.Integer()
+    user_count = fields.Integer(required=False, dump_only=True)
     enrolled = fields.Boolean(required=False, dump_only=True)
     show_answer_after_contest = fields.Boolean(required=False, dump_only=True)
     deadline_for_appeal = auto_field(column_name='deadline_for_appeal', required=True)
@@ -141,6 +142,15 @@ class SimpleContestSchema(SQLAlchemySchema):
         user_id = jwt_get_id()
         if user_id is not None:
             data['enrolled'] = is_user_in_contest(user_id, original)
+        return data
+
+    @post_dump
+    def delete_user_count(self, data, many, **kwargs):
+        from common.jwt_verify import jwt_get_role
+        from user.models import UserRoleEnum
+        role = jwt_get_role()
+        if role != UserRoleEnum.admin.value and role != UserRoleEnum.creator.value:
+            del data['user_count']
         return data
 
 
@@ -191,10 +201,20 @@ class CompositeContestSchema(SQLAlchemySchema):
     base_contest = fields.Nested(BaseContestSchema, required=True, dump_only=True)
     status = EnumField(OlympiadStatusEnum, data_key='status', by_value=True)
     academic_year = fields.Integer()
+    user_count = fields.Integer(required=False, dump_only=True)
     composite_type = EnumField(ContestTypeEnum,
                                data_key='composite_type',
                                by_value=True, required=True,
                                validate=validate.OneOf([ContestTypeEnum.CompositeContest]))
+
+    @post_dump
+    def delete_user_count(self, data, many, **kwargs):
+        from common.jwt_verify import jwt_get_role
+        from user.models import UserRoleEnum
+        role = jwt_get_role()
+        if role != UserRoleEnum.admin.value and role != UserRoleEnum.creator.value:
+            del data['user_count']
+        return data
 
 
 class ContestSchema(OneOfSchema):
