@@ -850,7 +850,7 @@ def simple_contests_in_stage_for_user_count(test_base_contests_with_target, stag
     simple_contest.previous_contest_id = other_stage.contest_id
     simple_contest.previous_participation_condition = UserStatusEnum.Participant
 
-    simple_contest.variants.append(Variant(variant_number=1, variant_description="3"))
+    simple_contest.variants.append(Variant(variant_number=1))
     stages_for_user_count['base_contests'] = test_base_contests_with_target
     stages_for_user_count['stages'][0].contests.append(simple_contest)
     stages_for_user_count['stages'][1].contests.append(other_stage)
