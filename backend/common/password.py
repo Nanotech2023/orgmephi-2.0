@@ -2,6 +2,25 @@ from passlib.context import CryptContext
 from password_strength import PasswordPolicy
 
 
+_legacy_hash_name = 'org-legacy'
+
+
+# noinspection InsecureHash
+def _legacy_hash(password, salt):
+    from hashlib import md5
+    pwd_hash = md5(password.encode('utf-8')).hexdigest()
+    salt_hash = md5(salt.encode('utf-8')).hexdigest()
+    result_hash = md5((pwd_hash + salt_hash).encode('utf-8')).hexdigest()
+    return result_hash
+
+
+def _legacy_verify(password, hashed_password):
+    salt = hashed_password.split('$')[2]
+    orig_hash = hashed_password.split('$')[3]
+    real_hash = _legacy_hash(password, salt)
+    return orig_hash == real_hash
+
+
 class OrgMephiPassword:
     """
     Password manager
@@ -47,8 +66,13 @@ class OrgMephiPassword:
         :param password_hash: hash of a password
         """
         from .errors import WrongCredentials
-        if not self._passlib.verify(password, password_hash):
-            raise WrongCredentials()
+        if password_hash.split('$')[1] == _legacy_hash_name:
+            if _legacy_verify(password, password_hash):
+                return
+        else:
+            if self._passlib.verify(password, password_hash):
+                return
+        raise WrongCredentials()
 
 
 def get_password_policy():
