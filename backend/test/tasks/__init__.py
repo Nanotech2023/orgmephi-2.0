@@ -11,6 +11,8 @@ def create_group_for_everyone():
     from user.models.auth import Group
     everyone_group = Group(name='Everyone')
     test_app.db.session.add(everyone_group)
+    test_group = Group(name='Test Group')
+    test_app.db.session.add(test_group)
     test_app.db.session.commit()
     yield everyone_group
 
