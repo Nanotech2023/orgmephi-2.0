@@ -827,5 +827,14 @@ def test_contest_properties(client, create_user_with_answers):
     assert resp.status_code == 200
     response = resp.json
     assert response['academic_year'] == datetime.utcnow().year - 1
-    print(response.keys())
-    assert  2 == 3
+    assert response['total_points'] == 42
+    assert response['tasks_number'] == 3
+    assert response['status'] == 'In progress'
+
+    contest.start_date = datetime(datetime.utcnow().year + 1, 5, 10, 10, 0, 0)
+    test_app.db.session.commit()
+
+    resp = client.get(f'/base_olympiad/{base_contest_id}/olympiad/{contest_id}')
+    assert resp.status_code == 200
+    response = resp.json
+    assert response['status'] == 'Will start soon'

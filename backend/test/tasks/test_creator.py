@@ -273,3 +273,35 @@ def test_task_all(client, test_simple_contest, test_create_tasks_pool):
     resp = client.get(f'/task_pool/{test_create_tasks_pool[0].task_pool_id}/task/all')
     assert resp.status_code == 200
     assert len(test_create_tasks_pool[0].tasks.all()) == len(list(resp.json['tasks_list']))
+
+
+def test_composite_contest_properties(client, test_simple_contest_in_stage_1):
+    from contest.tasks.models import CompositeContest, SimpleContest
+    composite_contest = CompositeContest.query.first()
+    contest_id = composite_contest.contest_id
+    base_contest_id = composite_contest.base_contest_id
+    client.set_prefix('contest/tasks/unauthorized')
+
+    resp = client.get(f'/base_olympiad/{base_contest_id}/olympiad/{contest_id}')
+    assert resp.status_code == 200
+    response = resp.json
+    assert response['status'] == 'In progress'
+    assert response['academic_year'] == datetime.utcnow().year
+
+    simple_contests = SimpleContest.query.all()
+    for contest in simple_contests:
+        contest.start_date = datetime(datetime.utcnow().year + 1, 10, 10, 10, 0, 0)
+    test_app.db.session.commit()
+    resp = client.get(f'/base_olympiad/{base_contest_id}/olympiad/{contest_id}')
+    assert resp.status_code == 200
+    response = resp.json
+    assert response['status'] == 'Will start soon'
+
+    for contest in simple_contests:
+        contest.start_date = datetime(datetime.utcnow().year - 1, 10, 10, 10, 0, 0)
+        contest.end_date = datetime(datetime.utcnow().year - 1, 12, 12, 10, 0, 0)
+    test_app.db.session.commit()
+    resp = client.get(f'/base_olympiad/{base_contest_id}/olympiad/{contest_id}')
+    assert resp.status_code == 200
+    response = resp.json
+    assert response['status'] == 'Finished'
