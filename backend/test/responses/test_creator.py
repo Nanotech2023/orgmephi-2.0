@@ -102,7 +102,7 @@ def test_get_variant_by_number(client_tasks, create_user_response):
     assert resp.status_code == 200
     assert resp.json['variant_id'] == variant.variant_id
 
-    resp = client_tasks.get(f'/contest/{contest_id}/variant/{variant.variant_number+1}', data=test_image)
+    resp = client_tasks.get(f'/contest/{contest_id}/variant/{variant.variant_number + 1}', data=test_image)
     assert resp.status_code == 409
 
 
@@ -326,14 +326,41 @@ def test_mark_creator(client, create_user_response):
     simple_contest.deadline_for_appeal = datetime.utcnow() - timedelta(minutes=15)
     test_app.db.session.commit()
 
-    resp = client.post(f'/contest/{contest_id}/task/{ERROR_ID}/user/{user_id}/mark',
+    resp = client.post(f'/contest/{contest_id}/task/{task_id}/user/{user_id}/mark',
                        json={'mark': 12})
     assert resp.status_code == 409
+
+
+def test_admin_mark_creator(client_admin_response, create_user_with_answers):
+    contest_id = get_contest_id(create_user_with_answers, DEFAULT_INDEX)
+    user_id = get_user_id(create_user_with_answers, DEFAULT_INDEX)
+    from contest.tasks.models.tasks import TaskTypeEnum
+    task_id = get_task_id_by_variant_and_type(contest_id, user_id, TaskTypeEnum.PlainTask)
+
+    resp = client_admin_response.post(f'/contest/{contest_id}/task/{task_id}/user/{user_id}/mark',
+                                      json={'mark': 11})
+    assert resp.status_code == 200
+
+    from contest.responses.util import user_answer_get
+    answer = user_answer_get(user_id, contest_id, task_id)
+    assert answer.mark == 11
+
+    from contest.tasks.util import get_simple_contest_if_possible
+    simple_contest = get_simple_contest_if_possible(contest_id)
+    simple_contest.deadline_for_appeal = datetime.utcnow() - timedelta(minutes=15)
+    test_app.db.session.commit()
+
+    resp = client_admin_response.post(f'/contest/{contest_id}/task/{task_id}/user/{user_id}/mark',
+                                      json={'mark': 12})
+    assert resp.status_code == 200
 
 
 def test_time_left_creator(client, create_user_response):
     contest_id = get_contest_id(create_user_response, DEFAULT_INDEX)
     user_id = get_user_id(create_user_response, DEFAULT_INDEX)
+
+    resp = client.get(f'/contest/{1000}/user/{user_id}/time')
+    assert resp.status_code == 404
 
     resp = client.get(f'/contest/{contest_id}/user/{user_id}/time')
     assert resp.status_code == 200
@@ -734,3 +761,49 @@ def test_group_restrictions(client, create_user_with_answers):
                        json={'status': 'NotChecked'})
     assert resp.status_code == 403
 
+
+# noinspection DuplicatedCode
+def test_admin_group_restrictions(client_admin_response, create_user_with_answers):
+    contest_id = get_contest_id(create_user_with_answers, 0)
+    test_user_id = get_user_id(create_user_with_answers, 0)
+    client_admin_response.set_prefix('user/profile')
+
+    resp = client_admin_response.get('/user')
+    assert resp.status_code == 200
+    user_id = resp.json['id']
+
+    from user.models import Group, User
+    from common.util import db_get_one_or_none
+    test_group = db_get_one_or_none(Group, 'name', 'Test Group')
+    user = db_get_one_or_none(User, 'id', user_id)
+    test_group.users.append(user)
+    test_app.db.session.commit()
+
+    client_admin_response.set_prefix('contest/tasks/creator')
+
+    resp = client_admin_response.get(f'/contest/{contest_id}/restrictions')
+    assert resp.status_code == 200
+    restrictions = resp.json['restrictions']
+    assert restrictions[0]['group_name'] == 'Everyone'
+    assert restrictions[0]['restriction'] == 'EditUserStatus'
+
+    restrictions = [
+        {
+            'group_name': 'Test Group',
+            'restriction': 'ViewMarkAndUserStatus'
+        },
+        {
+            'group_name': 'Everyone',
+            'restriction': 'ViewMarkAndUserStatus'
+        }
+    ]
+
+    resp = client_admin_response.put(f'/contest/{contest_id}/restrictions',
+                                     json={'restrictions': restrictions})
+    assert resp.status_code == 200
+
+    client_admin_response.set_prefix('contest/responses/creator')
+    resp = client_admin_response.get(f'/contest/{contest_id}/user/{test_user_id}/status')
+    assert resp.status_code == 200
+    resp = client_admin_response.get(f'/contest/{contest_id}/user/{test_user_id}/response')
+    assert resp.status_code == 200
