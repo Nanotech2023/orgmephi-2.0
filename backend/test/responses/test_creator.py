@@ -807,3 +807,25 @@ def test_admin_group_restrictions(client_admin_response, create_user_with_answer
     assert resp.status_code == 200
     resp = client_admin_response.get(f'/contest/{contest_id}/user/{test_user_id}/response')
     assert resp.status_code == 200
+
+
+def test_contest_properties(client, create_user_with_answers):
+    contest_id = get_contest_id(create_user_with_answers, DEFAULT_INDEX)
+    base_contest_id = create_user_with_answers['base_contests'][DEFAULT_INDEX].base_contest_id
+    client.set_prefix('contest/tasks/unauthorized')
+
+    resp = client.get(f'/base_olympiad/{base_contest_id}/olympiad/{contest_id}')
+    assert resp.status_code == 200
+    response = resp.json
+    assert response['user_count'] == 1
+    assert response['academic_year'] == datetime.utcnow().year
+
+    contest = create_user_with_answers['contests'][0]
+    contest.start_date = datetime(2021, 6, 6, 10, 0, 0)
+    test_app.db.session.commit()
+    resp = client.get(f'/base_olympiad/{base_contest_id}/olympiad/{contest_id}')
+    assert resp.status_code == 200
+    response = resp.json
+    assert response['academic_year'] == datetime.utcnow().year - 1
+    print(response.keys())
+    assert  2 == 3
