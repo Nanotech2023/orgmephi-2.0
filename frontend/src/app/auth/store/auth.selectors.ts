@@ -23,6 +23,13 @@ export const selectUserInfo: MemoizedSelector<State, UserInfo> = createSelector(
         state.userInfo!
 )
 
+export const selectUserPhoto: MemoizedSelector<State, Blob> = createSelector(
+    selectFeature,
+    ( state: State ) =>
+        state.userPhoto!
+)
+
+
 
 export const selectIsParticipant: MemoizedSelector<State, boolean> = createSelector(
     selectFeature,

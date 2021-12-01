@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core'
 import { ComponentStore, tapResponse } from '@ngrx/component-store'
 import { TasksService } from '@api/tasks/tasks.service'
 import { CallState, getError, LoadingState } from '@/shared/callState'
-import { EMPTY, Observable } from 'rxjs'
+import { EMPTY, Observable, of } from 'rxjs'
 import {
     CompositeContest,
     Contest,
@@ -15,6 +15,7 @@ import {
 import { catchError, switchMap } from 'rxjs/operators'
 import { ResponsesService } from '@api/responses/responses.service'
 import CompositeTypeEnum = SimpleContest.CompositeTypeEnum
+import { displayErrorMessage } from '@/shared/logging'
 
 
 export interface ContestsState
@@ -90,7 +91,7 @@ export class ContestsStore extends ComponentStore<ContestsState>
                 ( response: FilterSimpleContestResponseTaskParticipant ) => this.setContests( response.contest_list ?? [] ),
                 ( error: string ) => this.updateError( error )
             ),
-            catchError( () => EMPTY )
+            catchError( ( error: any ) => of( displayErrorMessage( error ) ) )
         )
     } )
 
@@ -102,7 +103,7 @@ export class ContestsStore extends ComponentStore<ContestsState>
                         ( response: Contest ) => this.selectContest( response ),
                         ( error: string ) => this.updateError( error )
                     ),
-                    catchError( () => EMPTY ) ) )
+                    catchError( ( error: any ) => of( displayErrorMessage( error ) ) ) ) )
         ) )
 
     readonly enroll = this.effect( ( enroll$: Observable<{ contestId: number, locationId: number }> ) =>
@@ -112,7 +113,7 @@ export class ContestsStore extends ComponentStore<ContestsState>
                 const { contestId, locationId } = enroll
                 const enrollRequestTaskParticipant: EnrollRequestTaskParticipant = { location_id: locationId }
                 return this.tasksService.tasksParticipantContestIdContestEnrollPost( contestId, enrollRequestTaskParticipant ).pipe(
-                    catchError( () => EMPTY )
+                    catchError( ( error: any ) => of( displayErrorMessage( error ) ) )
                 )
             } )
         ) )
@@ -121,7 +122,7 @@ export class ContestsStore extends ComponentStore<ContestsState>
         contestId$.pipe(
             switchMap( ( contestId: number ) =>
                 this.responsesService.responsesParticipantContestContestIdUserSelfCreatePost( contestId ).pipe(
-                    catchError( () => EMPTY )
+                    catchError( ( error: any ) => of( displayErrorMessage( error ) ) )
                 ) )
         ) )
 }

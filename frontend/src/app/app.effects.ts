@@ -1,8 +1,8 @@
 import { Actions, createEffect, ofType, ROOT_EFFECTS_INIT } from '@ngrx/effects'
-import { catchError, concatMap, finalize, mergeMap } from 'rxjs/operators'
+import { catchError, concatMap, finalize, mergeMap, tap } from 'rxjs/operators'
 import { CSRFPairUser } from '@api/users/models'
-import { of } from 'rxjs'
-import { errorCaught, loginSuccess } from '@/auth/store/auth.actions'
+import { EMPTY, of } from 'rxjs'
+import { loginSuccess } from '@/auth/store/auth.actions'
 import { Injectable } from '@angular/core'
 import { Router } from '@angular/router'
 import { UsersService } from '@api/users/users.service'
@@ -27,7 +27,7 @@ export class RootEffects
                     of( loginSuccess( { csrfPair } ) )
                 ),
                 finalize( () => this.router.initialNavigation() ),
-                catchError( error => of( errorCaught( { error: error } ) ) )
+                catchError( _ => EMPTY )
             ) )
         ) )
 }

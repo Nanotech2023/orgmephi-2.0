@@ -1,15 +1,18 @@
 import { Injectable } from '@angular/core'
 import { ComponentStore, tapResponse } from '@ngrx/component-store'
-import { EMPTY, Observable } from 'rxjs'
+import { EMPTY, Observable, of } from 'rxjs'
 import { CallState, getError, LoadingState } from '@/shared/callState'
 import { catchError, switchMap } from 'rxjs/operators'
 import {
     AllUserAnswersResponse,
-    AllUserMarksResponse, AnswerWithoutMark, BaseAnswer,
+    AllUserMarksResponse,
+    AnswerWithoutMark,
+    BaseAnswer,
     UserResponseStatusResponse,
     UserTimeResponseRequest
 } from '@api/responses/model'
 import { ResponsesService } from '@api/responses/responses.service'
+import { displayErrorMessage } from '@/shared/logging'
 
 
 export interface ManageContestUserAssignmentState
@@ -118,7 +121,7 @@ export class ManageContestUserAssignmentStore extends ComponentStore<ManageConte
                         } ),
                     ( error: string ) => this.updateError( error )
                 ),
-                catchError( () => EMPTY )
+                catchError( ( error: any ) => of( displayErrorMessage( error ) ) )
             ) ) )
     } )
 
@@ -134,7 +137,7 @@ export class ManageContestUserAssignmentStore extends ComponentStore<ManageConte
                         } ),
                     ( error: string ) => this.updateError( error )
                 ),
-                catchError( () => EMPTY )
+                catchError( ( error: any ) => of( displayErrorMessage( error ) ) )
             ) ) )
     } )
 
@@ -150,7 +153,7 @@ export class ManageContestUserAssignmentStore extends ComponentStore<ManageConte
                         } ),
                     ( error: string ) => this.updateError( error )
                 ),
-                catchError( () => EMPTY )
+                catchError( ( error: any ) => of( displayErrorMessage( error ) ) )
             ) ) )
     } )
 
@@ -166,7 +169,7 @@ export class ManageContestUserAssignmentStore extends ComponentStore<ManageConte
                         } ),
                     ( error: string ) => this.updateError( error )
                 ),
-                catchError( () => EMPTY )
+                catchError( ( error: any ) => of( displayErrorMessage( error ) ) )
             ) ) )
     } )
 
@@ -182,7 +185,7 @@ export class ManageContestUserAssignmentStore extends ComponentStore<ManageConte
                         } ),
                     ( error: string ) => this.updateError( error )
                 ),
-                catchError( () => EMPTY )
+                catchError( ( error: any ) => of( displayErrorMessage( error ) ) )
             ) ) )
     } )
 }

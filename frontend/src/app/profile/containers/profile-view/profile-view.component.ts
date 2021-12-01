@@ -1,17 +1,12 @@
 import { Component } from '@angular/core'
 import { ProfileStore } from '@/profile/profile.store'
 import { Observable } from 'rxjs'
-import {
-    UserInfo,
-    SchoolInfo,
-    DocumentRF,
-    LocationRussia,
-    UserLimitations,
-    GenderEnum,
-    DocumentTypeEnum
-} from '@api/users/models'
+import { DocumentRF, GenderEnum, LocationRussia, SchoolInfo, UserInfo, UserLimitations } from '@api/users/models'
 import { UsersService } from '@api/users/users.service'
-import { getDocumentDisplay, getGenderDisplay } from '@/shared/displayUtils'
+import { getGenderDisplay } from '@/shared/displayUtils'
+import { Router } from '@angular/router'
+import { Store } from '@ngrx/store'
+import { AuthActions, AuthSelectors, AuthState } from '@/auth/store'
 
 
 @Component( {
@@ -35,7 +30,7 @@ export class ProfileViewComponent
     readonly genders: GenderEnum[] = [ GenderEnum.Male, GenderEnum.Female ]
     mobNumberPattern = "^((\\+91-?)|0)?[0-9]{10}$"
 
-    constructor( private profileStore: ProfileStore, private usersService: UsersService )
+    constructor( private profileStore: ProfileStore, private router: Router, private usersService: UsersService, private store: Store<AuthState.State> )
     {
         this.profileStore.fetch()
         this.viewModel$ = this.profileStore.viewModel$
@@ -53,7 +48,7 @@ export class ProfileViewComponent
 
     download(): void
     {
-        this.usersService.userProfileCardGet().subscribe( data => this.downloadFile( data ) )
+        this.store.select( AuthSelectors.selectUserPhoto ).subscribe( data => this.downloadFile( data ) )
     }
 
     getGenderDisplay( genderEnum: GenderEnum ): string
@@ -68,4 +63,8 @@ export class ProfileViewComponent
         window.open( url )
     }
 
+    logoutButtonClick(): void
+    {
+        this.store.dispatch( AuthActions.logoutRequest() )
+    }
 }

@@ -2,9 +2,10 @@ import { Injectable } from '@angular/core'
 import { ComponentStore, tapResponse } from '@ngrx/component-store'
 import { ResponsesService } from '@api/responses/responses.service'
 import { CallState, getError, LoadingState } from '@/shared/callState'
-import { EMPTY, Observable } from 'rxjs'
+import { EMPTY, Observable, of } from 'rxjs'
 import { catchError } from 'rxjs/operators'
 import { AllUserResultsResponse, UserResultsForContestResponse } from '@api/responses/model'
+import { displayErrorMessage } from '@/shared/logging'
 
 
 export interface ContestResultsState
@@ -67,7 +68,7 @@ export class ContestResultsStore extends ComponentStore<ContestResultsState>
                 ( response: AllUserResultsResponse ) => this.setResults( response.results ?? [] ),
                 ( error: string ) => this.updateError( error )
             ),
-            catchError( () => EMPTY )
+            catchError( ( error: any ) => of( displayErrorMessage( error ) ) )
         )
     } )
 }

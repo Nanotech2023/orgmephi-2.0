@@ -8,12 +8,13 @@ import {
     VariantWithCompletedTasksCountTaskParticipant
 } from '@api/tasks/model'
 import { catchError, switchMap, tap } from 'rxjs/operators'
-import { EMPTY, Observable } from 'rxjs'
+import { EMPTY, Observable, of } from 'rxjs'
 import { CallState, getError, LoadingState } from '@/shared/callState'
 import { TasksService } from '@api/tasks/tasks.service'
 import { ResponsesService } from '@api/responses/responses.service'
 import { UserResponseStatusResponse, UserTimeResponseRequest } from '@api/responses/model'
 import { Router } from '@angular/router'
+import { displayErrorMessage } from '@/shared/logging'
 
 
 export interface ContestAssignmentState
@@ -135,7 +136,7 @@ export class ContestAssignmentStore extends ComponentStore<ContestAssignmentStat
                     )
                 )
             ),
-            catchError( () => EMPTY ) )
+            catchError( ( error: any ) => of( displayErrorMessage( error ) ) ) )
     } )
 
     readonly fetchContest = this.effect( ( contestId$: Observable<number> ) =>
@@ -146,7 +147,7 @@ export class ContestAssignmentStore extends ComponentStore<ContestAssignmentStat
                         ( response ) => this.setContest( response ),
                         ( error: string ) => this.updateError( error )
                     ),
-                    catchError( () => EMPTY )
+                    catchError( ( error: any ) => of( displayErrorMessage( error ) ) )
                 ) )
         ) )
 
@@ -161,7 +162,7 @@ export class ContestAssignmentStore extends ComponentStore<ContestAssignmentStat
                     )
                 )
             ),
-            catchError( () => EMPTY ) )
+            catchError( ( error: any ) => of( displayErrorMessage( error ) ) ) )
     } )
 
     readonly fetchTime = this.effect( ( contestId$: Observable<number> ) =>
@@ -175,7 +176,7 @@ export class ContestAssignmentStore extends ComponentStore<ContestAssignmentStat
                     )
                 )
             ),
-            catchError( () => EMPTY ) )
+            catchError( ( error: any ) => of( displayErrorMessage( error ) ) ) )
     } )
 
 
@@ -190,7 +191,7 @@ export class ContestAssignmentStore extends ComponentStore<ContestAssignmentStat
                     )
                 )
             ),
-            catchError( () => EMPTY ) )
+            catchError( ( error: any ) => of( displayErrorMessage( error ) ) ) )
     } )
 
     readonly finish = this.effect( ( contestId$: Observable<number> ) =>
@@ -205,6 +206,6 @@ export class ContestAssignmentStore extends ComponentStore<ContestAssignmentStat
                     tap( () => this.router.navigate( [ `/contests/${ contestId }/registration` ] ) )
                 )
             ),
-            catchError( () => EMPTY ) )
+            catchError( ( error: any ) => of( displayErrorMessage( error ) ) ) )
     } )
 }

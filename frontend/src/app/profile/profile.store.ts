@@ -11,9 +11,10 @@ import {
     DocumentTypeEnum, SchoolTypeEnum
 } from '@api/users/models'
 import { UsersService } from '@api/users/users.service'
-import { EMPTY, Observable, zip } from 'rxjs'
+import { EMPTY, Observable, of, zip } from 'rxjs'
 import { CallState, getError, LoadingState } from '@/shared/callState'
 import { catchError, finalize, switchMap } from 'rxjs/operators'
+import { displayErrorMessage } from '@/shared/logging'
 
 
 export interface ProfileState
@@ -171,7 +172,7 @@ export class ProfileStore extends ComponentStore<ProfileState>
     {
         this.setLoading()
         return zip( [ this.fetchUserInfo, this.fetchSchoolInfo, this.fetchUnfilled ] ).pipe(
-            catchError( () => EMPTY ),
+            catchError( ( error: any ) => of( displayErrorMessage( error ) ) ),
             finalize( () => this.setLoaded )
         )
     } )
@@ -206,7 +207,7 @@ export class ProfileStore extends ComponentStore<ProfileState>
             {
                 this.setLoading()
                 return this.usersService.userProfilePersonalPatch( userInfo ).pipe(
-                    catchError( () => EMPTY )
+                    catchError( ( error: any ) => of( displayErrorMessage( error ) ) )
                 )
             } )
         ) )
@@ -217,7 +218,7 @@ export class ProfileStore extends ComponentStore<ProfileState>
             {
                 this.setLoading()
                 return this.usersService.userProfileSchoolPatch( userInfo ).pipe(
-                    catchError( () => EMPTY )
+                    catchError( ( error: any ) => of( displayErrorMessage( error ) ) )
                 )
             } )
         ) )

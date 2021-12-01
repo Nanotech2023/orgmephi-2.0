@@ -1,10 +1,11 @@
 import { Injectable } from '@angular/core'
 import { ComponentStore, tapResponse } from '@ngrx/component-store'
 import { SchoolRegistrationRequestUser, User, UserFull, UserFullListResponseUser } from '@api/users/models'
-import { EMPTY, Observable } from 'rxjs'
+import { EMPTY, Observable, of } from 'rxjs'
 import { catchError, concatMap } from 'rxjs/operators'
 import { UsersService } from '@api/users/users.service'
 import { CallState, getError, LoadingState } from '@/shared/callState'
+import { displayErrorMessage } from '@/shared/logging'
 
 
 export interface ManageUsersState
@@ -64,7 +65,7 @@ export class ManageUsersStore extends ComponentStore<ManageUsersState>
                     } ),
                 ( error: string ) => this.updateError( error )
             ),
-            catchError( () => EMPTY )
+            catchError( ( error: any ) => of( displayErrorMessage( error ) ) )
         )
     } )
 
@@ -79,7 +80,7 @@ export class ManageUsersStore extends ComponentStore<ManageUsersState>
                         () => this.reload(),
                         ( error: string ) => this.updateError( error )
                     ),
-                    catchError( () => EMPTY )
+                    catchError( ( error: any ) => of( displayErrorMessage( error ) ) )
                 )
             } )
         ) )
@@ -96,7 +97,7 @@ export class ManageUsersStore extends ComponentStore<ManageUsersState>
                         () => this.reload(),
                         ( error: string ) => this.updateError( error )
                     ),
-                    catchError( () => EMPTY )
+                    catchError( ( error: any ) => of( displayErrorMessage( error ) ) )
                 )
             } )
         ) )

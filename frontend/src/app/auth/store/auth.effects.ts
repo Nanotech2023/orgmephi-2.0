@@ -2,20 +2,25 @@ import { Injectable } from '@angular/core'
 import { Actions, createEffect, ofType } from '@ngrx/effects'
 import { UsersService } from '@api/users/users.service'
 import {
-    errorCaught, getUserInfoRequest, getUserInfoSuccess,
+    errorCaught,
+    getUserInfoRequest,
+    getUserInfoSuccess, getUserPhotoRequest, getUserPhotoSuccess,
     getUserRequest,
     getUserSuccess,
     loginRequest,
     loginSuccess,
+    logoutRequest,
+    logoutSuccess,
     registerRequest,
     registerSuccess
 } from '@/auth/store/auth.actions'
-import { catchError, concatMap, mergeMap, switchMap } from 'rxjs/operators'
+import { catchError, concatMap, mergeMap, switchMap, tap } from 'rxjs/operators'
 import { of } from 'rxjs'
 import { Router } from '@angular/router'
 import { CSRFPairUser, User, UserInfo } from '@api/users/models'
 import { TasksService } from '@api/tasks/tasks.service'
 import { ResponsesService } from '@api/responses/responses.service'
+import { displayErrorMessage } from '@/shared/logging'
 
 
 // noinspection JSUnusedGlobalSymbols
@@ -26,7 +31,7 @@ export class AuthEffects
     {
     }
 
-    loginAttempt$ = createEffect( () =>
+    readonly loginAttempt$ = createEffect( () =>
         this.actions$.pipe
         (
             ofType( loginRequest ),
@@ -46,15 +51,32 @@ export class AuthEffects
         )
     )
 
-    loginSuccess$ = createEffect( () =>
+    readonly loginSuccess$ = createEffect( () =>
         this.actions$.pipe(
             ofType( loginSuccess ),
-            switchMap( () => [ getUserRequest(), getUserInfoRequest() ] )
+            switchMap( () => [ getUserRequest(), getUserInfoRequest(), getUserPhotoRequest() ] )
         )
     )
 
+    readonly logoutRequest$ = createEffect( () =>
+        this.actions$.pipe
+        (
+            ofType( logoutRequest ),
+            concatMap( () =>
+                this.authService.userAuthLogoutPost().pipe(
+                    mergeMap( () =>
+                        {
+                            this.router.navigate( [ '/login' ] )
+                            return of( logoutSuccess() )
+                        }
+                    ),
+                    catchError( error => of( errorCaught( { error: error } ) ) )
+                )
+            )
+        )
+    )
 
-    getUserRequest$ = createEffect( () =>
+    readonly getUserRequest$ = createEffect( () =>
         this.actions$.pipe(
             ofType( getUserRequest ),
             concatMap( () =>
@@ -66,7 +88,7 @@ export class AuthEffects
         )
     )
 
-    getUserInfoRequest$ = createEffect( () =>
+    readonly getUserInfoRequest$ = createEffect( () =>
         this.actions$.pipe(
             ofType( getUserInfoRequest ),
             concatMap( () =>
@@ -78,7 +100,19 @@ export class AuthEffects
         )
     )
 
-    registerRequest$ = createEffect( () =>
+    readonly getUserPhotoRequest$ = createEffect( () =>
+        this.actions$.pipe(
+            ofType( getUserPhotoRequest ),
+            concatMap( () =>
+                this.authService.userProfilePhotoGet().pipe(
+                    mergeMap( ( photo: Blob ) => of( getUserPhotoSuccess( { userPhoto: photo } ) ) ),
+                    catchError( error => of( errorCaught( { error: error } ) ) )
+                )
+            )
+        )
+    )
+
+    readonly registerRequest$ = createEffect( () =>
         this.actions$.pipe
         (
             ofType( registerRequest ),
@@ -90,5 +124,14 @@ export class AuthEffects
                 )
             )
         )
+    )
+
+    readonly errorCaught$ = createEffect( () =>
+            this.actions$.pipe
+            (
+                ofType( errorCaught ),
+                tap( ( { error } ) => displayErrorMessage( error ) )
+            ),
+        { dispatch: false }
     )
 }
