@@ -367,7 +367,7 @@ class SimpleContest(Contest):
             return None
         else:
             if self.variants.count() != 0:
-                tasks = self.variants.first().tasks
+                tasks = self.variants.first().contest_tasks_in_variant.all()
                 return len(tasks)
             else:
                 return None
@@ -379,10 +379,10 @@ class SimpleContest(Contest):
         else:
             if self.variants.count() != 0:
                 sum_points = 0
-                tasks = self.variants.first().tasks
+                tasks = self.variants.first().contest_tasks_in_variant.all()
                 if len(tasks) != 0:
                     for task in tasks:
-                        sum_points += task.task_points
+                        sum_points += task.contest_task.task_points
                     return sum_points
                 else:
                     return None
