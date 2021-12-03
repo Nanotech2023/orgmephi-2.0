@@ -9,11 +9,11 @@
  * https://openapi-generator.tech
  * Do not edit the class manually.
  */
-import { SimpleContest } from './simpleContest';
+import { Contest } from './contest';
 
 
 export interface FilterSimpleContestResponse { 
-    contest_list?: Array<SimpleContest>;
+    contest_list?: Array<Contest>;
     count?: number;
 }
 

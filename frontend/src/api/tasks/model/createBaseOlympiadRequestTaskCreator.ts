@@ -16,6 +16,7 @@ export interface CreateBaseOlympiadRequestTaskCreator {
     diploma_1_condition: number;
     diploma_2_condition: number;
     diploma_3_condition: number;
+    level: CreateBaseOlympiadRequestTaskCreator.LevelEnum;
     name: string;
     olympiad_type_id: number;
     rules: string;
@@ -25,11 +26,21 @@ export interface CreateBaseOlympiadRequestTaskCreator {
     winner_3_condition: number;
 }
 export namespace CreateBaseOlympiadRequestTaskCreator {
-    export type SubjectEnum = 'Math' | 'Physics' | 'Informatics';
+    export type LevelEnum = '1' | '2' | '3' | 'No level';
+    export const LevelEnum = {
+        _1: '1' as LevelEnum,
+        _2: '2' as LevelEnum,
+        _3: '3' as LevelEnum,
+        NoLevel: 'No level' as LevelEnum
+    };
+    export type SubjectEnum = 'Math' | 'Physics' | 'Informatics' | 'Natural Sciences' | 'Engineering Sciences' | 'Other';
     export const SubjectEnum = {
         Math: 'Math' as SubjectEnum,
         Physics: 'Physics' as SubjectEnum,
-        Informatics: 'Informatics' as SubjectEnum
+        Informatics: 'Informatics' as SubjectEnum,
+        NaturalSciences: 'Natural Sciences' as SubjectEnum,
+        EngineeringSciences: 'Engineering Sciences' as SubjectEnum,
+        Other: 'Other' as SubjectEnum
     };
 }
 

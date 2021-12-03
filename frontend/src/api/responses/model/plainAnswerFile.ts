@@ -12,20 +12,6 @@
 
 
 export interface PlainAnswerFile { 
-    filetype?: PlainAnswerFile.FiletypeEnum;
+    filetype?: string;
 }
-export namespace PlainAnswerFile {
-    export type FiletypeEnum = 'txt' | 'pdf' | 'jpg' | 'doc' | 'docx' | 'png' | 'gif' | 'odt';
-    export const FiletypeEnum = {
-        Txt: 'txt' as FiletypeEnum,
-        Pdf: 'pdf' as FiletypeEnum,
-        Jpg: 'jpg' as FiletypeEnum,
-        Doc: 'doc' as FiletypeEnum,
-        Docx: 'docx' as FiletypeEnum,
-        Png: 'png' as FiletypeEnum,
-        Gif: 'gif' as FiletypeEnum,
-        Odt: 'odt' as FiletypeEnum
-    };
-}
-
 

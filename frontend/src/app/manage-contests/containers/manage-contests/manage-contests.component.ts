@@ -1,48 +1,90 @@
 import { Component, OnInit, ViewChild } from '@angular/core'
-import { ManageContestsStore } from '@/manage-contests/manage-contests.store'
-import { Observable } from 'rxjs'
-import { fixedHeight } from '@/shared/consts'
-import { User } from '@api/users/models'
-import { Contest } from '@api/tasks/model'
-import { AgGridAngular } from 'ag-grid-angular'
+import { TasksService } from '@api/tasks/tasks.service'
+import { CompositeContest, SimpleContest } from '@api/tasks/model'
+import { DxDataGridComponent } from 'devextreme-angular'
+import { ActivatedRoute, Router } from '@angular/router'
+import CompositeTypeEnum = SimpleContest.CompositeTypeEnum
 
 
 @Component( {
-    selector: 'app-manage-olympiads',
+    selector: 'app-manage-contests',
     templateUrl: './manage-contests.component.html',
-    styleUrls: [ './manage-contests.component.scss' ],
-    providers: [ ManageContestsStore ]
+    styleUrls: [ './manage-contests.component.scss' ]
 } )
 export class ManageContestsComponent implements OnInit
 {
-    minContainerHeight: number = fixedHeight
-    columnDefs = [
-        { field: 'contest_id', sortable: true, filter: true, headerName: 'ID' },
-        { field: 'description', sortable: true, filter: true, headerName: 'Описание' },
-        { field: 'start_time', sortable: true, filter: true, headerName: 'Дата начала' },
-        { field: 'end_time', sortable: true, filter: true, headerName: 'Дата окончания' },
-        { field: 'rules', sortable: true, filter: true, headerName: 'Правила' },
-        { field: 'winning_condition', sortable: true, filter: true, headerName: 'Условия победы' },
-        { field: 'laureate_condition', sortable: true, filter: true, headerName: 'Условия лауреата' },
-        { field: 'certificate_template', sortable: true, filter: true, headerName: 'Шаблон сертификата' },
-        { field: 'visibility', sortable: true, filter: true, headerName: 'Видимость' }
-    ]
+    constructor( private route: ActivatedRoute, private router: Router, private tasksService: TasksService )
+    {
 
-    contests$: Observable<Contest[]> = this.store.contests$
-    addModalVisible: boolean = false
-    editModalVisible: boolean = false
-    editing: any = null
-    @ViewChild( 'table_users' ) agGrid!: AgGridAngular
-    
-    constructor( private store: ManageContestsStore ) {}
+        this.navigateElement3 = this.navigateElement3.bind( this )
+    }
 
     ngOnInit(): void
     {
-        this.store.reload()
+        this.tasksService.tasksUnauthorizedOlympiadAllGet( undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, CompositeTypeEnum.SimpleContest ).subscribe( response =>
+        {
+            this.simpleContests = response.contest_list! as SimpleContest[]
+        } )
     }
 
-    getRowNodeId( data: User ): number | undefined
+    simpleContestId!: number
+    simpleContests!: SimpleContest[]
+
+    @ViewChild( DxDataGridComponent, { static: false } ) grid!: DxDataGridComponent
+    selectedRowIndex: number = -1
+    selectedRow?: SimpleContest = undefined
+    previousParticipationConditionEnum: ( "Winner 1" | "Winner 2" | "Winner 3" | "Diploma 1" | "Diploma 2" | "Diploma 3" | "Participant" )[] = Object.values( SimpleContest.PreviousParticipationConditionEnum )
+    holdingTypeEnum: ( "OfflineContest" | "OnLineContest" )[] = Object.values( SimpleContest.HoldingTypeEnum )
+    statusEnum: ( "Will start soon" | "In progress" | "Finished" )[] = Object.values( SimpleContest.StatusEnum )
+
+    navigateElement(): void
     {
-        return data.id
+        if ( this.selectedRow )
+        {
+            const routePath = [ '/manage', 'contests', this.selectedRow.base_contest.base_contest_id, 'contest', this.selectedRow.contest_id, 'users' ]
+            this.router.navigate( routePath )
+        }
+    }
+
+
+    navigateElement3( e: any ): void
+    {
+        const simpleContest: SimpleContest = e.row.data
+        const routePath = [ '/manage', 'contests', simpleContest.base_contest.base_contest_id, 'contest', simpleContest.contest_id, 'users' ]
+        this.router.navigate( routePath )
+        e.event.preventDefault()
+    }
+
+    navigateElement2(): void
+    {
+        if ( this.selectedRow )
+        {
+            const routePath = [ '/manage', 'contests', this.selectedRow.base_contest.base_contest_id, 'contest', this.selectedRow.contest_id, 'variants' ]
+            this.router.navigate( routePath )
+        }
+    }
+
+    editElement(): void
+    {
+        this.grid.instance.editRow( this.selectedRowIndex )
+        this.grid.instance.deselectAll()
+    }
+
+    deleteElement(): void
+    {
+        this.grid.instance.deleteRow( this.selectedRowIndex )
+        this.grid.instance.deselectAll()
+    }
+
+    addElement(): void
+    {
+        this.grid.instance.addRow()
+        this.grid.instance.deselectAll()
+    }
+
+    selectedChanged( $event: any ): void
+    {
+        this.selectedRow = $event.selectedRowsData[ 0 ]
+        this.selectedRowIndex = $event.component.getRowIndexByKey( $event.selectedRowKeys[ 0 ] )
     }
 }

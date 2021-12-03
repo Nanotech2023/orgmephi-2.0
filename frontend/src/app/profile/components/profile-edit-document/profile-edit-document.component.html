@@ -1,0 +1,17 @@
+<div class="form_container">
+    <div class="form_item">
+        <p class="form_label">Тип документа</p>
+        <select class="form_input" [(ngModel)]="model.document_type">
+            <option *ngFor="let documentType of documentTypes"
+                    [ngValue]="documentType">{{ getDocumentDisplay( documentType ) }}</option>
+        </select>
+    </div>
+    <ng-container [ngSwitch]="model.document_type">
+        <app-profile-edit-document-rfpassport [(model)]="model" *ngSwitchCase="'RFPassport'"></app-profile-edit-document-rfpassport>
+        <app-profile-edit-document-rfinternationalpassport [(model)]="model" *ngSwitchCase="'RfInternationalPassport'"></app-profile-edit-document-rfinternationalpassport>
+        <app-profile-edit-document-birthcertificate [(model)]="model" *ngSwitchCase="'BirthCertificate'"></app-profile-edit-document-birthcertificate>
+        <app-profile-edit-document-foreignpassport [(model)]="model" *ngSwitchCase="'ForeignPassport'"></app-profile-edit-document-foreignpassport>
+        <app-profile-edit-document-otherdocument [(model)]="model" *ngSwitchCase="'OtherDocument'"></app-profile-edit-document-otherdocument>
+        <div *ngSwitchDefault></div>
+    </ng-container>
+</div>

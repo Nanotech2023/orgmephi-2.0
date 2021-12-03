@@ -1,0 +1,76 @@
+<div class="manage-container_main">
+    <div class="row">
+        <div class="col-md-3">
+            <app-manage-navbar></app-manage-navbar>
+        </div>
+        <div class="col-md-9">
+            <h2 class="pt-1 pb-3">Управление олимпиадой {{ baseContestId }}</h2>
+            <dx-data-grid [dataSource]="compositeContests"
+                          width="100%"
+                          [showColumnLines]="false"
+                          [showRowLines]="true"
+                          [showBorders]="true"
+                          [columnAutoWidth]="true"
+                          [allowColumnReordering]="true"
+                          [allowColumnResizing]="true"
+                          keyExpr="contest_id"
+                          (onSelectionChanged)="selectedChanged($event)">
+
+                <dxi-column dataField="contest_id"></dxi-column>
+                <dxi-column dataField="academic_year"></dxi-column>
+                <dxi-column dataField="holding_type">
+                    <dxo-lookup [dataSource]="holdingTypeEnum"></dxo-lookup>
+                </dxi-column>
+                <dxi-column dataField="status">
+                    <dxo-lookup [dataSource]="statusEnum"></dxo-lookup>
+                </dxi-column>
+                <dxi-column dataField="visibility"></dxi-column>
+
+                <dxo-selection mode="single"></dxo-selection>
+                <dxo-grouping [autoExpandAll]="false" [contextMenuEnabled]="true"></dxo-grouping>
+                <dxo-group-panel [visible]="true"></dxo-group-panel>
+
+                <dxo-scrolling mode="standard" [useNative]="true"></dxo-scrolling>
+                <dxo-column-chooser [enabled]="true"></dxo-column-chooser>
+                <dxo-search-panel [visible]="true" [highlightCaseSensitive]="true"></dxo-search-panel>
+                <dxo-editing mode="popup">
+                    <dxo-texts confirmDeleteMessage=""></dxo-texts>
+                </dxo-editing>
+
+                <dxo-export [enabled]="true"></dxo-export>
+                <dxo-paging [pageSize]="25"></dxo-paging>
+                <dxo-pager [showPageSizeSelector]="true" [allowedPageSizes]="[25, 50, 100]"></dxo-pager>
+                <dxo-state-storing [enabled]="true" type="localStorage"
+                                   storageKey="app-manage-contests"></dxo-state-storing>
+            </dx-data-grid>
+
+            <dx-speed-dial-action
+                icon="add"
+                label="Добавить"
+                [index]="1"
+                (onClick)="addElement()">
+            </dx-speed-dial-action>
+            <dx-speed-dial-action
+                icon="arrowdown"
+                label="Стадии"
+                [index]="3"
+                [visible]="selectedRowIndex !== -1"
+                (onClick)="navigateElement()">
+            </dx-speed-dial-action>
+            <dx-speed-dial-action
+                icon="trash"
+                label="Удалить"
+                [index]="2"
+                [visible]="selectedRowIndex !== -1"
+                (onClick)="deleteElement()">
+            </dx-speed-dial-action>
+            <dx-speed-dial-action
+                icon="edit"
+                label="Изменить"
+                [index]="3"
+                [visible]="selectedRowIndex !== -1"
+                (onClick)="editElement()">
+            </dx-speed-dial-action>
+        </div>
+    </div>
+</div>

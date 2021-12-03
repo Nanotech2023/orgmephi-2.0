@@ -3,6 +3,11 @@ import { RouterModule, Routes } from '@angular/router'
 import { ManageUsersComponent } from '@/manage-users/containers/manage-users/manage-users.component'
 
 
+export const COMPONENTS = [
+    ManageUsersComponent
+]
+
+
 const routes: Routes =
     [
         {

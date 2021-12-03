@@ -3,16 +3,8 @@ import { HttpParameterCodec } from '@angular/common/http'
 
 export interface ConfigurationParameters
 {
-    /**
-     *  @deprecated Since 5.0. Use credentials instead
-     */
-    apiKeys?: { [ key: string ]: string };
     username?: string;
     password?: string;
-    /**
-     *  @deprecated Since 5.0. Use credentials instead
-     */
-    accessToken?: string | ( () => string );
     basePath?: string;
     withCredentials?: boolean;
     encoder?: HttpParameterCodec;
@@ -27,16 +19,8 @@ export interface ConfigurationParameters
 
 export class Configuration
 {
-    /**
-     *  @deprecated Since 5.0. Use credentials instead
-     */
-    apiKeys?: { [ key: string ]: string }
     username?: string
     password?: string
-    /**
-     *  @deprecated Since 5.0. Use credentials instead
-     */
-    accessToken?: string | ( () => string )
     basePath?: string
     withCredentials?: boolean
     encoder?: HttpParameterCodec
@@ -49,10 +33,8 @@ export class Configuration
 
     constructor( configurationParameters: ConfigurationParameters = {} )
     {
-        this.apiKeys = configurationParameters.apiKeys
         this.username = configurationParameters.username
         this.password = configurationParameters.password
-        this.accessToken = configurationParameters.accessToken
         this.basePath = configurationParameters.basePath
         this.withCredentials = configurationParameters.withCredentials
         this.encoder = configurationParameters.encoder
@@ -65,69 +47,12 @@ export class Configuration
             this.credentials = {}
         }
 
-        // init default CSRFAcessToken credential
-        if ( !this.credentials[ 'CSRFAcessToken' ] )
-        {
-            this.credentials[ 'CSRFAcessToken' ] = () =>
-            {
-                if ( this.apiKeys === null || this.apiKeys === undefined )
-                {
-                    return undefined
-                }
-                else
-                {
-                    return this.apiKeys[ 'CSRFAcessToken' ] || this.apiKeys[ 'X-CSRF-TOKEN' ]
-                }
-            }
-        }
 
-        // init default CSRFRefreshToken credential
-        if ( !this.credentials[ 'CSRFRefreshToken' ] )
-        {
-            this.credentials[ 'CSRFRefreshToken' ] = () =>
-            {
-                if ( this.apiKeys === null || this.apiKeys === undefined )
-                {
-                    return undefined
-                }
-                else
-                {
-                    return this.apiKeys[ 'CSRFRefreshToken' ] || this.apiKeys[ 'X-CSRF-TOKEN' ]
-                }
-            }
-        }
-
-        // init default JWTAcessToken credential
-        if ( !this.credentials[ 'JWTAcessToken' ] )
-        {
-            this.credentials[ 'JWTAcessToken' ] = () =>
-            {
-                if ( this.apiKeys === null || this.apiKeys === undefined )
-                {
-                    return undefined
-                }
-                else
-                {
-                    return this.apiKeys[ 'JWTAcessToken' ] || this.apiKeys[ 'access_token_cookie' ]
-                }
-            }
-        }
-
-        // init default JWTRefreshToken credential
-        if ( !this.credentials[ 'JWTRefreshToken' ] )
-        {
-            this.credentials[ 'JWTRefreshToken' ] = () =>
-            {
-                if ( this.apiKeys === null || this.apiKeys === undefined )
-                {
-                    return undefined
-                }
-                else
-                {
-                    return this.apiKeys[ 'JWTRefreshToken' ] || this.apiKeys[ 'refresh_token_cookie' ]
-                }
-            }
-        }
+        this.withCredentials = true
+        this.credentials[ "CSRFAccessToken" ] = () => localStorage.getItem( 'CSRFAccessToken' ) ?? undefined
+        this.credentials[ "CSRFRefreshToken" ] = () => localStorage.getItem( 'CSRFRefreshToken' ) ?? undefined
+        this.credentials[ "JWTAccessToken" ] = () => localStorage.getItem( 'JWTAccessToken' ) ?? undefined
+        this.credentials[ "JWTRefreshToken" ] = () => localStorage.getItem( 'JWTRefreshToken' ) ?? undefined
     }
 
     /**

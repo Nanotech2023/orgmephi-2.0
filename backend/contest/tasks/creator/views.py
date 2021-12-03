@@ -1,7 +1,4 @@
-import io
-
 from flask import request
-from flask import send_file
 
 from common import get_current_module
 from contest.tasks.creator.schemas import *
@@ -55,6 +52,7 @@ def base_olympiad_create():
     diploma_3_condition = values['diploma_3_condition']
 
     subject = values['subject']
+    level = values['level']
 
     db_get_or_raise(OlympiadType, "olympiad_type_id", values["olympiad_type_id"])
     base_contest = add_base_contest(db.session,
@@ -69,7 +67,8 @@ def base_olympiad_create():
                                     diploma_3_condition=diploma_3_condition,
                                     rules=rules,
                                     olympiad_type_id=olympiad_type_id,
-                                    subject=subject)
+                                    subject=subject,
+                                    level=level)
 
     db.session.commit()
 
@@ -126,17 +125,22 @@ def olympiad_create_simple(id_base_olympiad):
     stage_id = values.get('stage_id', None)
     previous_contest_id = values.get('previous_contest_id', None)
     previous_participation_condition = values.get('previous_participation_condition', None)
+
     holding_type = values.get('holding_type', None)
+
+    regulations = values.get('regulations', None)
 
     validate_contest_values(previous_contest_id, previous_participation_condition)
 
     base_contest = db_get_or_raise(BaseContest, "base_contest_id", str(id_base_olympiad))
 
     current_contest = add_simple_contest(db.session,
+                                         base_contest_id=id_base_olympiad,
                                          visibility=visibility,
                                          start_date=start_date,
                                          end_date=end_date,
                                          holding_type=holding_type,
+                                         regulations=regulations,
                                          previous_contest_id=previous_contest_id,
                                          previous_participation_condition=previous_participation_condition,
                                          end_of_enroll_date=end_of_enroll_date,
@@ -146,11 +150,12 @@ def olympiad_create_simple(id_base_olympiad):
     if previous_contest_id is not None:
         prev_contest = db_get_or_raise(Contest, "contest_id", str(previous_contest_id))
         prev_contest.next_contests.append(current_contest)
-    base_contest.child_contests.append(current_contest)
 
     if stage_id is not None:
         stage = db_get_or_raise(Stage, "stage_id", str(stage_id))
         stage.contests.append(current_contest)
+    else:
+        base_contest.child_contests.append(current_contest)
 
     db.session.commit()
 
@@ -777,10 +782,88 @@ def task_image(id_contest, id_variant, id_task):
           description: Olympiad type already in use
     """
     task = get_task_if_possible(id_contest, id_variant, id_task)
+    return app.send_media(task.image_of_task)
 
-    if task.image_of_task is None:
-        raise InsufficientData("task", "image_of_task")
 
-    return send_file(io.BytesIO(task.image_of_task),
-                     attachment_filename='task_image.png',
-                     mimetype='image/jpeg'), 200
+# Group Restriction
+
+
+@module.route('/contest/<int:contest_id>/restrictions', methods=['PUT'],
+              input_schema=ContestGroupRestrictionListAdminSchema)
+def contest_restriction_create(contest_id):
+    """
+    Add new restriction
+    ---
+    put:
+      parameters:
+        - in: path
+          description: Id of the contest
+          name: contest_id
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: ContestGroupRestrictionListAdminSchema
+      security:
+        - JWTAccessToken: [ ]
+        - CSRFAccessToken: [ ]
+      responses:
+        '200':
+          description: OK
+        '400':
+          description: Bad request
+        '404':
+          description: Contest or group not found
+    """
+    values = request.marshmallow
+    restrictions = values['restrictions']
+    current_contest: Contest = db_get_or_raise(Contest, 'contest_id', contest_id)
+    for old_restriction in current_contest.group_restrictions.all():
+        db.session.delete(old_restriction)
+    new_restrictions = []
+    for restriction_elem in restrictions:
+        group_name = restriction_elem['group_name']
+        restriction = restriction_elem['restriction']
+        group = db_get_or_raise(Group, 'name', group_name)
+        new_restrictions.append(ContestGroupRestriction(contest_id=contest_id,
+                                                        group_id=group.id,
+                                                        restriction=restriction))
+    current_contest.group_restrictions = new_restrictions
+    db.session.commit()
+    return {}, 200
+
+
+@module.route('/contest/<int:contest_id>/restrictions', methods=['GET'],
+              output_schema=ContestGroupRestrictionListAdminSchema)
+def contest_restriction_get(contest_id):
+    """
+    Get current contest restrictions
+    ---
+    get:
+      parameters:
+        - in: path
+          description: Id of the contest
+          name: contest_id
+          required: true
+          schema:
+            type: integer
+      security:
+        - JWTAccessToken: [ ]
+        - CSRFAccessToken: [ ]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: ContestGroupRestrictionListAdminSchema
+        '400':
+          description: Bad request
+        '404':
+          description: Contest or group not found
+    """
+    current_contest: SimpleContest = db_get_or_raise(SimpleContest, 'contest_id', contest_id)
+    restrictions = current_contest.group_restrictions.all()
+    return {"restrictions": restrictions}, 200

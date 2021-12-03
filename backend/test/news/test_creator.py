@@ -110,7 +110,7 @@ def test_get_image(client, test_news_posted):
     news = test_news_posted[0]
     resp = client.get(f'/news/{news.id}/image')
     assert resp.status_code == 200
-    assert resp.data == news.image
+    assert resp.content_type == 'image/jpeg'
 
 
 # noinspection DuplicatedCode
@@ -122,10 +122,11 @@ def test_get_image_not_exists(client, test_news):
 
 def test_get_image_none(client, test_news_posted):
     news = test_news_posted[0]
-    news.image = None
+    with test_app.store_manager:
+        news.image = None
     test_app.db.session.commit()
     resp = client.get(f'/news/{news.id}/image')
-    assert resp.status_code == 409
+    assert resp.status_code == 404
 
 
 # noinspection DuplicatedCode
@@ -196,11 +197,11 @@ def test_post_image(client, test_categories, test_contests):
     }
     resp = client.post('/news', json=request_create)
     news_id = resp.json['id']
-    resp = client.post(f'/news/{news_id}/image', data=b'Test')
+    resp = client.post(f'/news/{news_id}/image', data=test_image)
     assert resp.status_code == 204
     resp = client.get(f'/news/{news_id}/image')
     assert resp.status_code == 200
-    assert resp.data == b'Test'
+    assert resp.content_type == 'image/jpeg'
 
 
 def test_post_image_none(client, test_categories, test_contests):
@@ -212,7 +213,7 @@ def test_post_image_none(client, test_categories, test_contests):
     resp = client.post('/news', json=request_create)
     news_id = resp.json['id']
     resp = client.post(f'/news/{news_id}/image')
-    assert resp.status_code == 409
+    assert resp.status_code == 400
 
 
 def test_post_news(client, test_categories):

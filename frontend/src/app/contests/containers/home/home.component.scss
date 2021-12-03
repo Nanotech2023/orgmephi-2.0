@@ -1,0 +1,61 @@
+@import "src/styles/colors";
+
+.home_title_container, .actions_list {
+  width: 100%;
+  height: 100%;
+  padding: 5%;
+}
+
+.home_title_container {
+  padding-top: 10%;
+
+  .home_title {
+    font-style: normal;
+    font-weight: normal;
+    font-size: 42px;
+    line-height: 50px;
+    color: #171717;
+  }
+
+  .home_subtitle {
+    padding-top: 10%;
+    font-style: normal;
+    font-weight: normal;
+    font-size: 16px;
+    line-height: 24px;
+    color: #565656;
+  }
+}
+
+.actions_list {
+
+  .actions_list_item {
+    padding: 8% 4%;
+    height: 300px;
+    display: flex;
+    flex-direction: column;
+
+    .actions_title {
+      font-style: normal;
+      font-weight: 500;
+      font-size: 28px;
+      line-height: 36px;
+      color: $black;
+    }
+
+    .actions_divider {
+      height: 150px;
+    }
+
+    .actions_links {
+      display: flex;
+      flex-direction: column;
+      justify-items: start;
+
+      a {
+        color: $blue;
+        text-decoration: none;
+      }
+    }
+  }
+}

@@ -10,25 +10,39 @@ def client(client_creator):
     yield client_creator
 
 
-def test_user_response_creator(client, create_plain_task):
+@pytest.fixture
+def client_admin_response(client_admin):
+    client_admin.set_prefix('contest/responses/creator')
+    yield client_admin
+
+
+def test_user_response_creator(client_admin_response, create_plain_task):
     contest_id = get_contest_id(create_plain_task, DEFAULT_INDEX)
     user_id = get_user_id(create_plain_task, DEFAULT_INDEX)
 
-    resp = client.post(f'/contest/{contest_id}/user/{ERROR_ID}/create')
+    resp = client_admin_response.post(f'/contest/{contest_id}/user/{ERROR_ID}/create')
     assert resp.status_code == 404
 
-    resp = client.post(f'/contest/{ERROR_ID}/user/{user_id}/create')
+    resp = client_admin_response.post(f'/contest/{ERROR_ID}/user/{user_id}/create')
     assert resp.status_code == 404
 
-    resp = client.post(f'/contest/{contest_id}/user/{user_id}/create')
+    resp = client_admin_response.post(f'/contest/{contest_id}/user/{user_id}/create')
     assert resp.status_code == 200
 
-    resp = client.post(f'/contest/{contest_id}/user/{user_id}/create')
+    resp = client_admin_response.post(f'/contest/{contest_id}/user/{user_id}/create')
     assert resp.status_code == 409
 
     from contest.responses.util import get_user_in_contest_work
     response = get_user_in_contest_work(user_id, contest_id)
     assert response.work_status.value == 'InProgress'
+
+
+def test_creator_create_response(client, create_plain_task):
+    contest_id = get_contest_id(create_plain_task, DEFAULT_INDEX)
+    user_id = get_user_id(create_plain_task, DEFAULT_INDEX)
+
+    resp = client.post(f'/contest/{contest_id}/user/{user_id}/create')
+    assert resp.status_code == 403
 
 
 def test_plain_task_text_creator(client, create_two_tasks):
@@ -65,39 +79,58 @@ def test_plain_task_text_creator(client, create_two_tasks):
 
 
 def test_plain_task_file_creator(client, create_one_task):
-    contest_id = get_contest_id(create_one_task, DEFAULT_INDEX)
-    user_id = get_user_id(create_one_task, DEFAULT_INDEX)
-    task_id = get_plain_task_id(create_one_task, DEFAULT_INDEX)
+    index = 1
+    contest_id = get_contest_id(create_one_task, index)
+    user_id = get_user_id(create_one_task, index)
+    task_id = get_plain_task_id(create_one_task, index)
     task_id_from_different_contest = get_plain_task_id(create_one_task, 2)
 
     resp = client.post(f'/contest/{contest_id}/task/{task_id_from_different_contest}/user/{user_id}/png',
-                       data=b'Test')
-    assert resp.status_code == 404
+                       data=test_image)
+    assert resp.status_code == 409
 
-    resp = client.post(f'/contest/{contest_id}/task/{task_id}/user/{user_id}/png', data=b'Test')
+    resp = client.post(f'/contest/{contest_id}/task/{task_id}/user/{user_id}/jpeg', data=test_image)
     assert resp.status_code == 200
 
     from contest.responses.util import user_answer_get
     user_answer = user_answer_get(user_id, contest_id, task_id, 'PlainAnswerFile')
-    assert user_answer.answer_file == b'Test'
-    assert user_answer.filetype.value == 'png'
+    assert user_answer.filetype == 'image/jpeg'
+
+
+# noinspection DuplicatedCode
+def test_plain_task_file_failed(client, create_one_task):
+    contest_id_text = get_contest_id(create_one_task, DEFAULT_INDEX)
+    user_id_text = get_user_id(create_one_task, DEFAULT_INDEX)
+    task_id_text = get_plain_task_id(create_one_task, DEFAULT_INDEX)
+
+    resp = client.post(f'/contest/{contest_id_text}/task/{task_id_text}/user/{user_id_text}/png', data=test_image)
+    assert resp.status_code == 409
+
+    index = 1
+    contest_id_file = get_contest_id(create_one_task, index)
+    user_id_file = get_user_id(create_one_task, index)
+    task_id_file = get_plain_task_id(create_one_task, index)
+
+    resp = client.post(f'/contest/{contest_id_file}/task/{task_id_file}/user/{user_id_file}/plain',
+                       json={'answer_text': 'answer'})
+    assert resp.status_code == 409
 
 
 def test_plain_task_get_creator(client, create_one_task):
-    contest_id = get_contest_id(create_one_task, DEFAULT_INDEX)
-    user_id = get_user_id(create_one_task, DEFAULT_INDEX)
-    task_id = get_plain_task_id(create_one_task, DEFAULT_INDEX)
+    contest_id = get_contest_id(create_one_task, 1)
+    user_id = get_user_id(create_one_task, 1)
+    task_id = get_plain_task_id(create_one_task, 1)
 
-    from contest.responses.util import user_answer_post_file
-    user_answer_post_file(b'Test', 'png', user_id, contest_id, task_id)
+    resp = client.post(f'/contest/{contest_id}/task/{task_id}/user/{user_id}/plain/file', data=test_image)
+    assert resp.status_code == 200
 
     resp = client.get(f'/contest/{contest_id}/task/{task_id}/user/{user_id}')
     assert resp.status_code == 200
-    assert resp.json['filetype'] == 'png'
+    assert resp.json['filetype'] == 'image/jpeg'
 
     resp = client.get(f'/contest/{contest_id}/task/{task_id}/user/{user_id}/plain/file')
     assert resp.status_code == 200
-    assert resp.data == b'Test'
+    assert resp.content_type == 'image/jpeg'
 
 
 def test_range_task_creator(client, create_two_tasks):
@@ -243,7 +276,7 @@ def test_time_extend_creator(client, create_one_task):
     contest_id = get_contest_id(create_one_task, DEFAULT_INDEX)
     user_id = get_user_id(create_one_task, DEFAULT_INDEX)
 
-    resp = client.post(f'/contest/{contest_id}/user/{user_id}/time',
+    resp = client.post(f'/contest/{contest_id}/user/{user_id}/time/extra',
                        json={'time': 1800})
     assert resp.status_code == 200
 
@@ -254,6 +287,10 @@ def test_time_extend_creator(client, create_one_task):
     resp = client.get(f'/contest/{contest_id}/user/{user_id}/time')
     assert resp.status_code == 200
     assert resp.json['time'] > 1800
+
+    resp = client.get(f'/contest/{contest_id}/user/{user_id}/time/extra')
+    assert resp.status_code == 200
+    assert resp.json['time'] == 1800
 
 
 def test_finish_contest_creator(client, create_one_task):
@@ -436,6 +473,20 @@ def test_auto_check_creator(client, create_user_with_answers):
     user_in_contest = UserInContest.query.filter_by(contest_id=contest_id, user_id=user_id).one_or_none()
     assert user_in_contest.user_status == UserStatusEnum.Winner_1
 
+    resp = client.get(f'/contest/user/{user_id}/results')
+    assert resp.status_code == 200
+
+    results = resp.json['results']
+    contest = results[0]['contest_info']
+    assert len(results) == 8
+    assert contest['subject'] == 'Math'
+
+    academic_year = datetime.utcnow().year - 1 if datetime.utcnow().month < 9 else datetime.utcnow().year
+    assert contest['academic_year'] == academic_year
+    assert results[0]['status'] == 'NoResults'
+    assert results[0]['mark'] == 23
+    assert results[0]['user_status'] == 'Winner 1'
+
 
 # noinspection DuplicatedCode
 def test_auto_check_status(client, create_three_tasks):
@@ -464,7 +515,8 @@ def test_auto_check_status(client, create_three_tasks):
 
     from contest.responses.util import user_answer_get, get_user_in_contest_work
     user_work = get_user_in_contest_work(user_id, contest_id)
-    assert user_work.status.value == 'Accepted'
+    assert user_work.status.value == 'NoResults'
+    assert user_work.work_status.value == 'Accepted'
     range_answer = user_answer_get(user_id, contest_id, range_id)
     assert range_answer.mark == 5
     multiple_answer = user_answer_get(user_id, contest_id, multiple_id)

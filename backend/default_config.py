@@ -27,6 +27,7 @@ class DefaultConfiguration:
     ORGMEPHI_NATIVE_DOCUMENT = 'Паспорт гражданина РФ'
     ORGMEPHI_INTERNATIONAL_DOCUMENT = 'Заграничный паспорт гражданина РФ'
     ORGMEPHI_FOREIGN_DOCUMENT = 'Паспорт гражданина иностранного государства'
+    ORGMEPHI_BIRTH_CERTIFICATE = 'Свидетельство о рождении в РФ'
     ORGMEPHI_AREA = 'both'
     ORGMEPHI_DAILY_THREAD_LIMIT = 5
     ORGMEPHI_DAILY_MESSAGE_LIMIT = 10
@@ -50,3 +51,12 @@ class DefaultConfiguration:
     ORGMEPHI_CAPTCHA_LENGTH = 6
     ORGMEPHI_CAPTCHA_EXPIRATION = timedelta(minutes=5)
     RESPONSE_EXTRA_MINUTES = timedelta(seconds=300)
+    ORGMEPHI_WKHTMLTOPDF_PATH = '/usr/bin/wkhtmltopdf'
+    ORGMEPHI_MEDIA_KEY = 'ORGMEPHI'
+    ORGMEPHI_MEDIA_ROOT_PATH = 'media'
+    ORGMEPHI_MEDIA_STORES = {
+        'PROFILE': 'profile',
+        'RESPONSE': 'responses',
+        'TASK': 'tasks',
+        'NEWS': 'news'
+    }

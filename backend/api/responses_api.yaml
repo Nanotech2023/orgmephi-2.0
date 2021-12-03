@@ -35,6 +35,15 @@ components:
       - user_id
       - work_id
       type: object
+    AllUserResultsResponse:
+      properties:
+        results:
+          items:
+            $ref: '#/components/schemas/UserResultsForContestResponse'
+          type: array
+      required:
+      - results
+      type: object
     Answer:
       discriminator:
         mapping:
@@ -97,6 +106,33 @@ components:
       - right_answer
       - task_points
       type: object
+    ContestInfo:
+      properties:
+        contest_id:
+          readOnly: true
+          type: integer
+        end_year:
+          type: integer
+        name:
+          readOnly: true
+          type: string
+        start_year:
+          type: integer
+        subject:
+          enum:
+          - Math
+          - Physics
+          - Informatics
+          - Natural Sciences
+          - Engineering Sciences
+          - Other
+          type: string
+      required:
+      - contest_id
+      - end_year
+      - name
+      - start_year
+      type: object
     ContestResultSheetResponse:
       properties:
         contest_id:
@@ -146,15 +182,6 @@ components:
     PlainAnswerFile:
       properties:
         filetype:
-          enum:
-          - txt
-          - pdf
-          - jpg
-          - doc
-          - docx
-          - png
-          - gif
-          - odt
           type: string
       type: object
     PlainAnswerRequest:
@@ -240,9 +267,42 @@ components:
           - Rejected
           - Appeal
           - Correction
+          - NoResults
           type: string
       required:
       - status
+      type: object
+    UserResultsForContestResponse:
+      properties:
+        contest_info:
+          $ref: '#/components/schemas/ContestInfo'
+        mark:
+          type: number
+        status:
+          enum:
+          - InProgress
+          - NotChecked
+          - Accepted
+          - Rejected
+          - Appeal
+          - Correction
+          - NoResults
+          type: string
+        user_status:
+          enum:
+          - Winner 1
+          - Winner 2
+          - Winner 3
+          - Diploma 1
+          - Diploma 2
+          - Diploma 3
+          - Participant
+          type: string
+      required:
+      - contest_info
+      - mark
+      - status
+      - user_status
       type: object
     UserTimeResponseRequest:
       properties:
@@ -293,6 +353,8 @@ paths:
       responses:
         '200':
           description: OK
+        '403':
+          description: Permission Denied
         '404':
           description: User or contest not found
         '409':
@@ -323,7 +385,7 @@ paths:
                 $ref: '#/components/schemas/AllUserAnswersResponse'
           description: OK
         '403':
-          description: Not enough rights for current user
+          description: Restriction error
         '404':
           description: User or contest not found
       security:
@@ -351,7 +413,7 @@ paths:
                 $ref: '#/components/schemas/AllUserMarksResponse'
           description: OK
         '403':
-          description: Not enough rights for current user
+          description: Restriction error
         '404':
           description: User or contest not found
       security:
@@ -388,11 +450,7 @@ paths:
               schema:
                 format: binary
                 type: string
-            application/vnd.oasis.opendocument.text:
-              schema:
-                format: binary
-                type: string
-            application/vnd.openxmlformats-officedocument.wordprocessingml.document:
+            application/zip:
               schema:
                 format: binary
                 type: string
@@ -414,11 +472,73 @@ paths:
                 type: string
           description: OK
         '403':
-          description: Not enough rights for current user
+          description: Restriction error
         '404':
           description: User, contest or task not found
       security:
       - JWTAccessToken: []
+    post:
+      parameters:
+      - description: Id of the contest
+        in: path
+        name: contest_id
+        required: true
+        schema:
+          type: integer
+      - description: Id of the task
+        in: path
+        name: task_id
+        required: true
+        schema:
+          type: integer
+      - description: Id of the user
+        in: path
+        name: user_id
+        required: true
+        schema:
+          type: integer
+      requestBody:
+        content:
+          application/msword:
+            schema:
+              format: binary
+              type: string
+          application/pdf:
+            schema:
+              format: binary
+              type: string
+          application/zip:
+            schema:
+              format: binary
+              type: string
+          image/gif:
+            schema:
+              format: binary
+              type: string
+          image/jpeg:
+            schema:
+              format: binary
+              type: string
+          image/png:
+            schema:
+              format: binary
+              type: string
+          text/plain:
+            schema:
+              format: binary
+              type: string
+      responses:
+        '200':
+          description: OK
+        '403':
+          description: Restriction error
+        '404':
+          description: User, contest or task not found
+        '409':
+          description: Timing error or file is too large
+      security:
+      - JWTAccessToken: []
+      - CSRFAccessToken: []
   /responses/creator/contest/{contest_id}/task/{task_id}/user/{user_id}:
     get:
       parameters:
@@ -448,13 +568,14 @@ paths:
                 $ref: '#/components/schemas/Answer'
           description: OK
         '403':
-          description: Not enough rights for current user
+          description: Restriction error
         '404':
           description: User, contest or task not found
       security:
       - JWTAccessToken: []
   /responses/creator/contest/{contest_id}/task/{task_id}/user/{user_id}/{filetype}:
     post:
+      deprecated: true
       parameters:
       - description: Id of the contest
         in: path
@@ -490,7 +611,7 @@ paths:
         '200':
           description: OK
         '403':
-          description: Not enough rights for current user
+          description: Restriction error
         '404':
           description: User, contest or task not found
         '409':
@@ -528,7 +649,7 @@ paths:
         '200':
           description: OK
         '403':
-          description: Not enough rights for current user
+          description: Restriction error
         '404':
           description: User, contest or task not found
         '409':
@@ -566,7 +687,7 @@ paths:
         '200':
           description: OK
         '403':
-          description: Not enough rights for current user
+          description: Restriction error
         '404':
           description: User, contest or task not found
         '409':
@@ -604,7 +725,7 @@ paths:
         '200':
           description: OK
         '403':
-          description: Not enough rights for current user
+          description: Restriction error
         '404':
           description: User, contest or task not found
         '409':
@@ -639,7 +760,7 @@ paths:
         '400':
           description: Incorrect mark or status
         '403':
-          description: Invalid role of current user
+          description: Restriction error
         '404':
           description: User or contest not found
       security:
@@ -669,12 +790,11 @@ paths:
         '400':
           description: Incorrect mark or status
         '403':
-          description: Invalid role of current user
+          description: Restriction error
         '404':
           description: User or contest not found
       security:
       - JWTAccessToken: []
-      - CSRFAccessToken: []
   /responses/creator/contest/{contest_id}/list:
     get:
       parameters:
@@ -691,6 +811,8 @@ paths:
               schema:
                 $ref: '#/components/schemas/ContestResultSheetResponse'
           description: OK
+        '403':
+          description: Restriction error
         '404':
           description: Contest not found
       security:
@@ -725,6 +847,8 @@ paths:
       responses:
         '200':
           description: OK
+        '403':
+          description: Restriction error
         '404':
           description: User or contest not found
         '409':
@@ -759,11 +883,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/UserAnswerMarkResponse'
           description: OK
+        '403':
+          description: Restriction error
         '404':
           description: User or contest not found
       security:
       - JWTAccessToken: []
-      - CSRFAccessToken: []
   /responses/creator/contest/{contest_id}/user/{user_id}/time:
     get:
       parameters:
@@ -786,11 +911,40 @@ paths:
               schema:
                 $ref: '#/components/schemas/UserTimeResponseRequest'
           description: OK
+        '403':
+          description: Restriction error
         '404':
           description: User or contest not found
       security:
       - JWTAccessToken: []
-      - CSRFAccessToken: []
+  /responses/creator/contest/{contest_id}/user/{user_id}/time/extra:
+    get:
+      parameters:
+      - description: Id of the contest
+        in: path
+        name: contest_id
+        required: true
+        schema:
+          type: integer
+      - description: Id of the user
+        in: path
+        name: user_id
+        required: true
+        schema:
+          type: integer
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserTimeResponseRequest'
+          description: OK
+        '403':
+          description: Restriction error
+        '404':
+          description: User or contest not found
+      security:
+      - JWTAccessToken: []
     post:
       parameters:
       - description: Id of the contest
@@ -814,6 +968,8 @@ paths:
       responses:
         '200':
           description: OK
+        '403':
+          description: Restriction error
         '404':
           description: User or contest not found
       security:
@@ -837,6 +993,8 @@ paths:
       responses:
         '200':
           description: OK
+        '403':
+          description: Restriction error
         '404':
           description: User or contest not found
       security:
@@ -854,6 +1012,8 @@ paths:
       responses:
         '200':
           description: OK
+        '403':
+          description: Restriction error
         '404':
           description: Contest not found
         '409':
@@ -873,6 +1033,8 @@ paths:
       responses:
         '200':
           description: OK
+        '403':
+          description: Restriction error
         '404':
           description: Contest not found
         '409':
@@ -880,6 +1042,26 @@ paths:
       security:
       - JWTAccessToken: []
       - CSRFAccessToken: []
+  /responses/creator/contest/user/{user_id}/results:
+    get:
+      parameters:
+      - description: Id of the user
+        in: path
+        name: user_id
+        required: true
+        schema:
+          type: integer
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AllUserResultsResponse'
+          description: OK
+        '404':
+          description: User not found
+      security:
+      - JWTAccessToken: []
   /responses/participant/contest/{contest_id}/user/self/create:
     post:
       parameters:
@@ -971,11 +1153,7 @@ paths:
               schema:
                 format: binary
                 type: string
-            application/vnd.oasis.opendocument.text:
-              schema:
-                format: binary
-                type: string
-            application/vnd.openxmlformats-officedocument.wordprocessingml.document:
+            application/zip:
               schema:
                 format: binary
                 type: string
@@ -1002,6 +1180,62 @@ paths:
           description: User, contest or task not found
       security:
       - JWTAccessToken: []
+    post:
+      parameters:
+      - description: Id of the contest
+        in: path
+        name: contest_id
+        required: true
+        schema:
+          type: integer
+      - description: Id of the task
+        in: path
+        name: task_id
+        required: true
+        schema:
+          type: integer
+      requestBody:
+        content:
+          application/msword:
+            schema:
+              format: binary
+              type: string
+          application/pdf:
+            schema:
+              format: binary
+              type: string
+          application/zip:
+            schema:
+              format: binary
+              type: string
+          image/gif:
+            schema:
+              format: binary
+              type: string
+          image/jpeg:
+            schema:
+              format: binary
+              type: string
+          image/png:
+            schema:
+              format: binary
+              type: string
+          text/plain:
+            schema:
+              format: binary
+              type: string
+      responses:
+        '200':
+          description: OK
+        '403':
+          description: Not enough rights for current user
+        '404':
+          description: User, contest or task not found
+        '409':
+          description: Timing error or file is too large
+      security:
+      - JWTAccessToken: []
+      - CSRFAccessToken: []
   /responses/participant/contest/{contest_id}/task/{task_id}/user/self:
     get:
       parameters:
@@ -1032,6 +1266,7 @@ paths:
       - JWTAccessToken: []
   /responses/participant/contest/{contest_id}/task/{task_id}/user/self/{filetype}:
     post:
+      deprecated: true
       parameters:
       - description: Id of the contest
         in: path
@@ -1189,7 +1424,6 @@ paths:
           description: User or contest not found
       security:
       - JWTAccessToken: []
-      - CSRFAccessToken: []
   /responses/participant/contest/{contest_id}/task/{task_id}/user/self/mark:
     get:
       parameters:
@@ -1218,7 +1452,6 @@ paths:
           description: The results have not yet been published
       security:
       - JWTAccessToken: []
-      - CSRFAccessToken: []
   /responses/participant/contest/{contest_id}/user/self/time:
     get:
       parameters:
@@ -1239,7 +1472,6 @@ paths:
           description: User or contest not found
       security:
       - JWTAccessToken: []
-      - CSRFAccessToken: []
   /responses/participant/contest/{contest_id}/user/self/finish:
     post:
       parameters:
@@ -1257,5 +1489,18 @@ paths:
       security:
       - JWTAccessToken: []
       - CSRFAccessToken: []
+  /responses/participant/contest/user/self/results:
+    get:
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AllUserResultsResponse'
+          description: OK
+        '404':
+          description: User not found
+      security:
+      - JWTAccessToken: []
 servers:
 - url: /contest

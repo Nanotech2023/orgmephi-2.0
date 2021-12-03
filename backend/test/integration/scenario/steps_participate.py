@@ -17,7 +17,7 @@ def step_response_to_contest_a(client, state):
                       f'/contest/{contest_id}/variant/self')
     assert resp.status_code == 200
 
-    var_id = resp.json['variant_id']
+    var_id = resp.json['variant']['variant_id']
     resp = client.get(f'contest/tasks/participant'
                       f'/contest/{contest_id}/tasks/self')
     assert resp.status_code == 200
@@ -219,9 +219,14 @@ def step_creator_time_change(client, state):
         'time': 3600
     }
     resp = client.post(f'contest/responses/creator'
-                       f'/contest/{state.contest["contest_id"]}/user/{state.participants[3]["id"]}/time',
+                       f'/contest/{state.contest["contest_id"]}/user/{state.participants[3]["id"]}/time/extra',
                        json=request)
     assert resp.status_code == 200
+
+    resp = client.get(f'contest/responses/creator'
+                      f'/contest/{state.contest["contest_id"]}/user/{state.participants[3]["id"]}/time/extra')
+    assert resp.status_code == 200
+    assert resp.json['time'] == 3600
 
     resp = client.logout('/user/auth/logout')
     assert resp.status_code == 200

@@ -91,11 +91,6 @@ def filter_threads():
           required: false
           schema:
             type: integer
-        - in: query
-          name: work_id
-          required: false
-          schema:
-            type: integer
       security:
         - JWTAccessToken: [ ]
       responses:
@@ -140,10 +135,6 @@ def create_thread():
             raise QuotaExceeded('New threads per day', thread_limit)
 
     thread = ThreadSchema(load_instance=True).load(request.json, unknown=EXCLUDE)
-
-    if thread.related_work is not None:
-        if thread.related_work.user_id != author.id:
-            raise NotFound('related_work.id', str(thread.related_work.work_id))
 
     thread.author = author
     thread.messages.append(Message(message=values['message']))

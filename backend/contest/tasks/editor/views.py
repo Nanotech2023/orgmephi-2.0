@@ -574,16 +574,9 @@ def task_image_upload(id_contest, id_variant, id_task):
         '409':
           description: Wrong value
     """
-
-    image_of_task = request.data
-
-    validate_file_size(image_of_task)
-
     task = get_task_if_possible(id_contest, id_variant, id_task)
-    task.image_of_task = image_of_task
-
+    app.store_media('TASK', task, 'image_of_task', TaskImage)
     db.session.commit()
-
     return {}, 200
 
 
@@ -853,8 +846,8 @@ def add_locations_to_contest(id_contest):
 
     for location_id in locations:
         current_location = db_get_or_raise(OlympiadLocation, "location_id", str(location_id))
-
-        current_contest.locations.append(current_location)
+        if current_location not in current_contest.locations:
+            current_contest.locations.append(current_location)
 
     db.session.commit()
     return {}, 200

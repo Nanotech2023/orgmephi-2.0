@@ -6,11 +6,13 @@ import { AuthEffects, AuthState } from '@/auth/store'
 import { LoginComponent } from '@/auth/components/login/login.component'
 import { RegisterComponent } from '@/auth/components/register/register.component'
 import { AuthRouterModule } from '@/auth/auth.router.module'
+import { RegisterSchoolComponent } from '@/auth/components/register-school/register-school.component'
 
 
 const COMPONENTS = [
     RegisterComponent,
-    LoginComponent
+    LoginComponent,
+    RegisterSchoolComponent
 ]
 
 

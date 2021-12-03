@@ -30,7 +30,6 @@ class OlympiadLocation(db.Model):
 
     __mapper_args__ = {
         'polymorphic_identity': LocationEnum.OlympiadLocation,
-        'with_polymorphic': '*',
         "polymorphic_on": location_type
     }
 

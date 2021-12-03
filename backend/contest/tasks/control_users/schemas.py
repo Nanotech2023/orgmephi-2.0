@@ -1,13 +1,18 @@
 from marshmallow import Schema, fields
+from marshmallow_enum import EnumField
 
+from common import fields as common_fields
 from contest.tasks.model_schemas.user import UserInContestSchema
+from contest.tasks.models.olympiad import UserStatusEnum
 
 
 class UpdateUserInContestRequestTaskControlUsersSchema(Schema):
     users_id = fields.List(fields.Int(), required=True)
     location_id = fields.Int(required=False)
+    supervisor = common_fields.CommonName(required=False)
     show_results_to_user = fields.Boolean(required=False)
     check_condition = fields.Boolean(required=False)
+    user_status = EnumField(UserStatusEnum, by_value=True, required=False)
 
 
 class ChangeUsersLocationInContestRequestTaskControlUsersSchema(Schema):

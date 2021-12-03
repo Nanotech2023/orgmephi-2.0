@@ -46,7 +46,6 @@ class ThreadSchema(SQLAlchemySchema):
     topic = auto_field(column_name='topic', allow_none=False)
     messages = Nested(nested=MessageSchema, many=True, allow_none=False, dump_only=True)
     related_contest = Related(column=['contest_id'], many=False, allow_none=True)
-    related_work = Related(column=['work_id'], many=True, allow_none=True)
     author_username = fields.String(allow_none=True, dump_only=True)
     author_first_name = fields.String(allow_none=True, dump_only=True)
     author_second_name = fields.String(allow_none=True, dump_only=True)
@@ -66,11 +65,6 @@ class ThreadSchema(SQLAlchemySchema):
     @pre_load()
     def check_contest(self, data, many, **kwargs):
         return check_related_existence(data, 'related_contest', 'contest_id', Contest)
-
-    # noinspection PyUnusedLocal
-    @pre_load()
-    def check_work(self, data, many, **kwargs):
-        return check_related_existence(data, 'related_work', 'work_id', Response)
 
 
 class ThreadInfoSchema(ThreadSchema):

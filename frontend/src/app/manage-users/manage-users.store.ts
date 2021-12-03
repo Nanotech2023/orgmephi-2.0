@@ -1,10 +1,11 @@
 import { Injectable } from '@angular/core'
 import { ComponentStore, tapResponse } from '@ngrx/component-store'
 import { SchoolRegistrationRequestUser, User, UserFull, UserFullListResponseUser } from '@api/users/models'
-import { EMPTY, Observable } from 'rxjs'
+import { EMPTY, Observable, of } from 'rxjs'
 import { catchError, concatMap } from 'rxjs/operators'
 import { UsersService } from '@api/users/users.service'
 import { CallState, getError, LoadingState } from '@/shared/callState'
+import { displayErrorMessage } from '@/shared/logging'
 
 
 export interface ManageUsersState
@@ -14,15 +15,21 @@ export interface ManageUsersState
 }
 
 
+const initialState = {
+    users: [],
+    callState: LoadingState.INIT
+}
+
+
 @Injectable()
 export class ManageUsersStore extends ComponentStore<ManageUsersState>
 {
     constructor( private authService: UsersService )
     {
-        super( { users: [], callState: LoadingState.INIT } )
+        super( initialState )
     }
 
-    readonly users$: Observable<User[]> = this.select( state => state.users )
+    readonly users$: Observable<UserFull[]> = this.select( state => state.users )
     private readonly loading$: Observable<boolean> = this.select( state => state.callState === LoadingState.LOADING )
     private readonly error$: Observable<string | null> = this.select( state => getError( state.callState ) )
 
@@ -45,23 +52,20 @@ export class ManageUsersStore extends ComponentStore<ManageUsersState>
             callState: LoadingState.LOADED
         } ) )
 
-    readonly updateUsers = this.updater( ( state: ManageUsersState, user: User ) =>
-        ( {
-            ...state,
-            error: "",
-            users: [ ...state.users, user ]
-        } ) )
-
     // EFFECTS
     readonly reload = this.effect( () =>
     {
         this.setLoading()
         return this.authService.userCreatorUserFullAllGet().pipe(
-            tapResponse( ( response: UserFullListResponseUser ) =>
-                    this.setState( { users: response.users, callState: LoadingState.LOADED } ),
+            tapResponse(
+                ( response: UserFullListResponseUser ) =>
+                    this.setState( {
+                        users: response.users ?? [],
+                        callState: LoadingState.LOADED
+                    } ),
                 ( error: string ) => this.updateError( error )
             ),
-            catchError( () => EMPTY )
+            catchError( ( error: any ) => of( displayErrorMessage( error ) ) )
         )
     } )
 
@@ -76,7 +80,7 @@ export class ManageUsersStore extends ComponentStore<ManageUsersState>
                         () => this.reload(),
                         ( error: string ) => this.updateError( error )
                     ),
-                    catchError( () => EMPTY )
+                    catchError( ( error: any ) => of( displayErrorMessage( error ) ) )
                 )
             } )
         ) )
@@ -93,7 +97,7 @@ export class ManageUsersStore extends ComponentStore<ManageUsersState>
                         () => this.reload(),
                         ( error: string ) => this.updateError( error )
                     ),
-                    catchError( () => EMPTY )
+                    catchError( ( error: any ) => of( displayErrorMessage( error ) ) )
                 )
             } )
         ) )

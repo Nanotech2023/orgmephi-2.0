@@ -1,4 +1,5 @@
 from marshmallow import Schema, fields
+from marshmallow_enum import EnumField
 
 from contest.tasks.model_schemas.location import OlympiadLocationSchema
 from contest.tasks.model_schemas.olympiad import OlympiadTypeSchema, ContestSchema, BaseContestSchema, \
@@ -6,6 +7,8 @@ from contest.tasks.model_schemas.olympiad import OlympiadTypeSchema, ContestSche
 
 
 # Olympiad type
+from contest.tasks.models import ContestTypeEnum
+
 
 class AllOlympiadTypesResponseTaskUnauthorizedSchema(Schema):
     olympiad_types = fields.Nested(OlympiadTypeSchema, many=True, required=True)
@@ -60,7 +63,7 @@ class AllTargetClassesRequestTaskUnauthorizedSchema(Schema):
 
 
 class FilterSimpleContestResponseSchema(Schema):
-    contest_list = fields.Nested(nested=SimpleContestSchema, many=True)
+    contest_list = fields.Nested(nested=ContestSchema, many=True)
     count = fields.Integer()
 
 
@@ -69,6 +72,8 @@ class FilterOlympiadAllRequestSchema(Schema):
     location_id = fields.Integer()
     target_classes = fields.Nested(TargetClassSchema, many=True, required=False)
     end_date = fields.DateTime()
+    academic_year = fields.Integer()
     only_count = fields.Boolean()
     offset = fields.Integer()
     limit = fields.Integer()
+    composite_type = EnumField(ContestTypeEnum, data_key='composite_type', by_value=True, required=False)

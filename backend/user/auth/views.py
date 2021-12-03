@@ -68,7 +68,8 @@ def serve_tokens(user, original_user, remember_me):
     response = make_response(
         {
             "csrf_access_token": access_csrf,
-            "csrf_refresh_token": refresh_csrf
+            "csrf_refresh_token": refresh_csrf,
+            "confirmed": user.role != UserRoleEnum.unconfirmed
         }, 200)
 
     set_access_cookies(response, access_token)

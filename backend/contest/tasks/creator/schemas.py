@@ -2,19 +2,19 @@ from datetime import timedelta
 
 from marshmallow import Schema, fields
 from marshmallow_enum import EnumField
-
 from common import fields as common_fields
 from contest.tasks.model_schemas.contest import VariantSchema
-from contest.tasks.model_schemas.olympiad import ContestSchema, BaseContestSchema, StageSchema
+from contest.tasks.model_schemas.olympiad import ContestSchema, BaseContestSchema, StageSchema, \
+    ContestGroupRestrictionEnum
 from contest.tasks.model_schemas.tasks import TaskSchema
 from contest.tasks.models import OlympiadSubjectEnum, StageConditionEnum, ContestHoldingTypeEnum, \
-    UserStatusEnum
+    UserStatusEnum, OlympiadLevelEnum, TaskAnswerTypeEnum
 
 
 # Base contest
 
 class CreateBaseOlympiadRequestTaskCreatorSchema(Schema):
-    name = common_fields.CommonName(required=True)
+    name = common_fields.OlympiadName(required=True)
     description = common_fields.Text(required=True)
     rules = common_fields.Text(required=True)
     winner_1_condition = common_fields.FloatCondition(required=True)
@@ -25,6 +25,7 @@ class CreateBaseOlympiadRequestTaskCreatorSchema(Schema):
     diploma_3_condition = common_fields.FloatCondition(required=True)
     olympiad_type_id = fields.Int(required=True)
     subject = EnumField(OlympiadSubjectEnum, required=True, by_value=True)
+    level = EnumField(OlympiadLevelEnum, required=True, by_value=True)
 
 
 class BaseOlympiadResponseTaskCreatorSchema(BaseContestSchema):
@@ -50,6 +51,7 @@ class CreateSimpleContestRequestTaskCreatorSchema(Schema):
     previous_contest_id = fields.Int(required=False)
     previous_participation_condition = EnumField(UserStatusEnum, required=False, by_value=True)
     holding_type = EnumField(ContestHoldingTypeEnum, required=True, by_value=True)
+    regulations = common_fields.Text(required=False)
 
 
 class CreateCompositeContestRequestTaskCreatorSchema(Schema):
@@ -139,6 +141,7 @@ class CreatePlainRequestTaskCreatorSchema(Schema):
     recommended_answer = common_fields.Text(required=True)
     show_answer_after_contest = fields.Boolean(required=False)
     task_points = fields.Integer(required=False)
+    answer_type = EnumField(TaskAnswerTypeEnum, required=False, by_value=True)
 
 
 class CreateRangeRequestTaskCreatorSchema(Schema):
@@ -174,3 +177,14 @@ class TaskResponseTaskCreatorSchema(Schema):
 
 class TaskIdResponseTaskCreatorSchema(Schema):
     task_id = fields.Int(required=True)
+
+# Restrictions
+
+
+class ListElemContestGroupRestrictionAdminSchema(Schema):
+    group_name = common_fields.CommonName(required=True)
+    restriction = EnumField(ContestGroupRestrictionEnum, by_value=True, required=True)
+
+
+class ContestGroupRestrictionListAdminSchema(Schema):
+    restrictions = fields.Nested(ListElemContestGroupRestrictionAdminSchema, many=True, required=True)

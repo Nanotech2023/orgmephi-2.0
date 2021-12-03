@@ -458,3 +458,72 @@ def remove_user_groups(user_id):
     group.users.remove(user)
     db.session.commit()
     return {}, 200
+
+
+@module.route('/personal/<int:user_id>/photo', methods=['PUT'])
+def post_photo(user_id):
+    """
+    Edit photo
+    ---
+    put:
+      parameters:
+        - in: path
+          description: ID of user
+          name: user_id
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          image/*:
+            schema:
+              type: string
+              format: binary
+      security:
+        - JWTAccessToken: [ ]
+        - CSRFAccessToken: [ ]
+      responses:
+        '204':
+          description: OK
+        '409':
+          description: File is too big
+
+    """
+    from common.media_types import ProfileImage
+    user = db_get_or_raise(User, 'id', user_id)
+    app.store_media('PROFILE', user.user_info, 'photo', ProfileImage)
+    db.session.commit()
+    return {}, 204
+
+
+@module.route('/personal/<int:user_id>/photo', methods=['GET'])
+def get_photo(user_id):
+    """
+    Get photo
+    ---
+    get:
+      parameters:
+        - in: path
+          description: ID of user
+          name: user_id
+          required: true
+          schema:
+            type: integer
+      security:
+        - JWTAccessToken: [ ]
+      responses:
+        '200':
+          description: OK
+          content:
+            image/*:
+              schema:
+                type: string
+                format: binary
+        '404':
+          description: User not found
+        '409':
+          description: Photo not attached
+    """
+    user = db_get_or_raise(User, 'id', user_id)
+    return app.send_media(user.user_info.photo)

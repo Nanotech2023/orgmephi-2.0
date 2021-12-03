@@ -2,50 +2,50 @@ import { Injectable } from '@angular/core'
 import { ComponentStore, tapResponse } from '@ngrx/component-store'
 import { TasksService } from '@api/tasks/tasks.service'
 import { CallState, getError, LoadingState } from '@/shared/callState'
-import { EMPTY, Observable } from 'rxjs'
+import { EMPTY, Observable, of } from 'rxjs'
 import {
-    AllLocationResponseTaskUnauthorized,
-    AllOlympiadsResponseTaskUnauthorized,
+    CompositeContest,
     Contest,
     EnrollRequestTaskParticipant,
+    FilterSimpleContestResponseTaskParticipant,
     OlympiadLocation,
-    Variant
+    SimpleContest,
+    SimpleContestWithFlagResponseTaskParticipant
 } from '@api/tasks/model'
 import { catchError, switchMap } from 'rxjs/operators'
+import { ResponsesService } from '@api/responses/responses.service'
+import CompositeTypeEnum = SimpleContest.CompositeTypeEnum
+import { displayErrorMessage } from '@/shared/logging'
 
 
 export interface ContestsState
 {
-    contests: Array<Contest>
+    contests: Array<SimpleContestWithFlagResponseTaskParticipant>
     locations: Array<OlympiadLocation>
-    selectedContest?: Contest
-    selectedVariant?: Variant
+    contest?: Contest
     callState: CallState
 }
 
 
-const initialState: ContestsState = {
-    contests: [],
-    locations: [],
-    selectedVariant: undefined,
-    selectedContest: undefined,
-    callState: LoadingState.INIT
-}
+const initialState: ContestsState =
+    {
+        contests: [],
+        locations: [],
+        contest: undefined,
+        callState: LoadingState.INIT
+    }
 
 
 @Injectable()
 export class ContestsStore extends ComponentStore<ContestsState>
 {
-    constructor( private tasksService: TasksService )
+    constructor( private tasksService: TasksService, private responsesService: ResponsesService )
     {
         super( initialState )
     }
 
-    // TODO fix when openapi will match real response
-    // @ts-ignore
-    readonly contests: Observable<Contest[]> = this.select( state => state.contests.map( item => item.contest ) )
-    readonly selectedContest: Observable<Contest | undefined> = this.select( state => state.selectedContest )
-    readonly locations: Observable<Contest | undefined> = this.select( state => state.selectedContest )
+    readonly contests$: Observable<SimpleContestWithFlagResponseTaskParticipant[]> = this.select( state => state.contests.filter( item => item.contest?.composite_type === CompositeTypeEnum.SimpleContest ) )
+    readonly contest$: Observable<SimpleContest | undefined> = this.select( state => state.contest as SimpleContest )
     private readonly loading$: Observable<boolean> = this.select( state => state.callState === LoadingState.LOADING )
     private readonly error$: Observable<string | null> = this.select( state => getError( state.callState ) )
 
@@ -69,7 +69,7 @@ export class ContestsStore extends ComponentStore<ContestsState>
             callState: LoadingState.LOADED
         } ) )
 
-    readonly setContests = this.updater( ( state: ContestsState, contests: Array<Contest> ) =>
+    readonly setContests = this.updater( ( state: ContestsState, contests: Array<SimpleContestWithFlagResponseTaskParticipant> ) =>
         ( {
             ...state,
             error: "",
@@ -79,73 +79,50 @@ export class ContestsStore extends ComponentStore<ContestsState>
     readonly selectContest = this.updater( ( state: ContestsState, contest: Contest ) =>
         ( {
             ...state,
-            selectedContest: contest
+            contest: contest
         } ) )
 
-    readonly setVariant = this.updater( ( state: ContestsState, variant: Variant ) =>
-        ( {
-            ...state,
-            variant: variant
-        } ) )
-
-
-    readonly setLocations = this.updater( ( state: ContestsState, locations: Array<OlympiadLocation> ) =>
-        ( {
-            ...state,
-            locations: locations
-        } ) )
     // EFFECTS
-
     readonly fetchAll = this.effect( () =>
     {
         this.setLoading()
-        this.tasksService.tasksUnauthorizedLocationAllGet().pipe(
+        return this.tasksService.tasksParticipantOlympiadAllGet( undefined, undefined, undefined, undefined, 2021 ).pipe(
             tapResponse(
-                ( response: AllLocationResponseTaskUnauthorized ) => this.setLocations( response.locations ),
+                ( response: FilterSimpleContestResponseTaskParticipant ) => this.setContests( response.contest_list ?? [] ),
                 ( error: string ) => this.updateError( error )
             ),
-            catchError( () => EMPTY )
-        )
-        return this.tasksService.tasksParticipantOlympiadAllGet().pipe(
-            tapResponse(
-                ( response: AllOlympiadsResponseTaskUnauthorized ) => this.setContests( response.contest_list ),
-                ( error: string ) => this.updateError( error )
-            ),
-            catchError( () => EMPTY )
+            catchError( ( error: any ) => of( displayErrorMessage( error ) ) )
         )
     } )
 
-    readonly getVariant = this.effect( ( contestId$: Observable<number> ) =>
-    {
-        this.setLoading()
-        return contestId$.pipe( switchMap( ( contest: number ) =>
-                this.tasksService.tasksParticipantContestIdContestVariantSelfGet( contest ).pipe(
+    readonly fetchSingle = this.effect( ( contestId$: Observable<number> ) =>
+        contestId$.pipe(
+            switchMap( ( contestId: number ) =>
+                this.tasksService.tasksParticipantOlympiadIdOlympiadGet( contestId ).pipe(
                     tapResponse(
-                        ( response: Variant ) => this.setVariant( response ),
+                        ( response: Contest ) => this.selectContest( response ),
                         ( error: string ) => this.updateError( error )
-                    )
+                    ),
+                    catchError( ( error: any ) => of( displayErrorMessage( error ) ) ) ) )
+        ) )
+
+    readonly enroll = this.effect( ( enroll$: Observable<{ contestId: number, locationId: number }> ) =>
+        enroll$.pipe(
+            switchMap( ( enroll: { contestId: number, locationId: number } ) =>
+            {
+                const { contestId, locationId } = enroll
+                const enrollRequestTaskParticipant: EnrollRequestTaskParticipant = { location_id: locationId }
+                return this.tasksService.tasksParticipantContestIdContestEnrollPost( contestId, enrollRequestTaskParticipant ).pipe(
+                    catchError( ( error: any ) => of( displayErrorMessage( error ) ) )
                 )
-            ),
-            catchError( () => EMPTY ) )
-    } )
+            } )
+        ) )
 
-    // readonly fetchSingle = this.effect( ( contestId$: Observable<number> ) =>
-    //     contestId$.pipe(
-    //         switchMap( ( id: number ) =>
-    //             this.tasksService.tasksParticipantOlympiadIdOlympiadGet( id ).pipe(
-    //                 tapResponse(
-    //                     ( response ) => this.selectContest( response ),
-    //                     ( error: string ) => this.updateError( error )
-    //                 ),
-    //                 catchError( () => EMPTY )
-    //             ) )
-    //     ) )
-
-    readonly enroll = this.effect( ( contest$: Observable<{ contestId: number, enrollRequestTaskParticipant: EnrollRequestTaskParticipant }> ) =>
-        contest$.pipe(
-            switchMap( ( contest: { contestId: number; enrollRequestTaskParticipant: EnrollRequestTaskParticipant } ) =>
-                this.tasksService.tasksParticipantContestIdContestEnrollPost( contest.contestId, contest.enrollRequestTaskParticipant ).pipe(
-                    catchError( () => EMPTY )
+    readonly start = this.effect( ( contestId$: Observable<number> ) =>
+        contestId$.pipe(
+            switchMap( ( contestId: number ) =>
+                this.responsesService.responsesParticipantContestContestIdUserSelfCreatePost( contestId ).pipe(
+                    catchError( ( error: any ) => of( displayErrorMessage( error ) ) )
                 ) )
         ) )
 }

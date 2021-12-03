@@ -12,6 +12,7 @@
 
 
 export interface CSRFPairUser { 
+    confirmed: boolean;
     csrf_access_token: string;
     csrf_refresh_token: string;
 }

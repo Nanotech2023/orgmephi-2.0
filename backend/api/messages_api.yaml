@@ -43,8 +43,6 @@ components:
           type: string
         related_contest:
           type: integer
-        related_work:
-          type: integer
         thread_type:
           enum:
           - Appeal
@@ -129,9 +127,6 @@ components:
         related_contest:
           nullable: true
           type: integer
-        related_work:
-          nullable: true
-          type: integer
         resolve_time:
           format: date-time
           nullable: true
@@ -193,9 +188,6 @@ components:
           format: date-time
           type: string
         related_contest:
-          nullable: true
-          type: integer
-        related_work:
           nullable: true
           type: integer
         resolve_time:
@@ -313,11 +305,6 @@ paths:
           type: boolean
       - in: query
         name: contest_id
-        required: false
-        schema:
-          type: integer
-      - in: query
-        name: work_id
         required: false
         schema:
           type: integer
@@ -518,11 +505,6 @@ paths:
           type: boolean
       - in: query
         name: contest_id
-        required: false
-        schema:
-          type: integer
-      - in: query
-        name: work_id
         required: false
         schema:
           type: integer

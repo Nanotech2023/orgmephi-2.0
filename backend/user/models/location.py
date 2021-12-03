@@ -16,7 +16,6 @@ class Location(db.Model):
 
     __mapper_args__ = {
         'polymorphic_identity': None,
-        'with_polymorphic': '*',
         "polymorphic_on": russian
     }
 

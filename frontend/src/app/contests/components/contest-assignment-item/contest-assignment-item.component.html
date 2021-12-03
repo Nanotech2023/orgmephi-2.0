@@ -1,0 +1,19 @@
+<div class="tasks_list_item">
+    <div class="task_title">
+        Задание {{task.task_id}}<br/>
+    </div>
+    <div class="row">
+        <div class="col-md-8">
+            <div class="task_image">
+                <img [src]="imageUrl" alt="Задание" class="img-fluid">
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="task_actions">
+                <p class="input_label">Ответ</p>
+                <textarea [(ngModel)]="answer" class="input_textarea" maxlength="1000" placeholder="Введите свой ответ"
+                          (focusout)="updateAnswer()"></textarea>
+            </div>
+        </div>
+    </div>
+</div>

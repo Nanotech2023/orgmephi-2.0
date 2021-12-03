@@ -1,0 +1,48 @@
+@import "src/styles/colors";
+
+.chat-list_title {
+  font-family: Inter;
+  font-style: normal;
+  font-weight: 500;
+  font-size: 20px;
+  line-height: 26px;
+  color: $black;
+}
+
+.left, .right {
+}
+
+
+.col-md-3 {
+  border-right: 2px solid $black;
+}
+
+.messages {
+  height: 64px;
+  border-bottom: 2px solid $black;
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-end;
+
+  p {
+    margin-top: 20px;
+    margin-right: 60%;
+  }
+
+  button {
+    height: 64px;
+    width: 64px;
+    background: $blue;
+    border: none;
+    float: right;
+  }
+}
+
+.right {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  justify-items: center;
+  align-items: center;
+  padding-top: 8%;
+}

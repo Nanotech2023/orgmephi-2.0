@@ -1,13 +1,40 @@
 import enum
 from datetime import datetime, timedelta
 
+from sqlalchemy import extract, select
 from sqlalchemy.ext.associationproxy import association_proxy
+from sqlalchemy.ext.hybrid import hybrid_property
+from sqlalchemy.sql import case
 
 from common import get_current_db
+from contest.tasks.models import Stage, contestsInStage
+from user.models.auth import Group
 
 db = get_current_db()
 
 DEFAULT_VISIBILITY = True
+
+"""
+Olympiad level
+"""
+
+
+class OlympiadLevelEnum(enum.Enum):
+    Level1 = "1"
+    Level2 = "2"
+    Level3 = "3"
+    Level4 = "No level"
+
+
+"""
+Olympiad status
+"""
+
+
+class OlympiadStatusEnum(enum.Enum):
+    OlympiadSoon = "Will start soon"
+    OlympiadInProgress = "In progress"
+    OlympiadFinished = "Finished"
 
 
 class UserStatusEnum(enum.Enum):
@@ -37,6 +64,9 @@ class OlympiadSubjectEnum(enum.Enum):
     Math = "Math"
     Physics = "Physics"
     Informatics = "Informatics"
+    NaturalSciences = "Natural Sciences"
+    EngineeringSciences = "Engineering Sciences"
+    Other = "Other"
 
 
 olympiad_subject_dict = {subject.value: subject for subject in OlympiadSubjectEnum}
@@ -81,6 +111,7 @@ def add_base_contest(db_session, name,
                      description, rules,
                      olympiad_type_id,
                      subject,
+                     level,
                      certificate_template):
     """
     Create new base content object
@@ -97,7 +128,8 @@ def add_base_contest(db_session, name,
         diploma_2_condition=diploma_2_condition,
         diploma_3_condition=diploma_3_condition,
         olympiad_type_id=olympiad_type_id,
-        subject=subject
+        subject=subject,
+        level=level,
     )
     db_session.add(base_contest)
     return base_contest
@@ -141,6 +173,7 @@ class BaseContest(db.Model):
     description = db.Column(db.Text, nullable=False)
     olympiad_type_id = db.Column(db.Integer, db.ForeignKey('olympiad_type.olympiad_type_id'), nullable=False)
     subject = db.Column(db.Enum(OlympiadSubjectEnum), nullable=False)
+    level = db.Column(db.Enum(OlympiadLevelEnum), nullable=False)
     certificate_template = db.Column(db.Text, nullable=True)
 
     winner_1_condition = db.Column(db.Float, nullable=False)
@@ -202,17 +235,42 @@ class Contest(db.Model):
     users = db.relationship('UserInContest', lazy='dynamic',
                             backref=db.backref('contest', lazy='joined'))
 
+    group_restrictions = db.relationship('ContestGroupRestriction', lazy='dynamic', cascade="all, delete")
+
     __mapper_args__ = {
         'polymorphic_identity': ContestTypeEnum.Contest,
-        'polymorphic_on': composite_type,
-        'with_polymorphic': '*'
+        'polymorphic_on': composite_type
     }
+
+    @hybrid_property
+    def academic_year(self):
+        if self.composite_type == ContestTypeEnum.CompositeContest:
+            return CompositeContest.query.filter_by(contest_id=self.contest_id)
+        else:
+            return SimpleContest.query.filter_by(contest_id=self.contest_id)
+
+    @academic_year.expression
+    def academic_year(cls):
+        return case(
+            [
+                (
+                    cls.composite_type == ContestTypeEnum.CompositeContest,
+                    select(CompositeContest.academic_year).where(
+                        CompositeContest.contest_id == cls.contest_id
+                    ).limit(1).scalar_subquery()
+                )
+            ],
+            else_=select(SimpleContest.academic_year).where(
+                SimpleContest.contest_id == cls.contest_id
+            ).limit(1).scalar_subquery()
+        ).label("academic_year")
 
 
 def add_simple_contest(db_session,
                        visibility,
                        start_date,
                        end_date,
+                       regulations=None,
                        result_publication_date=None,
                        end_of_enroll_date=None,
                        holding_type=None,
@@ -228,6 +286,7 @@ def add_simple_contest(db_session,
         visibility=visibility,
         start_date=start_date,
         end_date=end_date,
+        regulations=regulations,
         holding_type=holding_type,
         contest_duration=contest_duration,
         result_publication_date=result_publication_date,
@@ -236,6 +295,10 @@ def add_simple_contest(db_session,
         previous_participation_condition=previous_participation_condition,
     )
     db_session.add(simple_contest)
+    from user.models.auth import get_group_for_everyone
+    everyone_group: Group = get_group_for_everyone()
+    add_group_restriction(db_session, simple_contest.contest_id, everyone_group.id,
+                          ContestGroupRestrictionEnum.edit_user_status)
     return simple_contest
 
 
@@ -250,10 +313,12 @@ class SimpleContest(Contest):
     end_date: end date of contest
     result_publication_date: result publication date
 
+    regulations: regulations of the olympiad
+
     location: location of the olympiad
     previous_contest_id: previous contest id
     previous_participation_condition: previous participation condition
-    contest_duration: previous duration of the contest
+    contest_duration: duration of the contest
     variants: variants
     next_contest: next contests
 
@@ -266,33 +331,130 @@ class SimpleContest(Contest):
     end_date = db.Column(db.DateTime, index=True, default=datetime.utcnow)
     result_publication_date = db.Column(db.DateTime, nullable=True)
     end_of_enroll_date = db.Column(db.DateTime, nullable=True)
-
-    contest_duration = db.Column(db.Interval, default=timedelta(seconds=0),nullable=False)
-
+    contest_duration = db.Column(db.Interval, default=timedelta(seconds=0), nullable=False)
     target_classes = association_proxy('base_contest', 'target_classes')
-
     previous_contest_id = db.Column(db.Integer, db.ForeignKey('simple_contest.contest_id'), nullable=True)
     previous_participation_condition = db.Column(db.Enum(UserStatusEnum))
 
-    variants = db.relationship('Variant', lazy='dynamic',
-                               backref=db.backref('simple_contest', lazy='joined'))
+    regulations = db.Column(db.Text, nullable=True)
 
+    variants = db.relationship('Variant', backref=db.backref('simple_contest', lazy='joined'), lazy='dynamic')
     next_contests = db.relationship('SimpleContest',
                                     foreign_keys=[previous_contest_id])
 
     locations = db.relationship('OlympiadLocation', secondary=locationInContest, lazy='subquery',
                                 backref=db.backref('contest', lazy=True))
 
+    name = association_proxy('base_contest', 'name')
+    subject = association_proxy('base_contest', 'subject')
+
     __mapper_args__ = {
         'polymorphic_identity': ContestTypeEnum.SimpleContest,
         'with_polymorphic': '*'
     }
+
+    @hybrid_property
+    def academic_year(self):
+        if self.start_date.month < 9:
+            return self.start_date.year - 1
+        else:
+            return self.start_date.year
+
+    @academic_year.expression
+    def academic_year(cls):
+        return case(
+            [
+                (
+                    extract('month', cls.start_date) < 9,
+                    extract('year', cls.start_date) - 1
+                )
+            ],
+            else_=extract('year', cls.start_date)
+        ).label("academic_year")
 
     def change_previous(self, previous_contest_id=None, previous_participation_condition=None):
         if previous_contest_id is not None:
             self.previous_contest_id = previous_contest_id
         if previous_participation_condition is not None:
             self.previous_participation_condition = previous_participation_condition
+
+    @hybrid_property
+    def tasks_number(self):
+        if not self.variants:
+            return None
+        else:
+            if self.variants.count() != 0:
+                tasks = self.variants.first().tasks
+                return len(tasks)
+            else:
+                return None
+
+    @hybrid_property
+    def total_points(self):
+        if not self.variants:
+            return None
+        else:
+            if self.variants.count() != 0:
+                sum_points = 0
+                tasks = self.variants.first().tasks
+                if len(tasks) != 0:
+                    for task in tasks:
+                        sum_points += task.task_points
+                    return sum_points
+                else:
+                    return None
+            else:
+                return None
+
+    @hybrid_property
+    def status(self):
+        if datetime.utcnow() < self.start_date:
+            return OlympiadStatusEnum.OlympiadSoon
+        elif datetime.utcnow() < self.end_date:
+            return OlympiadStatusEnum.OlympiadInProgress
+        else:
+            return OlympiadStatusEnum.OlympiadFinished
+
+    @status.expression
+    def status(cls):
+        return case([(datetime.utcnow() < cls.start_date, OlympiadStatusEnum.OlympiadSoon.value),
+                     (datetime.utcnow() < cls.end_date, OlympiadStatusEnum.OlympiadInProgress.value)],
+                    else_=OlympiadStatusEnum.OlympiadFinished.value)
+
+
+def add_group_restriction(db_session, contest_id, group_id, restriction):
+    group_restriction = ContestGroupRestriction(
+        contest_id=contest_id,
+        group_id=group_id,
+        restriction=restriction
+    )
+    db_session.add(group_restriction)
+
+
+class ContestGroupRestrictionEnum(enum.Enum):
+    view_mark_and_user_status = 'ViewMarkAndUserStatus'
+    view_response = 'ViewResponse'
+    edit_mark = 'EditMark'
+    edit_user_status = 'EditUserStatus'
+
+
+restriction_range = {elem.value: i for i, elem in enumerate(ContestGroupRestrictionEnum)}
+
+
+class ContestGroupRestriction(db.Model):
+    """
+    Contest Group Restriction model
+
+    contest_id: id of the contest
+    group_id: id of the group
+    restriction: restriction for group
+    """
+    contest_id = db.Column(db.Integer, db.ForeignKey(Contest.contest_id), primary_key=True)
+    group_id = db.Column(db.Integer, db.ForeignKey(Group.id), primary_key=True)
+    restriction = db.Column(db.Enum(ContestGroupRestrictionEnum))
+
+    group = db.relationship(Group, uselist=False)
+    group_name = association_proxy('group', 'name')
 
 
 def add_composite_contest(db_session, visibility, base_contest_id=None, holding_type=None):
@@ -327,3 +489,58 @@ class CompositeContest(Contest):
         'polymorphic_identity': ContestTypeEnum.CompositeContest,
         'with_polymorphic': '*'
     }
+
+    @hybrid_property
+    def academic_year(self):
+        if len(self.stages.all()) == 0:
+            return None
+        stage = self.stages.all()[0]
+        if len(stage.contests) == 0:
+            return None
+        contest = stage.contests[0]
+        if contest.start_date.month < 9:
+            return contest.start_date.year - 1
+        else:
+            return contest.start_date.year
+
+    # noinspection PyMethodParameters
+    @academic_year.expression
+    def academic_year(cls):
+        contest_start_date = select(SimpleContest.start_date).where(
+            select(contestsInStage.columns.contest_id)
+            .where(
+                select(Stage.stage_id)
+                .where(
+                    Stage.olympiad_id == cls.contest_id
+                ).limit(1).scalar_subquery() == contestsInStage.columns.stage_id
+            ).limit(1).scalar_subquery() == cls.contest_id
+        ).scalar_subquery()
+
+        return case(
+            [
+                (
+                    extract('month', contest_start_date) < 9,
+                    extract('year', contest_start_date) - 1
+                )
+            ],
+            else_=extract('year', contest_start_date)
+        ).label("academic_year")
+
+    @hybrid_property
+    def status(self):
+        over = 0
+        not_started = 0
+        for stage in self.stages.all():
+            for contest in stage.contests:
+                if datetime.utcnow() < contest.start_date:
+                    not_started += 1
+                elif datetime.utcnow() < contest.end_date:
+                    return OlympiadStatusEnum.OlympiadInProgress
+                else:
+                    over += 1
+        if over == 0:
+            return OlympiadStatusEnum.OlympiadSoon
+        elif not_started == 0:
+            return OlympiadStatusEnum.OlympiadFinished
+        else:
+            return OlympiadStatusEnum.OlympiadInProgress
