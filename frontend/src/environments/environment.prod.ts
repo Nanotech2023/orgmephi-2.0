@@ -1,5 +1,5 @@
 export const environment = {
     production: true,
     hmr: false,
-    apiUrl: "https://org-mephi.artche.dev/api"
+    apiUrl: "https://orgnew.mephi.ru/api"
 }

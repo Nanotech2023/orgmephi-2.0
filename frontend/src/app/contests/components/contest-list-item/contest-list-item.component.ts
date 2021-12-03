@@ -1,8 +1,8 @@
 import { Component, Input } from '@angular/core'
-import { SimpleContestWithFlagResponseTaskParticipant, TargetClass } from '@api/tasks/model'
+import { Contest, SimpleContestWithFlagResponseTaskParticipant, TargetClass } from '@api/tasks/model'
 import { Router } from '@angular/router'
 import { ContestsStore } from '@/contests/contests.store'
-import { getClassesForDisplay, getStatusDisplay } from '@/shared/displayUtils'
+import { getClassesForDisplay, getStatusDisplay, getSubjectDisplay } from '@/shared/displayUtils'
 
 
 @Component( {
@@ -20,16 +20,8 @@ export class ContestListItemComponent
 
     navigateTo(): Promise<boolean>
     {
-        // TODO allow select other locations
-        const locationId = 3
         if ( this.contest.contest )
-        {
-            this.contestsStore.enroll( {
-                contestId: this.contest.contest.contest_id as number,
-                locationId: locationId
-            } )
             this.contestsStore.selectContest( this.contest.contest )
-        }
         return this.router.navigate( [ "/contests", this.contest.contest?.contest_id ] )
     }
 
@@ -41,5 +33,10 @@ export class ContestListItemComponent
     getStatusDisplay(): string
     {
         return getStatusDisplay( this.contest.contest )
+    }
+
+    getSubjectDisplay()
+    {
+        return getSubjectDisplay( this.contest.contest?.base_contest?.subject )
     }
 }

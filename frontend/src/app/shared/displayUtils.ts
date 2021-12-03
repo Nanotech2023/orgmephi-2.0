@@ -1,5 +1,6 @@
-import { Contest, SimpleContest, TargetClass } from '@api/tasks/model'
+import { Contest, CreateBaseOlympiadRequestTaskCreator, SimpleContest, TargetClass } from '@api/tasks/model'
 import { DocumentTypeEnum, GenderEnum, SchoolTypeEnum } from '@api/users/models'
+import SubjectEnum = CreateBaseOlympiadRequestTaskCreator.SubjectEnum
 
 
 export function getGenderDisplay( genderEnum: GenderEnum ): string
@@ -95,6 +96,25 @@ export function getSchoolTypeDisplay( schoolType: SchoolTypeEnum ): string
             return "Учебно-исправительный центр"
         case 'Other':
             return "Другое"
+    }
+}
 
+export function getSubjectDisplay( subject?: SubjectEnum ): string
+{
+    switch ( subject )
+    {
+        case 'Physics':
+            return "Физика"
+        case 'Informatics':
+            return "Информатика"
+        case 'Natural Sciences':
+            return "Естественные науки"
+        case 'Engineering Sciences':
+            return "Инженерные науки"
+        case 'Math':
+            return "Математика"
+        case 'Other':
+        case undefined:
+            return "Другое"
     }
 }

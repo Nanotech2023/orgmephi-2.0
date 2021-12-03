@@ -3,7 +3,7 @@ import { Observable } from 'rxjs'
 import { ContestsStore } from '@/contests/contests.store'
 import { Contest, SimpleContest, SimpleContestWithFlagResponseTaskParticipant } from '@api/tasks/model'
 import { ActivatedRoute } from '@angular/router'
-import { getClassesForDisplay, getStatusDisplay } from '@/shared/displayUtils'
+import { getClassesForDisplay, getStatusDisplay, getSubjectDisplay } from '@/shared/displayUtils'
 
 
 @Component( {
@@ -37,5 +37,10 @@ export class ContestDetailsComponent
     getStatusForDisplay( contest: SimpleContest )
     {
         return getStatusDisplay( contest )
+    }
+
+    getSubjectDisplay( contest: SimpleContest )
+    {
+        return getSubjectDisplay( contest.base_contest?.subject )
     }
 }

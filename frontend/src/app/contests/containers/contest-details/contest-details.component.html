@@ -4,14 +4,14 @@
             <div class="col-md-4">
                 <div class="olymp_title_container">
                     <div class="olymp_status">
-                        <span>{{ getStatusForDisplay(contest) }}</span>
+                        <span>{{ getStatusForDisplay( contest ) }}</span>
                     </div>
                     <div class="olymp_title">
                         {{ contest.base_contest?.name }}
                     </div>
                     <div class="olymp_subtitle">
                         <span>{{ getTargetClassesDisplay( contest ) }}</span>
-                        <span>{{ contest.base_contest?.subject }}</span>
+                        <span>{{ getSubjectDisplay( contest ) }}</span>
                         <span>Уровень {{ contest.base_contest?.level }}</span>
                     </div>
                     <div class="olymp_links">

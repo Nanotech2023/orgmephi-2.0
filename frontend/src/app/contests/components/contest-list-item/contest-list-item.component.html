@@ -5,13 +5,13 @@
     <div class="olymp_subtitle">
         <p>
             <span>{{ getClassesForDisplay() }} классы</span>
-            <span>{{ contest.contest?.base_contest?.subject }}</span>
+            <span>{{ getSubjectDisplay() }}</span>
             <span>Уровень {{ contest.contest?.base_contest?.level }}</span>
         </p>
     </div>
 
     <div class="olymp_title">
-        <p>{{contest.contest?.contest_id}}. {{ contest.contest?.base_contest?.name }}</p>
+        <p>{{ contest.contest?.base_contest?.name }}</p>
     </div>
 
     <div class="olymp_link">

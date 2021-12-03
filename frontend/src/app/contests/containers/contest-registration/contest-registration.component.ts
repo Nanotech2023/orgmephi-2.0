@@ -37,7 +37,14 @@ export class ContestRegistrationComponent
 
     onStartClick( contestId: number | undefined ): void
     {
-        this.contestsStore.start( contestId as number )
+        // TODO allow select other locations
+        const locationId = 3
+        const contestIdNumber = contestId as number
+        this.contestsStore.enroll( {
+            contestId: contestIdNumber,
+            locationId: locationId
+        } )
+        this.contestsStore.start( contestIdNumber )
         this.router.navigate( [ `/contests/${ contestId }/assignment` ] )
     }
 

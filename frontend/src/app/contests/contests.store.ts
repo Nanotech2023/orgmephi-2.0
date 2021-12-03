@@ -86,7 +86,7 @@ export class ContestsStore extends ComponentStore<ContestsState>
     readonly fetchAll = this.effect( () =>
     {
         this.setLoading()
-        return this.tasksService.tasksParticipantOlympiadAllGet().pipe(
+        return this.tasksService.tasksParticipantOlympiadAllGet( undefined, undefined, undefined, undefined, 2021 ).pipe(
             tapResponse(
                 ( response: FilterSimpleContestResponseTaskParticipant ) => this.setContests( response.contest_list ?? [] ),
                 ( error: string ) => this.updateError( error )

@@ -18,25 +18,26 @@ import { ResponsesService } from '@api/responses/responses.service'
 import { ProfileModule } from '@/profile/profile.module'
 import { RootEffects } from '@/app.effects'
 import { ManageUsersModule } from '@/manage-users/manage-users.module'
-import { ManageContestsModule } from '@/manage-contests/manage-contests.module';
+import { ManageContestsModule } from '@/manage-contests/manage-contests.module'
 import { NotFoundComponent } from './not-found.component'
+
 
 const COMMON_MODULES = [
     SharedModule,
     LayoutModule,
-    AuthModule,
+    AuthModule
 ]
 
 const PARTICIPANT_MODULES = [
     ContestsModule,
-    ProfileModule,
-    NewsModule,
-    ChatModule
+    ProfileModule
 ]
+
 const ADMIN_MODULES = [
     ManageUsersModule,
     ManageContestsModule
 ]
+
 
 @NgModule( {
     declarations: [
