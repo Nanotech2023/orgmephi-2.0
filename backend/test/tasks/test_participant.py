@@ -213,6 +213,18 @@ def test_olympiads_all(client, test_simple_contest, test_contests_composite):
     assert resp.status_code == 200
     assert 0 == resp.json['count']
 
+    test_simple_contest[0].visibility = False
+
+    resp = client.get('/olympiad/all?visibility=false')
+    assert resp.status_code == 200
+    assert 1 == resp.json['count']
+
+    test_simple_contest[1].visibility = False
+
+    resp = client.get('/olympiad/all?visibility=true')
+    assert resp.status_code == 200
+    assert len(test_simple_contest + test_contests_composite) - 1 == resp.json['count']
+
 
 def test_get_contest_self(client, test_base_contests, test_simple_contest, test_simple_contest_with_users):
     resp = client.get(
