@@ -455,7 +455,7 @@ def check_user_unfilled_for_enroll(current_user: User):
 
 
 # Contest filter
-_filter_fields = ['base_contest_id', 'end_date', 'academic_year', 'composite_type']
+_filter_fields = ['base_contest_id', 'end_date', 'academic_year', 'composite_type', 'visibility']
 
 
 def get_contest_filtered(args):

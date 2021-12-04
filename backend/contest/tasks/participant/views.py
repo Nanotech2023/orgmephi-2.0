@@ -466,6 +466,11 @@ def get_all_contests_self():
     get:
       parameters:
         - in: query
+          name: visibility
+          required: false
+          schema:
+            type: boolean
+        - in: query
           name: offset
           required: false
           schema:
