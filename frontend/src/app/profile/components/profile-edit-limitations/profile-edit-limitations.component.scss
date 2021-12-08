@@ -1,14 +1,14 @@
 @import "src/styles/colors";
 
-.form_container {
+.profile-form_container {
   padding-top: 3%;
 
 
-  .form_item {
+  .profile-form_item {
     padding: 2%;
     width: 60%;
 
-    .form_label {
+    .profile-form_label {
       font-style: normal;
       font-weight: normal;
       font-size: 12px;
@@ -17,7 +17,7 @@
       color: $grey;
     }
 
-    .form_input {
+    .profile-form_input {
       border-bottom: 2px solid $black;
       border-left: none;
       border-right: none;

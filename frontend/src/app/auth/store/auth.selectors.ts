@@ -24,9 +24,7 @@ export const selectIsPrivileged: MemoizedSelector<State, boolean> = createSelect
         if ( !!state.user?.role )
         {
             const userRole = state.user.role
-            let b = [ User.RoleEnum.Admin, User.RoleEnum.System, User.RoleEnum.Creator ].some( item => item === userRole )
-            console.log( b, userRole )
-            return b
+            return [ User.RoleEnum.Admin, User.RoleEnum.System, User.RoleEnum.Creator ].some( item => item === userRole )
         }
         return false
     }

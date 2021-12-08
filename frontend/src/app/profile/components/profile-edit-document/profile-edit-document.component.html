@@ -1,7 +1,7 @@
-<div class="form_container">
-    <div class="form_item">
-        <p class="form_label">Тип документа</p>
-        <select class="form_input" [(ngModel)]="model.document_type" name="document_type" #document_type="ngModel" required>
+<div class="profile-form_container">
+    <div class="profile-form_item">
+        <p class="profile-form_label">Тип документа</p>
+        <select class="profile-form_input" [(ngModel)]="model.document_type" name="document_type" #document_type="ngModel" required>
             <option *ngFor="let documentType of documentTypes"
                     [ngValue]="documentType">{{ getDocumentDisplay( documentType ) }}</option>
         </select>

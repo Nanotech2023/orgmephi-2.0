@@ -20,15 +20,15 @@ import { PhoneValidatorDirective } from '@/shared/phone.validator.directive'
 
 
 @Component( {
-    selector: 'app-profile-view',
-    templateUrl: './profile-view.component.html',
-    styleUrls: [ './profile-view.component.scss' ],
+    selector: 'app-profile-edit-userinfo',
+    templateUrl: './profile-edit-userinfo.component.html',
+    styleUrls: [ './profile-edit-userinfo.component.scss' ],
     providers: [
         ProfileStore,
         { provide: NG_VALIDATORS, useExisting: forwardRef( () => PhoneValidatorDirective ), multi: true }
     ]
 } )
-export class ProfileViewComponent implements OnInit
+export class ProfileEditUserinfoComponent implements OnInit
 {
     viewModel$: Observable<{
         loading: boolean; error: string | null, userProfileUnfilled: string,
@@ -58,21 +58,10 @@ export class ProfileViewComponent implements OnInit
         this.profileStore.updateUserInfo( userInfo )
     }
 
-    download(): void
-    {
-        this.store.select( AuthSelectors.selectUserPhoto ).subscribe( data => this.downloadFile( data ) )
-    }
 
     getGenderDisplay( genderEnum: GenderEnum ): string
     {
         return getGenderDisplay( genderEnum )
-    }
-
-    downloadFile( data: Blob ): void
-    {
-        const blob = new Blob( [ data ], { type: 'application/pdf' } )
-        const url = window.URL.createObjectURL( blob )
-        window.open( url )
     }
 
     logoutButtonClick(): void

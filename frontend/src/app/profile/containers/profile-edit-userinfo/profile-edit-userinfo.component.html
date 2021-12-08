@@ -1,0 +1,125 @@
+<ng-container *ngIf="viewModel$ | async as viewModel">
+    <form name="userInfoForm" (ngSubmit)="userInfoForm.form.valid && onSubmit(this.viewModel.userInfo)"
+          #userInfoForm="ngForm" novalidate>
+        <div class="row">
+            <div class="col-md-8">
+                <p class="profile-form_container_title">Анкета абитуриента</p>
+                <p class="profile-form_container_subtitle">Пожалуйста заполните все поля вашего анкеты
+                    абитуриента.</p>
+            </div>
+            <div class="col-md-4">
+                <a class="btn btn-link" *ngIf="isPrivileged$ | async"
+                   routerLink="/manage">
+                    Администрирование
+                </a>
+                <button class="btn btn-link" (click)="logoutButtonClick()">Выйти</button>
+            </div>
+        </div>
+        <div class="mt-4 mb-4 org-divider"></div>
+        <div class="profile-photo_container">
+            <div class="row">
+                <div class="col-md-3">
+                    <img class="profile-photo_img" src="/frontend/src/assets/profile.png">
+                </div>
+                <div class="col-md-6">
+                    <p class="profile-photo_title">Фото профиля</p>
+                    <p class="profile-photo_subtitle">Только .jpg и .png файлы. Максимальный размер файла
+                        500кб.</p>
+                    <button class="profile-photo_button">Заменить</button>
+                </div>
+            </div>
+        </div>
+        <div class="profile-form_container">
+            <div class="profile_subtitle">Основная информация</div>
+            <div class="profile-form_item profile-form_item_disabled">
+                <p class="profile-form_label">Фамилия</p>
+                <input class="profile-form_input" placeholder="Введите фамилию" type="text"
+                       name="second_name" #second_name="ngModel"
+                       [(ngModel)]="viewModel.userInfo.second_name" readonly>
+            </div>
+            <div class="profile-form_item profile-form_item_disabled">
+                <p class="profile-form_label">Имя</p>
+                <input class="profile-form_input" placeholder="Введите имя" type="text"
+                       name="first_name" #first_name="ngModel"
+                       [(ngModel)]="viewModel.userInfo.first_name" readonly>
+            </div>
+            <div class="profile-form_item profile-form_item_disabled">
+                <p class="profile-form_label">Отчество</p>
+                <input class="profile-form_input" placeholder="Введите отчество" type="text"
+                       name="middle_name" #middle_name="ngModel"
+                       [(ngModel)]="viewModel.userInfo.middle_name" readonly>
+            </div>
+            <div class="profile-form_item profile-form_item_disabled">
+                <p class="profile-form_label">Email</p>
+                <input class="profile-form_input" placeholder="Введите адрес электронной почты" type="email"
+                       name="email" #email="ngModel"
+                       [(ngModel)]="viewModel.userInfo.email" readonly>
+            </div>
+            <div class="profile-form_item">
+                <p class="profile-form_label">Номер телефона</p>
+                <input class="profile-form_input" placeholder="Введите номер телефона" type="tel"
+                       name="phone" #phone="ngModel" [(ngModel)]="viewModel.userInfo.phone"
+                       required appPhoneValidator>
+                <ng-container [ngTemplateOutlet]="validationTemplate"
+                              [ngTemplateOutletContext]="{fieldName:phone}">
+                </ng-container>
+            </div>
+            <div class="profile_subtitle">Личные данные</div>
+            <div class="profile-form_item">
+                <p class="profile-form_label">Пол</p>
+                <select class="profile-form_input" name="gender" #gender="ngModel"
+                        [(ngModel)]="viewModel.userInfo.gender" required>
+                    <option *ngFor="let gender of genders"
+                            [ngValue]="gender">{{ getGenderDisplay( gender ) }}</option>
+                </select>
+                <ng-container [ngTemplateOutlet]="validationTemplate"
+                              [ngTemplateOutletContext]="{fieldName:gender}">
+                </ng-container>
+            </div>
+            <div class="profile-form_item">
+                <p class="profile-form_label">Дата рождения</p>
+                <input class="profile-form_input" placeholder="Введите дату рождения" type="date"
+                       name="date_of_birth" #date_of_birth="ngModel"
+                       [(ngModel)]="viewModel.userInfo.date_of_birth" required>
+                <ng-container [ngTemplateOutlet]="validationTemplate"
+                              [ngTemplateOutletContext]="{fieldName:date_of_birth}">
+                </ng-container>
+            </div>
+            <div class="profile-form_item">
+                <p class="profile-form_label">Место рождения</p>
+                <input class="profile-form_input" placeholder="Введите место рождения" type="text"
+                       name="place_of_birth" #place_of_birth="ngModel"
+                       [(ngModel)]="viewModel.userInfo.place_of_birth" required>
+                <ng-container [ngTemplateOutlet]="validationTemplate"
+                              [ngTemplateOutletContext]="{fieldName:place_of_birth}">
+                </ng-container>
+            </div>
+        </div>
+        <div class="profile_subtitle">Паспортные данные</div>
+        <app-profile-edit-document [(model)]="viewModel.userInfoDocument"></app-profile-edit-document>
+        <div class="profile_subtitle">Место регистрации</div>
+        <app-profile-edit-dwelling [(model)]="viewModel.userInfoDwelling">
+        </app-profile-edit-dwelling>
+        <div class="profile_subtitle">Особые условия при проведении олимпиад</div>
+        <app-profile-edit-limitations [(model)]="viewModel.userInfoLimitations">
+        </app-profile-edit-limitations>
+
+        <div class="profile-form_container">
+            <div class="profile-form_item">
+                <button class="save" type="submit" [disabled]="!userInfoForm.form.valid">Сохранить
+                </button>
+            </div>
+        </div>
+    </form>
+</ng-container>
+
+<ng-template #validationTemplate let-fieldName='fieldName'>
+    <div *ngIf="fieldName.invalid" class="input_error">
+        <div *ngIf="fieldName.errors?.required">
+            Поле обязательно для заполнения
+        </div>
+        <div *ngIf="fieldName.errors?.phoneNumberValid === false">
+            Номер телефона введен неправильно
+        </div>
+    </div>
+</ng-template>

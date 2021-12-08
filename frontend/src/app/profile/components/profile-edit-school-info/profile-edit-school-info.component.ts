@@ -4,11 +4,11 @@ import { LocationRussia, SchoolInfo, SchoolTypeEnum } from '@api/users/models'
 
 
 @Component( {
-    selector: 'app-profile-edit-school',
-    templateUrl: './profile-edit-school.component.html',
-    styleUrls: [ './profile-edit-school.component.scss' ]
+    selector: 'app-profile-edit-school-info',
+    templateUrl: './profile-edit-school-info.component.html',
+    styleUrls: [ './profile-edit-school-info.component.scss' ]
 } )
-export class ProfileEditSchoolComponent
+export class ProfileEditSchoolInfoComponent
 {
     @Input() model!: SchoolInfo
     @Output() modelChange = new EventEmitter<SchoolInfo>()

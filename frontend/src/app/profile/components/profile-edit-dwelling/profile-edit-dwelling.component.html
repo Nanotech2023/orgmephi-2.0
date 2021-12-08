@@ -1,7 +1,7 @@
-<div class="form_container">
-    <div class="form_item">
-        <p class="form_label">Расположение</p>
-        <select class="form_input" [(ngModel)]="selectedValue">
+<div class="profile-form_container">
+    <div class="profile-form_item">
+        <p class="profile-form_label">Расположение</p>
+        <select class="profile-form_input" [(ngModel)]="selectedValue">
             <option *ngFor="let locationType of locationTypes"
                     [ngValue]="locationType">{{ getLocationDisplay( locationType ) }}</option>
         </select>

@@ -38,7 +38,7 @@ export class ContestRegistrationComponent
     onStartClick( contestId: number | undefined ): void
     {
         // TODO allow select other locations
-        const locationId = 3
+        const locationId = 250
         const contestIdNumber = contestId as number
         this.contestsStore.enroll( {
             contestId: contestIdNumber,
