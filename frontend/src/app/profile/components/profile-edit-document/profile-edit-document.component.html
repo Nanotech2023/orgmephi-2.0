@@ -1,10 +1,13 @@
 <div class="form_container">
     <div class="form_item">
         <p class="form_label">Тип документа</p>
-        <select class="form_input" [(ngModel)]="model.document_type">
+        <select class="form_input" [(ngModel)]="model.document_type" name="document_type" #document_type="ngModel" required>
             <option *ngFor="let documentType of documentTypes"
                     [ngValue]="documentType">{{ getDocumentDisplay( documentType ) }}</option>
         </select>
+        <ng-container [ngTemplateOutlet]="validationTemplate"
+                      [ngTemplateOutletContext]="{fieldName:document_type}">
+        </ng-container>
     </div>
     <ng-container [ngSwitch]="model.document_type">
         <app-profile-edit-document-rfpassport [(model)]="model" *ngSwitchCase="'RFPassport'"></app-profile-edit-document-rfpassport>
@@ -15,3 +18,17 @@
         <div *ngSwitchDefault></div>
     </ng-container>
 </div>
+
+<ng-template #validationTemplate let-fieldName='fieldName'>
+    <div *ngIf="fieldName.invalid" class="input_error">
+        <div *ngIf="fieldName.errors?.required">
+            Поле обязательно для заполнения
+        </div>
+        <div *ngIf="fieldName.errors?.phoneNumberValid === false">
+            Номер телефона введен неправильно
+        </div>
+        <div *ngIf="fieldName.errors?.pattern">
+            Значение введено некорректно
+        </div>
+    </div>
+</ng-template>

@@ -1,20 +1,50 @@
 <div class="form_item">
-    <p class="form_label">Серия паспорта</p>
-    <input class="form_input" placeholder="Введите серию паспорта" type="text"
-           [(ngModel)]="model.series" (ngModelChange)="onModelChange()">
+    <p class="form_label">Серия свидетельства</p>
+    <input class="form_input" placeholder="Введите серию свидетельства" type="text" name="series" #series="ngModel"
+           [(ngModel)]="model.series" (ngModelChange)="onModelChange()" [pattern]="seriesPattern" required>
+    <ng-container [ngTemplateOutlet]="validationTemplate"
+                  [ngTemplateOutletContext]="{fieldName:series}">
+    </ng-container>
 </div>
+
 <div class="form_item">
-    <p class="form_label">Номер паспорта</p>
-    <input class="form_input" placeholder="Введите номер паспорта" type="text"
-           [(ngModel)]="model.number" (ngModelChange)="onModelChange()">
+    <p class="form_label">Номер свидетельства</p>
+    <input class="form_input" placeholder="Введите номер свидетельства" type="text" name="number" #number="ngModel"
+           [(ngModel)]="model.number" (ngModelChange)="onModelChange()" [pattern]="numberPattern" required>
+    <ng-container [ngTemplateOutlet]="validationTemplate"
+                  [ngTemplateOutletContext]="{fieldName:number}">
+    </ng-container>
 </div>
+
 <div class="form_item">
     <p class="form_label">Кем выдан</p>
-    <textarea class="form_input" placeholder="Введите место выдачи"
-              [(ngModel)]="model.issuer" (ngModelChange)="onModelChange()"></textarea>
+    <textarea class="form_input" placeholder="Введите место выдачи" name="issuer" #issuer="ngModel"
+              [(ngModel)]="model.issuer" (ngModelChange)="onModelChange()" [maxlength]="256" required></textarea>
+    <ng-container [ngTemplateOutlet]="validationTemplate"
+                  [ngTemplateOutletContext]="{fieldName:issuer}">
+    </ng-container>
 </div>
+
 <div class="form_item">
     <p class="form_label">Когда выдан</p>
-    <input class="form_input" placeholder="Введите дату выдачи паспорта" type="date"
-           [(ngModel)]="model.issue_date" (ngModelChange)="onModelChange()">
+    <input class="form_input" placeholder="Введите дату выдачи свидетельства" type="date" name="issue_date"
+           #issue_date="ngModel"
+           [(ngModel)]="model.issue_date" (ngModelChange)="onModelChange()"required>
+    <ng-container [ngTemplateOutlet]="validationTemplate"
+                  [ngTemplateOutletContext]="{fieldName:issue_date}">
+    </ng-container>
 </div>
+
+<ng-template #validationTemplate let-fieldName='fieldName'>
+    <div *ngIf="fieldName.invalid" class="input_error">
+        <div *ngIf="fieldName.errors?.required">
+            Поле обязательно для заполнения
+        </div>
+        <div *ngIf="fieldName.errors?.phoneNumberValid === false">
+            Номер телефона введен неправильно
+        </div>
+        <div *ngIf="fieldName.errors?.pattern">
+            Значение введено некорректно
+        </div>
+    </div>
+</ng-template>

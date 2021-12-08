@@ -16,7 +16,7 @@
     </div>
     <div class="form_item">
         <p class="form_label">Являетесь ли вы жителем сельской местности?</p>
-        <app-yes-no-component radioId="rural" [(model)]="model.rural"
-                              (modelChange)="onModelChange()"></app-yes-no-component>
+        <input class="form_input" type="checkbox" [(model)]="model.rural"
+               (modelChange)="onModelChange()">
     </div>
 </div>

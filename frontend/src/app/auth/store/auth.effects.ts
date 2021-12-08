@@ -20,7 +20,7 @@ import { Router } from '@angular/router'
 import { CSRFPairUser, User, UserInfo } from '@api/users/models'
 import { TasksService } from '@api/tasks/tasks.service'
 import { ResponsesService } from '@api/responses/responses.service'
-import { displayErrorMessage } from '@/shared/logging'
+import { displayErrorMessage, displaySuccessMessage } from '@/shared/logging'
 
 
 // noinspection JSUnusedGlobalSymbols
@@ -40,9 +40,7 @@ export class AuthEffects
                     mergeMap( ( csrfPair: CSRFPairUser ) =>
                         {
                             this.router.navigate( [ '/home' ] )
-                            return of( loginSuccess( {
-                                csrfPair: csrfPair
-                            } ) )
+                            return of( loginSuccess( { csrfPair: csrfPair } ) )
                         }
                     ),
                     catchError( error => of( errorCaught( { error: error } ) ) )
@@ -131,6 +129,15 @@ export class AuthEffects
             (
                 ofType( errorCaught ),
                 tap( ( { error } ) => displayErrorMessage( error ) )
+            ),
+        { dispatch: false }
+    )
+
+    readonly registerSuccess$ = createEffect( () =>
+            this.actions$.pipe
+            (
+                ofType( registerSuccess ),
+                tap( ( { type } ) => displaySuccessMessage( "Пользователь успешно зарегистрирован" ) )
             ),
         { dispatch: false }
     )

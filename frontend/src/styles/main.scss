@@ -125,3 +125,17 @@ input {
   height: 2px;
   width: 100%;
 }
+
+
+.input_error {
+  font-style: normal;
+  font-weight: normal;
+  font-size: 12px;
+  line-height: 16px;
+  color: $error;
+  flex: none;
+  order: 0;
+  flex-grow: 0;
+  margin-top: 1%;
+  padding-left: $paddingPx
+}

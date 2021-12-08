@@ -1,22 +1,31 @@
 <div class="form_container">
     <div class="form_item">
-        <p class="form_label">Страна</p>
-        <input class="form_input" type="text" readonly
-               [(ngModel)]="model.country">
+        <p class="form_label">Расположение</p>
+        <select class="form_input" [(ngModel)]="selectedValue">
+            <option *ngFor="let locationType of locationTypes"
+                    [ngValue]="locationType">{{ getLocationDisplay( locationType ) }}</option>
+        </select>
     </div>
-    <div class="form_item">
-        <p class="form_label">Регион</p>
-        <input class="form_input" type="text" placeholder="Введите регион"
-               [ngModel]="model.city?.region_name ?? ''" (ngModelChange)="onRegionChange($event)">
-    </div>
-    <div class="form_item">
-        <p class="form_label">Населённый пункт</p>
-        <input class="form_input" type="text" placeholder="Введите населённый пункт"
-               [ngModel]="model.city?.name ?? ''" (ngModelChange)="onCityChange($event)">
-    </div>
-    <div class="form_item">
-        <p class="form_label">Являетесь ли вы жителем сельской местности?</p>
-        <app-yes-no-component radioId="rural" [(model)]="model.rural"
-                              (modelChange)="onModelChange()"></app-yes-no-component>
-    </div>
+    <ng-container [ngSwitch]="selectedValue">
+        <app-profile-edit-dwelling-russia [(model)]="model"
+                                          *ngSwitchCase="'Russian'"></app-profile-edit-dwelling-russia>
+        <app-profile-edit-dwelling-other [(model)]="model"
+                                         *ngSwitchCase="'Foreign'"></app-profile-edit-dwelling-other>
+        <div *ngSwitchDefault></div>
+    </ng-container>
 </div>
+
+
+<ng-template #validationTemplate let-fieldName='fieldName'>
+    <div *ngIf="fieldName.invalid" class="input_error">
+        <div *ngIf="fieldName.errors?.required">
+            Поле обязательно для заполнения
+        </div>
+        <div *ngIf="fieldName.errors?.phoneNumberValid === false">
+            Номер телефона введен неправильно
+        </div>
+        <div *ngIf="fieldName.errors?.pattern">
+            Значение введено некорректно
+        </div>
+    </div>
+</ng-template>

@@ -19,7 +19,7 @@ import { ProfileModule } from '@/profile/profile.module'
 import { RootEffects } from '@/app.effects'
 import { ManageUsersModule } from '@/manage-users/manage-users.module'
 import { ManageContestsModule } from '@/manage-contests/manage-contests.module'
-import { NotFoundComponent } from './not-found.component'
+import { AdminAuthGuardService } from '@/shared/admin.auth.guard.service'
 
 
 const COMMON_MODULES = [
@@ -40,10 +40,7 @@ const ADMIN_MODULES = [
 
 
 @NgModule( {
-    declarations: [
-        AppComponent,
-        NotFoundComponent
-    ],
+    declarations: [ AppComponent ],
     imports: [
         ...COMMON_MODULES,
         ...PARTICIPANT_MODULES,
@@ -57,7 +54,8 @@ const ADMIN_MODULES = [
         { provide: UsersService },
         { provide: TasksService },
         { provide: ResponsesService },
-        { provide: AuthGuardService }
+        { provide: AuthGuardService },
+        { provide: AdminAuthGuardService }
     ],
     bootstrap: [ AppComponent ]
 } )

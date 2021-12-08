@@ -3,3 +3,5 @@ export const environment = {
     hmr: false,
     apiUrl: ""
 }
+
+import 'zone.js/plugins/zone-error'

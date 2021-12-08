@@ -52,7 +52,7 @@ export const getUserInfoRequest = createAction(
     '[Auth] Get User Info Request'
 )
 export const getUserInfoSuccess = createAction(
-    '[Auth] Get User Success',
+    '[Auth] Get User Info Success',
     props<{ userInfo: UserInfo }>()
 )
 

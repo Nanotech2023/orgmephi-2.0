@@ -45,21 +45,29 @@
             </div>
         </div>
         <div class="input_group_item">
-            <p class="form_label">Пароль</p>
-            <input type="password" required minlength="6" #password="ngModel"
-                   name="password" placeholder="Подтвердить пароль"
-                   [(ngModel)]="registerAttempt.auth_info.password">
-            <div *ngIf="password.invalid && (password.dirty || password.touched)"
-                 class="input_error">
-                <div *ngIf="password.errors?.required">
-                    Поле обязательно для заполнения
+            <p class="form_label">Подтвердите пароль</p>
+            <input type="password" required minlength="6" #passwordConfirm="ngModel"
+                   name="passwordConfirm" placeholder="Подтвердить пароль"
+                   [(ngModel)]="registerAttempt.passwordConfirm">
+            <div *ngIf="passwordConfirm.dirty || passwordConfirm.touched">
+                <div *ngIf="passwordConfirm.invalid"
+                     class="input_error">
+                    <div *ngIf="passwordConfirm.errors?.required">
+                        Поле обязательно для заполнения
+                    </div>
+                    <div *ngIf="passwordConfirm.errors?.minlength">
+                        Пароль должен содержать не менее 6-ти символов
+                    </div>
                 </div>
-                <div *ngIf="password.errors?.minlength">
-                    Пароль должен содержать не менее 6-ти символов
+                <div *ngIf="registerAttempt.auth_info.password !== registerAttempt.passwordConfirm" class="input_error">
+                    <div>
+                        Пароли должны совпадать
+                    </div>
                 </div>
             </div>
         </div>
     </div>
+
     <div class="input_group">
         <p class="group_label">Персональная информация</p>
         <div class="input_group_item">
@@ -131,8 +139,7 @@
         </div>
 
         <div class="input_group_item">
-            <button type="submit" [disabled]="!isValid(registerAttempt)"
-                    (click)="register(registerAttempt)">
+            <button type="submit" [disabled]="!isValid()" (click)="register(registerAttempt)">
                 Зарегистрироваться
             </button>
         </div>

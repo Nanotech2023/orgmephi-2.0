@@ -3,5 +3,8 @@ import { ErrorElement } from '@/shared/logging'
 
 export interface ErrorMessageError
 {
-    errors: ErrorElement[];
+    class?: string;
+    status?: number;
+    title?: string;
+    errors?: ErrorElement[];
 }

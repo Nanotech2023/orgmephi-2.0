@@ -1,5 +1,5 @@
 import { Contest, CreateBaseOlympiadRequestTaskCreator, SimpleContest, TargetClass } from '@api/tasks/model'
-import { DocumentTypeEnum, GenderEnum, SchoolTypeEnum } from '@api/users/models'
+import { DocumentTypeEnum, GenderEnum, LocationTypeEnum, SchoolTypeEnum } from '@api/users/models'
 import SubjectEnum = CreateBaseOlympiadRequestTaskCreator.SubjectEnum
 
 
@@ -61,10 +61,15 @@ export function getStatusDisplay( contest?: Contest ): string
 export function getClassesForDisplay( contest?: Contest ): string
 {
     let targetClasses = contest?.base_contest?.target_classes as TargetClass[]
-    if ( targetClasses && targetClasses.length )
-    {
-        return `${ targetClasses[ 0 ].target_class }-${ targetClasses[ targetClasses.length - 1 ].target_class }`
-    }
+    if ( targetClasses )
+        if ( targetClasses.length == 1 )
+        {
+            return `${ targetClasses[ 0 ].target_class }`
+        }
+        else if ( targetClasses.length > 1 )
+        {
+            return `${ targetClasses[ 0 ].target_class }-${ targetClasses[ targetClasses.length - 1 ].target_class }`
+        }
     return ""
 }
 
@@ -117,4 +122,16 @@ export function getSubjectDisplay( subject?: SubjectEnum ): string
         case undefined:
             return "Другое"
     }
+}
+
+export function getLocationDisplay( locationType: LocationTypeEnum ): string
+{
+    switch ( locationType )
+    {
+        case 'Russian':
+            return "Россия"
+        case 'Foreign':
+            return "Другая страна"
+    }
+
 }

@@ -1,7 +1,13 @@
 import { Component, OnInit } from '@angular/core'
-import { SchoolRegistrationRequestUser } from '@api/users/models'
+import { RegistrationInfoUser, SchoolRegistrationRequestUser } from '@api/users/models'
 import { AuthActions, AuthState } from '@/auth/store'
 import { Store } from '@ngrx/store'
+
+
+export interface SchoolRegistrationRequestUserAttempt extends SchoolRegistrationRequestUser
+{
+    passwordConfirm: string
+}
 
 
 @Component( {
@@ -11,7 +17,7 @@ import { Store } from '@ngrx/store'
 } )
 export class RegisterSchoolComponent implements OnInit
 {
-    registerAttempt: SchoolRegistrationRequestUser
+    registerAttempt: SchoolRegistrationRequestUserAttempt
     hasRegisterNumber!: boolean
     isRegistered: boolean
     agreementAccepted: boolean
@@ -21,8 +27,8 @@ export class RegisterSchoolComponent implements OnInit
         this.registerAttempt = {
             auth_info: { email: '', password: '' },
             register_type: SchoolRegistrationRequestUser.RegisterTypeEnum.School,
-            personal_info: { first_name: '', second_name: '', middle_name: '', date_of_birth: '' }
-            // register_confirm: { registration_number: 0, password: '' }
+            personal_info: { first_name: '', second_name: '', middle_name: '', date_of_birth: '' },
+            passwordConfirm: ''
         }
         this.isRegistered = false
         this.agreementAccepted = false
@@ -32,7 +38,7 @@ export class RegisterSchoolComponent implements OnInit
     {
     }
 
-    isValid( registration: SchoolRegistrationRequestUser ): boolean
+    isValid(): boolean
     {
         return this.agreementAccepted
     }

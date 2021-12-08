@@ -17,6 +17,21 @@ export const selectUser: MemoizedSelector<State, User> = createSelector(
         state.user!
 )
 
+export const selectIsPrivileged: MemoizedSelector<State, boolean> = createSelector(
+    selectFeature,
+    ( state: State ) =>
+    {
+        if ( !!state.user?.role )
+        {
+            const userRole = state.user.role
+            let b = [ User.RoleEnum.Admin, User.RoleEnum.System, User.RoleEnum.Creator ].some( item => item === userRole )
+            console.log( b, userRole )
+            return b
+        }
+        return false
+    }
+)
+
 export const selectUserInfo: MemoizedSelector<State, UserInfo> = createSelector(
     selectFeature,
     ( state: State ) =>
@@ -28,7 +43,6 @@ export const selectUserPhoto: MemoizedSelector<State, Blob> = createSelector(
     ( state: State ) =>
         state.userPhoto!
 )
-
 
 
 export const selectIsParticipant: MemoizedSelector<State, boolean> = createSelector(

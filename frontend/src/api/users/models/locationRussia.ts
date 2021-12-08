@@ -10,23 +10,19 @@
  * Do not edit the class manually.
  */
 import { LocationRussiaCity } from './locationRussiaCity';
+import { LocationTypeEnum } from './locationType'
 
 
 export interface LocationRussia { 
     city?: LocationRussiaCity;
     country: LocationRussia.CountryEnum;
-    readonly location_type?: LocationRussia.LocationTypeEnum;
+    readonly location_type?: LocationTypeEnum;
     rural?: boolean;
 }
 export namespace LocationRussia {
     export type CountryEnum = 'Россия';
     export const CountryEnum = {
         Russian: 'Россия' as CountryEnum
-    };
-    export type LocationTypeEnum = 'Russian' | 'Foreign';
-    export const LocationTypeEnum = {
-        Russian: 'Russian' as LocationTypeEnum,
-        Foreign: 'Foreign' as LocationTypeEnum
     };
 }
 

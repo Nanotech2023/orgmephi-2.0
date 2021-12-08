@@ -1,0 +1,22 @@
+<div class="form_container">
+    <div class="form_item">
+        <p class="form_label">Страна</p>
+        <input class="form_input" type="text" readonly
+               [(ngModel)]="locationRussia.country">
+    </div>
+    <div class="form_item">
+        <p class="form_label">Регион</p>
+        <input class="form_input" type="text" placeholder="Введите регион"
+               [ngModel]="locationRussia.city?.region_name ?? ''" (ngModelChange)="onRegionChange($event)">
+    </div>
+    <div class="form_item">
+        <p class="form_label">Населённый пункт</p>
+        <input class="form_input" type="text" placeholder="Введите населённый пункт"
+               [ngModel]="locationRussia.city?.name ?? ''" (ngModelChange)="onCityChange($event)">
+    </div>
+    <div class="form_item">
+        <p class="form_label">Являетесь ли вы жителем сельской местности?</p>
+        <input class="form_input" type="checkbox" [(ngModel)]="locationRussia.rural"
+               (ngModelChange)="onModelChange()">
+    </div>
+</div>

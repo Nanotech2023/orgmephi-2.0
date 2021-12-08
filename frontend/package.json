@@ -4,7 +4,7 @@
   "scripts": {
     "ng": "ng",
     "build": "ng build",
-    "debug": "ng serve --configuration hmr --hmr",
+    "debug": "node --max_old_space_size=8192 ./node_modules/@angular/cli/bin/ng serve --configuration hmr --hmr",
     "production": "lite-server --baseDir=\"dist\"",
     "test": "ng test"
   },
