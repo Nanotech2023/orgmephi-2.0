@@ -59,8 +59,8 @@ class Response(db.Model):
     work_id = db.Column(db.Integer, autoincrement=True, primary_key=True)
     user_id = db.Column(db.Integer)
     contest_id = db.Column(db.Integer)
-    start_time = db.Column(db.DateTime, default=datetime.utcnow())
-    finish_time = db.Column(db.DateTime, default=datetime.utcnow())
+    start_time = db.Column(db.DateTime, default=datetime.utcnow)
+    finish_time = db.Column(db.DateTime, default=datetime.utcnow)
     time_extension = db.Column(db.Interval, default=timedelta(seconds=0))
     work_status = db.Column(db.Enum(ResponseStatusEnum), default=ResponseStatusEnum.in_progress, nullable=False)
 
