@@ -11,8 +11,8 @@
         <div class="col-md-4">
             <div class="task_actions">
                 <p class="input_label">Ответ</p>
-                <textarea [(ngModel)]="answer" class="input_textarea" maxlength="1000" placeholder="Введите свой ответ"
-                          (focusout)="updateAnswer()"></textarea>
+                <input [(ngModel)]="answer" class="input_textarea" maxlength="100" placeholder="Введите свой ответ"
+                       (focusout)="updateAnswer()" (keypress)="numberOnly($event)">
             </div>
         </div>
     </div>

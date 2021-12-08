@@ -4,7 +4,7 @@ import { ResponsesService } from '@api/responses/responses.service'
 import { TasksService } from '@api/tasks/tasks.service'
 import { Subscription } from 'rxjs'
 import { DomSanitizer, SafeUrl } from '@angular/platform-browser'
-import { PlainAnswerRequest, PlainAnswerText } from '@api/responses/model'
+import { RangeAnswer, RangeAnswerRequest } from '@api/responses/model'
 
 
 @Component( {
@@ -18,7 +18,8 @@ export class ContestAssignmentItemComponent implements OnInit, OnDestroy
     @Input() contestId!: number | null
     imageUrl!: SafeUrl
     private subscription!: Subscription
-    answer!: string
+    answer!: number | undefined
+    rangeAnswerPattern: string = "^[0-9]+$"
 
     constructor( private tasksService: TasksService, private responsesService: ResponsesService, private sanitizer: DomSanitizer )
     {
@@ -33,7 +34,7 @@ export class ContestAssignmentItemComponent implements OnInit, OnDestroy
                 const unsafeImageUrl = URL.createObjectURL( data )
                 this.imageUrl = this.sanitizer.bypassSecurityTrustUrl( unsafeImageUrl )
             } )
-            this.responsesService.responsesParticipantContestContestIdTaskTaskIdUserSelfGet( this.contestId, this.task.task_id ).subscribe( item => this.answer = ( item as PlainAnswerText ).answer_text ?? "" )
+            this.responsesService.responsesParticipantContestContestIdTaskTaskIdUserSelfGet( this.contestId, this.task.task_id ).subscribe( item => this.answer = ( item as RangeAnswer )?.answer ?? undefined )
         }
     }
 
@@ -46,8 +47,14 @@ export class ContestAssignmentItemComponent implements OnInit, OnDestroy
     {
         if ( this.answer )
         {
-            let plainAnswerRequest: PlainAnswerRequest = { answer_text: this.answer }
-            this.responsesService.responsesParticipantContestContestIdTaskTaskIdUserSelfPlainPost( this.contestId as number, this.task.task_id, plainAnswerRequest ).subscribe()
+            const rangeAnswerRequest: RangeAnswerRequest = { answer: this.answer }
+            this.responsesService.responsesParticipantContestContestIdTaskTaskIdUserSelfRangePost( this.contestId as number, this.task.task_id, rangeAnswerRequest ).subscribe()
         }
+    }
+
+    numberOnly( $event: KeyboardEvent ): boolean
+    {
+        const number = Number( $event.key )
+        return number === NaN
     }
 }
