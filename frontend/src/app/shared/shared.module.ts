@@ -6,7 +6,6 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms'
 import { RouterModule } from '@angular/router'
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations'
 import { ManageNavbarComponent } from '@/layout/manage-navbar/manage-navbar.component'
-import { AutocompleteModule } from '@/shared/app-autocomplete/autocomplete.module'
 import { NotFoundComponent } from '@/shared/not-found/not-found.component'
 
 

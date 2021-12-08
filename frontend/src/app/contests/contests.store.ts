@@ -12,10 +12,14 @@ import {
     SimpleContest,
     SimpleContestWithFlagResponseTaskParticipant
 } from '@api/tasks/model'
-import { catchError, switchMap } from 'rxjs/operators'
+import { catchError, filter, map, switchMap, withLatestFrom } from 'rxjs/operators'
 import { ResponsesService } from '@api/responses/responses.service'
 import CompositeTypeEnum = SimpleContest.CompositeTypeEnum
 import { displayErrorMessage } from '@/shared/logging'
+import { Store } from '@ngrx/store'
+import { AuthSelectors, AuthState } from '@/auth/store'
+import { UsersService } from '@api/users/users.service'
+import { SchoolInfo } from '@api/users/models'
 
 
 export interface ContestsState
@@ -24,6 +28,7 @@ export interface ContestsState
     locations: Array<OlympiadLocation>
     contest?: Contest
     callState: CallState
+    schoolInfo?: SchoolInfo
 }
 
 
@@ -32,19 +37,31 @@ const initialState: ContestsState =
         contests: [],
         locations: [],
         contest: undefined,
-        callState: LoadingState.INIT
+        callState: LoadingState.INIT,
+        schoolInfo: undefined
     }
 
 
 @Injectable()
 export class ContestsStore extends ComponentStore<ContestsState>
 {
-    constructor( private tasksService: TasksService, private responsesService: ResponsesService )
+    constructor( private tasksService: TasksService, private responsesService: ResponsesService, private usersService: UsersService )
     {
         super( initialState )
     }
 
-    readonly contests$: Observable<SimpleContestWithFlagResponseTaskParticipant[]> = this.select( state => state.contests.filter( item => item.contest?.composite_type === CompositeTypeEnum.SimpleContest ) )
+    readonly contests$: Observable<SimpleContestWithFlagResponseTaskParticipant[]> = this.select( state => state.contests.filter( item =>
+    {
+        if ( item.contest === undefined )
+            return false
+        if ( item.contest.composite_type !== CompositeTypeEnum.SimpleContest )
+            return false
+        if ( state.schoolInfo?.grade === undefined )
+            return true
+        if ( item.contest.base_contest.target_classes === undefined )
+            return true
+        return item.contest.base_contest.target_classes.some( targetClass => targetClass.target_class == state.schoolInfo!.grade!.toString() )
+    } ) )
     readonly contest$: Observable<SimpleContest | undefined> = this.select( state => state.contest as SimpleContest )
     private readonly loading$: Observable<boolean> = this.select( state => state.callState === LoadingState.LOADING )
     private readonly error$: Observable<string | null> = this.select( state => getError( state.callState ) )
@@ -82,6 +99,12 @@ export class ContestsStore extends ComponentStore<ContestsState>
             contest: contest
         } ) )
 
+    readonly setSchoolInfo = this.updater( ( state: ContestsState, schoolInfo: SchoolInfo ) =>
+        ( {
+            ...state,
+            schoolInfo: schoolInfo
+        } ) )
+
     // EFFECTS
     readonly fetchAll = this.effect( () =>
     {
@@ -89,6 +112,18 @@ export class ContestsStore extends ComponentStore<ContestsState>
         return this.tasksService.tasksParticipantOlympiadAllGet( undefined, undefined, undefined, undefined, 2021 ).pipe(
             tapResponse(
                 ( response: FilterSimpleContestResponseTaskParticipant ) => this.setContests( response.contest_list ?? [] ),
+                ( error: string ) => this.updateError( error )
+            ),
+            catchError( ( error: any ) => of( displayErrorMessage( error ) ) )
+        )
+    } )
+
+    readonly fetchSchoolInfo = this.effect( () =>
+    {
+        this.setLoading()
+        return this.usersService.userProfileSchoolGet().pipe(
+            tapResponse(
+                ( response: SchoolInfo ) => this.setSchoolInfo( response ),
                 ( error: string ) => this.updateError( error )
             ),
             catchError( ( error: any ) => of( displayErrorMessage( error ) ) )

@@ -1,4 +1,4 @@
-import { Component, Input, OnDestroy, OnInit } from '@angular/core'
+import { Component, EventEmitter, Input, OnDestroy, OnInit, Output } from '@angular/core'
 import { TaskForUserResponseTaskParticipant } from '@api/tasks/model'
 import { ResponsesService } from '@api/responses/responses.service'
 import { TasksService } from '@api/tasks/tasks.service'
@@ -20,6 +20,7 @@ export class ContestAssignmentItemComponent implements OnInit, OnDestroy
     private subscription!: Subscription
     answer!: number | undefined
     rangeAnswerPattern: string = "^[0-9]+$"
+    @Output() onAnswerUpdate = new EventEmitter<number>()
 
     constructor( private tasksService: TasksService, private responsesService: ResponsesService, private sanitizer: DomSanitizer )
     {
@@ -49,12 +50,13 @@ export class ContestAssignmentItemComponent implements OnInit, OnDestroy
         {
             const rangeAnswerRequest: RangeAnswerRequest = { answer: this.answer }
             this.responsesService.responsesParticipantContestContestIdTaskTaskIdUserSelfRangePost( this.contestId as number, this.task.task_id, rangeAnswerRequest ).subscribe()
+            this.onAnswerUpdate.emit( this.answer )
         }
     }
 
     numberOnly( $event: KeyboardEvent ): boolean
     {
         const number = Number( $event.key )
-        return number === NaN
+        return !isNaN( number )
     }
 }

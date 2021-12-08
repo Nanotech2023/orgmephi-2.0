@@ -75,10 +75,16 @@ export class ContestAssignmentComponent implements OnInit, OnDestroy
 
     finish(): void
     {
-        if ( this.contestId !== null )
+        if ( !!this.contestId )
         {
             this.contestAssignmentStore.finish( this.contestId )
             this.contestAssignmentStore.fetchTime( this.contestId )
         }
+    }
+
+    onAnswerUpdate()
+    {
+        if ( !!this.contestId )
+            this.contestAssignmentStore.fetchVariant( this.contestId )
     }
 }

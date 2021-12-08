@@ -28,6 +28,7 @@ export class ContestListComponent implements OnInit
     ngOnInit(): void
     {
         this.isParticipant$ = this.authStore.pipe( select( AuthSelectors.selectIsParticipant ) )
+        this.contestsStore.fetchSchoolInfo()
         this.contestsStore.fetchAll()
     }
 
