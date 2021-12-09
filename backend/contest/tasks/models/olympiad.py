@@ -363,31 +363,14 @@ class SimpleContest(Contest):
 
     @hybrid_property
     def tasks_number(self):
-        if not self.variants:
-            return None
-        else:
-            if self.variants.count() != 0:
-                tasks = self.variants.first().contest_tasks_in_variant.all()
-                return len(tasks)
-            else:
-                return None
+        return self.contest_tasks.count()
 
     @hybrid_property
     def total_points(self):
-        if not self.variants:
-            return None
-        else:
-            if self.variants.count() != 0:
-                sum_points = 0
-                tasks = self.variants.first().contest_tasks_in_variant.all()
-                if len(tasks) != 0:
-                    for task in tasks:
-                        sum_points += task.contest_task.task_points
-                    return sum_points
-                else:
-                    return None
-            else:
-                return None
+        sum_points = 0
+        for task in self.contest_tasks:
+            sum_points += task.task_points
+        return sum_points
 
     @hybrid_property
     def status(self):
