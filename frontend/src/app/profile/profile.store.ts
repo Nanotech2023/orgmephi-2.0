@@ -6,7 +6,7 @@ import {
     LocationRussia,
     UserInfo,
     UserLimitations,
-    DocumentTypeEnum, LocationTypeEnum
+    DocumentTypeEnum, LocationTypeEnum, SchoolInfo
 } from '@api/users/models'
 import { UsersService } from '@api/users/users.service'
 import { Observable, of, zip } from 'rxjs'
@@ -18,6 +18,7 @@ import { displayErrorMessage } from '@/shared/logging'
 export interface ProfileState
 {
     userInfo?: UserInfo
+    schoolInfo?: SchoolInfo
     profileUnfilled: any
     callState: CallState
 }
@@ -25,6 +26,7 @@ export interface ProfileState
 
 const initialState: ProfileState = {
     userInfo: undefined,
+    schoolInfo: undefined,
     profileUnfilled: null,
     callState: LoadingState.INIT
 }
@@ -40,6 +42,7 @@ export class ProfileStore extends ComponentStore<ProfileState>
 
     private readonly userProfileUnfilled$: Observable<string> = this.select( state => JSON.stringify( state.profileUnfilled, null, 4 ) )
     private readonly userInfo$: Observable<UserInfo | undefined> = this.select( state => state.userInfo )
+    readonly schoolInfo$: Observable<SchoolInfo> = this.select( state => state.schoolInfo ?? this.getEmptySchool() )
     private readonly userInfoDocument$: Observable<Document> = this.select( state => state.userInfo?.document ?? this.getEmptyDocument() )
     private readonly userInfoDwelling$: Observable<Location> = this.select( state => state.userInfo?.dwelling ?? this.getEmptyLocation() )
     private readonly userInfoLimitations$: Observable<UserLimitations> = this.select( state => state.userInfo?.limitations ?? this.getEmptyLimitations() )
@@ -68,11 +71,16 @@ export class ProfileStore extends ComponentStore<ProfileState>
             userInfo: userInfo ?? {},
             userInfoDocument: userInfoDocument,
             userInfoDwelling: userInfoDwelling,
-            userInfoLimitations: this.x( userInfoLimitations )
+            userInfoLimitations: this.getLimitationsForViewModel( userInfoLimitations )
         } )
     )
 
-    private x( userInfoLimitations: UserLimitations )
+    private getEmptySchool(): SchoolInfo
+    {
+        return {}
+    }
+
+    private getLimitationsForViewModel( userInfoLimitations: UserLimitations )
     {
         // @ts-ignore
         return { ...userInfoLimitations, user_id: undefined }
@@ -141,6 +149,12 @@ export class ProfileStore extends ComponentStore<ProfileState>
         } )
     )
 
+    readonly setSchoolInfo = this.updater( ( state: ProfileState, response: SchoolInfo ) =>
+        ( {
+            ...state, schoolInfo: response
+        } )
+    )
+
     readonly setProfileUnfilled = this.updater( ( state: ProfileState, response: any ) =>
         ( {
             ...state, profileUnfilled: response
@@ -152,6 +166,15 @@ export class ProfileStore extends ComponentStore<ProfileState>
     {
         this.setLoading()
         return zip( [ this.fetchUserInfo, this.fetchUnfilled ] ).pipe(
+            catchError( ( error: any ) => of( displayErrorMessage( error ) ) ),
+            finalize( () => this.setLoaded )
+        )
+    } )
+
+    readonly fetch2 = this.effect( () =>
+    {
+        this.setLoading()
+        return zip( [ this.fetchSchoolInfo, this.fetchUnfilled ] ).pipe(
             catchError( ( error: any ) => of( displayErrorMessage( error ) ) ),
             finalize( () => this.setLoaded )
         )
@@ -173,15 +196,12 @@ export class ProfileStore extends ComponentStore<ProfileState>
             )
         ) )
 
-    readonly updateUserDocument = this.effect( ( document$: Observable<Document> ) =>
-        document$.pipe(
-            switchMap( ( document: Document ) =>
-            {
-                this.setLoading()
-                return this.usersService.userProfilePersonalPatch( { document: document } ).pipe(
-                    catchError( ( error: any ) => of( displayErrorMessage( error ) ) )
-                )
-            } )
+    readonly fetchSchoolInfo = this.effect( () =>
+        this.usersService.userProfileSchoolGet().pipe(
+            tapResponse(
+                ( response: SchoolInfo ) => this.setSchoolInfo( response ),
+                ( error: string ) => this.updateError( error )
+            )
         ) )
 
     readonly updateUserInfo = this.effect( ( userInfo$: Observable<UserInfo> ) =>
@@ -189,13 +209,24 @@ export class ProfileStore extends ComponentStore<ProfileState>
             withLatestFrom( this.userInfoDocument$, this.userInfoDwelling$, this.userInfoLimitations$ ),
             switchMap( ( [ userInfo, document, dwelling, limitations ] ) =>
             {
-                console.log( 'dwelling', dwelling )
                 this.setLoading()
                 const newUserInfo = { ...userInfo }
                 newUserInfo.document = document
                 newUserInfo.dwelling = dwelling
                 newUserInfo.limitations = limitations
                 return this.usersService.userProfilePersonalPatch( newUserInfo ).pipe(
+                    catchError( ( error: any ) => of( displayErrorMessage( error ) ) )
+                )
+            } )
+        ) )
+
+    readonly updateSchoolInfo = this.effect( ( schoolInfo$: Observable<SchoolInfo> ) =>
+        schoolInfo$.pipe(
+            switchMap( ( schoolInfo: SchoolInfo ) =>
+            {
+                this.setLoading()
+                const newSchoolInfo = { ...schoolInfo }
+                return this.usersService.userProfileSchoolPatch( newSchoolInfo ).pipe(
                     catchError( ( error: any ) => of( displayErrorMessage( error ) ) )
                 )
             } )

@@ -15,7 +15,7 @@ import {
     registerSuccess
 } from '@/auth/store/auth.actions'
 import { catchError, concatMap, mergeMap, switchMap, tap } from 'rxjs/operators'
-import { of } from 'rxjs'
+import { EMPTY, of } from 'rxjs'
 import { Router } from '@angular/router'
 import { CSRFPairUser, User, UserInfo } from '@api/users/models'
 import { TasksService } from '@api/tasks/tasks.service'
@@ -104,7 +104,7 @@ export class AuthEffects
             concatMap( () =>
                 this.authService.userProfilePhotoGet().pipe(
                     mergeMap( ( photo: Blob ) => of( getUserPhotoSuccess( { userPhoto: photo } ) ) ),
-                    catchError( error => of( errorCaught( { error: error } ) ) )
+                    catchError( error => EMPTY )
                 )
             )
         )

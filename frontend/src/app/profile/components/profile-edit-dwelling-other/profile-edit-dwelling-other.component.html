@@ -1,14 +1,14 @@
 <div class="profile-form_container">
     <div class="profile-form_item">
         <p class="profile-form_label">Страна</p>
-        <input class="profile-form_input" type="text" [(ngModel)]="model.country">
+        <input class="profile-form_input" type="text" [(ngModel)]="locationOther.country">
     </div>
     <div class="profile-form_item">
         <p class="profile-form_label">Регион</p>
-        <input class="profile-form_input" type="text" placeholder="Введите регион" [ngModel]="model.location">
+        <input class="profile-form_input" type="text" placeholder="Введите регион" [ngModel]="locationOther.location">
     </div>
     <div class="profile-form_item">
         <p class="profile-form_label">Являетесь ли вы жителем сельской местности?</p>
-        <input class="profile-form_input" type="checkbox" [(ngModel)]="model.rural" (ngModelChange)="onModelChange()">
+        <input class="profile-form_input" type="checkbox" [(ngModel)]="locationOther.rural" (ngModelChange)="onModelChange()">
     </div>
 </div>

@@ -7,10 +7,10 @@
         </select>
     </div>
     <ng-container [ngSwitch]="selectedValue">
-        <app-profile-edit-dwelling-russia [(model)]="model"
-                                          *ngSwitchCase="'Russian'"></app-profile-edit-dwelling-russia>
-        <app-profile-edit-dwelling-other [(model)]="model"
-                                         *ngSwitchCase="'Foreign'"></app-profile-edit-dwelling-other>
+        <app-profile-edit-dwelling-russia [(model)]="model" *ngSwitchCase="'Russian'" (modelChange)="onModelChange()">
+        </app-profile-edit-dwelling-russia>
+        <app-profile-edit-dwelling-other [(model)]="model" *ngSwitchCase="'Foreign'" (modelChange)="onModelChange()">
+        </app-profile-edit-dwelling-other>
         <div *ngSwitchDefault></div>
     </ng-container>
 </div>

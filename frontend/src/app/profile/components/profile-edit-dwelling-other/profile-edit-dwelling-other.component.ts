@@ -9,18 +9,18 @@ import { Location, LocationOther, LocationRussia, LocationTypeEnum } from '@api/
 } )
 export class ProfileEditDwellingOtherComponent
 {
-    @Input() model!: LocationOther
+    @Input() model!: LocationOther | undefined
     @Output() modelChange = new EventEmitter<LocationOther>()
     locationOther!: LocationOther
 
     constructor()
     {
-        this.locationOther = this.getEmptyLocation()
+        this.locationOther = this.model ?? this.getEmptyLocation()
     }
 
     onModelChange(): void
     {
-        this.modelChange.emit( this.model )
+        this.modelChange.emit( this.locationOther )
     }
 
     getEmptyLocation(): LocationOther

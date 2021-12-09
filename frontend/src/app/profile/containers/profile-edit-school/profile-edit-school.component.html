@@ -1,0 +1,58 @@
+<ng-container *ngIf="viewModel$ | async as viewModel">
+    <form name="schoolInfoForm" (ngSubmit)="schoolInfoForm.form.valid && onSubmit(this.viewModel)"
+          #schoolInfoForm="ngForm" novalidate>
+        <div class="row">
+            <div class="col-md-8">
+                <p class="profile-form_container_title">Анкета абитуриента</p>
+                <p class="profile-form_container_subtitle">Пожалуйста заполните все поля вашего анкеты
+                    абитуриента.</p>
+            </div>
+            <div class="col-md-4">
+                <a class="btn btn-link" *ngIf="isPrivileged$ | async"
+                   routerLink="/manage">
+                    Администрирование
+                </a>
+                <button class="btn btn-link" (click)="logoutButtonClick()">Выйти</button>
+            </div>
+        </div>
+        <div class="mt-4 mb-4 org-divider"></div>
+        <div class="profile_subtitle">Учебное заведение</div>
+        <div class="profile-form_container">
+            <div class="profile-form_item">
+                <p class="profile-form_label">Тип образовательного учреждения</p>
+                <select class="profile-form_input" [(ngModel)]="viewModel.school_type"
+                        (ngModelChange)="onModelChange()">
+                    <option *ngFor="let schoolType of schoolTypes"
+                            [ngValue]="schoolType">{{ getSchoolTypeDisplay( schoolType ) }}</option>
+                </select>
+            </div>
+            <div class="profile-form_item">
+                <p class="profile-form_label">Номер образовательного учреждения</p>
+                <input class="profile-form_input" placeholder="Введите ноль, если нет номера" type="text"
+                       [(ngModel)]="viewModel.number">
+            </div>
+            <div class="profile-form_item">
+                <p class="profile-form_label">Название образовательного учреждения</p>
+                <input class="profile-form_input" placeholder="Введите название учреждения" type="text"
+                       [(ngModel)]="viewModel.name" (ngModelChange)="onModelChange()">
+            </div>
+            <div class="profile-form_item">
+                <p class="profile-form_label">Являюсь учащимся класса</p>
+                <input class="profile-form_input" placeholder="Введите класс" type="number"
+                       [(ngModel)]="viewModel.grade" (ngModelChange)="onModelChange()" min="1" max="12">
+            </div>
+        </div>
+        <app-profile-edit-dwelling [(model)]="viewModel.location"></app-profile-edit-dwelling>
+    </form>
+</ng-container>
+
+<ng-template #validationTemplate let-fieldName='fieldName'>
+    <div *ngIf="fieldName.invalid" class="input_error">
+        <div *ngIf="fieldName.errors?.required">
+            Поле обязательно для заполнения
+        </div>
+        <div *ngIf="fieldName.errors?.phoneNumberValid === false">
+            Номер телефона введен неправильно
+        </div>
+    </div>
+</ng-template>

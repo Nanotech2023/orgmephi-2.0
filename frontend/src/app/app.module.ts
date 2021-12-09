@@ -48,7 +48,7 @@ const ADMIN_MODULES = [
         AppRoutingModule,
         StoreModule.forRoot( {} ),
         EffectsModule.forRoot( [ RootEffects ] ),
-        environment.production ? [] : StoreDevtoolsModule.instrument()
+        // environment.production ? [] : StoreDevtoolsModule.instrument()
     ],
     providers: [
         { provide: UsersService },

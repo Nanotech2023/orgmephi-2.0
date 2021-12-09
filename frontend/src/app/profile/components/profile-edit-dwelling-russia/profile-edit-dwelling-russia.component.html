@@ -4,16 +4,29 @@
         <input class="profile-form_input" type="text" readonly
                [(ngModel)]="locationRussia.country">
     </div>
+
     <div class="profile-form_item">
         <p class="profile-form_label">Регион</p>
-        <input class="profile-form_input" type="text" placeholder="Введите регион"
-               [ngModel]="locationRussia.city?.region_name ?? ''" (ngModelChange)="onRegionChange($event)">
+        <ng-select [items]="regions$ | async"
+                   bindLabel="name"
+                   bindValue="name"
+                   placeholder="Введите регион"
+                   [(ngModel)]="selectedRegion"
+                   (change)="onRegionChange()">
+        </ng-select>
     </div>
+
     <div class="profile-form_item">
         <p class="profile-form_label">Населённый пункт</p>
-        <input class="profile-form_input" type="text" placeholder="Введите населённый пункт"
-               [ngModel]="locationRussia.city?.name ?? ''" (ngModelChange)="onCityChange($event)">
+        <ng-select [items]="cities$ | async"
+                   bindLabel="name"
+                   bindValue="name"
+                   placeholder="Введите населённый пункт"
+                   [(ngModel)]="selectedCity"
+                   (change)="onCityChange()">
+        </ng-select>
     </div>
+
     <div class="profile-form_item">
         <p class="profile-form_label">Являетесь ли вы жителем сельской местности?</p>
         <input class="profile-form_input" type="checkbox" [(ngModel)]="locationRussia.rural"

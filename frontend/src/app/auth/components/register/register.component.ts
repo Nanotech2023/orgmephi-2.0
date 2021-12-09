@@ -13,7 +13,7 @@ import { Agreements } from '@/auth/agreements'
 export class RegisterComponent
 {
     agreements: string[] = Agreements
-    registerTypes: SchoolRegistrationRequestUser.RegisterTypeEnum[] = [ SchoolRegistrationRequestUser.RegisterTypeEnum.PreUniversity, SchoolRegistrationRequestUser.RegisterTypeEnum.School, SchoolRegistrationRequestUser.RegisterTypeEnum.Enrollee ]
+    registerTypes: SchoolRegistrationRequestUser.RegisterTypeEnum[] = [ SchoolRegistrationRequestUser.RegisterTypeEnum.School ]
 
     registerAttempt: SchoolRegistrationRequestUser // TODO support RequestRegistrationUniversity
     isRegistered: boolean

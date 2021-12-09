@@ -1,24 +1,24 @@
-<div class="profile-form_container">
-    <div class="profile-form_item">
-        <p class="profile-form_label">Тип образовательного учреждения</p>
-        <select class="profile-form_input" [(ngModel)]="model.school_type" (ngModelChange)="onModelChange()">
-            <option *ngFor="let schoolType of schoolTypes"
-                    [ngValue]="schoolType">{{ getSchoolTypeDisplay( schoolType ) }}</option>
-        </select>
-    </div>
-    <div class="profile-form_item">
-        <p class="profile-form_label">Номер образовательного учреждения</p>
-        <input class="profile-form_input" placeholder="Введите ноль, если нет номера" type="text"
-               [(ngModel)]="model.number" (ngModelChange)="onModelChange()">
-    </div>
-    <div class="profile-form_item">
-        <p class="profile-form_label">Название образовательного учреждения</p>
-        <input class="profile-form_input" placeholder="Введите название учреждения" type="text"
-               [(ngModel)]="model.name" (ngModelChange)="onModelChange()">
-    </div>
-    <div class="profile-form_item">
-        <p class="profile-form_label">Являюсь учащимся класса</p>
-        <input class="profile-form_input" placeholder="Введите класс" type="number"
-               [(ngModel)]="model.grade" (ngModelChange)="onModelChange()" min="1" max="12">
-    </div>
-</div>
+<!--<div class="profile-form_container">-->
+<!--    <div class="profile-form_item">-->
+<!--        <p class="profile-form_label">Тип образовательного учреждения</p>-->
+<!--        <select class="profile-form_input" [(ngModel)]="model.school_type" (ngModelChange)="onModelChange()">-->
+<!--            <option *ngFor="let schoolType of schoolTypes"-->
+<!--                    [ngValue]="schoolType">{{ getSchoolTypeDisplay( schoolType ) }}</option>-->
+<!--        </select>-->
+<!--    </div>-->
+<!--    <div class="profile-form_item">-->
+<!--        <p class="profile-form_label">Номер образовательного учреждения</p>-->
+<!--        <input class="profile-form_input" placeholder="Введите ноль, если нет номера" type="text"-->
+<!--               [(ngModel)]="model.number" (ngModelChange)="onModelChange()">-->
+<!--    </div>-->
+<!--    <div class="profile-form_item">-->
+<!--        <p class="profile-form_label">Название образовательного учреждения</p>-->
+<!--        <input class="profile-form_input" placeholder="Введите название учреждения" type="text"-->
+<!--               [(ngModel)]="model.name" (ngModelChange)="onModelChange()">-->
+<!--    </div>-->
+<!--    <div class="profile-form_item">-->
+<!--        <p class="profile-form_label">Являюсь учащимся класса</p>-->
+<!--        <input class="profile-form_input" placeholder="Введите класс" type="number"-->
+<!--               [(ngModel)]="model.grade" (ngModelChange)="onModelChange()" min="1" max="12">-->
+<!--    </div>-->
+<!--</div>-->

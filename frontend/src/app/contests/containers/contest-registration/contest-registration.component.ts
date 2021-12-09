@@ -44,7 +44,6 @@ export class ContestRegistrationComponent
             contestId: contestIdNumber,
             locationId: locationId
         } )
-        this.contestsStore.start( contestIdNumber )
         this.router.navigate( [ `/contests/${ contestId }/assignment` ] )
     }
 

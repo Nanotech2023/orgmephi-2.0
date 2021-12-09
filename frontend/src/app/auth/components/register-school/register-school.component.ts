@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core'
-import { RegistrationInfoUser, SchoolRegistrationRequestUser } from '@api/users/models'
+import { SchoolRegistrationRequestUser } from '@api/users/models'
 import { AuthActions, AuthState } from '@/auth/store'
 import { Store } from '@ngrx/store'
 
@@ -19,7 +19,6 @@ export class RegisterSchoolComponent implements OnInit
 {
     registerAttempt: SchoolRegistrationRequestUserAttempt
     hasRegisterNumber!: boolean
-    isRegistered: boolean
     agreementAccepted: boolean
 
     constructor( private readonly store: Store<AuthState.State> )
@@ -30,7 +29,6 @@ export class RegisterSchoolComponent implements OnInit
             personal_info: { first_name: '', second_name: '', middle_name: '', date_of_birth: '' },
             passwordConfirm: ''
         }
-        this.isRegistered = false
         this.agreementAccepted = false
     }
 
@@ -45,7 +43,6 @@ export class RegisterSchoolComponent implements OnInit
 
     register( registerUser: SchoolRegistrationRequestUser ): void
     {
-        this.isRegistered = true
         this.store.dispatch( AuthActions.registerRequest( { registrationRequestUser: registerUser } ) )
     }
 }

@@ -149,15 +149,12 @@ export class ContestsStore extends ComponentStore<ContestsState>
                 const enrollRequestTaskParticipant: EnrollRequestTaskParticipant = { location_id: locationId }
                 return this.tasksService.tasksParticipantContestIdContestEnrollPost( contestId, enrollRequestTaskParticipant ).pipe(
                     catchError( ( error: any ) => of( displayErrorMessage( error ) ) )
+                ).pipe(
+                    switchMap( () =>
+                        this.responsesService.responsesParticipantContestContestIdUserSelfCreatePost( contestId ).pipe(
+                            catchError( ( error: any ) => of( displayErrorMessage( error ) ) )
+                        ) )
                 )
             } )
-        ) )
-
-    readonly start = this.effect( ( contestId$: Observable<number> ) =>
-        contestId$.pipe(
-            switchMap( ( contestId: number ) =>
-                this.responsesService.responsesParticipantContestContestIdUserSelfCreatePost( contestId ).pipe(
-                    catchError( ( error: any ) => of( displayErrorMessage( error ) ) )
-                ) )
         ) )
 }

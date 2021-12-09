@@ -1,7 +1,8 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core'
-import { Location, LocationRussia, LocationTypeEnum } from '@api/users/models'
+import { City, Location, LocationRussia, LocationTypeEnum, Region } from '@api/users/models'
 import { UsersService } from '@api/users/users.service'
-import { FormControl } from '@angular/forms'
+import { Observable } from 'rxjs'
+import { map } from 'rxjs/operators'
 
 
 @Component( {
@@ -11,10 +12,13 @@ import { FormControl } from '@angular/forms'
 } )
 export class ProfileEditDwellingRussiaComponent implements OnInit
 {
-    @Input() model!: Location
+    @Input() model!: Location | undefined
     @Output() modelChange = new EventEmitter<Location>()
     locationRussia: LocationRussia
-    regions!: string[]
+    regions$!: Observable<Region[]>
+    cities$!: Observable<City[]>
+    selectedRegion!: string
+    selectedCity!: string
 
     constructor( private usersService: UsersService )
     {
@@ -23,9 +27,7 @@ export class ProfileEditDwellingRussiaComponent implements OnInit
 
     ngOnInit(): void
     {
-        this.usersService.userRegistrationInfoRegionsGet().subscribe(
-            items => this.regions = items.region_list.map( region => region.name )
-        )
+        this.regions$ = this.usersService.userRegistrationInfoRegionsGet().pipe( map( item => item.region_list ) )
     }
 
     getEmptyLocation(): LocationRussia
@@ -43,21 +45,21 @@ export class ProfileEditDwellingRussiaComponent implements OnInit
         this.modelChange.emit( this.locationRussia as Location )
     }
 
-    onCityChange( value: string ): void
+    onCityChange(): void
     {
         if ( this.locationRussia.city === undefined )
             return
-        this.locationRussia.city.name = value
+        this.locationRussia.city.name = this.selectedCity
         this.modelChange.emit( this.locationRussia as Location )
     }
 
-    onRegionChange( value: string ): void
+    onRegionChange(): void
     {
         if ( this.locationRussia.city === undefined )
-            this.locationRussia.city = { region_name: value, name: "" }
+            this.locationRussia.city = { region_name: this.selectedRegion, name: "" }
         else
-            this.locationRussia.city.region_name = value
+            this.locationRussia.city.region_name = this.selectedRegion
         this.modelChange.emit( this.locationRussia as Location )
-        console.log(this.locationRussia)
+        this.cities$ = this.usersService.userRegistrationInfoCitiesRegionGet( this.selectedRegion ).pipe( map( item => item.city_list ) )
     }
 }

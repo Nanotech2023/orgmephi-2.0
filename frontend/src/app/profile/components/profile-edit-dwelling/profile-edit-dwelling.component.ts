@@ -10,7 +10,7 @@ import { Location, LocationTypeEnum } from '@api/users/models'
 } )
 export class ProfileEditDwellingComponent
 {
-    @Input() model!: Location
+    @Input() model!: Location | undefined
     @Output() modelChange = new EventEmitter<Location>()
 
     readonly locationTypes: LocationTypeEnum[] = [

@@ -28,6 +28,7 @@ import {
     ProfileEditSchoolInfoComponent
 } from '@/profile/components/profile-edit-school-info/profile-edit-school-info.component'
 import { ProfileEditSchoolComponent } from '@/profile/containers/profile-edit-school/profile-edit-school.component'
+import { NgSelectModule } from '@ng-select/ng-select'
 
 
 const COMPONENTS = [
@@ -58,6 +59,7 @@ const COMPONENTS = [
     imports: [
         SharedModule,
         ReactiveFormsModule,
+        NgSelectModule,
         ProfileRoutingModule
     ]
 } )

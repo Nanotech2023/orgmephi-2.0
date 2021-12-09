@@ -19,7 +19,7 @@
                     <div class="form_options" *ngIf="!selectedUserType">
                         <div class="option" *ngFor="let registerType of registerTypes"
                              (click)="selectRegisterType(registerType)">
-                            <span>{{ registerType }}
+                            <span>Участник олимпиад школьников
                                 <svg width="16" height="14" viewBox="0 0 16 14" fill="none"
                                      xmlns="http://www.w3.org/2000/svg">
                                 <path
@@ -32,9 +32,8 @@
 
 
                     <p>Уже есть аккант? <a [routerLink]="'/login'">Войти в систему</a></p>
-                    <p>Не пришло письмо для активации учётной записи?</p>
-                    <p>Если у вас возникли проблемы при регистрации или вводе информации, обращайтесь: +7 (495)
-                        785-55-25, orginfo@mephi.ru</p>
+<!--                    <p>Не пришло письмо для активации учётной записи?</p>-->
+                    <p>Если у вас возникли проблемы при регистрации или вводе информации, обращайтесь: orginfo@mephi.ru</p>
                 </div>
             </div>
             <app-register-school *ngIf="isAvailable(); else notSupported"></app-register-school>
