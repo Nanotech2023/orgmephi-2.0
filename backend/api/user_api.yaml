@@ -283,9 +283,7 @@ components:
           type: string
         location_type:
           enum:
-          - Russian
           - Foreign
-          readOnly: true
           type: string
         rural:
           type: boolean
@@ -312,8 +310,6 @@ components:
         location_type:
           enum:
           - Russian
-          - Foreign
-          readOnly: true
           type: string
         rural:
           type: boolean
