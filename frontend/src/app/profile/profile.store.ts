@@ -6,7 +6,9 @@ import {
     LocationRussia,
     UserInfo,
     UserLimitations,
-    DocumentTypeEnum, LocationTypeEnum, SchoolInfo
+    DocumentTypeEnum,
+    LocationTypeEnum,
+    SchoolInfo
 } from '@api/users/models'
 import { UsersService } from '@api/users/users.service'
 import { Observable, of, zip } from 'rxjs'
@@ -185,13 +187,23 @@ export class ProfileStore extends ComponentStore<ProfileState>
             {
                 this.setLoading()
                 const newUserInfo = { ...userInfo }
+                newUserInfo.user_id = undefined
                 newUserInfo.document = document
+
+                // @ts-ignore
+                newUserInfo.document.user_id = undefined
+                if ( document.document_type != DocumentTypeEnum.OtherDocument )
+                {
+                    // @ts-ignore
+                    newUserInfo.document.document_name = undefined
+                }
                 newUserInfo.dwelling = dwelling
                 newUserInfo.limitations = limitations
+                // @ts-ignore
+                newUserInfo.limitations.user_id = undefined
                 return this.usersService.userProfilePersonalPatch( newUserInfo ).pipe(
                     catchError( ( error: any ) => of( displayErrorMessage( error ) ) )
                 )
             } )
         ) )
-
 }
