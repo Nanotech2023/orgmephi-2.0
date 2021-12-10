@@ -42,7 +42,6 @@ export class ProfileStore extends ComponentStore<ProfileState>
 
     private readonly userProfileUnfilled$: Observable<string> = this.select( state => JSON.stringify( state.profileUnfilled, null, 4 ) )
     private readonly userInfo$: Observable<UserInfo | undefined> = this.select( state => state.userInfo )
-    readonly schoolInfo$: Observable<SchoolInfo> = this.select( state => state.schoolInfo ?? this.getEmptySchool() )
     private readonly userInfoDocument$: Observable<Document> = this.select( state => state.userInfo?.document ?? this.getEmptyDocument() )
     private readonly userInfoDwelling$: Observable<Location> = this.select( state => state.userInfo?.dwelling ?? this.getEmptyLocation() )
     private readonly userInfoLimitations$: Observable<UserLimitations> = this.select( state => state.userInfo?.limitations ?? this.getEmptyLimitations() )
@@ -75,10 +74,6 @@ export class ProfileStore extends ComponentStore<ProfileState>
         } )
     )
 
-    private getEmptySchool(): SchoolInfo
-    {
-        return {}
-    }
 
     private getLimitationsForViewModel( userInfoLimitations: UserLimitations )
     {
@@ -149,12 +144,6 @@ export class ProfileStore extends ComponentStore<ProfileState>
         } )
     )
 
-    readonly setSchoolInfo = this.updater( ( state: ProfileState, response: SchoolInfo ) =>
-        ( {
-            ...state, schoolInfo: response
-        } )
-    )
-
     readonly setProfileUnfilled = this.updater( ( state: ProfileState, response: any ) =>
         ( {
             ...state, profileUnfilled: response
@@ -171,14 +160,6 @@ export class ProfileStore extends ComponentStore<ProfileState>
         )
     } )
 
-    readonly fetch2 = this.effect( () =>
-    {
-        this.setLoading()
-        return zip( [ this.fetchSchoolInfo, this.fetchUnfilled ] ).pipe(
-            catchError( ( error: any ) => of( displayErrorMessage( error ) ) ),
-            finalize( () => this.setLoaded )
-        )
-    } )
 
     readonly fetchUnfilled = this.effect( () =>
         this.usersService.userProfileUnfilledGet().pipe(
@@ -196,13 +177,6 @@ export class ProfileStore extends ComponentStore<ProfileState>
             )
         ) )
 
-    readonly fetchSchoolInfo = this.effect( () =>
-        this.usersService.userProfileSchoolGet().pipe(
-            tapResponse(
-                ( response: SchoolInfo ) => this.setSchoolInfo( response ),
-                ( error: string ) => this.updateError( error )
-            )
-        ) )
 
     readonly updateUserInfo = this.effect( ( userInfo$: Observable<UserInfo> ) =>
         userInfo$.pipe(
@@ -220,15 +194,4 @@ export class ProfileStore extends ComponentStore<ProfileState>
             } )
         ) )
 
-    readonly updateSchoolInfo = this.effect( ( schoolInfo$: Observable<SchoolInfo> ) =>
-        schoolInfo$.pipe(
-            switchMap( ( schoolInfo: SchoolInfo ) =>
-            {
-                this.setLoading()
-                const newSchoolInfo = { ...schoolInfo }
-                return this.usersService.userProfileSchoolPatch( newSchoolInfo ).pipe(
-                    catchError( ( error: any ) => of( displayErrorMessage( error ) ) )
-                )
-            } )
-        ) )
 }

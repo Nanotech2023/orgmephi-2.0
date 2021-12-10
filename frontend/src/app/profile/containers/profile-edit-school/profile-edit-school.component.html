@@ -20,29 +20,48 @@
         <div class="profile-form_container">
             <div class="profile-form_item">
                 <p class="profile-form_label">Тип образовательного учреждения</p>
-                <select class="profile-form_input" [(ngModel)]="viewModel.school_type"
-                        (ngModelChange)="onModelChange()">
+                <select class="profile-form_input" [(ngModel)]="viewModel.school_type" name="school_type"
+                        #school_type="ngModel" required>
                     <option *ngFor="let schoolType of schoolTypes"
                             [ngValue]="schoolType">{{ getSchoolTypeDisplay( schoolType ) }}</option>
                 </select>
+                <ng-container [ngTemplateOutlet]="validationTemplate"
+                              [ngTemplateOutletContext]="{fieldName:school_type}">
+                </ng-container>
             </div>
             <div class="profile-form_item">
                 <p class="profile-form_label">Номер образовательного учреждения</p>
                 <input class="profile-form_input" placeholder="Введите ноль, если нет номера" type="text"
-                       [(ngModel)]="viewModel.number">
+                       name="number" #number="ngModel" required [(ngModel)]="viewModel.number">
+                <ng-container [ngTemplateOutlet]="validationTemplate"
+                              [ngTemplateOutletContext]="{fieldName:number}">
+                </ng-container>
             </div>
             <div class="profile-form_item">
                 <p class="profile-form_label">Название образовательного учреждения</p>
-                <input class="profile-form_input" placeholder="Введите название учреждения" type="text"
-                       [(ngModel)]="viewModel.name" (ngModelChange)="onModelChange()">
+                <input class="profile-form_input" placeholder="Введите название учреждения" type="text" name="name"
+                       #name="ngModel" required [(ngModel)]="viewModel.name">
+                <ng-container [ngTemplateOutlet]="validationTemplate"
+                              [ngTemplateOutletContext]="{fieldName:name}">
+                </ng-container>
             </div>
             <div class="profile-form_item">
                 <p class="profile-form_label">Являюсь учащимся класса</p>
-                <input class="profile-form_input" placeholder="Введите класс" type="number"
-                       [(ngModel)]="viewModel.grade" (ngModelChange)="onModelChange()" min="1" max="12">
+                <input class="profile-form_input" placeholder="Введите класс" type="number" name="grade"
+                       #grade="ngModel" required [(ngModel)]="viewModel.grade" min="1" max="11">
+                <ng-container [ngTemplateOutlet]="validationTemplate"
+                              [ngTemplateOutletContext]="{fieldName:grade}">
+                </ng-container>
+            </div>
+            <!--        <app-profile-edit-dwelling [(model)]="viewModel.location"></app-profile-edit-dwelling>-->
+
+            <div class="profile-form_container">
+                <div class="profile-form_item">
+                    <button class="save" type="submit" [disabled]="!schoolInfoForm.form.valid">Сохранить
+                    </button>
+                </div>
             </div>
         </div>
-        <app-profile-edit-dwelling [(model)]="viewModel.location"></app-profile-edit-dwelling>
     </form>
 </ng-container>
 

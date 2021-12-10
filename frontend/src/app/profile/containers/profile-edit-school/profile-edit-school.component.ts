@@ -1,28 +1,41 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core'
+import { Component, OnInit } from '@angular/core'
 import { Observable } from 'rxjs'
-import { LocationRussia, SchoolInfo, SchoolTypeEnum } from '@api/users/models'
-import { ProfileStore } from '@/profile/profile.store'
+import { SchoolInfo, SchoolTypeEnum } from '@api/users/models'
 import { Router } from '@angular/router'
 import { UsersService } from '@api/users/users.service'
 import { Store } from '@ngrx/store'
 import { AuthActions, AuthSelectors, AuthState } from '@/auth/store'
 import { getSchoolTypeDisplay } from '@/shared/displayUtils'
+import { ProfileSchoolStore } from '@/profile/profile-school.store'
 
 
 @Component( {
     selector: 'app-profile-edit-school',
     templateUrl: './profile-edit-school.component.html',
     styleUrls: [ './profile-edit-school.component.scss' ],
-    providers: [ ProfileStore ]
+    providers: [ ProfileSchoolStore ]
 } )
-export class ProfileEditSchoolComponent
+export class ProfileEditSchoolComponent implements OnInit
 {
     isPrivileged$!: Observable<boolean>
     viewModel$: Observable<SchoolInfo>
 
-    constructor( private profileStore: ProfileStore, private router: Router, private usersService: UsersService, private store: Store<AuthState.State> )
+    schoolTypes: SchoolTypeEnum[] = [
+        SchoolTypeEnum.School,
+        SchoolTypeEnum.Lyceum,
+        SchoolTypeEnum.Gymnasium,
+        SchoolTypeEnum.EducationCenter,
+        SchoolTypeEnum.NightSchool,
+        SchoolTypeEnum.External,
+        SchoolTypeEnum.Collage,
+        SchoolTypeEnum.University,
+        SchoolTypeEnum.Correctional,
+        SchoolTypeEnum.Other
+    ]
+
+    constructor( private profileStore: ProfileSchoolStore, private router: Router, private usersService: UsersService, private store: Store<AuthState.State> )
     {
-        this.profileStore.fetch2()
+        this.profileStore.fetch()
         this.viewModel$ = this.profileStore.schoolInfo$
     }
 
@@ -46,35 +59,6 @@ export class ProfileEditSchoolComponent
         this.updateSchoolInfo( schoolInfo )
     }
 
-    @Input() model!: SchoolInfo
-    @Output() modelChange = new EventEmitter<SchoolInfo>()
-    schoolTypes: SchoolTypeEnum[] = [
-        SchoolTypeEnum.School,
-        SchoolTypeEnum.Lyceum,
-        SchoolTypeEnum.Gymnasium,
-        SchoolTypeEnum.EducationCenter,
-        SchoolTypeEnum.NightSchool,
-        SchoolTypeEnum.External,
-        SchoolTypeEnum.Collage,
-        SchoolTypeEnum.University,
-        SchoolTypeEnum.Correctional,
-        SchoolTypeEnum.Other
-    ]
-
-    get schoolLocation(): LocationRussia
-    {
-        return this.model.location as LocationRussia
-    }
-
-    set schoolLocation( location: LocationRussia )
-    {
-        this.model.location = location
-    }
-
-    onModelChange(): void
-    {
-        this.modelChange.emit( this.model )
-    }
 
     getSchoolTypeDisplay( schoolType: SchoolTypeEnum ): string
     {

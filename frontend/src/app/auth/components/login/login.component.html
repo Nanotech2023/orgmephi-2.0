@@ -18,7 +18,9 @@
                     <input [(ngModel)]="loginAttempt.username" placeholder="Введите email">
                     <p class="form_label">Пароль</p>
                     <input [(ngModel)]="loginAttempt.password" placeholder="Введите пароль" type="password">
-                    <p class="form_label"><a href="">Восстановить пароль</a></p>
+                    <p class="form_label">
+                        <a routerLink="/in-development">Восстановить пароль</a>
+                    </p>
                     <button [disabled]="!isValid(this.loginAttempt)"
                             (click)="login(this.loginAttempt)">Войти
                     </button>
