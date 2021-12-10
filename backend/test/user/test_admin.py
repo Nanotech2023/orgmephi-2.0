@@ -1,3 +1,5 @@
+import copy
+
 from . import *
 
 
@@ -150,4 +152,15 @@ def test_photo(client, test_user_school):
     assert resp.status_code == 204
 
     resp = client.get(f'/personal/{test_user_school.id}/photo')
+    assert resp.status_code == 200
+
+
+def test_custom_native_location(client, test_user, test_country_native, test_region, test_city):
+    test_info = copy.deepcopy(test_user_info)
+    test_info['dwelling']['location_type'] = 'Foreign'
+    test_info['dwelling']['location'] = 'Где-то далеко'
+    test_info['dwelling']['country'] = 'native'
+    del test_info['dwelling']['region']
+    del test_info['dwelling']['city']
+    resp = client.patch(f'/personal/{test_user.id}', json=test_info)
     assert resp.status_code == 200
