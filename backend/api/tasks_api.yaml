@@ -492,6 +492,8 @@ components:
         result_publication_date:
           format: date-time
           type: string
+        show_result_after_finish:
+          type: boolean
         start_date:
           format: date-time
           type: string
@@ -516,10 +518,9 @@ components:
           type: integer
         task_pools:
           items:
-            type: integer
-          minItems: 1
+            $ref: '#/components/schemas/TaskPool'
+          readOnly: true
           type: array
-          writeOnly: true
       required:
       - num
       - task_points
@@ -629,6 +630,8 @@ components:
           format: date-time
           type: string
         show_answer_after_contest:
+          type: boolean
+        show_result_after_finish:
           type: boolean
         stage_id:
           type: integer
@@ -925,6 +928,9 @@ components:
           type: string
         show_answer_after_contest:
           readOnly: true
+          type: boolean
+        show_result_after_finish:
+          nullable: true
           type: boolean
         start_date:
           format: date-time
@@ -1233,6 +1239,8 @@ components:
           format: date-time
           type: string
         show_answer_after_contest:
+          type: boolean
+        show_result_after_finish:
           type: boolean
         start_date:
           format: date-time
@@ -3308,6 +3316,11 @@ paths:
     get:
       parameters:
       - in: query
+        name: visibility
+        required: false
+        schema:
+          type: boolean
+      - in: query
         name: offset
         required: false
         schema:
@@ -3557,6 +3570,11 @@ paths:
   /tasks/unauthorized/olympiad/all:
     get:
       parameters:
+      - in: query
+        name: visibility
+        required: false
+        schema:
+          type: boolean
       - in: query
         name: offset
         required: false
