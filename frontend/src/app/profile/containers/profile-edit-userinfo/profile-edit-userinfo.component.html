@@ -98,7 +98,7 @@
         <div class="profile_subtitle">Паспортные данные</div>
         <app-profile-edit-document [(model)]="viewModel.userInfoDocument"></app-profile-edit-document>
         <div class="profile_subtitle">Место регистрации</div>
-        <app-profile-edit-dwelling [(model)]="viewModel.userInfoDwelling">
+        <app-profile-edit-dwelling [(model)]="viewModel.userInfoDwelling" [(city)]="viewModel.userInfoDwellingCity">
         </app-profile-edit-dwelling>
         <div class="profile_subtitle">Особые условия при проведении олимпиад</div>
         <app-profile-edit-limitations [(model)]="viewModel.userInfoLimitations">

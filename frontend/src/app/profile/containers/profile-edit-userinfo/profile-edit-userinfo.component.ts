@@ -5,7 +5,7 @@ import {
     Document,
     DocumentRF,
     GenderEnum, Location,
-    LocationRussia,
+    LocationRussia, LocationRussiaCity,
     SchoolInfo,
     UserInfo,
     UserLimitations
@@ -35,9 +35,9 @@ export class ProfileEditUserinfoComponent implements OnInit
         userInfo: UserInfo,
         userInfoDocument: Document,
         userInfoDwelling: Location,
-        userInfoLimitations: UserLimitations
+        userInfoDwellingCity: LocationRussiaCity,
+        userInfoLimitations: UserLimitations,
     }>
-
 
     readonly genders: GenderEnum[] = [ GenderEnum.Male, GenderEnum.Female ]
     isPrivileged$!: Observable<boolean>
@@ -71,5 +71,10 @@ export class ProfileEditUserinfoComponent implements OnInit
     onSubmit( userInfo: UserInfo )
     {
         this.updateUserInfo( userInfo )
+    }
+
+    onCityChange( $event: LocationRussiaCity )
+    {
+        this.profileStore.setCity( $event )
     }
 }

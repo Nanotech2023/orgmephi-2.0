@@ -1,0 +1,17 @@
+@import "src/styles/colors";
+
+button {
+  border: none;
+  height: 56px;
+  width: 50%;
+  font-style: normal;
+  font-weight: normal;
+  font-size: 14px;
+  line-height: 18px;
+  letter-spacing: 0.16px;
+  color: $white;
+}
+
+button.save {
+  background-color: $blue;
+}

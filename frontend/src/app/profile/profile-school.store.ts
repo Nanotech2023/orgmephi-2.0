@@ -1,7 +1,13 @@
 import { Injectable } from '@angular/core'
 import { ComponentStore, tapResponse } from '@ngrx/component-store'
-import { SchoolInfo, UserInfo } from '@api/users/models'
-import { CallState, LoadingState } from '@/shared/callState'
+import {
+    Location,
+    LocationRussia,
+    LocationRussiaCity,
+    LocationTypeEnum,
+    SchoolInfo,
+} from '@api/users/models'
+import { CallState, getError, LoadingState } from '@/shared/callState'
 import { UsersService } from '@api/users/users.service'
 import { Observable, of, zip } from 'rxjs'
 import { ProfileState } from '@/profile/profile.store'
@@ -33,11 +39,58 @@ export class ProfileSchoolStore extends ComponentStore<ProfileSchoolState>
     }
 
     private readonly userProfileUnfilled$: Observable<string> = this.select( state => JSON.stringify( state.profileUnfilled, null, 4 ) )
-    readonly schoolInfo$: Observable<SchoolInfo> = this.select( state => state.schoolInfo ?? this.getEmptySchool() )
+    private readonly schoolInfo$: Observable<SchoolInfo> = this.select( state => state.schoolInfo ?? this.getEmptySchool() )
+    private readonly schoolLocation$: Observable<Location> = this.select( state => state.schoolInfo?.location ?? this.getEmptyLocation() )
+    private readonly schoolLocationCity$: Observable<LocationRussiaCity> = this.select( state => ( state.schoolInfo?.location as LocationRussia )?.city ?? this.getEmptyCity() )
+    private readonly loading$: Observable<boolean> = this.select( state => state.callState === LoadingState.LOADING )
+    private readonly error$: Observable<string | null> = this.select( state => getError( state.callState ) )
+
+    // @ts-ignore
+    readonly viewModel$: Observable<{
+        loading: boolean;
+        error: string | null,
+        userProfileUnfilled: string,
+        schoolInfo: SchoolInfo,
+        schoolLocation: Location,
+        schoolLocationCity: LocationRussiaCity
+    }> = this.select(
+        this.loading$,
+        this.error$,
+        this.userProfileUnfilled$,
+        this.schoolInfo$,
+        this.schoolLocation$,
+        this.schoolLocationCity$,
+        ( loading, error, userProfileUnfilled, schoolInfo, schoolLocation, schoolLocationCity ) => ( {
+            loading: loading,
+            error: error,
+            userProfileUnfilled: userProfileUnfilled,
+            schoolInfo: schoolInfo ?? this.getEmptySchool(),
+            schoolLocation: schoolLocation,
+            schoolLocationCity: schoolLocationCity
+        } )
+    )
 
     private getEmptySchool(): SchoolInfo
     {
         return {}
+    }
+
+
+    private getEmptyCity(): LocationRussiaCity
+    {
+        return {
+            region_name: "",
+            name: ""
+        }
+    }
+
+    private getEmptyLocation(): Location
+    {
+        return {
+            country: "Россия",
+            location_type: LocationTypeEnum.Russian,
+            rural: false
+        } as LocationRussia
     }
 
     // UPDATERS

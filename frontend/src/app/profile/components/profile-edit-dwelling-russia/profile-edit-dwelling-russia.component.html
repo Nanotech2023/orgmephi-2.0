@@ -2,7 +2,7 @@
     <div class="profile-form_item">
         <p class="profile-form_label">Страна</p>
         <input class="profile-form_input" type="text" readonly
-               [(ngModel)]="locationRussia.country">
+               [(ngModel)]="model.country">
     </div>
 
     <div class="profile-form_item">
@@ -11,7 +11,7 @@
                    bindLabel="name"
                    bindValue="name"
                    placeholder="Введите регион"
-                   [(ngModel)]="selectedRegion"
+                   [(ngModel)]="city.region_name"
                    (change)="onRegionChange()">
         </ng-select>
     </div>
@@ -22,14 +22,14 @@
                    bindLabel="name"
                    bindValue="name"
                    placeholder="Введите населённый пункт"
-                   [(ngModel)]="selectedCity"
+                   [(ngModel)]="city.name"
                    (change)="onCityChange()">
         </ng-select>
     </div>
 
     <div class="profile-form_item">
         <p class="profile-form_label">Являетесь ли вы жителем сельской местности?</p>
-        <input class="profile-form_input" type="checkbox" [(ngModel)]="locationRussia.rural"
+        <input class="profile-form_input" type="checkbox" [(ngModel)]="model.rural"
                (ngModelChange)="onModelChange()">
     </div>
 </div>

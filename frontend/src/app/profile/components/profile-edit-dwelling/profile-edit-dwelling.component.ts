@@ -1,6 +1,6 @@
 import { getLocationDisplay } from '@/shared/displayUtils'
 import { Component, EventEmitter, Input, Output } from '@angular/core'
-import { Location, LocationTypeEnum } from '@api/users/models'
+import { Location, LocationRussiaCity, LocationTypeEnum } from '@api/users/models'
 
 
 @Component( {
@@ -12,6 +12,8 @@ export class ProfileEditDwellingComponent
 {
     @Input() model!: Location
     @Output() modelChange = new EventEmitter<Location>()
+    @Input() city!: LocationRussiaCity
+    @Output() cityChange = new EventEmitter<LocationRussiaCity>()
 
     readonly locationTypes: LocationTypeEnum[] = [
         LocationTypeEnum.Russian,
@@ -19,9 +21,15 @@ export class ProfileEditDwellingComponent
     ]
     selectedValue: LocationTypeEnum = this.locationTypes[ 0 ]
 
+
     onModelChange(): void
     {
         this.modelChange.emit( this.model )
+    }
+
+    onCityChange(): void
+    {
+        this.cityChange.emit( this.city )
     }
 
     getLocationDisplay( locationType: LocationTypeEnum ): string

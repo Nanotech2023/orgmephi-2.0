@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core'
 import { Observable } from 'rxjs'
-import { SchoolInfo, SchoolTypeEnum } from '@api/users/models'
+import { Location, LocationRussiaCity, SchoolInfo, SchoolTypeEnum } from '@api/users/models'
 import { Router } from '@angular/router'
 import { UsersService } from '@api/users/users.service'
 import { Store } from '@ngrx/store'
@@ -18,7 +18,15 @@ import { ProfileSchoolStore } from '@/profile/profile-school.store'
 export class ProfileEditSchoolComponent implements OnInit
 {
     isPrivileged$!: Observable<boolean>
-    viewModel$: Observable<SchoolInfo>
+
+    viewModel$: Observable<{
+        loading: boolean;
+        error: string | null,
+        userProfileUnfilled: string,
+        schoolInfo: SchoolInfo,
+        schoolLocation: Location,
+        schoolLocationCity: LocationRussiaCity
+    }>
 
     schoolTypes: SchoolTypeEnum[] = [
         SchoolTypeEnum.School,
@@ -36,7 +44,7 @@ export class ProfileEditSchoolComponent implements OnInit
     constructor( private profileStore: ProfileSchoolStore, private router: Router, private usersService: UsersService, private store: Store<AuthState.State> )
     {
         this.profileStore.fetch()
-        this.viewModel$ = this.profileStore.schoolInfo$
+        this.viewModel$ = this.profileStore.viewModel$
     }
 
     ngOnInit(): void
@@ -54,11 +62,10 @@ export class ProfileEditSchoolComponent implements OnInit
         this.store.dispatch( AuthActions.logoutRequest() )
     }
 
-    onSubmit( schoolInfo: SchoolInfo )
+    onSubmit( schoolInfo: { loading: boolean; error: string | null; userProfileUnfilled: string; schoolInfo: SchoolInfo; schoolLocation: Location; schoolLocationCity: LocationRussiaCity } )
     {
-        this.updateSchoolInfo( schoolInfo )
+        this.updateSchoolInfo( schoolInfo.schoolInfo )
     }
-
 
     getSchoolTypeDisplay( schoolType: SchoolTypeEnum ): string
     {

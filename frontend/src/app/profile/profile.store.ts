@@ -8,7 +8,7 @@ import {
     UserLimitations,
     DocumentTypeEnum,
     LocationTypeEnum,
-    SchoolInfo
+    SchoolInfo, LocationRussiaCity
 } from '@api/users/models'
 import { UsersService } from '@api/users/users.service'
 import { Observable, of, zip } from 'rxjs'
@@ -23,12 +23,14 @@ export interface ProfileState
     schoolInfo?: SchoolInfo
     profileUnfilled: any
     callState: CallState
+    city?: LocationRussiaCity
 }
 
 
 const initialState: ProfileState = {
     userInfo: undefined,
     schoolInfo: undefined,
+    city: undefined,
     profileUnfilled: null,
     callState: LoadingState.INIT
 }
@@ -46,6 +48,7 @@ export class ProfileStore extends ComponentStore<ProfileState>
     private readonly userInfo$: Observable<UserInfo | undefined> = this.select( state => state.userInfo )
     private readonly userInfoDocument$: Observable<Document> = this.select( state => state.userInfo?.document ?? this.getEmptyDocument() )
     private readonly userInfoDwelling$: Observable<Location> = this.select( state => state.userInfo?.dwelling ?? this.getEmptyLocation() )
+    private readonly userInfoDwellingCity$: Observable<LocationRussiaCity> = this.select( state => ( state.userInfo?.dwelling as LocationRussia )?.city ?? this.getEmptyCity() )
     private readonly userInfoLimitations$: Observable<UserLimitations> = this.select( state => state.userInfo?.limitations ?? this.getEmptyLimitations() )
     private readonly loading$: Observable<boolean> = this.select( state => state.callState === LoadingState.LOADING )
     private readonly error$: Observable<string | null> = this.select( state => getError( state.callState ) )
@@ -56,6 +59,7 @@ export class ProfileStore extends ComponentStore<ProfileState>
         userInfo: UserInfo,
         userInfoDocument: Document,
         userInfoDwelling: Location,
+        userInfoDwellingCity: LocationRussiaCity,
         userInfoLimitations: UserLimitations,
     }> = this.select(
         this.loading$,
@@ -64,14 +68,16 @@ export class ProfileStore extends ComponentStore<ProfileState>
         this.userInfo$,
         this.userInfoDocument$,
         this.userInfoDwelling$,
+        this.userInfoDwellingCity$,
         this.userInfoLimitations$,
-        ( loading, error, userProfileUnfilled, userInfo, userInfoDocument, userInfoDwelling, userInfoLimitations ) => ( {
+        ( loading, error, userProfileUnfilled, userInfo, userInfoDocument, userInfoDwelling, userInfoDwellingCity, userInfoLimitations ) => ( {
             loading: loading,
             error: error,
             userProfileUnfilled: userProfileUnfilled,
             userInfo: userInfo ?? {},
             userInfoDocument: userInfoDocument,
             userInfoDwelling: userInfoDwelling,
+            userInfoDwellingCity: userInfoDwellingCity,
             userInfoLimitations: this.getLimitationsForViewModel( userInfoLimitations )
         } )
     )
@@ -97,14 +103,18 @@ export class ProfileStore extends ComponentStore<ProfileState>
         }
     }
 
+    private getEmptyCity(): LocationRussiaCity
+    {
+        return {
+            region_name: "",
+            name: ""
+        }
+    }
+
     private getEmptyLocation(): Location
     {
         return {
             country: "Россия",
-            city: {
-                region_name: "",
-                name: ""
-            },
             location_type: LocationTypeEnum.Russian,
             rural: false
         } as LocationRussia
@@ -152,6 +162,12 @@ export class ProfileStore extends ComponentStore<ProfileState>
         } )
     )
 
+    readonly setCity = this.updater( ( state: ProfileState, city: LocationRussiaCity ) =>
+        ( {
+            ...state, city: city
+        } )
+    )
+
     // EFFECTS
     readonly fetch = this.effect( () =>
     {
@@ -182,8 +198,8 @@ export class ProfileStore extends ComponentStore<ProfileState>
 
     readonly updateUserInfo = this.effect( ( userInfo$: Observable<UserInfo> ) =>
         userInfo$.pipe(
-            withLatestFrom( this.userInfoDocument$, this.userInfoDwelling$, this.userInfoLimitations$ ),
-            switchMap( ( [ userInfo, document, dwelling, limitations ] ) =>
+            withLatestFrom( this.userInfoDocument$, this.userInfoDwelling$, this.userInfoDwellingCity$, this.userInfoLimitations$ ),
+            switchMap( ( [ userInfo, document, dwelling, dwellingCity, limitations ] ) =>
             {
                 this.setLoading()
                 const newUserInfo = { ...userInfo }
@@ -198,6 +214,11 @@ export class ProfileStore extends ComponentStore<ProfileState>
                     newUserInfo.document.document_name = undefined
                 }
                 newUserInfo.dwelling = dwelling
+                if ( dwelling.location_type == LocationTypeEnum.Russian )
+                {
+                    // @ts-ignore
+                    newUserInfo.dwelling.city = dwellingCity
+                }
                 newUserInfo.limitations = limitations
                 // @ts-ignore
                 newUserInfo.limitations.user_id = undefined
@@ -206,4 +227,5 @@ export class ProfileStore extends ComponentStore<ProfileState>
                 )
             } )
         ) )
+
 }
