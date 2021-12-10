@@ -5,13 +5,13 @@
     <div class="row">
         <div class="col-md-8">
             <div class="task_image">
-                <img [src]="imageUrl" alt="Задание" class="img-fluid">
+                <img [src]="imageUrl" alt="Задание" class="img-fluid pt-1 pb-1">
             </div>
         </div>
         <div class="col-md-4">
             <div class="task_actions">
                 <p class="input_label">Ответ</p>
-                <input [(ngModel)]="answer" class="input_textarea" maxlength="100" placeholder="Введите свой ответ"
+                <input [(ngModel)]="answer" class="input_textarea" maxlength="100" placeholder="Введите свой ответ" type="number"
                        (focusout)="updateAnswer()" (keypress)="numberOnly($event)">
             </div>
         </div>

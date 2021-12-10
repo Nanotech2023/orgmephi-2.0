@@ -24,10 +24,7 @@ export class AppComponent implements OnInit, OnDestroy
         ).subscribe( ( event ) =>
         {
             if ( event instanceof NavigationEnd )
-            {
-                console.log( event )
                 this.showHeader = event.url != "/login"
-            }
         } )
     }
 

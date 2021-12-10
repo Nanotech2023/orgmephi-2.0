@@ -7,6 +7,7 @@ import { RouterModule } from '@angular/router'
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations'
 import { ManageNavbarComponent } from '@/layout/manage-navbar/manage-navbar.component'
 import { NotFoundComponent } from '@/shared/not-found/not-found.component'
+import { InDevelopmentComponent } from '@/shared/in-development/in-development.component'
 
 
 const SHARED = [
@@ -21,6 +22,7 @@ const SHARED = [
 
 const COMPONENTS = [
     ManageNavbarComponent,
+    InDevelopmentComponent,
     NotFoundComponent
 ]
 

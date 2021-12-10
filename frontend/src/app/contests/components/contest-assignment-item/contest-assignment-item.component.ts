@@ -19,7 +19,7 @@ export class ContestAssignmentItemComponent implements OnInit, OnDestroy
     imageUrl!: SafeUrl
     private subscription!: Subscription
     answer!: number | undefined
-    rangeAnswerPattern: string = "^[0-9]+$"
+    rangeAnswerPattern: string = "^[0-9\,\.]+$"
     @Output() onAnswerUpdate = new EventEmitter<number>()
 
     constructor( private tasksService: TasksService, private responsesService: ResponsesService, private sanitizer: DomSanitizer )
