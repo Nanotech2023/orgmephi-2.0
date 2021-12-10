@@ -45,7 +45,8 @@
                                     <div class="col-md-5">
                                         <div class="stage_action">
                                             <a [routerLink]="['/profile']">
-                                                <button class="stage_action_button">Заполнить анкету</button>
+                                                <button
+                                                    class="stage_action_button">{{ getProfileText( isFilledProfile$ | async ) }}</button>
                                             </a>
                                         </div>
                                     </div>
@@ -75,7 +76,9 @@
                                     <div class="col-md-5">
                                         <div class="stage_action">
                                             <a [routerLink]="['registration']">
-                                                <button class="stage_action_button">Принять участие</button>
+                                                <button class="stage_action_button"
+                                                        [disabled]="!(isFilledProfile$ | async)">Принять участие
+                                                </button>
                                             </a>
                                         </div>
                                     </div>

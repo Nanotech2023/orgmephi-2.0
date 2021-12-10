@@ -1,17 +1,17 @@
-<div class="tasks_list_item">
+<div class="tasks_list_item pt-5 pb-5">
     <div class="task_title">
-        Задание {{task.task_id}}<br/>
+        Задание {{ taskIndex }}<br/>
     </div>
     <div class="row">
         <div class="col-md-8">
             <div class="task_image">
-                <img [src]="imageUrl" alt="Задание" class="img-fluid pt-1 pb-1">
+                <img [src]="imageUrl" alt="Задание" class="img-fluid pt-5 pb-5">
             </div>
         </div>
         <div class="col-md-4">
             <div class="task_actions">
                 <p class="input_label">Ответ</p>
-                <input [(ngModel)]="answer" class="input_textarea" maxlength="100" placeholder="Введите свой ответ" type="number"
+                <input [(ngModel)]="answer" class="input_textarea" maxlength="100" placeholder="Введите свой ответ"
                        (focusout)="updateAnswer()" (keypress)="numberOnly($event)">
             </div>
         </div>

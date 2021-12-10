@@ -15,11 +15,12 @@ import { RangeAnswer, RangeAnswerRequest } from '@api/responses/model'
 export class ContestAssignmentItemComponent implements OnInit, OnDestroy
 {
     @Input() task!: TaskForUserResponseTaskParticipant
+    @Input() taskIndex!: number
     @Input() contestId!: number | null
     imageUrl!: SafeUrl
     private subscription!: Subscription
     answer!: number | undefined
-    rangeAnswerPattern: string = "^[0-9\,\.]+$"
+    rangeAnswerPattern: string = "^[0-9\.]+$"
     @Output() onAnswerUpdate = new EventEmitter<number>()
 
     constructor( private tasksService: TasksService, private responsesService: ResponsesService, private sanitizer: DomSanitizer )
@@ -56,6 +57,8 @@ export class ContestAssignmentItemComponent implements OnInit, OnDestroy
 
     numberOnly( $event: KeyboardEvent ): boolean
     {
+        if ( $event.key === "." )
+            return true
         const number = Number( $event.key )
         return !isNaN( number )
     }

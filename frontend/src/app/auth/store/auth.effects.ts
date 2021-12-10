@@ -137,7 +137,8 @@ export class AuthEffects
             this.actions$.pipe
             (
                 ofType( registerSuccess ),
-                tap( ( { type } ) => displaySuccessMessage( "Пользователь успешно зарегистрирован" ) )
+                tap( ( { type } ) => displaySuccessMessage( "Пользователь успешно зарегистрирован" ) ),
+                tap( () => this.router.navigate( [ '/login' ] ) )
             ),
         { dispatch: false }
     )

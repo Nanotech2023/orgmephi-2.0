@@ -19,7 +19,7 @@ import { displayErrorMessage } from '@/shared/logging'
 import { Store } from '@ngrx/store'
 import { AuthSelectors, AuthState } from '@/auth/store'
 import { UsersService } from '@api/users/users.service'
-import { SchoolInfo } from '@api/users/models'
+import { SchoolInfo, SelfUnfilledResponse } from '@api/users/models'
 
 
 export interface ContestsState
@@ -29,6 +29,7 @@ export interface ContestsState
     contest?: Contest
     callState: CallState
     schoolInfo?: SchoolInfo
+    unfilledProfile?: Array<object>
 }
 
 
@@ -38,7 +39,8 @@ const initialState: ContestsState =
         locations: [],
         contest: undefined,
         callState: LoadingState.INIT,
-        schoolInfo: undefined
+        schoolInfo: undefined,
+        unfilledProfile: undefined
     }
 
 
@@ -63,6 +65,7 @@ export class ContestsStore extends ComponentStore<ContestsState>
         return item.contest.base_contest.target_classes.some( targetClass => targetClass.target_class == state.schoolInfo!.grade!.toString() )
     } ) )
     readonly contest$: Observable<SimpleContest | undefined> = this.select( state => state.contest as SimpleContest )
+    readonly isFilledProfile$: Observable<boolean> = this.select( state => state.unfilledProfile === undefined || !state.unfilledProfile.length )
     private readonly loading$: Observable<boolean> = this.select( state => state.callState === LoadingState.LOADING )
     private readonly error$: Observable<string | null> = this.select( state => getError( state.callState ) )
 
@@ -103,6 +106,12 @@ export class ContestsStore extends ComponentStore<ContestsState>
         ( {
             ...state,
             schoolInfo: schoolInfo
+        } ) )
+
+    readonly setUnfilledProfile = this.updater( ( state: ContestsState, unfilledProfile: object[] | undefined ) =>
+        ( {
+            ...state,
+            unfilledProfile: unfilledProfile
         } ) )
 
     // EFFECTS
@@ -157,4 +166,16 @@ export class ContestsStore extends ComponentStore<ContestsState>
                 )
             } )
         ) )
+
+    readonly fetchUnfilledProfile = this.effect( () =>
+    {
+        this.setLoading()
+        return this.usersService.userProfileUnfilledGet().pipe(
+            tapResponse(
+                ( response: SelfUnfilledResponse ) => this.setUnfilledProfile( response.unfilled ),
+                ( error: string ) => this.updateError( error )
+            ),
+            catchError( ( error: any ) => of( displayErrorMessage( error ) ) )
+        )
+    } )
 }

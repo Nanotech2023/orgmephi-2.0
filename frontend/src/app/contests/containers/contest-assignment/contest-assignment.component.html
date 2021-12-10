@@ -42,8 +42,8 @@
             </div>
             <div class="col-md-8">
                 <div class="tasks_list">
-                    <ng-container *ngFor="let task of viewModel.tasks">
-                        <app-contest-assignment-item [task]="task" [contestId]="contestId" (onAnswerUpdate)="onAnswerUpdate()">
+                    <ng-container *ngFor="let task of viewModel.tasks; let i = index">
+                        <app-contest-assignment-item [taskIndex]="i+1" [task]="task" [contestId]="contestId" (onAnswerUpdate)="onAnswerUpdate()">
                         </app-contest-assignment-item>
                     </ng-container>
                 </div>

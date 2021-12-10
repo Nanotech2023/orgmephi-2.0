@@ -54,10 +54,8 @@ export class ProfileEditSchoolComponent
         SchoolTypeEnum.Gymnasium,
         SchoolTypeEnum.EducationCenter,
         SchoolTypeEnum.NightSchool,
-        SchoolTypeEnum.Technical,
         SchoolTypeEnum.External,
         SchoolTypeEnum.Collage,
-        SchoolTypeEnum.ProfTech,
         SchoolTypeEnum.University,
         SchoolTypeEnum.Correctional,
         SchoolTypeEnum.Other
