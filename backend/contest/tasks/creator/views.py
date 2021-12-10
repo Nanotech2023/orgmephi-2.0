@@ -220,6 +220,7 @@ def olympiad_create_simple(id_base_olympiad):
     result_publication_date = values.get('result_publication_date', None)
     end_of_enroll_date = values.get('end_of_enroll_date', None)
     deadline_for_appeal = values.get('deadline_for_appeal', None)
+    show_result_after_finish = values.get('show_result_after_finish', False)
     stage_id = values.get('stage_id', None)
     previous_contest_id = values.get('previous_contest_id', None)
     show_answer_after_contest = values.get('show_answer_after_contest', None)
@@ -246,6 +247,7 @@ def olympiad_create_simple(id_base_olympiad):
                                          end_of_enroll_date=end_of_enroll_date,
                                          deadline_for_appeal=deadline_for_appeal,
                                          contest_duration=contest_duration,
+                                         show_result_after_finish=show_result_after_finish,
                                          result_publication_date=result_publication_date)
 
     if previous_contest_id is not None:
