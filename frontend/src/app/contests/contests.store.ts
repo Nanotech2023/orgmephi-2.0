@@ -162,7 +162,7 @@ export class ContestsStore extends ComponentStore<ContestsState>
                 ).pipe(
                     switchMap( () =>
                         this.responsesService.responsesParticipantContestContestIdUserSelfCreatePost( contestId ).pipe(
-                            catchError( ( error: any ) => of( displayErrorMessage( error ) ) ),
+                            catchError( ( error: any ) => of( EMPTY ) ),
                             tap( () => this.router.navigate( [ `/contests/${ contestId }/assignment` ] ) )
                         ) )
                 )

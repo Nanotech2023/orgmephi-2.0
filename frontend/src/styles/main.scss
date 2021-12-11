@@ -338,7 +338,6 @@ input {
 .button-action_default {
   border: none;
   height: 56px;
-  //width: 50%;
   font-style: normal;
   font-weight: normal;
   font-size: 14px;
@@ -351,6 +350,10 @@ input {
 .button-action_default:disabled {
   color: $grey-disabled-dark;
   background: $grey-disabled;
+}
+
+.button-action_save {
+  width: 50%;
 }
 
 .auth-text_help {
