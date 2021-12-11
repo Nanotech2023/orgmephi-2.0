@@ -30,6 +30,16 @@ export const selectIsPrivileged: MemoizedSelector<State, boolean> = createSelect
     }
 )
 
+export const selectIsConfirmed: MemoizedSelector<State, boolean> = createSelector(
+    selectFeature,
+    ( state: State ) =>
+    {
+        if ( !!state.user?.role )
+            return state.user.role != User.RoleEnum.Unconfirmed
+        return true
+    }
+)
+
 export const selectUserInfo: MemoizedSelector<State, UserInfo> = createSelector(
     selectFeature,
     ( state: State ) =>

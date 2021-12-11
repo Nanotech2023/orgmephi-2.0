@@ -15,6 +15,7 @@ export class AppComponent implements OnInit, OnDestroy
     isAuthorized$!: Observable<boolean>
     urlSubscription: SubscriptionLike
     showHeader: boolean | undefined
+    selectIsConfirmed$!: Observable<boolean>
 
     constructor( private store: Store<AuthState.State>, private router: Router )
     {
@@ -33,6 +34,7 @@ export class AppComponent implements OnInit, OnDestroy
     ngOnInit(): void
     {
         this.isAuthorized$ = this.store.pipe( select( AuthSelectors.selectIsAuthorized ) )
+        this.selectIsConfirmed$ = this.store.pipe( select( AuthSelectors.selectIsConfirmed ) )
     }
 
     ngOnDestroy(): void

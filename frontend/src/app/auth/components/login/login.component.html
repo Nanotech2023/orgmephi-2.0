@@ -15,18 +15,29 @@
                 <p class="form_subtitle">Авторизуйтесь чтобы войти в систему</p>
                 <div class="form_group">
                     <p class="form_label">Email</p>
-                    <input [(ngModel)]="loginAttempt.username" placeholder="Введите email">
+                    <input type="email" email required [(ngModel)]="loginAttempt.username"
+                           #email="ngModel"
+                           name="email"
+                           placeholder="Введите Email">
+                    <div *ngIf="email.invalid && (email.dirty || email.touched)"
+                         class="input_error">
+                        <div *ngIf="email.errors?.required">
+                            Поле обязательно для заполнения
+                        </div>
+                        <div *ngIf="email.errors?.email">
+                            Невалидный e-mail
+                        </div>
+                    </div>
                     <p class="form_label">Пароль</p>
                     <input [(ngModel)]="loginAttempt.password" placeholder="Введите пароль" type="password">
                     <p class="form_label">
-                        <a routerLink="/in-development">Восстановить пароль</a>
+                        <a routerLink="/reset-password">Восстановить пароль</a>
                     </p>
                     <button [disabled]="!isValid(this.loginAttempt)"
                             (click)="login(this.loginAttempt)">Войти
                     </button>
-                    <p>Ещё нет акканта? <a [routerLink]="'/register'">Зарегистрироваться</a></p>
-<!--                    <p>Не пришло письмо для активации учётной записи?</p>-->
-                    <p>Если у вас возникли проблемы при регистрации или вводе информации, обращайтесь: orginfo@mephi.ru</p>
+                    <p class="auth-text_help">Ещё нет учётной записи? <a [routerLink]="'/register'">Зарегистрироваться</a></p>
+                    <p class="auth-text_help">Если у вас возникли проблемы при регистрации или вводе информации, обращайтесь: orginfo@mephi.ru</p>
                 </div>
             </div>
 

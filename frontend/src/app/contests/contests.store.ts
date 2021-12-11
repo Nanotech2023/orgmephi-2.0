@@ -12,7 +12,7 @@ import {
     SimpleContest,
     SimpleContestWithFlagResponseTaskParticipant
 } from '@api/tasks/model'
-import { catchError, filter, map, switchMap, withLatestFrom } from 'rxjs/operators'
+import { catchError, filter, map, switchMap, tap, withLatestFrom } from 'rxjs/operators'
 import { ResponsesService } from '@api/responses/responses.service'
 import CompositeTypeEnum = SimpleContest.CompositeTypeEnum
 import { displayErrorMessage } from '@/shared/logging'
@@ -20,6 +20,7 @@ import { Store } from '@ngrx/store'
 import { AuthSelectors, AuthState } from '@/auth/store'
 import { UsersService } from '@api/users/users.service'
 import { SchoolInfo, SelfUnfilledResponse } from '@api/users/models'
+import { Router } from '@angular/router'
 
 
 export interface ContestsState
@@ -47,7 +48,7 @@ const initialState: ContestsState =
 @Injectable()
 export class ContestsStore extends ComponentStore<ContestsState>
 {
-    constructor( private tasksService: TasksService, private responsesService: ResponsesService, private usersService: UsersService )
+    constructor( private tasksService: TasksService, private responsesService: ResponsesService, private usersService: UsersService, private router: Router )
     {
         super( initialState )
     }
@@ -161,7 +162,8 @@ export class ContestsStore extends ComponentStore<ContestsState>
                 ).pipe(
                     switchMap( () =>
                         this.responsesService.responsesParticipantContestContestIdUserSelfCreatePost( contestId ).pipe(
-                            catchError( ( error: any ) => of( displayErrorMessage( error ) ) )
+                            catchError( ( error: any ) => of( displayErrorMessage( error ) ) ),
+                            tap( () => this.router.navigate( [ `/contests/${ contestId }/assignment` ] ) )
                         ) )
                 )
             } )

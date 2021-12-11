@@ -81,13 +81,4 @@ export class ContestAssignmentComponent implements OnInit, OnDestroy
             this.contestAssignmentStore.fetchTime( this.contestId )
         }
     }
-
-    onAnswerUpdate()
-    {
-        setTimeout( () =>
-        {
-            if ( !!this.contestId )
-                this.contestAssignmentStore.fetchVariant( this.contestId )
-        }, 1000 )
-    }
 }

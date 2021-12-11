@@ -20,7 +20,7 @@ export class ContestRegistrationComponent
     contestId!: number | null
     contestStatus$!: Observable<UserResponseStatusResponse>
 
-    constructor( private route: ActivatedRoute, private contestsStore: ContestsStore, private tasksService: TasksService, private responsesService: ResponsesService, private router: Router )
+    constructor( private route: ActivatedRoute, private contestsStore: ContestsStore, private tasksService: TasksService, private responsesService: ResponsesService )
     {
         this.route.paramMap.subscribe( paramMap =>
         {
@@ -44,7 +44,6 @@ export class ContestRegistrationComponent
             contestId: contestIdNumber,
             locationId: locationId
         } )
-        this.router.navigate( [ `/contests/${ contestId }/assignment` ] )
     }
 
     inProgress( contestStatus: UserResponseStatusResponse ): boolean

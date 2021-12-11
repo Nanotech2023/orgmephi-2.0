@@ -7,12 +7,18 @@ import { LoginComponent } from '@/auth/components/login/login.component'
 import { RegisterComponent } from '@/auth/components/register/register.component'
 import { AuthRouterModule } from '@/auth/auth.router.module'
 import { RegisterSchoolComponent } from '@/auth/components/register-school/register-school.component'
+import { ResetPasswordComponent } from '@/auth/components/reset-password/reset-password.component'
+import {
+    ResetPasswordConfirmComponent
+} from '@/auth/components/reset-password-confirm/reset-password-confirm.component'
 
 
 const COMPONENTS = [
     RegisterComponent,
     LoginComponent,
-    RegisterSchoolComponent
+    RegisterSchoolComponent,
+    ResetPasswordComponent,
+    ResetPasswordConfirmComponent
 ]
 
 

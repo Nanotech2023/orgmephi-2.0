@@ -1,6 +1,7 @@
 @import "src/styles/colors";
 
-button {
+.save {
+  background-color: $blue;
   border: none;
   height: 56px;
   width: 50%;
@@ -10,8 +11,4 @@ button {
   line-height: 18px;
   letter-spacing: 0.16px;
   color: $white;
-}
-
-button.save {
-  background-color: $blue;
 }

@@ -5,13 +5,12 @@ import {
     LocationRussia,
     LocationRussiaCity,
     LocationTypeEnum,
-    SchoolInfo,
+    SchoolInfo
 } from '@api/users/models'
 import { CallState, getError, LoadingState } from '@/shared/callState'
 import { UsersService } from '@api/users/users.service'
 import { Observable, of, zip } from 'rxjs'
-import { ProfileState } from '@/profile/profile.store'
-import { catchError, finalize, switchMap } from 'rxjs/operators'
+import { catchError, finalize, switchMap, withLatestFrom } from 'rxjs/operators'
 import { displayErrorMessage } from '@/shared/logging'
 
 
@@ -94,33 +93,39 @@ export class ProfileSchoolStore extends ComponentStore<ProfileSchoolState>
     }
 
     // UPDATERS
-    readonly updateError = this.updater( ( state: ProfileState, error: string ) =>
+    readonly updateError = this.updater( ( state: ProfileSchoolState, error: string ) =>
         ( {
             ...state,
             callState: { errorMessage: error }
         } ) )
 
-    readonly setLoading = this.updater( ( state: ProfileState ) =>
+    readonly setLoading = this.updater( ( state: ProfileSchoolState ) =>
         ( {
             ...state,
             callState: LoadingState.LOADING
         } ) )
 
-    readonly setLoaded = this.updater( ( state: ProfileState ) =>
+    readonly setLoaded = this.updater( ( state: ProfileSchoolState ) =>
         ( {
             ...state,
             callState: LoadingState.LOADED
         } ) )
 
-    readonly setSchoolInfo = this.updater( ( state: ProfileState, response: SchoolInfo ) =>
+    readonly setSchoolInfo = this.updater( ( state: ProfileSchoolState, response: SchoolInfo ) =>
         ( {
             ...state, schoolInfo: response
         } )
     )
 
-    readonly setProfileUnfilled = this.updater( ( state: ProfileState, response: any ) =>
+    readonly setProfileUnfilled = this.updater( ( state: ProfileSchoolState, response: any ) =>
         ( {
             ...state, profileUnfilled: response
+        } )
+    )
+
+    readonly setCity = this.updater( ( state: ProfileSchoolState, city: LocationRussiaCity ) =>
+        ( {
+            ...state, city: city
         } )
     )
 
@@ -152,10 +157,17 @@ export class ProfileSchoolStore extends ComponentStore<ProfileSchoolState>
 
     readonly updateSchoolInfo = this.effect( ( schoolInfo$: Observable<SchoolInfo> ) =>
         schoolInfo$.pipe(
-            switchMap( ( schoolInfo: SchoolInfo ) =>
+            withLatestFrom( this.schoolLocation$, this.schoolLocationCity$ ),
+            switchMap( ( [ schoolInfo, schoolLocation, schoolLocationCity ] ) =>
             {
                 this.setLoading()
                 const newSchoolInfo = { ...schoolInfo }
+                newSchoolInfo.location = schoolLocation
+                if ( schoolLocation.location_type == LocationTypeEnum.Russian )
+                {
+                    // @ts-ignore
+                    newSchoolInfo.location.city = schoolLocationCity
+                }
                 return this.usersService.userProfileSchoolPatch( newSchoolInfo ).pipe(
                     catchError( ( error: any ) => of( displayErrorMessage( error ) ) )
                 )

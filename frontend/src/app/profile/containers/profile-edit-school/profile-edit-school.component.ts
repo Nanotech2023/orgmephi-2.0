@@ -71,4 +71,9 @@ export class ProfileEditSchoolComponent implements OnInit
     {
         return getSchoolTypeDisplay( schoolType )
     }
+
+    onCityChange( $event: LocationRussiaCity )
+    {
+        this.profileStore.setCity( $event )
+    }
 }

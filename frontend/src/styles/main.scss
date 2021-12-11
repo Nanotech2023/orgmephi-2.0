@@ -334,3 +334,29 @@ input {
   /* Gray 7 */
   color: $grey;
 }
+
+.button-action_default {
+  border: none;
+  height: 56px;
+  //width: 50%;
+  font-style: normal;
+  font-weight: normal;
+  font-size: 14px;
+  line-height: 18px;
+  letter-spacing: 0.16px;
+  color: $white;
+  background: $blue;
+}
+
+.button-action_default:disabled {
+  color: $grey-disabled-dark;
+  background: $grey-disabled;
+}
+
+.auth-text_help {
+  margin-bottom: 1%;
+  color: $grey;
+  font-size: 14px;
+  line-height: 18px;
+  letter-spacing: 0.16px;
+}

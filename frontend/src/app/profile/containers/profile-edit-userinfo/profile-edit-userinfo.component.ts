@@ -56,6 +56,7 @@ export class ProfileEditUserinfoComponent implements OnInit
     updateUserInfo( userInfo: UserInfo ): void
     {
         this.profileStore.updateUserInfo( userInfo )
+        this.profileStore.fetch()
     }
 
     getGenderDisplay( genderEnum: GenderEnum ): string

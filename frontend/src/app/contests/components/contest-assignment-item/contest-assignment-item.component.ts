@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, OnDestroy, OnInit, Output } from '@angular/core'
+import { Component, Input, OnDestroy, OnInit } from '@angular/core'
 import { TaskForUserResponseTaskParticipant } from '@api/tasks/model'
 import { ResponsesService } from '@api/responses/responses.service'
 import { TasksService } from '@api/tasks/tasks.service'
@@ -20,8 +20,6 @@ export class ContestAssignmentItemComponent implements OnInit, OnDestroy
     imageUrl!: SafeUrl
     private subscription!: Subscription
     answer!: number | undefined
-    rangeAnswerPattern: string = "^[0-9\.]+$"
-    @Output() onAnswerUpdate = new EventEmitter<number>()
 
     constructor( private tasksService: TasksService, private responsesService: ResponsesService, private sanitizer: DomSanitizer )
     {
@@ -51,15 +49,22 @@ export class ContestAssignmentItemComponent implements OnInit, OnDestroy
         {
             const rangeAnswerRequest: RangeAnswerRequest = { answer: this.answer }
             this.responsesService.responsesParticipantContestContestIdTaskTaskIdUserSelfRangePost( this.contestId as number, this.task.task_id, rangeAnswerRequest ).subscribe()
-            this.onAnswerUpdate.emit( this.answer )
         }
     }
 
-    numberOnly( $event: KeyboardEvent ): boolean
+    numberOnly( el: HTMLInputElement ): void
     {
-        if ( $event.key === "." )
-            return true
-        const number = Number( $event.key )
-        return !isNaN( number )
+        const keyPressed = el.value.split( '' ).pop()
+        let transformedKey = keyPressed
+
+        if ( keyPressed === "," )
+            transformedKey = "."
+
+        if ( !isNaN( Number( keyPressed ) ) )
+            transformedKey = ""
+
+        const newString = el.value.substring( 0, el.value.length - 1 ) + transformedKey
+        el.value = newString
+        this.updateAnswer()
     }
 }
