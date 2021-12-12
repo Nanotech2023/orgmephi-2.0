@@ -1,6 +1,4 @@
 import { Component } from '@angular/core'
-import { AuthSelectors, AuthState } from '@/auth/store'
-import { Store } from '@ngrx/store'
 
 
 @Component( {

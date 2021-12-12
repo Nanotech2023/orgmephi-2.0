@@ -1,10 +1,6 @@
-import { Component, OnInit } from '@angular/core'
+import { Component } from '@angular/core'
 import { Observable } from 'rxjs'
 import { Location, LocationRussiaCity, SchoolInfo, SchoolTypeEnum } from '@api/users/models'
-import { Router } from '@angular/router'
-import { UsersService } from '@api/users/users.service'
-import { Store } from '@ngrx/store'
-import { AuthActions, AuthSelectors, AuthState } from '@/auth/store'
 import { getSchoolTypeDisplay } from '@/shared/displayUtils'
 import { ProfileSchoolStore } from '@/profile/profile-school.store'
 
@@ -15,10 +11,8 @@ import { ProfileSchoolStore } from '@/profile/profile-school.store'
     styleUrls: [ './profile-edit-school.component.scss' ],
     providers: [ ProfileSchoolStore ]
 } )
-export class ProfileEditSchoolComponent implements OnInit
+export class ProfileEditSchoolComponent
 {
-    isPrivileged$!: Observable<boolean>
-
     viewModel$: Observable<{
         loading: boolean;
         error: string | null,
@@ -41,25 +35,15 @@ export class ProfileEditSchoolComponent implements OnInit
         SchoolTypeEnum.Other
     ]
 
-    constructor( private profileStore: ProfileSchoolStore, private router: Router, private usersService: UsersService, private store: Store<AuthState.State> )
+    constructor( private profileStore: ProfileSchoolStore )
     {
         this.profileStore.fetch()
         this.viewModel$ = this.profileStore.viewModel$
     }
 
-    ngOnInit(): void
-    {
-        this.isPrivileged$ = this.store.select( AuthSelectors.selectIsPrivileged )
-    }
-
     updateSchoolInfo( schoolInfo: SchoolInfo ): void
     {
         this.profileStore.updateSchoolInfo( schoolInfo )
-    }
-
-    logoutButtonClick(): void
-    {
-        this.store.dispatch( AuthActions.logoutRequest() )
     }
 
     onSubmit( schoolInfo: { loading: boolean; error: string | null; userProfileUnfilled: string; schoolInfo: SchoolInfo; schoolLocation: Location; schoolLocationCity: LocationRussiaCity } )

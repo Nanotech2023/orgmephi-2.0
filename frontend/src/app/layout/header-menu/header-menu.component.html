@@ -1,0 +1,39 @@
+<div class="header_action_profile d-flex flex-row align-items-center justify-content-end">
+    <div style="justify-self: start" class="px-3">
+        <svg xmlns="http://www.w3.org/2000/svg" width="23" height="23" viewBox="0 0 32 32" fill="none">
+            <path fill-rule="evenodd" clip-rule="evenodd"
+                  d="M22.6279 26.6001C20.7066 27.804 18.4346 28.5 16 28.5C13.566 28.5 11.2945 27.8043 9.37344 26.601L9.3787 25.1313C9.39514 24.1258 9.81057 23.1669 10.5358 22.4605C11.2617 21.7535 12.24 21.3562 13.2599 21.3544H18.7467C19.7666 21.3562 20.7449 21.7535 21.4708 22.4605C22.1958 23.1666 22.6112 24.1251 22.6279 25.1301V26.6001ZM24 25.6051L24 25.1248L23.9998 25.1145C23.9789 23.7525 23.4168 22.4531 22.4345 21.4964C21.4522 20.5397 20.1284 20.0023 18.7485 20L13.2593 20L13.2581 20C11.8782 20.0023 10.5544 20.5397 9.57215 21.4964C8.58986 22.4531 8.02764 23.7525 8.00673 25.1145L8.00496 25.6092C5.25212 23.3163 3.5 19.8628 3.5 16C3.5 9.09644 9.09644 3.5 16 3.5C22.9036 3.5 28.5 9.09644 28.5 16C28.5 19.8605 26.75 23.3122 24 25.6051ZM30 16C30 23.732 23.732 30 16 30C8.26801 30 2 23.732 2 16C2 8.26801 8.26801 2 16 2C23.732 2 30 8.26801 30 16ZM16 16.5C17.933 16.5 19.5 14.933 19.5 13C19.5 11.067 17.933 9.5 16 9.5C14.067 9.5 12.5 11.067 12.5 13C12.5 14.933 14.067 16.5 16 16.5ZM16 18C18.7614 18 21 15.7614 21 13C21 10.2386 18.7614 8 16 8C13.2386 8 11 10.2386 11 13C11 15.7614 13.2386 18 16 18Z"
+                  fill="#171717"/>
+        </svg>
+    </div>
+    <div class="pl-3">
+        <ng-container *ngIf="personalInfo$ | async as personalInfo">
+            <p class="header_action_profile_name">{{ personalInfo.first_name }} {{ personalInfo.middle_name }} {{ personalInfo.second_name }}</p>
+            <p class="header_action_profile_id">#{{ personalInfo.user_id }}</p>
+        </ng-container>
+    </div>
+    <div class="btn-group pe-3">
+        <button type="button" class="btn dropdown-toggle dropdown-toggle-split" id="dropdownMenuReference"
+                data-bs-toggle="dropdown" aria-expanded="false" data-bs-reference="parent">
+            <span class="visually-hidden">Toggle Dropdown</span>
+        </button>
+        <ul class="dropdown-menu" aria-labelledby="dropdownMenuReference">
+            <li>
+                <a routerLink="/profile" class="dropdown-item">Анкета</a>
+            </li>
+            <li>
+                <hr class="dropdown-divider">
+            </li>
+            <li>
+                <a routerLink="/login" class="dropdown-item" (click)="logoutButtonClick()">Выйти</a>
+            </li>
+            <li *ngIf="isPrivileged$ | async">
+                <hr class="dropdown-divider">
+            </li>
+            <li *ngIf="isPrivileged$ | async">
+                <a routerLink="/manage" class="dropdown-item">Another action</a>
+            </li>
+        </ul>
+    </div>
+</div>
+
