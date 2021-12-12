@@ -1,8 +1,10 @@
 export * from './allUserAnswersResponse';
 export * from './allUserMarksResponse';
+export * from './allUserResultsResponse';
 export * from './answer';
 export * from './answerWithoutMark';
 export * from './baseAnswer';
+export * from './contestInfo';
 export * from './contestResultSheetResponse';
 export * from './multipleAnswerRequest';
 export * from './multipleChoiceAnswer';
@@ -19,4 +21,5 @@ export * from './rightAnswer';
 export * from './userAnswerMarkResponse';
 export * from './userResponseList';
 export * from './userResponseStatusResponse';
+export * from './userResultsForContestResponse';
 export * from './userTimeResponseRequest';

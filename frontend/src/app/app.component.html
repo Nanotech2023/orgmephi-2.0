@@ -1,8 +1,5 @@
-<app-header *ngIf="!(isAuthorized$ | async); else innerHeader"></app-header>
-<ng-template #innerHeader>
-    <app-inner-header></app-inner-header>
-</ng-template>
+<app-header *ngIf="isAuthorized$ | async"></app-header>
 <main role="main">
     <router-outlet></router-outlet>
 </main>
-<app-footer></app-footer>
+<app-footer *ngIf="isAuthorized$ | async"></app-footer>

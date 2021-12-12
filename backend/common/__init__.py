@@ -1,4 +1,8 @@
+import functools
+import io
+
 from flask import Flask, Config
+from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
 from flask_jwt_extended import JWTManager
 from flask_cors import CORS
@@ -8,6 +12,7 @@ from typing import Optional, Callable, Any
 
 import os
 
+from .errors import MediaError, NotFound
 from .module import OrgMephiModule, OrgMephiArea, org_mephi_area_by_name
 from .password import OrgMephiPassword
 from .access_levels import OrgMephiAccessLevel
@@ -50,6 +55,7 @@ class OrgMephiApp:
         self._init_cors()
         self._init_security(security)
         self._init_mail()
+        self._init_media()
 
     @property
     def name(self) -> str:
@@ -173,6 +179,75 @@ class OrgMephiApp:
         """
         self._app.run(**options)
 
+    @property
+    def store_manager(self):
+        """
+        Get media store manager
+        :return:
+        """
+        return self._store_manager
+
+    def get_media_store_id(self, key: str):
+        """
+        Get media store id for this app
+        :param key: Original store key
+        :return: Media store id for this app
+        """
+        return self._media_key(key)
+
+    def io_to_media(self, store_key: str, obj: object, field: str, data: io, cls, mimetype: str = None):
+        """
+        Convert bytes to a media object
+        :param store_key: Key for media store
+        :param obj: Model object
+        :param field: Field to hold media data
+        :param data: Media bytes
+        :param cls: Media data class
+        :param mimetype: media content type
+        """
+        from common import get_current_app
+        with self._store_manager:
+            media = cls.create_from(
+                attachable=data,
+                store_id=self.get_media_store_id(store_key),
+                content_type=mimetype
+            )
+            setattr(obj, field, media)
+
+    def media_to_io(self, media) -> io:
+        """
+        Convert media object to io
+        :param media: Media object
+        :return: io with media bytes
+        """
+        from common import get_current_app
+        if media is None:
+            raise NotFound('', 'media')
+        with self._store_manager:
+            store = media.get_store()
+            return store.open(media.path)
+
+    def store_media(self, store_key: str, obj: object, field: str, cls):
+        """
+        Store media content from flask request
+        :param store_key: Key for media store
+        :param obj: Model object
+        :param field: Field to hold media data
+        :param cls: Media data class
+        :return: Created media object
+        """
+        from flask import request
+        self.io_to_media(store_key, obj, field, io.BytesIO(request.data), cls)
+
+    def send_media(self, media):
+        """
+        Send media content
+        :param media: Media object
+        :return: Flask response
+        """
+        from flask import send_file
+        return send_file(self.media_to_io(media), media.content_type)
+
     def _init_app(self, default_config: object = None, test_config: object = None):
         self._app = Flask(__name__, root_path=os.getcwd())
         self._app.config['ORGMEPHI_APP'] = self
@@ -188,12 +263,14 @@ class OrgMephiApp:
 
     def _init_db(self):
         self._db = SQLAlchemy(self._app)
+        self._migrate = Migrate(self._app, self._db)
 
     def _read_key(self, key_type):
         var_name = 'ORGMEPHI_%s_KEY' % key_type.upper()
         jwt_var_name = 'JWT_%s_KEY' % key_type.upper()
-        if var_name in self._app.config:
-            key_path = _path_to_absolute(self._app.config[var_name])
+        var = self._app.config.get(var_name, None)
+        if var is not None:
+            key_path = _path_to_absolute(var)
             with open(key_path, 'r') as key_file:
                 key = key_file.read()
             self._app.config[jwt_var_name] = key
@@ -236,6 +313,23 @@ class OrgMephiApp:
 
     def _init_mail(self):
         self._mail = Mail(self._app)
+
+    def _media_key(self, key):
+        return f'{self.config["ORGMEPHI_MEDIA_KEY"]}_{key}'
+
+    def _init_media(self):
+        from sqlalchemy_media import StoreManager, FileSystemStore
+        media_stores: dict = self.config['ORGMEPHI_MEDIA_STORES']
+        root_path = self.config['ORGMEPHI_MEDIA_ROOT_PATH']
+        if not os.path.isabs(root_path):
+            root_path = os.path.join(os.path.abspath(self._app.root_path), root_path)
+        for val in media_stores.items():
+            StoreManager.register(
+                self._media_key(val[0]),
+                functools.partial(FileSystemStore, f'{root_path}/{val[1]}', f'{val[1]}'),
+                default=False
+            )
+        self._store_manager = StoreManager(self._db.session, delete_orphan=True)
 
 
 _orgmephi_current_module: ContextVar[Optional[OrgMephiModule]] = ContextVar('orgmephi_current_module', default=None)

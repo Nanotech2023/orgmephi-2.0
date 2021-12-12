@@ -1,13 +1,14 @@
 import enum
 from datetime import datetime, timedelta
 
-from sqlalchemy import func, select
-from sqlalchemy.sql import case
+from sqlalchemy import extract, select
 from sqlalchemy.ext.associationproxy import association_proxy
 from sqlalchemy.ext.hybrid import hybrid_property
+from sqlalchemy.sql import case
 
-from contest.tasks.models.contest import Variant
 from common import get_current_db
+from contest.tasks.models import Stage, contestsInStage
+from user.models.auth import Group
 
 db = get_current_db()
 
@@ -234,16 +235,42 @@ class Contest(db.Model):
     users = db.relationship('UserInContest', lazy='dynamic',
                             backref=db.backref('contest', lazy='joined'))
 
+    group_restrictions = db.relationship('ContestGroupRestriction', lazy='dynamic', cascade="all, delete")
+
     __mapper_args__ = {
         'polymorphic_identity': ContestTypeEnum.Contest,
         'polymorphic_on': composite_type
     }
+
+    @hybrid_property
+    def academic_year(self):
+        if self.composite_type == ContestTypeEnum.CompositeContest:
+            return CompositeContest.query.filter_by(contest_id=self.contest_id)
+        else:
+            return SimpleContest.query.filter_by(contest_id=self.contest_id)
+
+    @academic_year.expression
+    def academic_year(cls):
+        return case(
+            [
+                (
+                    cls.composite_type == ContestTypeEnum.CompositeContest,
+                    select(CompositeContest.academic_year).where(
+                        CompositeContest.contest_id == cls.contest_id
+                    ).limit(1).scalar_subquery()
+                )
+            ],
+            else_=select(SimpleContest.academic_year).where(
+                SimpleContest.contest_id == cls.contest_id
+            ).limit(1).scalar_subquery()
+        ).label("academic_year")
 
 
 def add_simple_contest(db_session,
                        visibility,
                        start_date,
                        end_date,
+                       regulations=None,
                        result_publication_date=None,
                        end_of_enroll_date=None,
                        holding_type=None,
@@ -259,6 +286,7 @@ def add_simple_contest(db_session,
         visibility=visibility,
         start_date=start_date,
         end_date=end_date,
+        regulations=regulations,
         holding_type=holding_type,
         contest_duration=contest_duration,
         result_publication_date=result_publication_date,
@@ -267,6 +295,10 @@ def add_simple_contest(db_session,
         previous_participation_condition=previous_participation_condition,
     )
     db_session.add(simple_contest)
+    from user.models.auth import get_group_for_everyone
+    everyone_group: Group = get_group_for_everyone()
+    add_group_restriction(db_session, simple_contest.contest_id, everyone_group.id,
+                          ContestGroupRestrictionEnum.edit_user_status)
     return simple_contest
 
 
@@ -307,7 +339,6 @@ class SimpleContest(Contest):
     regulations = db.Column(db.Text, nullable=True)
 
     variants = db.relationship('Variant', backref=db.backref('simple_contest', lazy='joined'), lazy='dynamic')
-
     next_contests = db.relationship('SimpleContest',
                                     foreign_keys=[previous_contest_id])
 
@@ -323,18 +354,23 @@ class SimpleContest(Contest):
     }
 
     @hybrid_property
-    def start_year(self):
-        if self.start_date.month < 6:
+    def academic_year(self):
+        if self.start_date.month < 9:
             return self.start_date.year - 1
         else:
             return self.start_date.year
 
-    @hybrid_property
-    def end_year(self):
-        if self.start_date.month < 6:
-            return self.start_date.year
-        else:
-            return self.start_date.year + 1
+    @academic_year.expression
+    def academic_year(cls):
+        return case(
+            [
+                (
+                    extract('month', cls.start_date) < 9,
+                    extract('year', cls.start_date) - 1
+                )
+            ],
+            else_=extract('year', cls.start_date)
+        ).label("academic_year")
 
     def change_previous(self, previous_contest_id=None, previous_participation_condition=None):
         if previous_contest_id is not None:
@@ -386,6 +422,41 @@ class SimpleContest(Contest):
                     else_=OlympiadStatusEnum.OlympiadFinished.value)
 
 
+def add_group_restriction(db_session, contest_id, group_id, restriction):
+    group_restriction = ContestGroupRestriction(
+        contest_id=contest_id,
+        group_id=group_id,
+        restriction=restriction
+    )
+    db_session.add(group_restriction)
+
+
+class ContestGroupRestrictionEnum(enum.Enum):
+    view_mark_and_user_status = 'ViewMarkAndUserStatus'
+    view_response = 'ViewResponse'
+    edit_mark = 'EditMark'
+    edit_user_status = 'EditUserStatus'
+
+
+restriction_range = {elem.value: i for i, elem in enumerate(ContestGroupRestrictionEnum)}
+
+
+class ContestGroupRestriction(db.Model):
+    """
+    Contest Group Restriction model
+
+    contest_id: id of the contest
+    group_id: id of the group
+    restriction: restriction for group
+    """
+    contest_id = db.Column(db.Integer, db.ForeignKey(Contest.contest_id), primary_key=True)
+    group_id = db.Column(db.Integer, db.ForeignKey(Group.id), primary_key=True)
+    restriction = db.Column(db.Enum(ContestGroupRestrictionEnum))
+
+    group = db.relationship(Group, uselist=False)
+    group_name = association_proxy('group', 'name')
+
+
 def add_composite_contest(db_session, visibility, base_contest_id=None, holding_type=None):
     """
     Create new composite contest object
@@ -418,3 +489,58 @@ class CompositeContest(Contest):
         'polymorphic_identity': ContestTypeEnum.CompositeContest,
         'with_polymorphic': '*'
     }
+
+    @hybrid_property
+    def academic_year(self):
+        if len(self.stages.all()) == 0:
+            return None
+        stage = self.stages.all()[0]
+        if len(stage.contests) == 0:
+            return None
+        contest = stage.contests[0]
+        if contest.start_date.month < 9:
+            return contest.start_date.year - 1
+        else:
+            return contest.start_date.year
+
+    # noinspection PyMethodParameters
+    @academic_year.expression
+    def academic_year(cls):
+        contest_start_date = select(SimpleContest.start_date).where(
+            select(contestsInStage.columns.contest_id)
+            .where(
+                select(Stage.stage_id)
+                .where(
+                    Stage.olympiad_id == cls.contest_id
+                ).limit(1).scalar_subquery() == contestsInStage.columns.stage_id
+            ).limit(1).scalar_subquery() == cls.contest_id
+        ).scalar_subquery()
+
+        return case(
+            [
+                (
+                    extract('month', contest_start_date) < 9,
+                    extract('year', contest_start_date) - 1
+                )
+            ],
+            else_=extract('year', contest_start_date)
+        ).label("academic_year")
+
+    @hybrid_property
+    def status(self):
+        over = 0
+        not_started = 0
+        for stage in self.stages.all():
+            for contest in stage.contests:
+                if datetime.utcnow() < contest.start_date:
+                    not_started += 1
+                elif datetime.utcnow() < contest.end_date:
+                    return OlympiadStatusEnum.OlympiadInProgress
+                else:
+                    over += 1
+        if over == 0:
+            return OlympiadStatusEnum.OlympiadSoon
+        elif not_started == 0:
+            return OlympiadStatusEnum.OlympiadFinished
+        else:
+            return OlympiadStatusEnum.OlympiadInProgress

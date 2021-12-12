@@ -1,7 +1,9 @@
 import { Component } from '@angular/core'
 import { Observable } from 'rxjs'
 import { ContestsStore } from '@/contests/contests.store'
-import { Contest } from '@api/tasks/model'
+import { Contest, SimpleContest, SimpleContestWithFlagResponseTaskParticipant } from '@api/tasks/model'
+import { ActivatedRoute } from '@angular/router'
+import { getClassesForDisplay, getStatusDisplay, getSubjectDisplay } from '@/shared/displayUtils'
 
 
 @Component( {
@@ -11,28 +13,34 @@ import { Contest } from '@api/tasks/model'
 } )
 export class ContestDetailsComponent
 {
-    contest$: Observable<Contest | undefined>
+    contest$: Observable<SimpleContest | undefined>
+    contestId!: number | null
 
-    constructor( private contestsStore: ContestsStore )
+    constructor( private route: ActivatedRoute, private contestsStore: ContestsStore )
     {
-        this.contest$ = this.contestsStore.selectedContest
-    }
-
-    onEnrollClick( contestId: number, locationId: number )
-    {
-        this.contestsStore.enroll( {
-            contestId: contestId,
-            enrollRequestTaskParticipant: { location_id: locationId }
+        this.route.paramMap.subscribe( paramMap =>
+        {
+            this.contestId = Number( paramMap.get( 'contestId' ) )
+            if ( !!this.contestId )
+            {
+                this.contestsStore.fetchSingle( this.contestId )
+            }
         } )
+        this.contest$ = this.contestsStore.contest$
     }
 
-    onStartClick( contestId: number ): void
+    getTargetClassesDisplay( contest: SimpleContest ): string
     {
-        this.contestsStore.getVariant( contestId )
+        return getClassesForDisplay( contest )
     }
 
-    getTargetClassesDisplay( contest: Contest ): string
+    getStatusForDisplay( contest: SimpleContest )
     {
-        return contest.base_contest?.target_classes?.map( item => item.target_class ).join( "," ) + " классы"
+        return getStatusDisplay( contest )
+    }
+
+    getSubjectDisplay( contest: SimpleContest )
+    {
+        return getSubjectDisplay( contest.base_contest?.subject )
     }
 }

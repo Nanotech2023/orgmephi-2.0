@@ -33,7 +33,8 @@
             "styles": [
               "node_modules/bootstrap/dist/css/bootstrap.min.css",
               "node_modules/ag-grid-community/dist/styles/ag-grid.css",
-              "node_modules/ag-grid-community/dist/styles/ag-theme-alpine.css",
+              "node_modules/ag-grid-community/dist/styles/ag-theme-material.css",
+              "node_modules/devextreme/dist/css/dx.material.blue.light.compact.css",
               "src/styles/main.scss"
             ],
             "scripts": [
@@ -48,7 +49,14 @@
               "sourceMap": false,
               "vendorChunk": false,
               "namedChunks": false,
-              "optimization": true,
+              "optimization": {
+                "scripts": true,
+                "styles": {
+                  "minify": true,
+                  "inlineCritical": false
+                },
+                "fonts": true
+              },
               "outputHashing": "all",
               "fileReplacements": [
                 {

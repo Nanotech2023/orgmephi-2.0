@@ -107,11 +107,11 @@
 
 ### Скрипты для сборки
 - `yarn --cwd frontend install` - устанавливает зависимости Node.js в папку `frontend/node_modules`
-- `yarn --cwd frontend debug` - запускает версию для отладки в конфигурации *hot module replacement* по адресу `http://localhost:4200`
+- `yarn --cwd frontend debug` - запускает версию для отладки в конфигурации *hot module replacement* по адресу `http://127.0.0.1:4200`
     - Необходимо установить зависимости Node.js 
 - `yarn --cwd frontend build` - собирает production версию в папку `frontend/dist`
     - Необходимо установить зависимости Node.js
-- `yarn --cwd frontend production` - запускает production версию из папку `frontend/dist` по адресу `http://localhost:3000`
+- `yarn --cwd frontend production` - запускает production версию из папку `frontend/dist` по адресу `http://127.0.0.1:3000`
     - Необходимо установить зависимости Node.js и собрать production версию
 
 

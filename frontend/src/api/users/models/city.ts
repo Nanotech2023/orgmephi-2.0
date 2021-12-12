@@ -11,7 +11,7 @@
  */
 
 
-export interface City { 
+export interface City {
     name: string;
     region: string;
 }

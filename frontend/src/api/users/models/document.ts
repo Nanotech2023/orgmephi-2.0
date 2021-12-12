@@ -9,6 +9,7 @@
  * https://openapi-generator.tech
  * Do not edit the class manually.
  */
+import { DocumentBirthCertificate } from './documentBirthCertificate';
 import { DocumentRF } from './documentRF';
 import { DocumentForeignPassport } from './documentForeignPassport';
 import { DocumentOther } from './documentOther';
@@ -19,5 +20,5 @@ import { DocumentRFInternational } from './documentRFInternational';
  * @type Document
  * @export
  */
-export type Document = DocumentForeignPassport | DocumentOther | DocumentRF | DocumentRFInternational;
+export type Document = DocumentBirthCertificate | DocumentForeignPassport | DocumentOther | DocumentRF | DocumentRFInternational;
 

@@ -101,7 +101,7 @@ def test_get_image(client, test_news_posted):
     news = test_news_posted[0]
     resp = client.get(f'/news/{news.id}/image')
     assert resp.status_code == 200
-    assert resp.data == news.image
+    assert resp.content_type == 'image/jpeg'
 
 
 def test_get_image_not_posted(client, test_news_not_posted):
@@ -119,7 +119,8 @@ def test_get_image_not_exists(client, test_news):
 
 def test_get_image_none(client, test_news_posted):
     news = test_news_posted[0]
-    news.image = None
+    with test_app.store_manager:
+        news.image = None
     test_app.db.session.commit()
     resp = client.get(f'/news/{news.id}/image')
-    assert resp.status_code == 409
+    assert resp.status_code == 404

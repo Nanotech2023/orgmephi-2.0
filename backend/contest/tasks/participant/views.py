@@ -1,13 +1,10 @@
-import io
-
-from flask import send_file, request
+from flask import request
 
 from common import get_current_module
 from common.errors import AlreadyExists, TimeOver
 from common.util import send_pdf
 from contest.responses.util import get_user_in_contest_work
-from contest.tasks.model_schemas.contest import VariantSchema
-from contest.tasks.model_schemas.olympiad import ContestSchema
+from contest.tasks.model_schemas.olympiad import SimpleContestSchema
 from contest.tasks.participant.schemas import *
 from contest.tasks.participant.util import filter_olympiad_query_with_enrolled_flag
 from contest.tasks.unauthorized.schemas import AllOlympiadsResponseTaskUnauthorizedSchema
@@ -22,7 +19,7 @@ app = get_current_app()
 
 @module.route(
     '/contest/<int:id_contest>/variant/self',
-    methods=['GET'], output_schema=VariantSchema)
+    methods=['GET'], output_schema=VariantWithCompletedTasksCountTaskParticipantSchema)
 def get_variant_self(id_contest):
     """
     Get variant for user in current contest
@@ -43,7 +40,7 @@ def get_variant_self(id_contest):
           description: OK
           content:
             application/json:
-              schema: VariantSchema
+              schema: VariantWithCompletedTasksCountTaskParticipantSchema
         '400':
           description: Bad request
         '409':
@@ -52,12 +49,21 @@ def get_variant_self(id_contest):
           description: User not found
     """
 
+    from contest.responses.models import Response
+
     # Contest not in progress or 'not show answers' flag
     if not user_can_view_variants_and_tasks(id_contest):
         raise ContestContentAccessDenied()
 
     variant = get_user_variant_if_possible(id_contest)
-    return variant, 200
+
+    user_work: Response = get_user_in_contest_work(jwt_get_id(), id_contest)
+    count_of_completed_tasks = user_work.answers.count()
+
+    return {
+               'variant': variant,
+               'completed_task_count': count_of_completed_tasks
+           }, 200
 
 
 # Enroll in Contest
@@ -108,6 +114,10 @@ def enroll_in_contest(id_contest):
         raise TimeOver("Time for enrolling is over")
 
     location_id = values.get('location_id', None)
+    supervisor = values.get('supervisor', None)
+
+    if current_contest.holding_type == ContestHoldingTypeEnum.OnLineContest and supervisor is not None:
+        raise InsufficientData("supervisor", "can't be added to online contest")
 
     # Can't add without location
     if location_id is not None:
@@ -133,6 +143,7 @@ def enroll_in_contest(id_contest):
                                                show_results_to_user=False,
                                                variant_id=generate_variant(id_contest, user_id),
                                                location_id=location_id,
+                                               supervisor=supervisor,
                                                user_status=UserStatusEnum.Participant))
 
     db.session.commit()
@@ -194,6 +205,59 @@ def change_user_location_in_contest(id_contest):
     ).one_or_none()
 
     current_user.location_id = location_id
+
+    db.session.commit()
+    return {}, 200
+
+
+@module.route('/contest/<int:id_contest>/change_supervisor', methods=['POST'],
+              input_schema=ChangeSupervisorRequestTaskParticipantSchema)
+def change_user_supervisor_in_contest(id_contest):
+    """
+    Change user supervisor
+    ---
+    post:
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: ChangeSupervisorRequestTaskParticipantSchema
+      parameters:
+        - in: path
+          description: ID of the contest
+          name: id_contest
+          required: true
+          schema:
+            type: integer
+      security:
+        - JWTAccessToken: [ ]
+        - CSRFAccessToken: [ ]
+      responses:
+        '200':
+          description: OK
+        '400':
+          description: Bad request
+        '409':
+          description: User already enrolled
+    """
+
+    values = request.marshmallow
+
+    user_id = jwt_get_id()
+
+    current_contest: SimpleContest = get_contest_if_possible(id_contest)
+
+    supervisor = values.get('supervisor', None)
+    if current_contest.holding_type == ContestHoldingTypeEnum.OnLineContest and supervisor is not None:
+        raise InsufficientData("supervisor", "can't be added to online contest")
+
+    # Can't enroll after deadline
+    if datetime.utcnow() > current_contest.end_of_enroll_date:
+        raise TimeOver("Time for enrolling is over")
+
+    current_user = current_contest.users.filter_by(user_id=user_id).one_or_none()
+
+    current_user.supervisor = supervisor
 
     db.session.commit()
     return {}, 200
@@ -281,19 +345,11 @@ def get_task_image_self(id_contest, id_task):
         '409':
           description: Olympiad type already in use
     """
-
     # Contest not in progress or 'not show answers' flag
     if not user_can_view_variants_and_tasks(id_contest):
         raise ContestContentAccessDenied()
-
     task = get_user_task_if_possible(id_contest, id_task)
-
-    if task.image_of_task is None:
-        raise DataConflict("Task does not have image")
-
-    return send_file(io.BytesIO(task.image_of_task),
-                     attachment_filename='task_image.png',
-                     mimetype='image/jpeg'), 200
+    return app.send_media(task.image_of_task)
 
 
 # Certificate
@@ -434,6 +490,11 @@ def get_all_contests_self():
           schema:
             type: integer
         - in: query
+          name: academic_year
+          required: false
+          schema:
+            type: integer
+        - in: query
           name: end_date
           required: false
           schema:
@@ -450,6 +511,12 @@ def get_all_contests_self():
           required: false
           schema:
             type: boolean
+        - in: query
+          name: composite_type
+          required: false
+          schema:
+            type: string
+            enum: ['SimpleContest', 'CompositeContest']
       security:
         - JWTAccessToken: [ ]
         - CSRFAccessToken: [ ]
@@ -471,7 +538,7 @@ def get_all_contests_self():
 
 @module.route(
     '/olympiad/<int:id_olympiad>/stage/<int:id_stage>/contest/<int:id_contest>',
-    methods=['GET'], output_schema=ContestSchema)
+    methods=['GET'])
 def get_contest_in_stage_self(id_olympiad, id_stage, id_contest):
     """
     Get current contest in stage
@@ -504,7 +571,7 @@ def get_contest_in_stage_self(id_olympiad, id_stage, id_contest):
           description: OK
           content:
             application/json:
-              schema: ContestSchema
+              schema: Contest
         '400':
           description: Bad request
         '409':
@@ -512,13 +579,14 @@ def get_contest_in_stage_self(id_olympiad, id_stage, id_contest):
         '404':
           description: User not found
     """
-    current_contest = get_user_contest_if_possible(id_olympiad, id_stage, id_contest)
-    return current_contest, 200
+    current_contest = get_contest_for_participant_if_possible(id_olympiad, id_stage, id_contest)
+    current_contest_dict = SimpleContestSchema().dump(current_contest)
+    return current_contest_dict, 200
 
 
 @module.route(
     '/olympiad/<int:id_olympiad>',
-    methods=['GET'], output_schema=ContestSchema)
+    methods=['GET'])
 def get_contest_self(id_olympiad):
     """
     Get current contest in stage
@@ -539,7 +607,7 @@ def get_contest_self(id_olympiad):
           description: OK
           content:
             application/json:
-              schema: ContestSchema
+              schema: Contest
         '400':
           description: Bad request
         '409':
@@ -547,5 +615,6 @@ def get_contest_self(id_olympiad):
         '404':
           description: User not found
     """
-    current_contest = get_user_simple_contest_if_possible(id_olympiad)
-    return current_contest, 200
+    current_contest = get_simple_contest_if_possible(id_olympiad)
+    current_contest_dict = SimpleContestSchema().dump(current_contest)
+    return current_contest_dict, 200

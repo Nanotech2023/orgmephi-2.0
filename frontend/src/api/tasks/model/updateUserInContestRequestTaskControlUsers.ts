@@ -15,6 +15,21 @@ export interface UpdateUserInContestRequestTaskControlUsers {
     check_condition?: boolean;
     location_id?: number;
     show_results_to_user?: boolean;
+    supervisor?: string;
+    user_status?: UpdateUserInContestRequestTaskControlUsers.UserStatusEnum;
     users_id: Array<number>;
 }
+export namespace UpdateUserInContestRequestTaskControlUsers {
+    export type UserStatusEnum = 'Winner 1' | 'Winner 2' | 'Winner 3' | 'Diploma 1' | 'Diploma 2' | 'Diploma 3' | 'Participant';
+    export const UserStatusEnum = {
+        Winner1: 'Winner 1' as UserStatusEnum,
+        Winner2: 'Winner 2' as UserStatusEnum,
+        Winner3: 'Winner 3' as UserStatusEnum,
+        Diploma1: 'Diploma 1' as UserStatusEnum,
+        Diploma2: 'Diploma 2' as UserStatusEnum,
+        Diploma3: 'Diploma 3' as UserStatusEnum,
+        Participant: 'Participant' as UserStatusEnum
+    };
+}
+
 

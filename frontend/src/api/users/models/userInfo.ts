@@ -12,6 +12,7 @@
 import { UserLimitations } from './userLimitations';
 import { Document } from './document';
 import { Location } from './location';
+import { GenderEnum } from './gender'
 
 
 export interface UserInfo { 
@@ -20,7 +21,7 @@ export interface UserInfo {
     dwelling?: Location;
     email?: string;
     first_name?: string;
-    gender?: UserInfo.GenderEnum;
+    gender?: GenderEnum;
     limitations?: UserLimitations;
     middle_name?: string;
     phone?: string;
@@ -28,12 +29,3 @@ export interface UserInfo {
     second_name?: string;
     readonly user_id?: number;
 }
-export namespace UserInfo {
-    export type GenderEnum = 'Male' | 'Female';
-    export const GenderEnum = {
-        Male: 'Male' as GenderEnum,
-        Female: 'Female' as GenderEnum
-    };
-}
-
-

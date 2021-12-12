@@ -12,26 +12,20 @@
 /* tslint:disable:no-unused-variable member-ordering */
 
 import { Inject, Injectable, Optional } from '@angular/core'
-import {
-    HttpClient,
-
-    HttpContext,
-    HttpEvent,
-    HttpHeaders,
-    HttpParameterCodec,
-    HttpParams,
-    HttpResponse
-} from '@angular/common/http'
+import { HttpClient, HttpContext, HttpEvent, HttpHeaders, HttpParameterCodec, HttpResponse } from '@angular/common/http'
 import { Observable } from 'rxjs'
 import { CustomHttpParameterCodec } from '@api/encoder'
 import { BASE_PATH } from '@api/variables'
 import { Configuration } from '@api/configuration'
 import {
     CSRFPairUser,
-    Group, GroupAddRequestUser,
+    Group,
+    GroupAddRequestUser,
     GroupListResponseUser,
     InfoCitiesResponseUser,
-    InfoCountriesResponseUser, InfoRegionsResponseUser, InfoUniversitiesResponseUser,
+    InfoCountriesResponseUser,
+    InfoRegionsResponseUser,
+    InfoUniversitiesResponseUser,
     LoginRequestUser,
     MembershipRequestUser,
     PasswordRequestUser,
@@ -43,6 +37,7 @@ import {
     SchoolRegistrationRequestUser,
     SelfGroupsResponseUser,
     SelfPasswordRequestUser,
+    SelfUnfilledResponse,
     StudentInfo,
     TypeRequestUser,
     UniversityRegistrationRequestUser,
@@ -51,12 +46,13 @@ import {
     UserInfo,
     UserListResponseUser
 } from '@api/users/models'
+import { environment } from '@environments/environment'
 
 
 @Injectable()
 export class UsersService
 {
-    protected basePath = 'http://127.0.0.1:5000'
+    protected basePath = environment.apiUrl
     public defaultHeaders = new HttpHeaders()
     public configuration = new Configuration()
     public encoder: HttpParameterCodec
@@ -75,7 +71,6 @@ export class UsersService
             }
             this.configuration.basePath = basePath
         }
-        this.configuration.withCredentials = true
         this.encoder = this.configuration.encoder || new CustomHttpParameterCodec()
     }
 
@@ -482,6 +477,147 @@ export class UsersService
 
         return this.httpClient.patch<any>( `${ this.configuration.basePath }/user/admin/personal/${ encodeURIComponent( String( userId ) ) }`,
             userInfo,
+            {
+                context: localVarHttpContext,
+                responseType: <any> responseType_,
+                withCredentials: this.configuration.withCredentials,
+                headers: localVarHeaders,
+                observe: observe,
+                reportProgress: reportProgress
+            }
+        )
+    }
+
+    /**
+     * @param userId ID of user
+     * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
+     * @param reportProgress flag to report request and response progress.
+     */
+    public userAdminPersonalUserIdPhotoGet( userId: number, observe?: 'body', reportProgress?: boolean, options?: { httpHeaderAccept?: 'image/_*', context?: HttpContext } ): Observable<Blob>;
+    public userAdminPersonalUserIdPhotoGet( userId: number, observe?: 'response', reportProgress?: boolean, options?: { httpHeaderAccept?: 'image/_*', context?: HttpContext } ): Observable<HttpResponse<Blob>>;
+    public userAdminPersonalUserIdPhotoGet( userId: number, observe?: 'events', reportProgress?: boolean, options?: { httpHeaderAccept?: 'image/_*', context?: HttpContext } ): Observable<HttpEvent<Blob>>;
+    public userAdminPersonalUserIdPhotoGet( userId: number, observe: any = 'body', reportProgress: boolean = false, options?: { httpHeaderAccept?: 'image/_*', context?: HttpContext } ): Observable<any>
+    {
+        if ( userId === null || userId === undefined )
+        {
+            throw new Error( 'Required parameter userId was null or undefined when calling userAdminPersonalUserIdPhotoGet.' )
+        }
+
+        let localVarHeaders = this.defaultHeaders
+
+        let localVarCredential: string | undefined
+        // authentication (JWTAccessToken) required
+        localVarCredential = this.configuration.lookupCredential( 'JWTAccessToken' )
+        if ( localVarCredential )
+        {
+        }
+
+        let localVarHttpHeaderAcceptSelected: string | undefined = options && options.httpHeaderAccept
+        if ( localVarHttpHeaderAcceptSelected === undefined )
+        {
+            // to determine the Accept header
+            const httpHeaderAccepts: string[] = [
+                'image/_*'
+            ]
+            localVarHttpHeaderAcceptSelected = this.configuration.selectHeaderAccept( httpHeaderAccepts )
+        }
+        if ( localVarHttpHeaderAcceptSelected !== undefined )
+        {
+            localVarHeaders = localVarHeaders.set( 'Accept', localVarHttpHeaderAcceptSelected )
+        }
+
+        let localVarHttpContext: HttpContext | undefined = options && options.context
+        if ( localVarHttpContext === undefined )
+        {
+            localVarHttpContext = new HttpContext()
+        }
+
+
+        return this.httpClient.get( `${ this.configuration.basePath }/user/admin/personal/${ encodeURIComponent( String( userId ) ) }/photo`,
+            {
+                context: localVarHttpContext,
+                responseType: "blob",
+                withCredentials: this.configuration.withCredentials,
+                headers: localVarHeaders,
+                observe: observe,
+                reportProgress: reportProgress
+            }
+        )
+    }
+
+    /**
+     * @param userId ID of user
+     * @param body
+     * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
+     * @param reportProgress flag to report request and response progress.
+     */
+    public userAdminPersonalUserIdPhotoPut( userId: number, body: Blob, observe?: 'body', reportProgress?: boolean, options?: { httpHeaderAccept?: undefined, context?: HttpContext } ): Observable<any>;
+    public userAdminPersonalUserIdPhotoPut( userId: number, body: Blob, observe?: 'response', reportProgress?: boolean, options?: { httpHeaderAccept?: undefined, context?: HttpContext } ): Observable<HttpResponse<any>>;
+    public userAdminPersonalUserIdPhotoPut( userId: number, body: Blob, observe?: 'events', reportProgress?: boolean, options?: { httpHeaderAccept?: undefined, context?: HttpContext } ): Observable<HttpEvent<any>>;
+    public userAdminPersonalUserIdPhotoPut( userId: number, body: Blob, observe: any = 'body', reportProgress: boolean = false, options?: { httpHeaderAccept?: undefined, context?: HttpContext } ): Observable<any>
+    {
+        if ( userId === null || userId === undefined )
+        {
+            throw new Error( 'Required parameter userId was null or undefined when calling userAdminPersonalUserIdPhotoPut.' )
+        }
+        if ( body === null || body === undefined )
+        {
+            throw new Error( 'Required parameter body was null or undefined when calling userAdminPersonalUserIdPhotoPut.' )
+        }
+
+        let localVarHeaders = this.defaultHeaders
+
+        let localVarCredential: string | undefined
+        // authentication (CSRFAccessToken) required
+        localVarCredential = this.configuration.lookupCredential( 'CSRFAccessToken' )
+        if ( localVarCredential )
+        {
+            localVarHeaders = localVarHeaders.set( 'X-CSRF-TOKEN', localVarCredential )
+        }
+
+        // authentication (JWTAccessToken) required
+        localVarCredential = this.configuration.lookupCredential( 'JWTAccessToken' )
+        if ( localVarCredential )
+        {
+        }
+
+        let localVarHttpHeaderAcceptSelected: string | undefined = options && options.httpHeaderAccept
+        if ( localVarHttpHeaderAcceptSelected === undefined )
+        {
+            // to determine the Accept header
+            const httpHeaderAccepts: string[] = []
+            localVarHttpHeaderAcceptSelected = this.configuration.selectHeaderAccept( httpHeaderAccepts )
+        }
+        if ( localVarHttpHeaderAcceptSelected !== undefined )
+        {
+            localVarHeaders = localVarHeaders.set( 'Accept', localVarHttpHeaderAcceptSelected )
+        }
+
+        let localVarHttpContext: HttpContext | undefined = options && options.context
+        if ( localVarHttpContext === undefined )
+        {
+            localVarHttpContext = new HttpContext()
+        }
+
+
+        // to determine the Content-Type header
+        const consumes: string[] = [
+            'image/_*'
+        ]
+        const httpContentTypeSelected: string | undefined = this.configuration.selectHeaderContentType( consumes )
+        if ( httpContentTypeSelected !== undefined )
+        {
+            localVarHeaders = localVarHeaders.set( 'Content-Type', httpContentTypeSelected )
+        }
+
+        let responseType_: 'text' | 'json' = 'json'
+        if ( localVarHttpHeaderAcceptSelected && localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+        {
+            responseType_ = 'text'
+        }
+
+        return this.httpClient.put<any>( `${ this.configuration.basePath }/user/admin/personal/${ encodeURIComponent( String( userId ) ) }/photo`,
+            body,
             {
                 context: localVarHttpContext,
                 responseType: <any> responseType_,
@@ -2327,6 +2463,137 @@ export class UsersService
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
      * @param reportProgress flag to report request and response progress.
      */
+    public userProfilePhotoGet( observe?: 'body', reportProgress?: boolean, options?: { httpHeaderAccept?: 'image/_*', context?: HttpContext } ): Observable<Blob>;
+    public userProfilePhotoGet( observe?: 'response', reportProgress?: boolean, options?: { httpHeaderAccept?: 'image/_*', context?: HttpContext } ): Observable<HttpResponse<Blob>>;
+    public userProfilePhotoGet( observe?: 'events', reportProgress?: boolean, options?: { httpHeaderAccept?: 'image/_*', context?: HttpContext } ): Observable<HttpEvent<Blob>>;
+    public userProfilePhotoGet( observe: any = 'body', reportProgress: boolean = false, options?: { httpHeaderAccept?: 'image/_*', context?: HttpContext } ): Observable<any>
+    {
+
+        let localVarHeaders = this.defaultHeaders
+
+        let localVarCredential: string | undefined
+        // authentication (JWTAccessToken) required
+        localVarCredential = this.configuration.lookupCredential( 'JWTAccessToken' )
+        if ( localVarCredential )
+        {
+        }
+
+        let localVarHttpHeaderAcceptSelected: string | undefined = options && options.httpHeaderAccept
+        if ( localVarHttpHeaderAcceptSelected === undefined )
+        {
+            // to determine the Accept header
+            const httpHeaderAccepts: string[] = [
+                'image/_*'
+            ]
+            localVarHttpHeaderAcceptSelected = this.configuration.selectHeaderAccept( httpHeaderAccepts )
+        }
+        if ( localVarHttpHeaderAcceptSelected !== undefined )
+        {
+            localVarHeaders = localVarHeaders.set( 'Accept', localVarHttpHeaderAcceptSelected )
+        }
+
+        let localVarHttpContext: HttpContext | undefined = options && options.context
+        if ( localVarHttpContext === undefined )
+        {
+            localVarHttpContext = new HttpContext()
+        }
+
+
+        return this.httpClient.get( `${ this.configuration.basePath }/user/profile/photo`,
+            {
+                context: localVarHttpContext,
+                responseType: "blob",
+                withCredentials: this.configuration.withCredentials,
+                headers: localVarHeaders,
+                observe: observe,
+                reportProgress: reportProgress
+            }
+        )
+    }
+
+    /**
+     * @param body
+     * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
+     * @param reportProgress flag to report request and response progress.
+     */
+    public userProfilePhotoPut( body: Blob, observe?: 'body', reportProgress?: boolean, options?: { httpHeaderAccept?: undefined, context?: HttpContext } ): Observable<any>;
+    public userProfilePhotoPut( body: Blob, observe?: 'response', reportProgress?: boolean, options?: { httpHeaderAccept?: undefined, context?: HttpContext } ): Observable<HttpResponse<any>>;
+    public userProfilePhotoPut( body: Blob, observe?: 'events', reportProgress?: boolean, options?: { httpHeaderAccept?: undefined, context?: HttpContext } ): Observable<HttpEvent<any>>;
+    public userProfilePhotoPut( body: Blob, observe: any = 'body', reportProgress: boolean = false, options?: { httpHeaderAccept?: undefined, context?: HttpContext } ): Observable<any>
+    {
+        if ( body === null || body === undefined )
+        {
+            throw new Error( 'Required parameter body was null or undefined when calling userProfilePhotoPut.' )
+        }
+
+        let localVarHeaders = this.defaultHeaders
+
+        let localVarCredential: string | undefined
+        // authentication (CSRFAccessToken) required
+        localVarCredential = this.configuration.lookupCredential( 'CSRFAccessToken' )
+        if ( localVarCredential )
+        {
+            localVarHeaders = localVarHeaders.set( 'X-CSRF-TOKEN', localVarCredential )
+        }
+
+        // authentication (JWTAccessToken) required
+        localVarCredential = this.configuration.lookupCredential( 'JWTAccessToken' )
+        if ( localVarCredential )
+        {
+        }
+
+        let localVarHttpHeaderAcceptSelected: string | undefined = options && options.httpHeaderAccept
+        if ( localVarHttpHeaderAcceptSelected === undefined )
+        {
+            // to determine the Accept header
+            const httpHeaderAccepts: string[] = []
+            localVarHttpHeaderAcceptSelected = this.configuration.selectHeaderAccept( httpHeaderAccepts )
+        }
+        if ( localVarHttpHeaderAcceptSelected !== undefined )
+        {
+            localVarHeaders = localVarHeaders.set( 'Accept', localVarHttpHeaderAcceptSelected )
+        }
+
+        let localVarHttpContext: HttpContext | undefined = options && options.context
+        if ( localVarHttpContext === undefined )
+        {
+            localVarHttpContext = new HttpContext()
+        }
+
+
+        // to determine the Content-Type header
+        const consumes: string[] = [
+            'image/_*'
+        ]
+        const httpContentTypeSelected: string | undefined = this.configuration.selectHeaderContentType( consumes )
+        if ( httpContentTypeSelected !== undefined )
+        {
+            localVarHeaders = localVarHeaders.set( 'Content-Type', httpContentTypeSelected )
+        }
+
+        let responseType_: 'text' | 'json' = 'json'
+        if ( localVarHttpHeaderAcceptSelected && localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+        {
+            responseType_ = 'text'
+        }
+
+        return this.httpClient.put<any>( `${ this.configuration.basePath }/user/profile/photo`,
+            body,
+            {
+                context: localVarHttpContext,
+                responseType: <any> responseType_,
+                withCredentials: this.configuration.withCredentials,
+                headers: localVarHeaders,
+                observe: observe,
+                reportProgress: reportProgress
+            }
+        )
+    }
+
+    /**
+     * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
+     * @param reportProgress flag to report request and response progress.
+     */
     public userProfileSchoolGet( observe?: 'body', reportProgress?: boolean, options?: { httpHeaderAccept?: 'application/json', context?: HttpContext } ): Observable<SchoolInfo>;
     public userProfileSchoolGet( observe?: 'response', reportProgress?: boolean, options?: { httpHeaderAccept?: 'application/json', context?: HttpContext } ): Observable<HttpResponse<SchoolInfo>>;
     public userProfileSchoolGet( observe?: 'events', reportProgress?: boolean, options?: { httpHeaderAccept?: 'application/json', context?: HttpContext } ): Observable<HttpEvent<SchoolInfo>>;
@@ -2464,10 +2731,10 @@ export class UsersService
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
      * @param reportProgress flag to report request and response progress.
      */
-    public userProfileUnfilledGet( observe?: 'body', reportProgress?: boolean, options?: { httpHeaderAccept?: undefined, context?: HttpContext } ): Observable<any>;
-    public userProfileUnfilledGet( observe?: 'response', reportProgress?: boolean, options?: { httpHeaderAccept?: undefined, context?: HttpContext } ): Observable<HttpResponse<any>>;
-    public userProfileUnfilledGet( observe?: 'events', reportProgress?: boolean, options?: { httpHeaderAccept?: undefined, context?: HttpContext } ): Observable<HttpEvent<any>>;
-    public userProfileUnfilledGet( observe: any = 'body', reportProgress: boolean = false, options?: { httpHeaderAccept?: undefined, context?: HttpContext } ): Observable<any>
+    public userProfileUnfilledGet( observe?: 'body', reportProgress?: boolean, options?: { httpHeaderAccept?: 'application/pdf', context?: HttpContext } ): Observable<SelfUnfilledResponse>;
+    public userProfileUnfilledGet( observe?: 'response', reportProgress?: boolean, options?: { httpHeaderAccept?: 'application/pdf', context?: HttpContext } ): Observable<HttpResponse<SelfUnfilledResponse>>;
+    public userProfileUnfilledGet( observe?: 'events', reportProgress?: boolean, options?: { httpHeaderAccept?: 'application/pdf', context?: HttpContext } ): Observable<HttpEvent<SelfUnfilledResponse>>;
+    public userProfileUnfilledGet( observe: any = 'body', reportProgress: boolean = false, options?: { httpHeaderAccept?: 'application/pdf', context?: HttpContext } ): Observable<any>
     {
 
         let localVarHeaders = this.defaultHeaders
@@ -2483,7 +2750,9 @@ export class UsersService
         if ( localVarHttpHeaderAcceptSelected === undefined )
         {
             // to determine the Accept header
-            const httpHeaderAccepts: string[] = []
+            const httpHeaderAccepts: string[] = [
+                'application/pdf'
+            ]
             localVarHttpHeaderAcceptSelected = this.configuration.selectHeaderAccept( httpHeaderAccepts )
         }
         if ( localVarHttpHeaderAcceptSelected !== undefined )
@@ -2504,7 +2773,7 @@ export class UsersService
             responseType_ = 'text'
         }
 
-        return this.httpClient.get<any>( `${ this.configuration.basePath }/user/profile/unfilled`,
+        return this.httpClient.get<SelfUnfilledResponse>( `${ this.configuration.basePath }/user/profile/unfilled`,
             {
                 context: localVarHttpContext,
                 responseType: <any> responseType_,
@@ -3146,6 +3415,125 @@ export class UsersService
     }
 
     /**
+     * @param email Email
+     * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
+     * @param reportProgress flag to report request and response progress.
+     */
+    public userRegistrationResendEmailPost( email: string, observe?: 'body', reportProgress?: boolean, options?: { httpHeaderAccept?: undefined, context?: HttpContext } ): Observable<any>;
+    public userRegistrationResendEmailPost( email: string, observe?: 'response', reportProgress?: boolean, options?: { httpHeaderAccept?: undefined, context?: HttpContext } ): Observable<HttpResponse<any>>;
+    public userRegistrationResendEmailPost( email: string, observe?: 'events', reportProgress?: boolean, options?: { httpHeaderAccept?: undefined, context?: HttpContext } ): Observable<HttpEvent<any>>;
+    public userRegistrationResendEmailPost( email: string, observe: any = 'body', reportProgress: boolean = false, options?: { httpHeaderAccept?: undefined, context?: HttpContext } ): Observable<any>
+    {
+        if ( email === null || email === undefined )
+        {
+            throw new Error( 'Required parameter email was null or undefined when calling userRegistrationResendEmailPost.' )
+        }
+
+        let localVarHeaders = this.defaultHeaders
+
+        let localVarHttpHeaderAcceptSelected: string | undefined = options && options.httpHeaderAccept
+        if ( localVarHttpHeaderAcceptSelected === undefined )
+        {
+            // to determine the Accept header
+            const httpHeaderAccepts: string[] = []
+            localVarHttpHeaderAcceptSelected = this.configuration.selectHeaderAccept( httpHeaderAccepts )
+        }
+        if ( localVarHttpHeaderAcceptSelected !== undefined )
+        {
+            localVarHeaders = localVarHeaders.set( 'Accept', localVarHttpHeaderAcceptSelected )
+        }
+
+        let localVarHttpContext: HttpContext | undefined = options && options.context
+        if ( localVarHttpContext === undefined )
+        {
+            localVarHttpContext = new HttpContext()
+        }
+
+
+        let responseType_: 'text' | 'json' = 'json'
+        if ( localVarHttpHeaderAcceptSelected && localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+        {
+            responseType_ = 'text'
+        }
+
+        return this.httpClient.post<any>( `${ this.configuration.basePath }/user/registration/resend/${ encodeURIComponent( String( email ) ) }`,
+            null,
+            {
+                context: localVarHttpContext,
+                responseType: <any> responseType_,
+                withCredentials: this.configuration.withCredentials,
+                headers: localVarHeaders,
+                observe: observe,
+                reportProgress: reportProgress
+            }
+        )
+    }
+
+    /**
+     * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
+     * @param reportProgress flag to report request and response progress.
+     */
+    public userRegistrationResendPost( observe?: 'body', reportProgress?: boolean, options?: { httpHeaderAccept?: undefined, context?: HttpContext } ): Observable<any>;
+    public userRegistrationResendPost( observe?: 'response', reportProgress?: boolean, options?: { httpHeaderAccept?: undefined, context?: HttpContext } ): Observable<HttpResponse<any>>;
+    public userRegistrationResendPost( observe?: 'events', reportProgress?: boolean, options?: { httpHeaderAccept?: undefined, context?: HttpContext } ): Observable<HttpEvent<any>>;
+    public userRegistrationResendPost( observe: any = 'body', reportProgress: boolean = false, options?: { httpHeaderAccept?: undefined, context?: HttpContext } ): Observable<any>
+    {
+
+        let localVarHeaders = this.defaultHeaders
+
+        let localVarCredential: string | undefined
+        // authentication (CSRFAccessToken) required
+        localVarCredential = this.configuration.lookupCredential( 'CSRFAccessToken' )
+        if ( localVarCredential )
+        {
+            localVarHeaders = localVarHeaders.set( 'X-CSRF-TOKEN', localVarCredential )
+        }
+
+        // authentication (JWTAccessToken) required
+        localVarCredential = this.configuration.lookupCredential( 'JWTAccessToken' )
+        if ( localVarCredential )
+        {
+        }
+
+        let localVarHttpHeaderAcceptSelected: string | undefined = options && options.httpHeaderAccept
+        if ( localVarHttpHeaderAcceptSelected === undefined )
+        {
+            // to determine the Accept header
+            const httpHeaderAccepts: string[] = []
+            localVarHttpHeaderAcceptSelected = this.configuration.selectHeaderAccept( httpHeaderAccepts )
+        }
+        if ( localVarHttpHeaderAcceptSelected !== undefined )
+        {
+            localVarHeaders = localVarHeaders.set( 'Accept', localVarHttpHeaderAcceptSelected )
+        }
+
+        let localVarHttpContext: HttpContext | undefined = options && options.context
+        if ( localVarHttpContext === undefined )
+        {
+            localVarHttpContext = new HttpContext()
+        }
+
+
+        let responseType_: 'text' | 'json' = 'json'
+        if ( localVarHttpHeaderAcceptSelected && localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+        {
+            responseType_ = 'text'
+        }
+
+        return this.httpClient.post<any>( `${ this.configuration.basePath }/user/registration/resend`,
+            null,
+            {
+                context: localVarHttpContext,
+                responseType: <any> responseType_,
+                withCredentials: this.configuration.withCredentials,
+                headers: localVarHeaders,
+                observe: observe,
+                reportProgress: reportProgress
+            }
+        )
+    }
+
+    /**
      * Register a new school student
      * @param schoolRegistrationRequestUser
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
@@ -3279,5 +3667,4 @@ export class UsersService
             }
         )
     }
-
 }

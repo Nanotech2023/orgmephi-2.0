@@ -4,6 +4,15 @@ from ..user import *
 
 
 @pytest.fixture
+def create_group_for_everyone():
+    from user.models.auth import Group
+    everyone_group = Group(name='Everyone')
+    test_app.db.session.add(everyone_group)
+    test_app.db.session.commit()
+    yield everyone_group
+
+
+@pytest.fixture
 def test_target_class():
     from contest.tasks.models.reference import TargetClass
     target_classes = [TargetClass(target_class='8'),
@@ -17,7 +26,7 @@ def test_target_class():
 
 
 @pytest.fixture
-def test_olympiad_types():
+def test_olympiad_types(create_group_for_everyone):
     from contest.tasks.models import OlympiadType
     olympiad_types = [OlympiadType(olympiad_type=f'Test {i}') for i in range(8)]
     test_app.db.session.add_all(olympiad_types)
@@ -26,19 +35,19 @@ def test_olympiad_types():
 
 
 @pytest.fixture
-def test_olympiad_locations():
+def test_olympiad_locations(test_city, test_country_native):
     from contest.tasks.models import OnlineOlympiadLocation, RussiaOlympiadLocation, \
         OtherOlympiadLocation
     online_olympiad_location = [
         OnlineOlympiadLocation(url=f'Test {i}') for i in range(2)
     ]
     russia_olympiad_location = [
-        RussiaOlympiadLocation(city_name='Москва',
-                               region_name='Московская обл.',
+        RussiaOlympiadLocation(city_name=f'{test_city.name}',
+                               region_name=f'{test_city.region_name}',
                                address=f'Test {i}') for i in range(2)
     ]
     other_olympiad_location = [
-        OtherOlympiadLocation(country_name='Россия',
+        OtherOlympiadLocation(country_name=f'{test_country_native.name}',
                               location=f'Test {i}') for i in range(2)
     ]
     test_app.db.session.add_all(online_olympiad_location + russia_olympiad_location + other_olympiad_location)
@@ -120,7 +129,17 @@ def test_simple_contest(test_base_contests_with_target, test_olympiad_locations)
                                      contest_duration=timedelta(minutes=30),
                                      result_publication_date=datetime.utcnow() + timedelta(hours=3),
                                      end_of_enroll_date=datetime.utcnow() + timedelta(minutes=15))
-                       for i in range(8)]
+                       for i in range(7)]
+    simple_contests.append(SimpleContest(
+        base_contest_id=test_base_contests_with_target[7].base_contest_id,
+        visibility=True,
+        start_date=datetime(2007, 10, 6, 16, 29, 43, 79043),
+        end_date=datetime(2007, 12, 6, 16, 29, 43, 79043),
+        holding_type=holding_types[7 % 2],
+        regulations=f'Test {7}',
+        contest_duration=timedelta(minutes=30),
+        result_publication_date=datetime(2007, 12, 6, 16, 29, 43, 79043),
+        end_of_enroll_date=datetime(2007, 11, 6, 16, 29, 43, 79043)))
     simple_contests[3].previous_contest_id = 1
     simple_contests[3].previous_participation_condition = UserStatusEnum.Winner_1
     test_app.db.session.add_all(simple_contests)
@@ -609,19 +628,19 @@ def test_simple_contest_with_users(test_simple_contest_with_location, test_varia
     from contest.responses.models import add_user_response, ResponseStatusEnum
     from contest.tasks.models.user import UserInContest, UserStatusEnum
     user_id = test_user_for_student_contest.id
-    user_in_contest = UserInContest(user_id=user_id,
-                                    show_results_to_user=True,
-                                    user_status=UserStatusEnum.Participant.value,
-                                    variant_id=test_variant[0].variant_id,
-                                    location_id=test_olympiad_locations[0].location_id)
-    test_simple_contest_with_location[0].users.append(user_in_contest)
+    user_in_contest_ = UserInContest(user_id=user_id,
+                                     show_results_to_user=True,
+                                     user_status=UserStatusEnum.Participant.value,
+                                     variant_id=test_variant[0].variant_id,
+                                     location_id=test_olympiad_locations[0].location_id)
+    test_simple_contest_with_location[0].users.append(user_in_contest_)
 
-    user_work = add_user_response(test_app.db.session, user_id, test_simple_contest_with_location[0].contest_id)
-    user_work.work_status = ResponseStatusEnum.in_progress
-    test_app.db.session.add(user_in_contest)
-    test_app.db.session.add(user_work)
-
+    test_app.db.session.add(user_in_contest_)
     test_app.db.session.commit()
+    user_work = add_user_response(test_app.db.session, user_id, test_simple_contest_with_location[0].contest_id)
+    test_app.db.session.add(user_work)
+    test_app.db.session.commit()
+
     yield test_simple_contest_with_location
 
 
@@ -632,16 +651,17 @@ def test_simple_contest_with_users_no_variant(test_simple_contest_with_location,
     from contest.responses.models import add_user_response, ResponseStatusEnum
     from contest.tasks.models.user import UserInContest, UserStatusEnum
     user_id = test_user_for_student_contest.id
-    user_in_contest = UserInContest(user_id=user_id,
-                                    show_results_to_user=True,
-                                    user_status=UserStatusEnum.Participant.value,
-                                    variant_id=152,
-                                    location_id=test_olympiad_locations[0].location_id)
-    test_simple_contest_with_location[0].users.append(user_in_contest)
+    user_in_contest_ = UserInContest(user_id=user_id,
+                                     show_results_to_user=True,
+                                     user_status=UserStatusEnum.Participant.value,
+                                     variant_id=152,
+                                     location_id=test_olympiad_locations[0].location_id)
+    test_simple_contest_with_location[0].users.append(user_in_contest_)
+
+    test_app.db.session.add(user_in_contest_)
+    test_app.db.session.commit()
 
     user_work = add_user_response(test_app.db.session, user_id, test_simple_contest_with_location[0].contest_id)
-    user_work.work_status = ResponseStatusEnum.in_progress
-    test_app.db.session.add(user_in_contest)
     test_app.db.session.add(user_work)
 
     test_app.db.session.commit()
@@ -655,16 +675,18 @@ def test_simple_contest_with_users_not_in_progress(test_simple_contest, test_var
     from contest.responses.models import add_user_response, ResponseStatusEnum
     from contest.tasks.models.user import UserInContest, UserStatusEnum
     user_id = test_user_for_student_contest.id
-    user_in_contest = UserInContest(user_id=user_id,
-                                    show_results_to_user=True,
-                                    user_status=UserStatusEnum.Participant.value,
-                                    variant_id=test_variant[0].variant_id,
-                                    location_id=test_olympiad_locations[0].location_id)
-    test_simple_contest[0].users.append(user_in_contest)
+    user_in_contest_ = UserInContest(user_id=user_id,
+                                     show_results_to_user=True,
+                                     user_status=UserStatusEnum.Participant.value,
+                                     variant_id=test_variant[0].variant_id,
+                                     location_id=test_olympiad_locations[0].location_id)
+    test_simple_contest[0].users.append(user_in_contest_)
 
+    test_app.db.session.add(user_in_contest_)
+    test_app.db.session.commit()
     user_work = add_user_response(test_app.db.session, user_id, test_simple_contest[0].contest_id)
+
     user_work.work_status = ResponseStatusEnum.not_checked
-    test_app.db.session.add(user_in_contest)
     test_app.db.session.add(user_work)
 
     test_app.db.session.commit()
@@ -678,18 +700,19 @@ def test_simple_contest_with_users_ended(test_simple_contest, test_variant, test
     from contest.responses.models import add_user_response, ResponseStatusEnum
     from contest.tasks.models.user import UserInContest, UserStatusEnum
     user_id = test_user_for_student_contest.id
-    user_in_contest = UserInContest(user_id=user_id,
-                                    show_results_to_user=True,
-                                    user_status=UserStatusEnum.Participant.value,
-                                    variant_id=test_variant[0].variant_id,
-                                    location_id=test_olympiad_locations[0].location_id)
-    test_simple_contest[0].users.append(user_in_contest)
+    user_in_contest_ = UserInContest(user_id=user_id,
+                                     show_results_to_user=True,
+                                     user_status=UserStatusEnum.Participant.value,
+                                     variant_id=test_variant[0].variant_id,
+                                     location_id=test_olympiad_locations[0].location_id)
+    test_simple_contest[0].users.append(user_in_contest_)
 
+    test_app.db.session.add(user_in_contest_)
+    test_app.db.session.commit()
     user_work = add_user_response(test_app.db.session, user_id, test_simple_contest[0].contest_id)
-    user_work.work_status = ResponseStatusEnum.in_progress
+
     test_simple_contest[0].result_publication_date = datetime.utcnow()
     test_simple_contest[0].end_of_enroll_date = datetime.utcnow()
-    test_app.db.session.add(user_in_contest)
     test_app.db.session.add(user_work)
 
     test_app.db.session.commit()
@@ -710,9 +733,10 @@ def test_composite_contest_with_users(test_simple_contest_in_stage_1, test_varia
                                     location_id=test_olympiad_locations[0].location_id)
     test_simple_contest_in_stage_1[0].users.append(user_in_contest)
 
-    user_work = add_user_response(test_app.db.session, user_id, test_simple_contest_in_stage_1[0].contest_id)
-    user_work.work_status = ResponseStatusEnum.in_progress
     test_app.db.session.add(user_in_contest)
+    test_app.db.session.commit()
+    user_work = add_user_response(test_app.db.session, user_id, test_simple_contest_in_stage_1[0].contest_id)
+
     test_app.db.session.add(user_work)
 
     test_app.db.session.commit()

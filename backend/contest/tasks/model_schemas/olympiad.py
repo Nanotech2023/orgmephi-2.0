@@ -1,14 +1,14 @@
+from marshmallow import fields, validate, post_dump
+from marshmallow import fields as m_f
 from marshmallow_enum import EnumField
 from marshmallow_oneofschema import OneOfSchema
 from marshmallow_sqlalchemy import SQLAlchemySchema, auto_field
 
-from marshmallow import fields
 from common.fields import text_validator, common_name_validator
 from contest.tasks.model_schemas.location import OlympiadLocationSchema
 from contest.tasks.models import *
 from contest.tasks.models.reference import TargetClass
 from user.models.auth import *
-from marshmallow import fields as m_f
 
 """
 Target class
@@ -78,6 +78,18 @@ Stage
 """
 
 
+class ContestGroupRestrictionSchema(SQLAlchemySchema):
+    class Meta:
+        model = ContestGroupRestriction
+        load_instance = True
+        sqla_session = db.session
+
+    contest_id = auto_field(column_name='contest_id', dump_only=True, required=True)
+    group_id = auto_field(column_name='group_id', dump_only=True, required=True)
+    restriction = EnumField(ContestGroupRestrictionEnum, data_key='restriction', by_value=True, required=True)
+    group_name = auto_field(column_name='group_name', dump_only=True, required=True)
+
+
 class SimpleContestSchema(SQLAlchemySchema):
     class Meta:
         model = SimpleContest
@@ -90,8 +102,10 @@ class SimpleContestSchema(SQLAlchemySchema):
     end_date = auto_field(column_name='end_date', required=True)
     regulations = auto_field(column_name='regulations', validate=text_validator, required=False)
     status = EnumField(OlympiadStatusEnum, data_key='status', by_value=True)
+    academic_year = fields.Integer()
     total_points = fields.Integer()
     tasks_number = fields.Integer()
+    enrolled = fields.Boolean(required=False, dump_only=True)
     contest_duration = auto_field(column_name='contest_duration', required=True)
     result_publication_date = auto_field(column_name='result_publication_date', required=True)
     end_of_enroll_date = auto_field(column_name='end_of_enroll_date', required=True)
@@ -101,10 +115,23 @@ class SimpleContestSchema(SQLAlchemySchema):
     previous_participation_condition = EnumField(UserStatusEnum,
                                                  data_key='previous_participation_condition',
                                                  by_value=True, required=True)
+    composite_type = EnumField(ContestTypeEnum,
+                               data_key='composite_type',
+                               by_value=True, required=True,
+                               validate=validate.OneOf([ContestTypeEnum.SimpleContest]))
     holding_type = EnumField(ContestHoldingTypeEnum,
                              data_key='holding_type',
                              by_value=True, required=True)
     base_contest = fields.Nested(BaseContestSchema, required=True, dump_only=True)
+
+    @post_dump(pass_original=True)
+    def add_enrolled(self, data, original, many, **kwargs):
+        from common.jwt_verify import jwt_get_id
+        from contest.tasks.util import is_user_in_contest
+        user_id = jwt_get_id()
+        if user_id is not None:
+            data['enrolled'] = is_user_in_contest(user_id, original)
+        return data
 
 
 class ContestInfoSchema(SQLAlchemySchema):
@@ -116,8 +143,11 @@ class ContestInfoSchema(SQLAlchemySchema):
     name = auto_field(column_name='name', dump_only=True, required=True)
     subject = EnumField(OlympiadSubjectEnum, data_key='subject', by_value=True)
     contest_id = auto_field(column_name='contest_id', dump_only=True)
-    start_year = m_f.Int(required=True)
-    end_year = m_f.Int(required=True)
+    academic_year = m_f.Int(required=True)
+    composite_type = EnumField(ContestTypeEnum,
+                               data_key='composite_type',
+                               by_value=True, required=True,
+                               validate=validate.OneOf([ContestTypeEnum.SimpleContest]))
 
 
 class StageSchema(SQLAlchemySchema):
@@ -149,13 +179,19 @@ class CompositeContestSchema(SQLAlchemySchema):
                              by_value=True, required=True)
     stages = fields.Nested(StageSchema, many=True, required=True, dump_only=True)
     base_contest = fields.Nested(BaseContestSchema, required=True, dump_only=True)
+    status = EnumField(OlympiadStatusEnum, data_key='status', by_value=True)
+    academic_year = fields.Integer()
+    composite_type = EnumField(ContestTypeEnum,
+                               data_key='composite_type',
+                               by_value=True, required=True,
+                               validate=validate.OneOf([ContestTypeEnum.CompositeContest]))
 
 
 class ContestSchema(OneOfSchema):
     type_schemas = {ContestTypeEnum.SimpleContest.value: SimpleContestSchema,
                     ContestTypeEnum.CompositeContest.value: CompositeContestSchema}
     type_field = "composite_type"
-    type_field_remove = True
+    type_field_remove = False
 
     class_types = {SimpleContestSchema: ContestTypeEnum.SimpleContest.value,
                    CompositeContestSchema: ContestTypeEnum.CompositeContest.value}

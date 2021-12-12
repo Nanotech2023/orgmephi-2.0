@@ -2,20 +2,25 @@ import { Injectable } from '@angular/core'
 import { Actions, createEffect, ofType } from '@ngrx/effects'
 import { UsersService } from '@api/users/users.service'
 import {
+    errorCaught,
     getUserInfoRequest,
-    getUserInfoSuccess,
+    getUserInfoSuccess, getUserPhotoRequest, getUserPhotoSuccess,
+    getUserRequest,
     getUserSuccess,
     loginRequest,
     loginSuccess,
+    logoutRequest,
+    logoutSuccess,
     registerRequest,
     registerSuccess
 } from '@/auth/store/auth.actions'
-import { catchError, concatMap, mergeMap, switchMap } from 'rxjs/operators'
+import { catchError, concatMap, mergeMap, switchMap, tap } from 'rxjs/operators'
 import { of } from 'rxjs'
 import { Router } from '@angular/router'
 import { CSRFPairUser, User, UserInfo } from '@api/users/models'
 import { TasksService } from '@api/tasks/tasks.service'
 import { ResponsesService } from '@api/responses/responses.service'
+import { displayErrorMessage } from '@/shared/logging'
 
 
 // noinspection JSUnusedGlobalSymbols
@@ -26,13 +31,7 @@ export class AuthEffects
     {
     }
 
-    // init$ = createEffect( () =>
-    //     this.actions$.pipe(
-    //         ofType( ROOT_EFFECTS_INIT ),
-    //         map( action => this. )
-    //     ) )
-
-    loginAttempt$ = createEffect( () =>
+    readonly loginAttempt$ = createEffect( () =>
         this.actions$.pipe
         (
             ofType( loginRequest ),
@@ -40,68 +39,99 @@ export class AuthEffects
                 this.authService.userAuthLoginPost( loginRequestUser ).pipe(
                     mergeMap( ( csrfPair: CSRFPairUser ) =>
                         {
-                            this.authService.configuration.credentials[ "CSRFAccessToken" ] = csrfPair.csrf_access_token
-                            this.tasksService.configuration.credentials[ "CSRFAccessToken" ] = csrfPair.csrf_access_token
-                            this.responsesService.configuration.credentials[ "CSRFAccessToken" ] = csrfPair.csrf_access_token
-                            this.router.navigate( [ '/contests' ] )
+                            this.router.navigate( [ '/home' ] )
                             return of( loginSuccess( {
-                                csrfPair: {
-                                    csrf_access_token: csrfPair.csrf_access_token,
-                                    csrf_refresh_token: csrfPair.csrf_refresh_token
-                                }
+                                csrfPair: csrfPair
                             } ) )
                         }
                     ),
-                    catchError( error => of( error( { error: error } ) ) )
+                    catchError( error => of( errorCaught( { error: error } ) ) )
                 )
             )
         )
     )
 
-    loginSuccess$ = createEffect( () =>
+    readonly loginSuccess$ = createEffect( () =>
         this.actions$.pipe(
             ofType( loginSuccess ),
-            switchMap( () => [ getUserInfoRequest() ] )
+            switchMap( () => [ getUserRequest(), getUserInfoRequest(), getUserPhotoRequest() ] )
         )
     )
 
+    readonly logoutRequest$ = createEffect( () =>
+        this.actions$.pipe
+        (
+            ofType( logoutRequest ),
+            concatMap( () =>
+                this.authService.userAuthLogoutPost().pipe(
+                    mergeMap( () =>
+                        {
+                            this.router.navigate( [ '/login' ] )
+                            return of( logoutSuccess() )
+                        }
+                    ),
+                    catchError( error => of( errorCaught( { error: error } ) ) )
+                )
+            )
+        )
+    )
 
-    getUserRequest$ = createEffect( () =>
+    readonly getUserRequest$ = createEffect( () =>
         this.actions$.pipe(
-            ofType( getUserInfoRequest ),
+            ofType( getUserRequest ),
             concatMap( () =>
                 this.authService.userProfileUserGet().pipe(
                     mergeMap( ( user: User ) => of( getUserSuccess( { user: user } ) ) ),
-                    catchError( error => of( error( { error: error } ) ) )
+                    catchError( error => of( errorCaught( { error: error } ) ) )
                 )
             )
         )
     )
 
-    getUserInfoRequest$ = createEffect( () =>
+    readonly getUserInfoRequest$ = createEffect( () =>
         this.actions$.pipe(
             ofType( getUserInfoRequest ),
             concatMap( () =>
                 this.authService.userProfilePersonalGet().pipe(
                     mergeMap( ( userInfo: UserInfo ) => of( getUserInfoSuccess( { userInfo: userInfo } ) ) ),
-                    catchError( error => of( error( { error: error } ) ) )
+                    catchError( error => of( errorCaught( { error: error } ) ) )
                 )
             )
         )
     )
 
+    readonly getUserPhotoRequest$ = createEffect( () =>
+        this.actions$.pipe(
+            ofType( getUserPhotoRequest ),
+            concatMap( () =>
+                this.authService.userProfilePhotoGet().pipe(
+                    mergeMap( ( photo: Blob ) => of( getUserPhotoSuccess( { userPhoto: photo } ) ) ),
+                    catchError( error => of( errorCaught( { error: error } ) ) )
+                )
+            )
+        )
+    )
 
-    registerAttempt$ = createEffect( () =>
+    readonly registerRequest$ = createEffect( () =>
         this.actions$.pipe
         (
             ofType( registerRequest ),
             concatMap( ( { registrationRequestUser } ) =>
                 this.authService.userRegistrationSchoolPost( registrationRequestUser ).pipe(
                     mergeMap( () => of( registerSuccess() ) ),
-                    catchError( error => of( error( { error: error } ) )
+                    catchError( error => of( errorCaught( { error: error } ) )
                     )
                 )
             )
         )
+    )
+
+    readonly errorCaught$ = createEffect( () =>
+            this.actions$.pipe
+            (
+                ofType( errorCaught ),
+                tap( ( { error } ) => displayErrorMessage( error ) )
+            ),
+        { dispatch: false }
     )
 }

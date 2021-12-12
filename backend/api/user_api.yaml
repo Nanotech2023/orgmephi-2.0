@@ -35,6 +35,7 @@ components:
     Document:
       discriminator:
         mapping:
+          BirthCertificate: '#/components/schemas/DocumentBirthCertificate'
           ForeignPassport: '#/components/schemas/DocumentForeignPassport'
           OtherDocument: '#/components/schemas/DocumentOther'
           RFInternationalPassport: '#/components/schemas/DocumentRFInternational'
@@ -45,6 +46,38 @@ components:
       - $ref: '#/components/schemas/DocumentRFInternational'
       - $ref: '#/components/schemas/DocumentForeignPassport'
       - $ref: '#/components/schemas/DocumentOther'
+      - $ref: '#/components/schemas/DocumentBirthCertificate'
+    DocumentBirthCertificate:
+      properties:
+        document_name:
+          maxLength: 32
+          readOnly: true
+          type: string
+        document_type:
+          enum:
+          - BirthCertificate
+          type: string
+        issue_date:
+          format: date
+          type: string
+        issuer:
+          maxLength: 256
+          type: string
+        number:
+          example: '123456'
+          pattern: ^[0-9]{6}$
+          type: string
+        series:
+          example: "III-\u0410\u0418"
+          pattern: "^M{0,3}(CM|CD|D?C{0,3})(XC|XL|L?X{0,3})(IX|IV|V?I{0,3})-[\u0410\
+            -\u042F]{2}$"
+          type: string
+        user_id:
+          readOnly: true
+          type: integer
+      required:
+      - document_type
+      type: object
     DocumentForeignPassport:
       properties:
         document_name:
@@ -1228,6 +1261,38 @@ paths:
           description: User is not a school student or has missing data
       security:
       - JWTAccessToken: []
+  /user/profile/photo:
+    put:
+      requestBody:
+        content:
+          image/*:
+            schema:
+              format: binary
+              type: string
+        required: true
+      responses:
+        '204':
+          description: OK
+        '409':
+          description: File is too big
+      security:
+      - JWTAccessToken: []
+      - CSRFAccessToken: []
+    get:
+      responses:
+        '200':
+          content:
+            image/*:
+              schema:
+                format: binary
+                type: string
+          description: OK
+        '404':
+          description: User not found
+        '409':
+          description: Photo not attached
+      security:
+      - JWTAccessToken: []
   /user/admin/internal_register:
     post:
       requestBody:
@@ -1511,6 +1576,52 @@ paths:
       security:
       - JWTAccessToken: []
       - CSRFAccessToken: []
+  /user/admin/personal/{user_id}/photo:
+    put:
+      parameters:
+      - description: ID of user
+        in: path
+        name: user_id
+        required: true
+        schema:
+          type: integer
+      requestBody:
+        content:
+          image/*:
+            schema:
+              format: binary
+              type: string
+        required: true
+      responses:
+        '204':
+          description: OK
+        '409':
+          description: File is too big
+      security:
+      - JWTAccessToken: []
+      - CSRFAccessToken: []
+    get:
+      parameters:
+      - description: ID of user
+        in: path
+        name: user_id
+        required: true
+        schema:
+          type: integer
+      responses:
+        '200':
+          content:
+            image/*:
+              schema:
+                format: binary
+                type: string
+          description: OK
+        '404':
+          description: User not found
+        '409':
+          description: Photo not attached
+      security:
+      - JWTAccessToken: []
   /user/creator/user/{user_id}:
     get:
       parameters:

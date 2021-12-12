@@ -1,3 +1,6 @@
+import io
+
+from contest.tasks.models import ContestHoldingTypeEnum
 from . import *
 
 
@@ -84,7 +87,7 @@ def test_get_variant_self(client, test_simple_contest_with_users,
                           test_variant):
     resp = client.get(f'/contest/{test_simple_contest_with_users[0].contest_id}/variant/self')
     assert resp.status_code == 200
-    assert test_simple_contest_with_users[0].users.all()[0].variant_id == resp.json['variant_id']
+    assert test_simple_contest_with_users[0].users.all()[0].variant_id == resp.json['variant']['variant_id']
 
     resp = client.get(f'/contest/{test_simple_contest_with_users[1].contest_id}/variant/self')
     assert resp.status_code == 404
@@ -109,6 +112,17 @@ def test_change_user_location_in_contest(client, test_simple_contest_with_users,
                            'location_id': test_olympiad_locations[0].location_id
                        })
     assert resp.status_code == 200
+
+
+def test_change_user_supervisor_in_contest(client, test_simple_contest_with_users, test_olympiad_locations,
+                                           test_user_for_student_contest):
+    test_simple_contest_with_users[0].holding_type = ContestHoldingTypeEnum.OfflineContest
+    resp = client.post(f'/contest/{test_simple_contest_with_users[0].contest_id}/change_supervisor',
+                       json={
+                           'supervisor': "Username of supervisor"
+                       })
+    assert resp.status_code == 200
+    assert test_simple_contest_with_users[0].users[0].supervisor == "Username of supervisor"
 
 
 def test_change_user_location_in_contest_ended(client, test_simple_contest_with_users_ended, test_olympiad_locations,
@@ -142,9 +156,11 @@ def test_get_all_tasks_self_completed(client, test_simple_contest_with_users_not
 def test_get_task_image_self(client, test_simple_contest_with_users, test_variant, create_plain_task):
     resp = client.get(
         f'/contest/{test_simple_contest_with_users[0].contest_id}/tasks/{test_variant[0].tasks[0].task_id}/image/self')
-    assert resp.status_code == 409
+    assert resp.status_code == 404
 
-    test_variant[0].tasks[0].image_of_task = b'Test'
+    from common.media_types import TaskImage
+    test_app.io_to_media('TASK', test_variant[0].tasks[0], 'image_of_task', io.BytesIO(test_image), TaskImage)
+    test_app.db.session.commit()
 
     resp = client.get(
         f'/contest/{test_simple_contest_with_users[0].contest_id}/tasks/{test_variant[0].tasks[0].task_id}/image/self')
@@ -215,13 +231,6 @@ def test_get_contest_in_stage_self(client, test_composite_contest_with_users, te
     assert resp.status_code == 409
 
 
-def test_get_contest_in_stage_self_error(client, test_composite_contest_with_users, test_simple_contest_in_stage_1,
-                                         test_contests_composite, test_stages):
-    resp = client.get(f'/olympiad/{test_contests_composite[0].contest_id}'
-                      f'/stage/{test_stages[0].stage_id}/contest/{test_simple_contest_in_stage_1[1].contest_id}')
-    assert resp.status_code == 409
-
-
 # Olympiad
 
 
@@ -230,6 +239,41 @@ def test_olympiads_all(client, test_simple_contest, test_contests_composite):
     print(resp.data)
     assert resp.status_code == 200
     assert len(test_simple_contest + test_contests_composite) == resp.json['count']
+
+    resp = client.get('/olympiad/all?composite_type=CompositeContest')
+    print(resp.data)
+    assert resp.status_code == 200
+    assert len(test_contests_composite) == resp.json['count']
+
+    resp = client.get('/olympiad/all?limit=2&composite_type=CompositeContest')
+    print(resp.data)
+    assert resp.status_code == 200
+    assert 2 == resp.json['count']
+
+    resp = client.get('/olympiad/all?composite_type=SimpleContest')
+    print(resp.data)
+    assert resp.status_code == 200
+    assert len(test_simple_contest) == resp.json['count']
+
+    resp = client.get('/olympiad/all?academic_year=2021')
+    print(resp.data)
+    assert resp.status_code == 200
+    assert len(test_simple_contest) - 1 == resp.json['count']
+
+    resp = client.get('/olympiad/all?academic_year=2007')
+    print(resp.data)
+    assert resp.status_code == 200
+    assert 1 == resp.json['count']
+
+    resp = client.get('/olympiad/all?base_contest_id=2')
+    print(resp.data)
+    assert resp.status_code == 200
+    assert 1 == resp.json['count']
+
+    resp = client.get('/olympiad/all?location_id=1')
+    print(resp.data)
+    assert resp.status_code == 200
+    assert 0 == resp.json['count']
 
 
 def test_get_contest_self(client, test_base_contests, test_simple_contest, test_simple_contest_with_users):
@@ -242,10 +286,4 @@ def test_get_contest_self(client, test_base_contests, test_simple_contest, test_
 def test_get_contest_sel_composite(client, test_base_contests, test_contests_composite, test_simple_contest_with_users):
     resp = client.get(
         f'/olympiad/{test_contests_composite[0].contest_id}')
-    assert resp.status_code == 409
-
-
-def test_get_contest_self_not_reg(client, test_base_contests, test_simple_contest):
-    resp = client.get(
-        f'/olympiad/{test_simple_contest[0].contest_id}')
     assert resp.status_code == 409

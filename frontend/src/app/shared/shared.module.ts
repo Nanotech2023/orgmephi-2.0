@@ -5,6 +5,7 @@ import { HttpClientModule } from '@angular/common/http'
 import { FormsModule } from '@angular/forms'
 import { RouterModule } from '@angular/router'
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations'
+import { ManageNavbarComponent } from '@/layout/manage-navbar/manage-navbar.component'
 
 
 const SHARED = [
@@ -16,10 +17,14 @@ const SHARED = [
     FormsModule
 ]
 
+const COMPONENTS = [
+    ManageNavbarComponent
+]
+
 
 @NgModule( {
+    declarations: COMPONENTS,
     imports: SHARED,
-    exports: SHARED
+    exports: [ ...SHARED, ...COMPONENTS ]
 } )
-
 export class SharedModule {}

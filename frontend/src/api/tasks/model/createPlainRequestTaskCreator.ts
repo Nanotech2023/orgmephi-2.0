@@ -12,9 +12,18 @@
 
 
 export interface CreatePlainRequestTaskCreator { 
+    answer_type?: CreatePlainRequestTaskCreator.AnswerTypeEnum;
     num_of_task: number;
     recommended_answer: string;
     show_answer_after_contest?: boolean;
     task_points?: number;
 }
+export namespace CreatePlainRequestTaskCreator {
+    export type AnswerTypeEnum = 'File' | 'Text';
+    export const AnswerTypeEnum = {
+        File: 'File' as AnswerTypeEnum,
+        Text: 'Text' as AnswerTypeEnum
+    };
+}
+
 

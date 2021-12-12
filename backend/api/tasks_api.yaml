@@ -223,6 +223,12 @@ components:
         winner_3_condition:
           type: number
       type: object
+    ChangeSupervisorRequestTaskParticipant:
+      properties:
+        supervisor:
+          maxLength: 32
+          type: string
+      type: object
     ChangeUsersLocationInContestRequestTaskControlUsers:
       properties:
         location_id:
@@ -236,10 +242,16 @@ components:
       type: object
     CompositeContest:
       properties:
+        academic_year:
+          type: integer
         base_contest:
           allOf:
           - $ref: '#/components/schemas/BaseContest'
           readOnly: true
+        composite_type:
+          enum:
+          - CompositeContest
+          type: string
         contest_id:
           readOnly: true
           type: integer
@@ -253,10 +265,17 @@ components:
             $ref: '#/components/schemas/Stage'
           readOnly: true
           type: array
+        status:
+          enum:
+          - Will start soon
+          - In progress
+          - Finished
+          type: string
         visibility:
           type: boolean
       required:
       - base_contest
+      - composite_type
       - contest_id
       - holding_type
       - stages
@@ -271,6 +290,15 @@ components:
       oneOf:
       - $ref: '#/components/schemas/SimpleContest'
       - $ref: '#/components/schemas/CompositeContest'
+    ContestGroupRestrictionListAdmin:
+      properties:
+        restrictions:
+          items:
+            $ref: '#/components/schemas/ListElemContestGroupRestrictionAdmin'
+          type: array
+      required:
+      - restrictions
+      type: object
     ContestIdResponseTaskCreator:
       properties:
         contest_id:
@@ -546,7 +574,6 @@ components:
       required:
       - end_date
       - holding_type
-      - regulations
       - start_date
       - visibility
       type: object
@@ -589,7 +616,7 @@ components:
       properties:
         contest_list:
           items:
-            $ref: '#/components/schemas/SimpleContest'
+            $ref: '#/components/schemas/Contest'
           type: array
         count:
           type: integer
@@ -602,6 +629,22 @@ components:
           type: array
         count:
           type: integer
+      type: object
+    ListElemContestGroupRestrictionAdmin:
+      properties:
+        group_name:
+          maxLength: 32
+          type: string
+        restriction:
+          enum:
+          - ViewMarkAndUserStatus
+          - ViewResponse
+          - EditMark
+          - EditUserStatus
+          type: string
+      required:
+      - group_name
+      - restriction
       type: object
     LocationResponseTaskAdmin:
       properties:
@@ -766,10 +809,16 @@ components:
       type: object
     SimpleContest:
       properties:
+        academic_year:
+          type: integer
         base_contest:
           allOf:
           - $ref: '#/components/schemas/BaseContest'
           readOnly: true
+        composite_type:
+          enum:
+          - SimpleContest
+          type: string
         contest_duration:
           type: integer
           x-unit: seconds
@@ -784,6 +833,9 @@ components:
           format: date-time
           nullable: true
           type: string
+        enrolled:
+          readOnly: true
+          type: boolean
         holding_type:
           enum:
           - OfflineContest
@@ -836,6 +888,7 @@ components:
           type: boolean
       required:
       - base_contest
+      - composite_type
       - contest_duration
       - contest_id
       - end_date
@@ -851,7 +904,7 @@ components:
       properties:
         contest:
           allOf:
-          - $ref: '#/components/schemas/SimpleContest'
+          - $ref: '#/components/schemas/Contest'
           readOnly: true
         enrolled:
           type: boolean
@@ -1194,6 +1247,9 @@ components:
           type: integer
         show_results_to_user:
           type: boolean
+        supervisor:
+          maxLength: 32
+          type: string
         user_status:
           enum:
           - Winner 1
@@ -1224,6 +1280,9 @@ components:
         show_results_to_user:
           nullable: true
           type: boolean
+        supervisor:
+          nullable: true
+          type: string
         user_id:
           readOnly: true
           type: integer
@@ -1295,6 +1354,15 @@ components:
       required:
       - variant_description
       - variant_number
+      type: object
+    VariantWithCompletedTasksCountTaskParticipant:
+      properties:
+        completed_task_count:
+          type: integer
+        variant:
+          $ref: '#/components/schemas/Variant'
+      required:
+      - completed_task_count
       type: object
   securitySchemes:
     CSRFAccessToken:
@@ -1739,6 +1807,53 @@ paths:
           description: Bad request
         '409':
           description: Olympiad type already in use
+      security:
+      - JWTAccessToken: []
+      - CSRFAccessToken: []
+  /tasks/creator/contest/{contest_id}/restrictions:
+    put:
+      parameters:
+      - description: Id of the contest
+        in: path
+        name: contest_id
+        required: true
+        schema:
+          type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ContestGroupRestrictionListAdmin'
+        required: true
+      responses:
+        '200':
+          description: OK
+        '400':
+          description: Bad request
+        '404':
+          description: Contest or group not found
+      security:
+      - JWTAccessToken: []
+      - CSRFAccessToken: []
+    get:
+      parameters:
+      - description: Id of the contest
+        in: path
+        name: contest_id
+        required: true
+        schema:
+          type: integer
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ContestGroupRestrictionListAdmin'
+          description: OK
+        '400':
+          description: Bad request
+        '404':
+          description: Contest or group not found
       security:
       - JWTAccessToken: []
       - CSRFAccessToken: []
@@ -2504,7 +2619,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Variant'
+                $ref: '#/components/schemas/VariantWithCompletedTasksCountTaskParticipant'
           description: OK
         '400':
           description: Bad request
@@ -2554,6 +2669,31 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/EnrollRequestTaskParticipant'
+        required: true
+      responses:
+        '200':
+          description: OK
+        '400':
+          description: Bad request
+        '409':
+          description: User already enrolled
+      security:
+      - JWTAccessToken: []
+      - CSRFAccessToken: []
+  /tasks/participant/contest/{id_contest}/change_supervisor:
+    post:
+      parameters:
+      - description: ID of the contest
+        in: path
+        name: id_contest
+        required: true
+        schema:
+          type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChangeSupervisorRequestTaskParticipant'
         required: true
       responses:
         '200':
@@ -2701,6 +2841,11 @@ paths:
         schema:
           type: integer
       - in: query
+        name: academic_year
+        required: false
+        schema:
+          type: integer
+      - in: query
         name: end_date
         required: false
         schema:
@@ -2725,6 +2870,14 @@ paths:
         required: false
         schema:
           type: boolean
+      - in: query
+        name: composite_type
+        required: false
+        schema:
+          enum:
+          - SimpleContest
+          - CompositeContest
+          type: string
       responses:
         '200':
           content:
@@ -2933,6 +3086,11 @@ paths:
         schema:
           type: integer
       - in: query
+        name: academic_year
+        required: false
+        schema:
+          type: integer
+      - in: query
         name: location_id
         required: false
         schema:
@@ -2953,6 +3111,14 @@ paths:
         required: false
         schema:
           type: boolean
+      - in: query
+        name: composite_type
+        required: false
+        schema:
+          enum:
+          - SimpleContest
+          - CompositeContest
+          type: string
       responses:
         '200':
           content:

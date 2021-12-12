@@ -1,11 +1,10 @@
 import datetime
-import io
-from flask import request, send_file
+from flask import request
 from marshmallow import EXCLUDE
 
 from common import get_current_app, get_current_module, get_current_db
+from common.media_types import NewsImage
 from common.util import db_get_all, db_get_or_raise
-from common.errors import InsufficientData, QuotaExceeded, DataConflict
 
 from news.models import NewsCategory, News
 from news.util import filter_news_query, FilterNewsResponseSchema
@@ -186,13 +185,8 @@ def post_news_image(news_id):
         '204':
           description: OK
     """
-    file = request.data
-    if file == b'':
-        raise InsufficientData('request', 'image')
-    if len(file) > 4 * 1024 * 1024:
-        raise QuotaExceeded('Image is too large', 4 * 1024 * 1024)
     news = db_get_or_raise(News, 'id', news_id)
-    news.image = file
+    app.store_media('NEWS', news, 'image', NewsImage)
     db.session.commit()
     return {}, 204
 
@@ -251,9 +245,7 @@ def get_image(news_id):
           description: News not found
     """
     news = db_get_or_raise(News, 'id', news_id)
-    if news.image is None:
-        raise DataConflict('Image not present')
-    return send_file(io.BytesIO(news.image), mimetype='image/*')
+    return app.send_media(news.image)
 
 
 @module.route('/news/<int:news_id>/post', methods=['POST'])

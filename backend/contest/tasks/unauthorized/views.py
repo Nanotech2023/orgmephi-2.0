@@ -215,6 +215,11 @@ def olympiads_all():
           schema:
             type: integer
         - in: query
+          name: academic_year
+          required: false
+          schema:
+            type: integer
+        - in: query
           name: location_id
           required: false
           schema:
@@ -235,6 +240,12 @@ def olympiads_all():
           required: false
           schema:
             type: boolean
+        - in: query
+          name: composite_type
+          required: false
+          schema:
+            type: string
+            enum: ['SimpleContest', 'CompositeContest']
       responses:
         '200':
           description: OK

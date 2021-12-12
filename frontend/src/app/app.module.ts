@@ -10,29 +10,47 @@ import { AppRoutingModule } from '@/app-routing.module'
 import { environment } from '@environments/environment'
 import { AppComponent } from '@/app.component'
 import { UsersService } from '@api/users/users.service'
-import { ManageContestsModule } from '@/manage-contests/manage-contests.module'
-import { ManageUsersModule } from '@/manage-users/manage-users.module'
+import { NewsModule } from '@/news/news.module'
+import { ChatModule } from '@/chat/chat.module'
 import { AuthGuardService } from '@/shared/auth.guard.service'
 import { TasksService } from '@api/tasks/tasks.service'
 import { ResponsesService } from '@api/responses/responses.service'
+import { ProfileModule } from '@/profile/profile.module'
+import { RootEffects } from '@/app.effects'
+import { ManageUsersModule } from '@/manage-users/manage-users.module'
+import { ManageContestsModule } from '@/manage-contests/manage-contests.module'
+import { NotFoundComponent } from './not-found.component'
+
+
+const COMMON_MODULES = [
+    SharedModule,
+    LayoutModule,
+    AuthModule
+]
+
+const PARTICIPANT_MODULES = [
+    ContestsModule,
+    ProfileModule
+]
+
+const ADMIN_MODULES = [
+    ManageUsersModule,
+    ManageContestsModule
+]
 
 
 @NgModule( {
     declarations: [
-        AppComponent
+        AppComponent,
+        NotFoundComponent
     ],
     imports: [
-        SharedModule,
-        LayoutModule,
-        AuthModule,
-        ContestsModule,
-        // TODO fix profile module
-        // ProfileModule,
-        ManageUsersModule,
-        ManageContestsModule,
+        ...COMMON_MODULES,
+        ...PARTICIPANT_MODULES,
+        ...ADMIN_MODULES,
         AppRoutingModule,
         StoreModule.forRoot( {} ),
-        EffectsModule.forRoot( [] ),
+        EffectsModule.forRoot( [ RootEffects ] ),
         environment.production ? [] : StoreDevtoolsModule.instrument()
     ],
     providers: [
