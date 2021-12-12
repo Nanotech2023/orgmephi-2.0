@@ -838,3 +838,49 @@ def test_contest_properties(client, create_user_with_answers):
     assert resp.status_code == 200
     response = resp.json
     assert response['status'] == 'Will start soon'
+
+
+# noinspection DuplicatedCode
+def test_show_result_after_finish(client, create_user_with_answers):
+    contest_id = get_contest_id(create_user_with_answers, DEFAULT_INDEX)
+    contest = create_user_with_answers['contests'][DEFAULT_INDEX]
+    contest.show_result_after_finish = True
+    contest.result_publication_date = datetime.utcnow() - timedelta(minutes=15)
+    test_app.db.session.commit()
+    user_id = get_user_id(create_user_with_answers, DEFAULT_INDEX)
+    from contest.tasks.models.tasks import TaskTypeEnum
+    plain_id = get_task_id_by_variant_and_type(contest_id, user_id, TaskTypeEnum.PlainTask)
+    range_id = get_task_id_by_variant_and_type(contest_id, user_id, TaskTypeEnum.RangeTask)
+    multiple_id = get_task_id_by_variant_and_type(contest_id, user_id, TaskTypeEnum.MultipleChoiceTask)
+
+    resp = client.post(f'/contest/{contest_id}/user/{user_id}/finish')
+    assert resp.status_code == 200
+
+    from contest.responses.util import get_user_in_contest_work
+    user_work = get_user_in_contest_work(user_id, contest_id)
+    assert user_work.status.value == 'NotChecked'
+
+    resp = client.get(f'/contest/{contest_id}/user/{user_id}/mark')
+    assert resp.status_code == 200
+    assert resp.json['contest_id'] == contest_id
+    assert resp.json['user_id'] == user_id
+    user_answers = resp.json['user_answers']
+    assert len(user_answers) == 3
+
+    for answer in user_answers:
+        if answer['answer_type'] == 'PlainAnswerText':
+            assert answer['mark'] == 0
+            assert answer['task_points'] == 14
+            assert answer['task_id'] == plain_id
+            assert answer['right_answer']['answer'] == 'answer'
+        elif answer['answer_type'] == 'RangeAnswer':
+            assert answer['mark'] == 14
+            assert answer['task_points'] == 14
+            assert answer['task_id'] == range_id
+            assert answer['right_answer']['start_value'] == 0.5
+            assert answer['right_answer']['end_value'] == 0.7
+        elif answer['answer_type'] == 'MultipleChoiceAnswer':
+            assert answer['mark'] == 0
+            assert answer['task_points'] == 14
+            assert answer['task_id'] == multiple_id
+            assert answer['right_answer']['answers'] == ['1', '3']

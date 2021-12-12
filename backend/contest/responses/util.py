@@ -315,6 +315,9 @@ def finish_contest(user_work: Response):
     user_in_contest: UserInContest = UserInContest.query.filter_by(contest_id=user_work.contest_id,
                                                                    user_id=user_work.user_id).one_or_none()
     user_in_contest.completed_the_contest = True
+    contest: SimpleContest = db_get_one_or_none(SimpleContest, 'contest_id', user_work.contest_id)
+    if contest.show_result_after_finish:
+        check_user_work(user_work)
     db.session.commit()
 
 

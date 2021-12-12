@@ -256,6 +256,7 @@ def add_simple_contest(db_session,
                        contest_duration=None,
                        previous_contest_id=None,
                        previous_participation_condition=None,
+                       show_result_after_finish=False,
                        base_contest_id=None):
     """
     Create new simple contest object
@@ -273,6 +274,7 @@ def add_simple_contest(db_session,
         end_of_enroll_date=end_of_enroll_date,
         deadline_for_appeal=deadline_for_appeal,
         previous_contest_id=previous_contest_id,
+        show_result_after_finish=show_result_after_finish,
         previous_participation_condition=previous_participation_condition,
     )
     db_session.add(simple_contest)
@@ -292,6 +294,7 @@ class SimpleContest(Contest):
     start_date: start date of contest
     end_of_enroll_date: end of enroll date
     deadline_for_appeal: deadline_for_appeal
+    show_result_after_finish: show or not result after finishing contest
     end_date: end date of contest
     result_publication_date: result publication date
 
@@ -314,6 +317,7 @@ class SimpleContest(Contest):
     result_publication_date = db.Column(db.DateTime, nullable=True)
     end_of_enroll_date = db.Column(db.DateTime, nullable=True)
     deadline_for_appeal = db.Column(db.DateTime, nullable=True)
+    show_result_after_finish = db.Column(db.Boolean, default=False)
     contest_duration = db.Column(db.Interval, default=timedelta(seconds=0), nullable=False)
     target_classes = association_proxy('base_contest', 'target_classes')
     previous_contest_id = db.Column(db.Integer, db.ForeignKey('simple_contest.contest_id'), nullable=True)

@@ -34,6 +34,7 @@ class UpdateContestRequestTaskEditorSchema(Schema):
     result_publication_date = fields.DateTime(required=False)
     end_of_enroll_date = fields.DateTime(required=False)
     deadline_for_appeal = fields.DateTime(required=False)
+    show_result_after_finish = fields.Boolean(required=False)
     visibility = fields.Boolean(required=False)
     show_answer_after_contest = fields.Boolean(required=False)
     contest_duration = fields.TimeDelta(required=False)

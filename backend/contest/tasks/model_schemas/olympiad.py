@@ -117,6 +117,7 @@ class SimpleContestSchema(SQLAlchemySchema):
     enrolled = fields.Boolean(required=False, dump_only=True)
     show_answer_after_contest = fields.Boolean(required=False, dump_only=True)
     deadline_for_appeal = auto_field(column_name='deadline_for_appeal', required=True)
+    show_result_after_finish = auto_field(column_name='show_result_after_finish', required=False)
     contest_duration = auto_field(column_name='contest_duration', required=False)
     result_publication_date = auto_field(column_name='result_publication_date', required=False)
     end_of_enroll_date = auto_field(column_name='end_of_enroll_date', required=False)
