@@ -1,5 +1,5 @@
 import { Component, OnDestroy, OnInit } from '@angular/core'
-import { Observable } from 'rxjs'
+import { interval, Observable, Subscription } from 'rxjs'
 import {
     Contest,
     TaskForUserResponseTaskParticipant,
@@ -19,10 +19,10 @@ import { UserResponseStatusResponse } from '@api/responses/model'
 export class ContestAssignmentComponent implements OnInit, OnDestroy
 {
     contestId!: number | null
-    // @ts-ignore
-    interval!
     viewModel$: Observable<{ loading: boolean; error: string | null; contest: Contest | undefined; variant: VariantWithCompletedTasksCountTaskParticipant | undefined; tasks: Array<TaskForUserResponseTaskParticipant>; time: number | undefined; status: UserResponseStatusResponse.StatusEnum | undefined }>
     timeLeft: number | undefined
+    decreaseTimerSubscription!: Subscription
+    reloadTimerSubscription!: Subscription
 
     constructor( private route: ActivatedRoute, private contestAssignmentStore: ContestAssignmentStore )
     {
@@ -53,24 +53,18 @@ export class ContestAssignmentComponent implements OnInit, OnDestroy
 
     ngOnInit(): void
     {
-        this.interval = setInterval( () =>
+        this.decreaseTimerSubscription = interval( 1000 ).subscribe( ( _ => this.decreaseTimer() ) )
+        this.reloadTimerSubscription = interval( 10000 ).subscribe( _ =>
         {
-            if ( this.timeLeft === undefined )
-                return
-            if ( this.timeLeft > 0 )
-            {
-                this.timeLeft--
-            }
-            else
-            {
-                this.timeLeft = 0
-            }
-        }, 1000 )
+            if ( !!this.contestId )
+                this.contestAssignmentStore.fetchTime( this.contestId )
+        } )
     }
 
     ngOnDestroy(): void
     {
-        clearInterval( this.interval )
+        this.decreaseTimerSubscription.unsubscribe()
+        this.reloadTimerSubscription.unsubscribe()
     }
 
     finish(): void
@@ -79,6 +73,20 @@ export class ContestAssignmentComponent implements OnInit, OnDestroy
         {
             this.contestAssignmentStore.finish( this.contestId )
             this.contestAssignmentStore.fetchTime( this.contestId )
+        }
+    }
+
+    private decreaseTimer()
+    {
+        if ( this.timeLeft === undefined )
+            return
+        if ( this.timeLeft > 0 )
+        {
+            this.timeLeft--
+        }
+        else
+        {
+            this.timeLeft = 0
         }
     }
 }

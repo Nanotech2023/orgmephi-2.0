@@ -11,6 +11,9 @@ import { ResetPasswordComponent } from '@/auth/components/reset-password/reset-p
 import {
     ResetPasswordConfirmComponent
 } from '@/auth/components/reset-password-confirm/reset-password-confirm.component'
+import { ProfileModule } from '@/profile/profile.module'
+import { ConfirmAccountTokenComponent } from '@/auth/components/confirm-account-token/confirm-account-token.component'
+import { ResetPasswordTokenComponent } from '@/auth/components/reset-password-token/reset-password-token.component'
 
 
 const COMPONENTS = [
@@ -18,7 +21,9 @@ const COMPONENTS = [
     LoginComponent,
     RegisterSchoolComponent,
     ResetPasswordComponent,
-    ResetPasswordConfirmComponent
+    ResetPasswordConfirmComponent,
+    ConfirmAccountTokenComponent,
+    ResetPasswordTokenComponent
 ]
 
 
@@ -28,7 +33,8 @@ const COMPONENTS = [
         SharedModule,
         StoreModule.forFeature( AuthState.featureKey, AuthState.reducer ),
         EffectsModule.forFeature( [ AuthEffects ] ),
-        AuthRouterModule
+        AuthRouterModule,
+        ProfileModule
     ]
 } )
 export class AuthModule {}

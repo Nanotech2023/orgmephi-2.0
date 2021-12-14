@@ -6,6 +6,8 @@ import { ResetPasswordComponent } from '@/auth/components/reset-password/reset-p
 import {
     ResetPasswordConfirmComponent
 } from '@/auth/components/reset-password-confirm/reset-password-confirm.component'
+import { ResetPasswordTokenComponent } from '@/auth/components/reset-password-token/reset-password-token.component'
+import { ConfirmAccountTokenComponent } from '@/auth/components/confirm-account-token/confirm-account-token.component'
 
 
 const routes: Routes =
@@ -23,8 +25,16 @@ const routes: Routes =
             component: ResetPasswordComponent
         },
         {
-            path: 'reset-password-confirm',
+            path: 'reset-password/confirm',
             component: ResetPasswordConfirmComponent
+        },
+        {
+            path: 'reset-password/token',
+            component: ResetPasswordTokenComponent
+        },
+        {
+            path: 'confirm-account',
+            component: ConfirmAccountTokenComponent
         }
     ]
 

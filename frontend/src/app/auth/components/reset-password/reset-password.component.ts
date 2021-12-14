@@ -19,6 +19,6 @@ export class ResetPasswordComponent
     onSubmit(): void
     {
         this.usersService.userRegistrationForgotEmailPost( this.emailToReset )
-        this.router.navigate( [ "/reset-password-confirm" ], { queryParams: { email: this.emailToReset } } )
+        this.router.navigate( [ "/reset-password/confirm" ], { queryParams: { email: this.emailToReset } } )
     }
 }

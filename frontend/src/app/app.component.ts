@@ -2,7 +2,7 @@ import { Component, OnDestroy, OnInit } from '@angular/core'
 import { select, Store } from '@ngrx/store'
 import { AuthSelectors, AuthState } from '@/auth/store'
 import { Observable, SubscriptionLike } from 'rxjs'
-import { ActivatedRoute, NavigationEnd, Router } from '@angular/router'
+import { NavigationEnd, Router } from '@angular/router'
 import { filter, startWith } from 'rxjs/operators'
 
 
@@ -24,8 +24,9 @@ export class AppComponent implements OnInit, OnDestroy
             startWith( this.router )
         ).subscribe( ( event ) =>
         {
+            const paths = [ "/login", "/register", "reset-password", "reset-password/confirm", "reset-password/token", "confirm-account" ]
             if ( event instanceof NavigationEnd )
-                this.showHeader = event.url != "/login"
+                this.showHeader = paths.includes( event.url )
         } )
     }
 

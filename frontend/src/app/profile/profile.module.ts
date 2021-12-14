@@ -29,6 +29,7 @@ import {
 } from '@/profile/components/profile-edit-school-info/profile-edit-school-info.component'
 import { ProfileEditSchoolComponent } from '@/profile/containers/profile-edit-school/profile-edit-school.component'
 import { NgSelectModule } from '@ng-select/ng-select'
+import { PasswordValidatorDirective } from '@/shared/password-validator.directive'
 
 
 const COMPONENTS = [
@@ -54,7 +55,11 @@ const COMPONENTS = [
 @NgModule( {
     declarations: [
         COMPONENTS,
-        PhoneValidatorDirective
+        PhoneValidatorDirective,
+        PasswordValidatorDirective
+    ],
+    exports: [
+        PasswordValidatorDirective
     ],
     imports: [
         SharedModule,

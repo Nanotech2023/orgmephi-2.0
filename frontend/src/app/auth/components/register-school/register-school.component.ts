@@ -1,7 +1,12 @@
-import { Component, OnInit } from '@angular/core'
+import { Component, forwardRef, OnDestroy, OnInit } from '@angular/core'
 import { SchoolRegistrationRequestUser } from '@api/users/models'
 import { AuthActions, AuthState } from '@/auth/store'
 import { Store } from '@ngrx/store'
+import { NG_VALIDATORS } from '@angular/forms'
+import { PasswordValidatorDirective } from '@/shared/password-validator.directive'
+import { UsersService } from '@api/users/users.service'
+import { DomSanitizer, SafeUrl } from '@angular/platform-browser'
+import { Subscription } from 'rxjs'
 
 
 export interface SchoolRegistrationRequestUserAttempt extends SchoolRegistrationRequestUser
@@ -13,15 +18,21 @@ export interface SchoolRegistrationRequestUserAttempt extends SchoolRegistration
 @Component( {
     selector: 'app-register-school',
     templateUrl: './register-school.component.html',
-    styleUrls: [ './register-school.component.scss' ]
+    styleUrls: [ './register-school.component.scss' ],
+    providers: [
+        { provide: NG_VALIDATORS, useExisting: forwardRef( () => PasswordValidatorDirective ), multi: true }
+    ]
 } )
-export class RegisterSchoolComponent implements OnInit
+export class RegisterSchoolComponent implements OnInit, OnDestroy
 {
     registerAttempt: SchoolRegistrationRequestUserAttempt
     hasRegisterNumber!: boolean
     agreementAccepted: boolean
+    captchaUrl!: SafeUrl
+    subscription!: Subscription
+    imageUrl!: SafeUrl
 
-    constructor( private readonly store: Store<AuthState.State> )
+    constructor( private readonly usersService: UsersService, private readonly store: Store<AuthState.State>, private sanitizer: DomSanitizer )
     {
         this.registerAttempt = {
             auth_info: { email: '', password: '' },
@@ -34,6 +45,17 @@ export class RegisterSchoolComponent implements OnInit
 
     ngOnInit(): void
     {
+        this.subscription = this.usersService.userRegistrationCaptchaGet().subscribe( data =>
+        {
+            const unsafeImageUrl = URL.createObjectURL( data )
+            this.captchaUrl = this.sanitizer.bypassSecurityTrustUrl( unsafeImageUrl )
+        } )
+
+        this.usersService.userRegistrationCaptchaGet().subscribe( data =>
+        {
+            const unsafeImageUrl = URL.createObjectURL( data )
+            this.imageUrl = this.sanitizer.bypassSecurityTrustUrl( unsafeImageUrl )
+        } )
     }
 
     isValid(): boolean
@@ -44,5 +66,10 @@ export class RegisterSchoolComponent implements OnInit
     register( registerUser: SchoolRegistrationRequestUser ): void
     {
         this.store.dispatch( AuthActions.registerRequest( { registrationRequestUser: registerUser } ) )
+    }
+
+    ngOnDestroy(): void
+    {
+        this.subscription.unsubscribe()
     }
 }

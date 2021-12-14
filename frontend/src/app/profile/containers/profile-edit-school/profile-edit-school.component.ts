@@ -3,6 +3,7 @@ import { Observable } from 'rxjs'
 import { Location, LocationRussiaCity, SchoolInfo, SchoolTypeEnum } from '@api/users/models'
 import { getSchoolTypeDisplay } from '@/shared/displayUtils'
 import { ProfileSchoolStore } from '@/profile/profile-school.store'
+import { Router } from '@angular/router'
 
 
 @Component( {
@@ -35,20 +36,15 @@ export class ProfileEditSchoolComponent
         SchoolTypeEnum.Other
     ]
 
-    constructor( private profileStore: ProfileSchoolStore )
+    constructor( private profileStore: ProfileSchoolStore, private router: Router )
     {
         this.profileStore.fetch()
         this.viewModel$ = this.profileStore.viewModel$
     }
 
-    updateSchoolInfo( schoolInfo: SchoolInfo ): void
+    onSubmit( schoolInfo: { loading: boolean; error: string | null; userProfileUnfilled: string; schoolInfo: SchoolInfo; schoolLocation: Location; schoolLocationCity: LocationRussiaCity } ): void
     {
-        this.profileStore.updateSchoolInfo( schoolInfo )
-    }
-
-    onSubmit( schoolInfo: { loading: boolean; error: string | null; userProfileUnfilled: string; schoolInfo: SchoolInfo; schoolLocation: Location; schoolLocationCity: LocationRussiaCity } )
-    {
-        this.updateSchoolInfo( schoolInfo.schoolInfo )
+        this.profileStore.updateSchoolInfo( schoolInfo.schoolInfo )
     }
 
     getSchoolTypeDisplay( schoolType: SchoolTypeEnum ): string
@@ -56,7 +52,7 @@ export class ProfileEditSchoolComponent
         return getSchoolTypeDisplay( schoolType )
     }
 
-    onCityChange( $event: LocationRussiaCity )
+    onCityChange( $event: LocationRussiaCity ): void
     {
         this.profileStore.setCity( $event )
     }

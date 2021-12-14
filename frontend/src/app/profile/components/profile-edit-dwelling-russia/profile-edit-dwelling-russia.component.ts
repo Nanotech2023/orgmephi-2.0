@@ -25,7 +25,7 @@ export class ProfileEditDwellingRussiaComponent implements OnInit
 
     ngOnInit(): void
     {
-        this.regions$ = this.usersService.userRegistrationInfoRegionsGet().pipe( map( item => item.region_list ) )
+        this.regions$ = this.usersService.userRegistrationInfoRegionsGet().pipe( map( item => item.region_list.filter( x => x.name !== "Некорректные данные" && x.name !== "Онлайн" ) ) )
     }
 
     getEmptyLocation(): LocationRussia

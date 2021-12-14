@@ -2,19 +2,21 @@ import { Injectable } from '@angular/core'
 import { ComponentStore, tapResponse } from '@ngrx/component-store'
 import {
     Document,
+    DocumentTypeEnum,
     Location,
     LocationRussia,
-    UserInfo,
-    UserLimitations,
-    DocumentTypeEnum,
+    LocationRussiaCity,
     LocationTypeEnum,
-    SchoolInfo, LocationRussiaCity
+    SchoolInfo,
+    UserInfo,
+    UserLimitations
 } from '@api/users/models'
 import { UsersService } from '@api/users/users.service'
 import { Observable, of, zip } from 'rxjs'
 import { CallState, getError, LoadingState } from '@/shared/callState'
-import { catchError, finalize, switchMap, withLatestFrom } from 'rxjs/operators'
+import { catchError, finalize, switchMap, tap, withLatestFrom } from 'rxjs/operators'
 import { displayErrorMessage } from '@/shared/logging'
+import { Router } from '@angular/router'
 
 
 export interface ProfileState
@@ -39,7 +41,7 @@ const initialState: ProfileState = {
 @Injectable()
 export class ProfileStore extends ComponentStore<ProfileState>
 {
-    constructor( private usersService: UsersService )
+    constructor( private usersService: UsersService, private router: Router )
     {
         super( initialState )
     }
@@ -200,32 +202,42 @@ export class ProfileStore extends ComponentStore<ProfileState>
         userInfo$.pipe(
             withLatestFrom( this.userInfoDocument$, this.userInfoDwelling$, this.userInfoDwellingCity$, this.userInfoLimitations$ ),
             switchMap( ( [ userInfo, document, dwelling, dwellingCity, limitations ] ) =>
-            {
-                this.setLoading()
-                const newUserInfo = { ...userInfo }
-                newUserInfo.user_id = undefined
-                newUserInfo.document = document
+                {
+                    this.setLoading()
+                    const newUserInfo = { ...userInfo }
+                    newUserInfo.user_id = undefined
+                    newUserInfo.document = document
 
-                // @ts-ignore
-                newUserInfo.document.user_id = undefined
-                if ( document.document_type != DocumentTypeEnum.OtherDocument )
-                {
                     // @ts-ignore
-                    newUserInfo.document.document_name = undefined
-                }
-                newUserInfo.dwelling = dwelling
-                if ( dwelling.location_type == LocationTypeEnum.Russian )
-                {
+                    newUserInfo.document.user_id = undefined
+                    if ( document.document_type != DocumentTypeEnum.OtherDocument )
+                    {
+                        // @ts-ignore
+                        newUserInfo.document.document_name = undefined
+                    }
+                    newUserInfo.dwelling = dwelling
+                    if ( dwelling.location_type == LocationTypeEnum.Russian )
+                    {
+                        // @ts-ignore
+                        newUserInfo.dwelling.city = dwellingCity
+                    }
+                    newUserInfo.limitations = limitations
                     // @ts-ignore
-                    newUserInfo.dwelling.city = dwellingCity
+                    newUserInfo.limitations.user_id = undefined
+                    return this.usersService.userProfilePersonalPatch( newUserInfo ).pipe(
+                        catchError( ( error: any ) => of( displayErrorMessage( error ) ) )
+                    )
                 }
-                newUserInfo.limitations = limitations
-                // @ts-ignore
-                newUserInfo.limitations.user_id = undefined
-                return this.usersService.userProfilePersonalPatch( newUserInfo ).pipe(
-                    catchError( ( error: any ) => of( displayErrorMessage( error ) ) )
-                )
-            } )
+            ),
+            tap( () => this.reloadCurrentRoute() )
         ) )
 
+    reloadCurrentRoute(): void
+    {
+        const currentUrl = this.router.url
+        this.router.navigateByUrl( '/', { skipLocationChange: true } ).then( () =>
+        {
+            this.router.navigate( [ currentUrl ] )
+        } )
+    }
 }

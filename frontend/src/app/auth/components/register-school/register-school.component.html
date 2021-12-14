@@ -1,16 +1,4 @@
 <div class="registration-form">
-<!--    <p class="group_label">Данные для подтверждения регистрации</p>-->
-<!--    <p class="form_label">Регистрационный номер и код активации</p>-->
-<!--    <div class="radio_group">-->
-<!--        <div class="radio_group_item">-->
-<!--            <input type="radio" [(ngModel)]="hasRegisterNumber" value="true">-->
-<!--            <span>Да</span>-->
-<!--        </div>-->
-<!--        <div class="radio_group_item">-->
-<!--            <input type="radio" [(ngModel)]="hasRegisterNumber" value="false">-->
-<!--            <span>Нет</span>-->
-<!--        </div>-->
-<!--    </div>-->
     <div class="input_group">
         <p class="group_label">Данные для авторизации в системе</p>
         <div class="input_group_item">
@@ -31,7 +19,7 @@
         </div>
         <div class="input_group_item">
             <p class="form_label">Пароль</p>
-            <input type="password" required minlength="6" #password="ngModel"
+            <input type="password" required #password="ngModel" appPasswordValidator minlength="8"
                    name="password" placeholder="Придумайте пароль"
                    [(ngModel)]="registerAttempt.auth_info.password">
             <div *ngIf="password.invalid && (password.dirty || password.touched)"
@@ -40,7 +28,10 @@
                     Поле обязательно для заполнения
                 </div>
                 <div *ngIf="password.errors?.minlength">
-                    Пароль должен содержать не менее 6-ти символов
+                    Пароль должен содержать не менее 8-ти символов
+                </div>
+                <div *ngIf="password.errors?.passwordStrength">
+                    Пароль должен содержать заглавные, строчные буквы и цифры
                 </div>
             </div>
         </div>
@@ -56,7 +47,7 @@
                         Поле обязательно для заполнения
                     </div>
                     <div *ngIf="passwordConfirm.errors?.minlength">
-                        Пароль должен содержать не менее 6-ти символов
+                        Пароль должен содержать не менее 8-ти символов
                     </div>
                 </div>
                 <div *ngIf="registerAttempt.auth_info.password !== registerAttempt.passwordConfirm" class="input_error">
@@ -128,14 +119,29 @@
             </div>
         </div>
 
-        <div class="input_group_item">
+        <div class="input_group_item ps-3">
             <div class="radio_group">
                 <div class="radio_group_item">
                     <input type="checkbox" class="checkbox" [(ngModel)]="agreementAccepted">
                     <span class="form_label" style="margin-left: 0; padding-left: 0">Согласен(на) на обработку персональных данных</span>
                 </div>
             </div>
+        </div>
 
+        <div class="input_group_item">
+            <img [src]="imageUrl" alt="Captcha" class="img-fluid pt-5 pb-5 px-5">
+            <br/>
+            <input type="text" required
+                   [(ngModel)]="registerAttempt.captcha"
+                   #captcha="ngModel"
+                   name="captcha"
+                   placeholder="Captcha">
+            <div *ngIf="captcha.invalid && (captcha.dirty || captcha.touched)"
+                 class="input_error">
+                <div *ngIf="captcha.errors?.required">
+                    Поле обязательно для заполнения
+                </div>
+            </div>
         </div>
 
         <div class="input_group_item">

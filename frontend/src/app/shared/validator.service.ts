@@ -24,4 +24,34 @@ export class ValidatorService
         else
             return ( { emailValid: false } )
     }
+
+    validatePassword( password: string ): ValidationErrors | null
+    {
+        let value = password
+        if ( !value )
+        {
+            return null
+        }
+
+        let upperCaseCharacters = /[A-Z]+/g
+        if ( !upperCaseCharacters.test( value ) )
+        {
+            return { passwordStrength: `text has to contine Upper case characters,current value ${ value }` }
+        }
+
+        let lowerCaseCharacters = /[a-z]+/g
+        if ( !lowerCaseCharacters.test( value ) )
+        {
+            return { passwordStrength: `text has to contine lower case characters,current value ${ value }` }
+        }
+
+
+        let numberCharacters = /[0-9]+/g
+        if ( !numberCharacters.test( value ) )
+        {
+            return { passwordStrength: `text has to contine number characters,current value ${ value }` }
+        }
+
+        return null
+    }
 }

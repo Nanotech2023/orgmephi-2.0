@@ -1,17 +1,11 @@
 import { Component, forwardRef } from '@angular/core'
 import { ProfileStore } from '@/profile/profile.store'
 import { Observable } from 'rxjs'
-import {
-    Document,
-    GenderEnum,
-    Location,
-    LocationRussiaCity,
-    UserInfo,
-    UserLimitations
-} from '@api/users/models'
+import { Document, GenderEnum, Location, LocationRussiaCity, UserInfo, UserLimitations } from '@api/users/models'
 import { getGenderDisplay } from '@/shared/displayUtils'
 import { NG_VALIDATORS } from '@angular/forms'
 import { PhoneValidatorDirective } from '@/shared/phone.validator.directive'
+import { Router } from '@angular/router'
 
 
 @Component( {
@@ -42,20 +36,15 @@ export class ProfileEditUserinfoComponent
         this.viewModel$ = this.profileStore.viewModel$
     }
 
-    updateUserInfo( userInfo: UserInfo ): void
-    {
-        this.profileStore.updateUserInfo( userInfo )
-        this.profileStore.fetch()
-    }
 
     getGenderDisplay( genderEnum: GenderEnum ): string
     {
         return getGenderDisplay( genderEnum )
     }
 
-    onSubmit( userInfo: UserInfo )
+    onSubmit( userInfo: UserInfo ): void
     {
-        this.updateUserInfo( userInfo )
+        this.profileStore.updateUserInfo( userInfo )
     }
 
     onCityChange( $event: LocationRussiaCity )

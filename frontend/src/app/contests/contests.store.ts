@@ -4,7 +4,6 @@ import { TasksService } from '@api/tasks/tasks.service'
 import { CallState, getError, LoadingState } from '@/shared/callState'
 import { EMPTY, Observable, of } from 'rxjs'
 import {
-    CompositeContest,
     Contest,
     EnrollRequestTaskParticipant,
     FilterSimpleContestResponseTaskParticipant,
@@ -12,15 +11,13 @@ import {
     SimpleContest,
     SimpleContestWithFlagResponseTaskParticipant
 } from '@api/tasks/model'
-import { catchError, filter, map, switchMap, tap, withLatestFrom } from 'rxjs/operators'
+import { catchError, switchMap, tap } from 'rxjs/operators'
 import { ResponsesService } from '@api/responses/responses.service'
-import CompositeTypeEnum = SimpleContest.CompositeTypeEnum
 import { displayErrorMessage } from '@/shared/logging'
-import { Store } from '@ngrx/store'
-import { AuthSelectors, AuthState } from '@/auth/store'
 import { UsersService } from '@api/users/users.service'
 import { SchoolInfo, SelfUnfilledResponse } from '@api/users/models'
 import { Router } from '@angular/router'
+import CompositeTypeEnum = SimpleContest.CompositeTypeEnum
 
 
 export interface ContestsState
@@ -158,14 +155,12 @@ export class ContestsStore extends ComponentStore<ContestsState>
                 const { contestId, locationId } = enroll
                 const enrollRequestTaskParticipant: EnrollRequestTaskParticipant = { location_id: locationId }
                 return this.tasksService.tasksParticipantContestIdContestEnrollPost( contestId, enrollRequestTaskParticipant ).pipe(
-                    catchError( ( error: any ) => of( displayErrorMessage( error ) ) )
-                ).pipe(
+                    catchError( ( error: any ) => of( displayErrorMessage( error ) ) ),
                     switchMap( () =>
                         this.responsesService.responsesParticipantContestContestIdUserSelfCreatePost( contestId ).pipe(
                             catchError( ( error: any ) => of( EMPTY ) ),
                             tap( () => this.router.navigate( [ `/contests/${ contestId }/assignment` ] ) )
-                        ) )
-                )
+                        ) ) )
             } )
         ) )
 

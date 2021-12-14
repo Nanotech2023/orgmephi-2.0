@@ -1,17 +1,12 @@
 import { Injectable } from '@angular/core'
 import { ComponentStore, tapResponse } from '@ngrx/component-store'
-import {
-    Location,
-    LocationRussia,
-    LocationRussiaCity,
-    LocationTypeEnum,
-    SchoolInfo
-} from '@api/users/models'
+import { Location, LocationRussia, LocationRussiaCity, LocationTypeEnum, SchoolInfo } from '@api/users/models'
 import { CallState, getError, LoadingState } from '@/shared/callState'
 import { UsersService } from '@api/users/users.service'
 import { Observable, of, zip } from 'rxjs'
-import { catchError, finalize, switchMap, withLatestFrom } from 'rxjs/operators'
+import { catchError, finalize, switchMap, tap, withLatestFrom } from 'rxjs/operators'
 import { displayErrorMessage } from '@/shared/logging'
+import { Router } from '@angular/router'
 
 
 export interface ProfileSchoolState
@@ -32,7 +27,7 @@ const initialState: ProfileSchoolState = {
 @Injectable()
 export class ProfileSchoolStore extends ComponentStore<ProfileSchoolState>
 {
-    constructor( private usersService: UsersService )
+    constructor( private usersService: UsersService, private router: Router )
     {
         super( initialState )
     }
@@ -171,6 +166,17 @@ export class ProfileSchoolStore extends ComponentStore<ProfileSchoolState>
                 return this.usersService.userProfileSchoolPatch( newSchoolInfo ).pipe(
                     catchError( ( error: any ) => of( displayErrorMessage( error ) ) )
                 )
-            } )
+            } ),
+            tap( () => this.reloadCurrentRoute() )
         ) )
+
+
+    reloadCurrentRoute(): void
+    {
+        const currentUrl = this.router.url
+        this.router.navigateByUrl( '/', { skipLocationChange: true } ).then( () =>
+        {
+            this.router.navigate( [ currentUrl ] )
+        } )
+    }
 }
