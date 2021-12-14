@@ -1,4 +1,4 @@
-import { Component, forwardRef, OnDestroy, OnInit } from '@angular/core'
+import { Component, forwardRef, OnInit } from '@angular/core'
 import { SchoolRegistrationRequestUser } from '@api/users/models'
 import { AuthActions, AuthState } from '@/auth/store'
 import { Store } from '@ngrx/store'
@@ -23,14 +23,13 @@ export interface SchoolRegistrationRequestUserAttempt extends SchoolRegistration
         { provide: NG_VALIDATORS, useExisting: forwardRef( () => PasswordValidatorDirective ), multi: true }
     ]
 } )
-export class RegisterSchoolComponent implements OnInit, OnDestroy
+export class RegisterSchoolComponent implements OnInit
 {
     registerAttempt: SchoolRegistrationRequestUserAttempt
     hasRegisterNumber!: boolean
     agreementAccepted: boolean
     captchaUrl!: SafeUrl
     subscription!: Subscription
-    imageUrl!: SafeUrl
 
     constructor( private readonly usersService: UsersService, private readonly store: Store<AuthState.State>, private sanitizer: DomSanitizer )
     {
@@ -45,17 +44,7 @@ export class RegisterSchoolComponent implements OnInit, OnDestroy
 
     ngOnInit(): void
     {
-        this.subscription = this.usersService.userRegistrationCaptchaGet().subscribe( data =>
-        {
-            const unsafeImageUrl = URL.createObjectURL( data )
-            this.captchaUrl = this.sanitizer.bypassSecurityTrustUrl( unsafeImageUrl )
-        } )
-
-        this.usersService.userRegistrationCaptchaGet().subscribe( data =>
-        {
-            const unsafeImageUrl = URL.createObjectURL( data )
-            this.imageUrl = this.sanitizer.bypassSecurityTrustUrl( unsafeImageUrl )
-        } )
+        this.refreshToken()
     }
 
     isValid(): boolean
@@ -68,8 +57,12 @@ export class RegisterSchoolComponent implements OnInit, OnDestroy
         this.store.dispatch( AuthActions.registerRequest( { registrationRequestUser: registerUser } ) )
     }
 
-    ngOnDestroy(): void
+    refreshToken(): void
     {
-        this.subscription.unsubscribe()
+        this.usersService.userRegistrationCaptchaGet().subscribe( data =>
+        {
+            const unsafeImageUrl = URL.createObjectURL( data )
+            this.captchaUrl = this.sanitizer.bypassSecurityTrustUrl( unsafeImageUrl )
+        } )
     }
 }
