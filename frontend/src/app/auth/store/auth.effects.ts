@@ -64,7 +64,7 @@ export class AuthEffects
                 this.authService.userAuthLogoutPost().pipe(
                     mergeMap( () =>
                         {
-                            this.router.navigate( [ '/login' ] )
+                            this.router.navigate( [ '/auth' ] )
                             return of( logoutSuccess() )
                         }
                     ),
@@ -138,7 +138,7 @@ export class AuthEffects
             (
                 ofType( registerSuccess ),
                 tap( ( { type } ) => displaySuccessMessage( "Пользователь успешно зарегистрирован" ) ),
-                tap( () => this.router.navigate( [ '/login' ] ) )
+                tap( () => this.router.navigate( [ '/auth' ] ) )
             ),
         { dispatch: false }
     )

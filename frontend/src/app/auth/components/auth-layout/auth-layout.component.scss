@@ -1,0 +1,52 @@
+@import "src/styles/colors";
+
+body, .container, .row, html {
+  height: 100vh
+}
+
+body {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+.container {
+  width: 100%;
+}
+
+.img-static {
+  position: absolute;
+  left: 2%;
+  top: 2%;
+}
+
+.col-md-4, .col-md-8 {
+  padding-top: 10vh;
+}
+
+.col-md-4 {
+  border-left: 2px solid $black;
+}
+
+
+.title {
+  font-style: normal;
+  font-weight: normal;
+  font-size: 54px;
+  line-height: 64px;
+  color: $black;
+}
+
+.image {
+  padding-top: 5vh;
+
+  img {
+    max-height: initial;
+  }
+}
+
+.copyright {
+  position: absolute;
+  bottom: 5%;
+  left: 7%;
+}

@@ -8,10 +8,10 @@ import { displayErrorMessage } from '@/shared/logging'
 
 @Component( {
     selector: 'app-confirm-account-token',
-    templateUrl: './confirm-account-token.component.html',
-    styleUrls: [ './confirm-account-token.component.scss' ]
+    templateUrl: './confirm-account-request-success.component.html',
+    styleUrls: [ './confirm-account-request-success.component.scss' ]
 } )
-export class ConfirmAccountTokenComponent implements OnInit, OnDestroy
+export class ConfirmAccountRequestSuccessComponent implements OnInit, OnDestroy
 {
     token!: string
     subscription!: Subscription

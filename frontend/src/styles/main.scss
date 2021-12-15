@@ -1,5 +1,6 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter&display=swap');
 @import "colors";
+@import "auth";
 
 body, html {
   font-family: 'Inter', sans-serif;
@@ -354,12 +355,4 @@ input {
 
 .button-action_save {
   width: 50%;
-}
-
-.auth-text_help {
-  margin-bottom: 1%;
-  color: $grey;
-  font-size: 14px;
-  line-height: 18px;
-  letter-spacing: 0.16px;
 }

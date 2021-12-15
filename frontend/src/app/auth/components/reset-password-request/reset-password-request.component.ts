@@ -5,20 +5,18 @@ import { Router } from '@angular/router'
 
 @Component( {
     selector: 'app-reset-password',
-    templateUrl: './reset-password.component.html',
-    styleUrls: [ './reset-password.component.scss' ]
+    templateUrl: './reset-password-request.component.html',
+    styleUrls: [ './reset-password-request.component.scss' ]
 } )
-export class ResetPasswordComponent
+export class ResetPasswordRequestComponent
 {
     emailToReset: string = ""
 
-    constructor( private usersService: UsersService, private router: Router )
-    {
-    }
+    constructor( private usersService: UsersService, private router: Router ) { }
 
     onSubmit(): void
     {
-        this.usersService.userRegistrationForgotEmailPost( this.emailToReset )
+        this.usersService.userRegistrationForgotEmailPost( this.emailToReset ).subscribe()
         this.router.navigate( [ "/reset-password/confirm" ], { queryParams: { email: this.emailToReset } } )
     }
 }

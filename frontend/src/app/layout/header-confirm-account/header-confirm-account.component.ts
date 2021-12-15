@@ -3,11 +3,11 @@ import { UsersService } from '@api/users/users.service'
 
 
 @Component( {
-    selector: 'app-confirm-account',
-    templateUrl: './confirm-account.component.html',
-    styleUrls: [ './confirm-account.component.scss' ]
+    selector: 'app-header-confirm-account',
+    templateUrl: './header-confirm-account.component.html',
+    styleUrls: [ './header-confirm-account.component.scss' ]
 } )
-export class ConfirmAccountComponent
+export class HeaderConfirmAccountComponent
 {
     constructor( private usersService: UsersService )
     {

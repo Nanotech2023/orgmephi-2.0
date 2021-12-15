@@ -8,11 +8,11 @@ import { displayErrorMessage, displaySuccessMessage } from '@/shared/logging'
 
 
 @Component( {
-    selector: 'app-reset-password-token',
-    templateUrl: './reset-password-token.component.html',
-    styleUrls: [ './reset-password-token.component.scss' ]
+    selector: 'app-reset-password-request-success',
+    templateUrl: './reset-password-request-success.component.html',
+    styleUrls: [ './reset-password-request-success.component.scss' ]
 } )
-export class ResetPasswordTokenComponent
+export class ResetPasswordRequestSuccessComponent
 {
     token$!: Observable<string>
     newPasswordConfirmValue: string = ""
@@ -24,8 +24,7 @@ export class ResetPasswordTokenComponent
     {
         this.token$ = this.route.queryParams.pipe(
             filter( params => params.token ),
-            map( params => params.token ),
-            tap( ( token: string ) => { this.usersService.userRegistrationConfirmTokenPost( token ) } )
+            map( params => params.token )
         )
     }
 
@@ -35,7 +34,7 @@ export class ResetPasswordTokenComponent
         this.usersService.userRegistrationRecoverTokenPost( token, resetPasswordUser ).pipe(
             tap( () => of( displaySuccessMessage( "Пароль успешно изменён" ) ) ),
             catchError( ( error: any ) => of( displayErrorMessage( error ) ) ),
-            tap( () => this.router.navigate( [ '/login' ] ) )
+            tap( () => this.router.navigate( [ '/auth/login' ] ) )
         ).subscribe()
     }
 }

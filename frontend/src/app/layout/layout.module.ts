@@ -2,14 +2,14 @@ import { NgModule } from '@angular/core'
 import { HeaderComponent } from '@/layout/header/header.component'
 import { FooterComponent } from '@/layout/footer/footer.component'
 import { SharedModule } from '@/shared/shared.module'
-import { ConfirmAccountComponent } from '@/layout/confirm-account/confirm-account.component'
+import { HeaderConfirmAccountComponent } from '@/layout/header-confirm-account/header-confirm-account.component'
 import { HeaderMenuComponent } from '@/layout/header-menu/header-menu.component'
 
 
 const COMPONENTS = [
     HeaderComponent,
     FooterComponent,
-    ConfirmAccountComponent,
+    HeaderConfirmAccountComponent,
     HeaderMenuComponent
 ]
 

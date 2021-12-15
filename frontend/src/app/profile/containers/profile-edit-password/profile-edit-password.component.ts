@@ -25,6 +25,6 @@ export class ProfileEditPasswordComponent
             new_password: this.newPasswordValue
         }
         this.usersService.userProfilePasswordPost( request ).subscribe()
-        this.router.navigate( [ '/login' ] )
+        this.router.navigate( [ '/auth' ] )
     }
 }

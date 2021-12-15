@@ -17,7 +17,7 @@ export class AuthGuardService implements CanActivate
             map( authorized =>
             {
                 if ( !authorized )
-                    this.router.navigate( [ '/login' ] )
+                    this.router.navigate( [ '/auth' ] )
                 return authorized
             } ) )
     }

@@ -31,7 +31,7 @@
                 <hr class="dropdown-divider">
             </li>
             <li>
-                <a routerLink="/login" class="dropdown-item" (click)="logoutButtonClick()">Выйти</a>
+                <a routerLink="/auth/login" class="dropdown-item" (click)="logoutButtonClick()">Выйти</a>
             </li>
             <li *ngIf="isPrivileged$ | async">
                 <hr class="dropdown-divider">

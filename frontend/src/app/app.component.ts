@@ -24,9 +24,8 @@ export class AppComponent implements OnInit, OnDestroy
             startWith( this.router )
         ).subscribe( ( event ) =>
         {
-            const paths = [ "/login", "/register", "/reset-password", "/reset-password/confirm", "/reset-password/token", "/confirm-account" ]
             if ( event instanceof NavigationEnd )
-                this.showHeader = !paths.includes( event.url )
+                this.showHeader = !event.url.startsWith( '/auth' )
         } )
     }
 
