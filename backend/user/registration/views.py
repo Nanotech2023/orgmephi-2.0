@@ -1,7 +1,7 @@
 import datetime
 import secrets
 import string
-
+from threading import Thread
 from flask import request, render_template, abort, send_file
 from flask_mail import Message
 from marshmallow import EXCLUDE
@@ -19,7 +19,6 @@ from user.model_schemas.personal import UserInfoSchema
 from user.model_schemas.university import StudentInfoSchema
 
 from .schemas import *
-
 
 db = get_current_db()
 module = get_current_module()
@@ -54,10 +53,26 @@ def load_email_token(token, token_type, return_timestamp=False):
     return claims
 
 
+class EmailThread(Thread):
+    def __init__(self, subject, recipient, template_name_or_list, **context):
+        self.subject = subject
+        self.recipient = recipient
+        self.template_name_or_list = template_name_or_list
+        self.context = context
+        Thread.__init__(self)
+
+    def run(self):
+        msg_body = render_template(self.template_name_or_list, **self.context)
+        msg = Message(subject=self.subject, body=msg_body, html=msg_body, recipients=[self.recipient])
+        app.mail.send(msg)
+
+
 def send_email(subject, recipient, template_name_or_list, **context):
-    msg_body = render_template(template_name_or_list, **context)
-    msg = Message(subject=subject, body=msg_body, html=msg_body, recipients=[recipient])
-    app.mail.send(msg)
+    email = EmailThread(template_name_or_list, **context)
+    email.run()
+    # msg_body = render_template(template_name_or_list, **context)
+    # msg = Message(subject=subject, body=msg_body, html=msg_body, recipients=[recipient])
+    # app.mail.send(msg)
 
 
 _captcha_chars = string.ascii_uppercase + string.digits
@@ -135,7 +150,7 @@ def register(values):
     user.user_info.email = username
 
     if reg_type == UserTypeEnum.university:
-        StudentInfoSchema(load_instance=True, only=['grade', 'university'])\
+        StudentInfoSchema(load_instance=True, only=['grade', 'university']) \
             .load(request.json['student_info'], instance=user.student_info, session=db.session, partial=False,
                   unknown=EXCLUDE)
         UserInfoSchema(only=['dwelling', 'phone'], load_instance=True).load(request.json['student_info'],
