@@ -3,9 +3,11 @@
         <div class="row">
             <div class="col-md-4">
                 <div class="olymp_title_container">
+
                     <div class="olymp_title">
                         {{ contest.base_contest?.name }}
                     </div>
+
                     <div class="olymp_subtitle">
                         Просьба внимательно ознакомиться с регламентом олимпиады перед началом прохождения
                     </div>
@@ -17,13 +19,34 @@
                     </ng-container>
 
                     <ng-container *ngIf="contestStatus$ | async as contestStatus">
-                        <div class="olymp_start" *ngIf="inProgress(contestStatus)">
-                            <button (click)="onStartClick(contest.contest_id)">Продолжить олимпиаду</button>
-                        </div>
-                        <div class="olymp_start" *ngIf="finished(contestStatus)">
-                            <button disabled>На проверке</button>
+                        <div class="olymp_start">
+                            <ng-container [ngSwitch]="contestStatus">
+                                <div *ngSwitchCase="'InProgress'">
+                                    <button (click)="onContinueClick(contest.contest_id)">Продолжить олимпиаду</button>
+                                </div>
+                                <div *ngSwitchCase="'NotChecked'">
+                                    <button disabled>Не проверено</button>
+                                </div>
+                                <div *ngSwitchCase="'Accepted'">
+                                    <button disabled>На проверке</button>
+                                </div>
+                                <div *ngSwitchCase="'Rejected'">
+                                    <button disabled>Аппеляция отклонена</button>
+                                </div>
+                                <div *ngSwitchCase="'Appeal'">
+                                    <button disabled>Аппеляция принята</button>
+                                </div>
+                                <div *ngSwitchCase="'Correction'">
+                                    <button disabled>Аппеляция принята</button>
+                                </div>
+                                <div *ngSwitchCase="'NoResults'">
+                                    <button disabled>Нет результатов</button>
+                                </div>
+                                <div *ngSwitchDefault></div>
+                            </ng-container>
                         </div>
                     </ng-container>
+
                 </div>
             </div>
             <div class="col-md-8">
@@ -79,9 +102,9 @@
                         </div>
                     </div>
                     <div class="rules_text">
-                        <p>
+                        <pre>
                             {{ contest.base_contest.rules }}
-                        </p>
+                        </pre>
                     </div>
                 </div>
             </div>

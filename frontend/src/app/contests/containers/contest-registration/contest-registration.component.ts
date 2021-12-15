@@ -20,7 +20,7 @@ export class ContestRegistrationComponent
     contestId!: number | null
     contestStatus$!: Observable<UserResponseStatusResponse>
 
-    constructor( private route: ActivatedRoute, private contestsStore: ContestsStore, private tasksService: TasksService, private responsesService: ResponsesService )
+    constructor( private route: ActivatedRoute, private router: Router, private contestsStore: ContestsStore, private tasksService: TasksService, private responsesService: ResponsesService )
     {
         this.route.paramMap.subscribe( paramMap =>
         {
@@ -46,6 +46,11 @@ export class ContestRegistrationComponent
         } )
     }
 
+    onContinueClick( contestId: number | undefined ): void
+    {
+        this.router.navigate( [ `/contests/${ contestId }/assignment` ] )
+    }
+
     inProgress( contestStatus: UserResponseStatusResponse ): boolean
     {
         return contestStatus.status === UserResponseStatusResponse.StatusEnum.InProgress
@@ -53,6 +58,6 @@ export class ContestRegistrationComponent
 
     finished( contestStatus: UserResponseStatusResponse ): boolean
     {
-        return !this.inProgress( contestStatus )
+        return contestStatus.status === UserResponseStatusResponse.StatusEnum.NotChecked
     }
 }

@@ -11,9 +11,13 @@
                    bindLabel="name"
                    bindValue="name"
                    placeholder="Введите регион"
+                   name="regionName"
                    [(ngModel)]="city.region_name"
                    (change)="onRegionChange()">
         </ng-select>
+        <div *ngIf="!city.region_name" class="input_error">
+            Необходимо указать регион
+        </div>
     </div>
 
     <div class="profile-form_item">
@@ -22,9 +26,14 @@
                    bindLabel="name"
                    bindValue="name"
                    placeholder="Введите населённый пункт"
+                   name="cityName"
                    [(ngModel)]="city.name"
                    (change)="onCityChange()">
         </ng-select>
+
+        <div *ngIf="!city.name" class="input_error">
+            Необходимо указать населённый пункт
+        </div>
     </div>
 
     <div class="profile-form_item">
