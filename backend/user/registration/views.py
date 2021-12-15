@@ -68,7 +68,7 @@ class EmailThread(Thread):
 
 
 def send_email(subject, recipient, template_name_or_list, **context):
-    email = EmailThread(template_name_or_list, **context)
+    email = EmailThread(subject, recipient, template_name_or_list, **context)
     email.run()
     # msg_body = render_template(template_name_or_list, **context)
     # msg = Message(subject=subject, body=msg_body, html=msg_body, recipients=[recipient])
