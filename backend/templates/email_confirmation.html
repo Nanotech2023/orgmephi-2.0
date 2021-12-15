@@ -2,9 +2,15 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Подтверждение почтового адреса</title>
+    <title>{{ title }}</title>
 </head>
 <body>
-<p>Ссылка на подтверждение аккаунта https://orgnew.mephi.ru/confirm-account?token={{ confirmation_token }}</p>
+<p>Здравствуйте, мы получили ваш запрос на регистрацию на портале олимпиад Национального исследовательского ядерного университета "МИФИ".</p>
+<br>
+<p>Если вы проигнорируете это сообщение, ваша электронная почта не будет подтверждена и вы не будете иметь доступа к вашему аккаунту.</p>
+<br>
+<p>Ссылка на подтверждение аккаунта <a href="https://orgnew.mephi.ru/auth/confirm-account/success?token={{ confirmation_token }}">https://orgnew.mephi.ru/auth/confirm-account/success?token={{ confirmation_token }}</a></p>
+<br>
+<p>Ваша ссылка действительна в течение 24 часов.</p>
 </body>
 </html>
