@@ -4,7 +4,7 @@ import { Router } from '@angular/router'
 
 
 @Component( {
-    selector: 'app-reset-password',
+    selector: 'app-reset-password-request',
     templateUrl: './reset-password-request.component.html',
     styleUrls: [ './reset-password-request.component.scss' ]
 } )
@@ -17,6 +17,6 @@ export class ResetPasswordRequestComponent
     onSubmit(): void
     {
         this.usersService.userRegistrationForgotEmailPost( this.emailToReset ).subscribe()
-        this.router.navigate( [ "/reset-password/confirm" ], { queryParams: { email: this.emailToReset } } )
+        this.router.navigate( [ "/auth/reset-password/request-send" ], { queryParams: { email: this.emailToReset } } )
     }
 }

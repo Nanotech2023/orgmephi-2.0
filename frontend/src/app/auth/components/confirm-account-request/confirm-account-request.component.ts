@@ -12,13 +12,11 @@ export class ConfirmAccountRequestComponent
 {
     emailToReset: string = ""
 
-    constructor( private usersService: UsersService, private router: Router )
-    {
-    }
+    constructor( private usersService: UsersService, private router: Router ) { }
 
     onSubmit(): void
     {
-        this.usersService.userRegistrationForgotEmailPost( this.emailToReset ).subscribe()
-        this.router.navigate( [ "/confirm-account/request-send" ], { queryParams: { email: this.emailToReset } } )
+        this.usersService.userRegistrationResendEmailPost( this.emailToReset ).subscribe()
+        this.router.navigate( [ "/auth/confirm-account/request-send" ], { queryParams: { email: this.emailToReset } } )
     }
 }

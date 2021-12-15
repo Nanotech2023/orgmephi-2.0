@@ -7,7 +7,7 @@ import { displayErrorMessage } from '@/shared/logging'
 
 
 @Component( {
-    selector: 'app-confirm-account-token',
+    selector: 'app-confirm-account-request-success',
     templateUrl: './confirm-account-request-success.component.html',
     styleUrls: [ './confirm-account-request-success.component.scss' ]
 } )
