@@ -60,7 +60,7 @@ export class ContestAssignmentItemComponent implements OnInit, OnDestroy
         if ( keyPressed === "," )
             transformedKey = "."
 
-        if ( !isNaN( Number( keyPressed ) ) )
+        if ( isNaN( Number( keyPressed ) ) )
             transformedKey = ""
 
         const newString = el.value.substring( 0, el.value.length - 1 ) + transformedKey

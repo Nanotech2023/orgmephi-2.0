@@ -12,14 +12,18 @@ import {
 } from '@/contests/components/contest-assignment-item/contest-assignment-item.component'
 import { ContestResultsComponent } from '@/contests/containers/contest-results/contest-results.component'
 import { VideoContainerComponent } from '@/contests/containers/video-container/video-container.component'
+import {
+    ContestAssignmentResultsComponent
+} from '@/contests/containers/contest-assignment-results/contest-assignment-results.component'
 
 
-export const COMPONENTS = [
+export const CONTESTS_COMPONENTS = [
     ContestListComponent,
     ContestDetailsComponent,
     ContestListItemComponent,
     ContestRegistrationComponent,
     ContestAssignmentComponent,
+    ContestAssignmentResultsComponent,
     HomeComponent,
     ContestAssignmentItemComponent,
     ContestResultsComponent,
@@ -27,7 +31,7 @@ export const COMPONENTS = [
 ]
 
 
-const routes: Routes =
+export const CONTEST_ROUTES: Routes =
     [
         {
             path: 'home',
@@ -59,12 +63,11 @@ const routes: Routes =
             path: 'contests/:contestId/assignment',
             component: ContestAssignmentComponent,
             canActivate: [ AuthGuardService ]
-        }
+        },
+        {
+            path: 'contests/:contestId/assignment-results',
+            component: ContestAssignmentResultsComponent,
+            canActivate: [ AuthGuardService ]
+        },
+
     ]
-
-
-@NgModule( {
-    imports: [ RouterModule.forChild( routes ) ],
-    exports: [ RouterModule ]
-} )
-export class ContestsRoutingModule {}
