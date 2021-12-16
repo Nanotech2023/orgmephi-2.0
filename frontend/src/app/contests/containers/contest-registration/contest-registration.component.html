@@ -12,40 +12,42 @@
                         Просьба внимательно ознакомиться с регламентом олимпиады перед началом прохождения
                     </div>
 
-                    <ng-container *ngIf="!(contestStatus$ | async)">
+                    <ng-container *ngIf="contestStatus$ | async as contestStatus; else startButton">
                         <div class="olymp_start">
-                            <button (click)="onStartClick(contest.contest_id)">Начать олимпиаду</button>
+                            <div *ngIf="inProgress(contestStatus)">
+                                <button (click)="onContinueClick(contest.contest_id)">Продолжить олимпиаду</button>
+                            </div>
+                            <div *ngIf="notChecked(contestStatus)">
+                                <button disabled>Не проверено</button>
+                            </div>
+                            <div *ngIf="noResults(contestStatus)">
+                                <button disabled>Нет результатов</button>
+                            </div>
+                            <div *ngIf="accepted(contestStatus)">
+                                <button disabled>На проверке</button>
+                            </div>
+                            <div *ngIf="rejected(contestStatus)">
+                                <button disabled>Аппеляция отклонена</button>
+                            </div>
+                            <div *ngIf="appeal(contestStatus)">
+                                <button disabled>На аппеляции</button>
+                            </div>
+                            <div *ngIf="correction(contestStatus)">
+                                <button disabled>Аппеляция принята</button>
+                            </div>
+                            <div *ngIf="noResults(contestStatus)">
+                                <button disabled>Нет результатов</button>
+                            </div>
                         </div>
                     </ng-container>
 
-                    <ng-container *ngIf="contestStatus$ | async as contestStatus">
+                    <ng-template #startButton>
                         <div class="olymp_start">
-                            <ng-container [ngSwitch]="contestStatus">
-                                <div *ngSwitchCase="'InProgress'">
-                                    <button (click)="onContinueClick(contest.contest_id)">Продолжить олимпиаду</button>
-                                </div>
-                                <div *ngSwitchCase="'NotChecked'">
-                                    <button disabled>Не проверено</button>
-                                </div>
-                                <div *ngSwitchCase="'Accepted'">
-                                    <button disabled>На проверке</button>
-                                </div>
-                                <div *ngSwitchCase="'Rejected'">
-                                    <button disabled>Аппеляция отклонена</button>
-                                </div>
-                                <div *ngSwitchCase="'Appeal'">
-                                    <button disabled>Аппеляция принята</button>
-                                </div>
-                                <div *ngSwitchCase="'Correction'">
-                                    <button disabled>Аппеляция принята</button>
-                                </div>
-                                <div *ngSwitchCase="'NoResults'">
-                                    <button disabled>Нет результатов</button>
-                                </div>
-                                <div *ngSwitchDefault></div>
-                            </ng-container>
+                            <div *ngSwitchCase="'InProgress'">
+                                <button (click)="onStartClick(contest.contest_id)">Начать олимпиаду</button>
+                            </div>
                         </div>
-                    </ng-container>
+                    </ng-template>
 
                 </div>
             </div>

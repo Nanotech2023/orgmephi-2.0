@@ -51,13 +51,38 @@ export class ContestRegistrationComponent
         this.router.navigate( [ `/contests/${ contestId }/assignment` ] )
     }
 
+    notChecked( contestStatus: UserResponseStatusResponse ): boolean
+    {
+        return contestStatus.status === UserResponseStatusResponse.StatusEnum.NotChecked
+    }
+
     inProgress( contestStatus: UserResponseStatusResponse ): boolean
     {
         return contestStatus.status === UserResponseStatusResponse.StatusEnum.InProgress
     }
 
-    finished( contestStatus: UserResponseStatusResponse ): boolean
+    noResults( contestStatus: UserResponseStatusResponse ): boolean
     {
-        return contestStatus.status === UserResponseStatusResponse.StatusEnum.NotChecked
+        return contestStatus.status === UserResponseStatusResponse.StatusEnum.NoResults
+    }
+
+    appeal( contestStatus: UserResponseStatusResponse ): boolean
+    {
+        return contestStatus.status === UserResponseStatusResponse.StatusEnum.Appeal
+    }
+
+    correction( contestStatus: UserResponseStatusResponse ): boolean
+    {
+        return contestStatus.status === UserResponseStatusResponse.StatusEnum.Correction
+    }
+
+    rejected( contestStatus: UserResponseStatusResponse ): boolean
+    {
+        return contestStatus.status === UserResponseStatusResponse.StatusEnum.Rejected
+    }
+
+    accepted( contestStatus: UserResponseStatusResponse ): boolean
+    {
+        return contestStatus.status === UserResponseStatusResponse.StatusEnum.Accepted
     }
 }
