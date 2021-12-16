@@ -1,7 +1,7 @@
 <ng-container *ngIf="viewModel$ | async as viewModel">
     <div class="container">
         <div class="row">
-            <div class="col-md-2">
+            <div class="col-md-4">
                 <div class="olymp_title_container">
                     <div class="olymp_title">
                         {{ viewModel.contest?.base_contest?.name }}
@@ -26,7 +26,7 @@
                     <button class="submit_button" (click)="finish()">Отправить на проверку</button>
                 </div>
             </div>
-            <div class="col-md-10">
+            <div class="col-md-8">
                 <div class="tasks_list">
                     <ng-container *ngFor="let task of viewModel.tasks; let i = index">
                         <app-contest-assignment-item [taskIndex]="i+1" [task]="task" [contestId]="contestId">

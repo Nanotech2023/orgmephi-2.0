@@ -1,1 +1,37 @@
-<p>contest-assignment-results works!</p>
+<ng-container *ngIf="viewModel$ | async as viewModel">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-4">
+                <div class="olymp_title_container">
+                    <div class="olymp_title">
+                        {{ viewModel.contest?.base_contest?.name }}
+                    </div>
+                    <div class="olymp_subtitle">
+<!--                        Помните, время на выполнение заданий ограничено-->
+                    </div>
+<!--                    <div class="timer_container">-->
+<!--                        <span>Осталось времени</span>-->
+<!--                        <div class="timer_content">-->
+<!--                            <svg width="32" height="32" viewBox="0 0 32 32" fill="none"-->
+<!--                                 xmlns="http://www.w3.org/2000/svg">-->
+<!--                                <path d="M17 11H15V20H17V11Z" fill="black"/>-->
+<!--                                <path d="M19 2H13V4H19V2Z" fill="black"/>-->
+<!--                                <path-->
+<!--                                    d="M27.9994 8.99999L26.5794 7.58999L24.3294 9.83999C22.4877 7.71302 19.8972 6.37742 17.0963 6.1107C14.2954 5.84397 11.4994 6.66663 9.28924 8.40774C7.0791 10.1488 5.62472 12.6745 5.22831 15.46C4.83189 18.2456 5.52391 21.0767 7.16058 23.3653C8.79725 25.6538 11.2527 27.2239 14.0168 27.7491C16.781 28.2744 19.6412 27.7145 22.0032 26.1858C24.3653 24.6571 26.0475 22.2771 26.7005 19.5403C27.3535 16.8036 26.9269 13.9204 25.5094 11.49L27.9994 8.99999ZM15.9995 26C14.2194 26 12.4794 25.4722 10.9993 24.4832C9.51928 23.4943 8.36572 22.0887 7.68454 20.4441C7.00335 18.7996 6.82512 16.99 7.17238 15.2442C7.51965 13.4983 8.37682 11.8947 9.63549 10.636C10.8942 9.37736 12.4978 8.52019 14.2436 8.17292C15.9895 7.82566 17.7991 8.00389 19.4436 8.68508C21.0881 9.36626 22.4937 10.5198 23.4827 11.9999C24.4716 13.4799 24.9994 15.22 24.9994 17C24.9994 19.3869 24.0512 21.6761 22.3634 23.364C20.6756 25.0518 18.3864 26 15.9995 26Z"-->
+<!--                                    fill="black"/>-->
+<!--                            </svg>-->
+<!--                        </div>-->
+                    </div>
+<!--                </div>-->
+            </div>
+            <div class="col-md-8">
+                <div class="tasks_list">
+                    <ng-container *ngFor="let task of viewModel.tasks; let i = index">
+                        <app-contest-assignment-item [taskIndex]="i+1" [task]="task" [contestId]="contestId">
+                        </app-contest-assignment-item>
+                    </ng-container>
+                </div>
+            </div>
+        </div>
+    </div>
+</ng-container>

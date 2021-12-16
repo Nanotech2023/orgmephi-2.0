@@ -30,7 +30,7 @@ export class ProfileEditUserinfoComponent
 
     readonly genders: GenderEnum[] = [ GenderEnum.Male, GenderEnum.Female ]
 
-    constructor( private profileStore: ProfileStore )
+    constructor( private profileStore: ProfileStore, private router: Router )
     {
         this.profileStore.fetch()
         this.viewModel$ = this.profileStore.viewModel$
@@ -50,5 +50,10 @@ export class ProfileEditUserinfoComponent
     onCityChange( $event: LocationRussiaCity )
     {
         this.profileStore.setCity( $event )
+    }
+
+    navigateToSchoolInfo()
+    {
+        this.router.navigate( [ '/profile', 'schoolinfo' ] )
     }
 }

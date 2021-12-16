@@ -1,6 +1,6 @@
-import { Component, OnInit } from '@angular/core'
+import { Component } from '@angular/core'
 import { ContestAssignmentStore } from '@/contests/containers/contest-assignment/contest-assignment.store'
-import { Observable, Subscription } from 'rxjs'
+import { Observable } from 'rxjs'
 import {
     Contest,
     TaskForUserResponseTaskParticipant,
@@ -21,8 +21,6 @@ export class ContestAssignmentResultsComponent
     contestId!: number | null
     viewModel$: Observable<{ loading: boolean; error: string | null; contest: Contest | undefined; variant: VariantWithCompletedTasksCountTaskParticipant | undefined; tasks: Array<TaskForUserResponseTaskParticipant>; time: number | undefined; status: UserResponseStatusResponse.StatusEnum | undefined }>
     timeLeft: number | undefined
-    decreaseTimerSubscription!: Subscription
-    reloadTimerSubscription!: Subscription
 
     constructor( private route: ActivatedRoute, private contestAssignmentStore: ContestAssignmentStore )
     {
@@ -34,7 +32,6 @@ export class ContestAssignmentResultsComponent
                 this.contestAssignmentStore.fetchContest( this.contestId )
                 this.contestAssignmentStore.fetchVariant( this.contestId )
                 this.contestAssignmentStore.fetchTasks( this.contestId )
-                this.contestAssignmentStore.fetchTime( this.contestId )
                 this.contestAssignmentStore.fetchStatus( this.contestId )
             }
         } )
