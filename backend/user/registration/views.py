@@ -68,8 +68,9 @@ class EmailThread(Thread):
 def send_email(subject, recipient, template_name_or_list, **context):
     msg_body = render_template(template_name_or_list, **context)
     msg = Message(subject=subject, body=msg_body, html=msg_body, recipients=[recipient])
-    email = EmailThread(app, msg)
-    email.start()
+    app.mail.send(msg)
+    # email = EmailThread(app, msg)
+    # email.start()
 
 
 _captcha_chars = string.ascii_uppercase + string.digits

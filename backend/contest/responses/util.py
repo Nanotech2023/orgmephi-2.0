@@ -2,7 +2,7 @@ from common import get_current_db, get_current_app
 from common.media_types import AnswerFile
 from .model_schemas.schemas import PlainAnswerTextSchema, RangeAnswerSchema
 from datetime import datetime, timedelta
-from common.errors import NotFound, RequestError, AlreadyExists, PermissionDenied
+from common.errors import NotFound, RequestError, AlreadyExists, PermissionDenied, DataConflict, TimeOver
 from common.util import db_get_one_or_none, db_exists, db_get_or_raise, db_get_list
 from contest.tasks.models import SimpleContest, RangeTask, MultipleChoiceTask, PlainTask, ContestHoldingTypeEnum, \
     UserInContest, ContestTask
@@ -240,6 +240,9 @@ def check_user_multiple_answers(answers, task_id):
 def check_user_show_results(contest_id, user_id):
     from contest.tasks.util import get_user_in_contest_by_id_if_possible
     user_in_contest = get_user_in_contest_by_id_if_possible(contest_id, user_id)
+    contest: SimpleContest = db_get_or_raise(SimpleContest, 'contest_id', contest_id)
+    if contest.show_result_after_finish:
+        return
     if not user_in_contest.show_results_to_user:
         raise OlympiadError("Not allowed to see results")
 
@@ -371,6 +374,8 @@ def calculate_time_left(user_work: Response, only_positive_time=True):
         time_left = contest_duration + user_work.time_extension - time_spent
     if time_left < timedelta(seconds=0) and only_positive_time:
         time_left = timedelta(seconds=0)
+        finish_contest(user_work)
+        raise TimeOver("Time left")
     return time_left
 
 
