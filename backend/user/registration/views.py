@@ -58,17 +58,11 @@ class EmailThread(Thread):
     def __init__(self, app, message):
         self.app = app
         self.message = message
-        self._return = None
         Thread.__init__(self)
-        self.bucket = []
 
     def run(self):
-        try:
-            with self.app.app.app_context():
-                app.mail.send(self.message)
-            self._return = 5
-        except Exception:
-            self.bucket.append(sys.exc_info())
+        with self.app.app.app_context():
+            app.mail.send(self.message)
 
 
 def send_email(subject, recipient, template_name_or_list, **context):
@@ -76,9 +70,6 @@ def send_email(subject, recipient, template_name_or_list, **context):
     msg = Message(subject=subject, body=msg_body, html=msg_body, recipients=[recipient])
     email = EmailThread(app, msg)
     email.start()
-    # msg_body = render_template(template_name_or_list, **context)
-    # msg = Message(subject=subject, body=msg_body, html=msg_body, recipients=[recipient])
-    # app.mail.send(msg)
 
 
 _captcha_chars = string.ascii_uppercase + string.digits
