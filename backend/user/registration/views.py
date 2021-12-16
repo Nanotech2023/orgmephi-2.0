@@ -68,8 +68,8 @@ class EmailThread(Thread):
 
 
 def send_email(subject, recipient, template_name_or_list, **context):
-    email = EmailThread(template_name_or_list, **context)
-    email.run()
+    email = EmailThread(subject, recipient, template_name_or_list, **context)
+    email.start()
     # msg_body = render_template(template_name_or_list, **context)
     # msg = Message(subject=subject, body=msg_body, html=msg_body, recipients=[recipient])
     # app.mail.send(msg)
@@ -82,7 +82,7 @@ _captcha_chars = _captcha_chars.replace('1', '').replace('I', '').replace('0', '
 def send_email_confirmation(email):
     token = dump_email_token(email, 'confirm')
     subj = app.config['ORGMEPHI_MAIL_CONFIRM_SUBJECT']
-    send_email(subj, email, 'email_confirmation.html', confirmation_token=token)
+    send_email(subj, email, 'email_confirmation.html', confirmation_token=token, title=subj)
 
 
 def generate_captcha(width, height):
@@ -351,7 +351,7 @@ def forgot_password(email):
         return {}, 204
     token = dump_email_token(user.user_info.email, 'recover')
     subj = app.config['ORGMEPHI_MAIL_RECOVER_SUBJECT']
-    send_email(subj, user.user_info.email, 'password_reset.html', reset_token=token)
+    send_email(subj, user.user_info.email, 'password_reset.html', reset_token=token, title=subj)
     return {}, 204
 
 
