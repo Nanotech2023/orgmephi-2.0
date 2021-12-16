@@ -3,12 +3,12 @@
         Задание {{ taskIndex }}<br/>
     </div>
     <div class="row">
-        <div class="col-md-8">
+        <div class="col-md-12">
             <div class="task_image">
                 <img [src]="imageUrl" alt="Задание" class="img-fluid pt-5 pb-5">
             </div>
         </div>
-        <div class="col-md-4">
+        <div class="col-md-12">
             <div class="task_actions">
                 <p class="input_label">Ответ</p>
                 <input #inputAnswer [(ngModel)]="answer" class="input_textarea" maxlength="100" placeholder="Введите свой ответ"

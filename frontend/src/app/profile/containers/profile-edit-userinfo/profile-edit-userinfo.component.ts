@@ -51,9 +51,4 @@ export class ProfileEditUserinfoComponent
     {
         this.profileStore.setCity( $event )
     }
-
-    navigateToSchoolInfo()
-    {
-        this.router.navigate( [ '/profile', 'schoolinfo' ] )
-    }
 }

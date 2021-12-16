@@ -14,7 +14,7 @@
         <div class="col-md-8">
             <div class="olymp_list">
                 <div class="row">
-                    <ng-container *ngIf="contests$ | async as contests">
+                    <ng-container *ngIf="contests$ | async as contests; else noContests">
                         <div class="col-md-6" *ngFor="let contest of contests; index as i">
                             <app-video-container>
                                 <div class="org-divider" *ngIf="i === 0 || i === 1"></div>
@@ -28,3 +28,9 @@
         </div>
     </div>
 </div>
+
+<ng-template #noContests>
+    <div class="py-5">
+        <span class="not-found_subtitle" style="align-self: stretch">Вам необходимо заполнить анкету для отображения списка олимпиад</span>
+    </div>
+</ng-template>

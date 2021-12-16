@@ -8,6 +8,8 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations'
 import { ManageNavbarComponent } from '@/layout/manage-navbar/manage-navbar.component'
 import { NotFoundComponent } from '@/shared/not-found/not-found.component'
 import { InDevelopmentComponent } from '@/shared/in-development/in-development.component'
+import { PhoneValidatorDirective } from '@/shared/phone.validator.directive'
+import { PasswordValidatorDirective } from '@/shared/password-validator.directive'
 
 
 const SHARED = [
@@ -23,7 +25,9 @@ const SHARED = [
 const COMPONENTS = [
     ManageNavbarComponent,
     InDevelopmentComponent,
-    NotFoundComponent
+    NotFoundComponent,
+    PhoneValidatorDirective,
+    PasswordValidatorDirective
 ]
 
 

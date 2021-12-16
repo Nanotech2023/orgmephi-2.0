@@ -20,7 +20,7 @@ export class ManageCompositeContestsComponent
             this.baseContestId = Number( paramMap.get( 'baseContestId' ) )
             if ( !!this.baseContestId )
             {
-                this.tasksService.tasksUnauthorizedOlympiadAllGet( undefined, undefined, this.baseContestId, undefined, undefined, undefined, undefined, undefined, CompositeTypeEnum.CompositeContest ).subscribe( response =>
+                this.tasksService.tasksUnauthorizedOlympiadAllGet( undefined, undefined, undefined, this.baseContestId, undefined, undefined, undefined, undefined, undefined, CompositeTypeEnum.CompositeContest ).subscribe( response =>
                 {
                     this.compositeContests = response.contest_list! as CompositeContest[]
                 } )

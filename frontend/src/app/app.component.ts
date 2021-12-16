@@ -15,7 +15,7 @@ export class AppComponent implements OnInit, OnDestroy
     isAuthorized$!: Observable<boolean>
     urlSubscription: SubscriptionLike
     showHeader: boolean | undefined
-    selectIsConfirmed$!: Observable<boolean>
+    selectIsProfileFilled$!: Observable<boolean>
 
     constructor( private store: Store<AuthState.State>, private router: Router )
     {
@@ -29,12 +29,12 @@ export class AppComponent implements OnInit, OnDestroy
         } )
     }
 
-    title = 'ORG MEPhI'
+    title = 'Портал олимпиад НИЯУ МИФИ'
 
     ngOnInit(): void
     {
         this.isAuthorized$ = this.store.pipe( select( AuthSelectors.selectIsAuthorized ) )
-        this.selectIsConfirmed$ = this.store.pipe( select( AuthSelectors.selectIsConfirmed ) )
+        this.selectIsProfileFilled$ = this.store.pipe( select( AuthSelectors.selectIsProfileFilled ) )
     }
 
     ngOnDestroy(): void

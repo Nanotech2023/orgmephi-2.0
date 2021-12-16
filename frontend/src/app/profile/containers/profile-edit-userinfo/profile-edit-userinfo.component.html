@@ -97,12 +97,11 @@
         <app-profile-edit-limitations [(model)]="viewModel.userInfoLimitations">
         </app-profile-edit-limitations>
 
-        <div class="profile-form_item" style="width: 80%">
-            <button class="button-action_default button-action_save" type="submit"
-                    [disabled]="!userInfoForm.form.valid">Сохранить
-            </button>
-            <button class="button-action_default button-action_save" routerLink='/profile/schoolinfo'>Перейти к заполнению школы
-            </button>
+        <div class="profile-form_container">
+            <div class="profile-form_item">
+                <button class="button-action_default button-action_save" type="submit" [disabled]="!userInfoForm.form.valid">Сохранить и перейти к следующему шагу
+                </button>
+            </div>
         </div>
     </form>
 </ng-container>

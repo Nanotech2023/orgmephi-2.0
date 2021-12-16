@@ -229,15 +229,12 @@ export class ProfileStore extends ComponentStore<ProfileState>
                     )
                 }
             ),
-            tap( () => this.reloadCurrentRoute() )
+            tap( () => this.navigateToSchoolInfo() )
         ) )
 
-    reloadCurrentRoute(): void
+
+    navigateToSchoolInfo()
     {
-        const currentUrl = this.router.url
-        this.router.navigateByUrl( '/', { skipLocationChange: true } ).then( () =>
-        {
-            this.router.navigate( [ currentUrl ] )
-        } )
+        this.router.navigate( [ '/profile', 'schoolinfo' ] )
     }
 }

@@ -52,9 +52,14 @@ export const selectUserPhoto: MemoizedSelector<State, Blob> = createSelector(
         state.userPhoto!
 )
 
-
 export const selectIsParticipant: MemoizedSelector<State, boolean> = createSelector(
     selectFeature,
     ( state: State ) =>
         state.user?.role === User.RoleEnum.Participant
+)
+
+export const selectIsProfileFilled: MemoizedSelector<State, boolean> = createSelector(
+    selectFeature,
+    ( state: State ) =>
+        state.unfilled !== undefined && !!state.unfilled.length
 )
