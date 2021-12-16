@@ -57,7 +57,9 @@ export class ContestAssignmentItemComponent implements OnInit, OnDestroy
         const keyPressed = el.value.split( '' ).pop()
         let transformedKey = keyPressed
 
-        if ( keyPressed === "," )
+        if ( keyPressed === "." )
+            transformedKey = "."
+        else if ( keyPressed === "," )
             transformedKey = "."
         else if ( isNaN( Number( keyPressed ) ) )
             transformedKey = ""
