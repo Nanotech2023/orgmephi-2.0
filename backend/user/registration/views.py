@@ -1,7 +1,8 @@
 import datetime
 import secrets
 import string
-
+import sys
+from threading import Thread
 from flask import request, render_template, abort, send_file
 from flask_mail import Message
 from marshmallow import EXCLUDE
@@ -19,7 +20,6 @@ from user.model_schemas.personal import UserInfoSchema
 from user.model_schemas.university import StudentInfoSchema
 
 from .schemas import *
-
 
 db = get_current_db()
 module = get_current_module()
@@ -54,10 +54,22 @@ def load_email_token(token, token_type, return_timestamp=False):
     return claims
 
 
+class EmailThread(Thread):
+    def __init__(self, app, message):
+        self.app = app
+        self.message = message
+        Thread.__init__(self)
+
+    def run(self):
+        with self.app.app.app_context():
+            app.mail.send(self.message)
+
+
 def send_email(subject, recipient, template_name_or_list, **context):
     msg_body = render_template(template_name_or_list, **context)
     msg = Message(subject=subject, body=msg_body, html=msg_body, recipients=[recipient])
-    app.mail.send(msg)
+    email = EmailThread(app, msg)
+    email.start()
 
 
 _captcha_chars = string.ascii_uppercase + string.digits
@@ -135,7 +147,7 @@ def register(values):
     user.user_info.email = username
 
     if reg_type == UserTypeEnum.university:
-        StudentInfoSchema(load_instance=True, only=['grade', 'university'])\
+        StudentInfoSchema(load_instance=True, only=['grade', 'university']) \
             .load(request.json['student_info'], instance=user.student_info, session=db.session, partial=False,
                   unknown=EXCLUDE)
         UserInfoSchema(only=['dwelling', 'phone'], load_instance=True).load(request.json['student_info'],
