@@ -54,12 +54,10 @@ export class ContestsStore extends ComponentStore<ContestsState>
     {
         if ( item.contest === undefined )
             return false
-        if ( item.contest.composite_type !== CompositeTypeEnum.SimpleContest )
-            return false
         if ( state.schoolInfo?.grade === undefined )
-            return true
+            return false
         if ( item.contest.base_contest.target_classes === undefined )
-            return true
+            return false
         return item.contest.base_contest.target_classes.some( targetClass => targetClass.target_class == state.schoolInfo!.grade!.toString() )
     } ) )
     readonly contest$: Observable<SimpleContest | undefined> = this.select( state => state.contest as SimpleContest )
@@ -116,7 +114,7 @@ export class ContestsStore extends ComponentStore<ContestsState>
     readonly fetchAll = this.effect( () =>
     {
         this.setLoading()
-        return this.tasksService.tasksParticipantOlympiadAllGet( undefined, undefined, undefined, undefined, 2021 ).pipe(
+        return this.tasksService.tasksParticipantOlympiadAllGet( true, undefined, undefined, undefined, undefined, 2021, undefined, undefined, undefined, CompositeTypeEnum.SimpleContest ).pipe(
             tapResponse(
                 ( response: FilterSimpleContestResponseTaskParticipant ) => this.setContests( response.contest_list ?? [] ),
                 ( error: string ) => this.updateError( error )
