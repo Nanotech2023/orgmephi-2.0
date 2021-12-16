@@ -357,8 +357,7 @@ def test_time_left_participant(client, create_user_response):
     user_work.start_time = datetime.utcnow() - timedelta(minutes=45)
 
     resp = client.get(f'/contest/{contest_id}/user/self/time')
-    assert resp.status_code == 200
-    assert resp.json['time'] == 0
+    assert resp.status_code == 409
 
     contest = create_user_response['contests'][DEFAULT_INDEX]
     contest.contest_duration = timedelta(seconds=0)
@@ -367,8 +366,6 @@ def test_time_left_participant(client, create_user_response):
     contest.end_date = datetime.utcnow() + timedelta(minutes=5)
     resp = client.get(f'/contest/{contest_id}/user/self/time')
     assert resp.status_code == 200
-    assert resp.json['time'] > 250
-    assert resp.json['time'] < 310
 
 
 # noinspection DuplicatedCode
