@@ -1,6 +1,8 @@
 import datetime
 import secrets
 import string
+import sys
+import time
 from threading import Thread
 from flask import request, render_template, abort, send_file
 from flask_mail import Message
@@ -54,22 +56,32 @@ def load_email_token(token, token_type, return_timestamp=False):
 
 
 class EmailThread(Thread):
-    def __init__(self, subject, recipient, template_name_or_list, **context):
-        self.subject = subject
-        self.recipient = recipient
-        self.template_name_or_list = template_name_or_list
-        self.context = context
+    def __init__(self, app, message):
+        self.app = app
+        self.message = message
+        self._return = None
         Thread.__init__(self)
+        self.bucket = []
 
     def run(self):
-        msg_body = render_template(self.template_name_or_list, **self.context)
-        msg = Message(subject=self.subject, body=msg_body, html=msg_body, recipients=[self.recipient])
-        app.mail.send(msg)
+        try:
+            with self.app.app.app_context():
+                app.mail.send(self.message)
+            self._return = 5
+        except Exception:
+            self.bucket.append(sys.exc_info())
+
+    def join(self):
+        Thread.join(self)
+        return self._return
 
 
 def send_email(subject, recipient, template_name_or_list, **context):
-    email = EmailThread(subject, recipient, template_name_or_list, **context)
+    msg_body = render_template(template_name_or_list, **context)
+    msg = Message(subject=subject, body=msg_body, html=msg_body, recipients=[recipient])
+    email = EmailThread(app, msg)
     email.start()
+    time.sleep(5)
     # msg_body = render_template(template_name_or_list, **context)
     # msg = Message(subject=subject, body=msg_body, html=msg_body, recipients=[recipient])
     # app.mail.send(msg)
