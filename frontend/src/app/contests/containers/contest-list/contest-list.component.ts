@@ -35,6 +35,7 @@ export class ContestListComponent implements OnInit, OnDestroy
             startWith( this.router )
         ).subscribe( ( event ) =>
         {
+            console.log( 'enter ContestListComponent/urlSubscription' )
             this.contestsStore.fetchSchoolInfo()
             this.contestsStore.fetchAll()
         } )

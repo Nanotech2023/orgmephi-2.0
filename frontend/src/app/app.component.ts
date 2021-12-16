@@ -16,6 +16,7 @@ export class AppComponent implements OnInit, OnDestroy
     urlSubscription: SubscriptionLike
     showHeader: boolean | undefined
     selectIsProfileFilled$!: Observable<boolean>
+    showConfirmHeader: boolean = true
 
     constructor( private store: Store<AuthState.State>, private router: Router )
     {
@@ -40,5 +41,10 @@ export class AppComponent implements OnInit, OnDestroy
     ngOnDestroy(): void
     {
         this.urlSubscription?.unsubscribe()
+    }
+
+    onCloseHeader()
+    {
+        this.showConfirmHeader = false
     }
 }

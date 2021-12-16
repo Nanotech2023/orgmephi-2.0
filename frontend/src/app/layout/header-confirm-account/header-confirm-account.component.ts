@@ -1,4 +1,4 @@
-import { Component } from '@angular/core'
+import { Component, EventEmitter, Output } from '@angular/core'
 
 
 @Component( {
@@ -6,4 +6,12 @@ import { Component } from '@angular/core'
     templateUrl: './header-confirm-account.component.html',
     styleUrls: [ './header-confirm-account.component.scss' ]
 } )
-export class HeaderConfirmAccountComponent {}
+export class HeaderConfirmAccountComponent
+{
+    @Output() closeHeader = new EventEmitter<boolean>()
+
+    onClose()
+    {
+        this.closeHeader.emit( true )
+    }
+}

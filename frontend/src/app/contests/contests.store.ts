@@ -52,6 +52,7 @@ export class ContestsStore extends ComponentStore<ContestsState>
 
     readonly contests$: Observable<SimpleContestWithFlagResponseTaskParticipant[]> = this.select( state => state.contests.filter( item =>
     {
+        console.log( 'enter ContestsStore/contests$ selector' )
         if ( item.contest === undefined )
             return false
         if ( state.schoolInfo?.grade === undefined )

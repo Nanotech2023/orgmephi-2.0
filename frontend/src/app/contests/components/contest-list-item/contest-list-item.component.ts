@@ -1,5 +1,5 @@
 import { Component, Input } from '@angular/core'
-import { Contest, SimpleContestWithFlagResponseTaskParticipant, TargetClass } from '@api/tasks/model'
+import { SimpleContestWithFlagResponseTaskParticipant } from '@api/tasks/model'
 import { Router } from '@angular/router'
 import { ContestsStore } from '@/contests/contests.store'
 import { getClassesForDisplay, getStatusDisplay, getSubjectDisplay } from '@/shared/displayUtils'

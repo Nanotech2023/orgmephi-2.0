@@ -1,6 +1,6 @@
 <app-header *ngIf="(isAuthorized$ | async) && showHeader"></app-header>
 <app-header-confirm-account
-    *ngIf="(isAuthorized$ | async) && showHeader && (selectIsProfileFilled$ | async)"></app-header-confirm-account>
+    *ngIf="(isAuthorized$ | async) && showHeader && (selectIsProfileFilled$ | async) && showConfirmHeader" (closeHeader)="onCloseHeader()"></app-header-confirm-account>
 <main role="main">
     <router-outlet></router-outlet>
 </main>
