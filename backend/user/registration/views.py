@@ -2,7 +2,6 @@ import datetime
 import secrets
 import string
 import sys
-import time
 from threading import Thread
 from flask import request, render_template, abort, send_file
 from flask_mail import Message
@@ -71,17 +70,12 @@ class EmailThread(Thread):
         except Exception:
             self.bucket.append(sys.exc_info())
 
-    def join(self):
-        Thread.join(self)
-        return self._return
-
 
 def send_email(subject, recipient, template_name_or_list, **context):
     msg_body = render_template(template_name_or_list, **context)
     msg = Message(subject=subject, body=msg_body, html=msg_body, recipients=[recipient])
     email = EmailThread(app, msg)
     email.start()
-    time.sleep(5)
     # msg_body = render_template(template_name_or_list, **context)
     # msg = Message(subject=subject, body=msg_body, html=msg_body, recipients=[recipient])
     # app.mail.send(msg)
