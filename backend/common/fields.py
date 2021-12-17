@@ -47,6 +47,7 @@ user_answer_validator = validate.Length(max=2048)
 condition_validator = validate.Range(min=0.0, max=1.0)
 points_validator = validate.Range(min=0)
 sequential_number_validator = validate.Range(min=1)
+school_name_validator = validate.Length(max=128)
 
 Email = _apply_validator(fields.Email, email_validator)
 Phone = _add_example(_apply_validator(fields.String, phone_validator), '8 (800) 555 35 35')
@@ -64,7 +65,7 @@ Message = _apply_validator(fields.String, message_validator)
 News = _apply_validator(fields.String, news_validator)
 UserAnswer = _apply_validator(fields.String, user_answer_validator)
 FloatCondition = _apply_validator(fields.Float, condition_validator)
-
+SchoolName = _apply_validator(fields.String, school_name_validator)
 # For Tasks and Contest
 
 UserIds = _apply_validator(fields.String, group_name_validator)
