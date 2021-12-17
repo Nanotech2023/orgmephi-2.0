@@ -475,7 +475,7 @@ components:
         location:
           $ref: '#/components/schemas/Location'
         name:
-          maxLength: 32
+          maxLength: 128
           type: string
         number:
           type: integer
