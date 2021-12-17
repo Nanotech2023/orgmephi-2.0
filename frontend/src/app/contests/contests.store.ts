@@ -15,7 +15,7 @@ import { catchError, switchMap, tap } from 'rxjs/operators'
 import { ResponsesService } from '@api/responses/responses.service'
 import { displayErrorMessage } from '@/shared/logging'
 import { UsersService } from '@api/users/users.service'
-import { SchoolInfo, SelfUnfilledResponse } from '@api/users/models'
+import { SelfUnfilledResponse } from '@api/users/models'
 import { Router } from '@angular/router'
 import CompositeTypeEnum = SimpleContest.CompositeTypeEnum
 
@@ -26,7 +26,6 @@ export interface ContestsState
     locations: Array<OlympiadLocation>
     contest?: Contest
     callState: CallState
-    schoolInfo?: SchoolInfo
     unfilledProfile?: Array<object>
 }
 
@@ -37,7 +36,6 @@ const initialState: ContestsState =
         locations: [],
         contest: undefined,
         callState: LoadingState.INIT,
-        schoolInfo: undefined,
         unfilledProfile: undefined
     }
 
@@ -52,14 +50,7 @@ export class ContestsStore extends ComponentStore<ContestsState>
 
     readonly contests$: Observable<SimpleContestWithFlagResponseTaskParticipant[]> = this.select( state => state.contests.filter( item =>
     {
-        console.log( 'enter ContestsStore/contests$ selector' )
-        if ( item.contest === undefined )
-            return false
-        if ( state.schoolInfo?.grade === undefined )
-            return false
-        if ( item.contest.base_contest.target_classes === undefined )
-            return false
-        return item.contest.base_contest.target_classes.some( targetClass => targetClass.target_class == state.schoolInfo!.grade!.toString() )
+        return item.contest !== undefined
     } ) )
     readonly contest$: Observable<SimpleContest | undefined> = this.select( state => state.contest as SimpleContest )
     readonly isFilledProfile$: Observable<boolean> = this.select( state => state.unfilledProfile === undefined || !state.unfilledProfile.length )
@@ -99,12 +90,6 @@ export class ContestsStore extends ComponentStore<ContestsState>
             contest: contest
         } ) )
 
-    readonly setSchoolInfo = this.updater( ( state: ContestsState, schoolInfo: SchoolInfo ) =>
-        ( {
-            ...state,
-            schoolInfo: schoolInfo
-        } ) )
-
     readonly setUnfilledProfile = this.updater( ( state: ContestsState, unfilledProfile: object[] | undefined ) =>
         ( {
             ...state,
@@ -112,29 +97,27 @@ export class ContestsStore extends ComponentStore<ContestsState>
         } ) )
 
     // EFFECTS
-    readonly fetchAll = this.effect( () =>
-    {
-        this.setLoading()
-        return this.tasksService.tasksParticipantOlympiadAllGet( true, undefined, undefined, undefined, undefined, 2021, undefined, undefined, undefined, CompositeTypeEnum.SimpleContest ).pipe(
-            tapResponse(
-                ( response: FilterSimpleContestResponseTaskParticipant ) => this.setContests( response.contest_list ?? [] ),
-                ( error: string ) => this.updateError( error )
-            ),
-            catchError( ( error: any ) => of( displayErrorMessage( error ) ) )
-        )
-    } )
+    readonly fetchAll = this.effect( ( userGrade$: Observable<number> ) =>
+        userGrade$.pipe(
+            switchMap( ( userGrade: number ) =>
+            {
+                return this.tasksService.tasksParticipantOlympiadAllGet( true, undefined, undefined, undefined, undefined, 2021, undefined, undefined, undefined, CompositeTypeEnum.SimpleContest ).pipe(
+                    tapResponse(
+                        ( response: FilterSimpleContestResponseTaskParticipant ) => this.setContests( response.contest_list?.filter( item => this.filterContest( item, userGrade ) ) ?? [] ),
+                        ( error: string ) => this.updateError( error )
+                    ),
+                    catchError( ( error: any ) => of( displayErrorMessage( error ) ) )
+                )
+            } ) ) )
 
-    readonly fetchSchoolInfo = this.effect( () =>
+    filterContest( item: SimpleContestWithFlagResponseTaskParticipant, userGrade: number )
     {
-        this.setLoading()
-        return this.usersService.userProfileSchoolGet().pipe(
-            tapResponse(
-                ( response: SchoolInfo ) => this.setSchoolInfo( response ),
-                ( error: string ) => this.updateError( error )
-            ),
-            catchError( ( error: any ) => of( displayErrorMessage( error ) ) )
-        )
-    } )
+        if ( item.contest === undefined )
+            return false
+        if ( item.contest.base_contest.target_classes === undefined )
+            return false
+        return item.contest.base_contest.target_classes.some( targetClass => targetClass.target_class == userGrade.toString() )
+    }
 
     readonly fetchSingle = this.effect( ( contestId$: Observable<number> ) =>
         contestId$.pipe(
