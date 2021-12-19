@@ -2,7 +2,7 @@ from flask import request
 from common import get_current_module
 from contest.responses.util import *
 from common.jwt_verify import jwt_get_id, jwt_get_role
-from contest.responses.model_schemas.schemas import AnswerSchema
+from contest.responses.model_schemas.schemas import UserAnswerSchema
 from .schemas import *
 from contest.tasks.models.olympiad import ContestGroupRestrictionEnum
 
@@ -216,7 +216,7 @@ def user_answer_for_task_by_id_plain_file(contest_id, task_id, user_id):
 
 
 @module.route('/contest/<int:contest_id>/task/<int:task_id>/user/<int:user_id>', methods=['GET'],
-              output_schema=AnswerSchema)
+              output_schema=UserAnswerSchema)
 def user_answer_for_task_by_id(contest_id, task_id, user_id):
     """
     Get user answer for task
@@ -248,7 +248,7 @@ def user_answer_for_task_by_id(contest_id, task_id, user_id):
           description: OK
           content:
             application/json:
-              schema: AnswerSchema
+              schema: UserAnswerSchema
         '403':
           description: Restriction error
         '404':

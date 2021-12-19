@@ -2,7 +2,7 @@ import io
 from flask import request
 from common import get_current_module
 from common.jwt_verify import jwt_get_id
-from contest.responses.model_schemas.schemas import AnswerSchema
+from contest.responses.model_schemas.schemas import UserAnswerSchema
 from contest.responses.util import *
 from contest.responses.creator.schemas import *
 
@@ -186,7 +186,7 @@ def get_self_user_answer_for_task_plain_file(contest_id, task_id):
 
 
 @module.route('/contest/<int:contest_id>/task/<int:task_id>/user/self', methods=['GET'],
-              output_schema=AnswerSchema)
+              output_schema=UserAnswerSchema)
 def user_answer_for_task_self(contest_id, task_id):
     """
     Get current user answer for task
@@ -212,7 +212,7 @@ def user_answer_for_task_self(contest_id, task_id):
           description: OK
           content:
             application/json:
-              schema: AnswerSchema
+              schema: UserAnswerSchema
         '403':
           description: Not enough rights for current user
         '404':

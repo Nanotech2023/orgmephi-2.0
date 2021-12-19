@@ -109,7 +109,7 @@ class PlainAnswerFileSchema(SQLAlchemySchema):
     filetype = m_f.String()
 
 
-class AnswerSchema(OneOfSchema):
+class UserAnswerSchema(OneOfSchema):
     type_schemas = {
         AnswerEnum.PlainAnswerText.value: PlainAnswerTextSchema,
         AnswerEnum.RangeAnswer.value: RangeAnswerSchema,
