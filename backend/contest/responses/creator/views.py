@@ -125,6 +125,47 @@ def get_user_by_id_all_marks(contest_id, user_id):
     return get_all_user_answers(user_id, contest_id), 200
 
 
+@module.route('/contest/<int:contest_id>/user/<int:user_id>/results', methods=['GET'],
+              output_schema=UserResultForContestResponseSchema)
+def get_user_by_id_resutls_for_contest(contest_id, user_id):
+    """
+    Get user results for contest
+    ---
+    get:
+      security:
+        - JWTAccessToken: []
+      parameters:
+        - in: path
+          description: Id of the contest
+          name: contest_id
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the user
+          name: user_id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: UserResultForContestResponseSchema
+        '403':
+          description: Restriction error
+        '404':
+          description: User or contest not found
+        '409':
+          description: Olympiad isn't over
+    """
+    creator_id = jwt_get_id()
+    check_contest_restriction(creator_id, contest_id, ContestGroupRestrictionEnum.view_mark_and_user_status)
+    if_user_ended_his_response(user_id, contest_id)
+    return get_user_results_and_variant(user_id, contest_id), 200
+
+
 @module.route('/contest/<int:contest_id>/task/<int:task_id>/user/<int:user_id>/plain/file', methods=['GET'])
 def user_answer_for_task_by_id_plain_file(contest_id, task_id, user_id):
     """
