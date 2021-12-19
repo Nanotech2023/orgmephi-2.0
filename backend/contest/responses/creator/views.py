@@ -127,7 +127,7 @@ def get_user_by_id_all_marks(contest_id, user_id):
 
 @module.route('/contest/<int:contest_id>/user/<int:user_id>/results', methods=['GET'],
               output_schema=UserResultForContestResponseSchema)
-def get_user_by_id_resutls_for_contest(contest_id, user_id):
+def get_user_by_id_results_for_contest(contest_id, user_id):
     """
     Get user results for contest
     ---

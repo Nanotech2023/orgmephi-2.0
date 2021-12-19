@@ -146,13 +146,12 @@ def get_user_results_and_variant(user_id, contest_id):
     variant = db_get_one_or_none(Variant, 'variant_id', current_user.variant_id)
     contest_tasks = variant.contest_tasks_in_variant[:]
 
-    from contest.tasks.models import Task
+    from contest.tasks.models import Task, ContestTask
     total_points = 0
     tasks_list = []
     for contest_task in contest_tasks:
         tasks_list.append(db_get_or_raise(Task, "task_id", contest_task.task_id))
-        total_points += contest_task.task_points
-
+        total_points += db_get_one_or_none(ContestTask, "contest_task_id", contest_task.contest_task_id).task_points
     response["tasks_list"] = tasks_list
     response["total_points"] = total_points
     return response

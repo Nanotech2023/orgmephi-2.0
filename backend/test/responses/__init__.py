@@ -175,6 +175,7 @@ def create_user_response(create_three_tasks):
     yield create_three_tasks
 
 
+# noinspection DuplicatedCode
 @pytest.fixture
 def create_user_with_answers(create_user_response):
     from contest.responses.models import PlainAnswerText, RangeAnswer, MultipleChoiceAnswer
@@ -204,6 +205,37 @@ def create_user_with_answers(create_user_response):
                                                task_id=multiple_id,
                                                answers=multiple_answers[i % 3])
         test_app.db.session.add(plain_answer)
+        test_app.db.session.add(range_answer)
+        test_app.db.session.add(multiple_answer)
+
+    test_app.db.session.commit()
+    yield create_user_response
+
+
+# noinspection DuplicatedCode
+@pytest.fixture
+def create_user_with_answers_without_plain(create_user_response):
+    from contest.responses.models import RangeAnswer, MultipleChoiceAnswer
+    range_answers = [0.6, 0.2, 0.9]
+    multiple_answers = [
+        ['1', '2'],
+        ['1', '3'],
+        ['2', '3']
+    ]
+    from contest.responses.models import Response
+    from contest.tasks.models import TaskTypeEnum
+    for i in range(8):
+        user_work_id = get_work_id(create_user_response, i)
+        user_work = Response.query.filter_by(work_id=user_work_id).one_or_none()
+        range_id = get_task_id_by_variant_and_type(user_work.contest_id, user_work.user_id, TaskTypeEnum.RangeTask)
+        multiple_id = get_task_id_by_variant_and_type(user_work.contest_id, user_work.user_id,
+                                                      TaskTypeEnum.MultipleChoiceTask)
+        range_answer = RangeAnswer(work_id=user_work_id,
+                                   task_id=range_id,
+                                   answer=range_answers[i % 3])
+        multiple_answer = MultipleChoiceAnswer(work_id=user_work_id,
+                                               task_id=multiple_id,
+                                               answers=multiple_answers[i % 3])
         test_app.db.session.add(range_answer)
         test_app.db.session.add(multiple_answer)
 
