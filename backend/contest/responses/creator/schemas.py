@@ -26,6 +26,7 @@ class TaskForUserResponseResultsSchema(Schema):
     task_id = fields.Integer(required=True)
     right_answer = fields.Nested(nested=RightAnswerSchema, required=True)
     task_type = EnumField(TaskTypeEnum, data_key='task_type', by_value=True)
+    task_points = fields.Int(required=True)
 
 
 class UserResultForContestResponseSchema(Schema):
@@ -34,7 +35,6 @@ class UserResultForContestResponseSchema(Schema):
     contest_id = fields.Int(required=True)
     user_answers = fields.Nested(nested=BaseAnswerSchema, many=True, required=True)
     tasks_list = fields.Nested(TaskForUserResponseResultsSchema, many=True, required=True)
-    total_points = fields.Int(required=True)
 
 
 class PlainAnswerRequestSchema(Schema):

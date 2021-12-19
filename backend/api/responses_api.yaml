@@ -233,6 +233,8 @@ components:
           $ref: '#/components/schemas/RightAnswer'
         task_id:
           type: integer
+        task_points:
+          type: integer
         task_type:
           enum:
           - PlainTask
@@ -243,6 +245,7 @@ components:
       required:
       - right_answer
       - task_id
+      - task_points
       type: object
     UserAnswer:
       discriminator:
@@ -297,8 +300,6 @@ components:
           items:
             $ref: '#/components/schemas/TaskForUserResponseResults'
           type: array
-        total_points:
-          type: integer
         user_answers:
           items:
             $ref: '#/components/schemas/BaseAnswer'
@@ -310,7 +311,6 @@ components:
       required:
       - contest_id
       - tasks_list
-      - total_points
       - user_answers
       - user_id
       - work_id

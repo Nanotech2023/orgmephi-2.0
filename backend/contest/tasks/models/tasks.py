@@ -117,7 +117,6 @@ class Task(db.Model):
     @hybrid_property
     def right_answer(self):
         from common.util import db_get_one_or_none
-        print("TUT")
         if self.task_type.value == "PlainTask":
             task: PlainTask = db_get_one_or_none(PlainTask, 'task_id', self.task_id)
             return {'answer': task.recommended_answer}
