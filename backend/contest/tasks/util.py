@@ -425,7 +425,7 @@ def user_can_view_variants_and_tasks(id_contest):
     current_contest: SimpleContest = get_contest_if_possible(id_contest)
     results_published = datetime.utcnow() >= current_contest.result_publication_date
     show_result = results_published and ResponseStatusEnum.accepted == current_response.work_status and \
-                  current_user.show_results_to_user
+                  (current_user.show_results_to_user or current_contest.show_result_after_finish)
 
     return current_response.status == ResponseStatusEnum.in_progress or show_result
 

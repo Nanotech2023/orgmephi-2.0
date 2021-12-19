@@ -624,3 +624,23 @@ def test_results_with_variant_self(client, create_user_with_answers_without_plai
             assert task['right_answer']['answers'] == ['1', '3']
             assert task['task_id'] == multiple_id
             assert task['task_points'] == 14
+
+    client.set_prefix('contest/tasks/participant')
+
+    from common.media_types import TaskImage
+    from contest.tasks.models.tasks import Task
+    from common.util import db_get_one_or_none
+
+    task = db_get_one_or_none(Task, "task_id", range_id)
+    test_app.io_to_media('TASK', task, 'image_of_task', io.BytesIO(test_image), TaskImage)
+
+    task = db_get_one_or_none(Task, "task_id", multiple_id)
+    test_app.io_to_media('TASK', task, 'image_of_task', io.BytesIO(test_image), TaskImage)
+    test_app.db.session.commit()
+
+    resp = client.get(f'/contest/{contest_id}/tasks/{range_id}/image/self')
+    assert resp.status_code == 200
+
+    resp = client.get(f'/contest/{contest_id}/tasks/{multiple_id}/image/self')
+    assert resp.status_code == 200
+
