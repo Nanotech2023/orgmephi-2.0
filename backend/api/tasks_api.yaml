@@ -2108,7 +2108,7 @@ paths:
       parameters:
       - description: ID of the base olympiad
         in: path
-        name: id_base_olympiad
+        name: id_contest
         required: true
         schema:
           type: integer
@@ -2350,15 +2350,9 @@ paths:
   /tasks/editor/task_pool/{id_task_pool}/task/{id_task}/upload_image:
     post:
       parameters:
-      - description: ID of the contest
+      - description: ID of the task pool
         in: path
-        name: id_contest
-        required: true
-        schema:
-          type: integer
-      - description: ID of the variant
-        in: path
-        name: id_variant
+        name: id_task_pool
         required: true
         schema:
           type: integer
@@ -2390,15 +2384,9 @@ paths:
   /tasks/editor/task_pool/{id_task_pool}/task/{id_task}/remove:
     post:
       parameters:
-      - description: ID of the contest
+      - description: ID of the task pool
         in: path
-        name: id_contest
-        required: true
-        schema:
-          type: integer
-      - description: ID of the variant
-        in: path
-        name: id_variant
+        name: id_task_pool
         required: true
         schema:
           type: integer
@@ -2421,15 +2409,9 @@ paths:
   /tasks/editor/task_pool/{id_task_pool}/task/{id_task}/plain:
     patch:
       parameters:
-      - description: ID of the contest
+      - description: ID of the task pool
         in: path
-        name: id_contest
-        required: true
-        schema:
-          type: integer
-      - description: ID of the variant
-        in: path
-        name: id_variant
+        name: id_task_pool
         required: true
         schema:
           type: integer
@@ -2462,15 +2444,9 @@ paths:
   /tasks/editor/task_pool/{id_task_pool}/task/{id_task}/range:
     patch:
       parameters:
-      - description: ID of the contest
+      - description: ID of the task pool
         in: path
-        name: id_contest
-        required: true
-        schema:
-          type: integer
-      - description: ID of the variant
-        in: path
-        name: id_variant
+        name: id_task_pool
         required: true
         schema:
           type: integer
@@ -2503,15 +2479,9 @@ paths:
   /tasks/editor/task_pool/{id_task_pool}/task/{id_task}/multiple:
     patch:
       parameters:
-      - description: ID of the contest
+      - description: ID of the task pool
         in: path
-        name: id_contest
-        required: true
-        schema:
-          type: integer
-      - description: ID of the variant
-        in: path
-        name: id_variant
+        name: id_task_pool
         required: true
         schema:
           type: integer

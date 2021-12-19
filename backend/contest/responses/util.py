@@ -5,7 +5,7 @@ from datetime import datetime, timedelta
 from common.errors import NotFound, RequestError, AlreadyExists, PermissionDenied, DataConflict, TimeOver
 from common.util import db_get_one_or_none, db_exists, db_get_or_raise, db_get_list
 from contest.tasks.models import SimpleContest, RangeTask, MultipleChoiceTask, PlainTask, ContestHoldingTypeEnum, \
-    UserInContest, ContestTask
+    UserInContest, ContestTask, Variant
 from .models import Response, PlainAnswerText, RangeAnswer, MultipleChoiceAnswer, PlainAnswerFile, BaseAnswer, \
     answer_dict, add_user_response, add_plain_answer_file, add_plain_answer_text, add_range_answer, \
     add_multiple_answer, ResponseStatusEnum
@@ -140,6 +140,27 @@ def get_all_user_answers(user_id, contest_id):
     }
 
 
+def get_user_results_and_variant(user_id, contest_id):
+    response = get_all_user_answers(user_id, contest_id)
+    current_user = UserInContest.query.filter_by(user_id=user_id, contest_id=contest_id).one_or_none()
+    variant = db_get_one_or_none(Variant, 'variant_id', current_user.variant_id)
+    contest_tasks = variant.contest_tasks_in_variant[:]
+
+    from contest.tasks.models import Task, ContestTask
+    tasks_list = []
+    for contest_task in contest_tasks:
+        task = db_get_or_raise(Task, "task_id", contest_task.task_id)
+        task_points = db_get_one_or_none(ContestTask, "contest_task_id", contest_task.contest_task_id).task_points
+        tasks_list.append({
+            'task_id': task.task_id,
+            'right_answer': task.right_answer,
+            'task_type': task.task_type,
+            'task_points': task_points
+        })
+    response["tasks_list"] = tasks_list
+    return response
+
+
 def get_mimetype(filetype):
     return mimetypes.get(filetype)
 
@@ -153,6 +174,13 @@ def get_variant_by_contest_and_user_id(contest_id, user_id):
 
 
 # Checkers
+
+def if_user_ended_his_response(user_id, contest_id):
+    user_work: Response = get_user_in_contest_work(user_id, contest_id)
+    if user_work.work_status == ResponseStatusEnum.in_progress or \
+            user_work.work_status == ResponseStatusEnum.not_checked:
+        raise OlympiadError("Olympiad is not over yet")
+
 
 def check_task_type(task_id, task_type):
     task = None

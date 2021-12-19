@@ -1,7 +1,8 @@
 from marshmallow import Schema, fields
 from common import fields as common_fields
-from contest.responses.model_schemas.schemas import BaseAnswerSchema, AnswerWithoutMarkSchema
+from contest.responses.model_schemas.schemas import BaseAnswerSchema, AnswerWithoutMarkSchema, RightAnswerSchema
 from contest.responses.models import ResponseStatusEnum
+from contest.tasks.models import TaskTypeEnum
 from contest.tasks.models.user import UserStatusEnum
 from marshmallow_enum import EnumField
 from contest.tasks.model_schemas.olympiad import ContestInfoSchema
@@ -19,6 +20,21 @@ class AllUserMarksResponseSchema(Schema):
     work_id = fields.Int(required=True)
     contest_id = fields.Int(required=True)
     user_answers = fields.Nested(nested=BaseAnswerSchema, many=True, required=True)
+
+
+class TaskForUserResponseResultsSchema(Schema):
+    task_id = fields.Integer(required=True)
+    right_answer = fields.Nested(nested=RightAnswerSchema, required=True)
+    task_type = EnumField(TaskTypeEnum, data_key='task_type', by_value=True)
+    task_points = fields.Int(required=True)
+
+
+class UserResultForContestResponseSchema(Schema):
+    user_id = fields.Int(required=True)
+    work_id = fields.Int(required=True)
+    contest_id = fields.Int(required=True)
+    user_answers = fields.Nested(nested=BaseAnswerSchema, many=True, required=True)
+    tasks_list = fields.Nested(TaskForUserResponseResultsSchema, many=True, required=True)
 
 
 class PlainAnswerRequestSchema(Schema):

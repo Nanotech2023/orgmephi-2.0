@@ -1,5 +1,7 @@
 import enum
 
+from sqlalchemy.ext.hybrid import hybrid_property
+
 from common import get_current_db
 from common.media_types import TaskImage, Json
 
@@ -111,6 +113,23 @@ class Task(db.Model):
     image_of_task = db.Column(TaskImage.as_mutable(Json))
 
     task_type = db.Column(db.Enum(TaskTypeEnum))
+
+    @hybrid_property
+    def right_answer(self):
+        from common.util import db_get_one_or_none
+        if self.task_type.value == "PlainTask":
+            task: PlainTask = db_get_one_or_none(PlainTask, 'task_id', self.task_id)
+            return {'answer': task.recommended_answer}
+        elif self.task_type.value == "RangeTask":
+            task: RangeTask = db_get_one_or_none(RangeTask, 'task_id', self.task_id)
+            return {
+                'start_value': task.start_value,
+                'end_value': task.end_value,
+            }
+        elif self.task_type.value == "MultipleChoiceTask":
+            task: MultipleChoiceTask = db_get_one_or_none(MultipleChoiceTask, 'task_id', self.task_id)
+            right_answers = [elem['answer'] for elem in task.answers if elem['is_right_answer']]
+            return {'answers': right_answers}
 
     __mapper_args__ = {
         'polymorphic_identity': TaskTypeEnum.BaseTask,

@@ -202,7 +202,7 @@ def contest_task_remove(id_contest, id_contest_task):
       parameters:
         - in: path
           description: ID of the base olympiad
-          name: id_base_olympiad
+          name: id_contest
           required: true
           schema:
             type: integer
@@ -597,14 +597,8 @@ def task_image_upload(id_task_pool, id_task):
               format: binary
       parameters:
         - in: path
-          description: ID of the contest
-          name: id_contest
-          required: true
-          schema:
-            type: integer
-        - in: path
-          description: ID of the variant
-          name: id_variant
+          description: ID of the task pool
+          name: id_task_pool
           required: true
           schema:
             type: integer
@@ -646,14 +640,8 @@ def task_remove(id_task_pool, id_task):
         - CSRFAccessToken: [ ]
       parameters:
         - in: path
-          description: ID of the contest
-          name: id_contest
-          required: true
-          schema:
-            type: integer
-        - in: path
-          description: ID of the variant
-          name: id_variant
+          description: ID of the task pool
+          name: id_task_pool
           required: true
           schema:
             type: integer
@@ -689,14 +677,8 @@ def task_patch_plain(id_task_pool, id_task):
     patch:
       parameters:
         - in: path
-          description: ID of the contest
-          name: id_contest
-          required: true
-          schema:
-            type: integer
-        - in: path
-          description: ID of the variant
-          name: id_variant
+          description: ID of the task pool
+          name: id_task_pool
           required: true
           schema:
             type: integer
@@ -745,14 +727,8 @@ def task_patch_range(id_task_pool, id_task):
     patch:
       parameters:
         - in: path
-          description: ID of the contest
-          name: id_contest
-          required: true
-          schema:
-            type: integer
-        - in: path
-          description: ID of the variant
-          name: id_variant
+          description: ID of the task pool
+          name: id_task_pool
           required: true
           schema:
             type: integer
@@ -801,14 +777,8 @@ def task_patch_multiple(id_task_pool, id_task):
     patch:
       parameters:
         - in: path
-          description: ID of the contest
-          name: id_contest
-          required: true
-          schema:
-            type: integer
-        - in: path
-          description: ID of the variant
-          name: id_variant
+          description: ID of the task pool
+          name: id_task_pool
           required: true
           schema:
             type: integer
