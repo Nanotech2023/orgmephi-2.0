@@ -282,9 +282,7 @@ components:
           type: string
         location_type:
           enum:
-          - Russian
           - Foreign
-          readOnly: true
           type: string
         rural:
           type: boolean
@@ -311,8 +309,6 @@ components:
         location_type:
           enum:
           - Russian
-          - Foreign
-          readOnly: true
           type: string
         rural:
           type: boolean
@@ -478,7 +474,7 @@ components:
         location:
           $ref: '#/components/schemas/Location'
         name:
-          maxLength: 32
+          maxLength: 128
           type: string
         number:
           type: integer

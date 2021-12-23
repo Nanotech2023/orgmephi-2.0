@@ -2,7 +2,7 @@ import io
 from flask import request
 from common import get_current_module
 from common.jwt_verify import jwt_get_id
-from contest.responses.model_schemas.schemas import AnswerSchema
+from contest.responses.model_schemas.schemas import UserAnswerSchema
 from contest.responses.util import *
 from contest.responses.creator.schemas import *
 
@@ -107,6 +107,42 @@ def get_user_by_id_all_marks(contest_id):
     return get_all_user_answers(self_user_id, contest_id), 200
 
 
+@module.route('/contest/<int:contest_id>/user/self/results', methods=['GET'],
+              output_schema=UserResultForContestResponseSchema)
+def get_user_results_for_contest(contest_id):
+    """
+    Get user results for contest
+    ---
+    get:
+      security:
+        - JWTAccessToken: []
+      parameters:
+        - in: path
+          description: Id of the contest
+          name: contest_id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: UserResultForContestResponseSchema
+        '403':
+          description: Restriction error
+        '404':
+          description: User or contest not found
+        '409':
+          description: Olympiad isn't over
+    """
+    self_user_id = jwt_get_id()
+    check_user_show_results(contest_id, self_user_id)
+    check_time_publishing(contest_id)
+    if_user_ended_his_response(self_user_id, contest_id)
+    return get_user_results_and_variant(self_user_id, contest_id), 200
+
+
 @module.route('/contest/<int:contest_id>/task/<int:task_id>/user/self/plain/file', methods=['GET'])
 def get_self_user_answer_for_task_plain_file(contest_id, task_id):
     """
@@ -150,7 +186,7 @@ def get_self_user_answer_for_task_plain_file(contest_id, task_id):
 
 
 @module.route('/contest/<int:contest_id>/task/<int:task_id>/user/self', methods=['GET'],
-              output_schema=AnswerSchema)
+              output_schema=UserAnswerSchema)
 def user_answer_for_task_self(contest_id, task_id):
     """
     Get current user answer for task
@@ -176,7 +212,7 @@ def user_answer_for_task_self(contest_id, task_id):
           description: OK
           content:
             application/json:
-              schema: AnswerSchema
+              schema: UserAnswerSchema
         '403':
           description: Not enough rights for current user
         '404':
@@ -227,6 +263,7 @@ def self_user_answer_for_task_post_plain_file(contest_id, task_id):
         '409':
           description: Timing error or file is too large
     """
+    check_contest_type(contest_id)
     check_task_type(task_id, answer_dict['PlainAnswerFile'])
     self_user_id = jwt_get_id()
     user_answer_post_file(self_user_id, contest_id, task_id)
@@ -318,6 +355,7 @@ def self_user_answer_for_task_post_plain_text(contest_id, task_id):
         '409':
           description: Timing error
     """
+    check_contest_type(contest_id)
     check_task_type(task_id, answer_dict['PlainAnswerText'])
     values = request.marshmallow
     self_user_id = jwt_get_id()
@@ -362,6 +400,7 @@ def self_user_answer_for_task_range(contest_id, task_id):
         '409':
           description: Timing error
     """
+    check_contest_type(contest_id)
     check_task_type(task_id, answer_dict['RangeAnswer'])
     values = request.marshmallow
     self_user_id = jwt_get_id()
@@ -406,6 +445,7 @@ def self_user_answer_for_task_multiple(contest_id, task_id):
         '409':
           description: Timing error
     """
+    check_contest_type(contest_id)
     check_task_type(task_id, answer_dict['MultipleChoiceAnswer'])
     values = request.marshmallow
     self_user_id = jwt_get_id()
@@ -545,6 +585,7 @@ def self_user_finish_contest(contest_id):
         '404':
           description: User or contest not found
     """
+    check_contest_type(contest_id)
     self_user_id = jwt_get_id()
     user_work = get_user_in_contest_work(self_user_id, contest_id)
     finish_contest(user_work)

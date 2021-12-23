@@ -44,19 +44,6 @@ components:
       required:
       - results
       type: object
-    Answer:
-      discriminator:
-        mapping:
-          MultipleChoiceAnswer: '#/components/schemas/MultipleChoiceAnswer'
-          PlainAnswerFile: '#/components/schemas/PlainAnswerFile'
-          PlainAnswerText: '#/components/schemas/PlainAnswerText'
-          RangeAnswer: '#/components/schemas/RangeAnswer'
-        propertyName: answer_type
-      oneOf:
-      - $ref: '#/components/schemas/PlainAnswerText'
-      - $ref: '#/components/schemas/RangeAnswer'
-      - $ref: '#/components/schemas/MultipleChoiceAnswer'
-      - $ref: '#/components/schemas/PlainAnswerFile'
     AnswerWithoutMark:
       properties:
         answer_id:
@@ -99,25 +86,25 @@ components:
           readOnly: true
           type: integer
         task_points:
-          nullable: true
           readOnly: true
           type: integer
       required:
       - right_answer
-      - task_points
       type: object
     ContestInfo:
       properties:
+        academic_year:
+          type: integer
+        composite_type:
+          enum:
+          - SimpleContest
+          type: string
         contest_id:
           readOnly: true
-          type: integer
-        end_year:
           type: integer
         name:
           readOnly: true
           type: string
-        start_year:
-          type: integer
         subject:
           enum:
           - Math
@@ -128,10 +115,10 @@ components:
           - Other
           type: string
       required:
+      - academic_year
+      - composite_type
       - contest_id
-      - end_year
       - name
-      - start_year
       type: object
     ContestResultSheetResponse:
       properties:
@@ -240,6 +227,39 @@ components:
       - $ref: '#/components/schemas/PlainRightAnswer'
       - $ref: '#/components/schemas/RangeRightAnswer'
       - $ref: '#/components/schemas/MultipleRightAnswer'
+    TaskForUserResponseResults:
+      properties:
+        right_answer:
+          $ref: '#/components/schemas/RightAnswer'
+        task_id:
+          type: integer
+        task_points:
+          type: integer
+        task_type:
+          enum:
+          - PlainTask
+          - RangeTask
+          - MultipleChoiceTask
+          - BaseTask
+          type: string
+      required:
+      - right_answer
+      - task_id
+      - task_points
+      type: object
+    UserAnswer:
+      discriminator:
+        mapping:
+          MultipleChoiceAnswer: '#/components/schemas/MultipleChoiceAnswer'
+          PlainAnswerFile: '#/components/schemas/PlainAnswerFile'
+          PlainAnswerText: '#/components/schemas/PlainAnswerText'
+          RangeAnswer: '#/components/schemas/RangeAnswer'
+        propertyName: answer_type
+      oneOf:
+      - $ref: '#/components/schemas/PlainAnswerText'
+      - $ref: '#/components/schemas/RangeAnswer'
+      - $ref: '#/components/schemas/MultipleChoiceAnswer'
+      - $ref: '#/components/schemas/PlainAnswerFile'
     UserAnswerMarkResponse:
       properties:
         mark:
@@ -271,6 +291,29 @@ components:
           type: string
       required:
       - status
+      type: object
+    UserResultForContestResponse:
+      properties:
+        contest_id:
+          type: integer
+        tasks_list:
+          items:
+            $ref: '#/components/schemas/TaskForUserResponseResults'
+          type: array
+        user_answers:
+          items:
+            $ref: '#/components/schemas/BaseAnswer'
+          type: array
+        user_id:
+          type: integer
+        work_id:
+          type: integer
+      required:
+      - contest_id
+      - tasks_list
+      - user_answers
+      - user_id
+      - work_id
       type: object
     UserResultsForContestResponse:
       properties:
@@ -416,6 +459,36 @@ paths:
           description: Restriction error
         '404':
           description: User or contest not found
+      security:
+      - JWTAccessToken: []
+  /responses/creator/contest/{contest_id}/user/{user_id}/results:
+    get:
+      parameters:
+      - description: Id of the contest
+        in: path
+        name: contest_id
+        required: true
+        schema:
+          type: integer
+      - description: Id of the user
+        in: path
+        name: user_id
+        required: true
+        schema:
+          type: integer
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResultForContestResponse'
+          description: OK
+        '403':
+          description: Restriction error
+        '404':
+          description: User or contest not found
+        '409':
+          description: Olympiad isn't over
       security:
       - JWTAccessToken: []
   /responses/creator/contest/{contest_id}/task/{task_id}/user/{user_id}/plain/file:
@@ -565,7 +638,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Answer'
+                $ref: '#/components/schemas/UserAnswer'
           description: OK
         '403':
           description: Restriction error
@@ -852,7 +925,7 @@ paths:
         '404':
           description: User or contest not found
         '409':
-          description: Mark Error
+          description: Mark or timing error
       security:
       - JWTAccessToken: []
       - CSRFAccessToken: []
@@ -1127,6 +1200,30 @@ paths:
           description: The results have not yet been published
       security:
       - JWTAccessToken: []
+  /responses/participant/contest/{contest_id}/user/self/results:
+    get:
+      parameters:
+      - description: Id of the contest
+        in: path
+        name: contest_id
+        required: true
+        schema:
+          type: integer
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResultForContestResponse'
+          description: OK
+        '403':
+          description: Restriction error
+        '404':
+          description: User or contest not found
+        '409':
+          description: Olympiad isn't over
+      security:
+      - JWTAccessToken: []
   /responses/participant/contest/{contest_id}/task/{task_id}/user/self/plain/file:
     get:
       parameters:
@@ -1256,7 +1353,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Answer'
+                $ref: '#/components/schemas/UserAnswer'
           description: OK
         '403':
           description: Not enough rights for current user

@@ -1,8 +1,7 @@
 from flask import request
 
 from common import get_current_module
-from common.errors import AlreadyExists, TimeOver
-from common.util import send_pdf
+from common.errors import TimeOver
 from contest.responses.util import get_user_in_contest_work
 from contest.tasks.model_schemas.olympiad import SimpleContestSchema
 from contest.tasks.participant.schemas import *
@@ -141,7 +140,6 @@ def enroll_in_contest(id_contest):
 
     current_contest.users.append(UserInContest(user_id=user_id,
                                                show_results_to_user=False,
-                                               variant_id=generate_variant(id_contest, user_id),
                                                location_id=location_id,
                                                supervisor=supervisor,
                                                user_status=UserStatusEnum.Participant))
@@ -397,15 +395,13 @@ def get_user_certificate_self(id_contest):
 
     current_contest = get_contest_if_possible(id_contest)
     current_user = db_get_or_raise(User, 'id', jwt_get_id())
+
     unfilled = current_user.unfilled()
     if len(unfilled) > 0:
         raise InsufficientData('user', str(unfilled))
 
-    mark = get_user_in_contest_work(jwt_get_id(), id_contest).mark
-    user_status = db_get_or_raise(UserInContest, 'user_id', jwt_get_id()).user_status
-
-    return send_pdf('user_certificate.html', u=current_user, mark=mark, user_status=user_status,
-                    back=current_contest)
+    certificate = find_certificate(current_user, current_contest)
+    return get_certificate_for_user(current_user.user_info, current_contest.name, certificate)
 
 
 # Contest
@@ -469,6 +465,11 @@ def get_all_contests_self():
     ---
     get:
       parameters:
+        - in: query
+          name: visibility
+          required: false
+          schema:
+            type: boolean
         - in: query
           name: offset
           required: false

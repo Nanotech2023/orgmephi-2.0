@@ -1,8 +1,8 @@
 from flask import request
 from common import get_current_module
 from contest.responses.util import *
-from common.jwt_verify import jwt_get_id
-from contest.responses.model_schemas.schemas import AnswerSchema
+from common.jwt_verify import jwt_get_id, jwt_get_role
+from contest.responses.model_schemas.schemas import UserAnswerSchema
 from .schemas import *
 from contest.tasks.models.olympiad import ContestGroupRestrictionEnum
 
@@ -125,6 +125,47 @@ def get_user_by_id_all_marks(contest_id, user_id):
     return get_all_user_answers(user_id, contest_id), 200
 
 
+@module.route('/contest/<int:contest_id>/user/<int:user_id>/results', methods=['GET'],
+              output_schema=UserResultForContestResponseSchema)
+def get_user_by_id_results_for_contest(contest_id, user_id):
+    """
+    Get user results for contest
+    ---
+    get:
+      security:
+        - JWTAccessToken: []
+      parameters:
+        - in: path
+          description: Id of the contest
+          name: contest_id
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the user
+          name: user_id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: UserResultForContestResponseSchema
+        '403':
+          description: Restriction error
+        '404':
+          description: User or contest not found
+        '409':
+          description: Olympiad isn't over
+    """
+    creator_id = jwt_get_id()
+    check_contest_restriction(creator_id, contest_id, ContestGroupRestrictionEnum.view_mark_and_user_status)
+    if_user_ended_his_response(user_id, contest_id)
+    return get_user_results_and_variant(user_id, contest_id), 200
+
+
 @module.route('/contest/<int:contest_id>/task/<int:task_id>/user/<int:user_id>/plain/file', methods=['GET'])
 def user_answer_for_task_by_id_plain_file(contest_id, task_id, user_id):
     """
@@ -175,7 +216,7 @@ def user_answer_for_task_by_id_plain_file(contest_id, task_id, user_id):
 
 
 @module.route('/contest/<int:contest_id>/task/<int:task_id>/user/<int:user_id>', methods=['GET'],
-              output_schema=AnswerSchema)
+              output_schema=UserAnswerSchema)
 def user_answer_for_task_by_id(contest_id, task_id, user_id):
     """
     Get user answer for task
@@ -207,7 +248,7 @@ def user_answer_for_task_by_id(contest_id, task_id, user_id):
           description: OK
           content:
             application/json:
-              schema: AnswerSchema
+              schema: UserAnswerSchema
         '403':
           description: Restriction error
         '404':
@@ -646,16 +687,17 @@ def user_answer_task_mark_post(contest_id, user_id, task_id):
         '404':
           description: User or contest not found
         '409':
-          description: Mark Error
+          description: Mark or timing error
     """
     creator_id = jwt_get_id()
     check_contest_restriction(creator_id, contest_id, ContestGroupRestrictionEnum.edit_mark)
+    check_timing_for_mark_editing_and_appeal(contest_id, jwt_get_role())
     values = request.marshmallow
-    check_mark_for_task(values['mark'], task_id)
     user_work = get_user_in_contest_work(user_id, contest_id)
     answer = get_answer_by_task_id_and_work_id(BaseAnswer, task_id, user_work.work_id)
     if answer is None:
         raise NotFound('task_id for user_id', f'{task_id, user_id}')
+    check_mark_for_task(values['mark'], answer)
     answer.mark = values['mark']
     db.session.commit()
     return {}, 200

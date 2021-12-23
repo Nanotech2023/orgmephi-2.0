@@ -1,3 +1,5 @@
+import time
+
 from . import *
 import datetime
 
@@ -341,6 +343,7 @@ def test_email_confirm(client):
             "register_type": "School"
         }
         resp = client.post('/school', json=request)
+        time.sleep(3)
         assert resp.status_code == 200
         assert len(outbox) == 1
         assert outbox[0].recipients[0] == 'confirm@example.com'
@@ -350,13 +353,17 @@ def test_email_confirm(client):
             assert token in outbox[0].html
 
         user = User.query.filter_by(username='confirm@example.com').one_or_none()
+        time.sleep(3)
         assert user.role.value == 'Unconfirmed'
 
         resp = client.post(f'/confirm/{token}')
+        time.sleep(3)
         assert resp.status_code == 204
         user = User.query.filter_by(username='confirm@example.com').one_or_none()
+        time.sleep(3)
         assert user.role.value == 'Participant'
         resp = client.post(f'/confirm/{token}')
+        time.sleep(3)
         assert resp.status_code == 404
 
     test_app.config['ORGMEPHI_CONFIRM_EMAIL'] = False
@@ -386,6 +393,7 @@ def test_email_confirm_wrong(client):
     test_app.db.session.commit()
 
     resp = client.post(f'/confirm/{token}')
+    time.sleep(3)
     assert resp.status_code == 404
 
     test_app.config['ORGMEPHI_CONFIRM_EMAIL'] = False
@@ -395,6 +403,7 @@ def test_email_confirm_invalid(client):
     test_app.config['ORGMEPHI_CONFIRM_EMAIL'] = True
 
     resp = client.post(f'/confirm/invalid_token')
+    time.sleep(3)
     assert resp.status_code == 404
 
     test_app.config['ORGMEPHI_CONFIRM_EMAIL'] = False
@@ -420,6 +429,7 @@ def test_recover_password(client):
         client.post('/school', json=request)
 
         resp = client.client.post('/user/registration/forgot/forgot@example.com')
+        time.sleep(3)
         assert resp.status_code == 204
         assert len(outbox) == 1
         assert outbox[0].recipients[0] == 'forgot@example.com'

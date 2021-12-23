@@ -200,6 +200,11 @@ def olympiads_all():
     get:
       parameters:
         - in: query
+          name: visibility
+          required: false
+          schema:
+            type: boolean
+        - in: query
           name: offset
           required: false
           schema:

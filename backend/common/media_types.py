@@ -103,3 +103,14 @@ class NewsImage(Image):
             content_types=['image/jpeg', 'image/png']
         )
     ]
+
+
+class CertificateImage(Image):
+    __pre_processors__ = [
+        ImageAnalyzer(),
+        ImageValidator(
+            minimum=(20, 20),
+            maximum=(3840, 2160),
+            content_types=['image/jpeg', 'image/png']
+        )
+    ]

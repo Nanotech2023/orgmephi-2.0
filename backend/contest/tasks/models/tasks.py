@@ -1,5 +1,7 @@
 import enum
 
+from sqlalchemy.ext.hybrid import hybrid_property
+
 from common import get_current_db
 from common.media_types import TaskImage, Json
 
@@ -18,6 +20,81 @@ class TaskTypeEnum(enum.Enum):
     BaseTask = "BaseTask"
 
 
+class TaskPool(db.Model):
+    """
+    Task pool
+
+    task_pool_id: id of the task pool
+    base_contest_id: id of the base contest
+    name: task pool name
+    year: year of the task pool usage
+    orig_task_points: recommended task points
+    """
+
+    __tablename__ = "task_pool"
+    task_pool_id = db.Column(db.Integer, autoincrement=True, primary_key=True)
+    base_contest_id = db.Column(db.Integer, db.ForeignKey('base_contest.base_contest_id'), nullable=True)
+    name = db.Column(db.Text)
+    year = db.Column(db.Integer)
+    orig_task_points = db.Column(db.Integer)
+
+    tasks = db.relationship('Task', backref='task_pool', lazy='dynamic')
+
+
+"""
+Table describing a Task Pool In Contest Task.
+
+stage_id: id of the stage
+contest_id: id of contest
+"""
+
+taskPoolInContestTask = db.Table('task_pool_in_contest_task',
+                                 db.Column('task_pool_id', db.Integer, db.ForeignKey('task_pool.task_pool_id'),
+                                           primary_key=True),
+                                 db.Column('contest_task_id', db.Integer, db.ForeignKey('contest_task.contest_task_id'),
+                                           primary_key=True)
+                                 )
+
+
+class ContestTask(db.Model):
+    """
+    Task pool
+
+    contest_task_id: id of the task pool
+    contest_id: id of the contest
+    num: num of the task
+    task_points: task points
+    """
+
+    __tablename__ = "contest_task"
+    contest_task_id = db.Column(db.Integer, autoincrement=True, primary_key=True)
+    contest_id = db.Column(db.Integer, db.ForeignKey('contest.contest_id'), nullable=True)
+    num = db.Column(db.Integer)
+    task_points = db.Column(db.Integer)
+
+    task_pools = db.relationship('TaskPool', secondary=taskPoolInContestTask, lazy='subquery',
+                                 backref=db.backref('contest_task', lazy=True))
+
+
+class ContestTaskInVariant(db.Model):
+    """
+    Contest Task In Variant
+
+    contest_task_id: id of the task pool
+    contest_id: id of the contest
+    num: num of the task
+    task_points: task points
+    """
+
+    __tablename__ = "contest_task_in_variant"
+    contest_task_id = db.Column(db.Integer, db.ForeignKey('contest_task.contest_task_id'), primary_key=True)
+    variant_id = db.Column(db.Integer, db.ForeignKey('variant.variant_id'), primary_key=True)
+    task_id = db.Column(db.Integer, db.ForeignKey('base_task.task_id'))
+
+    task = db.relationship('Task')
+    contest_task = db.relationship('ContestTask')
+
+
 class Task(db.Model):
     """
     Class describing a Base Task model.
@@ -30,36 +107,34 @@ class Task(db.Model):
 
     __tablename__ = 'base_task'
     task_id = db.Column(db.Integer, autoincrement=True, primary_key=True)
-    num_of_task = db.Column(db.Integer, nullable=False)
+    task_pool_id = db.Column(db.Integer, db.ForeignKey('task_pool.task_pool_id'))
+    name = db.Column(db.Text)
 
     image_of_task = db.Column(TaskImage.as_mutable(Json))
 
-    show_answer_after_contest = db.Column(db.Boolean, nullable=True)
-    task_points = db.Column(db.Integer, nullable=True)
-
     task_type = db.Column(db.Enum(TaskTypeEnum))
+
+    @hybrid_property
+    def right_answer(self):
+        from common.util import db_get_one_or_none
+        if self.task_type.value == "PlainTask":
+            task: PlainTask = db_get_one_or_none(PlainTask, 'task_id', self.task_id)
+            return {'answer': task.recommended_answer}
+        elif self.task_type.value == "RangeTask":
+            task: RangeTask = db_get_one_or_none(RangeTask, 'task_id', self.task_id)
+            return {
+                'start_value': task.start_value,
+                'end_value': task.end_value,
+            }
+        elif self.task_type.value == "MultipleChoiceTask":
+            task: MultipleChoiceTask = db_get_one_or_none(MultipleChoiceTask, 'task_id', self.task_id)
+            right_answers = [elem['answer'] for elem in task.answers if elem['is_right_answer']]
+            return {'answers': right_answers}
 
     __mapper_args__ = {
         'polymorphic_identity': TaskTypeEnum.BaseTask,
         'polymorphic_on': task_type
     }
-
-
-def add_plain_task(db_session, num_of_task, recommended_answer, image_of_task=None,
-                   task_points=None, show_answer_after_contest=None, answer_type=TaskAnswerTypeEnum.Text):
-    """
-    Create new plain task object
-    """
-    task = PlainTask(
-        num_of_task=num_of_task,
-        image_of_task=image_of_task,
-        show_answer_after_contest=show_answer_after_contest,
-        task_points=task_points,
-        recommended_answer=recommended_answer,
-        answer_type=answer_type,
-    )
-    db_session.add(task)
-    return task
 
 
 class PlainTask(Task):
@@ -80,23 +155,6 @@ class PlainTask(Task):
         'polymorphic_identity': TaskTypeEnum.PlainTask,
         'with_polymorphic': '*'
     }
-
-
-def add_range_task(db_session, num_of_task, start_value, end_value, image_of_task=None,
-                   task_points=None, show_answer_after_contest=None):
-    """
-    Create new range task object
-    """
-    task = RangeTask(
-        num_of_task=num_of_task,
-        image_of_task=image_of_task,
-        show_answer_after_contest=show_answer_after_contest,
-        task_points=task_points,
-        start_value=start_value,
-        end_value=end_value,
-    )
-    db_session.add(task)
-    return task
 
 
 class RangeTask(Task):
@@ -120,21 +178,6 @@ class RangeTask(Task):
     }
 
 
-def add_multiple_task(db_session, num_of_task, image_of_task=None,
-                      task_points=None, show_answer_after_contest=None):
-    """
-    Create new multiple task object
-    """
-    task = MultipleChoiceTask(
-        num_of_task=num_of_task,
-        image_of_task=image_of_task,
-        show_answer_after_contest=show_answer_after_contest,
-        task_points=task_points,
-    )
-    db_session.add(task)
-    return task
-
-
 class MultipleChoiceTask(Task):
     """
     Class describing a Task with multiple choice model.
@@ -146,10 +189,31 @@ class MultipleChoiceTask(Task):
     __tablename__ = 'multiple_task'
 
     task_id = db.Column(db.Integer, db.ForeignKey('base_task.task_id'), primary_key=True)
-
     answers = db.Column(db.PickleType)
 
     __mapper_args__ = {
         'polymorphic_identity': TaskTypeEnum.MultipleChoiceTask,
         'with_polymorphic': '*'
     }
+
+
+class Variant(db.Model):
+    """
+    Class describing a Task variant model.
+
+    variant_id: id of the variant
+    contest_id: id of contest
+    variant_number: id of the variant number
+
+    users: users
+    tasks: tasks
+    """
+
+    __tablename__ = 'variant'
+
+    variant_id = db.Column(db.Integer, autoincrement=True, primary_key=True)
+    contest_id = db.Column(db.Integer, db.ForeignKey('simple_contest.contest_id'))
+    variant_number = db.Column(db.Integer)
+
+    users = db.relationship('UserInContest', lazy='dynamic', backref='variant')
+    contest_tasks_in_variant = db.relationship('ContestTaskInVariant', lazy='dynamic', backref='variant')

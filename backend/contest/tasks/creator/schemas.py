@@ -6,27 +6,12 @@ from common import fields as common_fields
 from contest.tasks.model_schemas.contest import VariantSchema
 from contest.tasks.model_schemas.olympiad import ContestSchema, BaseContestSchema, StageSchema, \
     ContestGroupRestrictionEnum
-from contest.tasks.model_schemas.tasks import TaskSchema
+from contest.tasks.model_schemas.tasks import TaskSchema, TaskPoolSchema, ContestTaskSchema
 from contest.tasks.models import OlympiadSubjectEnum, StageConditionEnum, ContestHoldingTypeEnum, \
     UserStatusEnum, OlympiadLevelEnum, TaskAnswerTypeEnum
 
 
 # Base contest
-
-class CreateBaseOlympiadRequestTaskCreatorSchema(Schema):
-    name = common_fields.OlympiadName(required=True)
-    description = common_fields.Text(required=True)
-    rules = common_fields.Text(required=True)
-    winner_1_condition = common_fields.FloatCondition(required=True)
-    winner_2_condition = common_fields.FloatCondition(required=True)
-    winner_3_condition = common_fields.FloatCondition(required=True)
-    diploma_1_condition = common_fields.FloatCondition(required=True)
-    diploma_2_condition = common_fields.FloatCondition(required=True)
-    diploma_3_condition = common_fields.FloatCondition(required=True)
-    olympiad_type_id = fields.Int(required=True)
-    subject = EnumField(OlympiadSubjectEnum, required=True, by_value=True)
-    level = EnumField(OlympiadLevelEnum, required=True, by_value=True)
-
 
 class BaseOlympiadResponseTaskCreatorSchema(BaseContestSchema):
     class Meta(BaseContestSchema.Meta):
@@ -37,6 +22,31 @@ class BaseOlympiadIdResponseTaskCreatorSchema(Schema):
     base_contest_id = fields.Int(required=True)
 
 
+# Task pool
+
+
+class TaskPoolIdResponseTaskCreatorSchema(Schema):
+    task_pool_id = fields.Int(required=True)
+
+
+class FilterTaskPoolAllRequestSchema(Schema):
+    base_contest_id = fields.Integer()
+
+
+class AllTaskPoolsResponseTaskCreatorSchema(Schema):
+    task_pools_list = fields.Nested(TaskPoolSchema, many=True, required=True)
+
+
+# Contest Task
+
+
+class ContestTaskResponseTaskCreatorSchema(Schema):
+    contest_task_id = fields.Int(required=True)
+
+
+class AllContestTaskResponseTaskCreatorSchema(Schema):
+    contest_task_list = fields.Nested(ContestTaskSchema, many=True, required=True)
+
 # Contest
 
 
@@ -44,9 +54,12 @@ class CreateSimpleContestRequestTaskCreatorSchema(Schema):
     start_date = fields.DateTime(required=True)
     end_date = fields.DateTime(required=True)
     end_of_enroll_date = fields.DateTime(required=False)
+    deadline_for_appeal = fields.DateTime(required=False)
+    show_result_after_finish = fields.Boolean(required=False)
     contest_duration = fields.TimeDelta(required=False, default=timedelta(seconds=0))
     result_publication_date = fields.DateTime(required=False)
     visibility = fields.Boolean(required=True)
+    show_answer_after_contest = fields.Boolean(required=True)
     stage_id = fields.Int(required=False)
     previous_contest_id = fields.Int(required=False)
     previous_participation_condition = EnumField(UserStatusEnum, required=False, by_value=True)
@@ -66,6 +79,8 @@ class ContestResponseTaskCreatorSchema(Schema):
     start_date = fields.DateTime(required=False)
     end_of_enroll_date = fields.DateTime(required=False)
     end_date = fields.DateTime(required=False)
+    deadline_for_appeal = fields.DateTime(required=False)
+    show_result_after_finish = fields.Boolean(required=False)
     result_publication_date = fields.DateTime(required=False)
     contest_duration = fields.TimeDelta(required=False)
     visibility = fields.Boolean(required=True)
@@ -117,10 +132,6 @@ class AllVariantsResponseTaskCreatorSchema(Schema):
 # Variant
 
 
-class CreateVariantRequestTaskCreatorSchema(Schema):
-    variant_description = common_fields.Text(required=True)
-
-
 class VariantResponseTaskCreatorSchema(VariantSchema):
     class Meta(VariantSchema.Meta):
         exclude = ['contest_id']
@@ -136,47 +147,25 @@ class AllTasksResponseTaskCreatorSchema(Schema):
 
 # Tasks
 
-class CreatePlainRequestTaskCreatorSchema(Schema):
-    num_of_task = fields.Int(required=True)
-    recommended_answer = common_fields.Text(required=True)
-    show_answer_after_contest = fields.Boolean(required=False)
-    task_points = fields.Integer(required=False)
-    answer_type = EnumField(TaskAnswerTypeEnum, required=False, by_value=True)
-
-
-class CreateRangeRequestTaskCreatorSchema(Schema):
-    num_of_task = fields.Int(required=True)
-    start_value = fields.Float(required=True)
-    end_value = fields.Float(required=True)
-    show_answer_after_contest = fields.Boolean(required=False)
-    task_points = fields.Integer(required=False)
-
-
 class AnswersInTaskRequestTaskCreatorSchema(Schema):
     answer = common_fields.Text(required=True)
     is_right_answer = fields.Boolean(required=True)
 
 
-class CreateMultipleRequestTaskCreatorSchema(Schema):
-    num_of_task = fields.Int(required=True)
-    show_answer_after_contest = fields.Boolean(required=False)
-    task_points = fields.Integer(required=False)
-    answers = fields.List(fields.Nested(AnswersInTaskRequestTaskCreatorSchema), required=True)
-
-
 class TaskResponseTaskCreatorSchema(Schema):
     task_id = fields.Int(required=True)
+    name = common_fields.CommonName(required=True)
     num_of_task = fields.Int(required=True)
     recommended_answer = common_fields.Text(required=False)
     start_value = fields.Float(required=False)
     end_value = fields.Float(required=False)
-    show_answer_after_contest = fields.Boolean(required=False)
     task_points = fields.Integer(required=False)
     answers = fields.List(fields.Nested(AnswersInTaskRequestTaskCreatorSchema), required=False)
 
 
 class TaskIdResponseTaskCreatorSchema(Schema):
     task_id = fields.Int(required=True)
+
 
 # Restrictions
 

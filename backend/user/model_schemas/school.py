@@ -18,6 +18,6 @@ class SchoolInfoSchema(SQLAlchemySchema):
     user_id = fields.Integer(dump_only=True)
     school_type = EnumField(enum=SchoolType, by_value=True)
     number = fields.Integer()
-    name = common_fields.CommonName()
+    name = common_fields.SchoolName()
     grade = fields.Integer()
     location = Nested(nested=LocationSchema, many=False)

@@ -98,41 +98,7 @@ class OlympiadType(db.Model):
     olympiad_type = db.Column(db.Text, nullable=False, unique=True)
 
     contests = db.relationship('BaseContest', lazy='select',
-                               backref=db.backref('olympiad_type', lazy='joined'))
-
-
-def add_base_contest(db_session, name,
-                     winner_1_condition,
-                     winner_2_condition,
-                     winner_3_condition,
-                     diploma_1_condition,
-                     diploma_2_condition,
-                     diploma_3_condition,
-                     description, rules,
-                     olympiad_type_id,
-                     subject,
-                     level,
-                     certificate_template):
-    """
-    Create new base content object
-    """
-    base_contest = BaseContest(
-        description=description,
-        name=name,
-        certificate_template=certificate_template,
-        rules=rules,
-        winner_1_condition=winner_1_condition,
-        winner_2_condition=winner_2_condition,
-        winner_3_condition=winner_3_condition,
-        diploma_1_condition=diploma_1_condition,
-        diploma_2_condition=diploma_2_condition,
-        diploma_3_condition=diploma_3_condition,
-        olympiad_type_id=olympiad_type_id,
-        subject=subject,
-        level=level,
-    )
-    db_session.add(base_contest)
-    return base_contest
+                               backref='olympiad_type')
 
 
 # Contest models
@@ -158,7 +124,7 @@ class BaseContest(db.Model):
     description: description of the contest
     olympiad_type_id: olympiad type id
     subject: subject
-    certificate_template: contest certificate template
+    certificate_type: contest certificate template
     conditions: Diploma 3, Diploma 2, Diploma 1, Winner 3, Winner 2, Winner 1
     target_class: target class
     child_contests: child contests
@@ -174,7 +140,8 @@ class BaseContest(db.Model):
     olympiad_type_id = db.Column(db.Integer, db.ForeignKey('olympiad_type.olympiad_type_id'), nullable=False)
     subject = db.Column(db.Enum(OlympiadSubjectEnum), nullable=False)
     level = db.Column(db.Enum(OlympiadLevelEnum), nullable=False)
-    certificate_template = db.Column(db.Text, nullable=True)
+    certificate_type_id = db.Column(db.Integer, db.ForeignKey('certificate_type.certificate_type_id',
+                                                              ondelete='SET NULL'))
 
     winner_1_condition = db.Column(db.Float, nullable=False)
     winner_2_condition = db.Column(db.Float, nullable=False)
@@ -187,7 +154,8 @@ class BaseContest(db.Model):
                                      backref=db.backref('base_contest', lazy=True))
 
     child_contests = db.relationship('Contest', lazy='dynamic',
-                                     backref=db.backref('base_contest', lazy='joined'), cascade="all, delete-orphan")
+                                     backref='base_contest', cascade="all, delete-orphan")
+    task_pools = db.relationship('TaskPool', backref='base_contest', lazy='dynamic')
 
 
 class ContestTypeEnum(enum.Enum):
@@ -229,13 +197,15 @@ class Contest(db.Model):
     contest_id = db.Column(db.Integer, autoincrement=True, primary_key=True)
     composite_type = db.Column(db.Enum(ContestTypeEnum))
     holding_type = db.Column(db.Enum(ContestHoldingTypeEnum))
+    show_answer_after_contest = db.Column(db.Boolean, nullable=True, default=False)
 
     visibility = db.Column(db.Boolean, default=DEFAULT_VISIBILITY, nullable=False)
 
     users = db.relationship('UserInContest', lazy='dynamic',
-                            backref=db.backref('contest', lazy='joined'))
+                            backref='contest')
 
     group_restrictions = db.relationship('ContestGroupRestriction', lazy='dynamic', cascade="all, delete")
+    contest_tasks = db.relationship('ContestTask', backref='contest', lazy='dynamic')
 
     __mapper_args__ = {
         'polymorphic_identity': ContestTypeEnum.Contest,
@@ -245,9 +215,9 @@ class Contest(db.Model):
     @hybrid_property
     def academic_year(self):
         if self.composite_type == ContestTypeEnum.CompositeContest:
-            return CompositeContest.query.filter_by(contest_id=self.contest_id)
+            return CompositeContest.query.filter_by(contest_id=self.contest_id).one_or_none().academic_year
         else:
-            return SimpleContest.query.filter_by(contest_id=self.contest_id)
+            return SimpleContest.query.filter_by(contest_id=self.contest_id).one_or_none().academic_year
 
     @academic_year.expression
     def academic_year(cls):
@@ -265,6 +235,13 @@ class Contest(db.Model):
             ).limit(1).scalar_subquery()
         ).label("academic_year")
 
+    @hybrid_property
+    def user_count(self):
+        if self.composite_type == ContestTypeEnum.CompositeContest:
+            return CompositeContest.query.filter_by(contest_id=self.contest_id).one_or_none().user_count
+        else:
+            return SimpleContest.query.filter_by(contest_id=self.contest_id).one_or_none().user_count
+
 
 def add_simple_contest(db_session,
                        visibility,
@@ -272,11 +249,14 @@ def add_simple_contest(db_session,
                        end_date,
                        regulations=None,
                        result_publication_date=None,
+                       show_answer_after_contest=False,
                        end_of_enroll_date=None,
+                       deadline_for_appeal=None,
                        holding_type=None,
                        contest_duration=None,
                        previous_contest_id=None,
                        previous_participation_condition=None,
+                       show_result_after_finish=False,
                        base_contest_id=None):
     """
     Create new simple contest object
@@ -286,12 +266,15 @@ def add_simple_contest(db_session,
         visibility=visibility,
         start_date=start_date,
         end_date=end_date,
+        show_answer_after_contest=show_answer_after_contest,
         regulations=regulations,
         holding_type=holding_type,
         contest_duration=contest_duration,
         result_publication_date=result_publication_date,
         end_of_enroll_date=end_of_enroll_date,
+        deadline_for_appeal=deadline_for_appeal,
         previous_contest_id=previous_contest_id,
+        show_result_after_finish=show_result_after_finish,
         previous_participation_condition=previous_participation_condition,
     )
     db_session.add(simple_contest)
@@ -310,6 +293,8 @@ class SimpleContest(Contest):
 
     start_date: start date of contest
     end_of_enroll_date: end of enroll date
+    deadline_for_appeal: deadline_for_appeal
+    show_result_after_finish: show or not result after finishing contest
     end_date: end date of contest
     result_publication_date: result publication date
 
@@ -331,6 +316,8 @@ class SimpleContest(Contest):
     end_date = db.Column(db.DateTime, index=True, default=datetime.utcnow)
     result_publication_date = db.Column(db.DateTime, nullable=True)
     end_of_enroll_date = db.Column(db.DateTime, nullable=True)
+    deadline_for_appeal = db.Column(db.DateTime, nullable=True)
+    show_result_after_finish = db.Column(db.Boolean, default=False)
     contest_duration = db.Column(db.Interval, default=timedelta(seconds=0), nullable=False)
     target_classes = association_proxy('base_contest', 'target_classes')
     previous_contest_id = db.Column(db.Integer, db.ForeignKey('simple_contest.contest_id'), nullable=True)
@@ -338,7 +325,7 @@ class SimpleContest(Contest):
 
     regulations = db.Column(db.Text, nullable=True)
 
-    variants = db.relationship('Variant', backref=db.backref('simple_contest', lazy='joined'), lazy='dynamic')
+    variants = db.relationship('Variant', backref='simple_contest', lazy='dynamic')
     next_contests = db.relationship('SimpleContest',
                                     foreign_keys=[previous_contest_id])
 
@@ -380,31 +367,14 @@ class SimpleContest(Contest):
 
     @hybrid_property
     def tasks_number(self):
-        if not self.variants:
-            return None
-        else:
-            if self.variants.count() != 0:
-                tasks = self.variants.first().tasks
-                return len(tasks)
-            else:
-                return None
+        return self.contest_tasks.count()
 
     @hybrid_property
     def total_points(self):
-        if not self.variants:
-            return None
-        else:
-            if self.variants.count() != 0:
-                sum_points = 0
-                tasks = self.variants.first().tasks
-                if len(tasks) != 0:
-                    for task in tasks:
-                        sum_points += task.task_points
-                    return sum_points
-                else:
-                    return None
-            else:
-                return None
+        sum_points = 0
+        for task in self.contest_tasks:
+            sum_points += task.task_points
+        return sum_points
 
     @hybrid_property
     def status(self):
@@ -420,6 +390,11 @@ class SimpleContest(Contest):
         return case([(datetime.utcnow() < cls.start_date, OlympiadStatusEnum.OlympiadSoon.value),
                      (datetime.utcnow() < cls.end_date, OlympiadStatusEnum.OlympiadInProgress.value)],
                     else_=OlympiadStatusEnum.OlympiadFinished.value)
+
+    @hybrid_property
+    def user_count(self):
+        from contest.tasks.models import UserInContest
+        return UserInContest.query.filter_by(contest_id=self.contest_id).count()
 
 
 def add_group_restriction(db_session, contest_id, group_id, restriction):
@@ -483,7 +458,7 @@ class CompositeContest(Contest):
     contest_id = db.Column(db.Integer, db.ForeignKey('contest.contest_id'), primary_key=True)
 
     stages = db.relationship('Stage', lazy='dynamic',
-                             backref=db.backref('composite_contest', lazy='joined'))
+                             backref='composite_contest')
 
     __mapper_args__ = {
         'polymorphic_identity': ContestTypeEnum.CompositeContest,
@@ -544,3 +519,14 @@ class CompositeContest(Contest):
             return OlympiadStatusEnum.OlympiadFinished
         else:
             return OlympiadStatusEnum.OlympiadInProgress
+
+    @hybrid_property
+    def user_count(self):
+        from contest.tasks.models import UserInContest
+        stages = [stage for stage in self.stages.all()]
+        staged_contests = []
+        for stage in stages:
+            staged_contests.extend([contest_s for contest_s in stage.contests])
+        users = [UserInContest.query.filter_by(contest_id=composite_elem.contest_id).count()
+                 for composite_elem in staged_contests]
+        return sum(users)

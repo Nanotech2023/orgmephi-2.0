@@ -1,8 +1,7 @@
+import io
 import secrets
 
-from sqlalchemy import or_
-
-from common.errors import FileTooLarge, DataConflict, InsufficientData, RequestError, NotFound
+from common.errors import FileTooLarge, DataConflict, InsufficientData, RequestError, NotFound, AlreadyExists
 from common.jwt_verify import jwt_get_id
 from contest.tasks.models import *
 from contest.tasks.unauthorized.schemas import FilterOlympiadAllRequestSchema
@@ -141,35 +140,54 @@ def get_composite_contest_if_possible(contest_id):
 
 # Generators
 
+def try_to_generate_variant(contest_id, user_id):
+    current_user = UserInContest.query.filter_by(user_id=user_id,
+                                                 contest_id=contest_id).one_or_none()
+    if current_user is None:
+        raise DataConflict("current_user is not enrolled for this contest")
+    if current_user.variant_id is not None:
+        raise AlreadyExists("variant_id", current_user.variant_id)
 
-def get_last_variant_in_contest(current_contest):
-    """
-    Get last variant number in current contest
-    :param current_contest: current contest
-    :return: max number of the variant
-    """
-    variants = current_contest.variants.all()
-    if len(variants) > 0:
-        return max(variant.variant_number for variant in variants)
-    else:
-        return 0
+    current_contest: SimpleContest = db_get_or_raise(Contest, "contest_id", contest_id)
+    contest_tasks = current_contest.contest_tasks
 
+    contest_tasks_in_variant = []
+    base_tasks_ids_in_variant = []
 
-def generate_variant(contest_id, user_id):
-    """
-    Generate random variant number for user
-    :param contest_id: contest id
-    :param user_id: user id
-    :return: final variant number
-    """
-    current_contest = db_get_or_raise(Contest, "contest_id", contest_id)
-    variant_id_list = [variant.variant_id for variant in current_contest.variants.all()]
-    variants_amount = len(variant_id_list)
-    if variants_amount == 0:
-        raise DataConflict('No variants found in current contest')
-    random_number = secrets.randbelow(variants_amount * 420)
-    final_variant_number = variant_id_list[(user_id + random_number) % variants_amount]
-    return final_variant_number
+    for contest_task in contest_tasks:
+        task_pools = contest_task.task_pools
+        task_pool: TaskPool = secrets.choice(task_pools)
+        tasks_list = task_pool.tasks.all()
+        base_task: Task = secrets.choice(tasks_list)
+        base_tasks_ids_in_variant.append(base_task.task_id)
+
+    variant_number = abs(hash(tuple(base_tasks_ids_in_variant))) % 10000
+    variant = Variant.query.filter_by(contest_id=current_contest.contest_id,
+                                      variant_number=variant_number).one_or_none()
+    if variant is None:
+        variant = Variant(
+            variant_number=variant_number
+        )
+        db.session.add(variant)
+        current_contest.variants.append(variant)
+
+        db.session.flush()
+
+        for contest_task, base_task_id in zip(contest_tasks, base_tasks_ids_in_variant):
+            contest_task_in_variant = ContestTaskInVariant(
+                contest_task_id=contest_task.contest_task_id,
+                variant_id=variant.variant_id,
+                task_id=base_task_id
+            )
+            contest_tasks_in_variant.append(contest_task_in_variant)
+
+        db.session.add_all(contest_tasks_in_variant)
+        variant.contest_tasks_in_variant.extend(contest_tasks_in_variant)
+
+    current_user.variant_id = variant.variant_id
+
+    db.session.flush()
+    return variant.variant_id
 
 
 # User module
@@ -201,28 +219,8 @@ def is_task_in_variant(task_id, variant):
     :param variant: current variant
     :return: boolean value if task in current variant
     """
-    task = db_get_or_raise(Task, "task_id", task_id)
-    return task in variant.tasks
-
-
-def is_task_in_contest(task_id, contest_id):
-    """
-    Check if task in contest
-    :param task_id: task id
-    :param contest_id: contest id
-    :return: boolean value if task in contest
-    """
-
-    current_contest = db_get_or_raise(Contest, "contest_id", contest_id)
-    task = db_get_or_raise(Task, "task_id", task_id)
-    task_variant = task.variant
-    if task_variant is None:
-        raise DataConflict("Task variant is missing")
-    contest_variants = current_contest.variants.all()
-    for var in task_variant:
-        if var in contest_variants:
-            return True
-    return False
+    return ContestTaskInVariant.query.filter_by(variant_id=variant.variant_id,
+                                                task_id=task_id).one_or_none() is not None
 
 
 # Participant module
@@ -251,38 +249,6 @@ def get_contest_for_participant_if_possible(olympiad_id, stage_id, contest_id):
         raise DataConflict("Current contest is not in chosen stage")
 
     return current_contest
-
-
-def get_user_contest_if_possible(olympiad_id, stage_id, contest_id):
-    """
-    Get contest for user or raise exception
-    :param olympiad_id:
-    :param stage_id:
-    :param contest_id:
-    :return: user contest
-    """
-    current_contest = db_get_or_raise(Contest, "contest_id", str(contest_id))
-
-    # user is not registered
-    if not is_user_in_contest(jwt_get_id(), current_contest):
-        raise DataConflict("User is not registered for this olympiad")
-
-    return get_contest_for_participant_if_possible(olympiad_id, stage_id, contest_id)
-
-
-def get_user_simple_contest_if_possible(olympiad_id):
-    """
-    Get contest for user or raise exception
-    :param olympiad_id:
-    :return: user contest
-    """
-    current_olympiad = get_simple_contest_if_possible(olympiad_id)
-
-    # user is not registered
-    if not is_user_in_contest(jwt_get_id(), current_olympiad):
-        raise DataConflict("User is not registered for this olympiad")
-
-    return current_olympiad
 
 
 def get_user_in_contest_by_id_if_possible(contest_id, user_id) -> UserInContest:
@@ -329,7 +295,9 @@ def get_user_tasks_if_possible(contest_id):
 
     variant = get_user_variant_if_possible(contest_id)
 
-    tasks_list = variant.tasks[:]
+    contest_tasks = variant.contest_tasks_in_variant[:]
+
+    tasks_list = [db_get_or_raise(Task, "task_id", contest_task.task_id) for contest_task in contest_tasks]
 
     for task in tasks_list:
         if task.task_type == TaskTypeEnum.MultipleChoiceTask:
@@ -395,20 +363,6 @@ def get_base_contest(current_contest):
     return current_olympiad.base_contest
 
 
-def get_variant_if_possible(contest_id, variant_id):
-    """
-    Get variant by id
-    :param contest_id: Simple contest
-    :param variant_id:id variant
-    :return:
-    """
-    current_contest = get_simple_contest_if_possible(contest_id)
-
-    variant = current_contest.variants.filter_by(variant_id=str(variant_id)).one_or_none()
-
-    return variant
-
-
 def get_variant_if_possible_by_number(contest_id, variant_num):
     """
     Get variant by num
@@ -418,7 +372,7 @@ def get_variant_if_possible_by_number(contest_id, variant_num):
     """
     current_contest = get_simple_contest_if_possible(contest_id)
 
-    variant = current_contest.variants.filter_by(variant_number=str(variant_num)).one_or_none()
+    variant = current_contest.variants.filter_by(variant_number=variant_num).one_or_none()
 
     if variant is None:
         raise DataConflict('No variants in this contest')
@@ -426,31 +380,19 @@ def get_variant_if_possible_by_number(contest_id, variant_num):
     return variant
 
 
-def get_tasks_if_possible(contest_id, variant_id):
-    """
-    Get tasks if possible
-    :param contest_id: contest id
-    :param variant_id: variant id
-    :return: tasks
-    """
-    variant = get_variant_if_possible(contest_id, variant_id)
-    return variant.tasks
-
-
-def get_task_if_possible(contest_id, variant_id, task_id):
+def get_task_in_pool_if_possible(id_task_pool, task_id):
     """
     Get task if possible
-    :param contest_id: contest id
-    :param variant_id: variant id
+    :param id_task_pool: task pool id
     :param task_id: task id
     :return: task
     """
-    variant = get_variant_if_possible(contest_id, variant_id)
-    if is_task_in_variant(task_id, variant):
-        task = db_get_or_raise(Task, "task_id", str(task_id))
+
+    task = db_get_or_raise(Task, "task_id", task_id)
+    if task.task_pool.task_pool_id == id_task_pool:
         return task
     else:
-        raise DataConflict('Task not in current variant')
+        raise DataConflict('Task not in current pool')
 
 
 # Validators
@@ -483,22 +425,12 @@ def user_can_view_variants_and_tasks(id_contest):
     current_contest: SimpleContest = get_contest_if_possible(id_contest)
     results_published = datetime.utcnow() >= current_contest.result_publication_date
     show_result = results_published and ResponseStatusEnum.accepted == current_response.work_status and \
-                  current_user.show_results_to_user
+                  (current_user.show_results_to_user or current_contest.show_result_after_finish)
 
     return current_response.status == ResponseStatusEnum.in_progress or show_result
 
 
 # Schema
-
-
-def validate_file_size(binary_file):
-    """
-    Check size of binary file
-    :param binary_file:  file
-    :return: size
-    """
-    if len(binary_file) > app.config['ORGMEPHI_MAX_FILE_SIZE']:
-        raise FileTooLarge()
 
 
 def check_user_unfilled_for_enroll(current_user: User):
@@ -523,7 +455,7 @@ def check_user_unfilled_for_enroll(current_user: User):
 
 
 # Contest filter
-_filter_fields = ['base_contest_id', 'end_date', 'academic_year', 'composite_type']
+_filter_fields = ['base_contest_id', 'end_date', 'academic_year', 'composite_type', 'visibility']
 
 
 def get_contest_filtered(args):
@@ -588,3 +520,93 @@ class ContestIsStillOnReview(RequestError):
 
     def get_msg(self) -> str:
         return 'Contest is still on review'
+
+
+def split_line(font, text, width):
+    text = text + ' '
+    lines = []
+    while text:
+        index = text.find(' ')
+        last_space = None
+        while index != -1 and font.getsize(text[:index])[0] <= width:
+            last_space = index
+            new_index = text[index + 1:].find(' ')
+            if new_index == -1:
+                lines.append(text[:-1])
+                return lines
+            index = index + new_index + 1
+        if last_space is None:
+            last_space = index
+        lines.append(text[:last_space])
+        text = text[last_space + 1:]
+    return lines
+
+
+__size_step = 2
+
+
+def put_text_on_image(img_data, x, y, width, text, size, font_name, spacing, color, max_lines):
+    from PIL import Image, ImageDraw, ImageFont
+
+    text = " ".join(text.strip().split())
+    font = ImageFont.truetype(font_name, size)
+    lines = split_line(font, text, width)
+
+    if max_lines is not None:
+        while len(lines) > max_lines:
+            size = size - __size_step
+            if size <= 0:
+                raise DataConflict('Name too long to fit')
+            font = ImageFont.truetype(font_name, size)
+            lines = split_line(font, text, width)
+
+    img = Image.open(img_data)
+    draw = ImageDraw.Draw(img)
+
+    mid = x + (width / 2)
+    for line in lines:
+        draw.text((mid, y), line, color, font, 'ms', spacing)
+        y = y + spacing
+
+    bands = img.getbands()
+    if bands == ('R', 'G', 'B', 'A'):
+        background = Image.new("RGB", img.size, (255, 255, 255))
+        background.paste(img, mask=img.split()[3])
+        img = background
+    elif bands != ('R', 'G', 'B'):
+        raise TypeError(f'Unknown color encoding: {bands}')
+
+    output = io.BytesIO()
+    img.save(output, format='pdf')
+    output.seek(0)
+    return output
+
+
+def find_certificate(current_user, current_contest):
+    result = UserInContest.query.filter_by(user_id=current_user.id, contest_id=current_contest.contest_id).one_or_none()
+    if result is None:
+        raise NotFound('UserInContest (user_id, contest_id)', f'({current_user.id}, {current_contest.id})')
+    user_status = result.user_status
+
+    certificate_type = current_contest.base_contest.certificate_type
+    if certificate_type is None:
+        raise InsufficientData('contest', 'certificate')
+
+    certificate = certificate_type.certificates.filter_by(certificate_category=user_status,
+                                                          certificate_year=current_contest.academic_year).one_or_none()
+    if certificate is None or certificate.certificate_image is None:
+        raise InsufficientData('(contest, user_status)', 'certificate')
+
+    return certificate
+
+
+def get_certificate_for_user(user_info, contest_name, certificate):
+    from flask import send_file
+
+    img_data = app.media_to_io(certificate.certificate_image)
+    user_name = f'{user_info.second_name} {user_info.first_name} {user_info.middle_name}'
+    img = put_text_on_image(img_data, certificate.text_x, certificate.text_y, certificate.text_width, user_name,
+                            certificate.text_size, certificate.text_style, certificate.text_spacing,
+                            certificate.text_color, certificate.max_lines)
+    return send_file(img, mimetype='application/pdf', as_attachment=True,
+                     attachment_filename=f'Сертификат_{contest_name}_{user_name}'.replace(" ", "_"))
