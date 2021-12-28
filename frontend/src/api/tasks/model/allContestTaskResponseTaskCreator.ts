@@ -9,10 +9,10 @@
  * https://openapi-generator.tech
  * Do not edit the class manually.
  */
+import { ContestTask } from './contestTask';
 
 
-export interface AnswersInTaskRequestTaskEditor { 
-    answer: string;
-    is_right_answer: boolean;
+export interface AllContestTaskResponseTaskCreator { 
+    contest_task_list: Array<ContestTask>;
 }
 

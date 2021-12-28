@@ -18,7 +18,7 @@ export interface BaseAnswer {
     readonly mark?: number | null;
     right_answer: RightAnswer;
     readonly task_id?: number | null;
-    readonly task_points: number | null;
+    readonly task_points?: number;
 }
 export namespace BaseAnswer {
     export type AnswerTypeEnum = 'PlainAnswerText' | 'PlainAnswerFile' | 'RangeAnswer' | 'MultipleChoiceAnswer' | 'BaseAnswer';

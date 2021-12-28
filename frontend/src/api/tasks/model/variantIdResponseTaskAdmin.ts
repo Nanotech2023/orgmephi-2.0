@@ -11,11 +11,7 @@
  */
 
 
-export interface CreateRangeRequestTaskCreator { 
-    end_value: number;
-    num_of_task: number;
-    show_answer_after_contest?: boolean;
-    start_value: number;
-    task_points?: number;
+export interface VariantIdResponseTaskAdmin { 
+    variant_id: number;
 }
 

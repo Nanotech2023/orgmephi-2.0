@@ -15,9 +15,13 @@ import { VideoContainerComponent } from '@/contests/containers/video-container/v
 import {
     ContestAssignmentResultsComponent
 } from '@/contests/containers/contest-assignment-results/contest-assignment-results.component'
+import {
+    ContestAssignmentResultsItemComponent
+} from '@/contests/components/contest-assignment-results-item/contest-assignment-results-item.component'
 
 
 export const CONTESTS_COMPONENTS = [
+    ContestAssignmentResultsItemComponent,
     ContestListComponent,
     ContestDetailsComponent,
     ContestListItemComponent,

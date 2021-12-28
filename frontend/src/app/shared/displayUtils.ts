@@ -1,6 +1,6 @@
-import { Contest, CreateBaseOlympiadRequestTaskCreator, SimpleContest, TargetClass } from '@api/tasks/model'
+import { Contest, SimpleContest, TargetClass } from '@api/tasks/model'
 import { DocumentTypeEnum, GenderEnum, LocationTypeEnum, SchoolTypeEnum } from '@api/users/models'
-import SubjectEnum = CreateBaseOlympiadRequestTaskCreator.SubjectEnum
+import { SubjectEnum } from '@api/shared/model'
 
 
 export function getGenderDisplay( genderEnum: GenderEnum ): string

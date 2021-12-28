@@ -1,0 +1,41 @@
+
+.task_title {
+  border-bottom: 2px solid #171717;
+  font-style: normal;
+  font-weight: 600;
+  font-size: 14px;
+  line-height: 18px;
+  letter-spacing: 0.16px;
+  color: #171717;
+}
+
+.row {
+  padding-top: 3%;
+}
+
+.col-md-9, .col-md-3 {
+  padding: 3%;
+}
+
+.task_image {
+  border: 2px solid #171717;
+  box-sizing: border-box;
+}
+
+.input_label {
+  font-style: normal;
+  font-weight: normal;
+  font-size: 12px;
+  line-height: 16px;
+  letter-spacing: 0.32px;
+  color: #565656;
+}
+
+.input_textarea {
+  border-bottom: 2px solid #171717;
+  border-left: none;
+  border-top: none;
+  border-right: none;
+  width: 100%;
+  min-height: 80px;
+}

@@ -10,23 +10,25 @@
  * Do not edit the class manually.
  */
 import { TargetClass } from './targetClass';
+import { SubjectEnum } from '@api/shared/model'
 
 
 export interface BaseOlympiadResponseTaskCreator { 
     readonly base_contest_id?: number;
-    description?: string;
-    diploma_1_condition?: number;
-    diploma_2_condition?: number;
-    diploma_3_condition?: number;
-    level?: BaseOlympiadResponseTaskCreator.LevelEnum;
-    name?: string;
-    olympiad_type_id?: number;
-    rules?: string;
-    subject?: BaseOlympiadResponseTaskCreator.SubjectEnum;
-    target_classes?: Array<TargetClass>;
-    winner_1_condition?: number;
-    winner_2_condition?: number;
-    winner_3_condition?: number;
+    certificate_type?: number;
+    description: string;
+    diploma_1_condition: number;
+    diploma_2_condition: number;
+    diploma_3_condition: number;
+    level: BaseOlympiadResponseTaskCreator.LevelEnum;
+    name: string;
+    olympiad_type_id: number;
+    rules: string;
+    subject: SubjectEnum;
+    readonly target_classes?: Array<TargetClass>;
+    winner_1_condition: number;
+    winner_2_condition: number;
+    winner_3_condition: number;
 }
 export namespace BaseOlympiadResponseTaskCreator {
     export type LevelEnum = '1' | '2' | '3' | 'No level';
@@ -35,15 +37,6 @@ export namespace BaseOlympiadResponseTaskCreator {
         _2: '2' as LevelEnum,
         _3: '3' as LevelEnum,
         NoLevel: 'No level' as LevelEnum
-    };
-    export type SubjectEnum = 'Math' | 'Physics' | 'Informatics' | 'Natural Sciences' | 'Engineering Sciences' | 'Other';
-    export const SubjectEnum = {
-        Math: 'Math' as SubjectEnum,
-        Physics: 'Physics' as SubjectEnum,
-        Informatics: 'Informatics' as SubjectEnum,
-        NaturalSciences: 'Natural Sciences' as SubjectEnum,
-        EngineeringSciences: 'Engineering Sciences' as SubjectEnum,
-        Other: 'Other' as SubjectEnum
     };
 }
 

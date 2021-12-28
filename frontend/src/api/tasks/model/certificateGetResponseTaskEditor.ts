@@ -9,10 +9,10 @@
  * https://openapi-generator.tech
  * Do not edit the class manually.
  */
+import { CertificateType } from './certificateType';
 
 
-export interface UpdateVariantRequestTaskEditor { 
-    variant_description?: string;
-    variant_number?: number;
+export interface CertificateGetResponseTaskEditor { 
+    certificate_types?: Array<CertificateType>;
 }
 

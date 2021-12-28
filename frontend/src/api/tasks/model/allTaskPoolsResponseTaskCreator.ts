@@ -9,13 +9,10 @@
  * https://openapi-generator.tech
  * Do not edit the class manually.
  */
+import { TaskPool } from './taskPool';
 
 
-export interface UpdateRangeRequestTaskEditor { 
-    end_value?: number;
-    num_of_task?: number;
-    show_answer_after_contest?: boolean;
-    start_value?: number;
-    task_points?: number;
+export interface AllTaskPoolsResponseTaskCreator { 
+    task_pools_list: Array<TaskPool>;
 }
 

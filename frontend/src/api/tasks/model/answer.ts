@@ -11,8 +11,8 @@
  */
 
 
-export interface VariantResponseTaskCreator { 
-    readonly variant_id?: number;
-    variant_number: number | null;
+export interface Answer { 
+    answer: string;
+    is_right_answer: boolean;
 }
 

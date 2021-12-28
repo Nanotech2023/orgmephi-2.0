@@ -11,7 +11,7 @@
  */
 
 
-export interface CreateVariantRequestTaskCreator { 
-    variant_description: string;
+export interface ContestTaskResponseTaskCreator { 
+    contest_task_id: number;
 }
 

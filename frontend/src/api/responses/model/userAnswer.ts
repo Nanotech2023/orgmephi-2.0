@@ -16,8 +16,8 @@ import { PlainAnswerText } from './plainAnswerText';
 
 
 /**
- * @type Answer
+ * @type UserAnswer
  * @export
  */
-export type Answer = MultipleChoiceAnswer | PlainAnswerFile | PlainAnswerText | RangeAnswer;
+export type UserAnswer = MultipleChoiceAnswer | PlainAnswerFile | PlainAnswerText | RangeAnswer;
 

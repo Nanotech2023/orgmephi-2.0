@@ -11,8 +11,7 @@
  */
 
 
-export interface VariantResponseTaskCreator { 
-    readonly variant_id?: number;
-    variant_number: number | null;
+export interface TaskPoolIdResponseTaskCreator { 
+    task_pool_id: number;
 }
 

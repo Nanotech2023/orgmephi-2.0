@@ -9,13 +9,12 @@
  * https://openapi-generator.tech
  * Do not edit the class manually.
  */
+import { Answer } from './answer';
 
 
 export interface MultipleChoiceTask { 
-    answers?: string | null;
-    num_of_task?: number;
-    show_answer_after_contest?: boolean | null;
+    answers?: Array<Answer>;
+    name?: string | null;
     readonly task_id: number;
-    task_points?: number | null;
 }
 

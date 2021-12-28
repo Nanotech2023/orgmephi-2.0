@@ -9,13 +9,13 @@
  * https://openapi-generator.tech
  * Do not edit the class manually.
  */
-import { AnswersInTaskRequestTaskEditor } from './answersInTaskRequestTaskEditor';
+import { Certificate } from './certificate';
 
 
-export interface UpdateMultipleRequestTaskEditor { 
-    answers?: Array<AnswersInTaskRequestTaskEditor>;
-    num_of_task?: number;
-    show_answer_after_contest?: boolean;
-    task_points?: number;
+export interface CertificateType { 
+    readonly certificate_type_id?: number;
+    readonly certificates?: Array<Certificate>;
+    description?: string | null;
+    name: string | null;
 }
 

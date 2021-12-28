@@ -4,15 +4,14 @@ import {
     AllTaskResponseTaskParticipant,
     Contest,
     TaskForUserResponseTaskParticipant,
-    Variant,
     VariantWithCompletedTasksCountTaskParticipant
 } from '@api/tasks/model'
 import { catchError, switchMap, tap } from 'rxjs/operators'
-import { EMPTY, Observable, of } from 'rxjs'
+import { Observable, of } from 'rxjs'
 import { CallState, getError, LoadingState } from '@/shared/callState'
 import { TasksService } from '@api/tasks/tasks.service'
 import { ResponsesService } from '@api/responses/responses.service'
-import { UserResponseStatusResponse, UserTimeResponseRequest } from '@api/responses/model'
+import { UserResponseStatusResponse, UserResultForContestResponse, UserTimeResponseRequest } from '@api/responses/model'
 import { Router } from '@angular/router'
 import { displayErrorMessage } from '@/shared/logging'
 
@@ -24,7 +23,8 @@ export interface ContestAssignmentState
     variant?: VariantWithCompletedTasksCountTaskParticipant
     tasks: Array<TaskForUserResponseTaskParticipant>
     time?: number,
-    status?: UserResponseStatusResponse.StatusEnum
+    status?: UserResponseStatusResponse.StatusEnum,
+    results?: UserResultForContestResponse
 }
 
 
@@ -35,7 +35,8 @@ const initialState: ContestAssignmentState =
         variant: undefined,
         tasks: [],
         time: undefined,
-        status: undefined
+        status: undefined,
+        results: undefined
     }
 
 
@@ -178,7 +179,6 @@ export class ContestAssignmentStore extends ComponentStore<ContestAssignmentStat
             ),
             catchError( ( error: any ) => of( displayErrorMessage( error ) ) ) )
     } )
-
 
     readonly fetchStatus = this.effect( ( contestId$: Observable<number> ) =>
     {

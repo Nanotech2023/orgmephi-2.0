@@ -59,6 +59,8 @@ export class ContestAssignmentItemComponent implements OnInit, OnDestroy
 
         if ( keyPressed === "." )
             transformedKey = "."
+        else if ( keyPressed === "-" )
+            transformedKey = "-"
         else if ( keyPressed === "," )
             transformedKey = "."
         else if ( isNaN( Number( keyPressed ) ) )

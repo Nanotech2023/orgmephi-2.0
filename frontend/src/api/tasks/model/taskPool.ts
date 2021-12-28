@@ -9,13 +9,12 @@
  * https://openapi-generator.tech
  * Do not edit the class manually.
  */
-import { AnswersInTaskRequestTaskCreator } from './answersInTaskRequestTaskCreator';
 
 
-export interface CreateMultipleRequestTaskCreator { 
-    answers: Array<AnswersInTaskRequestTaskCreator>;
-    num_of_task: number;
-    show_answer_after_contest?: boolean;
-    task_points?: number;
+export interface TaskPool { 
+    name: string | null;
+    orig_task_points: number | null;
+    readonly task_pool_id?: number;
+    year: number | null;
 }
 

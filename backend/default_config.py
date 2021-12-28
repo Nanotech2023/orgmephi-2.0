@@ -2,7 +2,7 @@ from datetime import timedelta
 
 
 class DefaultConfiguration:
-    SQLALCHEMY_DATABASE_URI = "postgresql://postgres:new_password@localhost/orgmephi_db"
+    SQLALCHEMY_DATABASE_URI = "sqlite:///database.sqlite"
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     ORGMEPHI_API_PATH = 'api'
     JWT_ALGORITHM = 'RS256'

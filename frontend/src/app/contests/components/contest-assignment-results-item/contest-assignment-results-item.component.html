@@ -1,0 +1,36 @@
+<div class="tasks_list_item pt-5 pb-5">
+    <div class="task_title">
+        Задание {{ taskIndex }}<br/>
+    </div>
+    <p class="input_label">
+        Максимальное количество баллов за задание {{ task.task_points }}
+    </p>
+    <p class="input_label" *ngIf="!!answer; else notAnswer">
+        Получно баллов за задание {{ answer.mark }}
+    </p>
+    <div class="row">
+        <div class="col-md-12">
+            <div class="task_image">
+                <img [src]="imageUrl" alt="Задание" class="img-fluid pt-5 pb-5">
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="task_actions">
+                <p class="input_label">Ваш ответ</p>
+                <input [ngModel]="userAnswer" class="input_textarea" maxlength="100" disabled>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="task_actions" *ngIf="rightAnswer">
+                <p class="input_label">Правильный ответ</p>
+                <p class="input_label">Диапазон от {{ rightAnswer.start_value }} до {{ rightAnswer.end_value }}</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<ng-template #notAnswer>
+    <p class="input_label">
+        Нет ответа на эту задачу
+    </p>
+</ng-template>

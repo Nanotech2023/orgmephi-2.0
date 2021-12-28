@@ -18,22 +18,26 @@ export interface SimpleContest {
     academic_year?: number;
     readonly base_contest: BaseContest;
     composite_type: SimpleContest.CompositeTypeEnum;
-    contest_duration: number;
+    contest_duration?: number;
     readonly contest_id: number;
+    deadline_for_appeal: string | null;
     end_date: string | null;
-    end_of_enroll_date: string | null;
+    end_of_enroll_date?: string | null;
     readonly enrolled?: boolean;
     holding_type: SimpleContest.HoldingTypeEnum;
     locations: Array<OlympiadLocation>;
     previous_contest_id?: number | null;
     previous_participation_condition: SimpleContest.PreviousParticipationConditionEnum;
     regulations?: string | null;
-    result_publication_date: string | null;
+    result_publication_date?: string | null;
+    readonly show_answer_after_contest?: boolean;
+    show_result_after_finish?: boolean | null;
     start_date: string | null;
     status?: SimpleContest.StatusEnum;
     target_classes?: Array<TargetClass>;
     tasks_number?: number;
     total_points?: number;
+    readonly user_count?: number;
     visibility: boolean;
 }
 export namespace SimpleContest {

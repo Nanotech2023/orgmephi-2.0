@@ -3,6 +3,7 @@ import { TasksService } from '@api/tasks/tasks.service'
 import { BaseContest } from '@api/tasks/model'
 import { DxDataGridComponent } from 'devextreme-angular'
 import { ActivatedRoute, Router } from '@angular/router'
+import { SubjectEnum } from '@api/shared/model'
 
 
 @Component( {
@@ -28,7 +29,7 @@ export class ManageBaseContestsComponent implements OnInit
     selectedRowIndex: number = -1
     selectedRow?: BaseContest = undefined
     levelEnum: ( "1" | "2" | "3" | "No level" )[] = Object.values( BaseContest.LevelEnum )
-    subjectEnum: ( "Math" | "Physics" | "Informatics" | "Natural Sciences" | "Engineering Sciences" | "Other" )[] = Object.values( BaseContest.SubjectEnum )
+    subjectEnum: SubjectEnum[] = Object.values( SubjectEnum )
 
     navigateToSelectedElement(): void
     {

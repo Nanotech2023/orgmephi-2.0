@@ -11,8 +11,7 @@
  */
 
 
-export interface VariantResponseTaskCreator { 
-    readonly variant_id?: number;
-    variant_number: number | null;
+export interface FontsResponseTasksAdmin { 
+    fonts?: Array<string>;
 }
 
