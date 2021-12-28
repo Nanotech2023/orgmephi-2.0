@@ -612,16 +612,15 @@ def test_results_with_variant_self(client, create_user_with_answers_without_plai
 
     for task in tasks:
         if task['task_type'] == 'PlainTask':
-            assert task['right_answer']['answer'] == 'answer'
+            assert 'right_answer' not in task
             assert task['task_id'] == plain_id
             assert task['task_points'] == 14
         elif task['task_type'] == 'RangeTask':
-            assert task['right_answer']['end_value'] == 0.7
-            assert task['right_answer']['start_value'] == 0.5
+            assert 'right_answer' not in task
             assert task['task_id'] == range_id
             assert task['task_points'] == 14
         elif task['task_type'] == 'MultipleChoiceTask':
-            assert task['right_answer']['answers'] == ['1', '3']
+            assert 'right_answer' not in task
             assert task['task_id'] == multiple_id
             assert task['task_points'] == 14
 
