@@ -24,7 +24,6 @@ class AllUserMarksResponseSchema(Schema):
 
 class TaskForUserResponseResultsSchema(Schema):
     task_id = fields.Integer(required=True)
-    right_answer = fields.Nested(nested=RightAnswerSchema, required=True)
     task_type = EnumField(TaskTypeEnum, data_key='task_type', by_value=True)
     task_points = fields.Int(required=True)
 
