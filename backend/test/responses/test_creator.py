@@ -891,7 +891,7 @@ def test_results_with_variant(client, create_user_with_answers_without_plain):
     contest_id = get_contest_id(create_user_with_answers_without_plain, DEFAULT_INDEX)
     contest = create_user_with_answers_without_plain['contests'][DEFAULT_INDEX]
     contest.show_result_after_finish = True
-    contest.show_answer_after_contest = True
+    contest.show_answer_after_contest = False
     contest.result_publication_date = datetime.utcnow() - timedelta(minutes=15)
     test_app.db.session.commit()
     user_id = get_user_id(create_user_with_answers_without_plain, DEFAULT_INDEX)
@@ -923,25 +923,23 @@ def test_results_with_variant(client, create_user_with_answers_without_plain):
             assert answer['mark'] == 14
             assert answer['task_points'] == 14
             assert answer['task_id'] == range_id
-            assert answer['right_answer']['start_value'] == 0.5
-            assert answer['right_answer']['end_value'] == 0.7
+            assert answer['right_answer'] is None
         elif answer['answer_type'] == 'MultipleChoiceAnswer':
             assert answer['mark'] == 0
             assert answer['task_points'] == 14
             assert answer['task_id'] == multiple_id
-            assert answer['right_answer']['answers'] == ['1', '3']
+            assert answer['right_answer'] is None
 
     for task in tasks:
         if task['task_type'] == 'PlainTask':
-            assert task['right_answer']['answer'] == 'answer'
+            assert 'right_answer' not in task
             assert task['task_id'] == plain_id
             assert task['task_points'] == 14
         elif task['task_type'] == 'RangeTask':
-            assert task['right_answer']['end_value'] == 0.7
-            assert task['right_answer']['start_value'] == 0.5
+            assert 'right_answer' not in task
             assert task['task_id'] == range_id
             assert task['task_points'] == 14
         elif task['task_type'] == 'MultipleChoiceTask':
-            assert task['right_answer']['answers'] == ['1', '3']
+            assert 'right_answer' not in task
             assert task['task_id'] == multiple_id
             assert task['task_points'] == 14

@@ -153,7 +153,6 @@ def get_user_results_and_variant(user_id, contest_id):
         task_points = db_get_one_or_none(ContestTask, "contest_task_id", contest_task.contest_task_id).task_points
         tasks_list.append({
             'task_id': task.task_id,
-            'right_answer': task.right_answer,
             'task_type': task.task_type,
             'task_points': task_points
         })

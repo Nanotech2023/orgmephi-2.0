@@ -229,8 +229,6 @@ components:
       - $ref: '#/components/schemas/MultipleRightAnswer'
     TaskForUserResponseResults:
       properties:
-        right_answer:
-          $ref: '#/components/schemas/RightAnswer'
         task_id:
           type: integer
         task_points:
@@ -243,7 +241,6 @@ components:
           - BaseTask
           type: string
       required:
-      - right_answer
       - task_id
       - task_points
       type: object
