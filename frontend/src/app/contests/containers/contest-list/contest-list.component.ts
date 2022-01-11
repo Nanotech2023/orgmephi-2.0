@@ -3,7 +3,7 @@ import { select, Store } from '@ngrx/store'
 import { AuthSelectors, AuthState } from '@/auth/store'
 import { Observable, Subscription } from 'rxjs'
 import { Contest, SimpleContestWithFlagResponseTaskParticipant } from '@api/tasks/model'
-import { ContestsStore } from '@/contests/contests.store'
+import { ContestListStore } from '@/contests/containers/contest-list/contest-list.store'
 import { Router } from '@angular/router'
 import { UsersService } from '@api/users/users.service'
 import { SchoolInfo } from '@api/users/models'
@@ -12,7 +12,8 @@ import { SchoolInfo } from '@api/users/models'
 @Component( {
     selector: 'app-contest-list',
     templateUrl: './contest-list.component.html',
-    styleUrls: [ './contest-list.component.scss' ]
+    styleUrls: [ './contest-list.component.scss' ],
+    providers: [ ContestListStore ]
 } )
 export class ContestListComponent implements OnInit, OnDestroy
 {
@@ -22,16 +23,16 @@ export class ContestListComponent implements OnInit, OnDestroy
     contests$: Observable<SimpleContestWithFlagResponseTaskParticipant[]>
     urlSubscription!: Subscription
 
-    constructor( private authStore: Store<AuthState.State>, private contestsStore: ContestsStore, private router: Router, private usersService: UsersService )
+    constructor( private authStore: Store<AuthState.State>, private contestListStore: ContestListStore, private router: Router, private usersService: UsersService )
     {
         this.showContestsList = false
-        this.contests$ = this.contestsStore.contests$
+        this.contests$ = this.contestListStore.contests$
     }
 
     ngOnInit(): void
     {
         this.isParticipant$ = this.authStore.pipe( select( AuthSelectors.selectIsParticipant ) )
-        this.usersService.userProfileSchoolGet().subscribe( ( response: SchoolInfo ) => this.contestsStore.fetchAll( response!.grade! ) )
+        this.usersService.userProfileSchoolGet().subscribe( ( response: SchoolInfo ) => this.contestListStore.fetchAll( response!.grade! ) )
     }
 
     ngOnDestroy(): void

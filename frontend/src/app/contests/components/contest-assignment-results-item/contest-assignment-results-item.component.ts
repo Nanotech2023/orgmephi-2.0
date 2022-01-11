@@ -17,7 +17,6 @@ export class ContestAssignmentResultsItemComponent implements OnInit
     @Input() taskIndex!: number
     @Input() answer!: BaseAnswer | undefined
     @Input() contestId!: number | null
-    rightAnswer!: RangeRightAnswer | null
     imageUrl!: SafeUrl
     private subscription!: Subscription
     userAnswer!: number | undefined
@@ -30,7 +29,6 @@ export class ContestAssignmentResultsItemComponent implements OnInit
     {
         if ( !!this.contestId )
         {
-            this.rightAnswer = this.task.right_answer as RangeRightAnswer
             this.subscription = this.tasksService.tasksParticipantContestIdContestTasksIdTaskImageSelfGet( this.contestId, this.task.task_id ).subscribe( data =>
             {
                 const unsafeImageUrl = URL.createObjectURL( data )

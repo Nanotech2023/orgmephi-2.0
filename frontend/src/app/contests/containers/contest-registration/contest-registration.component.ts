@@ -1,17 +1,20 @@
 import { Component } from '@angular/core'
-import { ContestsStore } from '@/contests/contests.store'
 import { OlympiadLocation, SimpleContest } from '@api/tasks/model'
 import { Observable } from 'rxjs'
 import { TasksService } from '@api/tasks/tasks.service'
 import { ActivatedRoute, Router } from '@angular/router'
 import { ResponsesService } from '@api/responses/responses.service'
 import { UserResponseStatusResponse } from '@api/responses/model'
+import { getStatusDisplay, getUserResponseStatusDisplay } from '@/shared/displayUtils'
+import { ContestRegistrationStore } from '@/contests/containers/contest-registration/contest-registration.store'
+import { environment } from '@environments/environment'
 
 
 @Component( {
     selector: 'app-contest-registration',
     templateUrl: './contest-registration.component.html',
-    styleUrls: [ './contest-registration.component.scss' ]
+    styleUrls: [ './contest-registration.component.scss' ],
+    providers: [ ContestRegistrationStore ]
 } )
 export class ContestRegistrationComponent
 {
@@ -20,40 +23,35 @@ export class ContestRegistrationComponent
     contestId!: number | null
     contestStatus$!: Observable<UserResponseStatusResponse>
 
-    constructor( private route: ActivatedRoute, private router: Router, private contestsStore: ContestsStore, private tasksService: TasksService, private responsesService: ResponsesService )
+    constructor( private route: ActivatedRoute, private router: Router, private contestRegistrationStore: ContestRegistrationStore, private tasksService: TasksService, private responsesService: ResponsesService )
     {
         this.route.paramMap.subscribe( paramMap =>
         {
             this.contestId = Number( paramMap.get( 'contestId' ) )
             if ( !!this.contestId )
             {
-                this.contestsStore.fetchSingle( this.contestId )
+                this.contestRegistrationStore.fetchSingle( this.contestId )
                 this.contestStatus$ = this.responsesService.responsesParticipantContestContestIdUserSelfStatusGet( this.contestId )
             }
         } )
-        this.contest$ = this.contestsStore.contest$
+        this.contest$ = this.contestRegistrationStore.contest$
         this.tasksService.tasksUnauthorizedLocationAllGet().subscribe( items => this.locations = items.locations )
     }
 
     onStartClick( contestId: number | undefined ): void
     {
         // TODO allow select other locations
-        const locationId = 250
+        const locationId = environment.onlineLocationId
         const contestIdNumber = contestId as number
-        this.contestsStore.enroll( {
+        this.contestRegistrationStore.enroll( {
             contestId: contestIdNumber,
             locationId: locationId
         } )
     }
 
-    onContinueClick( contestId: number | undefined ): void
+    accepted( contestStatus: UserResponseStatusResponse ): boolean
     {
-        this.router.navigate( [ `/contests/${ contestId }/assignment` ] )
-    }
-
-    notChecked( contestStatus: UserResponseStatusResponse ): boolean
-    {
-        return contestStatus.status === UserResponseStatusResponse.StatusEnum.NotChecked
+        return contestStatus.status === UserResponseStatusResponse.StatusEnum.Accepted
     }
 
     inProgress( contestStatus: UserResponseStatusResponse ): boolean
@@ -61,28 +59,18 @@ export class ContestRegistrationComponent
         return contestStatus.status === UserResponseStatusResponse.StatusEnum.InProgress
     }
 
-    noResults( contestStatus: UserResponseStatusResponse ): boolean
+    onContinueClick( contestId: number | undefined ): void
     {
-        return contestStatus.status === UserResponseStatusResponse.StatusEnum.NoResults
+        this.router.navigate( [ `/contests/${ contestId }/assignment` ] )
     }
 
-    appeal( contestStatus: UserResponseStatusResponse ): boolean
+    onShowResultsClick( contestId: number | undefined ): void
     {
-        return contestStatus.status === UserResponseStatusResponse.StatusEnum.Appeal
+        this.router.navigate( [ `/contests/${ contestId }/assignment-results` ] )
     }
 
-    correction( contestStatus: UserResponseStatusResponse ): boolean
+    getUserResponseStatusDisplay( contestStatus: UserResponseStatusResponse ): string
     {
-        return contestStatus.status === UserResponseStatusResponse.StatusEnum.Correction
-    }
-
-    rejected( contestStatus: UserResponseStatusResponse ): boolean
-    {
-        return contestStatus.status === UserResponseStatusResponse.StatusEnum.Rejected
-    }
-
-    accepted( contestStatus: UserResponseStatusResponse ): boolean
-    {
-        return contestStatus.status === UserResponseStatusResponse.StatusEnum.Accepted
+        return getUserResponseStatusDisplay( contestStatus.status )
     }
 }

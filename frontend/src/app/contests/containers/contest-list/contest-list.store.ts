@@ -4,7 +4,6 @@ import { TasksService } from '@api/tasks/tasks.service'
 import { CallState, getError, LoadingState } from '@/shared/callState'
 import { EMPTY, Observable, of } from 'rxjs'
 import {
-    Contest,
     EnrollRequestTaskParticipant,
     FilterSimpleContestResponseTaskParticipant,
     OlympiadLocation,
@@ -14,8 +13,6 @@ import {
 import { catchError, switchMap, tap } from 'rxjs/operators'
 import { ResponsesService } from '@api/responses/responses.service'
 import { displayErrorMessage } from '@/shared/logging'
-import { UsersService } from '@api/users/users.service'
-import { SelfUnfilledResponse } from '@api/users/models'
 import { Router } from '@angular/router'
 import CompositeTypeEnum = SimpleContest.CompositeTypeEnum
 
@@ -24,9 +21,7 @@ export interface ContestsState
 {
     contests: Array<SimpleContestWithFlagResponseTaskParticipant>
     locations: Array<OlympiadLocation>
-    contest?: Contest
     callState: CallState
-    unfilledProfile?: Array<object>
 }
 
 
@@ -34,16 +29,14 @@ const initialState: ContestsState =
     {
         contests: [],
         locations: [],
-        contest: undefined,
-        callState: LoadingState.INIT,
-        unfilledProfile: undefined
+        callState: LoadingState.INIT
     }
 
 
 @Injectable()
-export class ContestsStore extends ComponentStore<ContestsState>
+export class ContestListStore extends ComponentStore<ContestsState>
 {
-    constructor( private tasksService: TasksService, private responsesService: ResponsesService, private usersService: UsersService, private router: Router )
+    constructor( private tasksService: TasksService )
     {
         super( initialState )
     }
@@ -52,8 +45,6 @@ export class ContestsStore extends ComponentStore<ContestsState>
     {
         return item.contest !== undefined
     } ) )
-    readonly contest$: Observable<SimpleContest | undefined> = this.select( state => state.contest as SimpleContest )
-    readonly isFilledProfile$: Observable<boolean> = this.select( state => state.unfilledProfile === undefined || !state.unfilledProfile.length )
     private readonly loading$: Observable<boolean> = this.select( state => state.callState === LoadingState.LOADING )
     private readonly error$: Observable<string | null> = this.select( state => getError( state.callState ) )
 
@@ -84,17 +75,6 @@ export class ContestsStore extends ComponentStore<ContestsState>
             contests: [ ...state.contests, ...contests ]
         } ) )
 
-    readonly selectContest = this.updater( ( state: ContestsState, contest: Contest ) =>
-        ( {
-            ...state,
-            contest: contest
-        } ) )
-
-    readonly setUnfilledProfile = this.updater( ( state: ContestsState, unfilledProfile: object[] | undefined ) =>
-        ( {
-            ...state,
-            unfilledProfile: unfilledProfile
-        } ) )
 
     // EFFECTS
     readonly fetchAll = this.effect( ( userGrade$: Observable<number> ) =>
@@ -119,42 +99,6 @@ export class ContestsStore extends ComponentStore<ContestsState>
         return item.contest.base_contest.target_classes.some( targetClass => targetClass.target_class == userGrade.toString() )
     }
 
-    readonly fetchSingle = this.effect( ( contestId$: Observable<number> ) =>
-        contestId$.pipe(
-            switchMap( ( contestId: number ) =>
-                this.tasksService.tasksParticipantOlympiadIdOlympiadGet( contestId ).pipe(
-                    tapResponse(
-                        ( response: Contest ) => this.selectContest( response ),
-                        ( error: string ) => this.updateError( error )
-                    ),
-                    catchError( ( error: any ) => of( displayErrorMessage( error ) ) ) ) )
-        ) )
 
-    readonly enroll = this.effect( ( enroll$: Observable<{ contestId: number, locationId: number }> ) =>
-        enroll$.pipe(
-            switchMap( ( enroll: { contestId: number, locationId: number } ) =>
-            {
-                const { contestId, locationId } = enroll
-                const enrollRequestTaskParticipant: EnrollRequestTaskParticipant = { location_id: locationId }
-                return this.tasksService.tasksParticipantContestIdContestEnrollPost( contestId, enrollRequestTaskParticipant ).pipe(
-                    catchError( ( error: any ) => of( displayErrorMessage( error ) ) ),
-                    switchMap( () =>
-                        this.responsesService.responsesParticipantContestContestIdUserSelfCreatePost( contestId ).pipe(
-                            catchError( ( error: any ) => of( EMPTY ) ),
-                            tap( () => this.router.navigate( [ `/contests/${ contestId }/assignment` ] ) )
-                        ) ) )
-            } )
-        ) )
 
-    readonly fetchUnfilledProfile = this.effect( () =>
-    {
-        this.setLoading()
-        return this.usersService.userProfileUnfilledGet().pipe(
-            tapResponse(
-                ( response: SelfUnfilledResponse ) => this.setUnfilledProfile( response.unfilled ),
-                ( error: string ) => this.updateError( error )
-            ),
-            catchError( ( error: any ) => of( displayErrorMessage( error ) ) )
-        )
-    } )
 }

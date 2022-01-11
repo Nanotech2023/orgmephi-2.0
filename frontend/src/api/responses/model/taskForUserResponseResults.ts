@@ -9,11 +9,9 @@
  * https://openapi-generator.tech
  * Do not edit the class manually.
  */
-import { RightAnswer } from './rightAnswer';
 
 
 export interface TaskForUserResponseResults { 
-    right_answer: RightAnswer;
     task_id: number;
     task_points: number;
     task_type?: TaskForUserResponseResults.TaskTypeEnum;

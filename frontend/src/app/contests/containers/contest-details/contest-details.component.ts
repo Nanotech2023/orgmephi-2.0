@@ -1,15 +1,16 @@
 import { Component } from '@angular/core'
 import { Observable } from 'rxjs'
-import { ContestsStore } from '@/contests/contests.store'
 import { SimpleContest } from '@api/tasks/model'
 import { ActivatedRoute } from '@angular/router'
 import { getClassesForDisplay, getStatusDisplay, getSubjectDisplay } from '@/shared/displayUtils'
+import { ContestDetailsStore } from '@/contests/containers/contest-details/contest-details.store'
 
 
 @Component( {
     selector: 'app-contest-details',
     templateUrl: './contest-details.component.html',
-    styleUrls: [ './contest-details.component.scss' ]
+    styleUrls: [ './contest-details.component.scss' ],
+    providers: [ ContestDetailsStore ]
 } )
 export class ContestDetailsComponent
 {
@@ -17,19 +18,19 @@ export class ContestDetailsComponent
     contestId!: number | null
     isFilledProfile$: Observable<boolean>
 
-    constructor( private route: ActivatedRoute, private contestsStore: ContestsStore )
+    constructor( private contestDetailsStore: ContestDetailsStore, private route: ActivatedRoute )
     {
         this.route.paramMap.subscribe( paramMap =>
         {
             this.contestId = Number( paramMap.get( 'contestId' ) )
             if ( !!this.contestId )
             {
-                this.contestsStore.fetchUnfilledProfile()
-                this.contestsStore.fetchSingle( this.contestId )
+                this.contestDetailsStore.fetchUnfilledProfile()
+                this.contestDetailsStore.fetchSingle( this.contestId )
             }
         } )
-        this.contest$ = this.contestsStore.contest$
-        this.isFilledProfile$ = this.contestsStore.isFilledProfile$
+        this.contest$ = this.contestDetailsStore.contest$
+        this.isFilledProfile$ = this.contestDetailsStore.isFilledProfile$
     }
 
     getTargetClassesDisplay( contest: SimpleContest ): string

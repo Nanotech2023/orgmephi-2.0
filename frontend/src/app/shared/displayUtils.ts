@@ -1,6 +1,7 @@
 import { Contest, SimpleContest, TargetClass } from '@api/tasks/model'
 import { DocumentTypeEnum, GenderEnum, LocationTypeEnum, SchoolTypeEnum } from '@api/users/models'
 import { SubjectEnum } from '@api/shared/model'
+import { UserResponseStatusResponse } from '@api/responses/model'
 
 
 export function getGenderDisplay( genderEnum: GenderEnum ): string
@@ -133,5 +134,25 @@ export function getLocationDisplay( locationType: LocationTypeEnum ): string
         case 'Foreign':
             return "Другая страна"
     }
+}
 
+export function getUserResponseStatusDisplay( userResponseStatus: UserResponseStatusResponse.StatusEnum ): string
+{
+    switch ( userResponseStatus )
+    {
+        case 'InProgress':
+            return "Продолжить"
+        case 'NotChecked':
+            return "Не проверено"
+        case 'Accepted':
+            return "Работа принята и проверена"
+        case 'Rejected':
+            return "Работа отклонена"
+        case 'Appeal':
+            return "Подана апелляция"
+        case 'Correction':
+            return "Работа отправлена на доработку"
+        case 'NoResults':
+            return "Нет результатов"
+    }
 }

@@ -1,12 +1,13 @@
+@import "src/styles/colors";
 
 .task_title {
-  border-bottom: 2px solid #171717;
+  border-bottom: 2px solid $black;
   font-style: normal;
   font-weight: 600;
   font-size: 14px;
   line-height: 18px;
   letter-spacing: 0.16px;
-  color: #171717;
+  color: $black;
 }
 
 .row {
@@ -18,8 +19,18 @@
 }
 
 .task_image {
-  border: 2px solid #171717;
+  border: 2px solid $black;
   box-sizing: border-box;
+}
+
+.info_label {
+  //styleName: Body 2;
+  font-family: Inter;
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 18px;
+  text-align: left;
 }
 
 .input_label {
@@ -28,14 +39,22 @@
   font-size: 12px;
   line-height: 16px;
   letter-spacing: 0.32px;
-  color: #565656;
+  color: $grey;
 }
 
 .input_textarea {
-  border-bottom: 2px solid #171717;
+  border-bottom: 2px solid $black;
   border-left: none;
   border-top: none;
   border-right: none;
   width: 100%;
   min-height: 80px;
+}
+
+.task-point-span_right {
+  color: $success
+}
+
+.task-point-span_wrong {
+  color: $error
 }

@@ -12,8 +12,8 @@ export class ProfileEditDocumentOtherdocumentComponent
     @Input() model!: DocumentOther
     @Output() modelChange = new EventEmitter<DocumentOther>()
 
-    numberPattern: string = "^[0-9]{1,32}$"
-    seriesPattern: string = "^[0-9]{1,16}$"
+    numberPattern: string = "^[a-zA-Z0-9]{1,32}$"
+    seriesPattern: string = "^[a-zA-Z0-9]{1,16}$"
 
     onModelChange(): void
     {
