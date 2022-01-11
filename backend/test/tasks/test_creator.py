@@ -286,7 +286,11 @@ def test_composite_contest_properties(client, test_simple_contest_in_stage_1):
     assert resp.status_code == 200
     response = resp.json
     assert response['status'] == 'In progress'
-    assert response['academic_year'] == datetime.utcnow().year
+    if datetime.utcnow().month < 9:
+        year = datetime.utcnow().year - 1
+    else:
+        year = datetime.utcnow().year
+    assert response['academic_year'] == year
 
     simple_contests = SimpleContest.query.all()
     for contest in simple_contests:

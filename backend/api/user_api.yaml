@@ -69,8 +69,7 @@ components:
           type: string
         series:
           example: "III-\u0410\u0418"
-          pattern: "^M{0,3}(CM|CD|D?C{0,3})(XC|XL|L?X{0,3})(IX|IV|V?I{0,3})-[\u0410\
-            -\u042F]{2}$"
+          pattern: "^M{0,3}(CM|CD|D?C{0,3})(XC|XL|L?X{0,3})(IX|IV|V?I{0,3})-[\u0410\-\u042F]{2}$"
           type: string
         user_id:
           readOnly: true
@@ -96,11 +95,11 @@ components:
           type: string
         number:
           example: '1234567'
-          pattern: ^[0-9]{1,32}$
+          pattern: ^[a-zA-Z0-9]{1,32}$
           type: string
         series:
           example: '12'
-          pattern: ^[0-9]{1,16}$
+          pattern: ^[a-zA-Z0-9]{1,16}$
           type: string
         user_id:
           readOnly: true
@@ -125,11 +124,11 @@ components:
           type: string
         number:
           example: '1234567'
-          pattern: ^[0-9]{1,32}$
+          pattern: ^[a-zA-Z0-9]{1,32}$
           type: string
         series:
           example: '12'
-          pattern: ^[0-9]{1,16}$
+          pattern: ^[a-zA-Z0-9]{1,16}$
           type: string
         user_id:
           readOnly: true
