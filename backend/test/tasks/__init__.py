@@ -86,7 +86,7 @@ def test_base_contests(test_olympiad_types, test_certificate_type):
 def test_create_tasks_pool(test_base_contests):
     from contest.tasks.models import TaskPool
     task_pools = [TaskPool(name=f'Test tasks pool {i}',
-                           year=2021,
+                           year=datetime.now().year,
                            orig_task_points=20) for i in range(3)]
     for test_base_contest in test_base_contests:
         test_base_contest.task_pools = task_pools
