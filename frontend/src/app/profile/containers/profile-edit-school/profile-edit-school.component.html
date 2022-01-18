@@ -32,8 +32,8 @@
             </div>
             <div class="profile-form_item">
                 <p class="profile-form_label">Название образовательного учреждения</p>
-                <input class="profile-form_input" placeholder="Введите название учреждения" type="text" name="name"
-                       #name="ngModel" required [(ngModel)]="viewModel.schoolInfo.name">
+                <textarea class="profile-form_input" placeholder="Введите название учреждения" type="text" name="name" [maxLength]="128"
+                       #name="ngModel" required [(ngModel)]="viewModel.schoolInfo.name"></textarea>
                 <ng-container [ngTemplateOutlet]="validationTemplate"
                               [ngTemplateOutletContext]="{fieldName:name}">
                 </ng-container>

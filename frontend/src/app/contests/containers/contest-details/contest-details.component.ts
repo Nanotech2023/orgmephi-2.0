@@ -2,7 +2,7 @@ import { Component } from '@angular/core'
 import { Observable } from 'rxjs'
 import { SimpleContest } from '@api/tasks/model'
 import { ActivatedRoute } from '@angular/router'
-import { getClassesForDisplay, getStatusDisplay, getSubjectDisplay } from '@/shared/displayUtils'
+import { getClassesForDisplay, getStatusDisplay, getSubjectDisplay } from '@/shared/localizeUtils'
 import { ContestDetailsStore } from '@/contests/containers/contest-details/contest-details.store'
 
 

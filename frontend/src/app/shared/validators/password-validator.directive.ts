@@ -1,6 +1,6 @@
 import { Directive } from '@angular/core'
 import { Validator, AbstractControl, ValidationErrors, NG_VALIDATORS } from '@angular/forms'
-import { ValidatorService } from '@/shared/validator.service'
+import { ValidatorService } from '@/shared/validators/validator.service'
 
 
 @Directive( {

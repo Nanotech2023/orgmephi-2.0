@@ -2,10 +2,9 @@ import { Component, forwardRef } from '@angular/core'
 import { ProfileStore } from '@/profile/profile.store'
 import { Observable } from 'rxjs'
 import { Document, GenderEnum, Location, LocationRussiaCity, UserInfo, UserLimitations } from '@api/users/models'
-import { getGenderDisplay } from '@/shared/displayUtils'
+import { getGenderDisplay } from '@/shared/localizeUtils'
 import { NG_VALIDATORS } from '@angular/forms'
-import { PhoneValidatorDirective } from '@/shared/phone.validator.directive'
-import { Router } from '@angular/router'
+import { PhoneValidatorDirective } from '@/shared/validators/phone.validator.directive'
 
 
 @Component( {
@@ -30,12 +29,11 @@ export class ProfileEditUserinfoComponent
 
     readonly genders: GenderEnum[] = [ GenderEnum.Male, GenderEnum.Female ]
 
-    constructor( private profileStore: ProfileStore, private router: Router )
+    constructor( private profileStore: ProfileStore )
     {
         this.profileStore.fetch()
         this.viewModel$ = this.profileStore.viewModel$
     }
-
 
     getGenderDisplay( genderEnum: GenderEnum ): string
     {
@@ -47,8 +45,8 @@ export class ProfileEditUserinfoComponent
         this.profileStore.updateUserInfo( userInfo )
     }
 
-    onCityChange( $event: LocationRussiaCity )
+    showRawData( viewModel: { loading: boolean; error: string | null; userProfileUnfilled: string; userInfo: UserInfo; userInfoDocument: Document; userInfoDwelling: Location; userInfoDwellingCity: LocationRussiaCity; userInfoLimitations: UserLimitations } )
     {
-        this.profileStore.setCity( $event )
+        console.log( viewModel )
     }
 }

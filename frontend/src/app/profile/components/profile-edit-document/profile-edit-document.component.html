@@ -11,7 +11,7 @@
     </div>
     <ng-container [ngSwitch]="model.document_type">
         <app-profile-edit-document-rfpassport [(model)]="model" *ngSwitchCase="'RFPassport'"></app-profile-edit-document-rfpassport>
-        <app-profile-edit-document-rfinternationalpassport [(model)]="model" *ngSwitchCase="'RfInternationalPassport'"></app-profile-edit-document-rfinternationalpassport>
+        <app-profile-edit-document-rfinternationalpassport [(model)]="model" *ngSwitchCase="'RFInternationalPassport'"></app-profile-edit-document-rfinternationalpassport>
         <app-profile-edit-document-birthcertificate [(model)]="model" *ngSwitchCase="'BirthCertificate'"></app-profile-edit-document-birthcertificate>
         <app-profile-edit-document-foreignpassport [(model)]="model" *ngSwitchCase="'ForeignPassport'"></app-profile-edit-document-foreignpassport>
         <app-profile-edit-document-otherdocument [(model)]="model" *ngSwitchCase="'OtherDocument'"></app-profile-edit-document-otherdocument>
@@ -23,9 +23,6 @@
     <div *ngIf="fieldName.invalid" class="input_error">
         <div *ngIf="fieldName.errors?.required">
             Поле обязательно для заполнения
-        </div>
-        <div *ngIf="fieldName.errors?.phoneNumberValid === false">
-            Номер телефона введен неправильно
         </div>
         <div *ngIf="fieldName.errors?.pattern">
             Значение введено некорректно

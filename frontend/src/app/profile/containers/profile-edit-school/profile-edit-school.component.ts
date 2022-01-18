@@ -1,9 +1,8 @@
 import { Component } from '@angular/core'
 import { Observable } from 'rxjs'
 import { Location, LocationRussiaCity, SchoolInfo, SchoolTypeEnum } from '@api/users/models'
-import { getSchoolTypeDisplay } from '@/shared/displayUtils'
+import { getSchoolTypeDisplay } from '@/shared/localizeUtils'
 import { ProfileSchoolStore } from '@/profile/profile-school.store'
-import { Router } from '@angular/router'
 
 
 @Component( {
@@ -32,11 +31,10 @@ export class ProfileEditSchoolComponent
         SchoolTypeEnum.External,
         SchoolTypeEnum.Collage,
         SchoolTypeEnum.University,
-        SchoolTypeEnum.Correctional,
-        SchoolTypeEnum.Other
+        SchoolTypeEnum.Correctional
     ]
 
-    constructor( private profileStore: ProfileSchoolStore, private router: Router )
+    constructor( private profileStore: ProfileSchoolStore )
     {
         this.profileStore.fetch()
         this.viewModel$ = this.profileStore.viewModel$

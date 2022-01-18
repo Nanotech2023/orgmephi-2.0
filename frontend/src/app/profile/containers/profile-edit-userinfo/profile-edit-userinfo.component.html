@@ -1,6 +1,14 @@
 <ng-container *ngIf="viewModel$ | async as viewModel">
+
+
+    <button (click)="showRawData(this.viewModel)"
+            style="position:fixed;	width:60px; height:60px; bottom:40px; right:40px">SHOW RAW DATA
+    </button>
+
     <form name="userInfoForm" (ngSubmit)="userInfoForm.form.valid && onSubmit(this.viewModel.userInfo)"
           #userInfoForm="ngForm" novalidate>
+
+
         <div class="row">
             <div class="col-md-12">
                 <p class="profile-form_container_title">Анкета абитуриента</p>
@@ -71,7 +79,8 @@
             </div>
             <div class="profile-form_item">
                 <p class="profile-form_label">Дата рождения</p>
-                <input class="profile-form_input" placeholder="Введите дату рождения" type="date"
+                <input class="profile-form_input" placeholder="Введите дату рождения" type="date" min="1990-01-01"
+                       max="2100-01-01"
                        name="date_of_birth" #date_of_birth="ngModel"
                        [(ngModel)]="viewModel.userInfo.date_of_birth" required>
                 <ng-container [ngTemplateOutlet]="validationTemplate"
@@ -91,7 +100,7 @@
         <div class="profile_subtitle">Паспортные данные</div>
         <app-profile-edit-document [(model)]="viewModel.userInfoDocument"></app-profile-edit-document>
         <div class="profile_subtitle">Место регистрации</div>
-        <app-profile-edit-dwelling [(model)]="viewModel.userInfoDwelling" [(city)]="viewModel.userInfoDwellingCity">
+        <app-profile-edit-dwelling [(model)]="viewModel.userInfoDwelling">
         </app-profile-edit-dwelling>
         <div class="profile_subtitle">Особые условия при проведении олимпиад</div>
         <app-profile-edit-limitations [(model)]="viewModel.userInfoLimitations">
@@ -99,7 +108,8 @@
 
         <div class="profile-form_container">
             <div class="profile-form_item">
-                <button class="button-action_default button-action_save" type="submit" [disabled]="!userInfoForm.form.valid">Сохранить и перейти к следующему шагу
+                <button class="button-action_default button-action_save" type="submit"
+                        [disabled]="!userInfoForm.form.valid">Сохранить и перейти к следующему шагу
                 </button>
             </div>
         </div>
@@ -111,8 +121,11 @@
         <div *ngIf="fieldName.errors?.required">
             Поле обязательно для заполнения
         </div>
-        <div *ngIf="fieldName.errors?.phoneNumberValid === false">
-            Номер телефона введен неправильно
+        <div *ngIf="fieldName.errors?.min">
+            Дата рождения не может быть ранее 1 января 1990
+        </div>
+        <div *ngIf="fieldName.errors?.max">
+            Дата рождения не может быть позднее 1 января 2100
         </div>
     </div>
 </ng-template>

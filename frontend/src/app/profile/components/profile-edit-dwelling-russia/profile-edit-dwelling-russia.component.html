@@ -1,9 +1,5 @@
 <div class="profile-form_container">
-    <div class="profile-form_item">
-        <p class="profile-form_label">Страна</p>
-        <input class="profile-form_input" type="text" readonly
-               [(ngModel)]="model.country">
-    </div>
+    <input type="hidden" readonly [(ngModel)]="model.country">
 
     <div class="profile-form_item">
         <p class="profile-form_label">Регион</p>
@@ -12,10 +8,10 @@
                    bindValue="name"
                    placeholder="Введите регион"
                    name="regionName"
-                   [(ngModel)]="city.region_name"
+                   [(ngModel)]="model.region_name"
                    (change)="onRegionChange()">
         </ng-select>
-        <div *ngIf="!city.region_name" class="input_error">
+        <div *ngIf="!model.region_name" class="input_error">
             Необходимо указать регион
         </div>
     </div>

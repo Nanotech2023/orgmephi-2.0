@@ -6,10 +6,11 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms'
 import { RouterModule } from '@angular/router'
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations'
 import { ManageNavbarComponent } from '@/layout/manage-navbar/manage-navbar.component'
-import { NotFoundComponent } from '@/shared/not-found/not-found.component'
-import { InDevelopmentComponent } from '@/shared/in-development/in-development.component'
-import { PhoneValidatorDirective } from '@/shared/phone.validator.directive'
-import { PasswordValidatorDirective } from '@/shared/password-validator.directive'
+import { NotFoundComponent } from '@/shared/components/not-found/not-found.component'
+import { InDevelopmentComponent } from '@/shared/components/in-development/in-development.component'
+import { PhoneValidatorDirective } from '@/shared/validators/phone.validator.directive'
+import { PasswordValidatorDirective } from '@/shared/validators/password-validator.directive'
+import { LoadingComponent } from '@/shared/components/loading/loading.component'
 
 
 const SHARED = [
@@ -26,6 +27,7 @@ const COMPONENTS = [
     ManageNavbarComponent,
     InDevelopmentComponent,
     NotFoundComponent,
+    LoadingComponent,
     PhoneValidatorDirective,
     PasswordValidatorDirective
 ]

@@ -5,7 +5,7 @@ import { TasksService } from '@api/tasks/tasks.service'
 import { ActivatedRoute, Router } from '@angular/router'
 import { ResponsesService } from '@api/responses/responses.service'
 import { UserResponseStatusResponse } from '@api/responses/model'
-import { getStatusDisplay, getUserResponseStatusDisplay } from '@/shared/displayUtils'
+import { getStatusDisplay, getUserResponseStatusDisplay } from '@/shared/localizeUtils'
 import { ContestRegistrationStore } from '@/contests/containers/contest-registration/contest-registration.store'
 import { environment } from '@environments/environment'
 

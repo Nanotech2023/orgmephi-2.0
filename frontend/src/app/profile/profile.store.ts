@@ -215,6 +215,11 @@ export class ProfileStore extends ComponentStore<ProfileState>
                         // @ts-ignore
                         newUserInfo.document.document_name = undefined
                     }
+                    if ( document.document_type != DocumentTypeEnum.RfPassport )
+                    {
+                        // @ts-ignore
+                        newUserInfo.document.code = undefined
+                    }
                     newUserInfo.dwelling = dwelling
                     if ( dwelling.location_type == LocationTypeEnum.Russian )
                     {

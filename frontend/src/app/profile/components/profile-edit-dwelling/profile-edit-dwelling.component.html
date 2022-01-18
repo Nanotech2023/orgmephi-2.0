@@ -7,25 +7,10 @@
         </select>
     </div>
     <ng-container [ngSwitch]="selectedValue">
-        <app-profile-edit-dwelling-russia [(model)]="model" [(city)]="city" *ngSwitchCase="'Russian'" (modelChange)="onModelChange()" (cityChange)="onCityChange()">
+        <app-profile-edit-dwelling-russia [(model)]="model" *ngSwitchCase="'Russian'">
         </app-profile-edit-dwelling-russia>
-        <app-profile-edit-dwelling-other [(model)]="model" *ngSwitchCase="'Foreign'" (modelChange)="onModelChange()">
+        <app-profile-edit-dwelling-other [(model)]="model" *ngSwitchCase="'Foreign'">
         </app-profile-edit-dwelling-other>
         <div *ngSwitchDefault></div>
     </ng-container>
 </div>
-
-
-<ng-template #validationTemplate let-fieldName='fieldName'>
-    <div *ngIf="fieldName.invalid" class="input_error">
-        <div *ngIf="fieldName.errors?.required">
-            Поле обязательно для заполнения
-        </div>
-        <div *ngIf="fieldName.errors?.phoneNumberValid === false">
-            Номер телефона введен неправильно
-        </div>
-        <div *ngIf="fieldName.errors?.pattern">
-            Значение введено некорректно
-        </div>
-    </div>
-</ng-template>

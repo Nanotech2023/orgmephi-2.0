@@ -21,7 +21,7 @@ export function getDocumentDisplay( documentTypeEnum: DocumentTypeEnum ): string
     {
         case 'RFPassport':
             return "Паспорт гражданина РФ"
-        case 'RfInternationalPassport':
+        case 'RFInternationalPassport':
             return "Заграничный паспорт гражданина РФ"
         case 'BirthCertificate':
             return "Свидетельство о рождении гражданина РФ"

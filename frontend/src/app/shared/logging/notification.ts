@@ -1,5 +1,5 @@
 import notify from 'devextreme/ui/notify'
-import { ErrorMessage } from '@/shared/logging'
+import { ErrorMessage } from '@/shared/logging/index'
 
 
 const displayMessageTime = 4000
