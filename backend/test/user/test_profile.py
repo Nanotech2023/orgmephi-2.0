@@ -34,6 +34,16 @@ def test_user_info_patch(client, test_country_native, test_region, test_city):
     assert resp.status_code == 200
 
 
+def test_user_info_limitations_patch(client, test_country_native, test_region, test_city):
+    resp = client.patch('/personal/limitations', json=test_user_info['limitations'])
+    assert resp.status_code == 200
+
+
+def test_user_info_dwellings_patch(client, test_country_native, test_region, test_city):
+    resp = client.patch('/personal/dwelling', json=test_user_info['dwelling'])
+    assert resp.status_code == 200
+
+
 def test_user_info_get(client, test_country_native, test_region, test_city):
     client.patch('/personal', json=test_user_info)
 
