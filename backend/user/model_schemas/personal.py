@@ -55,3 +55,12 @@ class UserInfoSchema(SQLAlchemySchema):
                 if current_email != email:
                     raise AlreadyExists('user.email', email)
         return data
+
+
+class UserPhoneSchema(SQLAlchemySchema):
+    phone = common_fields.Phone()
+
+
+class UserInfoSchemaPersonal(UserInfoSchema):
+    class Meta(UserInfoSchema.Meta):
+        exclude = ['user_id', 'email', 'phone', 'dwelling', 'limitations']

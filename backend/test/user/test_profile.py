@@ -1,3 +1,4 @@
+from user.models import GenderEnum
 from . import *
 import datetime
 
@@ -41,6 +42,24 @@ def test_user_info_limitations_patch(client, test_country_native, test_region, t
 
 def test_user_info_dwellings_patch(client, test_country_native, test_region, test_city):
     resp = client.patch('/personal/dwelling', json=test_user_info['dwelling'])
+    assert resp.status_code == 200
+
+
+def test_user_info_phone_number_patch(client, test_country_native, test_region, test_city):
+    resp = client.patch('/personal/phone_number', json={
+        "phone": "8 (800) 555 35 35"
+    })
+    assert resp.status_code == 200
+
+
+def test_user_info_personal_patch(client, test_country_native, test_region, test_city):
+    resp = client.patch('/personal/personal', json={
+        "first_name": "first_name",
+        "middle_name": "middle_name",
+        "second_name": "second_name",
+        "gender": GenderEnum.male.value,
+        "place_of_birth": "test place",
+    })
     assert resp.status_code == 200
 
 

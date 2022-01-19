@@ -6,7 +6,7 @@ from common.errors import NotFound, InsufficientData, WrongType
 from common.jwt_verify import jwt_get_id
 from common.util import db_get_or_raise, send_pdf
 from user.model_schemas.auth import UserSchema
-from user.model_schemas.personal import UserInfoSchema, UserLimitationsSchema
+from user.model_schemas.personal import UserInfoSchema, UserLimitationsSchema, UserPhoneSchema, UserInfoSchemaPersonal
 from user.model_schemas.school import SchoolInfoSchema
 from user.model_schemas.university import StudentInfoSchema
 from user.models import User, UserInfo, StudentInfo, SchoolInfo, UserTypeEnum
@@ -181,6 +181,71 @@ def set_user_limitations_self():
     if user.user_info is None:
         user.user_info = UserInfo()
     UserInfoSchema(load_instance=True, exclude=['email', 'first_name', 'middle_name', 'second_name', 'date_of_birth'])\
+        .load({'limitations': request.json}, instance=user.user_info, session=db.session, partial=False, unknown=EXCLUDE)
+    db.session.commit()
+    return {}, 200
+
+
+@module.route('/personal/phone_number', methods=['PATCH'])
+def set_user_phone_number_self():
+    """
+    Set personal phone number info for current user
+    ---
+    patch:
+      security:
+        - JWTAccessToken: [ ]
+        - CSRFAccessToken: [ ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: UserPhoneSchema
+      responses:
+        '200':
+          description: OK
+        '403':
+          description: Invalid role of current user
+        '404':
+          description: User not found
+    """
+    user = db_get_or_raise(User, "id", jwt_get_id())
+    if user.user_info is None:
+        user.user_info = UserInfo()
+    UserInfoSchema(load_instance=True, exclude=['email', 'first_name', 'middle_name', 'second_name', 'date_of_birth',
+                                                'place_of_birth',
+                                                'phone', 'dwelling', 'limitations'])\
+        .load({'limitations': request.json}, instance=user.user_info, session=db.session, partial=False, unknown=EXCLUDE)
+    db.session.commit()
+    return {}, 200
+
+
+@module.route('/personal/personal', methods=['PATCH'])
+def set_user_personal_self():
+    """
+    Set personal info for current user
+    ---
+    patch:
+      security:
+        - JWTAccessToken: [ ]
+        - CSRFAccessToken: [ ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: UserInfoSchemaPersonal
+      responses:
+        '200':
+          description: OK
+        '403':
+          description: Invalid role of current user
+        '404':
+          description: User not found
+    """
+    exclude = ['user_id', 'email', 'phone', 'dwelling', 'limitations']
+    user = db_get_or_raise(User, "id", jwt_get_id())
+    if user.user_info is None:
+        user.user_info = UserInfo()
+    UserInfoSchema(load_instance=True, exclude=['email', 'phone', 'dwelling', 'limitations'])\
         .load({'limitations': request.json}, instance=user.user_info, session=db.session, partial=False, unknown=EXCLUDE)
     db.session.commit()
     return {}, 200
