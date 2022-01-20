@@ -56,6 +56,7 @@
                 <input class="profile-form_input" placeholder="Введите номер телефона" type="tel"
                        name="phone" #phone="ngModel" [(ngModel)]="viewModel.userInfo.phone"
                        required appPhoneValidator>
+                <small class="form-text text-muted">Пример: +79991234567</small>
                 <ng-container [ngTemplateOutlet]="validationTemplate"
                               [ngTemplateOutletContext]="{fieldName:phone}">
                 </ng-container>
@@ -115,6 +116,9 @@
     <div *ngIf="fieldName.invalid" class="input_error">
         <div *ngIf="fieldName.errors?.required">
             Поле обязательно для заполнения
+        </div>
+        <div *ngIf="fieldName.errors?.phoneNumberValid === false">
+            Номер телефона введен неправильно
         </div>
         <div *ngIf="fieldName.errors?.min">
             Дата рождения не может быть ранее 1 января 1990

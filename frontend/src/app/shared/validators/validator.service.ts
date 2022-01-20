@@ -9,7 +9,7 @@ export class ValidatorService
 {
     validatePhoneNumber( phone: string ): ValidationErrors | null
     {
-        const pattern = new RegExp( "^([+]?\\d[-.\\s]??)?(\\d{2,3}[-.\\s]??\\d{2,3}[-.\\s]??\\d{2}[-.\\s]??\\d{2}|\\(\\d{3}\\)[-.\\s]??\\d{3}[-.\\s]??\\d{2}[-.\\s]??\\d{2}|\\d{3}[-.\\s]??\\d{2}[-.\\s]??\\d{2})$" )
+        const pattern = new RegExp( "^\\+[0-9]{10,17}$" )
         if ( pattern.test( phone ) )
             return null
         else
