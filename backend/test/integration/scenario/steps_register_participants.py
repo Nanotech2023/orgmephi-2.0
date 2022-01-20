@@ -106,7 +106,7 @@ def step_personal_info(client, state):
                 "movement": (user_id * 13 % 5) % 2,
                 "sight": (user_id * 17 % 7) % 2
             },
-            "phone": f"8 (800) 555 {user_id % 10}{(user_id + 1) % 10} {(user_id + 2) % 10}{(user_id + 3) % 10}",
+            "phone": f"+7800555{user_id % 10}{(user_id + 1) % 10}{(user_id + 2) % 10}{(user_id + 3) % 10}",
             "place_of_birth": f"place {user_id}"
         }
 

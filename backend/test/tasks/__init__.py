@@ -599,7 +599,7 @@ def test_user_for_student_contest(test_city, test_university, test_user_universi
     user_info = UserInfo(
         location_id=location.id,
         email="11@gmail.com",
-        phone="89999999999",
+        phone="+79999999999",
         first_name="test",
         middle_name="test",
         second_name="test",
