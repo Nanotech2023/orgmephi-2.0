@@ -46,9 +46,14 @@ def test_user_info_dwellings_patch(client, test_country_native, test_region, tes
 
 def test_user_info_phone_number_patch(client, test_country_native, test_region, test_city):
     resp = client.patch('/personal/phone_number', json={
-        "phone": "8 (800) 555 35 35"
+        "phone": "+78005553535"
     })
     assert resp.status_code == 200
+
+    resp = client.patch('/personal/phone_number', json={
+        "phone": "8 (800) 555 35 35"
+    })
+    assert resp.status_code == 400
 
 
 def test_user_info_personal_patch(client, test_country_native, test_region, test_city):
