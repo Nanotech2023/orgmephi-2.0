@@ -765,6 +765,31 @@ components:
           readOnly: true
           type: integer
       type: object
+    UserInfoSchemaPersonal:
+      properties:
+        date_of_birth:
+          format: date
+          type: string
+        document:
+          $ref: '#/components/schemas/Document'
+        first_name:
+          maxLength: 32
+          type: string
+        gender:
+          enum:
+          - Male
+          - Female
+          type: string
+        middle_name:
+          maxLength: 32
+          type: string
+        place_of_birth:
+          maxLength: 256
+          type: string
+        second_name:
+          maxLength: 32
+          type: string
+      type: object
     UserLimitations:
       properties:
         hearing:
@@ -790,6 +815,12 @@ components:
           type: array
       required:
       - users
+      type: object
+    UserPhone:
+      properties:
+        phone:
+          example: 8 (800) 555 35 35
+          type: string
       type: object
   securitySchemes:
     CSRFAccessToken:
@@ -1143,6 +1174,78 @@ paths:
               $ref: '#/components/schemas/UserInfo'
         description: Will not set 'email', 'first_name', 'middle_name', 'second_name'
           and 'date_of_birth'
+        required: true
+      responses:
+        '200':
+          description: OK
+        '403':
+          description: Invalid role of current user
+        '404':
+          description: User not found
+      security:
+      - JWTAccessToken: []
+      - CSRFAccessToken: []
+  /user/profile/personal/dwelling:
+    patch:
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Location'
+        required: true
+      responses:
+        '200':
+          description: OK
+        '403':
+          description: Invalid role of current user
+        '404':
+          description: User not found
+      security:
+      - JWTAccessToken: []
+      - CSRFAccessToken: []
+  /user/profile/personal/limitations:
+    patch:
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserLimitations'
+        required: true
+      responses:
+        '200':
+          description: OK
+        '403':
+          description: Invalid role of current user
+        '404':
+          description: User not found
+      security:
+      - JWTAccessToken: []
+      - CSRFAccessToken: []
+  /user/profile/personal/phone_number:
+    patch:
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserPhone'
+        required: true
+      responses:
+        '200':
+          description: OK
+        '403':
+          description: Invalid role of current user
+        '404':
+          description: User not found
+      security:
+      - JWTAccessToken: []
+      - CSRFAccessToken: []
+  /user/profile/personal/personal:
+    patch:
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserInfoSchemaPersonal'
         required: true
       responses:
         '200':
