@@ -6,7 +6,7 @@ from common.errors import NotFound, InsufficientData, WrongType
 from common.jwt_verify import jwt_get_id
 from common.util import db_get_or_raise, send_pdf
 from user.model_schemas.auth import UserSchema
-from user.model_schemas.personal import UserInfoSchema, UserLimitationsSchema, UserPhoneSchema, UserInfoSchemaPersonal
+from user.model_schemas.personal import UserInfoSchema, UserLimitationsSchema, UserInfoSchemaPersonal
 from user.model_schemas.school import SchoolInfoSchema
 from user.model_schemas.university import StudentInfoSchema
 from user.models import User, UserInfo, StudentInfo, SchoolInfo, UserTypeEnum

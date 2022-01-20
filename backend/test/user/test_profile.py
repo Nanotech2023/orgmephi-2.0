@@ -1,4 +1,3 @@
-from user.models import GenderEnum
 from . import *
 import datetime
 
@@ -53,6 +52,7 @@ def test_user_info_phone_number_patch(client, test_country_native, test_region, 
 
 
 def test_user_info_personal_patch(client, test_country_native, test_region, test_city):
+    from user.models import GenderEnum
     resp = client.patch('/personal/personal', json={
         "first_name": "first_name",
         "middle_name": "middle_name",

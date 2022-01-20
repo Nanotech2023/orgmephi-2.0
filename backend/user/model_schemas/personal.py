@@ -57,10 +57,6 @@ class UserInfoSchema(SQLAlchemySchema):
         return data
 
 
-class UserPhoneSchema(SQLAlchemySchema):
-    phone = common_fields.Phone()
-
-
 class UserInfoSchemaPersonal(UserInfoSchema):
     class Meta(UserInfoSchema.Meta):
         exclude = ['user_id', 'email', 'phone', 'dwelling', 'limitations']
