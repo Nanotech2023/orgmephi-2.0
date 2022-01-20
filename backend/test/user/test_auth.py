@@ -50,6 +50,14 @@ def test_login_success(client, test_user_school, test_user_admin):
 
     check_jwt(resp, test_user_admin.id, test_user_admin.username, 'Admin')
 
+    resp = client.login('/user/auth/login', test_user_school.username.upper(), 'test-password')
+    assert resp.status_code == 200
+    assert 'csrf_access_token' in resp.json
+    assert 'csrf_refresh_token' in resp.json
+    assert resp.json['confirmed']
+
+    check_jwt(resp, test_user_school.id, test_user_school.username, 'Participant')
+
 
 def test_login_success_legacy(client, test_user_school, test_user_admin):
     test_user_school.password_hash = '$org-legacy$salt$fb47635b5776eb5d9da730578b4800c9'
