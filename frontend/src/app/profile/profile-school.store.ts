@@ -7,6 +7,7 @@ import { Observable, of, zip } from 'rxjs'
 import { catchError, finalize, switchMap, tap, withLatestFrom } from 'rxjs/operators'
 import { displayErrorMessage } from '@/shared/logging'
 import { Router } from '@angular/router'
+import CountryEnum = LocationRussia.CountryEnum
 
 
 export interface ProfileSchoolState
@@ -156,12 +157,24 @@ export class ProfileSchoolStore extends ComponentStore<ProfileSchoolState>
             switchMap( ( [ schoolInfo, schoolLocation, schoolLocationCity ] ) =>
             {
                 this.setLoading()
+
                 const newSchoolInfo = { ...schoolInfo }
                 newSchoolInfo.location = schoolLocation
                 if ( schoolLocation.location_type == LocationTypeEnum.Russian )
                 {
+                    newSchoolInfo.location.country = CountryEnum.Russian
                     // @ts-ignore
                     newSchoolInfo.location.city = schoolLocationCity
+                    // @ts-ignore
+                    newSchoolInfo.location.location = undefined
+                }
+                if ( schoolLocation.location_type == LocationTypeEnum.Foreign )
+                {
+                    newSchoolInfo.location.country = schoolLocation.country
+                    // @ts-ignore
+                    newSchoolInfo.location.location = schoolLocation.location
+                    // @ts-ignore
+                    newSchoolInfo.location.city = undefined
                 }
                 return this.usersService.userProfileSchoolPatch( newSchoolInfo ).pipe(
                     catchError( ( error: any ) => of( displayErrorMessage( error ) ) )

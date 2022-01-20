@@ -1,7 +1,7 @@
 <ng-container *ngIf="viewModel$ | async as viewModel">
 
 
-    <button (click)="showRawData(this.viewModel)"
+    <button (click)="showRawData(this.viewModel.userInfo)"
             style="position:fixed;	width:60px; height:60px; bottom:40px; right:40px">SHOW RAW DATA
     </button>
 
@@ -100,7 +100,7 @@
         <div class="profile_subtitle">Паспортные данные</div>
         <app-profile-edit-document [(model)]="viewModel.userInfoDocument"></app-profile-edit-document>
         <div class="profile_subtitle">Место регистрации</div>
-        <app-profile-edit-dwelling [(model)]="viewModel.userInfoDwelling">
+        <app-profile-edit-dwelling [(model)]="viewModel.userInfoDwelling" [(city)]="viewModel.userInfoDwellingCity">
         </app-profile-edit-dwelling>
         <div class="profile_subtitle">Особые условия при проведении олимпиад</div>
         <app-profile-edit-limitations [(model)]="viewModel.userInfoLimitations">

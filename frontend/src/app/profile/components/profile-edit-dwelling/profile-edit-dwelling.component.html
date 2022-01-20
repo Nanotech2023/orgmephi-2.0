@@ -1,15 +1,16 @@
 <div class="profile-form_container">
     <div class="profile-form_item">
         <p class="profile-form_label">Расположение</p>
-        <select class="profile-form_input" [(ngModel)]="selectedValue">
+        <select class="profile-form_input" [ngModel]="this.model.location_type" (change)="onLocationTypeChange($event)">
             <option *ngFor="let locationType of locationTypes"
-                    [ngValue]="locationType">{{ getLocationDisplay( locationType ) }}</option>
+                    [value]="locationType">{{ getLocationDisplay( locationType ) }}</option>
         </select>
     </div>
-    <ng-container [ngSwitch]="selectedValue">
-        <app-profile-edit-dwelling-russia [(model)]="model" *ngSwitchCase="'Russian'">
+    <ng-container [ngSwitch]="this.model.location_type">
+        <app-profile-edit-dwelling-russia [(model)]="model" [(city)]="city" *ngSwitchCase="'Russian'"
+                                          (modelChange)="onModelChange()" (cityChange)="onCityChange()">
         </app-profile-edit-dwelling-russia>
-        <app-profile-edit-dwelling-other [(model)]="model" *ngSwitchCase="'Foreign'">
+        <app-profile-edit-dwelling-other [(model)]="model" *ngSwitchCase="'Foreign'" (modelChange)="onModelChange()">
         </app-profile-edit-dwelling-other>
         <div *ngSwitchDefault></div>
     </ng-container>

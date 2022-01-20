@@ -22,7 +22,7 @@ export class ProfileEditUserinfoComponent
         loading: boolean; error: string | null, userProfileUnfilled: string,
         userInfo: UserInfo,
         userInfoDocument: Document,
-        userInfoDwelling: Location,
+        userInfoDwelling: any,
         userInfoDwellingCity: LocationRussiaCity,
         userInfoLimitations: UserLimitations,
     }>
@@ -42,11 +42,13 @@ export class ProfileEditUserinfoComponent
 
     onSubmit( userInfo: UserInfo ): void
     {
+        console.log( userInfo )
+        this.profileStore.state$.subscribe( x => console.log( x ) )
         this.profileStore.updateUserInfo( userInfo )
     }
 
-    showRawData( viewModel: { loading: boolean; error: string | null; userProfileUnfilled: string; userInfo: UserInfo; userInfoDocument: Document; userInfoDwelling: Location; userInfoDwellingCity: LocationRussiaCity; userInfoLimitations: UserLimitations } )
+    showRawData( userInfo: UserInfo )
     {
-        console.log( viewModel )
+        console.log( userInfo )
     }
 }

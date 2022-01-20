@@ -1,14 +1,34 @@
 <div class="profile-form_container">
     <div class="profile-form_item">
         <p class="profile-form_label">Страна</p>
-        <input class="profile-form_input" type="text" [(ngModel)]="locationOther.country">
+        <input class="profile-form_input" type="text" [(ngModel)]="model.country" name="country"
+               #country="ngModel" (ngModelChange)="onModelChange()" required>
+        <ng-container [ngTemplateOutlet]="validationTemplate"
+                      [ngTemplateOutletContext]="{fieldName:country}">
+        </ng-container>
     </div>
     <div class="profile-form_item">
         <p class="profile-form_label">Регион</p>
-        <input class="profile-form_input" type="text" placeholder="Введите регион" [ngModel]="locationOther.location">
+        <input class="profile-form_input" type="text" placeholder="Введите регион" [(ngModel)]="model.location"
+               name="location" #location="ngModel" (ngModelChange)="onModelChange()" required>
+        <ng-container [ngTemplateOutlet]="validationTemplate"
+                      [ngTemplateOutletContext]="{fieldName:location}">
+        </ng-container>
     </div>
     <div class="profile-form_item">
         <p class="profile-form_label">Являетесь ли вы жителем сельской местности?</p>
-        <input class="profile-form_input" type="checkbox" [(ngModel)]="locationOther.rural" (ngModelChange)="onModelChange()">
+        <input class="profile-form_input" type="checkbox" [(ngModel)]="model.rural"
+               (ngModelChange)="onModelChange()">
     </div>
 </div>
+
+<ng-template #validationTemplate let-fieldName='fieldName'>
+    <div *ngIf="fieldName.invalid" class="input_error">
+        <div *ngIf="fieldName.errors?.required">
+            Поле обязательно для заполнения
+        </div>
+        <div *ngIf="fieldName.errors?.pattern">
+            Значение введено некорректно
+        </div>
+    </div>
+</ng-template>

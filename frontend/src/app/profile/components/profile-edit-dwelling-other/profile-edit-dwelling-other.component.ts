@@ -1,5 +1,4 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core'
-import { Location, LocationOther, LocationRussia, LocationTypeEnum } from '@api/users/models'
 
 
 @Component( {
@@ -9,27 +8,16 @@ import { Location, LocationOther, LocationRussia, LocationTypeEnum } from '@api/
 } )
 export class ProfileEditDwellingOtherComponent
 {
-    @Input() model!: LocationOther | undefined
-    @Output() modelChange = new EventEmitter<LocationOther>()
-    locationOther!: LocationOther
+    @Input() model!: any
+    @Output() modelChange = new EventEmitter<any>()
 
     constructor()
     {
-        this.locationOther = this.model ?? this.getEmptyLocation()
+        this.model = this.model
     }
 
     onModelChange(): void
     {
-        this.modelChange.emit( this.locationOther )
-    }
-
-    getEmptyLocation(): LocationOther
-    {
-        return {
-            location_type: LocationTypeEnum.Foreign,
-            country: "",
-            location: "",
-            rural: false
-        }
+        this.modelChange.emit( this.model )
     }
 }

@@ -3,7 +3,7 @@ import { ComponentStore, tapResponse } from '@ngrx/component-store'
 import {
     Document,
     DocumentTypeEnum,
-    Location,
+    Location, LocationOther,
     LocationRussia,
     LocationRussiaCity,
     LocationTypeEnum,
@@ -17,6 +17,7 @@ import { CallState, getError, LoadingState } from '@/shared/callState'
 import { catchError, finalize, switchMap, tap, withLatestFrom } from 'rxjs/operators'
 import { displayErrorMessage } from '@/shared/logging'
 import { Router } from '@angular/router'
+import CountryEnum = LocationRussia.CountryEnum
 
 
 export interface ProfileState
@@ -49,7 +50,7 @@ export class ProfileStore extends ComponentStore<ProfileState>
     private readonly userProfileUnfilled$: Observable<string> = this.select( state => JSON.stringify( state.profileUnfilled, null, 4 ) )
     private readonly userInfo$: Observable<UserInfo | undefined> = this.select( state => state.userInfo )
     private readonly userInfoDocument$: Observable<Document> = this.select( state => state.userInfo?.document ?? this.getEmptyDocument() )
-    private readonly userInfoDwelling$: Observable<Location> = this.select( state => state.userInfo?.dwelling ?? this.getEmptyLocation() )
+    private readonly userInfoDwelling$: Observable<any> = this.select( state => state.userInfo?.dwelling ?? this.getEmptyLocation() )
     private readonly userInfoDwellingCity$: Observable<LocationRussiaCity> = this.select( state => ( state.userInfo?.dwelling as LocationRussia )?.city ?? this.getEmptyCity() )
     private readonly userInfoLimitations$: Observable<UserLimitations> = this.select( state => state.userInfo?.limitations ?? this.getEmptyLimitations() )
     private readonly loading$: Observable<boolean> = this.select( state => state.callState === LoadingState.LOADING )
@@ -60,7 +61,7 @@ export class ProfileStore extends ComponentStore<ProfileState>
         loading: boolean; error: string | null, userProfileUnfilled: string,
         userInfo: UserInfo,
         userInfoDocument: Document,
-        userInfoDwelling: Location,
+        userInfoDwelling: any,
         userInfoDwellingCity: LocationRussiaCity,
         userInfoLimitations: UserLimitations,
     }> = this.select(
@@ -206,8 +207,8 @@ export class ProfileStore extends ComponentStore<ProfileState>
                     this.setLoading()
                     const newUserInfo = { ...userInfo }
                     newUserInfo.user_id = undefined
-                    newUserInfo.document = document
 
+                    newUserInfo.document = document
                     // @ts-ignore
                     newUserInfo.document.user_id = undefined
                     if ( document.document_type != DocumentTypeEnum.OtherDocument )
@@ -220,12 +221,27 @@ export class ProfileStore extends ComponentStore<ProfileState>
                         // @ts-ignore
                         newUserInfo.document.code = undefined
                     }
+
                     newUserInfo.dwelling = dwelling
                     if ( dwelling.location_type == LocationTypeEnum.Russian )
                     {
                         // @ts-ignore
+                        newUserInfo.dwelling.country = CountryEnum.Russian
+                        // @ts-ignore
                         newUserInfo.dwelling.city = dwellingCity
+                        // @ts-ignore
+                        newUserInfo.dwelling.location = undefined
                     }
+                    if ( dwelling.location_type == LocationTypeEnum.Foreign )
+                    {
+                        // @ts-ignore
+                        newUserInfo.dwelling.country = dwelling.country
+                        // @ts-ignore
+                        newUserInfo.dwelling.location = dwelling.location
+                        // @ts-ignore
+                        newUserInfo.dwelling.city = undefined
+                    }
+
                     newUserInfo.limitations = limitations
                     // @ts-ignore
                     newUserInfo.limitations.user_id = undefined

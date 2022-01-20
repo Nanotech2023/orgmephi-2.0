@@ -28,16 +28,6 @@ export class ProfileEditDwellingRussiaComponent implements OnInit
         this.regions$ = this.usersService.userRegistrationInfoRegionsGet().pipe( map( item => item.region_list.filter( x => x.name !== "Некорректные данные" && x.name !== "Онлайн" ) ) )
     }
 
-    getEmptyLocation(): LocationRussia
-    {
-        return {
-            location_type: LocationTypeEnum.Russian,
-            country: "Россия",
-            city: { region_name: "", name: "" },
-            rural: false
-        }
-    }
-
     onModelChange(): void
     {
         this.modelChange.emit( this.model )

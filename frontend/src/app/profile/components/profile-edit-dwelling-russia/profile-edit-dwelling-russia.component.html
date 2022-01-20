@@ -8,10 +8,10 @@
                    bindValue="name"
                    placeholder="Введите регион"
                    name="regionName"
-                   [(ngModel)]="model.region_name"
+                   [(ngModel)]="city.region_name"
                    (change)="onRegionChange()">
         </ng-select>
-        <div *ngIf="!model.region_name" class="input_error">
+        <div *ngIf="!city.region_name" class="input_error">
             Необходимо указать регион
         </div>
     </div>

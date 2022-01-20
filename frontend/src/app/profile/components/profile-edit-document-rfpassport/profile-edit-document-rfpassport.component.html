@@ -37,7 +37,7 @@
 <div class="profile-form_item">
     <p class="profile-form_label">Код подразделения</p>
     <input class="profile-form_input" placeholder="Введите код подразделения" type="text" name="code" #code="ngModel"
-           [(ngModel)]="model.code" required [pattern]="codePattern" required>
+           [(ngModel)]="model.code" required [pattern]="codePattern">
     <ng-container [ngTemplateOutlet]="validationTemplate"
                   [ngTemplateOutletContext]="{fieldName:code}">
     </ng-container>
