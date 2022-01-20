@@ -42,13 +42,6 @@ export class ProfileEditUserinfoComponent
 
     onSubmit( userInfo: UserInfo ): void
     {
-        console.log( userInfo )
-        this.profileStore.state$.subscribe( x => console.log( x ) )
         this.profileStore.updateUserInfo( userInfo )
-    }
-
-    showRawData( userInfo: UserInfo )
-    {
-        console.log( userInfo )
     }
 }

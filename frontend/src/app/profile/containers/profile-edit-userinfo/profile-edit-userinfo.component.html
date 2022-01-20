@@ -1,10 +1,5 @@
 <ng-container *ngIf="viewModel$ | async as viewModel">
 
-
-    <button (click)="showRawData(this.viewModel.userInfo)"
-            style="position:fixed;	width:60px; height:60px; bottom:40px; right:40px">SHOW RAW DATA
-    </button>
-
     <form name="userInfoForm" (ngSubmit)="userInfoForm.form.valid && onSubmit(this.viewModel.userInfo)"
           #userInfoForm="ngForm" novalidate>
 
