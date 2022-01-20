@@ -20,6 +20,8 @@ from user.model_schemas.personal import UserInfoSchema
 from user.model_schemas.university import StudentInfoSchema
 
 from .schemas import *
+from ..util import get_username_case_insensitive, get_email_case_insensitive_or_raise, \
+    get_email_case_insensitive_or_none
 
 db = get_current_db()
 module = get_current_module()
@@ -117,7 +119,7 @@ def register(values):
     password_hash = app.password_policy.hash_password(values['auth_info']['password'], check=True)
     email_confirm = app.config.get('ORGMEPHI_CONFIRM_EMAIL', False)
 
-    existing_user = db_get_one_or_none(User, 'username', username)
+    existing_user = get_username_case_insensitive(username)
     if existing_user is not None:
         age = datetime.date.today() - existing_user.registration_date.date()
         max_age = app.config['ORGMEPHI_MAIL_CONFIRM_EXPIRATION']
@@ -258,7 +260,7 @@ def resend_email(email):
     """
     if not app.config.get('ORGMEPHI_CONFIRM_EMAIL', False):
         abort(404)
-    user_info = db_get_or_raise(UserInfo, 'email', email)
+    user_info = get_email_case_insensitive_or_raise(email)
     if user_info.user.role != UserRoleEnum.unconfirmed or user_info.user.type == UserTypeEnum.pre_register:
         raise WrongType('User is already confirmed')
     send_email_confirmation(user_info.email)
@@ -316,7 +318,7 @@ def confirm_email(token):
     email = load_email_token(token, 'confirm')
     if not isinstance(email, str):
         raise NotFound('token', token)
-    user_info = db_get_or_raise(UserInfo, 'email', email)
+    user_info = get_email_case_insensitive_or_raise(email)
     if user_info.user.role == UserRoleEnum.unconfirmed:
         user_info.user.role = UserRoleEnum.participant
     else:
@@ -344,7 +346,7 @@ def forgot_password(email):
     """
     if not app.config.get('ORGMEPHI_ENABLE_PASSWORD_RECOVERY', False):
         abort(404)
-    user = getattr(db_get_one_or_none(UserInfo, 'email', email), 'user', None)
+    user = getattr(get_email_case_insensitive_or_none(email), 'user', None)
     if user is None:
         return {}, 204
     token = dump_email_token(user.user_info.email, 'recover')
@@ -378,7 +380,7 @@ def recover_password(token):
     if not app.config.get('ORGMEPHI_ENABLE_PASSWORD_RECOVERY', False):
         abort(404)
     email, timestamp = load_email_token(token, 'recover', True)
-    user = getattr(db_get_one_or_none(UserInfo, 'email', email), 'user', None)
+    user = getattr(get_email_case_insensitive_or_none(email), 'user', None)
     if user is None:
         raise NotFound('token', token)
     if user.password_changed.replace(tzinfo=datetime.timezone.utc) > timestamp.replace(tzinfo=datetime.timezone.utc):
