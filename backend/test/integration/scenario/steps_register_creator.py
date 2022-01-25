@@ -28,7 +28,7 @@ def step_creator_fill_personal(client, state):
         "first_name": "Иван",
         "second_name": "Иванов",
         "middle_name": "Иванович",
-        "phone": "8 (800) 555 35 35"
+        "phone": "+78005553535"
     }
     resp = client.patch(f'/user/admin/personal/{state.creator["id"]}', json=request)
     assert resp.status_code == 200

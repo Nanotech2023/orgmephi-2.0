@@ -23,10 +23,7 @@ def _add_example(field, example):
 
 
 PHONE_REGEX = re.compile(
-    r'^([+]?\d[-.\s]??)?'
-    r'(\d{2,3}[-.\s]??\d{2,3}[-.\s]??\d{2}[-.\s]??\d{2}|'
-    r'\(\d{3}\)[-.\s]??\d{3}[-.\s]??\d{2}[-.\s]??\d{2}|'
-    r'\d{3}[-.\s]??\d{2}[-.\s]??\d{2})$'
+    r'\+[0-9]{10,17}$'
 )
 
 email_validator = validate.Length(max=64)
@@ -50,7 +47,7 @@ sequential_number_validator = validate.Range(min=1)
 school_name_validator = validate.Length(max=128)
 
 Email = _apply_validator(fields.Email, email_validator)
-Phone = _add_example(_apply_validator(fields.String, phone_validator), '8 (800) 555 35 35')
+Phone = _add_example(_apply_validator(fields.String, phone_validator), '+78005553535')
 URL = _add_example(_apply_validator(fields.URL, url_validator), 'https://www.example.com')
 Password = _add_example(_apply_validator(fields.String, password_validator), 'qwertyA*1')
 Username = _apply_validator(fields.String, username_validator)

@@ -10,7 +10,7 @@ from user.model_schemas.personal import UserInfoSchema, UserLimitationsSchema, U
 from user.model_schemas.school import SchoolInfoSchema
 from user.model_schemas.university import StudentInfoSchema
 from user.models import User, UserInfo, StudentInfo, SchoolInfo, UserTypeEnum
-from .schemas import SelfPasswordRequestUserSchema, SelfGroupsResponseUserSchema
+from .schemas import SelfPasswordRequestUserSchema, SelfGroupsResponseUserSchema, UserPhoneSchema
 from ..model_schemas.location import LocationSchema
 
 db = get_current_db()
@@ -186,7 +186,8 @@ def set_user_limitations_self():
     return {}, 200
 
 
-@module.route('/personal/phone_number', methods=['PATCH'])
+@module.route('/personal/phone_number', methods=['PATCH'],
+              input_schema=UserPhoneSchema)
 def set_user_phone_number_self():
     """
     Set personal phone number info for current user

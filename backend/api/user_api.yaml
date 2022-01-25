@@ -435,7 +435,7 @@ components:
           minimum: 1
           type: integer
         phone:
-          example: 8 (800) 555 35 35
+          example: '+78005553535'
           type: string
         university:
           $ref: '#/components/schemas/StudentUniversity'
@@ -753,7 +753,7 @@ components:
           maxLength: 32
           type: string
         phone:
-          example: 8 (800) 555 35 35
+          example: '+78005553535'
           type: string
         place_of_birth:
           maxLength: 256
@@ -819,7 +819,7 @@ components:
     UserPhone:
       properties:
         phone:
-          example: 8 (800) 555 35 35
+          example: '+78005553535'
           type: string
       type: object
   securitySchemes:

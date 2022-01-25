@@ -103,7 +103,7 @@ def test_registration_university(client, test_country_native, test_region, test_
                 "rural": False
             },
             "grade": 5,
-            "phone": "8 (800) 555 35 35",
+            "phone": "+78005553535",
             "university": {
                 "university": "test"
             }
@@ -129,7 +129,7 @@ def test_registration_university(client, test_country_native, test_region, test_
     assert user.user_info.middle_name == 'string'
     assert user.user_info.second_name == 'string'
     assert user.user_info.date_of_birth == datetime.date.fromisoformat('2021-09-01')
-    assert user.user_info.phone == '8 (800) 555 35 35'
+    assert user.user_info.phone == '+78005553535'
     assert user.user_info.dwelling.russian
     assert user.user_info.dwelling.city_name == 'test'
     assert user.user_info.dwelling.region_name == 'test'
