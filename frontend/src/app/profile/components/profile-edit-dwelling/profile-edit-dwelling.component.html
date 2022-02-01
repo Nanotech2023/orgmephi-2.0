@@ -7,10 +7,11 @@
         </select>
     </div>
     <ng-container [ngSwitch]="this.model.location_type">
-        <app-profile-edit-dwelling-russia [(model)]="model" [(city)]="city" *ngSwitchCase="'Russian'"
+        <app-profile-edit-dwelling-russia *ngSwitchCase="'Russian'" [(model)]="model" [(city)]="city"
                                           (modelChange)="onModelChange()" (cityChange)="onCityChange()">
         </app-profile-edit-dwelling-russia>
-        <app-profile-edit-dwelling-other [(model)]="model" *ngSwitchCase="'Foreign'" (modelChange)="onModelChange()">
+        <app-profile-edit-dwelling-other *ngSwitchCase="'Foreign'" [(model)]="model" [(country)]="country"
+                                         (modelChange)="onModelChange()" (countryChange)="onCountryChange()">
         </app-profile-edit-dwelling-other>
         <div *ngSwitchDefault></div>
     </ng-container>

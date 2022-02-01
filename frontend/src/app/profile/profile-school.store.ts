@@ -1,6 +1,13 @@
 import { Injectable } from '@angular/core'
 import { ComponentStore, tapResponse } from '@ngrx/component-store'
-import { Location, LocationRussia, LocationRussiaCity, LocationTypeEnum, SchoolInfo } from '@api/users/models'
+import {
+    Location,
+    LocationOther,
+    LocationRussia,
+    LocationRussiaCity,
+    LocationTypeEnum,
+    SchoolInfo
+} from '@api/users/models'
 import { CallState, getError, LoadingState } from '@/shared/callState'
 import { UsersService } from '@api/users/users.service'
 import { Observable, of, zip } from 'rxjs'
@@ -37,6 +44,7 @@ export class ProfileSchoolStore extends ComponentStore<ProfileSchoolState>
     private readonly schoolInfo$: Observable<SchoolInfo> = this.select( state => state.schoolInfo ?? this.getEmptySchool() )
     private readonly schoolLocation$: Observable<Location> = this.select( state => state.schoolInfo?.location ?? this.getEmptyLocation() )
     private readonly schoolLocationCity$: Observable<LocationRussiaCity> = this.select( state => ( state.schoolInfo?.location as LocationRussia )?.city ?? this.getEmptyCity() )
+    private readonly schoolLocationCountry$: Observable<string> = this.select( state => ( state.schoolInfo?.location as LocationOther )?.country ?? "" )
     private readonly loading$: Observable<boolean> = this.select( state => state.callState === LoadingState.LOADING )
     private readonly error$: Observable<string | null> = this.select( state => getError( state.callState ) )
 
@@ -47,7 +55,8 @@ export class ProfileSchoolStore extends ComponentStore<ProfileSchoolState>
         userProfileUnfilled: string,
         schoolInfo: SchoolInfo,
         schoolLocation: Location,
-        schoolLocationCity: LocationRussiaCity
+        schoolLocationCity: LocationRussiaCity,
+        schoolLocationCountry: string
     }> = this.select(
         this.loading$,
         this.error$,
@@ -55,13 +64,15 @@ export class ProfileSchoolStore extends ComponentStore<ProfileSchoolState>
         this.schoolInfo$,
         this.schoolLocation$,
         this.schoolLocationCity$,
-        ( loading, error, userProfileUnfilled, schoolInfo, schoolLocation, schoolLocationCity ) => ( {
+        this.schoolLocationCountry$,
+        ( loading, error, userProfileUnfilled, schoolInfo, schoolLocation, schoolLocationCity, schoolLocationCountry ) => ( {
             loading: loading,
             error: error,
             userProfileUnfilled: userProfileUnfilled,
             schoolInfo: schoolInfo ?? this.getEmptySchool(),
             schoolLocation: schoolLocation,
-            schoolLocationCity: schoolLocationCity
+            schoolLocationCity: schoolLocationCity,
+            schoolLocationCountry: schoolLocationCountry
         } )
     )
 

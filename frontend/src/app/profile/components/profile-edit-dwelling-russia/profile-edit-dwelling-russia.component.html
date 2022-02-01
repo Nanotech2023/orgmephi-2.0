@@ -6,7 +6,7 @@
         <ng-select [items]="regions$ | async"
                    bindLabel="name"
                    bindValue="name"
-                   placeholder="Введите регион"
+                   placeholder="Выберите регион"
                    name="regionName"
                    [(ngModel)]="city.region_name"
                    (change)="onRegionChange()">

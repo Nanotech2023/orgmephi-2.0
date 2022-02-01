@@ -1,5 +1,5 @@
-import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core'
-import { Location, LocationOther, LocationRussia, LocationRussiaCity, LocationTypeEnum } from '@api/users/models'
+import { Component, EventEmitter, Input, Output } from '@angular/core'
+import { Location, LocationRussiaCity, LocationTypeEnum } from '@api/users/models'
 import { getLocationDisplay } from '@/shared/localizeUtils'
 
 
@@ -14,6 +14,8 @@ export class ProfileEditDwellingComponent
     @Output() modelChange = new EventEmitter<Location>()
     @Input() city!: LocationRussiaCity
     @Output() cityChange = new EventEmitter<LocationRussiaCity>()
+    @Input() country!: string
+    @Output() countryChange = new EventEmitter<string>()
 
     readonly locationTypes: LocationTypeEnum[] = [
         LocationTypeEnum.Russian,
@@ -28,6 +30,11 @@ export class ProfileEditDwellingComponent
     onCityChange(): void
     {
         this.cityChange.emit( this.city )
+    }
+
+    onCountryChange()
+    {
+        this.countryChange.emit( this.country )
     }
 
     getLocationDisplay( locationType: LocationTypeEnum ): string

@@ -3,7 +3,8 @@ import { ComponentStore, tapResponse } from '@ngrx/component-store'
 import {
     Document,
     DocumentTypeEnum,
-    Location, LocationOther,
+    Location,
+    LocationOther,
     LocationRussia,
     LocationRussiaCity,
     LocationTypeEnum,
@@ -52,6 +53,7 @@ export class ProfileStore extends ComponentStore<ProfileState>
     private readonly userInfoDocument$: Observable<Document> = this.select( state => state.userInfo?.document ?? this.getEmptyDocument() )
     private readonly userInfoDwelling$: Observable<any> = this.select( state => state.userInfo?.dwelling ?? this.getEmptyLocation() )
     private readonly userInfoDwellingCity$: Observable<LocationRussiaCity> = this.select( state => ( state.userInfo?.dwelling as LocationRussia )?.city ?? this.getEmptyCity() )
+    private readonly userInfoDwellingCountry$: Observable<string> = this.select( state => ( state.userInfo?.dwelling as LocationOther )?.country ?? "" )
     private readonly userInfoLimitations$: Observable<UserLimitations> = this.select( state => state.userInfo?.limitations ?? this.getEmptyLimitations() )
     private readonly loading$: Observable<boolean> = this.select( state => state.callState === LoadingState.LOADING )
     private readonly error$: Observable<string | null> = this.select( state => getError( state.callState ) )
@@ -63,6 +65,7 @@ export class ProfileStore extends ComponentStore<ProfileState>
         userInfoDocument: Document,
         userInfoDwelling: any,
         userInfoDwellingCity: LocationRussiaCity,
+        userInfoDwellingCountry: string
         userInfoLimitations: UserLimitations,
     }> = this.select(
         this.loading$,
@@ -72,8 +75,9 @@ export class ProfileStore extends ComponentStore<ProfileState>
         this.userInfoDocument$,
         this.userInfoDwelling$,
         this.userInfoDwellingCity$,
+        this.userInfoDwellingCountry$,
         this.userInfoLimitations$,
-        ( loading, error, userProfileUnfilled, userInfo, userInfoDocument, userInfoDwelling, userInfoDwellingCity, userInfoLimitations ) => ( {
+        ( loading, error, userProfileUnfilled, userInfo, userInfoDocument, userInfoDwelling, userInfoDwellingCity, userInfoDwellingCountry, userInfoLimitations ) => ( {
             loading: loading,
             error: error,
             userProfileUnfilled: userProfileUnfilled,
@@ -81,6 +85,7 @@ export class ProfileStore extends ComponentStore<ProfileState>
             userInfoDocument: userInfoDocument,
             userInfoDwelling: userInfoDwelling,
             userInfoDwellingCity: userInfoDwellingCity,
+            userInfoDwellingCountry: userInfoDwellingCountry,
             userInfoLimitations: this.getLimitationsForViewModel( userInfoLimitations )
         } )
     )
@@ -201,8 +206,8 @@ export class ProfileStore extends ComponentStore<ProfileState>
 
     readonly updateUserInfo = this.effect( ( userInfo$: Observable<UserInfo> ) =>
         userInfo$.pipe(
-            withLatestFrom( this.userInfoDocument$, this.userInfoDwelling$, this.userInfoDwellingCity$, this.userInfoLimitations$ ),
-            switchMap( ( [ userInfo, document, dwelling, dwellingCity, limitations ] ) =>
+            withLatestFrom( this.userInfoDocument$, this.userInfoDwelling$, this.userInfoDwellingCity$, this.userInfoDwellingCountry$, this.userInfoLimitations$ ),
+            switchMap( ( [ userInfo, document, dwelling, dwellingCity, dwellingCountry, limitations ] ) =>
                 {
                     this.setLoading()
                     const newUserInfo = { ...userInfo }
@@ -237,9 +242,9 @@ export class ProfileStore extends ComponentStore<ProfileState>
                         // @ts-ignore
                         newUserInfo.dwelling.country = dwelling.country
                         // @ts-ignore
-                        newUserInfo.dwelling.location = dwelling.location
-                        // @ts-ignore
                         newUserInfo.dwelling.city = undefined
+                        // @ts-ignore
+                        newUserInfo.dwelling.location = dwelling.location
                     }
 
                     newUserInfo.limitations = limitations
@@ -254,7 +259,7 @@ export class ProfileStore extends ComponentStore<ProfileState>
         ) )
 
 
-    navigateToSchoolInfo()
+    navigateToSchoolInfo(): void
     {
         this.router.navigate( [ '/profile', 'schoolinfo' ] )
     }

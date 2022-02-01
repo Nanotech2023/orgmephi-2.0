@@ -1,7 +1,13 @@
 import { Component, forwardRef } from '@angular/core'
 import { ProfileStore } from '@/profile/profile.store'
 import { Observable } from 'rxjs'
-import { Document, GenderEnum, Location, LocationRussiaCity, UserInfo, UserLimitations } from '@api/users/models'
+import {
+    Document,
+    GenderEnum,
+    LocationRussiaCity,
+    UserInfo,
+    UserLimitations
+} from '@api/users/models'
 import { getGenderDisplay } from '@/shared/localizeUtils'
 import { NG_VALIDATORS } from '@angular/forms'
 import { PhoneValidatorDirective } from '@/shared/validators/phone.validator.directive'
@@ -24,6 +30,7 @@ export class ProfileEditUserinfoComponent
         userInfoDocument: Document,
         userInfoDwelling: any,
         userInfoDwellingCity: LocationRussiaCity,
+        userInfoDwellingCountry: string
         userInfoLimitations: UserLimitations,
     }>
 

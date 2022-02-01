@@ -1,12 +1,20 @@
 <div class="profile-form_container">
+
     <div class="profile-form_item">
         <p class="profile-form_label">Страна</p>
-        <input class="profile-form_input" type="text" [(ngModel)]="model.country" name="country"
-               #country="ngModel" (ngModelChange)="onModelChange()" required>
-        <ng-container [ngTemplateOutlet]="validationTemplate"
-                      [ngTemplateOutletContext]="{fieldName:country}">
-        </ng-container>
+        <ng-select [items]="countries$ | async"
+                   bindLabel="name"
+                   bindValue="name"
+                   placeholder="Выберите страну"
+                   name="countryName"
+                   [(ngModel)]="country"
+                   (change)="onCountryChange()">
+        </ng-select>
+        <div *ngIf="!country" class="input_error">
+            Необходимо указать страну
+        </div>
     </div>
+
     <div class="profile-form_item">
         <p class="profile-form_label">Регион</p>
         <input class="profile-form_input" type="text" placeholder="Введите регион" [(ngModel)]="model.location"
@@ -15,6 +23,7 @@
                       [ngTemplateOutletContext]="{fieldName:location}">
         </ng-container>
     </div>
+
     <div class="profile-form_item">
         <p class="profile-form_label">Являетесь ли вы жителем сельской местности?</p>
         <input class="profile-form_input" type="checkbox" [(ngModel)]="model.rural"

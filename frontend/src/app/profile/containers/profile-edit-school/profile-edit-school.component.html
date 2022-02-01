@@ -32,8 +32,9 @@
             </div>
             <div class="profile-form_item">
                 <p class="profile-form_label">Название образовательного учреждения</p>
-                <textarea class="profile-form_input" placeholder="Введите название учреждения" type="text" name="name" [maxLength]="128"
-                       #name="ngModel" required [(ngModel)]="viewModel.schoolInfo.name"></textarea>
+                <textarea class="profile-form_input" placeholder="Введите название учреждения" type="text" name="name"
+                          [maxLength]="128"
+                          #name="ngModel" required [(ngModel)]="viewModel.schoolInfo.name"></textarea>
                 <ng-container [ngTemplateOutlet]="validationTemplate"
                               [ngTemplateOutletContext]="{fieldName:name}">
                 </ng-container>
@@ -46,10 +47,13 @@
                               [ngTemplateOutletContext]="{fieldName:grade}">
                 </ng-container>
             </div>
-            <app-profile-edit-dwelling [(model)]="viewModel.schoolLocation" [(city)]="viewModel.schoolLocationCity"></app-profile-edit-dwelling>
+            <app-profile-edit-dwelling [(model)]="viewModel.schoolLocation" [(city)]="viewModel.schoolLocationCity"
+                                       [(country)]="viewModel.schoolLocationCountry">
+            </app-profile-edit-dwelling>
             <div class="profile-form_container">
                 <div class="profile-form_item">
-                    <button class="button-action_default button-action_save" type="submit" [disabled]="!schoolInfoForm.form.valid">Сохранить
+                    <button class="button-action_default button-action_save" type="submit"
+                            [disabled]="!schoolInfoForm.form.valid">Сохранить
                     </button>
                 </div>
             </div>

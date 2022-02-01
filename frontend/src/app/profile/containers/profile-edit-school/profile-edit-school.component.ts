@@ -19,7 +19,8 @@ export class ProfileEditSchoolComponent
         userProfileUnfilled: string,
         schoolInfo: SchoolInfo,
         schoolLocation: Location,
-        schoolLocationCity: LocationRussiaCity
+        schoolLocationCity: LocationRussiaCity,
+        schoolLocationCountry: string
     }>
 
     schoolTypes: SchoolTypeEnum[] = [
