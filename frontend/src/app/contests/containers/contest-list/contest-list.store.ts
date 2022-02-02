@@ -41,10 +41,7 @@ export class ContestListStore extends ComponentStore<ContestsState>
         super( initialState )
     }
 
-    readonly contests$: Observable<SimpleContestWithFlagResponseTaskParticipant[]> = this.select( state => state.contests.filter( item =>
-    {
-        return item.contest !== undefined
-    } ) )
+    readonly contests$: Observable<SimpleContestWithFlagResponseTaskParticipant[]> = this.select( state => state.contests.filter( item => item.contest !== undefined ) )
     private readonly loading$: Observable<boolean> = this.select( state => state.callState === LoadingState.LOADING )
     private readonly error$: Observable<string | null> = this.select( state => getError( state.callState ) )
 
@@ -98,7 +95,6 @@ export class ContestListStore extends ComponentStore<ContestsState>
             return false
         return item.contest.base_contest.target_classes.some( targetClass => targetClass.target_class == userGrade.toString() )
     }
-
 
 
 }
