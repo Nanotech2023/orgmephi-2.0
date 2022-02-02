@@ -16,15 +16,6 @@
     </div>
 
     <div class="profile-form_item">
-        <p class="profile-form_label">Регион</p>
-        <input class="profile-form_input" type="text" placeholder="Введите регион" [(ngModel)]="model.location"
-               name="location" #location="ngModel" (ngModelChange)="onModelChange()" required>
-        <ng-container [ngTemplateOutlet]="validationTemplate"
-                      [ngTemplateOutletContext]="{fieldName:location}">
-        </ng-container>
-    </div>
-
-    <div class="profile-form_item">
         <p class="profile-form_label">Являетесь ли вы жителем сельской местности?</p>
         <input class="profile-form_input" type="checkbox" [(ngModel)]="model.rural"
                (ngModelChange)="onModelChange()">

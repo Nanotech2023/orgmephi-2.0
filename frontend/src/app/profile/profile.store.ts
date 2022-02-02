@@ -244,7 +244,7 @@ export class ProfileStore extends ComponentStore<ProfileState>
                         // @ts-ignore
                         newUserInfo.dwelling.city = undefined
                         // @ts-ignore
-                        newUserInfo.dwelling.location = dwelling.location
+                        newUserInfo.dwelling.location = "Иностранец"
                     }
 
                     newUserInfo.limitations = limitations

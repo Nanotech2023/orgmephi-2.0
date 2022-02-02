@@ -183,7 +183,7 @@ export class ProfileSchoolStore extends ComponentStore<ProfileSchoolState>
                 {
                     newSchoolInfo.location.country = schoolLocation.country
                     // @ts-ignore
-                    newSchoolInfo.location.location = schoolLocation.location
+                    newSchoolInfo.location.location = "Иностранец"
                     // @ts-ignore
                     newSchoolInfo.location.city = undefined
                 }
