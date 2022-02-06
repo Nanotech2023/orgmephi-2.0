@@ -29,7 +29,7 @@
                         </div>
 
                         <div>
-                            <button class="button-action_default" type="submit" [disabled]="!answerForm.form.valid">
+                            <button class="button-action_default" type="submit" [disabled]="!answerForm.form.valid && !answerForm.dirty">
                                 Отправить
                             </button>
                         </div>

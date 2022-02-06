@@ -4,7 +4,7 @@ import { TasksService } from '@api/tasks/tasks.service'
 import { DomSanitizer, SafeUrl } from '@angular/platform-browser'
 import { Observable, of } from 'rxjs'
 import { ResponsesService } from '@api/responses/responses.service'
-import { catchError, switchMap, withLatestFrom } from 'rxjs/operators'
+import { catchError, switchMap, tap } from 'rxjs/operators'
 import { displayErrorMessage } from '@/shared/logging'
 import { RangeAnswer, RangeAnswerRequest, UserAnswer } from '@api/responses/model'
 
@@ -70,10 +70,8 @@ export class ContestAssignmentItemStore extends ComponentStore<ContestAssignment
     readonly updateAnswer = this.effect( ( contestTaskAnswer$: Observable<{ contestId: number, taskId: number, answer: number }> ) =>
         contestTaskAnswer$.pipe(
             switchMap( ( contestTaskAnswer: { contestId: number; taskId: number; answer: number } ) =>
-            {
-                const answerRequest: RangeAnswerRequest = { answer: contestTaskAnswer.answer }
-                return this.responsesService.responsesParticipantContestContestIdTaskTaskIdUserSelfRangePost( contestTaskAnswer.contestId, contestTaskAnswer.taskId, answerRequest ).pipe(
-                    catchError( ( error: any ) => of( displayErrorMessage( error ) ) ) )
-            } )
+                this.responsesService.responsesParticipantContestContestIdTaskTaskIdUserSelfRangePost( contestTaskAnswer.contestId, contestTaskAnswer.taskId, { answer: contestTaskAnswer.answer } ).pipe(
+                    catchError( ( error: any ) => of( displayErrorMessage( error ) ) ),
+                    tap( () => this.fetchAnswer( contestTaskAnswer ) ) ) )
         ) )
 }

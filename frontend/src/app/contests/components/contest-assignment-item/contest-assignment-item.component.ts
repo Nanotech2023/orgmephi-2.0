@@ -72,7 +72,7 @@ export class ContestAssignmentItemComponent implements OnInit, OnDestroy
         const pattern: RegExp = /^[-]?([0-9]+\.?[0-9]*|\.[0-9]+)$/
         if ( !pattern.test( newString ) )
             transformedKey = ""
-        console.log( newString, transformedKey )
+
         el.value = el.value.substring( 0, el.value.length - 1 ) + transformedKey
     }
 }

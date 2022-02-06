@@ -23,6 +23,7 @@ export interface ContestAssignmentState
     variant?: VariantWithCompletedTasksCountTaskParticipant
     tasks: Array<TaskForUserResponseTaskParticipant>
     time?: number,
+    endTime: Date
     status?: UserResponseStatusResponse.StatusEnum,
     results?: UserResultForContestResponse
 }
@@ -35,6 +36,7 @@ const initialState: ContestAssignmentState =
         variant: undefined,
         tasks: [],
         time: undefined,
+        endTime: new Date(),
         status: undefined,
         results: undefined
     }
@@ -53,10 +55,10 @@ export class ContestAssignmentStore extends ComponentStore<ContestAssignmentStat
     private readonly contest$: Observable<Contest | undefined> = this.select( state => state.contest )
     private readonly variant$: Observable<VariantWithCompletedTasksCountTaskParticipant | undefined> = this.select( state => state.variant )
     private readonly tasks$: Observable<Array<TaskForUserResponseTaskParticipant>> = this.select( state => state.tasks )
-    private readonly time$: Observable<number | undefined> = this.select( state => state.time )
+    private readonly time$: Observable<string> = this.select( state => new Date( Math.abs( state.endTime.getTime() - new Date().getTime() ) ).toISOString().substr( 11, 8 ) )
     private readonly status$: Observable<UserResponseStatusResponse.StatusEnum | undefined> = this.select( state => state.status )
 
-    readonly viewModel$: Observable<{ loading: boolean; error: string | null, contest: Contest | undefined, variant: VariantWithCompletedTasksCountTaskParticipant | undefined, tasks: Array<TaskForUserResponseTaskParticipant>, time: number | undefined, status: UserResponseStatusResponse.StatusEnum | undefined }> = this.select(
+    readonly viewModel$: Observable<{ loading: boolean; error: string | null, contest: Contest | undefined, variant: VariantWithCompletedTasksCountTaskParticipant | undefined, tasks: Array<TaskForUserResponseTaskParticipant>, time: string, status: UserResponseStatusResponse.StatusEnum | undefined }> = this.select(
         this.loading$,
         this.error$,
         this.contest$,
@@ -114,10 +116,15 @@ export class ContestAssignmentStore extends ComponentStore<ContestAssignmentStat
         } ) )
 
     readonly setTime = this.updater( ( state: ContestAssignmentState, response: UserTimeResponseRequest ) =>
-        ( {
+    {
+        var now = new Date()
+        now.setSeconds( now.getSeconds() + response.time )
+        return ( {
             ...state,
-            time: response.time
-        } ) )
+            time: response.time,
+            endTime: now
+        } )
+    } )
 
     readonly setStatus = this.updater( ( state: ContestAssignmentState, response: UserResponseStatusResponse ) =>
         ( {

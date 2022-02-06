@@ -19,9 +19,8 @@ import { UserResponseStatusResponse } from '@api/responses/model'
 export class ContestAssignmentComponent implements OnInit, OnDestroy
 {
     contestId!: number | null
-    viewModel$: Observable<{ loading: boolean; error: string | null; contest: Contest | undefined; variant: VariantWithCompletedTasksCountTaskParticipant | undefined; tasks: Array<TaskForUserResponseTaskParticipant>; time: number | undefined; status: UserResponseStatusResponse.StatusEnum | undefined }>
+    viewModel$: Observable<{ loading: boolean; error: string | null; contest: Contest | undefined; variant: VariantWithCompletedTasksCountTaskParticipant | undefined; tasks: Array<TaskForUserResponseTaskParticipant>; time: string; status: UserResponseStatusResponse.StatusEnum | undefined }>
     timeLeft: number | undefined
-    decreaseTimerSubscription!: Subscription
     reloadTimerSubscription!: Subscription
 
     constructor( private route: ActivatedRoute, private contestAssignmentStore: ContestAssignmentStore )
@@ -41,20 +40,9 @@ export class ContestAssignmentComponent implements OnInit, OnDestroy
         this.viewModel$ = this.contestAssignmentStore.viewModel$
     }
 
-    getDisplayTime( time: number | undefined ): string
-    {
-        if ( this.timeLeft === undefined )
-        {
-            this.timeLeft = time
-            return ""
-        }
-        return new Date( this.timeLeft * 1000 ).toISOString().substr( 11, 8 )
-    }
-
     ngOnInit(): void
     {
-        this.decreaseTimerSubscription = interval( 1000 ).subscribe( ( _ => this.decreaseTimer() ) )
-        this.reloadTimerSubscription = interval( 10000 ).subscribe( _ =>
+        this.reloadTimerSubscription = interval( 1000 ).subscribe( _ =>
         {
             if ( !!this.contestId )
                 this.contestAssignmentStore.fetchTime( this.contestId )
@@ -63,7 +51,6 @@ export class ContestAssignmentComponent implements OnInit, OnDestroy
 
     ngOnDestroy(): void
     {
-        this.decreaseTimerSubscription.unsubscribe()
         this.reloadTimerSubscription.unsubscribe()
     }
 
@@ -73,20 +60,6 @@ export class ContestAssignmentComponent implements OnInit, OnDestroy
         {
             this.contestAssignmentStore.finish( this.contestId )
             this.contestAssignmentStore.fetchTime( this.contestId )
-        }
-    }
-
-    private decreaseTimer()
-    {
-        if ( this.timeLeft === undefined )
-            return
-        if ( this.timeLeft > 0 )
-        {
-            this.timeLeft--
-        }
-        else
-        {
-            this.timeLeft = 0
         }
     }
 }
