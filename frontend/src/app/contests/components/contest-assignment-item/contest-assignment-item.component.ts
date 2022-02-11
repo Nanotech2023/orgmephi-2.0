@@ -61,17 +61,21 @@ export class ContestAssignmentItemComponent implements OnInit, OnDestroy
     {
         const keyPressed = el.value.split( '' ).pop()
         let transformedKey = keyPressed
+        console.log( el.value )
 
-        if ( keyPressed === "." )
+        if ( el.value === "-" && keyPressed === "-" )
+        {
+            return
+        }
+
+        if ( keyPressed === "." || keyPressed === "," )
             transformedKey = "."
-        else if ( keyPressed === "-" )
-            transformedKey = "-"
-        else if ( keyPressed === "," )
-            transformedKey = "."
+
         const newString = el.value.substring( 0, el.value.length - 1 ) + transformedKey
         const pattern: RegExp = /^[-]?([0-9]+\.?[0-9]*|\.[0-9]+)$/
         if ( !pattern.test( newString ) )
             transformedKey = ""
+
 
         el.value = el.value.substring( 0, el.value.length - 1 ) + transformedKey
     }

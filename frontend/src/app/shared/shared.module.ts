@@ -11,6 +11,7 @@ import { InDevelopmentComponent } from '@/shared/components/in-development/in-de
 import { PhoneValidatorDirective } from '@/shared/validators/phone.validator.directive'
 import { PasswordValidatorDirective } from '@/shared/validators/password-validator.directive'
 import { LoadingComponent } from '@/shared/components/loading/loading.component'
+import { DialogConfirmComponent } from '@/shared/components/dialog-confirm/dialog-confirm.component'
 
 
 const SHARED = [
@@ -28,6 +29,7 @@ const COMPONENTS = [
     InDevelopmentComponent,
     NotFoundComponent,
     LoadingComponent,
+    DialogConfirmComponent,
     PhoneValidatorDirective,
     PasswordValidatorDirective
 ]

@@ -23,7 +23,7 @@
                             {{ viewModel.time }}
                         </div>
                     </div>
-                    <button class="submit_button" (click)="finish()">Отправить на проверку</button>
+                    <button class="submit_button" (click)="finishModalVisible = true">Отправить на проверку</button>
                 </div>
             </div>
             <div class="col-md-8">
@@ -37,3 +37,8 @@
         </div>
     </div>
 </ng-container>
+
+<app-dialog-confirm [modalVisible]="finishModalVisible" [dialogMessage]="'Вы уверены, что хотите отправить на проверку?'"
+                    [actionConfirmText]="'Отправить'" (actionConfirmed)="finish()"
+                    (actionCanceled)="finishModalVisible = false">
+</app-dialog-confirm>

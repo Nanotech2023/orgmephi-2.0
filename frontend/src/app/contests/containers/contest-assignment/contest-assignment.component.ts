@@ -22,6 +22,7 @@ export class ContestAssignmentComponent implements OnInit, OnDestroy
     viewModel$: Observable<{ loading: boolean; error: string | null; contest: Contest | undefined; variant: VariantWithCompletedTasksCountTaskParticipant | undefined; tasks: Array<TaskForUserResponseTaskParticipant>; time: string; status: UserResponseStatusResponse.StatusEnum | undefined }>
     timeLeft: number | undefined
     reloadTimerSubscription!: Subscription
+    finishModalVisible: boolean = false
 
     constructor( private route: ActivatedRoute, private contestAssignmentStore: ContestAssignmentStore )
     {

@@ -23,7 +23,7 @@ export interface ContestAssignmentState
     variant?: VariantWithCompletedTasksCountTaskParticipant
     tasks: Array<TaskForUserResponseTaskParticipant>
     time?: number,
-    endTime: Date
+    endTime?: Date
     status?: UserResponseStatusResponse.StatusEnum,
     results?: UserResultForContestResponse
 }
@@ -36,7 +36,7 @@ const initialState: ContestAssignmentState =
         variant: undefined,
         tasks: [],
         time: undefined,
-        endTime: new Date(),
+        endTime: undefined,
         status: undefined,
         results: undefined
     }
@@ -55,7 +55,12 @@ export class ContestAssignmentStore extends ComponentStore<ContestAssignmentStat
     private readonly contest$: Observable<Contest | undefined> = this.select( state => state.contest )
     private readonly variant$: Observable<VariantWithCompletedTasksCountTaskParticipant | undefined> = this.select( state => state.variant )
     private readonly tasks$: Observable<Array<TaskForUserResponseTaskParticipant>> = this.select( state => state.tasks )
-    private readonly time$: Observable<string> = this.select( state => new Date( Math.abs( state.endTime.getTime() - new Date().getTime() ) ).toISOString().substr( 11, 8 ) )
+    private readonly time$: Observable<string> = this.select( state =>
+    {
+        if ( state.endTime )
+            return new Date( Math.abs( state.endTime.getTime() - new Date().getTime() ) ).toISOString().substr( 11, 8 )
+        return "--:--:--"
+    } )
     private readonly status$: Observable<UserResponseStatusResponse.StatusEnum | undefined> = this.select( state => state.status )
 
     readonly viewModel$: Observable<{ loading: boolean; error: string | null, contest: Contest | undefined, variant: VariantWithCompletedTasksCountTaskParticipant | undefined, tasks: Array<TaskForUserResponseTaskParticipant>, time: string, status: UserResponseStatusResponse.StatusEnum | undefined }> = this.select(
