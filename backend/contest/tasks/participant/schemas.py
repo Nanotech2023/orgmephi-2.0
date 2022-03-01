@@ -11,6 +11,11 @@ class AnswersInTaskRequestTaskParticipantSchema(Schema):
     answer = common_fields.Text(required=True)
 
 
+class UserProctoringDataResponseTaskParticipantSchema(Schema):
+    proctoring_login = common_fields.Text(required=True)
+    proctoring_password = common_fields.Text(required=True)
+
+
 class TaskForUserResponseTaskParticipantSchema(Schema):
     task_id = fields.Integer(required=True)
     answers = fields.List(fields.Nested(AnswersInTaskRequestTaskParticipantSchema), required=False)

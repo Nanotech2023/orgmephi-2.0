@@ -22,6 +22,10 @@ class BaseOlympiadIdResponseTaskCreatorSchema(Schema):
     base_contest_id = fields.Int(required=True)
 
 
+class UserProctoringDataRequestTaskCreatorSchema(Schema):
+    proctoring_login = common_fields.Text(required=True)
+    proctoring_password = common_fields.Text(required=True)
+
 # Task pool
 
 

@@ -10,6 +10,12 @@ def client(client_university):
     yield client_university
 
 
+@pytest.fixture
+def client_create(client_creator):
+    client_creator.set_prefix('contest/tasks/participant')
+    yield client_creator
+
+
 # Variant
 
 
@@ -94,6 +100,22 @@ def test_change_user_location_in_contest(client, test_simple_contest_with_users,
                            'location_id': test_olympiad_locations[0].location_id
                        })
     assert resp.status_code == 200
+
+
+def test_change_user_proctor_data(client, client_create, test_simple_contest_with_users, test_olympiad_locations,
+                                  test_user_for_student_contest):
+    test_simple_contest_with_users[0].holding_type = ContestHoldingTypeEnum.OfflineContest
+    resp = client_create.post(f'/contest/{test_simple_contest_with_users[0].contest_id}/user/'
+                              f'{test_simple_contest_with_users[0].users[0].user_id}/set_proctor_data',
+                              json={
+                                  'proctoring_login': "test",
+                                  'proctoring_password': "test_pass"
+                              })
+    assert resp.status_code == 200
+    resp = client.post(f'/contest/{test_simple_contest_with_users[0].users[0].user_id}/tasks/self')
+    assert resp.status_code == 200
+    assert resp.json['proctoring_login'] == "test"
+    assert resp.json['proctoring_password'] == "test_pass"
 
 
 def test_change_user_supervisor_in_contest(client, test_simple_contest_with_users, test_olympiad_locations,

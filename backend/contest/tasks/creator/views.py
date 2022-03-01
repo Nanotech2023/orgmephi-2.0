@@ -48,6 +48,50 @@ def base_olympiad_create():
            }, 200
 
 
+@module.route('contest/<id:contest_id>/user/<id:user_id>/set_proctor_data', methods=['POST'],
+              output_schema=UserProctoringDataRequestTaskCreatorSchema)
+def set_proctor_data(contest_id, user_id):
+    """
+    Set proctor data
+    ---
+    post:
+      parameters:
+        - in: path
+          description: ID of the contest
+          name: contest_id
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: ID of the contest
+          name: user_id
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: UserProctoringDataRequestTaskCreatorSchema
+      security:
+        - JWTAccessToken: [ ]
+        - CSRFAccessToken: [ ]
+      responses:
+        '200':
+          description: OK
+        '400':
+          description: Bad request
+        '409':
+          description: Olympiad type already in use
+    """
+    current_user = UserInContest.query.filter_by(user_id=user_id, contest_id=contest_id).one_or_none()
+    UserInContest(load_instance=True).load(request.json, instance=current_user, session=db.session,
+                                           partial=True, unknown=EXCLUDE)
+    db.session.commit()
+
+    return {}, 200
+
+
 # Tasks Pool
 
 @module.route('/base_olympiad/<int:id_base_olympiad>/task_pool/create', methods=['POST'],
