@@ -5,6 +5,7 @@ from common import get_current_module
 from contest.tasks.creator.schemas import *
 from contest.tasks.model_schemas.tasks import TaskPoolSchema, ContestTaskSchema, PlainTaskSchema, RangeTaskSchema, \
     MultipleChoiceTaskSchema
+from contest.tasks.model_schemas.user import UserInContestSchema
 from contest.tasks.util import *
 from common.util import db_get_all
 
@@ -48,8 +49,8 @@ def base_olympiad_create():
            }, 200
 
 
-@module.route('contest/<id:contest_id>/user/<id:user_id>/set_proctor_data', methods=['POST'],
-              output_schema=UserProctoringDataRequestTaskCreatorSchema)
+@module.route('contest/<int:contest_id>/user/<int:user_id>/set_proctor_data', methods=['POST'],
+              input_schema=UserProctoringDataRequestTaskCreatorSchema)
 def set_proctor_data(contest_id, user_id):
     """
     Set proctor data
@@ -85,8 +86,8 @@ def set_proctor_data(contest_id, user_id):
           description: Olympiad type already in use
     """
     current_user = UserInContest.query.filter_by(user_id=user_id, contest_id=contest_id).one_or_none()
-    UserInContest(load_instance=True).load(request.json, instance=current_user, session=db.session,
-                                           partial=True, unknown=EXCLUDE)
+    UserInContestSchema(load_instance=True).load(request.json, instance=current_user, session=db.session,
+                                                 partial=True, unknown=EXCLUDE)
     db.session.commit()
 
     return {}, 200

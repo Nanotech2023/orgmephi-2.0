@@ -12,7 +12,7 @@ def client(client_university):
 
 @pytest.fixture
 def client_create(client_creator):
-    client_creator.set_prefix('contest/tasks/participant')
+    client_creator.set_prefix('contest/tasks/creator')
     yield client_creator
 
 
@@ -102,7 +102,7 @@ def test_change_user_location_in_contest(client, test_simple_contest_with_users,
     assert resp.status_code == 200
 
 
-def test_change_user_proctor_data(client, client_create, test_simple_contest_with_users, test_olympiad_locations,
+def test_change_user_proctor_data(client_create, test_simple_contest_with_users, test_olympiad_locations,
                                   test_user_for_student_contest):
     test_simple_contest_with_users[0].holding_type = ContestHoldingTypeEnum.OfflineContest
     resp = client_create.post(f'/contest/{test_simple_contest_with_users[0].contest_id}/user/'
@@ -112,7 +112,13 @@ def test_change_user_proctor_data(client, client_create, test_simple_contest_wit
                                   'proctoring_password': "test_pass"
                               })
     assert resp.status_code == 200
-    resp = client.post(f'/contest/{test_simple_contest_with_users[0].users[0].user_id}/tasks/self')
+
+
+def test_change_user_proctor_data_get(client, test_simple_contest_with_users_and_proctor, test_olympiad_locations,
+                                      test_user_for_student_contest):
+    from contest.tasks.model_schemas.user import UserInContest
+    resp = client.get(f'/contest/{test_simple_contest_with_users_and_proctor[0].contest_id}/proctor_data')
+    print(resp.data)
     assert resp.status_code == 200
     assert resp.json['proctoring_login'] == "test"
     assert resp.json['proctoring_password'] == "test_pass"

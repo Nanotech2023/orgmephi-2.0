@@ -2,13 +2,14 @@ from datetime import timedelta
 
 from marshmallow import Schema, fields
 from marshmallow_enum import EnumField
+
 from common import fields as common_fields
 from contest.tasks.model_schemas.contest import VariantSchema
 from contest.tasks.model_schemas.olympiad import ContestSchema, BaseContestSchema, StageSchema, \
     ContestGroupRestrictionEnum
 from contest.tasks.model_schemas.tasks import TaskSchema, TaskPoolSchema, ContestTaskSchema
-from contest.tasks.models import OlympiadSubjectEnum, StageConditionEnum, ContestHoldingTypeEnum, \
-    UserStatusEnum, OlympiadLevelEnum, TaskAnswerTypeEnum
+from contest.tasks.models import StageConditionEnum, ContestHoldingTypeEnum, \
+    UserStatusEnum
 
 
 # Base contest
