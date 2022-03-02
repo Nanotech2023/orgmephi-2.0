@@ -1332,6 +1332,12 @@ components:
       type: object
     UserInContest:
       properties:
+        proctoring_login:
+          nullable: true
+          type: string
+        proctoring_password:
+          nullable: true
+          type: string
         show_results_to_user:
           nullable: true
           type: boolean
@@ -1477,7 +1483,7 @@ paths:
       security:
       - JWTAccessToken: []
       - CSRFAccessToken: []
-  /tasks/creator/contest/{contest_id}/user/{user_id}/set_proctor_data:
+  /tasks/creator/contest/{contest_id}/user/{user_id}/proctor_data:
     post:
       parameters:
       - description: ID of the contest
@@ -1505,6 +1511,34 @@ paths:
           description: Bad request
         '409':
           description: Olympiad type already in use
+      security:
+      - JWTAccessToken: []
+      - CSRFAccessToken: []
+    get:
+      parameters:
+      - description: ID of the contest
+        in: path
+        name: contest_id
+        required: true
+        schema:
+          type: integer
+      - description: ID of the contest
+        in: path
+        name: user_id
+        required: true
+        schema:
+          type: integer
+      responses:
+        responses:
+          '200':
+            content:
+              application/json:
+                schema: UserProctoringDataRequestTaskCreatorSchema
+            description: OK
+          '400':
+            description: Bad request
+          '409':
+            description: Olympiad type already in use
       security:
       - JWTAccessToken: []
       - CSRFAccessToken: []
