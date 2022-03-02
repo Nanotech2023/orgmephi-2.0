@@ -5,6 +5,7 @@ from common import get_current_module
 from contest.tasks.creator.schemas import *
 from contest.tasks.model_schemas.tasks import TaskPoolSchema, ContestTaskSchema, PlainTaskSchema, RangeTaskSchema, \
     MultipleChoiceTaskSchema
+from contest.tasks.model_schemas.user import UserInContestSchema
 from contest.tasks.util import *
 from common.util import db_get_all
 
@@ -45,6 +46,92 @@ def base_olympiad_create():
 
     return {
                'base_contest_id': base_contest.base_contest_id
+           }, 200
+
+
+@module.route('contest/<int:contest_id>/user/<int:user_id>/proctor_data', methods=['POST'],
+              input_schema=UserProctoringDataRequestTaskCreatorSchema)
+def set_proctor_data(contest_id, user_id):
+    """
+    Set proctor data
+    ---
+    post:
+      parameters:
+        - in: path
+          description: ID of the contest
+          name: contest_id
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: ID of the contest
+          name: user_id
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: UserProctoringDataRequestTaskCreatorSchema
+      security:
+        - JWTAccessToken: [ ]
+        - CSRFAccessToken: [ ]
+      responses:
+        '200':
+          description: OK
+        '400':
+          description: Bad request
+        '409':
+          description: Olympiad type already in use
+    """
+    current_user = UserInContest.query.filter_by(user_id=user_id, contest_id=contest_id).one_or_none()
+    UserInContestSchema(load_instance=True).load(request.json, instance=current_user, session=db.session,
+                                                 partial=True, unknown=EXCLUDE)
+    db.session.commit()
+
+    return {}, 200
+
+
+@module.route('contest/<int:contest_id>/user/<int:user_id>/proctor_data', methods=['GET'],
+              output_schema=UserProctoringDataRequestTaskCreatorSchema)
+def get_proctor_data(contest_id, user_id):
+    """
+    Get proctor data
+    ---
+    get:
+      parameters:
+        - in: path
+          description: ID of the contest
+          name: contest_id
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: ID of the contest
+          name: user_id
+          required: true
+          schema:
+            type: integer
+      security:
+        - JWTAccessToken: [ ]
+        - CSRFAccessToken: [ ]
+      responses:
+       responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: UserProctoringDataRequestTaskCreatorSchema
+        '400':
+          description: Bad request
+        '409':
+          description: Olympiad type already in use
+    """
+    current_user = UserInContest.query.filter_by(user_id=user_id, contest_id=contest_id).one_or_none()
+    return {
+               "proctoring_login": current_user.proctoring_login,
+               "proctoring_password": current_user.proctoring_password,
            }, 200
 
 

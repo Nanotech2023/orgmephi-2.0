@@ -518,9 +518,10 @@ components:
           type: integer
         task_pools:
           items:
-            $ref: '#/components/schemas/TaskPool'
-          readOnly: true
+            type: integer
+          minItems: 1
           type: array
+          writeOnly: true
       required:
       - num
       - task_points
@@ -1331,6 +1332,12 @@ components:
       type: object
     UserInContest:
       properties:
+        proctoring_login:
+          nullable: true
+          type: string
+        proctoring_password:
+          nullable: true
+          type: string
         show_results_to_user:
           nullable: true
           type: boolean
@@ -1357,6 +1364,30 @@ components:
       required:
       - user_id
       - user_status
+      type: object
+    UserProctoringDataRequestTaskCreator:
+      properties:
+        proctoring_login:
+          maxLength: 1024
+          type: string
+        proctoring_password:
+          maxLength: 1024
+          type: string
+      required:
+      - proctoring_login
+      - proctoring_password
+      type: object
+    UserProctoringDataResponseTaskParticipant:
+      properties:
+        proctoring_login:
+          maxLength: 1024
+          type: string
+        proctoring_password:
+          maxLength: 1024
+          type: string
+      required:
+      - proctoring_login
+      - proctoring_password
       type: object
     UsersResponseTaskControlUsers:
       properties:
@@ -1449,6 +1480,65 @@ paths:
           description: Bad request
         '409':
           description: Olympiad type already in use
+      security:
+      - JWTAccessToken: []
+      - CSRFAccessToken: []
+  /tasks/creator/contest/{contest_id}/user/{user_id}/proctor_data:
+    post:
+      parameters:
+      - description: ID of the contest
+        in: path
+        name: contest_id
+        required: true
+        schema:
+          type: integer
+      - description: ID of the contest
+        in: path
+        name: user_id
+        required: true
+        schema:
+          type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserProctoringDataRequestTaskCreator'
+        required: true
+      responses:
+        '200':
+          description: OK
+        '400':
+          description: Bad request
+        '409':
+          description: Olympiad type already in use
+      security:
+      - JWTAccessToken: []
+      - CSRFAccessToken: []
+    get:
+      parameters:
+      - description: ID of the contest
+        in: path
+        name: contest_id
+        required: true
+        schema:
+          type: integer
+      - description: ID of the contest
+        in: path
+        name: user_id
+        required: true
+        schema:
+          type: integer
+      responses:
+        responses:
+          '200':
+            content:
+              application/json:
+                schema: UserProctoringDataRequestTaskCreatorSchema
+            description: OK
+          '400':
+            description: Bad request
+          '409':
+            description: Olympiad type already in use
       security:
       - JWTAccessToken: []
       - CSRFAccessToken: []
@@ -3162,6 +3252,29 @@ paths:
         required: true
       responses:
         '200':
+          description: OK
+        '400':
+          description: Bad request
+        '409':
+          description: User already enrolled
+      security:
+      - JWTAccessToken: []
+      - CSRFAccessToken: []
+  /tasks/participant/contest/{id_contest}/proctor_data:
+    get:
+      parameters:
+      - description: ID of the contest
+        in: path
+        name: id_contest
+        required: true
+        schema:
+          type: integer
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserProctoringDataResponseTaskParticipant'
           description: OK
         '400':
           description: Bad request

@@ -21,7 +21,8 @@ class UserInContest(db.Model):
     __tablename__ = 'user_in_contest'
 
     user_id = db.Column(db.Integer, db.ForeignKey(f'{User.__table_name__}.id'), primary_key=True)
-
+    proctoring_login = db.Column(db.String, default=None, nullable=True)
+    proctoring_password = db.Column(db.String, default=None, nullable=True)
     contest_id = db.Column(db.Integer, db.ForeignKey('contest.contest_id'), primary_key=True)
     variant_id = db.Column(db.Integer, db.ForeignKey('variant.variant_id'))
     user_status = db.Column(db.Enum(UserStatusEnum))

@@ -264,6 +264,43 @@ def change_user_supervisor_in_contest(id_contest):
 # Task
 
 
+@module.route('/contest/<int:id_contest>/proctor_data',
+              methods=['GET'], output_schema=UserProctoringDataResponseTaskParticipantSchema
+)
+def get_user_proctor_data(id_contest):
+    """
+    Get user proctor data
+    ---
+    get:
+      parameters:
+        - in: path
+          description: ID of the contest
+          name: id_contest
+          required: true
+          schema:
+            type: integer
+      security:
+        - JWTAccessToken: [ ]
+        - CSRFAccessToken: [ ]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: UserProctoringDataResponseTaskParticipantSchema
+        '400':
+          description: Bad request
+        '409':
+          description: User already enrolled
+    """
+
+    current_user = UserInContest.query.filter_by(user_id=jwt_get_id(), contest_id=id_contest).one_or_none()
+    return {
+               "proctoring_login": current_user.proctoring_login,
+               "proctoring_password": current_user.proctoring_password,
+           }, 200
+
+
 @module.route(
     '/contest/<int:id_contest>/tasks/self',
     methods=['GET'], output_schema=AllTaskResponseTaskParticipantSchema)
