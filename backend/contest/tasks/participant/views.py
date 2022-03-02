@@ -265,7 +265,7 @@ def change_user_supervisor_in_contest(id_contest):
 
 
 @module.route('/contest/<int:id_contest>/proctor_data',
-    methods=['GET'], output_schema=UserProctoringDataResponseTaskParticipantSchema
+              methods=['GET'], output_schema=UserProctoringDataResponseTaskParticipantSchema
 )
 def get_user_proctor_data(id_contest):
     """

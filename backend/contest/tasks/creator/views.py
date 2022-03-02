@@ -49,7 +49,7 @@ def base_olympiad_create():
            }, 200
 
 
-@module.route('contest/<int:contest_id>/user/<int:user_id>/set_proctor_data', methods=['POST'],
+@module.route('contest/<int:contest_id>/user/<int:user_id>/proctor_data', methods=['POST'],
               input_schema=UserProctoringDataRequestTaskCreatorSchema)
 def set_proctor_data(contest_id, user_id):
     """
@@ -91,6 +91,48 @@ def set_proctor_data(contest_id, user_id):
     db.session.commit()
 
     return {}, 200
+
+
+@module.route('contest/<int:contest_id>/user/<int:user_id>/proctor_data', methods=['GET'],
+              output_schema=UserProctoringDataRequestTaskCreatorSchema)
+def get_proctor_data(contest_id, user_id):
+    """
+    Get proctor data
+    ---
+    get:
+      parameters:
+        - in: path
+          description: ID of the contest
+          name: contest_id
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: ID of the contest
+          name: user_id
+          required: true
+          schema:
+            type: integer
+      security:
+        - JWTAccessToken: [ ]
+        - CSRFAccessToken: [ ]
+      responses:
+       responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: UserProctoringDataRequestTaskCreatorSchema
+        '400':
+          description: Bad request
+        '409':
+          description: Olympiad type already in use
+    """
+    current_user = UserInContest.query.filter_by(user_id=user_id, contest_id=contest_id).one_or_none()
+    return {
+               "proctoring_login": current_user.proctoring_login,
+               "proctoring_password": current_user.proctoring_password,
+           }, 200
 
 
 # Tasks Pool

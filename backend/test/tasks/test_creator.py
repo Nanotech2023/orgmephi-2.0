@@ -10,12 +10,19 @@ def client(client_creator):
     yield client_creator
 
 
+def test_get_user_proctor_data(client, test_simple_contest_with_users_and_proctor, test_olympiad_locations,
+                               test_user_for_student_contest):
+    resp = client.get(f'/contest/{test_simple_contest_with_users_and_proctor[0].contest_id}/user/'
+                      f'{test_simple_contest_with_users_and_proctor[0].users[0].user_id}/proctor_data')
+    print(resp.data)
+    assert resp.json['proctoring_login'] == "test"
+    assert resp.json['proctoring_password'] == "test_pass"
+
+
 def test_change_user_proctor_data(client, test_simple_contest_with_users, test_olympiad_locations,
                                   test_user_for_student_contest):
-    from contest.tasks.models import ContestHoldingTypeEnum
-    test_simple_contest_with_users[0].holding_type = ContestHoldingTypeEnum.OfflineContest
     resp = client.post(f'/contest/{test_simple_contest_with_users[0].contest_id}/user/'
-                       f'{test_simple_contest_with_users[0].users[0].user_id}/set_proctor_data',
+                       f'{test_simple_contest_with_users[0].users[0].user_id}/proctor_data',
                        json={
                            'proctoring_login': "test",
                            'proctoring_password': "test_pass"
