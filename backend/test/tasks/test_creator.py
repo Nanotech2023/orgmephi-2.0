@@ -10,6 +10,21 @@ def client(client_creator):
     yield client_creator
 
 
+def test_change_user_proctor_data(client, test_simple_contest_with_users, test_olympiad_locations,
+                                  test_user_for_student_contest):
+    from contest.tasks.models import ContestHoldingTypeEnum
+    test_simple_contest_with_users[0].holding_type = ContestHoldingTypeEnum.OfflineContest
+    resp = client.post(f'/contest/{test_simple_contest_with_users[0].contest_id}/user/'
+                       f'{test_simple_contest_with_users[0].users[0].user_id}/set_proctor_data',
+                       json={
+                           'proctoring_login': "test",
+                           'proctoring_password': "test_pass"
+                       })
+    assert resp.status_code == 200
+    assert test_simple_contest_with_users[0].users[0].proctoring_login == "test"
+    assert test_simple_contest_with_users[0].users[0].proctoring_password == "test_pass"
+
+
 def test_base_olympiad_create(client, test_olympiad_types):
     from contest.tasks.models import BaseContest
     resp = client.post('/base_olympiad/create',

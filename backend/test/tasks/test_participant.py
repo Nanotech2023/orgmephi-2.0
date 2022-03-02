@@ -1,6 +1,5 @@
 import io
 
-from contest.tasks.models import ContestHoldingTypeEnum
 from . import *
 
 
@@ -8,12 +7,6 @@ from . import *
 def client(client_university):
     client_university.set_prefix('contest/tasks/participant')
     yield client_university
-
-
-@pytest.fixture
-def client_create(client_creator):
-    client_creator.set_prefix('contest/tasks/creator')
-    yield client_creator
 
 
 # Variant
@@ -102,23 +95,10 @@ def test_change_user_location_in_contest(client, test_simple_contest_with_users,
     assert resp.status_code == 200
 
 
-def test_change_user_proctor_data(client_create, test_simple_contest_with_users, test_olympiad_locations,
-                                  test_user_for_student_contest):
-    test_simple_contest_with_users[0].holding_type = ContestHoldingTypeEnum.OfflineContest
-    resp = client_create.post(f'/contest/{test_simple_contest_with_users[0].contest_id}/user/'
-                              f'{test_simple_contest_with_users[0].users[0].user_id}/set_proctor_data',
-                              json={
-                                  'proctoring_login': "test",
-                                  'proctoring_password': "test_pass"
-                              })
-    assert resp.status_code == 200
-
-
 def test_change_user_proctor_data_get(client, test_simple_contest_with_users_and_proctor, test_olympiad_locations,
                                       test_user_for_student_contest):
     from contest.tasks.model_schemas.user import UserInContest
     resp = client.get(f'/contest/{test_simple_contest_with_users_and_proctor[0].contest_id}/proctor_data')
-    print(resp.data)
     assert resp.status_code == 200
     assert resp.json['proctoring_login'] == "test"
     assert resp.json['proctoring_password'] == "test_pass"
@@ -126,6 +106,7 @@ def test_change_user_proctor_data_get(client, test_simple_contest_with_users_and
 
 def test_change_user_supervisor_in_contest(client, test_simple_contest_with_users, test_olympiad_locations,
                                            test_user_for_student_contest):
+    from contest.tasks.models import ContestHoldingTypeEnum
     test_simple_contest_with_users[0].holding_type = ContestHoldingTypeEnum.OfflineContest
     resp = client.post(f'/contest/{test_simple_contest_with_users[0].contest_id}/change_supervisor',
                        json={
