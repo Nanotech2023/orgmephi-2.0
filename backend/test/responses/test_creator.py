@@ -814,14 +814,16 @@ def test_contest_properties(client, create_user_with_answers):
     base_contest_id = create_user_with_answers['base_contests'][DEFAULT_INDEX].base_contest_id
     client.set_prefix('contest/tasks/unauthorized')
 
+    contest = create_user_with_answers['contests'][0]
+    contest.start_date = datetime(datetime.utcnow().year - 1, 9, 9, 10, 0, 0)
+    test_app.db.session.commit()
     resp = client.get(f'/base_olympiad/{base_contest_id}/olympiad/{contest_id}')
     assert resp.status_code == 200
     response = resp.json
     assert response['user_count'] == 1
-    assert response['academic_year'] == datetime.utcnow().year
+    assert response['academic_year'] == datetime.utcnow().year - 1
 
-    contest = create_user_with_answers['contests'][0]
-    contest.start_date = datetime(2021, 6, 6, 10, 0, 0)
+    contest.start_date = datetime(datetime.utcnow().year, 1, 1, 0, 0, 0)
     test_app.db.session.commit()
     resp = client.get(f'/base_olympiad/{base_contest_id}/olympiad/{contest_id}')
     assert resp.status_code == 200

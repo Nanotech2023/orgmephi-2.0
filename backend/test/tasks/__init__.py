@@ -86,7 +86,7 @@ def test_base_contests(test_olympiad_types, test_certificate_type):
 def test_create_tasks_pool(test_base_contests):
     from contest.tasks.models import TaskPool
     task_pools = [TaskPool(name=f'Test tasks pool {i}',
-                           year=2021,
+                           year=datetime.now().year,
                            orig_task_points=20) for i in range(3)]
     for test_base_contest in test_base_contests:
         test_base_contest.task_pools = task_pools
@@ -599,7 +599,7 @@ def test_user_for_student_contest(test_city, test_university, test_user_universi
     user_info = UserInfo(
         location_id=location.id,
         email="11@gmail.com",
-        phone="89999999999",
+        phone="+79999999999",
         first_name="test",
         middle_name="test",
         second_name="test",
@@ -627,12 +627,36 @@ def test_user_for_student_contest(test_city, test_university, test_user_universi
 
 
 @pytest.fixture
-def test_user_for_student_contest_none(test_city, test_university, test_user_university):
-    from user.models import StudentInfo, StudentUniversityKnown
+def test_user_for_student_contest(test_city, test_university, test_user_university):
+    from user.models import StudentInfo, UserInfo, Location, GenderEnum, Document, UserLimitations, DocumentTypeEnum, \
+        StudentUniversityKnown, LocationRussia
     student_info = StudentInfo(admission_year=datetime.utcnow() + timedelta(hours=40))
     student_info.university = StudentUniversityKnown(university=test_university)
-    user_info = None
+    location = Location()
+    user_info = UserInfo(
+        location_id=location.id,
+        email="11@gmail.com",
+        phone="+79999999999",
+        first_name="test",
+        middle_name="test",
+        second_name="test",
+        date_of_birth=datetime.utcnow(),
+        place_of_birth="test",
+        gender=GenderEnum.male
+    )
+    user_info.dwelling = LocationRussia(city=test_city)
+    user_info.document = Document(
+        document_type=DocumentTypeEnum.rf_passport,
+        series="444",
+        number="444",
+        issuer="444",
+        issue_date=datetime.utcnow() + timedelta(hours=40),
+        rf_code="4444444")
+    user_info.limitations = UserLimitations(hearing=False,
+                                            sight=False,
+                                            movement=False)
     test_app.db.session.add(student_info)
+    test_app.db.session.add(user_info)
     test_user_university.student_info = student_info
     test_user_university.user_info = user_info
     test_app.db.session.commit()
@@ -647,6 +671,30 @@ def test_simple_contest_with_users(test_simple_contest_with_location, test_olymp
     from contest.tasks.models.user import UserInContest, UserStatusEnum
     user_id = test_user_for_student_contest.id
     user_in_contest_ = UserInContest(user_id=user_id,
+                                     show_results_to_user=True,
+                                     user_status=UserStatusEnum.Participant.value,
+                                     location_id=test_olympiad_locations[0].location_id)
+    test_simple_contest_with_location[0].users.append(user_in_contest_)
+
+    test_app.db.session.add(user_in_contest_)
+    test_app.db.session.commit()
+    user_work = add_user_response(test_app.db.session, user_id, test_simple_contest_with_location[0].contest_id)
+    test_app.db.session.add(user_work)
+    test_app.db.session.commit()
+
+    yield test_simple_contest_with_location
+
+
+# noinspection DuplicatedCode
+@pytest.fixture
+def test_simple_contest_with_users_and_proctor(test_simple_contest_with_location, test_olympiad_locations,
+                                               test_user_for_student_contest):
+    from contest.responses.models import add_user_response
+    from contest.tasks.models.user import UserInContest, UserStatusEnum
+    user_id = test_user_for_student_contest.id
+    user_in_contest_ = UserInContest(user_id=user_id,
+                                     proctoring_login="test",
+                                     proctoring_password="test_pass",
                                      show_results_to_user=True,
                                      user_status=UserStatusEnum.Participant.value,
                                      location_id=test_olympiad_locations[0].location_id)

@@ -103,7 +103,7 @@ def test_registration_university(client, test_country_native, test_region, test_
                 "rural": False
             },
             "grade": 5,
-            "phone": "8 (800) 555 35 35",
+            "phone": "+78005553535",
             "university": {
                 "university": "test"
             }
@@ -129,7 +129,7 @@ def test_registration_university(client, test_country_native, test_region, test_
     assert user.user_info.middle_name == 'string'
     assert user.user_info.second_name == 'string'
     assert user.user_info.date_of_birth == datetime.date.fromisoformat('2021-09-01')
-    assert user.user_info.phone == '8 (800) 555 35 35'
+    assert user.user_info.phone == '+78005553535'
     assert user.user_info.dwelling.russian
     assert user.user_info.dwelling.city_name == 'test'
     assert user.user_info.dwelling.region_name == 'test'
@@ -154,6 +154,10 @@ def test_registration_existing(client):
         "register_type": "School"
     }
     client.post('/school', json=request)
+    resp = client.post('/school', json=request)
+    assert resp.status_code == 409
+
+    request['auth_info']['email'] = "ExisTing@example.COM"
     resp = client.post('/school', json=request)
     assert resp.status_code == 409
 
@@ -353,17 +357,13 @@ def test_email_confirm(client):
             assert token in outbox[0].html
 
         user = User.query.filter_by(username='confirm@example.com').one_or_none()
-        time.sleep(3)
         assert user.role.value == 'Unconfirmed'
 
         resp = client.post(f'/confirm/{token}')
-        time.sleep(3)
         assert resp.status_code == 204
         user = User.query.filter_by(username='confirm@example.com').one_or_none()
-        time.sleep(3)
         assert user.role.value == 'Participant'
         resp = client.post(f'/confirm/{token}')
-        time.sleep(3)
         assert resp.status_code == 404
 
     test_app.config['ORGMEPHI_CONFIRM_EMAIL'] = False
@@ -393,7 +393,6 @@ def test_email_confirm_wrong(client):
     test_app.db.session.commit()
 
     resp = client.post(f'/confirm/{token}')
-    time.sleep(3)
     assert resp.status_code == 404
 
     test_app.config['ORGMEPHI_CONFIRM_EMAIL'] = False
@@ -403,7 +402,6 @@ def test_email_confirm_invalid(client):
     test_app.config['ORGMEPHI_CONFIRM_EMAIL'] = True
 
     resp = client.post(f'/confirm/invalid_token')
-    time.sleep(3)
     assert resp.status_code == 404
 
     test_app.config['ORGMEPHI_CONFIRM_EMAIL'] = False
@@ -429,6 +427,52 @@ def test_recover_password(client):
         client.post('/school', json=request)
 
         resp = client.client.post('/user/registration/forgot/forgot@example.com')
+        time.sleep(3)
+        assert resp.status_code == 204
+        assert len(outbox) == 1
+        assert outbox[0].recipients[0] == 'forgot@example.com'
+        token = test_app.config['TESTING_LAST_EMAIL_TOKEN']
+        assert token in outbox[0].body
+        if outbox[0].html is not None:
+            assert token in outbox[0].html
+
+        user = User.query.filter_by(username='forgot@example.com').one_or_none()
+        user.password_changed = datetime.datetime.utcnow() - datetime.timedelta(minutes=5)
+        test_app.db.session.commit()
+
+        request = {'password': 'qwertyA*2'}
+        resp = client.client.post(f'/user/registration/recover/{token}', json=request)
+        assert resp.status_code == 204
+        user = User.query.filter_by(username='forgot@example.com').one_or_none()
+        test_app.password_policy.validate_password('qwertyA*2', user.password_hash)
+
+        resp = client.client.post(f'/user/registration/recover/{token}', json=request)
+        assert resp.status_code == 404
+
+    test_app.config['ORGMEPHI_ENABLE_PASSWORD_RECOVERY'] = False
+
+
+# noinspection DuplicatedCode
+def test_recover_password_case_insensitive(client):
+    from user.models import User
+    test_app.config['ORGMEPHI_ENABLE_PASSWORD_RECOVERY'] = True
+    with test_app.mail.record_messages() as outbox:
+        request = {
+            "auth_info": {
+                "email": "forgot@example.com",
+                "password": "qwertyA*1"
+            },
+            "personal_info": {
+                "date_of_birth": "2021-09-01",
+                "first_name": "string",
+                "middle_name": "string",
+                "second_name": "string"
+            },
+            "register_type": "School"
+        }
+        client.post('/school', json=request)
+
+        resp = client.client.post('/user/registration/forgot/forGOT@exaMPle.COM')
         time.sleep(3)
         assert resp.status_code == 204
         assert len(outbox) == 1
@@ -482,10 +526,29 @@ def test_token_wrong_type(client):
     test_app.config['ORGMEPHI_ENABLE_PASSWORD_RECOVERY'] = False
 
 
+# noinspection DuplicatedCode
 def test_resend_confirmation(client, test_user_unconfirmed):
     test_app.config['ORGMEPHI_CONFIRM_EMAIL'] = True
     with test_app.mail.record_messages() as outbox:
         resp = client.post(f'/resend/{test_user_unconfirmed.user_info.email}')
+        assert resp.status_code == 204
+        assert len(outbox) == 1
+        assert outbox[0].recipients[0] == test_user_unconfirmed.user_info.email
+        token = test_app.config['TESTING_LAST_EMAIL_TOKEN']
+        assert token in outbox[0].body
+        if outbox[0].html is not None:
+            assert token in outbox[0].html
+
+        resp = client.post(f'/confirm/{token}')
+        assert resp.status_code == 204
+    test_app.config['ORGMEPHI_CONFIRM_EMAIL'] = False
+
+
+# noinspection DuplicatedCode
+def test_resend_confirmation_case_insensitive(client, test_user_unconfirmed):
+    test_app.config['ORGMEPHI_CONFIRM_EMAIL'] = True
+    with test_app.mail.record_messages() as outbox:
+        resp = client.post(f'/resend/{test_user_unconfirmed.user_info.email.upper()}')
         assert resp.status_code == 204
         assert len(outbox) == 1
         assert outbox[0].recipients[0] == test_user_unconfirmed.user_info.email
