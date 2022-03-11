@@ -1,5 +1,4 @@
-import { NgModule } from '@angular/core'
-import { RouterModule, Routes } from '@angular/router'
+import { Routes } from '@angular/router'
 import { AuthGuardService } from '@/shared/auth.guard.service'
 import { ContestListComponent } from '@/contests/containers/contest-list/contest-list.component'
 import { ContestDetailsComponent } from '@/contests/containers/contest-details/contest-details.component'
@@ -49,9 +48,8 @@ export const CONTEST_ROUTES: Routes =
         },
         {
             path: 'contests/results',
-            redirectTo: 'in-development'
-            // component: ContestResultsComponent,
-            // canActivate: [ AuthGuardService ]
+            component: ContestResultsComponent,
+            canActivate: [ AuthGuardService ]
         },
         {
             path: 'contests/:contestId',
