@@ -1,8 +1,8 @@
 export const environment = {
     production: false,
     hmr: true,
-    apiUrl: "https://orgnew.mephi.ru/api",
-    onlineLocationId: 250
+    apiUrl: "http://127.0.0.1:5000",
+    onlineLocationId: 3
 }
 
 import 'zone.js/plugins/zone-error'
