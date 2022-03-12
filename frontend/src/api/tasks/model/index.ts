@@ -71,6 +71,8 @@ export * from './updateStageRequestTaskEditor';
 export * from './updateTargetClassesOfContestRequestTaskEditor';
 export * from './updateUserInContestRequestTaskControlUsers';
 export * from './userInContest';
+export * from './userProctoringDataRequestTaskCreator';
+export * from './userProctoringDataResponseTaskParticipant';
 export * from './usersResponseTaskControlUsers';
 export * from './variant';
 export * from './variantIdResponseTaskAdmin';

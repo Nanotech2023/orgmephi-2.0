@@ -11,10 +11,8 @@
  */
 
 
-export interface ContestTask { 
-    readonly contest_task_id?: number;
-    num: number | null;
-    task_points: number | null;
-    task_pools: Array<number>;
+export interface UserProctoringDataResponseTaskParticipant { 
+    proctoring_login: string;
+    proctoring_password: string;
 }
 

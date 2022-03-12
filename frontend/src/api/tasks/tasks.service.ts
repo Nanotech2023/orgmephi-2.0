@@ -89,7 +89,7 @@ import {
     RangeTask,
     TaskPool,
     TaskPoolIdResponseTaskCreator,
-    VariantIdResponseTaskAdmin
+    VariantIdResponseTaskAdmin, UserProctoringDataResponseTaskParticipant
 } from '@api/tasks/model'
 
 
@@ -5910,6 +5910,76 @@ export class TasksService
 
         return this.httpClient.post<any>( `${ this.configuration.basePath }/tasks/participant/contest/${ encodeURIComponent( String( idContest ) ) }/enroll`,
             enrollRequestTaskParticipant,
+            {
+                context: localVarHttpContext,
+                responseType: <any> responseType_,
+                withCredentials: this.configuration.withCredentials,
+                headers: localVarHeaders,
+                observe: observe,
+                reportProgress: reportProgress
+            }
+        )
+    }
+
+    /**
+     * @param idContest ID of the contest
+     * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
+     * @param reportProgress flag to report request and response progress.
+     */
+    public tasksParticipantContestIdContestProctorDataGet( idContest: number, observe?: 'body', reportProgress?: boolean, options?: { httpHeaderAccept?: 'application/json', context?: HttpContext } ): Observable<UserProctoringDataResponseTaskParticipant>;
+    public tasksParticipantContestIdContestProctorDataGet( idContest: number, observe?: 'response', reportProgress?: boolean, options?: { httpHeaderAccept?: 'application/json', context?: HttpContext } ): Observable<HttpResponse<UserProctoringDataResponseTaskParticipant>>;
+    public tasksParticipantContestIdContestProctorDataGet( idContest: number, observe?: 'events', reportProgress?: boolean, options?: { httpHeaderAccept?: 'application/json', context?: HttpContext } ): Observable<HttpEvent<UserProctoringDataResponseTaskParticipant>>;
+    public tasksParticipantContestIdContestProctorDataGet( idContest: number, observe: any = 'body', reportProgress: boolean = false, options?: { httpHeaderAccept?: 'application/json', context?: HttpContext } ): Observable<any>
+    {
+        if ( idContest === null || idContest === undefined )
+        {
+            throw new Error( 'Required parameter idContest was null or undefined when calling tasksParticipantContestIdContestProctorDataGet.' )
+        }
+
+        let localVarHeaders = this.defaultHeaders
+
+        let localVarCredential: string | undefined
+        // authentication (CSRFAccessToken) required
+        localVarCredential = this.configuration.lookupCredential( 'CSRFAccessToken' )
+        if ( localVarCredential )
+        {
+            localVarHeaders = localVarHeaders.set( 'X-CSRF-TOKEN', localVarCredential )
+        }
+
+        // authentication (JWTAccessToken) required
+        localVarCredential = this.configuration.lookupCredential( 'JWTAccessToken' )
+        if ( localVarCredential )
+        {
+        }
+
+        let localVarHttpHeaderAcceptSelected: string | undefined = options && options.httpHeaderAccept
+        if ( localVarHttpHeaderAcceptSelected === undefined )
+        {
+            // to determine the Accept header
+            const httpHeaderAccepts: string[] = [
+                'application/json'
+            ]
+            localVarHttpHeaderAcceptSelected = this.configuration.selectHeaderAccept( httpHeaderAccepts )
+        }
+        if ( localVarHttpHeaderAcceptSelected !== undefined )
+        {
+            localVarHeaders = localVarHeaders.set( 'Accept', localVarHttpHeaderAcceptSelected )
+        }
+
+        let localVarHttpContext: HttpContext | undefined = options && options.context
+        if ( localVarHttpContext === undefined )
+        {
+            localVarHttpContext = new HttpContext()
+        }
+
+
+        let responseType_: 'text' | 'json' = 'json'
+        if ( localVarHttpHeaderAcceptSelected && localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+        {
+            responseType_ = 'text'
+        }
+
+        return this.httpClient.get<UserProctoringDataResponseTaskParticipant>( `${ this.configuration.basePath }/tasks/participant/contest/${ encodeURIComponent( String( idContest ) ) }/proctor_data`,
             {
                 context: localVarHttpContext,
                 responseType: <any> responseType_,

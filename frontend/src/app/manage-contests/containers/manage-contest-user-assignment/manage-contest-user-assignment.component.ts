@@ -1,13 +1,10 @@
 import { Component, OnInit, ViewChild } from '@angular/core'
-import { ActivatedRoute, Router } from '@angular/router'
-import { UserInContest } from '@api/tasks/model'
+import { ActivatedRoute } from '@angular/router'
 import { DxDataGridComponent } from 'devextreme-angular'
-import { ResponsesService } from '@api/responses/responses.service'
 import {
-    AllUserAnswersResponse,
-    AllUserMarksResponse, AnswerWithoutMark, BaseAnswer,
-    UserResponseStatusResponse,
-    UserTimeResponseRequest
+    AnswerWithoutMark,
+    BaseAnswer,
+    UserResponseStatusResponse
 } from '@api/responses/model'
 import { Observable } from 'rxjs'
 import { ManageContestUserAssignmentStore } from '@/manage-contests/containers/manage-contest-user-assignment/manage-contest-user-assignment.store'

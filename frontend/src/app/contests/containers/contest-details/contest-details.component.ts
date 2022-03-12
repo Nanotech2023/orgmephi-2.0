@@ -1,9 +1,10 @@
 import { Component } from '@angular/core'
 import { Observable } from 'rxjs'
-import { SimpleContest } from '@api/tasks/model'
+import { SimpleContest, UserProctoringDataResponseTaskParticipant } from '@api/tasks/model'
 import { ActivatedRoute } from '@angular/router'
 import { getClassesForDisplay, getStatusDisplay, getSubjectDisplay } from '@/shared/localizeUtils'
 import { ContestDetailsStore } from '@/contests/containers/contest-details/contest-details.store'
+import { UserResultsForContestResponse } from '@api/responses/model'
 
 
 @Component( {
@@ -17,6 +18,8 @@ export class ContestDetailsComponent
     contest$: Observable<SimpleContest | undefined>
     contestId!: number | null
     isFilledProfile$: Observable<boolean>
+    contestResult$: Observable<UserResultsForContestResponse | undefined>
+    contestProctoringData$: Observable<UserProctoringDataResponseTaskParticipant | undefined>
 
     constructor( private contestDetailsStore: ContestDetailsStore, private route: ActivatedRoute )
     {
@@ -27,9 +30,13 @@ export class ContestDetailsComponent
             {
                 this.contestDetailsStore.fetchUnfilledProfile()
                 this.contestDetailsStore.fetchSingle( this.contestId )
+                this.contestDetailsStore.fetchProctoringData( this.contestId )
+                this.contestDetailsStore.fetchAllResults()
             }
         } )
         this.contest$ = this.contestDetailsStore.contest$
+        this.contestResult$ = this.contestDetailsStore.contestResult$
+        this.contestProctoringData$ = this.contestDetailsStore.contestProctoringData$
         this.isFilledProfile$ = this.contestDetailsStore.isFilledProfile$
     }
 
