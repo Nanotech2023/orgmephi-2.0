@@ -93,9 +93,13 @@
                                 <div class="divider"></div>
                             </div>
                             <div class="olymp_stage_content">
-                                <ng-container *ngIf="contestProctoringData$| async as proctoringData; else contestDetailsStage3Failure">
-                                    <app-contest-details-stage3-success>
-                                    </app-contest-details-stage3-success>
+                                <ng-container
+                                    *ngIf="contestProctoringData$ | async as proctoringData; else contestDetailsStage3Failure">
+                                    <ng-container
+                                        *ngIf="proctoringData.proctoring_login != null; else contestDetailsStage3Failure">
+                                        <app-contest-details-stage3-success>
+                                        </app-contest-details-stage3-success>
+                                    </ng-container>
                                 </ng-container>
                             </div>
                         </div>
@@ -108,10 +112,14 @@
                                 <div class="divider"></div>
                             </div>
                             <div class="olymp_stage_content">
-                                <ng-container *ngIf="contestProctoringData$| async as proctoringData; else contestDetailsUnavailable">
-                                    <app-contest-details-register [proctorLogin]="proctoringData.proctoring_login"
-                                                                  [proctorPassword]="proctoringData.proctoring_password">
-                                    </app-contest-details-register>
+                                <ng-container
+                                    *ngIf="contestProctoringData$ | async as proctoringData; else contestDetailsUnavailable">
+                                    <ng-container
+                                        *ngIf="proctoringData.proctoring_login != null; else contestDetailsUnavailable">
+                                        <app-contest-details-register [proctorLogin]="proctoringData.proctoring_login"
+                                                                      [proctorPassword]="proctoringData.proctoring_password">
+                                        </app-contest-details-register>
+                                    </ng-container>
                                 </ng-container>
                             </div>
                         </div>
