@@ -266,7 +266,7 @@ def change_user_supervisor_in_contest(id_contest):
 
 @module.route('/contest/<int:id_contest>/proctor_data',
               methods=['GET'], output_schema=UserProctoringDataResponseTaskParticipantSchema
-)
+              )
 def get_user_proctor_data(id_contest):
     """
     Get user proctor data
@@ -298,6 +298,47 @@ def get_user_proctor_data(id_contest):
     return {
                "proctoring_login": current_user.proctoring_login,
                "proctoring_password": current_user.proctoring_password,
+           }, 200
+
+
+@module.route('/contest/<int:id_contest>/external_stage',
+              methods=['GET'], output_schema=UserExternalDataResponseTaskParticipantSchema
+              )
+def get_user_external_contest_data(id_contest):
+    """
+    Get user external contest result data
+    ---
+    get:
+      parameters:
+        - in: path
+          description: ID of the contest
+          name: id_contest
+          required: true
+          schema:
+            type: integer
+      security:
+        - JWTAccessToken: [ ]
+        - CSRFAccessToken: [ ]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: UserExternalDataResponseTaskParticipantSchema
+        '400':
+          description: Bad request
+        '404':
+          description: Contest not found
+        '409':
+          description: User already enrolled
+    """
+
+    user_data = ExternalContestResult.query.filter_by(user_id=jwt_get_id(), contest_id=id_contest).all()
+
+    return {
+               "tasks": user_data,
+               "num_of_tasks": len(user_data),
+               "total_points": sum([result.task_points for result in user_data]),
            }, 200
 
 

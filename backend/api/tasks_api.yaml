@@ -518,10 +518,9 @@ components:
           type: integer
         task_pools:
           items:
-            type: integer
-          minItems: 1
+            $ref: '#/components/schemas/TaskPool'
+          readOnly: true
           type: array
-          writeOnly: true
       required:
       - num
       - task_points
@@ -1329,6 +1328,30 @@ components:
           type: array
       required:
       - users_id
+      type: object
+    UserExternalDataResponseTaskParticipant:
+      properties:
+        num_of_tasks:
+          type: integer
+        tasks:
+          items:
+            $ref: '#/components/schemas/UserExternalSingleDataResponseTaskParticipant'
+          type: array
+        total_points:
+          type: integer
+      required:
+      - num_of_tasks
+      - total_points
+      type: object
+    UserExternalSingleDataResponseTaskParticipant:
+      properties:
+        num_of_task:
+          type: integer
+        task_points:
+          type: integer
+      required:
+      - num_of_task
+      - task_points
       type: object
     UserInContest:
       properties:
@@ -3278,6 +3301,31 @@ paths:
           description: OK
         '400':
           description: Bad request
+        '409':
+          description: User already enrolled
+      security:
+      - JWTAccessToken: []
+      - CSRFAccessToken: []
+  /tasks/participant/contest/{id_contest}/external_stage:
+    get:
+      parameters:
+      - description: ID of the contest
+        in: path
+        name: id_contest
+        required: true
+        schema:
+          type: integer
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserExternalDataResponseTaskParticipant'
+          description: OK
+        '400':
+          description: Bad request
+        '404':
+          description: Contest not found
         '409':
           description: User already enrolled
       security:

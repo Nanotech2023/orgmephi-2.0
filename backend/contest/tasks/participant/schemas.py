@@ -16,6 +16,17 @@ class UserProctoringDataResponseTaskParticipantSchema(Schema):
     proctoring_password = common_fields.Text(required=True)
 
 
+class UserExternalSingleDataResponseTaskParticipantSchema(Schema):
+    num_of_task = fields.Int(required=True)
+    task_points = fields.Int(required=True)
+
+
+class UserExternalDataResponseTaskParticipantSchema(Schema):
+    tasks = fields.List(fields.Nested(UserExternalSingleDataResponseTaskParticipantSchema), required=False)
+    num_of_tasks = fields.Int(required=True)
+    total_points = fields.Int(required=True)
+
+
 class TaskForUserResponseTaskParticipantSchema(Schema):
     task_id = fields.Integer(required=True)
     answers = fields.List(fields.Nested(AnswersInTaskRequestTaskParticipantSchema), required=False)
