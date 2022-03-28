@@ -114,6 +114,7 @@ def test_change_user_external_contest_data_get(client, test_simple_contest_with_
     assert resp.json['tasks'][0]['task_points'] == 4
     assert resp.json['tasks'][1]['num_of_task'] == 2
     assert resp.json['tasks'][1]['task_points'] == 6
+    assert resp.json['total_points'] == 10
 
 
 def test_change_user_supervisor_in_contest(client, test_simple_contest_with_users, test_olympiad_locations,

@@ -338,6 +338,7 @@ def get_user_external_contest_data(id_contest):
     return {
                "tasks": user_data,
                "num_of_tasks": len(user_data),
+               "total_points": sum([result.task_points for result in user_data]),
            }, 200
 
 

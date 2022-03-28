@@ -1337,8 +1337,11 @@ components:
           items:
             $ref: '#/components/schemas/UserExternalSingleDataResponseTaskParticipant'
           type: array
+        total_points:
+          type: integer
       required:
       - num_of_tasks
+      - total_points
       type: object
     UserExternalSingleDataResponseTaskParticipant:
       properties:

@@ -36,8 +36,8 @@ class ExternalContestResult(db.Model):
     """
     Class describing contest result on other platform
 
-    work_id: if of work
-    user_id: if of user
+    work_id: id of work
+    user_id: id of user
     contest_id: id of the contest
     num_of_task: number of the tusk
     task_points: number of points for task

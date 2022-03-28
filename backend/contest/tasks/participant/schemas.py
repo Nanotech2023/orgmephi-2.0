@@ -24,6 +24,7 @@ class UserExternalSingleDataResponseTaskParticipantSchema(Schema):
 class UserExternalDataResponseTaskParticipantSchema(Schema):
     tasks = fields.List(fields.Nested(UserExternalSingleDataResponseTaskParticipantSchema), required=False)
     num_of_tasks = fields.Int(required=True)
+    total_points = fields.Int(required=True)
 
 
 class TaskForUserResponseTaskParticipantSchema(Schema):
