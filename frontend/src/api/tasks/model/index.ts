@@ -70,6 +70,8 @@ export * from './updatePreviousContestRequestTaskEditor';
 export * from './updateStageRequestTaskEditor';
 export * from './updateTargetClassesOfContestRequestTaskEditor';
 export * from './updateUserInContestRequestTaskControlUsers';
+export * from './userExternalDataResponseTaskParticipant';
+export * from './userExternalSingleDataResponseTaskParticipant';
 export * from './userInContest';
 export * from './userProctoringDataRequestTaskCreator';
 export * from './userProctoringDataResponseTaskParticipant';

@@ -9,13 +9,10 @@
  * https://openapi-generator.tech
  * Do not edit the class manually.
  */
-import { TaskPool } from './taskPool';
 
 
-export interface ContestTask { 
-    readonly contest_task_id?: number;
-    num: number | null;
-    task_points: number | null;
-    readonly task_pools: Array<TaskPool>;
+export interface UserExternalSingleDataResponseTaskParticipant { 
+    num_of_task: number;
+    task_points: number;
 }
 

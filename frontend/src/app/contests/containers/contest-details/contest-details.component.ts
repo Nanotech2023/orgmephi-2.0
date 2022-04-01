@@ -1,6 +1,10 @@
 import { Component } from '@angular/core'
 import { Observable } from 'rxjs'
-import { SimpleContest, UserProctoringDataResponseTaskParticipant } from '@api/tasks/model'
+import {
+    SimpleContest,
+    UserExternalDataResponseTaskParticipant,
+    UserProctoringDataResponseTaskParticipant
+} from '@api/tasks/model'
 import { ActivatedRoute } from '@angular/router'
 import { getClassesForDisplay, getStatusDisplay, getSubjectDisplay } from '@/shared/localizeUtils'
 import { ContestDetailsStore } from '@/contests/containers/contest-details/contest-details.store'
@@ -20,6 +24,7 @@ export class ContestDetailsComponent
     isFilledProfile$: Observable<boolean>
     contestResult$: Observable<UserResultsForContestResponse | undefined>
     contestProctoringData$: Observable<UserProctoringDataResponseTaskParticipant | undefined>
+    contestFinalStageData$: Observable<UserExternalDataResponseTaskParticipant | undefined>
 
     constructor( private contestDetailsStore: ContestDetailsStore, private route: ActivatedRoute )
     {
@@ -31,12 +36,14 @@ export class ContestDetailsComponent
                 this.contestDetailsStore.fetchUnfilledProfile()
                 this.contestDetailsStore.fetchSingle( this.contestId )
                 this.contestDetailsStore.fetchProctoringData( this.contestId )
+                this.contestDetailsStore.fetchFinalStageData( this.contestId )
                 this.contestDetailsStore.fetchAllResults()
             }
         } )
         this.contest$ = this.contestDetailsStore.contest$
         this.contestResult$ = this.contestDetailsStore.contestResult$
         this.contestProctoringData$ = this.contestDetailsStore.contestProctoringData$
+        this.contestFinalStageData$ = this.contestDetailsStore.contestFinalStageData$
         this.isFilledProfile$ = this.contestDetailsStore.isFilledProfile$
     }
 

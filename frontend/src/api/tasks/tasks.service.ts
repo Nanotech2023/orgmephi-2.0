@@ -89,7 +89,9 @@ import {
     RangeTask,
     TaskPool,
     TaskPoolIdResponseTaskCreator,
-    VariantIdResponseTaskAdmin, UserProctoringDataResponseTaskParticipant
+    VariantIdResponseTaskAdmin,
+    UserProctoringDataResponseTaskParticipant,
+    UserExternalDataResponseTaskParticipant
 } from '@api/tasks/model'
 
 
@@ -226,10 +228,21 @@ export class TasksService
         }
 
 
-        let responseType_: 'text' | 'json' = 'json'
-        if ( localVarHttpHeaderAcceptSelected && localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+        let responseType_: 'text' | 'json' | 'blob' = 'json'
+        if ( localVarHttpHeaderAcceptSelected )
         {
-            responseType_ = 'text'
+            if ( localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+            {
+                responseType_ = 'text'
+            }
+            else if ( this.configuration.isJsonMime( localVarHttpHeaderAcceptSelected ) )
+            {
+                responseType_ = 'json'
+            }
+            else
+            {
+                responseType_ = 'blob'
+            }
         }
 
         return this.httpClient.delete<any>( `${ this.configuration.basePath }/tasks/admin/certificate/${ encodeURIComponent( String( certificateId ) ) }`,
@@ -310,10 +323,21 @@ export class TasksService
             localVarHeaders = localVarHeaders.set( 'Content-Type', httpContentTypeSelected )
         }
 
-        let responseType_: 'text' | 'json' = 'json'
-        if ( localVarHttpHeaderAcceptSelected && localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+        let responseType_: 'text' | 'json' | 'blob' = 'json'
+        if ( localVarHttpHeaderAcceptSelected )
         {
-            responseType_ = 'text'
+            if ( localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+            {
+                responseType_ = 'text'
+            }
+            else if ( this.configuration.isJsonMime( localVarHttpHeaderAcceptSelected ) )
+            {
+                responseType_ = 'json'
+            }
+            else
+            {
+                responseType_ = 'blob'
+            }
         }
 
         return this.httpClient.post<any>( `${ this.configuration.basePath }/tasks/admin/certificate/${ encodeURIComponent( String( certificateId ) ) }/image`,
@@ -394,10 +418,21 @@ export class TasksService
             localVarHeaders = localVarHeaders.set( 'Content-Type', httpContentTypeSelected )
         }
 
-        let responseType_: 'text' | 'json' = 'json'
-        if ( localVarHttpHeaderAcceptSelected && localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+        let responseType_: 'text' | 'json' | 'blob' = 'json'
+        if ( localVarHttpHeaderAcceptSelected )
         {
-            responseType_ = 'text'
+            if ( localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+            {
+                responseType_ = 'text'
+            }
+            else if ( this.configuration.isJsonMime( localVarHttpHeaderAcceptSelected ) )
+            {
+                responseType_ = 'json'
+            }
+            else
+            {
+                responseType_ = 'blob'
+            }
         }
 
         return this.httpClient.patch<any>( `${ this.configuration.basePath }/tasks/admin/certificate/${ encodeURIComponent( String( certificateId ) ) }`,
@@ -633,10 +668,21 @@ export class TasksService
             localVarHeaders = localVarHeaders.set( 'Content-Type', httpContentTypeSelected )
         }
 
-        let responseType_: 'text' | 'json' = 'json'
-        if ( localVarHttpHeaderAcceptSelected && localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+        let responseType_: 'text' | 'json' | 'blob' = 'json'
+        if ( localVarHttpHeaderAcceptSelected )
         {
-            responseType_ = 'text'
+            if ( localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+            {
+                responseType_ = 'text'
+            }
+            else if ( this.configuration.isJsonMime( localVarHttpHeaderAcceptSelected ) )
+            {
+                responseType_ = 'json'
+            }
+            else
+            {
+                responseType_ = 'blob'
+            }
         }
 
         return this.httpClient.post<Certificate>( `${ this.configuration.basePath }/tasks/admin/certificate_type/${ encodeURIComponent( String( certificateTypeId ) ) }/certificate`,
@@ -702,10 +748,21 @@ export class TasksService
         }
 
 
-        let responseType_: 'text' | 'json' = 'json'
-        if ( localVarHttpHeaderAcceptSelected && localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+        let responseType_: 'text' | 'json' | 'blob' = 'json'
+        if ( localVarHttpHeaderAcceptSelected )
         {
-            responseType_ = 'text'
+            if ( localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+            {
+                responseType_ = 'text'
+            }
+            else if ( this.configuration.isJsonMime( localVarHttpHeaderAcceptSelected ) )
+            {
+                responseType_ = 'json'
+            }
+            else
+            {
+                responseType_ = 'blob'
+            }
         }
 
         return this.httpClient.delete<any>( `${ this.configuration.basePath }/tasks/admin/certificate_type/${ encodeURIComponent( String( certificateTypeId ) ) }`,
@@ -785,10 +842,21 @@ export class TasksService
             localVarHeaders = localVarHeaders.set( 'Content-Type', httpContentTypeSelected )
         }
 
-        let responseType_: 'text' | 'json' = 'json'
-        if ( localVarHttpHeaderAcceptSelected && localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+        let responseType_: 'text' | 'json' | 'blob' = 'json'
+        if ( localVarHttpHeaderAcceptSelected )
         {
-            responseType_ = 'text'
+            if ( localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+            {
+                responseType_ = 'text'
+            }
+            else if ( this.configuration.isJsonMime( localVarHttpHeaderAcceptSelected ) )
+            {
+                responseType_ = 'json'
+            }
+            else
+            {
+                responseType_ = 'blob'
+            }
         }
 
         return this.httpClient.patch<any>( `${ this.configuration.basePath }/tasks/admin/certificate_type/${ encodeURIComponent( String( certificateTypeId ) ) }`,
@@ -866,10 +934,21 @@ export class TasksService
             localVarHeaders = localVarHeaders.set( 'Content-Type', httpContentTypeSelected )
         }
 
-        let responseType_: 'text' | 'json' = 'json'
-        if ( localVarHttpHeaderAcceptSelected && localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+        let responseType_: 'text' | 'json' | 'blob' = 'json'
+        if ( localVarHttpHeaderAcceptSelected )
         {
-            responseType_ = 'text'
+            if ( localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+            {
+                responseType_ = 'text'
+            }
+            else if ( this.configuration.isJsonMime( localVarHttpHeaderAcceptSelected ) )
+            {
+                responseType_ = 'json'
+            }
+            else
+            {
+                responseType_ = 'blob'
+            }
         }
 
         return this.httpClient.post<CertificateType>( `${ this.configuration.basePath }/tasks/admin/certificate_type`,
@@ -942,10 +1021,21 @@ export class TasksService
         }
 
 
-        let responseType_: 'text' | 'json' = 'json'
-        if ( localVarHttpHeaderAcceptSelected && localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+        let responseType_: 'text' | 'json' | 'blob' = 'json'
+        if ( localVarHttpHeaderAcceptSelected )
         {
-            responseType_ = 'text'
+            if ( localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+            {
+                responseType_ = 'text'
+            }
+            else if ( this.configuration.isJsonMime( localVarHttpHeaderAcceptSelected ) )
+            {
+                responseType_ = 'json'
+            }
+            else
+            {
+                responseType_ = 'blob'
+            }
         }
 
         return this.httpClient.post<VariantIdResponseTaskAdmin>( `${ this.configuration.basePath }/tasks/admin/contest/${ encodeURIComponent( String( idContest ) ) }/user/${ encodeURIComponent( String( idUser ) ) }/variant/generate`,
@@ -1001,10 +1091,21 @@ export class TasksService
         }
 
 
-        let responseType_: 'text' | 'json' = 'json'
-        if ( localVarHttpHeaderAcceptSelected && localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+        let responseType_: 'text' | 'json' | 'blob' = 'json'
+        if ( localVarHttpHeaderAcceptSelected )
         {
-            responseType_ = 'text'
+            if ( localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+            {
+                responseType_ = 'text'
+            }
+            else if ( this.configuration.isJsonMime( localVarHttpHeaderAcceptSelected ) )
+            {
+                responseType_ = 'json'
+            }
+            else
+            {
+                responseType_ = 'blob'
+            }
         }
 
         return this.httpClient.get<FontsResponseTasksAdmin>( `${ this.configuration.basePath }/tasks/admin/fonts`,
@@ -1081,10 +1182,21 @@ export class TasksService
             localVarHeaders = localVarHeaders.set( 'Content-Type', httpContentTypeSelected )
         }
 
-        let responseType_: 'text' | 'json' = 'json'
-        if ( localVarHttpHeaderAcceptSelected && localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+        let responseType_: 'text' | 'json' | 'blob' = 'json'
+        if ( localVarHttpHeaderAcceptSelected )
         {
-            responseType_ = 'text'
+            if ( localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+            {
+                responseType_ = 'text'
+            }
+            else if ( this.configuration.isJsonMime( localVarHttpHeaderAcceptSelected ) )
+            {
+                responseType_ = 'json'
+            }
+            else
+            {
+                responseType_ = 'blob'
+            }
         }
 
         return this.httpClient.post<LocationResponseTaskAdmin>( `${ this.configuration.basePath }/tasks/admin/location/create_online`,
@@ -1162,10 +1274,21 @@ export class TasksService
             localVarHeaders = localVarHeaders.set( 'Content-Type', httpContentTypeSelected )
         }
 
-        let responseType_: 'text' | 'json' = 'json'
-        if ( localVarHttpHeaderAcceptSelected && localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+        let responseType_: 'text' | 'json' | 'blob' = 'json'
+        if ( localVarHttpHeaderAcceptSelected )
         {
-            responseType_ = 'text'
+            if ( localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+            {
+                responseType_ = 'text'
+            }
+            else if ( this.configuration.isJsonMime( localVarHttpHeaderAcceptSelected ) )
+            {
+                responseType_ = 'json'
+            }
+            else
+            {
+                responseType_ = 'blob'
+            }
         }
 
         return this.httpClient.post<LocationResponseTaskAdmin>( `${ this.configuration.basePath }/tasks/admin/location/create_other`,
@@ -1243,10 +1366,21 @@ export class TasksService
             localVarHeaders = localVarHeaders.set( 'Content-Type', httpContentTypeSelected )
         }
 
-        let responseType_: 'text' | 'json' = 'json'
-        if ( localVarHttpHeaderAcceptSelected && localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+        let responseType_: 'text' | 'json' | 'blob' = 'json'
+        if ( localVarHttpHeaderAcceptSelected )
         {
-            responseType_ = 'text'
+            if ( localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+            {
+                responseType_ = 'text'
+            }
+            else if ( this.configuration.isJsonMime( localVarHttpHeaderAcceptSelected ) )
+            {
+                responseType_ = 'json'
+            }
+            else
+            {
+                responseType_ = 'blob'
+            }
         }
 
         return this.httpClient.post<LocationResponseTaskAdmin>( `${ this.configuration.basePath }/tasks/admin/location/create_russia`,
@@ -1312,10 +1446,21 @@ export class TasksService
         }
 
 
-        let responseType_: 'text' | 'json' = 'json'
-        if ( localVarHttpHeaderAcceptSelected && localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+        let responseType_: 'text' | 'json' | 'blob' = 'json'
+        if ( localVarHttpHeaderAcceptSelected )
         {
-            responseType_ = 'text'
+            if ( localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+            {
+                responseType_ = 'text'
+            }
+            else if ( this.configuration.isJsonMime( localVarHttpHeaderAcceptSelected ) )
+            {
+                responseType_ = 'json'
+            }
+            else
+            {
+                responseType_ = 'blob'
+            }
         }
 
         return this.httpClient.post<any>( `${ this.configuration.basePath }/tasks/admin/location/${ encodeURIComponent( String( idLocation ) ) }/remove`,
@@ -1393,10 +1538,21 @@ export class TasksService
             localVarHeaders = localVarHeaders.set( 'Content-Type', httpContentTypeSelected )
         }
 
-        let responseType_: 'text' | 'json' = 'json'
-        if ( localVarHttpHeaderAcceptSelected && localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+        let responseType_: 'text' | 'json' | 'blob' = 'json'
+        if ( localVarHttpHeaderAcceptSelected )
         {
-            responseType_ = 'text'
+            if ( localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+            {
+                responseType_ = 'text'
+            }
+            else if ( this.configuration.isJsonMime( localVarHttpHeaderAcceptSelected ) )
+            {
+                responseType_ = 'json'
+            }
+            else
+            {
+                responseType_ = 'blob'
+            }
         }
 
         return this.httpClient.post<OlympiadTypeResponseTaskAdmin>( `${ this.configuration.basePath }/tasks/admin/olympiad_type/create`,
@@ -1462,10 +1618,21 @@ export class TasksService
         }
 
 
-        let responseType_: 'text' | 'json' = 'json'
-        if ( localVarHttpHeaderAcceptSelected && localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+        let responseType_: 'text' | 'json' | 'blob' = 'json'
+        if ( localVarHttpHeaderAcceptSelected )
         {
-            responseType_ = 'text'
+            if ( localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+            {
+                responseType_ = 'text'
+            }
+            else if ( this.configuration.isJsonMime( localVarHttpHeaderAcceptSelected ) )
+            {
+                responseType_ = 'json'
+            }
+            else
+            {
+                responseType_ = 'blob'
+            }
         }
 
         return this.httpClient.post<any>( `${ this.configuration.basePath }/tasks/admin/olympiad_type/${ encodeURIComponent( String( idOlympiadType ) ) }/remove`,
@@ -1546,10 +1713,21 @@ export class TasksService
             localVarHeaders = localVarHeaders.set( 'Content-Type', httpContentTypeSelected )
         }
 
-        let responseType_: 'text' | 'json' = 'json'
-        if ( localVarHttpHeaderAcceptSelected && localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+        let responseType_: 'text' | 'json' | 'blob' = 'json'
+        if ( localVarHttpHeaderAcceptSelected )
         {
-            responseType_ = 'text'
+            if ( localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+            {
+                responseType_ = 'text'
+            }
+            else if ( this.configuration.isJsonMime( localVarHttpHeaderAcceptSelected ) )
+            {
+                responseType_ = 'json'
+            }
+            else
+            {
+                responseType_ = 'blob'
+            }
         }
 
         return this.httpClient.post<any>( `${ this.configuration.basePath }/tasks/control_users/contest/${ encodeURIComponent( String( idContest ) ) }/add_user`,
@@ -1630,10 +1808,21 @@ export class TasksService
             localVarHeaders = localVarHeaders.set( 'Content-Type', httpContentTypeSelected )
         }
 
-        let responseType_: 'text' | 'json' = 'json'
-        if ( localVarHttpHeaderAcceptSelected && localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+        let responseType_: 'text' | 'json' | 'blob' = 'json'
+        if ( localVarHttpHeaderAcceptSelected )
         {
-            responseType_ = 'text'
+            if ( localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+            {
+                responseType_ = 'text'
+            }
+            else if ( this.configuration.isJsonMime( localVarHttpHeaderAcceptSelected ) )
+            {
+                responseType_ = 'json'
+            }
+            else
+            {
+                responseType_ = 'blob'
+            }
         }
 
         return this.httpClient.post<any>( `${ this.configuration.basePath }/tasks/control_users/contest/${ encodeURIComponent( String( idContest ) ) }/change_location`,
@@ -1714,10 +1903,21 @@ export class TasksService
             localVarHeaders = localVarHeaders.set( 'Content-Type', httpContentTypeSelected )
         }
 
-        let responseType_: 'text' | 'json' = 'json'
-        if ( localVarHttpHeaderAcceptSelected && localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+        let responseType_: 'text' | 'json' | 'blob' = 'json'
+        if ( localVarHttpHeaderAcceptSelected )
         {
-            responseType_ = 'text'
+            if ( localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+            {
+                responseType_ = 'text'
+            }
+            else if ( this.configuration.isJsonMime( localVarHttpHeaderAcceptSelected ) )
+            {
+                responseType_ = 'json'
+            }
+            else
+            {
+                responseType_ = 'blob'
+            }
         }
 
         return this.httpClient.patch<any>( `${ this.configuration.basePath }/tasks/control_users/contest/${ encodeURIComponent( String( idContest ) ) }/edit_users`,
@@ -1798,10 +1998,21 @@ export class TasksService
             localVarHeaders = localVarHeaders.set( 'Content-Type', httpContentTypeSelected )
         }
 
-        let responseType_: 'text' | 'json' = 'json'
-        if ( localVarHttpHeaderAcceptSelected && localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+        let responseType_: 'text' | 'json' | 'blob' = 'json'
+        if ( localVarHttpHeaderAcceptSelected )
         {
-            responseType_ = 'text'
+            if ( localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+            {
+                responseType_ = 'text'
+            }
+            else if ( this.configuration.isJsonMime( localVarHttpHeaderAcceptSelected ) )
+            {
+                responseType_ = 'json'
+            }
+            else
+            {
+                responseType_ = 'blob'
+            }
         }
 
         return this.httpClient.post<any>( `${ this.configuration.basePath }/tasks/control_users/contest/${ encodeURIComponent( String( idContest ) ) }/remove_user`,
@@ -1869,10 +2080,21 @@ export class TasksService
         }
 
 
-        let responseType_: 'text' | 'json' = 'json'
-        if ( localVarHttpHeaderAcceptSelected && localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+        let responseType_: 'text' | 'json' | 'blob' = 'json'
+        if ( localVarHttpHeaderAcceptSelected )
         {
-            responseType_ = 'text'
+            if ( localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+            {
+                responseType_ = 'text'
+            }
+            else if ( this.configuration.isJsonMime( localVarHttpHeaderAcceptSelected ) )
+            {
+                responseType_ = 'json'
+            }
+            else
+            {
+                responseType_ = 'blob'
+            }
         }
 
         return this.httpClient.get<UsersResponseTaskControlUsers>( `${ this.configuration.basePath }/tasks/control_users/contest/${ encodeURIComponent( String( idContest ) ) }/user/all`,
@@ -2018,10 +2240,21 @@ export class TasksService
             localVarHeaders = localVarHeaders.set( 'Content-Type', httpContentTypeSelected )
         }
 
-        let responseType_: 'text' | 'json' = 'json'
-        if ( localVarHttpHeaderAcceptSelected && localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+        let responseType_: 'text' | 'json' | 'blob' = 'json'
+        if ( localVarHttpHeaderAcceptSelected )
         {
-            responseType_ = 'text'
+            if ( localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+            {
+                responseType_ = 'text'
+            }
+            else if ( this.configuration.isJsonMime( localVarHttpHeaderAcceptSelected ) )
+            {
+                responseType_ = 'json'
+            }
+            else
+            {
+                responseType_ = 'blob'
+            }
         }
 
         return this.httpClient.post<BaseOlympiadIdResponseTaskCreator>( `${ this.configuration.basePath }/tasks/creator/base_olympiad/create`,
@@ -2104,10 +2337,21 @@ export class TasksService
             localVarHeaders = localVarHeaders.set( 'Content-Type', httpContentTypeSelected )
         }
 
-        let responseType_: 'text' | 'json' = 'json'
-        if ( localVarHttpHeaderAcceptSelected && localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+        let responseType_: 'text' | 'json' | 'blob' = 'json'
+        if ( localVarHttpHeaderAcceptSelected )
         {
-            responseType_ = 'text'
+            if ( localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+            {
+                responseType_ = 'text'
+            }
+            else if ( this.configuration.isJsonMime( localVarHttpHeaderAcceptSelected ) )
+            {
+                responseType_ = 'json'
+            }
+            else
+            {
+                responseType_ = 'blob'
+            }
         }
 
         return this.httpClient.post<ContestIdResponseTaskCreator>( `${ this.configuration.basePath }/tasks/creator/base_olympiad/${ encodeURIComponent( String( idBaseOlympiad ) ) }/olympiad/create_composite`,
@@ -2190,10 +2434,21 @@ export class TasksService
             localVarHeaders = localVarHeaders.set( 'Content-Type', httpContentTypeSelected )
         }
 
-        let responseType_: 'text' | 'json' = 'json'
-        if ( localVarHttpHeaderAcceptSelected && localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+        let responseType_: 'text' | 'json' | 'blob' = 'json'
+        if ( localVarHttpHeaderAcceptSelected )
         {
-            responseType_ = 'text'
+            if ( localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+            {
+                responseType_ = 'text'
+            }
+            else if ( this.configuration.isJsonMime( localVarHttpHeaderAcceptSelected ) )
+            {
+                responseType_ = 'json'
+            }
+            else
+            {
+                responseType_ = 'blob'
+            }
         }
 
         return this.httpClient.post<ContestIdResponseTaskCreator>( `${ this.configuration.basePath }/tasks/creator/base_olympiad/${ encodeURIComponent( String( idBaseOlympiad ) ) }/olympiad/create_simple`,
@@ -2276,10 +2531,21 @@ export class TasksService
             localVarHeaders = localVarHeaders.set( 'Content-Type', httpContentTypeSelected )
         }
 
-        let responseType_: 'text' | 'json' = 'json'
-        if ( localVarHttpHeaderAcceptSelected && localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+        let responseType_: 'text' | 'json' | 'blob' = 'json'
+        if ( localVarHttpHeaderAcceptSelected )
         {
-            responseType_ = 'text'
+            if ( localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+            {
+                responseType_ = 'text'
+            }
+            else if ( this.configuration.isJsonMime( localVarHttpHeaderAcceptSelected ) )
+            {
+                responseType_ = 'json'
+            }
+            else
+            {
+                responseType_ = 'blob'
+            }
         }
 
         return this.httpClient.post<TaskPoolIdResponseTaskCreator>( `${ this.configuration.basePath }/tasks/creator/base_olympiad/${ encodeURIComponent( String( idBaseOlympiad ) ) }/task_pool/create`,
@@ -2352,10 +2618,21 @@ export class TasksService
         }
 
 
-        let responseType_: 'text' | 'json' = 'json'
-        if ( localVarHttpHeaderAcceptSelected && localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+        let responseType_: 'text' | 'json' | 'blob' = 'json'
+        if ( localVarHttpHeaderAcceptSelected )
         {
-            responseType_ = 'text'
+            if ( localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+            {
+                responseType_ = 'text'
+            }
+            else if ( this.configuration.isJsonMime( localVarHttpHeaderAcceptSelected ) )
+            {
+                responseType_ = 'json'
+            }
+            else
+            {
+                responseType_ = 'blob'
+            }
         }
 
         return this.httpClient.get<TaskPool>( `${ this.configuration.basePath }/tasks/creator/base_olympiad/${ encodeURIComponent( String( idBaseOlympiad ) ) }/task_pool/${ encodeURIComponent( String( idTaskPool ) ) }`,
@@ -2422,10 +2699,21 @@ export class TasksService
         }
 
 
-        let responseType_: 'text' | 'json' = 'json'
-        if ( localVarHttpHeaderAcceptSelected && localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+        let responseType_: 'text' | 'json' | 'blob' = 'json'
+        if ( localVarHttpHeaderAcceptSelected )
         {
-            responseType_ = 'text'
+            if ( localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+            {
+                responseType_ = 'text'
+            }
+            else if ( this.configuration.isJsonMime( localVarHttpHeaderAcceptSelected ) )
+            {
+                responseType_ = 'json'
+            }
+            else
+            {
+                responseType_ = 'blob'
+            }
         }
 
         return this.httpClient.get<ContestGroupRestrictionListAdmin>( `${ this.configuration.basePath }/tasks/creator/contest/${ encodeURIComponent( String( contestId ) ) }/restrictions`,
@@ -2505,10 +2793,21 @@ export class TasksService
             localVarHeaders = localVarHeaders.set( 'Content-Type', httpContentTypeSelected )
         }
 
-        let responseType_: 'text' | 'json' = 'json'
-        if ( localVarHttpHeaderAcceptSelected && localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+        let responseType_: 'text' | 'json' | 'blob' = 'json'
+        if ( localVarHttpHeaderAcceptSelected )
         {
-            responseType_ = 'text'
+            if ( localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+            {
+                responseType_ = 'text'
+            }
+            else if ( this.configuration.isJsonMime( localVarHttpHeaderAcceptSelected ) )
+            {
+                responseType_ = 'json'
+            }
+            else
+            {
+                responseType_ = 'blob'
+            }
         }
 
         return this.httpClient.put<any>( `${ this.configuration.basePath }/tasks/creator/contest/${ encodeURIComponent( String( contestId ) ) }/restrictions`,
@@ -2576,10 +2875,21 @@ export class TasksService
         }
 
 
-        let responseType_: 'text' | 'json' = 'json'
-        if ( localVarHttpHeaderAcceptSelected && localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+        let responseType_: 'text' | 'json' | 'blob' = 'json'
+        if ( localVarHttpHeaderAcceptSelected )
         {
-            responseType_ = 'text'
+            if ( localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+            {
+                responseType_ = 'text'
+            }
+            else if ( this.configuration.isJsonMime( localVarHttpHeaderAcceptSelected ) )
+            {
+                responseType_ = 'json'
+            }
+            else
+            {
+                responseType_ = 'blob'
+            }
         }
 
         return this.httpClient.get<AllContestTaskResponseTaskCreator>( `${ this.configuration.basePath }/tasks/creator/contest/${ encodeURIComponent( String( idContest ) ) }/contest_task/all`,
@@ -2661,10 +2971,21 @@ export class TasksService
             localVarHeaders = localVarHeaders.set( 'Content-Type', httpContentTypeSelected )
         }
 
-        let responseType_: 'text' | 'json' = 'json'
-        if ( localVarHttpHeaderAcceptSelected && localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+        let responseType_: 'text' | 'json' | 'blob' = 'json'
+        if ( localVarHttpHeaderAcceptSelected )
         {
-            responseType_ = 'text'
+            if ( localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+            {
+                responseType_ = 'text'
+            }
+            else if ( this.configuration.isJsonMime( localVarHttpHeaderAcceptSelected ) )
+            {
+                responseType_ = 'json'
+            }
+            else
+            {
+                responseType_ = 'blob'
+            }
         }
 
         return this.httpClient.post<ContestTaskResponseTaskCreator>( `${ this.configuration.basePath }/tasks/creator/contest/${ encodeURIComponent( String( idContest ) ) }/contest_task/create`,
@@ -2737,10 +3058,21 @@ export class TasksService
         }
 
 
-        let responseType_: 'text' | 'json' = 'json'
-        if ( localVarHttpHeaderAcceptSelected && localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+        let responseType_: 'text' | 'json' | 'blob' = 'json'
+        if ( localVarHttpHeaderAcceptSelected )
         {
-            responseType_ = 'text'
+            if ( localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+            {
+                responseType_ = 'text'
+            }
+            else if ( this.configuration.isJsonMime( localVarHttpHeaderAcceptSelected ) )
+            {
+                responseType_ = 'json'
+            }
+            else
+            {
+                responseType_ = 'blob'
+            }
         }
 
         return this.httpClient.get<ContestTask>( `${ this.configuration.basePath }/tasks/creator/contest/${ encodeURIComponent( String( idContest ) ) }/contest_task/${ encodeURIComponent( String( idContestTask ) ) }`,
@@ -2807,10 +3139,21 @@ export class TasksService
         }
 
 
-        let responseType_: 'text' | 'json' = 'json'
-        if ( localVarHttpHeaderAcceptSelected && localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+        let responseType_: 'text' | 'json' | 'blob' = 'json'
+        if ( localVarHttpHeaderAcceptSelected )
         {
-            responseType_ = 'text'
+            if ( localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+            {
+                responseType_ = 'text'
+            }
+            else if ( this.configuration.isJsonMime( localVarHttpHeaderAcceptSelected ) )
+            {
+                responseType_ = 'json'
+            }
+            else
+            {
+                responseType_ = 'blob'
+            }
         }
 
         return this.httpClient.get<AllVariantsResponseTaskCreator>( `${ this.configuration.basePath }/tasks/creator/contest/${ encodeURIComponent( String( idContest ) ) }/variant/all`,
@@ -2882,10 +3225,21 @@ export class TasksService
         }
 
 
-        let responseType_: 'text' | 'json' = 'json'
-        if ( localVarHttpHeaderAcceptSelected && localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+        let responseType_: 'text' | 'json' | 'blob' = 'json'
+        if ( localVarHttpHeaderAcceptSelected )
         {
-            responseType_ = 'text'
+            if ( localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+            {
+                responseType_ = 'text'
+            }
+            else if ( this.configuration.isJsonMime( localVarHttpHeaderAcceptSelected ) )
+            {
+                responseType_ = 'json'
+            }
+            else
+            {
+                responseType_ = 'blob'
+            }
         }
 
         return this.httpClient.get<VariantResponseTaskCreator>( `${ this.configuration.basePath }/tasks/creator/contest/${ encodeURIComponent( String( idContest ) ) }/variant/${ encodeURIComponent( String( variantNum ) ) }`,
@@ -2967,10 +3321,21 @@ export class TasksService
             localVarHeaders = localVarHeaders.set( 'Content-Type', httpContentTypeSelected )
         }
 
-        let responseType_: 'text' | 'json' = 'json'
-        if ( localVarHttpHeaderAcceptSelected && localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+        let responseType_: 'text' | 'json' | 'blob' = 'json'
+        if ( localVarHttpHeaderAcceptSelected )
         {
-            responseType_ = 'text'
+            if ( localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+            {
+                responseType_ = 'text'
+            }
+            else if ( this.configuration.isJsonMime( localVarHttpHeaderAcceptSelected ) )
+            {
+                responseType_ = 'json'
+            }
+            else
+            {
+                responseType_ = 'blob'
+            }
         }
 
         return this.httpClient.post<StageIdResponseTaskCreator>( `${ this.configuration.basePath }/tasks/creator/olympiad/${ encodeURIComponent( String( idOlympiad ) ) }/stage/create`,
@@ -3043,10 +3408,21 @@ export class TasksService
         }
 
 
-        let responseType_: 'text' | 'json' = 'json'
-        if ( localVarHttpHeaderAcceptSelected && localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+        let responseType_: 'text' | 'json' | 'blob' = 'json'
+        if ( localVarHttpHeaderAcceptSelected )
         {
-            responseType_ = 'text'
+            if ( localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+            {
+                responseType_ = 'text'
+            }
+            else if ( this.configuration.isJsonMime( localVarHttpHeaderAcceptSelected ) )
+            {
+                responseType_ = 'json'
+            }
+            else
+            {
+                responseType_ = 'blob'
+            }
         }
 
         return this.httpClient.get<AllOlympiadsResponseTaskCreator>( `${ this.configuration.basePath }/tasks/creator/olympiad/${ encodeURIComponent( String( idOlympiad ) ) }/stage/${ encodeURIComponent( String( idStage ) ) }/contest/all`,
@@ -3116,10 +3492,21 @@ export class TasksService
         }
 
 
-        let responseType_: 'text' | 'json' = 'json'
-        if ( localVarHttpHeaderAcceptSelected && localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+        let responseType_: 'text' | 'json' | 'blob' = 'json'
+        if ( localVarHttpHeaderAcceptSelected )
         {
-            responseType_ = 'text'
+            if ( localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+            {
+                responseType_ = 'text'
+            }
+            else if ( this.configuration.isJsonMime( localVarHttpHeaderAcceptSelected ) )
+            {
+                responseType_ = 'json'
+            }
+            else
+            {
+                responseType_ = 'blob'
+            }
         }
 
         return this.httpClient.get<AllTaskPoolsResponseTaskCreator>( `${ this.configuration.basePath }/tasks/creator/task_pool/all`,
@@ -3187,10 +3574,21 @@ export class TasksService
         }
 
 
-        let responseType_: 'text' | 'json' = 'json'
-        if ( localVarHttpHeaderAcceptSelected && localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+        let responseType_: 'text' | 'json' | 'blob' = 'json'
+        if ( localVarHttpHeaderAcceptSelected )
         {
-            responseType_ = 'text'
+            if ( localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+            {
+                responseType_ = 'text'
+            }
+            else if ( this.configuration.isJsonMime( localVarHttpHeaderAcceptSelected ) )
+            {
+                responseType_ = 'json'
+            }
+            else
+            {
+                responseType_ = 'blob'
+            }
         }
 
         return this.httpClient.get<AllTasksResponseTaskCreator>( `${ this.configuration.basePath }/tasks/creator/task_pool/${ encodeURIComponent( String( idTaskPool ) ) }/task/all`,
@@ -3272,10 +3670,21 @@ export class TasksService
             localVarHeaders = localVarHeaders.set( 'Content-Type', httpContentTypeSelected )
         }
 
-        let responseType_: 'text' | 'json' = 'json'
-        if ( localVarHttpHeaderAcceptSelected && localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+        let responseType_: 'text' | 'json' | 'blob' = 'json'
+        if ( localVarHttpHeaderAcceptSelected )
         {
-            responseType_ = 'text'
+            if ( localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+            {
+                responseType_ = 'text'
+            }
+            else if ( this.configuration.isJsonMime( localVarHttpHeaderAcceptSelected ) )
+            {
+                responseType_ = 'json'
+            }
+            else
+            {
+                responseType_ = 'blob'
+            }
         }
 
         return this.httpClient.post<TaskIdResponseTaskCreator>( `${ this.configuration.basePath }/tasks/creator/task_pool/${ encodeURIComponent( String( idTaskPool ) ) }/task/create_multiple`,
@@ -3358,10 +3767,21 @@ export class TasksService
             localVarHeaders = localVarHeaders.set( 'Content-Type', httpContentTypeSelected )
         }
 
-        let responseType_: 'text' | 'json' = 'json'
-        if ( localVarHttpHeaderAcceptSelected && localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+        let responseType_: 'text' | 'json' | 'blob' = 'json'
+        if ( localVarHttpHeaderAcceptSelected )
         {
-            responseType_ = 'text'
+            if ( localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+            {
+                responseType_ = 'text'
+            }
+            else if ( this.configuration.isJsonMime( localVarHttpHeaderAcceptSelected ) )
+            {
+                responseType_ = 'json'
+            }
+            else
+            {
+                responseType_ = 'blob'
+            }
         }
 
         return this.httpClient.post<TaskIdResponseTaskCreator>( `${ this.configuration.basePath }/tasks/creator/task_pool/${ encodeURIComponent( String( idTaskPool ) ) }/task/create_plain`,
@@ -3444,10 +3864,21 @@ export class TasksService
             localVarHeaders = localVarHeaders.set( 'Content-Type', httpContentTypeSelected )
         }
 
-        let responseType_: 'text' | 'json' = 'json'
-        if ( localVarHttpHeaderAcceptSelected && localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+        let responseType_: 'text' | 'json' | 'blob' = 'json'
+        if ( localVarHttpHeaderAcceptSelected )
         {
-            responseType_ = 'text'
+            if ( localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+            {
+                responseType_ = 'text'
+            }
+            else if ( this.configuration.isJsonMime( localVarHttpHeaderAcceptSelected ) )
+            {
+                responseType_ = 'json'
+            }
+            else
+            {
+                responseType_ = 'blob'
+            }
         }
 
         return this.httpClient.post<TaskIdResponseTaskCreator>( `${ this.configuration.basePath }/tasks/creator/task_pool/${ encodeURIComponent( String( idTaskPool ) ) }/task/create_range`,
@@ -3520,10 +3951,21 @@ export class TasksService
         }
 
 
-        let responseType_: 'text' | 'json' = 'json'
-        if ( localVarHttpHeaderAcceptSelected && localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+        let responseType_: 'text' | 'json' | 'blob' = 'json'
+        if ( localVarHttpHeaderAcceptSelected )
         {
-            responseType_ = 'text'
+            if ( localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+            {
+                responseType_ = 'text'
+            }
+            else if ( this.configuration.isJsonMime( localVarHttpHeaderAcceptSelected ) )
+            {
+                responseType_ = 'json'
+            }
+            else
+            {
+                responseType_ = 'blob'
+            }
         }
 
         return this.httpClient.get<TaskResponseTaskCreator>( `${ this.configuration.basePath }/tasks/creator/task_pool/${ encodeURIComponent( String( idTaskPool ) ) }/task/${ encodeURIComponent( String( idTask ) ) }`,
@@ -3672,10 +4114,21 @@ export class TasksService
             localVarHeaders = localVarHeaders.set( 'Content-Type', httpContentTypeSelected )
         }
 
-        let responseType_: 'text' | 'json' = 'json'
-        if ( localVarHttpHeaderAcceptSelected && localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+        let responseType_: 'text' | 'json' | 'blob' = 'json'
+        if ( localVarHttpHeaderAcceptSelected )
         {
-            responseType_ = 'text'
+            if ( localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+            {
+                responseType_ = 'text'
+            }
+            else if ( this.configuration.isJsonMime( localVarHttpHeaderAcceptSelected ) )
+            {
+                responseType_ = 'json'
+            }
+            else
+            {
+                responseType_ = 'blob'
+            }
         }
 
         return this.httpClient.post<any>( `${ this.configuration.basePath }/tasks/editor/base_olympiad/${ encodeURIComponent( String( idBaseOlympiad ) ) }/add_target_classes`,
@@ -3763,10 +4216,21 @@ export class TasksService
             localVarHeaders = localVarHeaders.set( 'Content-Type', httpContentTypeSelected )
         }
 
-        let responseType_: 'text' | 'json' = 'json'
-        if ( localVarHttpHeaderAcceptSelected && localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+        let responseType_: 'text' | 'json' | 'blob' = 'json'
+        if ( localVarHttpHeaderAcceptSelected )
         {
-            responseType_ = 'text'
+            if ( localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+            {
+                responseType_ = 'text'
+            }
+            else if ( this.configuration.isJsonMime( localVarHttpHeaderAcceptSelected ) )
+            {
+                responseType_ = 'json'
+            }
+            else
+            {
+                responseType_ = 'blob'
+            }
         }
 
         return this.httpClient.patch<ContestResponseTaskCreator>( `${ this.configuration.basePath }/tasks/editor/base_olympiad/${ encodeURIComponent( String( idBaseOlympiad ) ) }/olympiad/${ encodeURIComponent( String( idOlympiad ) ) }`,
@@ -3837,10 +4301,21 @@ export class TasksService
         }
 
 
-        let responseType_: 'text' | 'json' = 'json'
-        if ( localVarHttpHeaderAcceptSelected && localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+        let responseType_: 'text' | 'json' | 'blob' = 'json'
+        if ( localVarHttpHeaderAcceptSelected )
         {
-            responseType_ = 'text'
+            if ( localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+            {
+                responseType_ = 'text'
+            }
+            else if ( this.configuration.isJsonMime( localVarHttpHeaderAcceptSelected ) )
+            {
+                responseType_ = 'json'
+            }
+            else
+            {
+                responseType_ = 'blob'
+            }
         }
 
         return this.httpClient.post<any>( `${ this.configuration.basePath }/tasks/editor/base_olympiad/${ encodeURIComponent( String( idBaseOlympiad ) ) }/olympiad/${ encodeURIComponent( String( idOlympiad ) ) }/remove`,
@@ -3923,10 +4398,21 @@ export class TasksService
             localVarHeaders = localVarHeaders.set( 'Content-Type', httpContentTypeSelected )
         }
 
-        let responseType_: 'text' | 'json' = 'json'
-        if ( localVarHttpHeaderAcceptSelected && localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+        let responseType_: 'text' | 'json' | 'blob' = 'json'
+        if ( localVarHttpHeaderAcceptSelected )
         {
-            responseType_ = 'text'
+            if ( localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+            {
+                responseType_ = 'text'
+            }
+            else if ( this.configuration.isJsonMime( localVarHttpHeaderAcceptSelected ) )
+            {
+                responseType_ = 'json'
+            }
+            else
+            {
+                responseType_ = 'blob'
+            }
         }
 
         return this.httpClient.patch<BaseOlympiadResponseTaskCreator>( `${ this.configuration.basePath }/tasks/editor/base_olympiad/${ encodeURIComponent( String( idBaseOlympiad ) ) }`,
@@ -3992,10 +4478,21 @@ export class TasksService
         }
 
 
-        let responseType_: 'text' | 'json' = 'json'
-        if ( localVarHttpHeaderAcceptSelected && localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+        let responseType_: 'text' | 'json' | 'blob' = 'json'
+        if ( localVarHttpHeaderAcceptSelected )
         {
-            responseType_ = 'text'
+            if ( localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+            {
+                responseType_ = 'text'
+            }
+            else if ( this.configuration.isJsonMime( localVarHttpHeaderAcceptSelected ) )
+            {
+                responseType_ = 'json'
+            }
+            else
+            {
+                responseType_ = 'blob'
+            }
         }
 
         return this.httpClient.post<any>( `${ this.configuration.basePath }/tasks/editor/base_olympiad/${ encodeURIComponent( String( idBaseOlympiad ) ) }/remove`,
@@ -4076,10 +4573,21 @@ export class TasksService
             localVarHeaders = localVarHeaders.set( 'Content-Type', httpContentTypeSelected )
         }
 
-        let responseType_: 'text' | 'json' = 'json'
-        if ( localVarHttpHeaderAcceptSelected && localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+        let responseType_: 'text' | 'json' | 'blob' = 'json'
+        if ( localVarHttpHeaderAcceptSelected )
         {
-            responseType_ = 'text'
+            if ( localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+            {
+                responseType_ = 'text'
+            }
+            else if ( this.configuration.isJsonMime( localVarHttpHeaderAcceptSelected ) )
+            {
+                responseType_ = 'json'
+            }
+            else
+            {
+                responseType_ = 'blob'
+            }
         }
 
         return this.httpClient.post<any>( `${ this.configuration.basePath }/tasks/editor/base_olympiad/${ encodeURIComponent( String( idBaseOlympiad ) ) }/remove_target_classes`,
@@ -4165,10 +4673,21 @@ export class TasksService
             localVarHeaders = localVarHeaders.set( 'Content-Type', httpContentTypeSelected )
         }
 
-        let responseType_: 'text' | 'json' = 'json'
-        if ( localVarHttpHeaderAcceptSelected && localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+        let responseType_: 'text' | 'json' | 'blob' = 'json'
+        if ( localVarHttpHeaderAcceptSelected )
         {
-            responseType_ = 'text'
+            if ( localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+            {
+                responseType_ = 'text'
+            }
+            else if ( this.configuration.isJsonMime( localVarHttpHeaderAcceptSelected ) )
+            {
+                responseType_ = 'json'
+            }
+            else
+            {
+                responseType_ = 'blob'
+            }
         }
 
         return this.httpClient.patch<any>( `${ this.configuration.basePath }/tasks/editor/base_olympiad/${ encodeURIComponent( String( idBaseOlympiad ) ) }/task_pool/${ encodeURIComponent( String( idTaskPool ) ) }`,
@@ -4239,10 +4758,21 @@ export class TasksService
         }
 
 
-        let responseType_: 'text' | 'json' = 'json'
-        if ( localVarHttpHeaderAcceptSelected && localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+        let responseType_: 'text' | 'json' | 'blob' = 'json'
+        if ( localVarHttpHeaderAcceptSelected )
         {
-            responseType_ = 'text'
+            if ( localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+            {
+                responseType_ = 'text'
+            }
+            else if ( this.configuration.isJsonMime( localVarHttpHeaderAcceptSelected ) )
+            {
+                responseType_ = 'json'
+            }
+            else
+            {
+                responseType_ = 'blob'
+            }
         }
 
         return this.httpClient.post<any>( `${ this.configuration.basePath }/tasks/editor/base_olympiad/${ encodeURIComponent( String( idBaseOlympiad ) ) }/task_pool/${ encodeURIComponent( String( idTaskPool ) ) }/remove`,
@@ -4303,10 +4833,21 @@ export class TasksService
         }
 
 
-        let responseType_: 'text' | 'json' = 'json'
-        if ( localVarHttpHeaderAcceptSelected && localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+        let responseType_: 'text' | 'json' | 'blob' = 'json'
+        if ( localVarHttpHeaderAcceptSelected )
         {
-            responseType_ = 'text'
+            if ( localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+            {
+                responseType_ = 'text'
+            }
+            else if ( this.configuration.isJsonMime( localVarHttpHeaderAcceptSelected ) )
+            {
+                responseType_ = 'json'
+            }
+            else
+            {
+                responseType_ = 'blob'
+            }
         }
 
         return this.httpClient.get<Certificate>( `${ this.configuration.basePath }/tasks/editor/certificate/${ encodeURIComponent( String( certificateId ) ) }`,
@@ -4424,10 +4965,21 @@ export class TasksService
         }
 
 
-        let responseType_: 'text' | 'json' = 'json'
-        if ( localVarHttpHeaderAcceptSelected && localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+        let responseType_: 'text' | 'json' | 'blob' = 'json'
+        if ( localVarHttpHeaderAcceptSelected )
         {
-            responseType_ = 'text'
+            if ( localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+            {
+                responseType_ = 'text'
+            }
+            else if ( this.configuration.isJsonMime( localVarHttpHeaderAcceptSelected ) )
+            {
+                responseType_ = 'json'
+            }
+            else
+            {
+                responseType_ = 'blob'
+            }
         }
 
         return this.httpClient.get<CertificateType>( `${ this.configuration.basePath }/tasks/editor/certificate_type/${ encodeURIComponent( String( certificateTypeId ) ) }`,
@@ -4482,10 +5034,21 @@ export class TasksService
         }
 
 
-        let responseType_: 'text' | 'json' = 'json'
-        if ( localVarHttpHeaderAcceptSelected && localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+        let responseType_: 'text' | 'json' | 'blob' = 'json'
+        if ( localVarHttpHeaderAcceptSelected )
         {
-            responseType_ = 'text'
+            if ( localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+            {
+                responseType_ = 'text'
+            }
+            else if ( this.configuration.isJsonMime( localVarHttpHeaderAcceptSelected ) )
+            {
+                responseType_ = 'json'
+            }
+            else
+            {
+                responseType_ = 'blob'
+            }
         }
 
         return this.httpClient.get<CertificateGetResponseTaskEditor>( `${ this.configuration.basePath }/tasks/editor/certificate_type`,
@@ -4565,10 +5128,21 @@ export class TasksService
             localVarHeaders = localVarHeaders.set( 'Content-Type', httpContentTypeSelected )
         }
 
-        let responseType_: 'text' | 'json' = 'json'
-        if ( localVarHttpHeaderAcceptSelected && localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+        let responseType_: 'text' | 'json' | 'blob' = 'json'
+        if ( localVarHttpHeaderAcceptSelected )
         {
-            responseType_ = 'text'
+            if ( localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+            {
+                responseType_ = 'text'
+            }
+            else if ( this.configuration.isJsonMime( localVarHttpHeaderAcceptSelected ) )
+            {
+                responseType_ = 'json'
+            }
+            else
+            {
+                responseType_ = 'blob'
+            }
         }
 
         return this.httpClient.post<any>( `${ this.configuration.basePath }/tasks/editor/contest/${ encodeURIComponent( String( idContest ) ) }/add_location`,
@@ -4654,10 +5228,21 @@ export class TasksService
             localVarHeaders = localVarHeaders.set( 'Content-Type', httpContentTypeSelected )
         }
 
-        let responseType_: 'text' | 'json' = 'json'
-        if ( localVarHttpHeaderAcceptSelected && localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+        let responseType_: 'text' | 'json' | 'blob' = 'json'
+        if ( localVarHttpHeaderAcceptSelected )
         {
-            responseType_ = 'text'
+            if ( localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+            {
+                responseType_ = 'text'
+            }
+            else if ( this.configuration.isJsonMime( localVarHttpHeaderAcceptSelected ) )
+            {
+                responseType_ = 'json'
+            }
+            else
+            {
+                responseType_ = 'blob'
+            }
         }
 
         return this.httpClient.patch<any>( `${ this.configuration.basePath }/tasks/editor/contest/${ encodeURIComponent( String( idContest ) ) }/contest_task/${ encodeURIComponent( String( idContestTask ) ) }`,
@@ -4728,10 +5313,21 @@ export class TasksService
         }
 
 
-        let responseType_: 'text' | 'json' = 'json'
-        if ( localVarHttpHeaderAcceptSelected && localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+        let responseType_: 'text' | 'json' | 'blob' = 'json'
+        if ( localVarHttpHeaderAcceptSelected )
         {
-            responseType_ = 'text'
+            if ( localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+            {
+                responseType_ = 'text'
+            }
+            else if ( this.configuration.isJsonMime( localVarHttpHeaderAcceptSelected ) )
+            {
+                responseType_ = 'json'
+            }
+            else
+            {
+                responseType_ = 'blob'
+            }
         }
 
         return this.httpClient.post<any>( `${ this.configuration.basePath }/tasks/editor/contest/${ encodeURIComponent( String( idContest ) ) }/contest_task/${ encodeURIComponent( String( idContestTask ) ) }/remove`,
@@ -4812,10 +5408,21 @@ export class TasksService
             localVarHeaders = localVarHeaders.set( 'Content-Type', httpContentTypeSelected )
         }
 
-        let responseType_: 'text' | 'json' = 'json'
-        if ( localVarHttpHeaderAcceptSelected && localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+        let responseType_: 'text' | 'json' | 'blob' = 'json'
+        if ( localVarHttpHeaderAcceptSelected )
         {
-            responseType_ = 'text'
+            if ( localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+            {
+                responseType_ = 'text'
+            }
+            else if ( this.configuration.isJsonMime( localVarHttpHeaderAcceptSelected ) )
+            {
+                responseType_ = 'json'
+            }
+            else
+            {
+                responseType_ = 'blob'
+            }
         }
 
         return this.httpClient.post<any>( `${ this.configuration.basePath }/tasks/editor/contest/${ encodeURIComponent( String( idContest ) ) }/remove_location`,
@@ -4906,10 +5513,21 @@ export class TasksService
             localVarHeaders = localVarHeaders.set( 'Content-Type', httpContentTypeSelected )
         }
 
-        let responseType_: 'text' | 'json' = 'json'
-        if ( localVarHttpHeaderAcceptSelected && localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+        let responseType_: 'text' | 'json' | 'blob' = 'json'
+        if ( localVarHttpHeaderAcceptSelected )
         {
-            responseType_ = 'text'
+            if ( localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+            {
+                responseType_ = 'text'
+            }
+            else if ( this.configuration.isJsonMime( localVarHttpHeaderAcceptSelected ) )
+            {
+                responseType_ = 'json'
+            }
+            else
+            {
+                responseType_ = 'blob'
+            }
         }
 
         return this.httpClient.patch<any>( `${ this.configuration.basePath }/tasks/editor/olympiad/${ encodeURIComponent( String( idOlympiad ) ) }/stage/${ encodeURIComponent( String( idStage ) ) }/contest/${ encodeURIComponent( String( idContest ) ) }/add_previous`,
@@ -4985,10 +5603,21 @@ export class TasksService
         }
 
 
-        let responseType_: 'text' | 'json' = 'json'
-        if ( localVarHttpHeaderAcceptSelected && localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+        let responseType_: 'text' | 'json' | 'blob' = 'json'
+        if ( localVarHttpHeaderAcceptSelected )
         {
-            responseType_ = 'text'
+            if ( localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+            {
+                responseType_ = 'text'
+            }
+            else if ( this.configuration.isJsonMime( localVarHttpHeaderAcceptSelected ) )
+            {
+                responseType_ = 'json'
+            }
+            else
+            {
+                responseType_ = 'blob'
+            }
         }
 
         return this.httpClient.post<any>( `${ this.configuration.basePath }/tasks/editor/olympiad/${ encodeURIComponent( String( idOlympiad ) ) }/stage/${ encodeURIComponent( String( idStage ) ) }/contest/${ encodeURIComponent( String( idContest ) ) }/remove`,
@@ -5076,10 +5705,21 @@ export class TasksService
             localVarHeaders = localVarHeaders.set( 'Content-Type', httpContentTypeSelected )
         }
 
-        let responseType_: 'text' | 'json' = 'json'
-        if ( localVarHttpHeaderAcceptSelected && localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+        let responseType_: 'text' | 'json' | 'blob' = 'json'
+        if ( localVarHttpHeaderAcceptSelected )
         {
-            responseType_ = 'text'
+            if ( localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+            {
+                responseType_ = 'text'
+            }
+            else if ( this.configuration.isJsonMime( localVarHttpHeaderAcceptSelected ) )
+            {
+                responseType_ = 'json'
+            }
+            else
+            {
+                responseType_ = 'blob'
+            }
         }
 
         return this.httpClient.patch<StageResponseTaskCreator>( `${ this.configuration.basePath }/tasks/editor/olympiad/${ encodeURIComponent( String( idOlympiad ) ) }/stage/${ encodeURIComponent( String( idStage ) ) }`,
@@ -5150,10 +5790,21 @@ export class TasksService
         }
 
 
-        let responseType_: 'text' | 'json' = 'json'
-        if ( localVarHttpHeaderAcceptSelected && localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+        let responseType_: 'text' | 'json' | 'blob' = 'json'
+        if ( localVarHttpHeaderAcceptSelected )
         {
-            responseType_ = 'text'
+            if ( localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+            {
+                responseType_ = 'text'
+            }
+            else if ( this.configuration.isJsonMime( localVarHttpHeaderAcceptSelected ) )
+            {
+                responseType_ = 'json'
+            }
+            else
+            {
+                responseType_ = 'blob'
+            }
         }
 
         return this.httpClient.post<any>( `${ this.configuration.basePath }/tasks/editor/olympiad/${ encodeURIComponent( String( idOlympiad ) ) }/stage/${ encodeURIComponent( String( idStage ) ) }/remove`,
@@ -5241,10 +5892,21 @@ export class TasksService
             localVarHeaders = localVarHeaders.set( 'Content-Type', httpContentTypeSelected )
         }
 
-        let responseType_: 'text' | 'json' = 'json'
-        if ( localVarHttpHeaderAcceptSelected && localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+        let responseType_: 'text' | 'json' | 'blob' = 'json'
+        if ( localVarHttpHeaderAcceptSelected )
         {
-            responseType_ = 'text'
+            if ( localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+            {
+                responseType_ = 'text'
+            }
+            else if ( this.configuration.isJsonMime( localVarHttpHeaderAcceptSelected ) )
+            {
+                responseType_ = 'json'
+            }
+            else
+            {
+                responseType_ = 'blob'
+            }
         }
 
         return this.httpClient.patch<TaskResponseTaskCreator>( `${ this.configuration.basePath }/tasks/editor/task_pool/${ encodeURIComponent( String( idTaskPool ) ) }/task/${ encodeURIComponent( String( idTask ) ) }/multiple`,
@@ -5332,10 +5994,21 @@ export class TasksService
             localVarHeaders = localVarHeaders.set( 'Content-Type', httpContentTypeSelected )
         }
 
-        let responseType_: 'text' | 'json' = 'json'
-        if ( localVarHttpHeaderAcceptSelected && localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+        let responseType_: 'text' | 'json' | 'blob' = 'json'
+        if ( localVarHttpHeaderAcceptSelected )
         {
-            responseType_ = 'text'
+            if ( localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+            {
+                responseType_ = 'text'
+            }
+            else if ( this.configuration.isJsonMime( localVarHttpHeaderAcceptSelected ) )
+            {
+                responseType_ = 'json'
+            }
+            else
+            {
+                responseType_ = 'blob'
+            }
         }
 
         return this.httpClient.patch<TaskResponseTaskCreator>( `${ this.configuration.basePath }/tasks/editor/task_pool/${ encodeURIComponent( String( idTaskPool ) ) }/task/${ encodeURIComponent( String( idTask ) ) }/plain`,
@@ -5423,10 +6096,21 @@ export class TasksService
             localVarHeaders = localVarHeaders.set( 'Content-Type', httpContentTypeSelected )
         }
 
-        let responseType_: 'text' | 'json' = 'json'
-        if ( localVarHttpHeaderAcceptSelected && localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+        let responseType_: 'text' | 'json' | 'blob' = 'json'
+        if ( localVarHttpHeaderAcceptSelected )
         {
-            responseType_ = 'text'
+            if ( localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+            {
+                responseType_ = 'text'
+            }
+            else if ( this.configuration.isJsonMime( localVarHttpHeaderAcceptSelected ) )
+            {
+                responseType_ = 'json'
+            }
+            else
+            {
+                responseType_ = 'blob'
+            }
         }
 
         return this.httpClient.patch<TaskResponseTaskCreator>( `${ this.configuration.basePath }/tasks/editor/task_pool/${ encodeURIComponent( String( idTaskPool ) ) }/task/${ encodeURIComponent( String( idTask ) ) }/range`,
@@ -5497,10 +6181,21 @@ export class TasksService
         }
 
 
-        let responseType_: 'text' | 'json' = 'json'
-        if ( localVarHttpHeaderAcceptSelected && localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+        let responseType_: 'text' | 'json' | 'blob' = 'json'
+        if ( localVarHttpHeaderAcceptSelected )
         {
-            responseType_ = 'text'
+            if ( localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+            {
+                responseType_ = 'text'
+            }
+            else if ( this.configuration.isJsonMime( localVarHttpHeaderAcceptSelected ) )
+            {
+                responseType_ = 'json'
+            }
+            else
+            {
+                responseType_ = 'blob'
+            }
         }
 
         return this.httpClient.post<any>( `${ this.configuration.basePath }/tasks/editor/task_pool/${ encodeURIComponent( String( idTaskPool ) ) }/task/${ encodeURIComponent( String( idTask ) ) }/remove`,
@@ -5586,10 +6281,21 @@ export class TasksService
             localVarHeaders = localVarHeaders.set( 'Content-Type', httpContentTypeSelected )
         }
 
-        let responseType_: 'text' | 'json' = 'json'
-        if ( localVarHttpHeaderAcceptSelected && localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+        let responseType_: 'text' | 'json' | 'blob' = 'json'
+        if ( localVarHttpHeaderAcceptSelected )
         {
-            responseType_ = 'text'
+            if ( localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+            {
+                responseType_ = 'text'
+            }
+            else if ( this.configuration.isJsonMime( localVarHttpHeaderAcceptSelected ) )
+            {
+                responseType_ = 'json'
+            }
+            else
+            {
+                responseType_ = 'blob'
+            }
         }
 
         return this.httpClient.post<any>( `${ this.configuration.basePath }/tasks/editor/task_pool/${ encodeURIComponent( String( idTaskPool ) ) }/task/${ encodeURIComponent( String( idTask ) ) }/upload_image`,
@@ -5734,10 +6440,21 @@ export class TasksService
             localVarHeaders = localVarHeaders.set( 'Content-Type', httpContentTypeSelected )
         }
 
-        let responseType_: 'text' | 'json' = 'json'
-        if ( localVarHttpHeaderAcceptSelected && localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+        let responseType_: 'text' | 'json' | 'blob' = 'json'
+        if ( localVarHttpHeaderAcceptSelected )
         {
-            responseType_ = 'text'
+            if ( localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+            {
+                responseType_ = 'text'
+            }
+            else if ( this.configuration.isJsonMime( localVarHttpHeaderAcceptSelected ) )
+            {
+                responseType_ = 'json'
+            }
+            else
+            {
+                responseType_ = 'blob'
+            }
         }
 
         return this.httpClient.post<any>( `${ this.configuration.basePath }/tasks/participant/contest/${ encodeURIComponent( String( idContest ) ) }/change_location`,
@@ -5818,10 +6535,21 @@ export class TasksService
             localVarHeaders = localVarHeaders.set( 'Content-Type', httpContentTypeSelected )
         }
 
-        let responseType_: 'text' | 'json' = 'json'
-        if ( localVarHttpHeaderAcceptSelected && localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+        let responseType_: 'text' | 'json' | 'blob' = 'json'
+        if ( localVarHttpHeaderAcceptSelected )
         {
-            responseType_ = 'text'
+            if ( localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+            {
+                responseType_ = 'text'
+            }
+            else if ( this.configuration.isJsonMime( localVarHttpHeaderAcceptSelected ) )
+            {
+                responseType_ = 'json'
+            }
+            else
+            {
+                responseType_ = 'blob'
+            }
         }
 
         return this.httpClient.post<any>( `${ this.configuration.basePath }/tasks/participant/contest/${ encodeURIComponent( String( idContest ) ) }/change_supervisor`,
@@ -5902,14 +6630,106 @@ export class TasksService
             localVarHeaders = localVarHeaders.set( 'Content-Type', httpContentTypeSelected )
         }
 
-        let responseType_: 'text' | 'json' = 'json'
-        if ( localVarHttpHeaderAcceptSelected && localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+        let responseType_: 'text' | 'json' | 'blob' = 'json'
+        if ( localVarHttpHeaderAcceptSelected )
         {
-            responseType_ = 'text'
+            if ( localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+            {
+                responseType_ = 'text'
+            }
+            else if ( this.configuration.isJsonMime( localVarHttpHeaderAcceptSelected ) )
+            {
+                responseType_ = 'json'
+            }
+            else
+            {
+                responseType_ = 'blob'
+            }
         }
 
         return this.httpClient.post<any>( `${ this.configuration.basePath }/tasks/participant/contest/${ encodeURIComponent( String( idContest ) ) }/enroll`,
             enrollRequestTaskParticipant,
+            {
+                context: localVarHttpContext,
+                responseType: <any> responseType_,
+                withCredentials: this.configuration.withCredentials,
+                headers: localVarHeaders,
+                observe: observe,
+                reportProgress: reportProgress
+            }
+        )
+    }
+
+    /**
+     * @param idContest ID of the contest
+     * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
+     * @param reportProgress flag to report request and response progress.
+     */
+    public tasksParticipantContestIdContestExternalStageGet( idContest: number, observe?: 'body', reportProgress?: boolean, options?: { httpHeaderAccept?: 'application/json', context?: HttpContext } ): Observable<UserExternalDataResponseTaskParticipant>;
+    public tasksParticipantContestIdContestExternalStageGet( idContest: number, observe?: 'response', reportProgress?: boolean, options?: { httpHeaderAccept?: 'application/json', context?: HttpContext } ): Observable<HttpResponse<UserExternalDataResponseTaskParticipant>>;
+    public tasksParticipantContestIdContestExternalStageGet( idContest: number, observe?: 'events', reportProgress?: boolean, options?: { httpHeaderAccept?: 'application/json', context?: HttpContext } ): Observable<HttpEvent<UserExternalDataResponseTaskParticipant>>;
+    public tasksParticipantContestIdContestExternalStageGet( idContest: number, observe: any = 'body', reportProgress: boolean = false, options?: { httpHeaderAccept?: 'application/json', context?: HttpContext } ): Observable<any>
+    {
+        if ( idContest === null || idContest === undefined )
+        {
+            throw new Error( 'Required parameter idContest was null or undefined when calling tasksParticipantContestIdContestExternalStageGet.' )
+        }
+
+        let localVarHeaders = this.defaultHeaders
+
+        let localVarCredential: string | undefined
+        // authentication (CSRFAccessToken) required
+        localVarCredential = this.configuration.lookupCredential( 'CSRFAccessToken' )
+        if ( localVarCredential )
+        {
+            localVarHeaders = localVarHeaders.set( 'X-CSRF-TOKEN', localVarCredential )
+        }
+
+        // authentication (JWTAccessToken) required
+        localVarCredential = this.configuration.lookupCredential( 'JWTAccessToken' )
+        if ( localVarCredential )
+        {
+        }
+
+        let localVarHttpHeaderAcceptSelected: string | undefined = options && options.httpHeaderAccept
+        if ( localVarHttpHeaderAcceptSelected === undefined )
+        {
+            // to determine the Accept header
+            const httpHeaderAccepts: string[] = [
+                'application/json'
+            ]
+            localVarHttpHeaderAcceptSelected = this.configuration.selectHeaderAccept( httpHeaderAccepts )
+        }
+        if ( localVarHttpHeaderAcceptSelected !== undefined )
+        {
+            localVarHeaders = localVarHeaders.set( 'Accept', localVarHttpHeaderAcceptSelected )
+        }
+
+        let localVarHttpContext: HttpContext | undefined = options && options.context
+        if ( localVarHttpContext === undefined )
+        {
+            localVarHttpContext = new HttpContext()
+        }
+
+
+        let responseType_: 'text' | 'json' | 'blob' = 'json'
+        if ( localVarHttpHeaderAcceptSelected )
+        {
+            if ( localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+            {
+                responseType_ = 'text'
+            }
+            else if ( this.configuration.isJsonMime( localVarHttpHeaderAcceptSelected ) )
+            {
+                responseType_ = 'json'
+            }
+            else
+            {
+                responseType_ = 'blob'
+            }
+        }
+
+        return this.httpClient.get<UserExternalDataResponseTaskParticipant>( `${ this.configuration.basePath }/tasks/participant/contest/${ encodeURIComponent( String( idContest ) ) }/external_stage`,
             {
                 context: localVarHttpContext,
                 responseType: <any> responseType_,
@@ -5973,10 +6793,21 @@ export class TasksService
         }
 
 
-        let responseType_: 'text' | 'json' = 'json'
-        if ( localVarHttpHeaderAcceptSelected && localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+        let responseType_: 'text' | 'json' | 'blob' = 'json'
+        if ( localVarHttpHeaderAcceptSelected )
         {
-            responseType_ = 'text'
+            if ( localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+            {
+                responseType_ = 'text'
+            }
+            else if ( this.configuration.isJsonMime( localVarHttpHeaderAcceptSelected ) )
+            {
+                responseType_ = 'json'
+            }
+            else
+            {
+                responseType_ = 'blob'
+            }
         }
 
         return this.httpClient.get<UserProctoringDataResponseTaskParticipant>( `${ this.configuration.basePath }/tasks/participant/contest/${ encodeURIComponent( String( idContest ) ) }/proctor_data`,
@@ -6112,10 +6943,21 @@ export class TasksService
         }
 
 
-        let responseType_: 'text' | 'json' = 'json'
-        if ( localVarHttpHeaderAcceptSelected && localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+        let responseType_: 'text' | 'json' | 'blob' = 'json'
+        if ( localVarHttpHeaderAcceptSelected )
         {
-            responseType_ = 'text'
+            if ( localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+            {
+                responseType_ = 'text'
+            }
+            else if ( this.configuration.isJsonMime( localVarHttpHeaderAcceptSelected ) )
+            {
+                responseType_ = 'json'
+            }
+            else
+            {
+                responseType_ = 'blob'
+            }
         }
 
         return this.httpClient.get<AllTaskResponseTaskParticipant>( `${ this.configuration.basePath }/tasks/participant/contest/${ encodeURIComponent( String( idContest ) ) }/tasks/self`,
@@ -6182,10 +7024,21 @@ export class TasksService
         }
 
 
-        let responseType_: 'text' | 'json' = 'json'
-        if ( localVarHttpHeaderAcceptSelected && localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+        let responseType_: 'text' | 'json' | 'blob' = 'json'
+        if ( localVarHttpHeaderAcceptSelected )
         {
-            responseType_ = 'text'
+            if ( localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+            {
+                responseType_ = 'text'
+            }
+            else if ( this.configuration.isJsonMime( localVarHttpHeaderAcceptSelected ) )
+            {
+                responseType_ = 'json'
+            }
+            else
+            {
+                responseType_ = 'blob'
+            }
         }
 
         return this.httpClient.get<VariantWithCompletedTasksCountTaskParticipant>( `${ this.configuration.basePath }/tasks/participant/contest/${ encodeURIComponent( String( idContest ) ) }/variant/self`,
@@ -6309,10 +7162,21 @@ export class TasksService
         }
 
 
-        let responseType_: 'text' | 'json' = 'json'
-        if ( localVarHttpHeaderAcceptSelected && localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+        let responseType_: 'text' | 'json' | 'blob' = 'json'
+        if ( localVarHttpHeaderAcceptSelected )
         {
-            responseType_ = 'text'
+            if ( localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+            {
+                responseType_ = 'text'
+            }
+            else if ( this.configuration.isJsonMime( localVarHttpHeaderAcceptSelected ) )
+            {
+                responseType_ = 'json'
+            }
+            else
+            {
+                responseType_ = 'blob'
+            }
         }
 
         return this.httpClient.get<FilterSimpleContestResponseTaskParticipant>( `${ this.configuration.basePath }/tasks/participant/olympiad/all`,
@@ -6380,10 +7244,21 @@ export class TasksService
         }
 
 
-        let responseType_: 'text' | 'json' = 'json'
-        if ( localVarHttpHeaderAcceptSelected && localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+        let responseType_: 'text' | 'json' | 'blob' = 'json'
+        if ( localVarHttpHeaderAcceptSelected )
         {
-            responseType_ = 'text'
+            if ( localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+            {
+                responseType_ = 'text'
+            }
+            else if ( this.configuration.isJsonMime( localVarHttpHeaderAcceptSelected ) )
+            {
+                responseType_ = 'json'
+            }
+            else
+            {
+                responseType_ = 'blob'
+            }
         }
 
         return this.httpClient.get<Contest>( `${ this.configuration.basePath }/tasks/participant/olympiad/${ encodeURIComponent( String( idOlympiad ) ) }`,
@@ -6455,10 +7330,21 @@ export class TasksService
         }
 
 
-        let responseType_: 'text' | 'json' = 'json'
-        if ( localVarHttpHeaderAcceptSelected && localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+        let responseType_: 'text' | 'json' | 'blob' = 'json'
+        if ( localVarHttpHeaderAcceptSelected )
         {
-            responseType_ = 'text'
+            if ( localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+            {
+                responseType_ = 'text'
+            }
+            else if ( this.configuration.isJsonMime( localVarHttpHeaderAcceptSelected ) )
+            {
+                responseType_ = 'json'
+            }
+            else
+            {
+                responseType_ = 'blob'
+            }
         }
 
         return this.httpClient.get<AllOlympiadsResponseTaskUnauthorized>( `${ this.configuration.basePath }/tasks/participant/olympiad/${ encodeURIComponent( String( idOlympiad ) ) }/stage/${ encodeURIComponent( String( idStage ) ) }/contest/all`,
@@ -6535,10 +7421,21 @@ export class TasksService
         }
 
 
-        let responseType_: 'text' | 'json' = 'json'
-        if ( localVarHttpHeaderAcceptSelected && localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+        let responseType_: 'text' | 'json' | 'blob' = 'json'
+        if ( localVarHttpHeaderAcceptSelected )
         {
-            responseType_ = 'text'
+            if ( localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+            {
+                responseType_ = 'text'
+            }
+            else if ( this.configuration.isJsonMime( localVarHttpHeaderAcceptSelected ) )
+            {
+                responseType_ = 'json'
+            }
+            else
+            {
+                responseType_ = 'blob'
+            }
         }
 
         return this.httpClient.get<Contest>( `${ this.configuration.basePath }/tasks/participant/olympiad/${ encodeURIComponent( String( idOlympiad ) ) }/stage/${ encodeURIComponent( String( idStage ) ) }/contest/${ encodeURIComponent( String( idContest ) ) }`,
@@ -6586,10 +7483,21 @@ export class TasksService
         }
 
 
-        let responseType_: 'text' | 'json' = 'json'
-        if ( localVarHttpHeaderAcceptSelected && localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+        let responseType_: 'text' | 'json' | 'blob' = 'json'
+        if ( localVarHttpHeaderAcceptSelected )
         {
-            responseType_ = 'text'
+            if ( localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+            {
+                responseType_ = 'text'
+            }
+            else if ( this.configuration.isJsonMime( localVarHttpHeaderAcceptSelected ) )
+            {
+                responseType_ = 'json'
+            }
+            else
+            {
+                responseType_ = 'blob'
+            }
         }
 
         return this.httpClient.get<AllBaseContestResponseTaskUnauthorized>( `${ this.configuration.basePath }/tasks/unauthorized/base_olympiad/all`,
@@ -6642,10 +7550,21 @@ export class TasksService
         }
 
 
-        let responseType_: 'text' | 'json' = 'json'
-        if ( localVarHttpHeaderAcceptSelected && localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+        let responseType_: 'text' | 'json' | 'blob' = 'json'
+        if ( localVarHttpHeaderAcceptSelected )
         {
-            responseType_ = 'text'
+            if ( localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+            {
+                responseType_ = 'text'
+            }
+            else if ( this.configuration.isJsonMime( localVarHttpHeaderAcceptSelected ) )
+            {
+                responseType_ = 'json'
+            }
+            else
+            {
+                responseType_ = 'blob'
+            }
         }
 
         return this.httpClient.get<BaseContest>( `${ this.configuration.basePath }/tasks/unauthorized/base_olympiad/${ encodeURIComponent( String( idBaseOlympiad ) ) }`,
@@ -6703,10 +7622,21 @@ export class TasksService
         }
 
 
-        let responseType_: 'text' | 'json' = 'json'
-        if ( localVarHttpHeaderAcceptSelected && localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+        let responseType_: 'text' | 'json' | 'blob' = 'json'
+        if ( localVarHttpHeaderAcceptSelected )
         {
-            responseType_ = 'text'
+            if ( localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+            {
+                responseType_ = 'text'
+            }
+            else if ( this.configuration.isJsonMime( localVarHttpHeaderAcceptSelected ) )
+            {
+                responseType_ = 'json'
+            }
+            else
+            {
+                responseType_ = 'blob'
+            }
         }
 
         return this.httpClient.get<Contest>( `${ this.configuration.basePath }/tasks/unauthorized/base_olympiad/${ encodeURIComponent( String( idBaseOlympiad ) ) }/olympiad/${ encodeURIComponent( String( idOlympiad ) ) }`,
@@ -6754,10 +7684,21 @@ export class TasksService
         }
 
 
-        let responseType_: 'text' | 'json' = 'json'
-        if ( localVarHttpHeaderAcceptSelected && localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+        let responseType_: 'text' | 'json' | 'blob' = 'json'
+        if ( localVarHttpHeaderAcceptSelected )
         {
-            responseType_ = 'text'
+            if ( localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+            {
+                responseType_ = 'text'
+            }
+            else if ( this.configuration.isJsonMime( localVarHttpHeaderAcceptSelected ) )
+            {
+                responseType_ = 'json'
+            }
+            else
+            {
+                responseType_ = 'blob'
+            }
         }
 
         return this.httpClient.get<AllLocationResponseTaskUnauthorized>( `${ this.configuration.basePath }/tasks/unauthorized/location/all`,
@@ -6810,10 +7751,21 @@ export class TasksService
         }
 
 
-        let responseType_: 'text' | 'json' = 'json'
-        if ( localVarHttpHeaderAcceptSelected && localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+        let responseType_: 'text' | 'json' | 'blob' = 'json'
+        if ( localVarHttpHeaderAcceptSelected )
         {
-            responseType_ = 'text'
+            if ( localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+            {
+                responseType_ = 'text'
+            }
+            else if ( this.configuration.isJsonMime( localVarHttpHeaderAcceptSelected ) )
+            {
+                responseType_ = 'json'
+            }
+            else
+            {
+                responseType_ = 'blob'
+            }
         }
 
         return this.httpClient.get<OlympiadLocation>( `${ this.configuration.basePath }/tasks/unauthorized/location/${ encodeURIComponent( String( idLocation ) ) }`,
@@ -6923,10 +7875,21 @@ export class TasksService
         }
 
 
-        let responseType_: 'text' | 'json' = 'json'
-        if ( localVarHttpHeaderAcceptSelected && localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+        let responseType_: 'text' | 'json' | 'blob' = 'json'
+        if ( localVarHttpHeaderAcceptSelected )
         {
-            responseType_ = 'text'
+            if ( localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+            {
+                responseType_ = 'text'
+            }
+            else if ( this.configuration.isJsonMime( localVarHttpHeaderAcceptSelected ) )
+            {
+                responseType_ = 'json'
+            }
+            else
+            {
+                responseType_ = 'blob'
+            }
         }
 
         return this.httpClient.get<FilterSimpleContestResponse>( `${ this.configuration.basePath }/tasks/unauthorized/olympiad/all`,
@@ -6980,10 +7943,21 @@ export class TasksService
         }
 
 
-        let responseType_: 'text' | 'json' = 'json'
-        if ( localVarHttpHeaderAcceptSelected && localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+        let responseType_: 'text' | 'json' | 'blob' = 'json'
+        if ( localVarHttpHeaderAcceptSelected )
         {
-            responseType_ = 'text'
+            if ( localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+            {
+                responseType_ = 'text'
+            }
+            else if ( this.configuration.isJsonMime( localVarHttpHeaderAcceptSelected ) )
+            {
+                responseType_ = 'json'
+            }
+            else
+            {
+                responseType_ = 'blob'
+            }
         }
 
         return this.httpClient.get<AllStagesResponseTaskUnauthorized>( `${ this.configuration.basePath }/tasks/unauthorized/olympiad/${ encodeURIComponent( String( idOlympiad ) ) }/stage/all`,
@@ -7041,10 +8015,21 @@ export class TasksService
         }
 
 
-        let responseType_: 'text' | 'json' = 'json'
-        if ( localVarHttpHeaderAcceptSelected && localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+        let responseType_: 'text' | 'json' | 'blob' = 'json'
+        if ( localVarHttpHeaderAcceptSelected )
         {
-            responseType_ = 'text'
+            if ( localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+            {
+                responseType_ = 'text'
+            }
+            else if ( this.configuration.isJsonMime( localVarHttpHeaderAcceptSelected ) )
+            {
+                responseType_ = 'json'
+            }
+            else
+            {
+                responseType_ = 'blob'
+            }
         }
 
         return this.httpClient.get<Stage>( `${ this.configuration.basePath }/tasks/unauthorized/olympiad/${ encodeURIComponent( String( idOlympiad ) ) }/stage/${ encodeURIComponent( String( idStage ) ) }`,
@@ -7092,10 +8077,21 @@ export class TasksService
         }
 
 
-        let responseType_: 'text' | 'json' = 'json'
-        if ( localVarHttpHeaderAcceptSelected && localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+        let responseType_: 'text' | 'json' | 'blob' = 'json'
+        if ( localVarHttpHeaderAcceptSelected )
         {
-            responseType_ = 'text'
+            if ( localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+            {
+                responseType_ = 'text'
+            }
+            else if ( this.configuration.isJsonMime( localVarHttpHeaderAcceptSelected ) )
+            {
+                responseType_ = 'json'
+            }
+            else
+            {
+                responseType_ = 'blob'
+            }
         }
 
         return this.httpClient.get<AllOlympiadTypesResponseTaskUnauthorized>( `${ this.configuration.basePath }/tasks/unauthorized/olympiad_type/all`,
@@ -7148,10 +8144,21 @@ export class TasksService
         }
 
 
-        let responseType_: 'text' | 'json' = 'json'
-        if ( localVarHttpHeaderAcceptSelected && localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+        let responseType_: 'text' | 'json' | 'blob' = 'json'
+        if ( localVarHttpHeaderAcceptSelected )
         {
-            responseType_ = 'text'
+            if ( localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+            {
+                responseType_ = 'text'
+            }
+            else if ( this.configuration.isJsonMime( localVarHttpHeaderAcceptSelected ) )
+            {
+                responseType_ = 'json'
+            }
+            else
+            {
+                responseType_ = 'blob'
+            }
         }
 
         return this.httpClient.get<OlympiadType>( `${ this.configuration.basePath }/tasks/unauthorized/olympiad_type/${ encodeURIComponent( String( idOlympiadType ) ) }`,
@@ -7199,10 +8206,21 @@ export class TasksService
         }
 
 
-        let responseType_: 'text' | 'json' = 'json'
-        if ( localVarHttpHeaderAcceptSelected && localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+        let responseType_: 'text' | 'json' | 'blob' = 'json'
+        if ( localVarHttpHeaderAcceptSelected )
         {
-            responseType_ = 'text'
+            if ( localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+            {
+                responseType_ = 'text'
+            }
+            else if ( this.configuration.isJsonMime( localVarHttpHeaderAcceptSelected ) )
+            {
+                responseType_ = 'json'
+            }
+            else
+            {
+                responseType_ = 'blob'
+            }
         }
 
         return this.httpClient.get<AllTargetClassesRequestTaskUnauthorized>( `${ this.configuration.basePath }/tasks/unauthorized/target_class/all`,
@@ -7255,10 +8273,21 @@ export class TasksService
         }
 
 
-        let responseType_: 'text' | 'json' = 'json'
-        if ( localVarHttpHeaderAcceptSelected && localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+        let responseType_: 'text' | 'json' | 'blob' = 'json'
+        if ( localVarHttpHeaderAcceptSelected )
         {
-            responseType_ = 'text'
+            if ( localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+            {
+                responseType_ = 'text'
+            }
+            else if ( this.configuration.isJsonMime( localVarHttpHeaderAcceptSelected ) )
+            {
+                responseType_ = 'json'
+            }
+            else
+            {
+                responseType_ = 'blob'
+            }
         }
 
         return this.httpClient.get<TargetClass>( `${ this.configuration.basePath }/tasks/unauthorized/target_class/${ encodeURIComponent( String( idTargetClass ) ) }`,

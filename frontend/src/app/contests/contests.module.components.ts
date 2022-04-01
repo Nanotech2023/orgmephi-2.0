@@ -21,6 +21,9 @@ import { ContestDetailsStage3FailureComponent } from '@/contests/components/cont
 import { ContestDetailsStage3SuccessComponent } from '@/contests/components/contest-details-stage3-success/contest-details-stage3-success.component'
 import { ContestDetailsUnavailableComponent } from '@/contests/components/contest-details-unavailable/contest-details-unavailable.component'
 import { ContestDetailsRegisterComponent } from '@/contests/components/contest-details-register/contest-details-register.component'
+import {
+    ContestDetailsStage5Component
+} from '@/contests/components/contest-details-stage5/contest-details-stage5.component'
 
 
 export const CONTESTS_COMPONENTS = [
@@ -38,7 +41,8 @@ export const CONTESTS_COMPONENTS = [
     ContestDetailsStage3FailureComponent,
     ContestDetailsStage3SuccessComponent,
     ContestDetailsUnavailableComponent,
-    ContestDetailsRegisterComponent
+    ContestDetailsRegisterComponent,
+    ContestDetailsStage5Component
 ]
 
 

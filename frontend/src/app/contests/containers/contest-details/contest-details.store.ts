@@ -6,7 +6,12 @@ import { catchError, switchMap } from 'rxjs/operators'
 import { displayErrorMessage } from '@/shared/logging'
 import { CallState, getError, LoadingState } from '@/shared/callState'
 import { UsersService } from '@api/users/users.service'
-import { Contest, SimpleContest, UserProctoringDataResponseTaskParticipant } from '@api/tasks/model'
+import {
+    Contest,
+    SimpleContest,
+    UserExternalDataResponseTaskParticipant,
+    UserProctoringDataResponseTaskParticipant
+} from '@api/tasks/model'
 import { TasksService } from '@api/tasks/tasks.service'
 import {
     AllUserResultsResponse,
@@ -21,6 +26,7 @@ export interface ContestDetailsState
     unfilledProfile?: Array<object>
     result?: UserResultsForContestResponse[]
     proctoringData?: UserProctoringDataResponseTaskParticipant
+    finalStageData?: UserExternalDataResponseTaskParticipant
     callState: CallState
 }
 
@@ -30,6 +36,7 @@ const initialState: ContestDetailsState = {
     unfilledProfile: undefined,
     result: undefined,
     proctoringData: undefined,
+    finalStageData: undefined,
     callState: LoadingState.INIT
 }
 
@@ -46,6 +53,7 @@ export class ContestDetailsStore extends ComponentStore<ContestDetailsState>
     readonly contest$: Observable<SimpleContest | undefined> = this.select( state => state.contest as SimpleContest )
     readonly contestResult$: Observable<UserResultsForContestResponse | undefined> = this.select( state => state.result?.find( item => item.contest_info.contest_id == state.contest?.contest_id ) )
     readonly contestProctoringData$: Observable<UserProctoringDataResponseTaskParticipant | undefined> = this.select( state => state.proctoringData )
+    readonly contestFinalStageData$: Observable<UserExternalDataResponseTaskParticipant | undefined> = this.select( state => state.finalStageData )
 
     private readonly loading$: Observable<boolean> = this.select( state => state.callState === LoadingState.LOADING )
     private readonly error$: Observable<string | null> = this.select( state => getError( state.callState ) )
@@ -93,6 +101,12 @@ export class ContestDetailsStore extends ComponentStore<ContestDetailsState>
             proctoringData: proctoringData
         } ) )
 
+    readonly setFinalStageData = this.updater( ( state: ContestDetailsState, finalStageData: UserExternalDataResponseTaskParticipant ) =>
+        ( {
+            ...state,
+            finalStageData: finalStageData
+        } ) )
+
     // EFFECTS
     readonly fetchUnfilledProfile = this.effect( () =>
     {
@@ -127,6 +141,15 @@ export class ContestDetailsStore extends ComponentStore<ContestDetailsState>
                     ),
                     catchError( ( error: any ) => EMPTY ) ) ) ) )
 
+    readonly fetchFinalStageData = this.effect( ( contestId$: Observable<number> ) =>
+        contestId$.pipe(
+            switchMap( ( contestId: number ) =>
+                this.tasksService.tasksParticipantContestIdContestExternalStageGet( contestId ).pipe(
+                    tapResponse(
+                        ( response: UserExternalDataResponseTaskParticipant ) => this.setFinalStageData( response ),
+                        ( error: string ) => this.updateError( error )
+                    ),
+                    catchError( ( error: any ) => EMPTY ) ) ) ) )
 
     readonly fetchAllResults = this.effect( () =>
     {

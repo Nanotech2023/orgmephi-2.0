@@ -9,13 +9,12 @@
  * https://openapi-generator.tech
  * Do not edit the class manually.
  */
-import { TaskPool } from './taskPool';
+import { UserExternalSingleDataResponseTaskParticipant } from './userExternalSingleDataResponseTaskParticipant';
 
 
-export interface ContestTask { 
-    readonly contest_task_id?: number;
-    num: number | null;
-    task_points: number | null;
-    readonly task_pools: Array<TaskPool>;
+export interface UserExternalDataResponseTaskParticipant { 
+    num_of_tasks: number;
+    tasks?: Array<UserExternalSingleDataResponseTaskParticipant>;
+    total_points: number;
 }
 
