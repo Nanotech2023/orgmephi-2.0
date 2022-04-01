@@ -711,6 +711,49 @@ def test_simple_contest_with_users_and_proctor(test_simple_contest_with_location
 
 # noinspection DuplicatedCode
 @pytest.fixture
+def test_simple_contest_with_external_data(test_simple_contest_with_location, test_olympiad_locations,
+                                           test_user_for_student_contest):
+    from contest.responses.models import add_user_response
+    from contest.tasks.models.user import UserInContest, UserStatusEnum, ExternalContestResult
+    user_id = test_user_for_student_contest.id
+    user_in_contest_ = UserInContest(user_id=user_id,
+                                     proctoring_login="test",
+                                     proctoring_password="test_pass",
+                                     show_results_to_user=True,
+                                     user_status=UserStatusEnum.Participant.value,
+                                     location_id=test_olympiad_locations[0].location_id)
+    test_simple_contest_with_location[0].users.append(user_in_contest_)
+
+    external_contest_result_1 = ExternalContestResult(
+        user_id=user_id,
+        work_id=1,
+        contest_id=test_simple_contest_with_location[0].contest_id,
+        num_of_task=1,
+        task_points=4,
+    )
+
+    external_contest_result_2 = ExternalContestResult(
+        user_id=user_id,
+        work_id=2,
+        contest_id=test_simple_contest_with_location[0].contest_id,
+        num_of_task=2,
+        task_points=6,
+    )
+
+    test_app.db.session.add(external_contest_result_1)
+    test_app.db.session.add(external_contest_result_2)
+
+    test_app.db.session.add(user_in_contest_)
+    test_app.db.session.commit()
+    user_work = add_user_response(test_app.db.session, user_id, test_simple_contest_with_location[0].contest_id)
+    test_app.db.session.add(user_work)
+    test_app.db.session.commit()
+
+    yield test_simple_contest_with_location
+
+
+# noinspection DuplicatedCode
+@pytest.fixture
 def test_simple_contest_with_users_no_variant(test_simple_contest_with_location, test_olympiad_locations,
                                               test_user_for_student_contest):
     from contest.responses.models import add_user_response

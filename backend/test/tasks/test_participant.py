@@ -104,6 +104,19 @@ def test_change_user_proctor_data_get(client, test_simple_contest_with_users_and
     assert resp.json['proctoring_password'] == "test_pass"
 
 
+def test_change_user_external_contest_data_get(client, test_simple_contest_with_external_data,
+                                               test_olympiad_locations,
+                                               test_user_for_student_contest):
+    resp = client.get(f'/contest/{test_simple_contest_with_external_data[0].contest_id}/external_stage')
+    assert resp.status_code == 200
+    assert resp.json['num_of_tasks'] == 2
+    assert resp.json['tasks'][0]['num_of_task'] == 1
+    assert resp.json['tasks'][0]['task_points'] == 4
+    assert resp.json['tasks'][1]['num_of_task'] == 2
+    assert resp.json['tasks'][1]['task_points'] == 6
+    assert resp.json['total_points'] == 10
+
+
 def test_change_user_supervisor_in_contest(client, test_simple_contest_with_users, test_olympiad_locations,
                                            test_user_for_student_contest):
     from contest.tasks.models import ContestHoldingTypeEnum
