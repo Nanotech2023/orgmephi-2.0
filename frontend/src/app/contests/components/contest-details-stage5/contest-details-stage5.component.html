@@ -7,12 +7,21 @@
         </svg>
     </div>
     <div class="col-md-6">
-        Вы приняли участие в заключительном этапе олимпиады по физике. Вы
-        набрали {{ contestFinalStageData.total_points }}.
+        Вы приняли участие в заключительном этапе олимпиады. Вы набрали {{ contestFinalStageData.total_points }} балла(ов).
+        <br/>
         <br/>
         <ng-container *ngFor="let task of contestFinalStageData.tasks">
-            Задание {{ task.num_of_task }}: {{ task.task_points }}
+            Задание {{ task.num_of_task }}: {{ task.task_points }} балла(ов)
             <br/>
         </ng-container>
+    </div>
+    <div class="col-md-5">
+        <div class="stage_action">
+            <a [routerLink]="['/contests/results']">
+                <button
+                    class="stage_action_button">Скачать диплом
+                </button>
+            </a>
+        </div>
     </div>
 </div>

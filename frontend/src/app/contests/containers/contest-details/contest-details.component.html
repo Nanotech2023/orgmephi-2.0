@@ -134,8 +134,11 @@
                             <div class="olymp_stage_content">
                                 <ng-container
                                     *ngIf="contestFinalStageData$ | async as contestFinalStageData; else contestDetailsUnavailable">
+                                    <ng-container
+                                        *ngIf="contestFinalStageData.num_of_tasks !==0; else contestDetailsUnavailable">
                                         <app-contest-details-stage5 [contestFinalStageData]="contestFinalStageData">
                                         </app-contest-details-stage5>
+                                    </ng-container>
                                 </ng-container>
                             </div>
                         </div>
