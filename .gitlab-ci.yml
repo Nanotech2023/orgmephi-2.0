@@ -34,8 +34,9 @@ stages:
   image: python:3.9-slim
   stage: test
   before_script:
-    - pip install -r backend/requirements.txt
-    - apt update && apt install -y libmagic1
+    - apt update && apt install -y libmagic1 fonts-dejavu
+    - sed 's/uWSGI.*//g'  backend/requirements.txt > requirements.txt
+    - pip install -r requirements.txt
   script:
     - cd backend
     - python -m pytest --cov=. --rootdir=.. .

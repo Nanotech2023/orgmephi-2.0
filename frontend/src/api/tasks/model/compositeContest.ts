@@ -21,6 +21,7 @@ export interface CompositeContest {
     holding_type: CompositeContest.HoldingTypeEnum;
     readonly stages: Array<Stage>;
     status?: CompositeContest.StatusEnum;
+    readonly user_count?: number;
     visibility: boolean;
 }
 export namespace CompositeContest {

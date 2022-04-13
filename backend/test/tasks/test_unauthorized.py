@@ -101,3 +101,19 @@ def test_get_target_class(client, test_target_class):
     resp = client.get(f'/target_class/{test_target_class[0].target_class_id}')
     assert resp.status_code == 200
     assert test_target_class[0].target_class_id == resp.json['target_class_id']
+
+
+def test_user_count_unauthorized(client, simple_contests_in_stage_for_user_count):
+    contest_id_1 = simple_contests_in_stage_for_user_count['composite_contests'][0].contest_id
+    contest_id_2 = simple_contests_in_stage_for_user_count['simple_contests'][0].contest_id
+    base_contest_id = simple_contests_in_stage_for_user_count['base_contests'][0].base_contest_id
+
+    resp = client.get(f'/base_olympiad/{base_contest_id}/olympiad/{contest_id_2}')
+    assert resp.status_code == 200
+    assert 'user_count' not in resp.json
+
+    resp = client.get(f'/base_olympiad/{base_contest_id}/olympiad/{contest_id_1}')
+    assert resp.status_code == 200
+    response = resp.json
+    assert 'user_count' not in response
+    assert 'user_count' not in response['stages'][0]['contests'][0]

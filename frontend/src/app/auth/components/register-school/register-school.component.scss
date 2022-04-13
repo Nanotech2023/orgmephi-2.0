@@ -1,6 +1,5 @@
 @import "src/styles/colors";
 
-$paddingPx: 25px;
 
 .registration-form {
   width: 100%;
@@ -65,43 +64,6 @@ $paddingPx: 25px;
     input {
       margin-left: $paddingPx;
       width: 50%;
-    }
-
-    .input_error {
-      font-style: normal;
-      font-weight: normal;
-      font-size: 12px;
-      line-height: 16px;
-      color: $error;
-      flex: none;
-      order: 0;
-      flex-grow: 0;
-      margin-top: 1%;
-      padding-left: $paddingPx
-    }
-
-    button {
-      height: 56px;
-      background-color: $blue;
-      flex: none;
-      order: 2;
-      align-self: stretch;
-      flex-grow: 0;
-      margin-top: 32px;
-      margin-bottom: 0;
-      font-style: normal;
-      font-weight: normal;
-      font-size: 14px;
-      line-height: 18px;
-      letter-spacing: 0.16px;
-      color: #FFFFFF;
-      border: none;
-      width: 50%;
-      margin-left: $paddingPx
-    }
-
-    button:hover {
-      background-color: #004AA4;
     }
 
     .checkbox {

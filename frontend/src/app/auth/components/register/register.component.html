@@ -1,25 +1,13 @@
-<div class="container">
-    <a routerLink="/">
-        <img src="/assets/mephi-logo.png" class="img-responsive img-static">
-    </a>
-    <div class="row">
-        <div class="col-md-8">
-            <h1 class="title">Информационная система «Абитуриент-студент»</h1>
-            <div class="image">
-                <img src="/assets/register.png" class="img-responsive">
-            </div>
-        </div>
-        <div class="col-md-4 offset-md-8">
-            <div class="form_container">
-                <h2 class="form_title">Регистрация</h2>
-                <p *ngIf="!isAvailable()" class="form_subtitle">Выберите тип регистрации, чтобы начать</p>
-                <p *ngIf="isAvailable()" class="form_subtitle">Заполните регистрационную форму, чтобы завершить
-                    регистрацию</p>
-                <div class="form_group">
-                    <div class="form_options" *ngIf="!selectedUserType">
-                        <div class="option" *ngFor="let registerType of registerTypes"
-                             (click)="selectRegisterType(registerType)">
-                            <span>{{ registerType }}
+<div class="form_container">
+    <h2 class="form_title">Регистрация</h2>
+    <p *ngIf="!isAvailable()" class="form_subtitle">Выберите тип регистрации, чтобы начать</p>
+    <p *ngIf="isAvailable()" class="form_subtitle">Заполните регистрационную форму, чтобы завершить
+        регистрацию</p>
+    <div class="form_group">
+        <div class="form_options" *ngIf="!selectedUserType">
+            <div class="option" *ngFor="let registerType of registerTypes"
+                 (click)="selectRegisterType(registerType)">
+                            <span>Участник олимпиад школьников
                                 <svg width="16" height="14" viewBox="0 0 16 14" fill="none"
                                      xmlns="http://www.w3.org/2000/svg">
                                 <path
@@ -27,23 +15,13 @@
                                     fill="#171717"/>
                             </svg>
                             </span>
-                        </div>
-                    </div>
-
-
-                    <p>Уже есть аккант? <a [routerLink]="'/login'">Войти в систему</a></p>
-                    <p>Не пришло письмо для активации учётной записи?</p>
-                    <p>Если у вас возникли проблемы при регистрации или вводе информации, обращайтесь: +7 (495)
-                        785-55-25, orginfo@mephi.ru</p>
-                </div>
             </div>
-            <app-register-school *ngIf="isAvailable(); else notSupported"></app-register-school>
         </div>
     </div>
 
-    <span class="copyright">© 2021, НИЯУ «МИФИ»</span>
+    <app-auth-layout-links></app-auth-layout-links>
 </div>
-
+<app-register-school *ngIf="isAvailable(); else notSupported"></app-register-school>
 
 <ng-template #notSupported>
     <div *ngIf="selectedUserType" class="alert alert-warning" role="alert">

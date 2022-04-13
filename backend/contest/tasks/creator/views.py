@@ -1,8 +1,13 @@
 from flask import request
+from marshmallow import EXCLUDE
 
 from common import get_current_module
 from contest.tasks.creator.schemas import *
+from contest.tasks.model_schemas.tasks import TaskPoolSchema, ContestTaskSchema, PlainTaskSchema, RangeTaskSchema, \
+    MultipleChoiceTaskSchema
+from contest.tasks.model_schemas.user import UserInContestSchema
 from contest.tasks.util import *
+from common.util import db_get_all
 
 db = get_current_db()
 module = get_current_module()
@@ -10,7 +15,6 @@ app = get_current_app()
 
 
 @module.route('/base_olympiad/create', methods=['POST'],
-              input_schema=CreateBaseOlympiadRequestTaskCreatorSchema,
               output_schema=BaseOlympiadIdResponseTaskCreatorSchema)
 def base_olympiad_create():
     """
@@ -21,7 +25,7 @@ def base_olympiad_create():
         required: true
         content:
           application/json:
-            schema: CreateBaseOlympiadRequestTaskCreatorSchema
+            schema: BaseContestSchema
       security:
         - JWTAccessToken: [ ]
         - CSRFAccessToken: [ ]
@@ -36,44 +40,224 @@ def base_olympiad_create():
         '409':
           description: Olympiad type already in use
     """
-
-    values = request.marshmallow
-
-    name = values['name']
-    description = values['description']
-    rules = values['rules']
-    olympiad_type_id = values['olympiad_type_id']
-
-    winner_1_condition = values['winner_1_condition']
-    winner_2_condition = values['winner_2_condition']
-    winner_3_condition = values['winner_3_condition']
-    diploma_1_condition = values['diploma_1_condition']
-    diploma_2_condition = values['diploma_2_condition']
-    diploma_3_condition = values['diploma_3_condition']
-
-    subject = values['subject']
-    level = values['level']
-
-    db_get_or_raise(OlympiadType, "olympiad_type_id", values["olympiad_type_id"])
-    base_contest = add_base_contest(db.session,
-                                    description=description,
-                                    name=name,
-                                    certificate_template=None,
-                                    winner_1_condition=winner_1_condition,
-                                    winner_2_condition=winner_2_condition,
-                                    winner_3_condition=winner_3_condition,
-                                    diploma_1_condition=diploma_1_condition,
-                                    diploma_2_condition=diploma_2_condition,
-                                    diploma_3_condition=diploma_3_condition,
-                                    rules=rules,
-                                    olympiad_type_id=olympiad_type_id,
-                                    subject=subject,
-                                    level=level)
-
+    base_contest = BaseContestSchema().load(request.json, session=db.session, partial=False, unknown=EXCLUDE)
+    db.session.add(base_contest)
     db.session.commit()
 
     return {
                'base_contest_id': base_contest.base_contest_id
+           }, 200
+
+
+@module.route('contest/<int:contest_id>/user/<int:user_id>/proctor_data', methods=['POST'],
+              input_schema=UserProctoringDataRequestTaskCreatorSchema)
+def set_proctor_data(contest_id, user_id):
+    """
+    Set proctor data
+    ---
+    post:
+      parameters:
+        - in: path
+          description: ID of the contest
+          name: contest_id
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: ID of the contest
+          name: user_id
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: UserProctoringDataRequestTaskCreatorSchema
+      security:
+        - JWTAccessToken: [ ]
+        - CSRFAccessToken: [ ]
+      responses:
+        '200':
+          description: OK
+        '400':
+          description: Bad request
+        '409':
+          description: Olympiad type already in use
+    """
+    current_user = UserInContest.query.filter_by(user_id=user_id, contest_id=contest_id).one_or_none()
+    UserInContestSchema(load_instance=True).load(request.json, instance=current_user, session=db.session,
+                                                 partial=True, unknown=EXCLUDE)
+    db.session.commit()
+
+    return {}, 200
+
+
+@module.route('contest/<int:contest_id>/user/<int:user_id>/proctor_data', methods=['GET'],
+              output_schema=UserProctoringDataRequestTaskCreatorSchema)
+def get_proctor_data(contest_id, user_id):
+    """
+    Get proctor data
+    ---
+    get:
+      parameters:
+        - in: path
+          description: ID of the contest
+          name: contest_id
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: ID of the contest
+          name: user_id
+          required: true
+          schema:
+            type: integer
+      security:
+        - JWTAccessToken: [ ]
+        - CSRFAccessToken: [ ]
+      responses:
+       responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: UserProctoringDataRequestTaskCreatorSchema
+        '400':
+          description: Bad request
+        '409':
+          description: Olympiad type already in use
+    """
+    current_user = UserInContest.query.filter_by(user_id=user_id, contest_id=contest_id).one_or_none()
+    return {
+               "proctoring_login": current_user.proctoring_login,
+               "proctoring_password": current_user.proctoring_password,
+           }, 200
+
+
+# Tasks Pool
+
+@module.route('/base_olympiad/<int:id_base_olympiad>/task_pool/create', methods=['POST'],
+              output_schema=TaskPoolIdResponseTaskCreatorSchema)
+def task_pool_create(id_base_olympiad):
+    """
+    Create task pool
+    ---
+    post:
+      parameters:
+        - in: path
+          description: ID of the base olympiad
+          name: id_base_olympiad
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: TaskPoolSchema
+      security:
+        - JWTAccessToken: [ ]
+        - CSRFAccessToken: [ ]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: TaskPoolIdResponseTaskCreatorSchema
+        '400':
+          description: Bad request
+        '409':
+          description: Olympiad type already in use
+    """
+    base_contest = db_get_or_raise(BaseContest, "base_contest_id", id_base_olympiad)
+
+    task_pool = TaskPoolSchema().load(data=request.json, partial=False, session=db.session, unknown=EXCLUDE)
+
+    db.session.add(task_pool)
+    base_contest.task_pools.append(task_pool)
+    db.session.commit()
+
+    return {
+               'task_pool_id': task_pool.task_pool_id
+           }, 200
+
+
+@module.route('/base_olympiad/<int:id_base_olympiad>/task_pool/<int:id_task_pool>', methods=['GET'],
+              output_schema=TaskPoolSchema)
+def task_pool_get(id_base_olympiad, id_task_pool):
+    """
+    Create task pool
+    ---
+    get:
+      parameters:
+        - in: path
+          description: ID of the base olympiad
+          name: id_base_olympiad
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: ID of the task pool
+          name: id_task_pool
+          required: true
+          schema:
+            type: integer
+      security:
+        - JWTAccessToken: [ ]
+        - CSRFAccessToken: [ ]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: TaskPoolSchema
+        '400':
+          description: Bad request
+        '409':
+          description: Olympiad type already in use
+    """
+    task_pool = db_get_or_raise(TaskPool, "task_pool_id", id_task_pool)
+    return task_pool, 200
+
+
+@module.route('/task_pool/all', methods=['GET'],
+              output_schema=AllTaskPoolsResponseTaskCreatorSchema)
+def task_pool_get_all():
+    """
+    Create task pool
+    ---
+    get:
+      parameters:
+        - in: query
+          name: base_contest_id
+          required: false
+          schema:
+            type: integer
+      security:
+        - JWTAccessToken: [ ]
+        - CSRFAccessToken: [ ]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: AllTaskPoolsResponseTaskCreatorSchema
+        '400':
+          description: Bad request
+        '409':
+          description: Olympiad type already in use
+    """
+    args = request.args
+    marshmallow = FilterTaskPoolAllRequestSchema().load(args)
+    base_contest_id = marshmallow.get('base_contest_id', None)
+    if base_contest_id is not None:
+        base_contest = db_get_or_raise(BaseContest, "base_contest_id", base_contest_id)
+        task_pools = base_contest.task_pools
+    else:
+        task_pools = db_get_all(TaskPool)
+    return {
+               "task_pools_list": task_pools
            }, 200
 
 
@@ -122,8 +306,11 @@ def olympiad_create_simple(id_base_olympiad):
     contest_duration = values.get('contest_duration', None)
     result_publication_date = values.get('result_publication_date', None)
     end_of_enroll_date = values.get('end_of_enroll_date', None)
+    deadline_for_appeal = values.get('deadline_for_appeal', None)
+    show_result_after_finish = values.get('show_result_after_finish', False)
     stage_id = values.get('stage_id', None)
     previous_contest_id = values.get('previous_contest_id', None)
+    show_answer_after_contest = values.get('show_answer_after_contest', None)
     previous_participation_condition = values.get('previous_participation_condition', None)
 
     holding_type = values.get('holding_type', None)
@@ -141,10 +328,13 @@ def olympiad_create_simple(id_base_olympiad):
                                          end_date=end_date,
                                          holding_type=holding_type,
                                          regulations=regulations,
+                                         show_answer_after_contest=show_answer_after_contest,
                                          previous_contest_id=previous_contest_id,
                                          previous_participation_condition=previous_participation_condition,
                                          end_of_enroll_date=end_of_enroll_date,
+                                         deadline_for_appeal=deadline_for_appeal,
                                          contest_duration=contest_duration,
+                                         show_result_after_finish=show_result_after_finish,
                                          result_publication_date=result_publication_date)
 
     if previous_contest_id is not None:
@@ -313,19 +503,21 @@ def contests_all(id_olympiad, id_stage):
            }, 200
 
 
-# Variant views
+# Contest task
 
 
-@module.route(
-    '/contest/<int:id_contest>/variant/create',
-    methods=['POST'],
-    input_schema=CreateVariantRequestTaskCreatorSchema,
-    output_schema=VariantIdResponseTaskCreatorSchema)
-def variant_create(id_contest):
+@module.route('/contest/<int:id_contest>/contest_task/create', methods=['POST'],
+              output_schema=ContestTaskResponseTaskCreatorSchema)
+def contest_task_create(id_contest):
     """
-    Variant creation
+    Create contest task
     ---
     post:
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: ContestTaskSchema
       parameters:
         - in: path
           description: ID of the contest
@@ -333,11 +525,6 @@ def variant_create(id_contest):
           required: true
           schema:
             type: integer
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema: CreateVariantRequestTaskCreatorSchema
       security:
         - JWTAccessToken: [ ]
         - CSRFAccessToken: [ ]
@@ -346,29 +533,105 @@ def variant_create(id_contest):
           description: OK
           content:
             application/json:
-              schema: VariantIdResponseTaskCreatorSchema
+              schema: ContestTaskResponseTaskCreatorSchema
         '400':
           description: Bad request
         '409':
           description: Olympiad type already in use
     """
-    values = request.marshmallow
-    variant_description = values['variant_description']
+    contest_task = ContestTaskSchema().load(data=request.json, partial=False, session=db.session, unknown=EXCLUDE)
+    contest_: Contest = db_get_or_raise(Contest, "contest_id", id_contest)
 
-    current_contest = get_contest_if_possible(id_contest)
-    last_variant_number = get_last_variant_in_contest(current_contest)
+    previous_pools = {
+        task_pool_
+        for contest_task_ in contest_.contest_tasks.all()
+        for task_pool_ in contest_task_.task_pools}
 
-    variant = add_variant(db.session,
-                          variant_number=last_variant_number + 1,
-                          variant_description=variant_description,
-                          )
-    current_contest.variants.append(variant)
+    if len(previous_pools) != 0:
+        if previous_pools & set(contest_task.task_pools):
+            raise AlreadyExists("task_pool", "task_pool_id")
 
-    db.session.add(variant)
+    contest_.contest_tasks.append(contest_task)
     db.session.commit()
 
     return {
-               "variant_id": variant.variant_id,
+               'contest_task_id': contest_task.contest_task_id
+           }, 200
+
+
+@module.route('/contest/<int:id_contest>/contest_task/<int:id_contest_task>', methods=['GET'],
+              output_schema=ContestTaskSchema)
+def contest_task_get(id_contest, id_contest_task):
+    """
+    Create contest task
+    ---
+    get:
+      parameters:
+        - in: path
+          description: ID of the contest
+          name: id_contest
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: ID of the contest task
+          name: id_contest_task
+          required: true
+          schema:
+            type: integer
+      security:
+        - JWTAccessToken: [ ]
+        - CSRFAccessToken: [ ]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: ContestTaskSchema
+        '400':
+          description: Bad request
+        '409':
+          description: Olympiad type already in use
+    """
+
+    contest_task = db_get_or_raise(ContestTask, "contest_task_id", id_contest_task)
+    return contest_task, 200
+
+
+@module.route('/contest/<int:id_contest>/contest_task/all', methods=['GET'],
+              output_schema=AllContestTaskResponseTaskCreatorSchema)
+def contest_task_get_all(id_contest):
+    """
+    Get all contest task
+    ---
+    get:
+      parameters:
+        - in: path
+          description: ID of the contest
+          name: id_contest
+          required: true
+          schema:
+            type: integer
+      security:
+        - JWTAccessToken: [ ]
+        - CSRFAccessToken: [ ]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: AllContestTaskResponseTaskCreatorSchema
+        '400':
+          description: Bad request
+        '404':
+          description: Contest not found
+        '409':
+          description: Olympiad type already in use
+    """
+
+    contest_: Contest = db_get_or_raise(Contest, "contest_id", id_contest)
+    return {
+               "contest_task_list": contest_.contest_tasks
            }, 200
 
 
@@ -450,25 +713,18 @@ def variant_all(id_contest):
 # Task views
 
 @module.route(
-    '/contest/<int:id_contest>/variant/<int:id_variant>/task/create_plain',
+    '/task_pool/<int:id_task_pool>/task/create_plain',
     methods=['POST'],
-    input_schema=CreatePlainRequestTaskCreatorSchema,
     output_schema=TaskIdResponseTaskCreatorSchema)
-def task_create_plain(id_contest, id_variant):
+def task_create_plain(id_task_pool):
     """
     Create plain task
     ---
     post:
       parameters:
         - in: path
-          description: ID of the contest
-          name: id_contest
-          required: true
-          schema:
-            type: integer
-        - in: path
-          description: ID of the variant
-          name: id_variant
+          description: ID of the task pool
+          name: id_task_pool
           required: true
           schema:
             type: integer
@@ -476,7 +732,7 @@ def task_create_plain(id_contest, id_variant):
         required: true
         content:
           application/json:
-            schema: CreatePlainRequestTaskCreatorSchema
+            schema: PlainTaskSchema
       security:
         - JWTAccessToken: [ ]
         - CSRFAccessToken: [ ]
@@ -491,23 +747,12 @@ def task_create_plain(id_contest, id_variant):
         '409':
           description: Olympiad type already in use
     """
-    values = request.marshmallow
+    task_pool = db_get_or_raise(TaskPool, "task_pool_id", id_task_pool)
 
-    num_of_task = values['num_of_task']
-    recommended_answer = values['recommended_answer']
-    show_answer_after_contest = values.get('show_answer_after_contest', None)
-    task_points = values.get('task_points', None)
+    task = PlainTaskSchema().load(request.json, session=db.session, partial=False, unknown=EXCLUDE)
+    db.session.add(task)
 
-    variant = get_variant_if_possible(id_contest, id_variant)
-
-    task = add_plain_task(db.session,
-                          num_of_task=num_of_task,
-                          recommended_answer=recommended_answer,
-                          show_answer_after_contest=show_answer_after_contest,
-                          task_points=task_points,
-                          )
-
-    variant.tasks.append(task)
+    task_pool.tasks.append(task)
 
     db.session.commit()
 
@@ -517,24 +762,18 @@ def task_create_plain(id_contest, id_variant):
 
 
 @module.route(
-    '/contest/<int:id_contest>/variant/<int:id_variant>/task/create_range',
+    '/task_pool/<int:id_task_pool>/task/create_range',
     methods=['POST'],
-    input_schema=CreateRangeRequestTaskCreatorSchema, output_schema=TaskIdResponseTaskCreatorSchema)
-def task_create_range(id_contest, id_variant):
+    output_schema=TaskIdResponseTaskCreatorSchema)
+def task_create_range(id_task_pool):
     """
     Create range task
     ---
     post:
       parameters:
         - in: path
-          description: ID of the contest
-          name: id_contest
-          required: true
-          schema:
-            type: integer
-        - in: path
-          description: ID of the variant
-          name: id_variant
+          description: ID of the task pool
+          name: id_task_pool
           required: true
           schema:
             type: integer
@@ -542,7 +781,7 @@ def task_create_range(id_contest, id_variant):
         required: true
         content:
           application/json:
-            schema: CreateRangeRequestTaskCreatorSchema
+            schema: RangeTaskSchema
       security:
         - JWTAccessToken: [ ]
         - CSRFAccessToken: [ ]
@@ -557,22 +796,11 @@ def task_create_range(id_contest, id_variant):
         '409':
           description: Olympiad type already in use
     """
-    values = request.marshmallow
-    num_of_task = values['num_of_task']
-    start_value = values['start_value']
-    end_value = values['end_value']
-    show_answer_after_contest = values.get('show_answer_after_contest', None)
-    task_points = values.get('task_points', None)
+    task_pool = db_get_or_raise(TaskPool, "task_pool_id", id_task_pool)
+    task = RangeTaskSchema().load(request.json, session=db.session, partial=False, unknown=EXCLUDE)
+    db.session.add(task)
 
-    variant = get_variant_if_possible(id_contest, id_variant)
-    task = add_range_task(db.session,
-                          num_of_task=num_of_task,
-                          start_value=start_value,
-                          end_value=end_value,
-                          show_answer_after_contest=show_answer_after_contest,
-                          task_points=task_points,
-                          )
-    variant.tasks.append(task)
+    task_pool.tasks.append(task)
     db.session.commit()
 
     return {
@@ -581,24 +809,18 @@ def task_create_range(id_contest, id_variant):
 
 
 @module.route(
-    '/contest/<int:id_contest>/variant/<int:id_variant>/task/create_multiple',
+    '/task_pool/<int:id_task_pool>/task/create_multiple',
     methods=['POST'],
-    input_schema=CreateMultipleRequestTaskCreatorSchema, output_schema=TaskIdResponseTaskCreatorSchema)
-def task_create_multiple(id_contest, id_variant):
+    output_schema=TaskIdResponseTaskCreatorSchema)
+def task_create_multiple(id_task_pool):
     """
     Create multiple task
     ---
     post:
       parameters:
         - in: path
-          description: ID of the contest
-          name: id_contest
-          required: true
-          schema:
-            type: integer
-        - in: path
-          description: ID of the variant
-          name: id_variant
+          description: ID of the task pool
+          name: id_task_pool
           required: true
           schema:
             type: integer
@@ -606,7 +828,7 @@ def task_create_multiple(id_contest, id_variant):
         required: true
         content:
           application/json:
-            schema: CreateMultipleRequestTaskCreatorSchema
+            schema: MultipleChoiceTaskSchema
       security:
         - JWTAccessToken: [ ]
         - CSRFAccessToken: [ ]
@@ -621,28 +843,11 @@ def task_create_multiple(id_contest, id_variant):
         '409':
           description: Olympiad type already in use
     """
-    values = request.marshmallow
-
-    num_of_task = values['num_of_task']
-    answers = values['answers']
-    show_answer_after_contest = values.get('show_answer_after_contest', None)
-    task_points = values.get('task_points', None)
-
-    variant = get_variant_if_possible(id_contest, id_variant)
-
-    task = add_multiple_task(db.session,
-                             num_of_task=num_of_task,
-                             show_answer_after_contest=show_answer_after_contest,
-                             task_points=task_points,
-                             )
-    variant.tasks.append(task)
-
-    task.answers = [
-        {
-            "answer": answer['answer'],
-            "is_right_answer": answer['is_right_answer']}
-        for answer in answers]
-
+    values = request.json
+    task_pool = db_get_or_raise(TaskPool, "task_pool_id", id_task_pool)
+    task = MultipleChoiceTaskSchema().load(request.json, session=db.session, partial=False, unknown=EXCLUDE)
+    db.session.add(task)
+    task_pool.tasks.append(task)
     db.session.commit()
 
     return {
@@ -651,24 +856,18 @@ def task_create_multiple(id_contest, id_variant):
 
 
 @module.route(
-    '/contest/<int:id_contest>/variant/<int:id_variant>/task/<int:id_task>',
+    '/task_pool/<int:id_task_pool>/task/<int:id_task>',
     methods=['GET'],
     output_schema=TaskResponseTaskCreatorSchema)
-def task_get(id_contest, id_variant, id_task):
+def task_get(id_task_pool, id_task):
     """
     Get task
     ---
     get:
       parameters:
         - in: path
-          description: ID of the contest
-          name: id_contest
-          required: true
-          schema:
-            type: integer
-        - in: path
-          description: ID of the variant
-          name: id_variant
+          description: ID of the task pool
+          name: id_task_pool
           required: true
           schema:
             type: integer
@@ -692,29 +891,23 @@ def task_get(id_contest, id_variant, id_task):
         '409':
           description: Olympiad type already in use
     """
-    task = get_task_if_possible(id_contest, id_variant, id_task)
+    task = get_task_in_pool_if_possible(id_task_pool, id_task)
     return task, 200
 
 
 @module.route(
-    '/contest/<int:id_contest>/variant/<int:id_variant>/task/all',
+    '/task_pool/<int:id_task_pool>/task/all',
     methods=['GET'],
     output_schema=AllTasksResponseTaskCreatorSchema)
-def task_all(id_contest, id_variant):
+def task_all(id_task_pool):
     """
     Update multiple task
     ---
     get:
       parameters:
         - in: path
-          description: ID of the contest
-          name: id_contest
-          required: true
-          schema:
-            type: integer
-        - in: path
-          description: ID of the variant
-          name: id_variant
+          description: ID of the task pool
+          name: id_task_pool
           required: true
           schema:
             type: integer
@@ -732,30 +925,26 @@ def task_all(id_contest, id_variant):
         '409':
           description: Olympiad type already in use
     """
-    tasks_list = get_tasks_if_possible(id_contest, id_variant)
+
+    task_pool = db_get_or_raise(TaskPool, "task_pool_id", id_task_pool)
+    tasks_list = task_pool.tasks
     return {
                "tasks_list": tasks_list
            }, 200
 
 
 @module.route(
-    '/contest/<int:id_contest>/variant/<int:id_variant>/tasks/<int:id_task>/image',
+    '/task_pool/<int:id_task_pool>/task/<int:id_task>/image',
     methods=['GET'])
-def task_image(id_contest, id_variant, id_task):
+def task_image(id_task_pool, id_task):
     """
     Get task image
     ---
     get:
       parameters:
         - in: path
-          description: ID of the contest
-          name: id_contest
-          required: true
-          schema:
-            type: integer
-        - in: path
-          description: ID of the variant
-          name: id_variant
+          description: ID of the task pool
+          name: id_task_pool
           required: true
           schema:
             type: integer
@@ -781,7 +970,7 @@ def task_image(id_contest, id_variant, id_task):
         '409':
           description: Olympiad type already in use
     """
-    task = get_task_if_possible(id_contest, id_variant, id_task)
+    task = get_task_in_pool_if_possible(id_task_pool, id_task)
     return app.send_media(task.image_of_task)
 
 

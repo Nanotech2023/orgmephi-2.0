@@ -12,6 +12,8 @@
 
 
 export interface UserInContest { 
+    proctoring_login?: string | null;
+    proctoring_password?: string | null;
     show_results_to_user?: boolean | null;
     supervisor?: string | null;
     readonly user_id: number;

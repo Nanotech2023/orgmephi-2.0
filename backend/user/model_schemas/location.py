@@ -27,7 +27,7 @@ class LocationRussiaSchema(SQLAlchemySchema):
         sqla_session = db.session
 
     rural = fields.Boolean(column_name='rural')
-    location_type = EnumField(LocationTypeEnum, by_value=True, dump_only=True)
+    location_type = EnumField(LocationTypeEnum, by_value=True, validate=validate.OneOf([LocationTypeEnum.russian]))
     country = common_fields.CommonName(required=True, validate=validate.OneOf([native_country]))
     city = Related(column=['name', 'region_name'])
 
@@ -57,8 +57,8 @@ class LocationOtherSchema(SQLAlchemySchema):
         sqla_session = db.session
 
     rural = fields.Boolean(column_name='rural')
-    location_type = EnumField(LocationTypeEnum, by_value=True, dump_only=True)
-    country = Related(column=['name'], required=True, validate=validate.NoneOf([native_country]))
+    location_type = EnumField(LocationTypeEnum, by_value=True, validate=validate.OneOf([LocationTypeEnum.foreign]))
+    country = Related(column=['name'], required=True)
     location = common_fields.FreeDescription(column_name='location')
 
     # noinspection PyUnusedLocal
@@ -83,10 +83,15 @@ class LocationSchema(OneOfSchema):
         return obj_type
 
     def get_data_type(self, data):
-        if self.type_field in data and self.type_field_remove:
-            data.pop(self.type_field)
-        country_name = data.get('country')
-        if country_name == native_country:
-            return LocationTypeEnum.russian.value
+        if self.type_field_remove:
+            type_field = data.pop(self.type_field, None)
         else:
-            return LocationTypeEnum.foreign.value
+            type_field = data.get(self.type_field, None)
+        if type_field is None:
+            country_name = data.get('country')
+            if country_name == native_country:
+                return LocationTypeEnum.russian.value
+            else:
+                return LocationTypeEnum.foreign.value
+        else:
+            return type_field

@@ -14,6 +14,7 @@
 export interface ContestResponseTaskCreator { 
     contest_duration?: number;
     contest_id: number;
+    deadline_for_appeal?: string;
     end_date?: string;
     end_of_enroll_date?: string;
     holding_type?: ContestResponseTaskCreator.HoldingTypeEnum;
@@ -21,6 +22,7 @@ export interface ContestResponseTaskCreator {
     previous_contest_id?: number;
     previous_participation_condition?: ContestResponseTaskCreator.PreviousParticipationConditionEnum;
     result_publication_date?: string;
+    show_result_after_finish?: boolean;
     start_date?: string;
     visibility: boolean;
 }

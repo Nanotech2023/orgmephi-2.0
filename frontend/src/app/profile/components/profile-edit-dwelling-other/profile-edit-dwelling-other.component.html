@@ -1,0 +1,34 @@
+<div class="profile-form_container">
+
+    <div class="profile-form_item">
+        <p class="profile-form_label">Страна</p>
+        <ng-select [items]="countries$ | async"
+                   bindLabel="name"
+                   bindValue="name"
+                   placeholder="Выберите страну"
+                   name="countryName"
+                   [(ngModel)]="country"
+                   (change)="onCountryChange()">
+        </ng-select>
+        <div *ngIf="!country" class="input_error">
+            Необходимо указать страну
+        </div>
+    </div>
+
+    <div class="profile-form_item">
+        <p class="profile-form_label">Являетесь ли вы жителем сельской местности?</p>
+        <input class="profile-form_input" type="checkbox" [(ngModel)]="model.rural"
+               (ngModelChange)="onModelChange()">
+    </div>
+</div>
+
+<ng-template #validationTemplate let-fieldName='fieldName'>
+    <div *ngIf="fieldName.invalid" class="input_error">
+        <div *ngIf="fieldName.errors?.required">
+            Поле обязательно для заполнения
+        </div>
+        <div *ngIf="fieldName.errors?.pattern">
+            Значение введено некорректно
+        </div>
+    </div>
+</ng-template>

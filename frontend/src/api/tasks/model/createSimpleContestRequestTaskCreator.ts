@@ -13,6 +13,7 @@
 
 export interface CreateSimpleContestRequestTaskCreator { 
     contest_duration?: number;
+    deadline_for_appeal?: string;
     end_date: string;
     end_of_enroll_date?: string;
     holding_type: CreateSimpleContestRequestTaskCreator.HoldingTypeEnum;
@@ -20,6 +21,8 @@ export interface CreateSimpleContestRequestTaskCreator {
     previous_participation_condition?: CreateSimpleContestRequestTaskCreator.PreviousParticipationConditionEnum;
     regulations?: string;
     result_publication_date?: string;
+    show_answer_after_contest: boolean;
+    show_result_after_finish?: boolean;
     stage_id?: number;
     start_date: string;
     visibility: boolean;

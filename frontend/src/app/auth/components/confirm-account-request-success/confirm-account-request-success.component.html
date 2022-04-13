@@ -1,0 +1,18 @@
+<ng-container *ngIf="!!token; else tokenNotFound">
+    <div class="form_container">
+        <h2 class="form_title">Учётная запись активирована</h2>
+        <p class="form_subtitle">Спасибо, что активировали свою учётную запись. Теперь вы можете войти в
+            систему используя логин и пароль, указанный при регистрации.</p>
+        <div class="form_group">
+            <button routerLink="/auth/login" class="button-action_default button-action_save">Войти в систему</button>
+        </div>
+        <app-auth-layout-links></app-auth-layout-links>
+    </div>
+</ng-container>
+
+<ng-template #tokenNotFound>
+    <div class="form_container">
+        <h2 class="form_title">Произошла ошибка</h2>
+        <p class="form_subtitle">Попробуйте ещё раз</p>
+    </div>
+</ng-template>

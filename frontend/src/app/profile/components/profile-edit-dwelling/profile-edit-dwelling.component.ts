@@ -1,5 +1,6 @@
-import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core'
-import { Location, LocationOther, LocationRussia } from '@api/users/models'
+import { Component, EventEmitter, Input, Output } from '@angular/core'
+import { Location, LocationRussiaCity, LocationTypeEnum } from '@api/users/models'
+import { getLocationDisplay } from '@/shared/localizeUtils'
 
 
 @Component( {
@@ -9,26 +10,42 @@ import { Location, LocationOther, LocationRussia } from '@api/users/models'
 } )
 export class ProfileEditDwellingComponent
 {
-    @Input() model!: LocationRussia
-    @Output() modelChange = new EventEmitter<LocationRussia>()
+    @Input() model!: Location
+    @Output() modelChange = new EventEmitter<Location>()
+    @Input() city!: LocationRussiaCity
+    @Output() cityChange = new EventEmitter<LocationRussiaCity>()
+    @Input() country!: string
+    @Output() countryChange = new EventEmitter<string>()
+
+    readonly locationTypes: LocationTypeEnum[] = [
+        LocationTypeEnum.Russian,
+        LocationTypeEnum.Foreign
+    ]
 
     onModelChange(): void
     {
         this.modelChange.emit( this.model )
     }
 
-    onCityChange( $event: string ): void
+    onCityChange(): void
     {
-        // @ts-ignore
-        this.model.city.name = $event
-        this.modelChange.emit( this.model )
+        this.cityChange.emit( this.city )
     }
 
-    onRegionChange( $event: string ): void
+    onCountryChange()
     {
-        // @ts-ignore
-        this.model.city?.region_name = $event
-        this.modelChange.emit( this.model )
+        this.countryChange.emit( this.country )
     }
 
+    getLocationDisplay( locationType: LocationTypeEnum ): string
+    {
+        return getLocationDisplay( locationType )
+    }
+
+    onLocationTypeChange( $event: Event )
+    {
+        // @ts-ignore
+        this.model.location_type = $event.target.value
+        this.modelChange.emit( this.model )
+    }
 }

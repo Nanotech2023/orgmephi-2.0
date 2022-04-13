@@ -2,33 +2,39 @@ import { Injectable } from '@angular/core'
 import { ComponentStore, tapResponse } from '@ngrx/component-store'
 import {
     Document,
-    DocumentRF,
+    DocumentTypeEnum,
+    Location,
     LocationOther,
     LocationRussia,
+    LocationRussiaCity,
+    LocationTypeEnum,
     SchoolInfo,
     UserInfo,
-    UserLimitations,
-    DocumentTypeEnum, SchoolTypeEnum
+    UserLimitations
 } from '@api/users/models'
 import { UsersService } from '@api/users/users.service'
-import { EMPTY, Observable, of, zip } from 'rxjs'
+import { Observable, of, zip } from 'rxjs'
 import { CallState, getError, LoadingState } from '@/shared/callState'
-import { catchError, finalize, switchMap } from 'rxjs/operators'
+import { catchError, finalize, switchMap, tap, withLatestFrom } from 'rxjs/operators'
 import { displayErrorMessage } from '@/shared/logging'
+import { Router } from '@angular/router'
+import CountryEnum = LocationRussia.CountryEnum
 
 
 export interface ProfileState
 {
     userInfo?: UserInfo
-    schoolInfo: SchoolInfo | null
+    schoolInfo?: SchoolInfo
     profileUnfilled: any
     callState: CallState
+    city?: LocationRussiaCity
 }
 
 
 const initialState: ProfileState = {
     userInfo: undefined,
-    schoolInfo: null,
+    schoolInfo: undefined,
+    city: undefined,
     profileUnfilled: null,
     callState: LoadingState.INIT
 }
@@ -37,27 +43,30 @@ const initialState: ProfileState = {
 @Injectable()
 export class ProfileStore extends ComponentStore<ProfileState>
 {
-    constructor( private usersService: UsersService )
+    constructor( private usersService: UsersService, private router: Router )
     {
         super( initialState )
     }
 
-    readonly userProfileUnfilled$: Observable<string> = this.select( state => JSON.stringify( state.profileUnfilled, null, 4 ) )
-    readonly userInfo$: Observable<UserInfo | undefined> = this.select( state => state.userInfo )
-    readonly userInfoDocument$: Observable<DocumentRF | undefined> = this.select( state => state.userInfo?.document as DocumentRF )
-    readonly userInfoDwelling$: Observable<LocationRussia | undefined> = this.select( state => state.userInfo?.dwelling as LocationRussia )
-    readonly userInfoLimitations$: Observable<UserLimitations | undefined> = this.select( state => state.userInfo?.limitations )
-    readonly schoolInfo$: Observable<SchoolInfo | null> = this.select( state => state.schoolInfo )
+    private readonly userProfileUnfilled$: Observable<string> = this.select( state => JSON.stringify( state.profileUnfilled, null, 4 ) )
+    private readonly userInfo$: Observable<UserInfo | undefined> = this.select( state => state.userInfo )
+    private readonly userInfoDocument$: Observable<Document> = this.select( state => state.userInfo?.document ?? this.getEmptyDocument() )
+    private readonly userInfoDwelling$: Observable<any> = this.select( state => state.userInfo?.dwelling ?? this.getEmptyLocation() )
+    private readonly userInfoDwellingCity$: Observable<LocationRussiaCity> = this.select( state => ( state.userInfo?.dwelling as LocationRussia )?.city ?? this.getEmptyCity() )
+    private readonly userInfoDwellingCountry$: Observable<string> = this.select( state => ( state.userInfo?.dwelling as LocationOther )?.country ?? "" )
+    private readonly userInfoLimitations$: Observable<UserLimitations> = this.select( state => state.userInfo?.limitations ?? this.getEmptyLimitations() )
     private readonly loading$: Observable<boolean> = this.select( state => state.callState === LoadingState.LOADING )
     private readonly error$: Observable<string | null> = this.select( state => getError( state.callState ) )
 
+    // @ts-ignore
     readonly viewModel$: Observable<{
         loading: boolean; error: string | null, userProfileUnfilled: string,
         userInfo: UserInfo,
-        userInfoDocument: DocumentRF,
-        userInfoDwelling: LocationRussia,
+        userInfoDocument: Document,
+        userInfoDwelling: any,
+        userInfoDwellingCity: LocationRussiaCity,
+        userInfoDwellingCountry: string
         userInfoLimitations: UserLimitations,
-        schoolInfo: SchoolInfo
     }> = this.select(
         this.loading$,
         this.error$,
@@ -65,20 +74,28 @@ export class ProfileStore extends ComponentStore<ProfileState>
         this.userInfo$,
         this.userInfoDocument$,
         this.userInfoDwelling$,
+        this.userInfoDwellingCity$,
+        this.userInfoDwellingCountry$,
         this.userInfoLimitations$,
-        this.schoolInfo$,
-        ( loading, error, userProfileUnfilled, userInfo, userInfoDocument, userInfoDwelling, userInfoLimitations, schoolInfo ) => ( {
+        ( loading, error, userProfileUnfilled, userInfo, userInfoDocument, userInfoDwelling, userInfoDwellingCity, userInfoDwellingCountry, userInfoLimitations ) => ( {
             loading: loading,
             error: error,
             userProfileUnfilled: userProfileUnfilled,
             userInfo: userInfo ?? {},
-            userInfoDocument: userInfoDocument ?? this.getEmptyDocument(),
-            userInfoDwelling: userInfoDwelling ?? this.getEmptyLocation(),
-            userInfoLimitations: userInfoLimitations ?? this.getEmptyLimitations(),
-            schoolInfo: schoolInfo ?? this.getEmptySchool()
+            userInfoDocument: userInfoDocument,
+            userInfoDwelling: userInfoDwelling,
+            userInfoDwellingCity: userInfoDwellingCity,
+            userInfoDwellingCountry: userInfoDwellingCountry,
+            userInfoLimitations: this.getLimitationsForViewModel( userInfoLimitations )
         } )
     )
 
+
+    private getLimitationsForViewModel( userInfoLimitations: UserLimitations )
+    {
+        // @ts-ignore
+        return { ...userInfoLimitations, user_id: undefined }
+    }
 
     private getEmptyDocument(): Document
     {
@@ -94,15 +111,19 @@ export class ProfileStore extends ComponentStore<ProfileState>
         }
     }
 
-    private getEmptyLocation(): LocationRussia
+    private getEmptyCity(): LocationRussiaCity
+    {
+        return {
+            region_name: "",
+            name: ""
+        }
+    }
+
+    private getEmptyLocation(): Location
     {
         return {
             country: "Россия",
-            city: {
-                region_name: "",
-                name: ""
-            },
-            location_type: LocationOther.LocationTypeEnum.Russian,
+            location_type: LocationTypeEnum.Russian,
             rural: false
         } as LocationRussia
     }
@@ -115,18 +136,6 @@ export class ProfileStore extends ComponentStore<ProfileState>
             sight: false,
             // @ts-ignore
             user_id: undefined
-        }
-    }
-
-    getEmptySchool(): SchoolInfo
-    {
-        return {
-            grade: undefined,
-            number: undefined,
-            user_id: undefined,
-            school_type: SchoolTypeEnum.School,
-            name: undefined,
-            location: this.getEmptyLocation()
         }
     }
 
@@ -155,15 +164,15 @@ export class ProfileStore extends ComponentStore<ProfileState>
         } )
     )
 
-    readonly setSchoolInfo = this.updater( ( state: ProfileState, response: SchoolInfo ) =>
-        ( {
-            ...state, schoolInfo: response
-        } )
-    )
-
     readonly setProfileUnfilled = this.updater( ( state: ProfileState, response: any ) =>
         ( {
             ...state, profileUnfilled: response
+        } )
+    )
+
+    readonly setCity = this.updater( ( state: ProfileState, city: LocationRussiaCity ) =>
+        ( {
+            ...state, city: city
         } )
     )
 
@@ -171,11 +180,12 @@ export class ProfileStore extends ComponentStore<ProfileState>
     readonly fetch = this.effect( () =>
     {
         this.setLoading()
-        return zip( [ this.fetchUserInfo, this.fetchSchoolInfo, this.fetchUnfilled ] ).pipe(
+        return zip( [ this.fetchUserInfo, this.fetchUnfilled ] ).pipe(
             catchError( ( error: any ) => of( displayErrorMessage( error ) ) ),
             finalize( () => this.setLoaded )
         )
     } )
+
 
     readonly fetchUnfilled = this.effect( () =>
         this.usersService.userProfileUnfilledGet().pipe(
@@ -193,33 +203,64 @@ export class ProfileStore extends ComponentStore<ProfileState>
             )
         ) )
 
-    readonly fetchSchoolInfo = this.effect( () =>
-        this.usersService.userProfileSchoolGet().pipe(
-            tapResponse(
-                ( response: SchoolInfo ) => this.setSchoolInfo( response ),
-                ( error: string ) => this.updateError( error )
-            )
-        ) )
 
     readonly updateUserInfo = this.effect( ( userInfo$: Observable<UserInfo> ) =>
         userInfo$.pipe(
-            switchMap( ( userInfo: UserInfo ) =>
-            {
-                this.setLoading()
-                return this.usersService.userProfilePersonalPatch( userInfo ).pipe(
-                    catchError( ( error: any ) => of( displayErrorMessage( error ) ) )
-                )
-            } )
+            withLatestFrom( this.userInfoDocument$, this.userInfoDwelling$, this.userInfoDwellingCity$, this.userInfoDwellingCountry$, this.userInfoLimitations$ ),
+            switchMap( ( [ userInfo, document, dwelling, dwellingCity, dwellingCountry, limitations ] ) =>
+                {
+                    this.setLoading()
+                    const newUserInfo = { ...userInfo }
+                    newUserInfo.user_id = undefined
+
+                    newUserInfo.document = document
+                    // @ts-ignore
+                    newUserInfo.document.user_id = undefined
+                    if ( document.document_type != DocumentTypeEnum.OtherDocument )
+                    {
+                        // @ts-ignore
+                        newUserInfo.document.document_name = undefined
+                    }
+                    if ( document.document_type != DocumentTypeEnum.RfPassport )
+                    {
+                        // @ts-ignore
+                        newUserInfo.document.code = undefined
+                    }
+
+                    newUserInfo.dwelling = dwelling
+                    if ( dwelling.location_type == LocationTypeEnum.Russian )
+                    {
+                        // @ts-ignore
+                        newUserInfo.dwelling.country = CountryEnum.Russian
+                        // @ts-ignore
+                        newUserInfo.dwelling.city = dwellingCity
+                        // @ts-ignore
+                        newUserInfo.dwelling.location = undefined
+                    }
+                    if ( dwelling.location_type == LocationTypeEnum.Foreign )
+                    {
+                        // @ts-ignore
+                        newUserInfo.dwelling.country = dwelling.country
+                        // @ts-ignore
+                        newUserInfo.dwelling.city = undefined
+                        // @ts-ignore
+                        newUserInfo.dwelling.location = "Иностранец"
+                    }
+
+                    newUserInfo.limitations = limitations
+                    // @ts-ignore
+                    newUserInfo.limitations.user_id = undefined
+                    return this.usersService.userProfilePersonalPatch( newUserInfo ).pipe(
+                        catchError( ( error: any ) => of( displayErrorMessage( error ) ) )
+                    )
+                }
+            ),
+            tap( () => this.navigateToSchoolInfo() )
         ) )
 
-    readonly updateSchoolInfo = this.effect( ( userInfo$: Observable<SchoolInfo> ) =>
-        userInfo$.pipe(
-            switchMap( ( userInfo: SchoolInfo ) =>
-            {
-                this.setLoading()
-                return this.usersService.userProfileSchoolPatch( userInfo ).pipe(
-                    catchError( ( error: any ) => of( displayErrorMessage( error ) ) )
-                )
-            } )
-        ) )
+
+    navigateToSchoolInfo(): void
+    {
+        this.router.navigate( [ '/profile', 'schoolinfo' ] )
+    }
 }

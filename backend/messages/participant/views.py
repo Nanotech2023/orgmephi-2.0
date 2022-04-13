@@ -1,4 +1,4 @@
-from datetime import date
+from datetime import date, datetime
 
 from flask import request
 from marshmallow import EXCLUDE
@@ -11,7 +11,7 @@ from common.jwt_verify import jwt_get_id
 from .schemas import ListCategoriesMessagesResponseSchema, CreateThreadMessagesRequestSchema, \
     CreateMessageMessagesRequestSchema
 from messages.model_schemas import ThreadSchema, MessageSchema
-from messages.models import ThreadCategory, Thread, Message
+from messages.models import ThreadCategory, Thread, Message, ThreadType
 from messages.util import filter_threads_query, FilterThreadsMessagesResponseSchema
 
 from user.models import User
@@ -130,12 +130,15 @@ def create_thread():
     values = request.marshmallow
     author = db_get_or_raise(User, 'id', jwt_get_id())
     if thread_limit is not None:
-        cnt = Thread.query.filter(Thread.author_id == author.id, Thread.post_time >= date.today()).count()
+        cnt = Thread.query.filter(Thread.author_id == author.id, Thread.post_time >= datetime.utcnow().date()).count()
         if cnt >= thread_limit:
             raise QuotaExceeded('New threads per day', thread_limit)
 
     thread = ThreadSchema(load_instance=True).load(request.json, unknown=EXCLUDE)
 
+    from contest.responses.util import check_timing_for_mark_editing_and_appeal
+    if thread.thread_type == ThreadType.appeal:
+        check_timing_for_mark_editing_and_appeal(thread.related_contest.contest_id, jwt_get_id())
     thread.author = author
     thread.messages.append(Message(message=values['message']))
 
@@ -219,7 +222,7 @@ def add_message(thread_id):
 
     if message_limit is not None:
         # noinspection PyComparisonWithNone
-        cnt = Message.query.filter(Message.thread_id == thread_id, Message.post_time >= date.today(),
+        cnt = Message.query.filter(Message.thread_id == thread_id, Message.post_time >= datetime.utcnow().date(),
                                    Message.employee_id == None).count()
         if cnt >= message_limit:
             raise QuotaExceeded('New messages per day per thread', message_limit)

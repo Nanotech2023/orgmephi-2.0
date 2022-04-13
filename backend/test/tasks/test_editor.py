@@ -10,12 +10,6 @@ def client(client_creator):
 # Base olympiad
 
 
-def test_base_olympiad_upload(client, test_base_contests):
-    resp = client.post(f'/base_olympiad/{test_base_contests[0].base_contest_id}/upload_certificate',
-                       data=b'Test')
-    assert resp.status_code == 200
-
-
 def test_base_olympiad_remove(client, test_base_contests):
     from contest.tasks.models import BaseContest
     test_base_contests: BaseContest = test_base_contests[1]
@@ -80,6 +74,7 @@ def test_olympiad_patch(client, test_base_contests, test_simple_contest, test_co
     new_start_date = datetime.utcnow()
     new_end_date = datetime.utcnow() + timedelta(hours=4)
     new_end_of_enroll_date = datetime.utcnow() + timedelta(hours=1)
+    new_deadline_for_appeal = datetime.utcnow() + timedelta(hours=4)
     new_result_publication_date = datetime.utcnow() + timedelta(hours=6)
     resp = client.patch(
         f'/base_olympiad/{test_base_contests[0].base_contest_id}/olympiad/{test_simple_contest[0].contest_id}',
@@ -88,6 +83,7 @@ def test_olympiad_patch(client, test_base_contests, test_simple_contest, test_co
             'end_date': f'{new_end_date}',
             'regulations': 'Test 0',
             'end_of_enroll_date': f'{new_end_of_enroll_date}',
+            'deadline_for_appeal': f'{new_deadline_for_appeal}',
             'result_publication_date': f'{new_result_publication_date}',
             'visibility': 'true',
             'holding_type': f'{ContestHoldingTypeEnum.OfflineContest.value}',
@@ -101,6 +97,7 @@ def test_olympiad_patch(client, test_base_contests, test_simple_contest, test_co
     assert simple_contest.start_date == new_start_date
     assert simple_contest.end_date == new_end_date
     assert simple_contest.end_of_enroll_date == new_end_of_enroll_date
+    assert simple_contest.deadline_for_appeal == new_deadline_for_appeal
     assert simple_contest.result_publication_date == new_result_publication_date
 
     resp = client.patch(
@@ -192,52 +189,72 @@ def test_contest_add_previous(client, test_contests_composite, test_stages, test
 
 # Variant
 
-
-# noinspection DuplicatedCode
-def test_variant_remove(client, test_simple_contest, test_variant):
-    from contest.tasks.models import Variant
-    variant: Variant = test_variant[1]
-    resp = client.post(
-        f'/contest/{test_simple_contest[0].contest_id}/variant/{variant.variant_id}/remove')
-    assert resp.status_code == 200
-
-    assert not test_app.db.session.query(
-        Variant.query.filter_by(variant_id=f'{variant.variant_id}').exists()
-    ).scalar()
-
-
-def test_variant_patch(client, test_simple_contest, test_variant):
-    from contest.tasks.models import Variant
-    resp = client.patch(f'/contest/{test_simple_contest[0].contest_id}'
-                        f'/variant/{test_variant[0].variant_number}',
-                        json={
-                            'variant_description': 'Test2',
-                            'variant_number': '5',
-                        })
-    assert resp.status_code == 200
-
-    variant: Variant = Variant.query.filter_by(
-        variant_id=resp.json['variant_id']).one_or_none()
-    assert variant.variant_id == resp.json['variant_id']
-    assert variant.variant_number == 5
-    assert variant.variant_description == 'Test2'
-
-
 # Task
 
 
-def test_task_image_upload(client, test_simple_contest, test_variant, create_plain_task):
-    resp = client.post(f'/contest/{test_simple_contest[0].contest_id}/variant'
-                       f'/{test_variant[0].variant_id}/task/{create_plain_task[0].task_id}/upload_image',
+def test_task_image_upload(client, test_simple_contest, create_plain_task):
+    resp = client.post(f'/task_pool/{create_plain_task[0].task_pool_id}'
+                       f'/task/{create_plain_task[0].task_id}/upload_image',
                        data=test_image)
     assert resp.status_code == 200
 
 
-def test_task_remove(client, test_simple_contest, test_variant, create_plain_task):
+def test_task_pool_patch(client, test_create_tasks_pool):
+    from contest.tasks.models import TaskPool
+    task_pool: TaskPool = test_create_tasks_pool[0]
+    resp = client.patch(f'/base_olympiad/{test_create_tasks_pool[0].base_contest.base_contest_id}'
+                        f'/task_pool/{task_pool.task_pool_id}',
+                        json={
+                            'name': "renamed"
+                        })
+    assert resp.status_code == 200
+    task_pool: TaskPool = TaskPool.query.filter_by(
+        task_pool_id=task_pool.task_pool_id).one_or_none()
+    assert task_pool.name == "renamed"
+
+
+def test_task_pool_remove(client, test_create_tasks_pool):
+    from contest.tasks.models import TaskPool
+    task_pool: TaskPool = test_create_tasks_pool[0]
+    resp = client.post(f'/base_olympiad/{test_create_tasks_pool[0].base_contest.base_contest_id}'
+                       f'/task_pool/{task_pool.task_pool_id}/remove')
+    assert resp.status_code == 200
+
+    assert not test_app.db.session.query(
+        TaskPool.query.filter_by(task_pool_id=f'{task_pool.task_pool_id}').exists()
+    ).scalar()
+
+
+def test_contest_task_patch(client, test_create_contest_tasks):
+    from contest.tasks.models import ContestTask
+    resp = client.patch(f'/contest/{test_create_contest_tasks[0].contest.contest_id}'
+                        f'/contest_task/{test_create_contest_tasks[0].contest_task_id}',
+                        json={
+                            'num': 20
+                        })
+    assert resp.status_code == 200
+    contest_task: ContestTask = ContestTask.query.filter_by(
+        contest_task_id=test_create_contest_tasks[0].contest_task_id).one_or_none()
+    assert contest_task.num == 20
+
+
+def test_contest_task_remove(client, test_create_contest_tasks):
+    from contest.tasks.models import ContestTask
+    contest_task: ContestTask = test_create_contest_tasks[0]
+    resp = client.post(f'/contest/{test_create_contest_tasks[0].contest.contest_id}'
+                       f'/contest_task/{test_create_contest_tasks[0].contest_task_id}/remove')
+    assert resp.status_code == 200
+
+    assert not test_app.db.session.query(
+        ContestTask.query.filter_by(contest_task_id=f'{contest_task.contest_task_id}').exists()
+    ).scalar()
+
+
+def test_task_remove(client, test_simple_contest, create_plain_task):
     from contest.tasks.models import Task
     task: Task = create_plain_task[1]
-    resp = client.post(f'/contest/{test_simple_contest[0].contest_id}/variant'
-                       f'/{test_variant[0].variant_id}/task/{task.task_id}/remove')
+    resp = client.post(f'/task_pool/{create_plain_task[0].task_pool_id}'
+                       f'/task/{task.task_id}/remove')
     assert resp.status_code == 200
 
     assert not test_app.db.session.query(
@@ -245,57 +262,46 @@ def test_task_remove(client, test_simple_contest, test_variant, create_plain_tas
     ).scalar()
 
 
-def test_task_patch_plain(client, test_simple_contest, test_variant, create_plain_task):
+def test_task_patch_plain(client, test_simple_contest, create_plain_task):
     from contest.tasks.models import PlainTask
     resp = client.patch(
-        f'/contest/{test_simple_contest[0].contest_id}/variant/{test_variant[0].variant_id}'
+        f'/task_pool/{create_plain_task[0].task_pool_id}'
         f'/task/{create_plain_task[0].task_id}/plain',
         json={
-            'num_of_task': '0',
             'recommended_answer': 'TestTest',
-            'show_answer_after_contest': 'true',
-            'task_points': '15',
         })
     assert resp.status_code == 200
 
     task: PlainTask = PlainTask.query.filter_by(
         task_id=resp.json['task_id']).one_or_none()
     assert task.task_id == resp.json['task_id']
-    assert task.task_points == 15
-    assert task.show_answer_after_contest is True
     assert task.recommended_answer == "TestTest"
 
 
-def test_task_patch_range(client, test_simple_contest, test_variant, create_range_task):
+def test_task_patch_range(client, test_simple_contest, create_range_task):
     from contest.tasks.models import RangeTask
     resp = client.patch(
-        f'/contest/{test_simple_contest[0].contest_id}/variant/{test_variant[0].variant_id}'
+        f'/task_pool/{create_range_task[0].task_pool_id}'
         f'/task/{create_range_task[0].task_id}/range',
         json={
-            'num_of_task': '0',
             'start_value': '0.2',
-            'end_value': '0.9',
-            'show_answer_after_contest': 'true',
-            'task_points': '15',
+            'end_value': '0.9'
         })
     assert resp.status_code == 200
 
     task: RangeTask = RangeTask.query.filter_by(
         task_id=resp.json['task_id']).one_or_none()
     assert task.task_id == resp.json['task_id']
-    assert task.task_points == 15
-    assert task.show_answer_after_contest is True
     assert task.start_value == 0.2
     assert task.end_value == 0.9
 
 
-def test_task_patch_multiple(client, test_simple_contest, test_variant, create_multiple_task):
+def test_task_patch_multiple(client, test_simple_contest, create_multiple_task):
     from contest.tasks.models import MultipleChoiceTask
     resp = client.patch(
-        f'/contest/{test_simple_contest[0].contest_id}/variant/{test_variant[0].variant_id}'
+        f'/task_pool/{create_multiple_task[0].task_pool_id}'
         f'/task/{create_multiple_task[0].task_id}/multiple',
         json={
-            'num_of_task': '0',
             'answers': [
                 {
                     'answer': 'test',
@@ -305,17 +311,13 @@ def test_task_patch_multiple(client, test_simple_contest, test_variant, create_m
                     'answer': 'test2',
                     'is_right_answer': 'false'
                 }
-            ],
-            'show_answer_after_contest': 'true',
-            'task_points': '15',
+            ]
         })
     assert resp.status_code == 200
 
     task: MultipleChoiceTask = MultipleChoiceTask.query.filter_by(
         task_id=resp.json['task_id']).one_or_none()
     assert task.task_id == resp.json['task_id']
-    assert task.task_points == 15
-    assert task.show_answer_after_contest is True
     assert len(task.answers) == 2
 
 
@@ -377,3 +379,48 @@ def test_remove_target_classes_from_contest(client, test_base_contests_with_targ
             'target_classes_ids': [f'{test_target_class[0].target_class_id}']
         })
     assert resp.status_code == 404
+
+
+def cmp_certs(cert_type_obj, cert_type_json):
+    assert cert_type_json['name'] == cert_type_obj.name
+    assert cert_type_json['description'] == cert_type_obj.description
+    json_dict = {v['certificate_id']: v['certificate_category'] for v in cert_type_json['certificates']}
+    obj_dict = {v.certificate_id: v.certificate_category.value for v in cert_type_obj.certificates}
+    assert json_dict == obj_dict
+
+
+def test_get_certificate_types(client, test_certificate_type):
+    resp = client.get('/certificate_type')
+    assert resp.status_code == 200
+    assert len(resp.json['certificate_types']) == 1
+    resp_cert_type = resp.json['certificate_types'][0]
+    cmp_certs(test_certificate_type, resp_cert_type)
+
+
+def test_get_certificate_type_by_id(client, test_certificate_type):
+    resp = client.get(f'/certificate_type/{test_certificate_type.certificate_type_id}')
+    assert resp.status_code == 200
+    cmp_certs(test_certificate_type, resp.json)
+
+
+def test_get_certificate_by_id(client, test_certificate_type):
+    cert = test_certificate_type.certificates[0]
+    resp = client.get(f'/certificate/{cert.certificate_id}')
+    assert resp.status_code == 200
+    assert resp.json['certificate_id'] == cert.certificate_id
+    assert resp.json['certificate_type_id'] == cert.certificate_type_id
+    assert resp.json['certificate_category'] == cert.certificate_category.value
+    assert resp.json['text_x'] == cert.text_x
+    assert resp.json['text_y'] == cert.text_y
+    assert resp.json['text_width'] == cert.text_width
+    assert resp.json['text_size'] == cert.text_size
+    assert resp.json['text_style'] == cert.text_style
+    assert resp.json['text_spacing'] == cert.text_spacing
+    assert resp.json['text_color'] == cert.text_color
+
+
+def test_get_certificate_image(client, test_certificate_type):
+    cert = test_certificate_type.certificates[0]
+    resp = client.get(f'/certificate/{cert.certificate_id}/image')
+    assert resp.status_code == 200
+    assert resp.data

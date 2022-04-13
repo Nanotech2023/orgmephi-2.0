@@ -15,9 +15,7 @@
                         <span>Уровень {{ contest.base_contest?.level }}</span>
                     </div>
                     <div class="olymp_links">
-                        <a href="https://olymp.mephi.ru/rosatom/about">Сайт олимпиады</a>
-                        <a href="https://olymp.mephi.ru/rosatom/about/docs/reg">Регламент олимпиады</a>
-                        <a href="https://olymp.mephi.ru/rosatom/about/docs/pol">Положение олимпиады</a>
+                        <a href="https://olymp.mephi.ru/scholars">Сайт олимпиады</a>
                     </div>
                 </div>
             </div>
@@ -45,7 +43,8 @@
                                     <div class="col-md-5">
                                         <div class="stage_action">
                                             <a [routerLink]="['/profile']">
-                                                <button class="stage_action_button">Заполнить анкету</button>
+                                                <button
+                                                    class="stage_action_button">{{ getProfileText( isFilledProfile$ | async ) }}</button>
                                             </a>
                                         </div>
                                     </div>
@@ -53,6 +52,7 @@
                             </div>
                         </div>
                     </div>
+
                     <div class="timeline_container">
                         <div class="olymp_stage" #stage2>
                             <div class="olymp_stage_title">
@@ -75,15 +75,17 @@
                                     <div class="col-md-5">
                                         <div class="stage_action">
                                             <a [routerLink]="['registration']">
-                                                <button class="stage_action_button">Принять участие</button>
+                                                <button class="stage_action_button"
+                                                        [disabled]="!(isFilledProfile$ | async)">Принять участие
+                                                </button>
                                             </a>
                                         </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
-
                     </div>
+
                     <div class="timeline_container">
                         <div class="olymp_stage" #stage3>
                             <div class="olymp_stage_title">
@@ -91,23 +93,18 @@
                                 <div class="divider"></div>
                             </div>
                             <div class="olymp_stage_content">
-                                <div class="row">
-                                    <div class="col-md-1">
-                                        <svg width="20" height="28" viewBox="0 0 20 28" fill="none"
-                                             xmlns="http://www.w3.org/2000/svg">
-                                            <path
-                                                d="M18 12H16V6C16 4.4087 15.3679 2.88258 14.2426 1.75736C13.1174 0.632141 11.5913 0 10 0C8.4087 0 6.88258 0.632141 5.75736 1.75736C4.63214 2.88258 4 4.4087 4 6V12H2C1.46957 12 0.960859 12.2107 0.585786 12.5858C0.210714 12.9609 0 13.4696 0 14V26C0 26.5304 0.210714 27.0391 0.585786 27.4142C0.960859 27.7893 1.46957 28 2 28H18C18.5304 28 19.0391 27.7893 19.4142 27.4142C19.7893 27.0391 20 26.5304 20 26V14C20 13.4696 19.7893 12.9609 19.4142 12.5858C19.0391 12.2107 18.5304 12 18 12ZM6 6C6 4.93913 6.42143 3.92172 7.17157 3.17157C7.92172 2.42143 8.93913 2 10 2C11.0609 2 12.0783 2.42143 12.8284 3.17157C13.5786 3.92172 14 4.93913 14 6V12H6V6ZM18 26H2V14H18V26Z"
-                                                fill="#565656"/>
-                                        </svg>
-                                    </div>
-                                    <div class="col-md-6">
-                                        Данный раздел в настоящее время для вас не доступен
-                                    </div>
-                                </div>
+                                <ng-container
+                                    *ngIf="contestProctoringData$ | async as proctoringData; else contestDetailsStage3Failure">
+                                    <ng-container
+                                        *ngIf="proctoringData.proctoring_login != null; else contestDetailsStage3Failure">
+                                        <app-contest-details-stage3-success>
+                                        </app-contest-details-stage3-success>
+                                    </ng-container>
+                                </ng-container>
                             </div>
                         </div>
-
                     </div>
+
                     <div class="timeline_container">
                         <div class="olymp_stage" #stage4>
                             <div class="olymp_stage_title">
@@ -115,48 +112,48 @@
                                 <div class="divider"></div>
                             </div>
                             <div class="olymp_stage_content">
-                                <div class="row">
-                                    <div class="col-md-1">
-                                        <svg width="20" height="28" viewBox="0 0 20 28" fill="none"
-                                             xmlns="http://www.w3.org/2000/svg">
-                                            <path
-                                                d="M18 12H16V6C16 4.4087 15.3679 2.88258 14.2426 1.75736C13.1174 0.632141 11.5913 0 10 0C8.4087 0 6.88258 0.632141 5.75736 1.75736C4.63214 2.88258 4 4.4087 4 6V12H2C1.46957 12 0.960859 12.2107 0.585786 12.5858C0.210714 12.9609 0 13.4696 0 14V26C0 26.5304 0.210714 27.0391 0.585786 27.4142C0.960859 27.7893 1.46957 28 2 28H18C18.5304 28 19.0391 27.7893 19.4142 27.4142C19.7893 27.0391 20 26.5304 20 26V14C20 13.4696 19.7893 12.9609 19.4142 12.5858C19.0391 12.2107 18.5304 12 18 12ZM6 6C6 4.93913 6.42143 3.92172 7.17157 3.17157C7.92172 2.42143 8.93913 2 10 2C11.0609 2 12.0783 2.42143 12.8284 3.17157C13.5786 3.92172 14 4.93913 14 6V12H6V6ZM18 26H2V14H18V26Z"
-                                                fill="#565656"/>
-                                        </svg>
-                                    </div>
-                                    <div class="col-md-6">
-                                        Данный раздел в настоящее время для вас не доступен
-                                    </div>
-                                </div>
+                                <ng-container
+                                    *ngIf="contestProctoringData$ | async as proctoringData; else contestDetailsUnavailable">
+                                    <ng-container
+                                        *ngIf="proctoringData.proctoring_login != null; else contestDetailsUnavailable">
+                                        <app-contest-details-register [proctorLogin]="proctoringData.proctoring_login"
+                                                                      [proctorPassword]="proctoringData.proctoring_password">
+                                        </app-contest-details-register>
+                                    </ng-container>
+                                </ng-container>
                             </div>
                         </div>
-
                     </div>
+
                     <div class="timeline_container">
                         <div class="olymp_stage" #stage5>
                             <div class="olymp_stage_title">
-                                Итоги отборочного этапа
+                                Итоги заключительного этапа
                                 <div class="divider"></div>
                             </div>
                             <div class="olymp_stage_content">
-                                <div class="row">
-                                    <div class="col-md-1">
-                                        <svg width="20" height="28" viewBox="0 0 20 28" fill="none"
-                                             xmlns="http://www.w3.org/2000/svg">
-                                            <path
-                                                d="M18 12H16V6C16 4.4087 15.3679 2.88258 14.2426 1.75736C13.1174 0.632141 11.5913 0 10 0C8.4087 0 6.88258 0.632141 5.75736 1.75736C4.63214 2.88258 4 4.4087 4 6V12H2C1.46957 12 0.960859 12.2107 0.585786 12.5858C0.210714 12.9609 0 13.4696 0 14V26C0 26.5304 0.210714 27.0391 0.585786 27.4142C0.960859 27.7893 1.46957 28 2 28H18C18.5304 28 19.0391 27.7893 19.4142 27.4142C19.7893 27.0391 20 26.5304 20 26V14C20 13.4696 19.7893 12.9609 19.4142 12.5858C19.0391 12.2107 18.5304 12 18 12ZM6 6C6 4.93913 6.42143 3.92172 7.17157 3.17157C7.92172 2.42143 8.93913 2 10 2C11.0609 2 12.0783 2.42143 12.8284 3.17157C13.5786 3.92172 14 4.93913 14 6V12H6V6ZM18 26H2V14H18V26Z"
-                                                fill="#565656"/>
-                                        </svg>
-                                    </div>
-                                    <div class="col-md-6">
-                                        Заключительный этап
-                                    </div>
-                                </div>
+                                <ng-container
+                                    *ngIf="contestFinalStageData$ | async as contestFinalStageData; else contestDetailsUnavailable">
+                                    <ng-container
+                                        *ngIf="contestFinalStageData.num_of_tasks !==0; else contestDetailsUnavailable">
+                                        <app-contest-details-stage5 [contestFinalStageData]="contestFinalStageData">
+                                        </app-contest-details-stage5>
+                                    </ng-container>
+                                </ng-container>
                             </div>
                         </div>
                     </div>
+
                 </div>
             </div>
         </div>
     </div>
 </ng-container>
+
+<ng-template #contestDetailsUnavailable>
+    <app-contest-details-unavailable></app-contest-details-unavailable>
+</ng-template>
+
+<ng-template #contestDetailsStage3Failure>
+    <app-contest-details-stage3-failure></app-contest-details-stage3-failure>
+</ng-template>

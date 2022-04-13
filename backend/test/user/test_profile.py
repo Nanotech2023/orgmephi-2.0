@@ -34,6 +34,40 @@ def test_user_info_patch(client, test_country_native, test_region, test_city):
     assert resp.status_code == 200
 
 
+def test_user_info_limitations_patch(client, test_country_native, test_region, test_city):
+    resp = client.patch('/personal/limitations', json=test_user_info['limitations'])
+    assert resp.status_code == 200
+
+
+def test_user_info_dwellings_patch(client, test_country_native, test_region, test_city):
+    resp = client.patch('/personal/dwelling', json=test_user_info['dwelling'])
+    assert resp.status_code == 200
+
+
+def test_user_info_phone_number_patch(client, test_country_native, test_region, test_city):
+    resp = client.patch('/personal/phone_number', json={
+        "phone": "+78005553535"
+    })
+    assert resp.status_code == 200
+
+    resp = client.patch('/personal/phone_number', json={
+        "phone": "8 (800) 555 35 35"
+    })
+    assert resp.status_code == 400
+
+
+def test_user_info_personal_patch(client, test_country_native, test_region, test_city):
+    from user.models import GenderEnum
+    resp = client.patch('/personal/personal', json={
+        "first_name": "first_name",
+        "middle_name": "middle_name",
+        "second_name": "second_name",
+        "gender": GenderEnum.male.value,
+        "place_of_birth": "test place",
+    })
+    assert resp.status_code == 200
+
+
 def test_user_info_get(client, test_country_native, test_region, test_city):
     client.patch('/personal', json=test_user_info)
 

@@ -1,5 +1,5 @@
 import { Component, OnDestroy, OnInit } from '@angular/core'
-import { Observable } from 'rxjs'
+import { interval, Observable, Subscription } from 'rxjs'
 import {
     Contest,
     TaskForUserResponseTaskParticipant,
@@ -19,10 +19,10 @@ import { UserResponseStatusResponse } from '@api/responses/model'
 export class ContestAssignmentComponent implements OnInit, OnDestroy
 {
     contestId!: number | null
-    // @ts-ignore
-    interval!
-    viewModel$: Observable<{ loading: boolean; error: string | null; contest: Contest | undefined; variant: VariantWithCompletedTasksCountTaskParticipant | undefined; tasks: Array<TaskForUserResponseTaskParticipant>; time: number | undefined; status: UserResponseStatusResponse.StatusEnum | undefined }>
+    viewModel$: Observable<{ loading: boolean; error: string | null; contest: Contest | undefined; variant: VariantWithCompletedTasksCountTaskParticipant | undefined; tasks: Array<TaskForUserResponseTaskParticipant>; time: string; status: UserResponseStatusResponse.StatusEnum | undefined }>
     timeLeft: number | undefined
+    reloadTimerSubscription!: Subscription
+    finishModalVisible: boolean = false
 
     constructor( private route: ActivatedRoute, private contestAssignmentStore: ContestAssignmentStore )
     {
@@ -41,41 +41,23 @@ export class ContestAssignmentComponent implements OnInit, OnDestroy
         this.viewModel$ = this.contestAssignmentStore.viewModel$
     }
 
-    getDisplayTime( time: number | undefined ): string
-    {
-        if ( this.timeLeft === undefined )
-        {
-            this.timeLeft = time
-            return ""
-        }
-        return new Date( this.timeLeft * 1000 ).toISOString().substr( 11, 8 )
-    }
-
     ngOnInit(): void
     {
-        this.interval = setInterval( () =>
+        this.reloadTimerSubscription = interval( 1000 ).subscribe( _ =>
         {
-            if ( this.timeLeft === undefined )
-                return
-            if ( this.timeLeft > 0 )
-            {
-                this.timeLeft--
-            }
-            else
-            {
-                this.timeLeft = 0
-            }
-        }, 1000 )
+            if ( !!this.contestId )
+                this.contestAssignmentStore.fetchTime( this.contestId )
+        } )
     }
 
     ngOnDestroy(): void
     {
-        clearInterval( this.interval )
+        this.reloadTimerSubscription.unsubscribe()
     }
 
     finish(): void
     {
-        if ( this.contestId !== null )
+        if ( !!this.contestId )
         {
             this.contestAssignmentStore.finish( this.contestId )
             this.contestAssignmentStore.fetchTime( this.contestId )

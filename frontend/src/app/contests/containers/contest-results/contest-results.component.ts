@@ -16,6 +16,7 @@ import { TasksService } from '@api/tasks/tasks.service'
 export class ContestResultsComponent implements OnInit
 {
     results$: Observable<UserResultsForContestResponse[]>
+    public overlayNoRowsTemplate = 'Дипломы для скачивания отсутствуют или не сформированы'
     columnDefs = [
         { headerName: "ID", field: "contest_info.contest_id", width: 1, hide: true, suppressToolPanel: true },
         {

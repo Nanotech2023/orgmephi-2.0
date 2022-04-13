@@ -8,6 +8,10 @@ class SelfPasswordRequestUserSchema(Schema):
     old_password = common_fields.Password(required=True)
 
 
+class UserPhoneSchema(Schema):
+    phone = common_fields.Phone()
+
+
 class SelfGroupsResponseUserSchema(Schema):
     groups = fields.Nested(GroupSchema, many=True, required=True)
 

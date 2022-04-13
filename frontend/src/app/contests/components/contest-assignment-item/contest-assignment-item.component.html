@@ -1,19 +1,52 @@
-<div class="tasks_list_item">
+<div class="tasks_list_item pt-5 pb-5">
     <div class="task_title">
-        Задание {{task.task_id}}<br/>
+        Задание {{ taskIndex }}<br/>
     </div>
     <div class="row">
-        <div class="col-md-8">
+
+        <div class="col-md-12">
             <div class="task_image">
-                <img [src]="imageUrl" alt="Задание" class="img-fluid">
+                <ng-container *ngIf="taskImageUrl$ | async as taskImageUrl">
+                    <img [src]="taskImageUrl" alt="Задание" class="img-fluid pt-5 pb-5">
+                </ng-container>
             </div>
         </div>
-        <div class="col-md-4">
+
+        <div class="col-md-12">
             <div class="task_actions">
-                <p class="input_label">Ответ</p>
-                <textarea [(ngModel)]="answer" class="input_textarea" maxlength="1000" placeholder="Введите свой ответ"
-                          (focusout)="updateAnswer()"></textarea>
+                <form name="userInfoForm" (ngSubmit)="answerForm.form.valid && onSubmit()" #answerForm="ngForm"
+                      novalidate>
+                    <p class="input_label">Ваш ответ</p>
+                    <div class="d-flex justify-content-around align-items-end">
+
+                        <div>
+                            <input class="profile-form_input" placeholder="Введите свой ответ" name="userAnswer"
+                                   #userAnswer required [(ngModel)]="answer" maxlength="100" minlength="1"
+                                   (input)="numberOnly(userAnswer)">
+                            <ng-container [ngTemplateOutlet]="validationTemplate"
+                                          [ngTemplateOutletContext]="{fieldName:userAnswer}">
+                            </ng-container>
+                        </div>
+
+                        <div>
+                            <button class="button-action_default" type="submit" [disabled]="!answerForm.form.valid && !answerForm.dirty">
+                                Отправить
+                            </button>
+                        </div>
+                    </div>
+
+                </form>
+
             </div>
         </div>
+
     </div>
 </div>
+
+<ng-template #validationTemplate let-fieldName='fieldName'>
+    <div *ngIf="fieldName.invalid" class="input_error">
+        <div *ngIf="fieldName.errors?.required">
+            Поле обязательно для заполнения
+        </div>
+    </div>
+</ng-template>

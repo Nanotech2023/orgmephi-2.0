@@ -13,10 +13,8 @@
 
 export interface RangeTask { 
     end_value: number;
-    num_of_task: number;
-    show_answer_after_contest?: boolean | null;
+    name?: string | null;
     start_value: number;
     readonly task_id: number;
-    task_points?: number | null;
 }
 

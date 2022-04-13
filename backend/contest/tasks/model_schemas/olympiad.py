@@ -1,12 +1,15 @@
-from marshmallow import fields, validate, post_dump
+from marshmallow import fields, validate, post_dump, pre_load
 from marshmallow import fields as m_f
 from marshmallow_enum import EnumField
 from marshmallow_oneofschema import OneOfSchema
 from marshmallow_sqlalchemy import SQLAlchemySchema, auto_field
+from marshmallow_sqlalchemy.fields import Related
 
 from common.fields import text_validator, common_name_validator
+from common.marshmallow import check_related_existence
 from contest.tasks.model_schemas.location import OlympiadLocationSchema
 from contest.tasks.models import *
+from contest.tasks.models.certificate import CertificateType
 from contest.tasks.models.reference import TargetClass
 from user.models.auth import *
 
@@ -52,22 +55,27 @@ class BaseContestSchema(SQLAlchemySchema):
         sqla_session = db.session
 
     base_contest_id = auto_field(column_name='base_contest_id', dump_only=True)
-    name = auto_field(column_name='name', required=False)
-    description = auto_field(column_name='description', validate=text_validator, required=False)
-    rules = auto_field(column_name='rules', validate=text_validator, required=False)
+    name = auto_field(column_name='name', required=True)
+    description = auto_field(column_name='description', validate=text_validator, required=True)
+    rules = auto_field(column_name='rules', validate=text_validator, required=True)
 
-    winner_1_condition = auto_field(column_name='winner_1_condition', required=False)
-    winner_2_condition = auto_field(column_name='winner_2_condition', required=False)
-    winner_3_condition = auto_field(column_name='winner_3_condition', required=False)
-    diploma_1_condition = auto_field(column_name='diploma_1_condition', required=False)
-    diploma_2_condition = auto_field(column_name='diploma_2_condition', required=False)
-    diploma_3_condition = auto_field(column_name='diploma_3_condition', required=False)
+    winner_1_condition = auto_field(column_name='winner_1_condition', required=True)
+    winner_2_condition = auto_field(column_name='winner_2_condition', required=True)
+    winner_3_condition = auto_field(column_name='winner_3_condition', required=True)
+    diploma_1_condition = auto_field(column_name='diploma_1_condition', required=True)
+    diploma_2_condition = auto_field(column_name='diploma_2_condition', required=True)
+    diploma_3_condition = auto_field(column_name='diploma_3_condition', required=True)
 
-    olympiad_type_id = auto_field(column_name='olympiad_type_id', required=False)
-    subject = EnumField(OlympiadSubjectEnum, data_key='subject', by_value=True, required=False)
-    level = EnumField(OlympiadLevelEnum, data_key='level', by_value=True, required=False)
-    target_classes = fields.Nested(TargetClassSchema, many=True, required=False)
+    olympiad_type_id = auto_field(column_name='olympiad_type_id', required=True)
+    subject = EnumField(OlympiadSubjectEnum, data_key='subject', by_value=True, required=True)
+    level = EnumField(OlympiadLevelEnum, data_key='level', by_value=True, required=True)
+    target_classes = fields.Nested(TargetClassSchema, many=True, dump_only=True, required=False)
+    certificate_type = Related(['certificate_type_id'], required=False)
 
+    @pre_load()
+    def check_certificate(self, data, many, **kwargs):
+        return check_related_existence(data, 'certificate_type', 'certificate_type_id',
+                                       CertificateType, 'certificate_type_id')
 
 """
 Contest
@@ -105,10 +113,14 @@ class SimpleContestSchema(SQLAlchemySchema):
     academic_year = fields.Integer()
     total_points = fields.Integer()
     tasks_number = fields.Integer()
+    user_count = fields.Integer(required=False, dump_only=True)
     enrolled = fields.Boolean(required=False, dump_only=True)
-    contest_duration = auto_field(column_name='contest_duration', required=True)
-    result_publication_date = auto_field(column_name='result_publication_date', required=True)
-    end_of_enroll_date = auto_field(column_name='end_of_enroll_date', required=True)
+    show_answer_after_contest = fields.Boolean(required=False, dump_only=True)
+    deadline_for_appeal = auto_field(column_name='deadline_for_appeal', required=True)
+    show_result_after_finish = auto_field(column_name='show_result_after_finish', required=False)
+    contest_duration = auto_field(column_name='contest_duration', required=False)
+    result_publication_date = auto_field(column_name='result_publication_date', required=False)
+    end_of_enroll_date = auto_field(column_name='end_of_enroll_date', required=False)
     previous_contest_id = auto_field(column_name='previous_contest_id', allow_none=True)
     locations = fields.Nested(OlympiadLocationSchema, many=True, required=True)
     target_classes = fields.Nested(TargetClassSchema, many=True, required=False)
@@ -131,6 +143,15 @@ class SimpleContestSchema(SQLAlchemySchema):
         user_id = jwt_get_id()
         if user_id is not None:
             data['enrolled'] = is_user_in_contest(user_id, original)
+        return data
+
+    @post_dump
+    def delete_user_count(self, data, many, **kwargs):
+        from common.jwt_verify import jwt_get_role
+        from user.models import UserRoleEnum
+        role = jwt_get_role()
+        if role != UserRoleEnum.admin.value and role != UserRoleEnum.creator.value:
+            del data['user_count']
         return data
 
 
@@ -181,10 +202,20 @@ class CompositeContestSchema(SQLAlchemySchema):
     base_contest = fields.Nested(BaseContestSchema, required=True, dump_only=True)
     status = EnumField(OlympiadStatusEnum, data_key='status', by_value=True)
     academic_year = fields.Integer()
+    user_count = fields.Integer(required=False, dump_only=True)
     composite_type = EnumField(ContestTypeEnum,
                                data_key='composite_type',
                                by_value=True, required=True,
                                validate=validate.OneOf([ContestTypeEnum.CompositeContest]))
+
+    @post_dump
+    def delete_user_count(self, data, many, **kwargs):
+        from common.jwt_verify import jwt_get_role
+        from user.models import UserRoleEnum
+        role = jwt_get_role()
+        if role != UserRoleEnum.admin.value and role != UserRoleEnum.creator.value:
+            del data['user_count']
+        return data
 
 
 class ContestSchema(OneOfSchema):

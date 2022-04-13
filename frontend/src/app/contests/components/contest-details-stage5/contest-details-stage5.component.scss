@@ -1,0 +1,19 @@
+@import "src/styles/colors";
+
+.stage_action {
+  padding-top: 3%;
+  padding-bottom: 3%;
+
+  .stage_action_button {
+    width: 100%;
+    height: 50px;
+    background: $blue;
+    border: none;
+    color: $white;
+  }
+
+  .stage_action_button:disabled {
+    color: $grey-disabled-dark;
+    background: $grey-disabled;
+  }
+}

@@ -1,7 +1,8 @@
 import datetime
 import secrets
 import string
-
+import sys
+from threading import Thread
 from flask import request, render_template, abort, send_file
 from flask_mail import Message
 from marshmallow import EXCLUDE
@@ -19,7 +20,8 @@ from user.model_schemas.personal import UserInfoSchema
 from user.model_schemas.university import StudentInfoSchema
 
 from .schemas import *
-
+from ..util import get_username_case_insensitive, get_email_case_insensitive_or_raise, \
+    get_email_case_insensitive_or_none
 
 db = get_current_db()
 module = get_current_module()
@@ -54,10 +56,23 @@ def load_email_token(token, token_type, return_timestamp=False):
     return claims
 
 
+class EmailThread(Thread):
+    def __init__(self, app, message):
+        self.app = app
+        self.message = message
+        Thread.__init__(self)
+
+    def run(self):
+        with self.app.app.app_context():
+            app.mail.send(self.message)
+
+
 def send_email(subject, recipient, template_name_or_list, **context):
     msg_body = render_template(template_name_or_list, **context)
     msg = Message(subject=subject, body=msg_body, html=msg_body, recipients=[recipient])
     app.mail.send(msg)
+    # email = EmailThread(app, msg)
+    # email.start()
 
 
 _captcha_chars = string.ascii_uppercase + string.digits
@@ -67,7 +82,7 @@ _captcha_chars = _captcha_chars.replace('1', '').replace('I', '').replace('0', '
 def send_email_confirmation(email):
     token = dump_email_token(email, 'confirm')
     subj = app.config['ORGMEPHI_MAIL_CONFIRM_SUBJECT']
-    send_email(subj, email, 'email_confirmation.html', confirmation_token=token)
+    send_email(subj, email, 'email_confirmation.html', confirmation_token=token, title=subj)
 
 
 def generate_captcha(width, height):
@@ -104,7 +119,7 @@ def register(values):
     password_hash = app.password_policy.hash_password(values['auth_info']['password'], check=True)
     email_confirm = app.config.get('ORGMEPHI_CONFIRM_EMAIL', False)
 
-    existing_user = db_get_one_or_none(User, 'username', username)
+    existing_user = get_username_case_insensitive(username)
     if existing_user is not None:
         age = datetime.date.today() - existing_user.registration_date.date()
         max_age = app.config['ORGMEPHI_MAIL_CONFIRM_EXPIRATION']
@@ -135,7 +150,7 @@ def register(values):
     user.user_info.email = username
 
     if reg_type == UserTypeEnum.university:
-        StudentInfoSchema(load_instance=True, only=['grade', 'university'])\
+        StudentInfoSchema(load_instance=True, only=['grade', 'university']) \
             .load(request.json['student_info'], instance=user.student_info, session=db.session, partial=False,
                   unknown=EXCLUDE)
         UserInfoSchema(only=['dwelling', 'phone'], load_instance=True).load(request.json['student_info'],
@@ -245,7 +260,7 @@ def resend_email(email):
     """
     if not app.config.get('ORGMEPHI_CONFIRM_EMAIL', False):
         abort(404)
-    user_info = db_get_or_raise(UserInfo, 'email', email)
+    user_info = get_email_case_insensitive_or_raise(email)
     if user_info.user.role != UserRoleEnum.unconfirmed or user_info.user.type == UserTypeEnum.pre_register:
         raise WrongType('User is already confirmed')
     send_email_confirmation(user_info.email)
@@ -303,7 +318,7 @@ def confirm_email(token):
     email = load_email_token(token, 'confirm')
     if not isinstance(email, str):
         raise NotFound('token', token)
-    user_info = db_get_or_raise(UserInfo, 'email', email)
+    user_info = get_email_case_insensitive_or_raise(email)
     if user_info.user.role == UserRoleEnum.unconfirmed:
         user_info.user.role = UserRoleEnum.participant
     else:
@@ -331,12 +346,12 @@ def forgot_password(email):
     """
     if not app.config.get('ORGMEPHI_ENABLE_PASSWORD_RECOVERY', False):
         abort(404)
-    user = getattr(db_get_one_or_none(UserInfo, 'email', email), 'user', None)
+    user = getattr(get_email_case_insensitive_or_none(email), 'user', None)
     if user is None:
         return {}, 204
     token = dump_email_token(user.user_info.email, 'recover')
     subj = app.config['ORGMEPHI_MAIL_RECOVER_SUBJECT']
-    send_email(subj, user.user_info.email, 'password_reset.html', reset_token=token)
+    send_email(subj, user.user_info.email, 'password_reset.html', reset_token=token, title=subj)
     return {}, 204
 
 
@@ -365,7 +380,7 @@ def recover_password(token):
     if not app.config.get('ORGMEPHI_ENABLE_PASSWORD_RECOVERY', False):
         abort(404)
     email, timestamp = load_email_token(token, 'recover', True)
-    user = getattr(db_get_one_or_none(UserInfo, 'email', email), 'user', None)
+    user = getattr(get_email_case_insensitive_or_none(email), 'user', None)
     if user is None:
         raise NotFound('token', token)
     if user.password_changed.replace(tzinfo=datetime.timezone.utc) > timestamp.replace(tzinfo=datetime.timezone.utc):

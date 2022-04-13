@@ -4,7 +4,11 @@ import { UsersService } from '@api/users/users.service'
 import {
     errorCaught,
     getUserInfoRequest,
-    getUserInfoSuccess, getUserPhotoRequest, getUserPhotoSuccess,
+    getUserInfoSuccess,
+    getUserPhotoRequest,
+    getUserPhotoSuccess,
+    getUserProfileUnfilledRequest,
+    getUserProfileUnfilledSuccess,
     getUserRequest,
     getUserSuccess,
     loginRequest,
@@ -15,12 +19,12 @@ import {
     registerSuccess
 } from '@/auth/store/auth.actions'
 import { catchError, concatMap, mergeMap, switchMap, tap } from 'rxjs/operators'
-import { of } from 'rxjs'
+import { EMPTY, of } from 'rxjs'
 import { Router } from '@angular/router'
-import { CSRFPairUser, User, UserInfo } from '@api/users/models'
+import { CSRFPairUser, SelfUnfilledResponse, User, UserInfo } from '@api/users/models'
 import { TasksService } from '@api/tasks/tasks.service'
 import { ResponsesService } from '@api/responses/responses.service'
-import { displayErrorMessage } from '@/shared/logging'
+import { displayErrorMessage, displaySuccessMessage } from '@/shared/logging'
 
 
 // noinspection JSUnusedGlobalSymbols
@@ -31,7 +35,7 @@ export class AuthEffects
     {
     }
 
-    readonly loginAttempt$ = createEffect( () =>
+    readonly loginRequest$ = createEffect( () =>
         this.actions$.pipe
         (
             ofType( loginRequest ),
@@ -40,9 +44,7 @@ export class AuthEffects
                     mergeMap( ( csrfPair: CSRFPairUser ) =>
                         {
                             this.router.navigate( [ '/home' ] )
-                            return of( loginSuccess( {
-                                csrfPair: csrfPair
-                            } ) )
+                            return of( loginSuccess( { csrfPair: csrfPair } ) )
                         }
                     ),
                     catchError( error => of( errorCaught( { error: error } ) ) )
@@ -50,14 +52,12 @@ export class AuthEffects
             )
         )
     )
-
     readonly loginSuccess$ = createEffect( () =>
         this.actions$.pipe(
             ofType( loginSuccess ),
-            switchMap( () => [ getUserRequest(), getUserInfoRequest(), getUserPhotoRequest() ] )
+            switchMap( () => [ getUserRequest(), getUserInfoRequest(), getUserPhotoRequest(), getUserProfileUnfilledRequest() ] )
         )
     )
-
     readonly logoutRequest$ = createEffect( () =>
         this.actions$.pipe
         (
@@ -66,7 +66,7 @@ export class AuthEffects
                 this.authService.userAuthLogoutPost().pipe(
                     mergeMap( () =>
                         {
-                            this.router.navigate( [ '/login' ] )
+                            this.router.navigate( [ '/auth' ] )
                             return of( logoutSuccess() )
                         }
                     ),
@@ -100,17 +100,29 @@ export class AuthEffects
         )
     )
 
-    readonly getUserPhotoRequest$ = createEffect( () =>
+    readonly getUserProfileUnfilledRequest$ = createEffect( () =>
         this.actions$.pipe(
-            ofType( getUserPhotoRequest ),
+            ofType( getUserProfileUnfilledRequest ),
             concatMap( () =>
-                this.authService.userProfilePhotoGet().pipe(
-                    mergeMap( ( photo: Blob ) => of( getUserPhotoSuccess( { userPhoto: photo } ) ) ),
+                this.authService.userProfileUnfilledGet().pipe(
+                    mergeMap( ( response: SelfUnfilledResponse ) => of( getUserProfileUnfilledSuccess( { unfilled: response.unfilled } ) ) ),
                     catchError( error => of( errorCaught( { error: error } ) ) )
                 )
             )
         )
     )
+
+    // readonly getUserPhotoRequest$ = createEffect( () =>
+    //     this.actions$.pipe(
+    //         ofType( getUserPhotoRequest ),
+    //         concatMap( () =>
+    //             this.authService.userProfilePhotoGet().pipe(
+    //                 mergeMap( ( photo: Blob ) => of( getUserPhotoSuccess( { userPhoto: photo } ) ) ),
+    //                 catchError( error => EMPTY )
+    //             )
+    //         )
+    //     )
+    // )
 
     readonly registerRequest$ = createEffect( () =>
         this.actions$.pipe
@@ -124,6 +136,15 @@ export class AuthEffects
                 )
             )
         )
+    )
+    readonly registerSuccess$ = createEffect( () =>
+            this.actions$.pipe
+            (
+                ofType( registerSuccess ),
+                tap( ( { type } ) => displaySuccessMessage( "Пользователь успешно зарегистрирован" ) ),
+                tap( () => this.router.navigate( [ '/auth' ] ) )
+            ),
+        { dispatch: false }
     )
 
     readonly errorCaught$ = createEffect( () =>

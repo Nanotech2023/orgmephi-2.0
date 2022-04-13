@@ -6,19 +6,20 @@
                     Список олимпиад НИЯУ «МИФИ»
                 </div>
                 <div class="olymp_subtitle">
-                    «Я — профессионал» — масштабная образовательная олимпиада нового формата для студентов разных
-                    специальностей: технических, гуманитарных и естественнонаучных.
+                    Олимпиады НИЯУ МИФИ - масштабные всероссийские мепроприятия в которых вы можете продемонстрировать
+                    свои способности в точных науках, мы рады вашему участию!
                 </div>
             </div>
         </div>
         <div class="col-md-8">
             <div class="olymp_list">
                 <div class="row">
-                    <ng-container *ngIf="contests$ | async as contests">
+                    <ng-container *ngIf="contests$ | async as contests; else noContests">
                         <div class="col-md-6" *ngFor="let contest of contests; index as i">
                             <app-video-container>
                                 <div class="org-divider" *ngIf="i === 0 || i === 1"></div>
-                                <app-contest-list-item [contest]="contest" class="video-container-overlay"></app-contest-list-item>
+                                <app-contest-list-item [contest]="contest"
+                                                       class="video-container-overlay"></app-contest-list-item>
                             </app-video-container>
                         </div>
                     </ng-container>
@@ -27,3 +28,9 @@
         </div>
     </div>
 </div>
+
+<ng-template #noContests>
+    <div class="py-5">
+        <span class="not-found_subtitle" style="align-self: stretch">Вам необходимо заполнить анкету для отображения списка олимпиад</span>
+    </div>
+</ng-template>

@@ -59,7 +59,6 @@ def step_show_results_to_creator(client, state):
     for answer in user_answers:
         if answer['answer_type'] == 'PlainAnswerText':
             assert answer['mark'] == 2 + user_id_a
-            assert answer['right_answer'] is None
         elif answer['answer_type'] == 'RangeAnswer':
             assert answer['mark'] == 8
             assert answer['right_answer']["start_value"] == 0.1
@@ -75,7 +74,6 @@ def step_show_results_to_creator(client, state):
     for answer in user_answers:
         if answer['answer_type'] == 'PlainAnswerText':
             assert answer['mark'] == 2 + user_id_c
-            assert answer['right_answer'] is None
         elif answer['answer_type'] == 'RangeAnswer':
             assert answer['mark'] == 0
             assert answer['right_answer']["start_value"] == 0.1
@@ -89,7 +87,7 @@ def step_show_results_to_creator(client, state):
 
     for user in resp.json['user_list']:
         if user['user_id'] == user_id_a or user['user_id'] == state.participants[1]['id']:
-            assert user['user_status'] == 'Winner 2'
+            assert user['user_status'] == 'Winner 3'
         elif user['user_id'] == user_id_c:
             assert user['user_status'] == 'Participant'
         elif user['user_id'] == state.participants[3]['id']:

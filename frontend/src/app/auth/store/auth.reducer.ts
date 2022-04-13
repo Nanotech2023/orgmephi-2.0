@@ -1,7 +1,7 @@
 import { createReducer, on } from '@ngrx/store'
 import {
     getUserInfoSuccess,
-    getUserPhotoSuccess,
+    getUserPhotoSuccess, getUserProfileUnfilledSuccess,
     getUserSuccess,
     loginSuccess,
     logoutSuccess
@@ -18,6 +18,7 @@ export interface State
     user: User | null,
     userInfo: UserInfo | null
     userPhoto: Blob | null
+    unfilled: Array<object> | undefined
 }
 
 
@@ -25,7 +26,8 @@ const initialState: State = {
     csrfTokens: null,
     user: null,
     userInfo: null,
-    userPhoto: null
+    userPhoto: null,
+    unfilled: undefined
 }
 
 export const reducer =
@@ -47,10 +49,6 @@ export const reducer =
                 return ( { ...state, csrfTokens: null } )
             }
         ),
-        on( getUserPhotoSuccess,
-            ( state, { userPhoto } ) =>
-                ( { ...state, userPhoto: userPhoto } )
-        ),
         on( getUserSuccess,
             ( state, { user } ) =>
                 ( { ...state, user: user } )
@@ -58,5 +56,13 @@ export const reducer =
         on( getUserInfoSuccess,
             ( state, { userInfo } ) =>
                 ( { ...state, userInfo: userInfo } )
+        ),
+        on( getUserProfileUnfilledSuccess,
+            ( state, { unfilled } ) =>
+                ( { ...state, unfilled: unfilled } )
+        ),
+        on( getUserPhotoSuccess,
+            ( state, { userPhoto } ) =>
+                ( { ...state, userPhoto: userPhoto } )
         )
     )

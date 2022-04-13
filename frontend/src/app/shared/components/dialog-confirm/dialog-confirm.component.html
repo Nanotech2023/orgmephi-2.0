@@ -1,0 +1,9 @@
+<div *ngIf="modalVisible" class="modal_container">
+    <div class="modal_content delete-client-modal_content">
+        <p class="modal_content_message">{{ dialogMessage }}</p>
+        <div class="modal_content_buttons_container">
+            <button class="button-action_default" (click)="confirmClicked()">{{ actionConfirmText }}</button>
+            <button class="button-action_default" (click)="cancelClicked()">Отмена</button>
+        </div>
+    </div>
+</div>

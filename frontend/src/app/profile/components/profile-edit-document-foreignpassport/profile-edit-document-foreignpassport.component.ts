@@ -12,6 +12,9 @@ export class ProfileEditDocumentForeignpassportComponent
     @Input() model!: DocumentForeignPassport
     @Output() modelChange = new EventEmitter<DocumentForeignPassport>()
 
+    numberPattern: string = "^[a-zA-Z0-9]{1,32}$"
+    seriesPattern: string = "^[a-zA-Z0-9]{1,16}$"
+
     onModelChange(): void
     {
         this.modelChange.emit( this.model )

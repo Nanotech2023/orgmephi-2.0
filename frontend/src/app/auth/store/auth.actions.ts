@@ -47,12 +47,19 @@ export const getUserSuccess = createAction(
     props<{ user: User }>()
 )
 
+export const getUserProfileUnfilledRequest = createAction(
+    '[Auth] Get User Profile Unfilled Request'
+)
+export const getUserProfileUnfilledSuccess = createAction(
+    '[Auth] Get User Profile Unfilled  Success',
+    props<{ unfilled?: Array<object> }>()
+)
 
 export const getUserInfoRequest = createAction(
     '[Auth] Get User Info Request'
 )
 export const getUserInfoSuccess = createAction(
-    '[Auth] Get User Success',
+    '[Auth] Get User Info Success',
     props<{ userInfo: UserInfo }>()
 )
 

@@ -1,6 +1,6 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core'
 import { Document, DocumentTypeEnum } from '@api/users/models'
-import { getDocumentDisplay } from '@/shared/displayUtils'
+import { getDocumentDisplay } from '@/shared/localizeUtils'
 
 
 @Component( {
@@ -24,10 +24,5 @@ export class ProfileEditDocumentComponent
     getDocumentDisplay( documentType: DocumentTypeEnum ): string
     {
         return getDocumentDisplay( documentType )
-    }
-
-    onModelChange(): void
-    {
-        this.modelChange.emit( this.model )
     }
 }

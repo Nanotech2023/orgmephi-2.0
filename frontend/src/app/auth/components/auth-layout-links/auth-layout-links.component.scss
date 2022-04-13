@@ -1,0 +1,10 @@
+@import "src/styles/colors";
+
+a {
+  color: $blue;
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: $blue solid;
+}

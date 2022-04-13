@@ -49,3 +49,23 @@ def get_unfilled(obj, required_fields: list[str], child_fields: list[str]):
             if len(unfilled_attr) > 0:
                 unfilled.append({key: unfilled_attr})
     return unfilled
+
+
+def get_username_case_insensitive(email):
+    from sqlalchemy import func
+    from user.models import User
+    return User.query.filter(func.lower(User.username) == func.lower(email)).one_or_none()
+
+
+def get_email_case_insensitive_or_none(email):
+    from sqlalchemy import func
+    from user.models import UserInfo
+    return UserInfo.query.filter(func.lower(UserInfo.email) == func.lower(email)).one_or_none()
+
+
+def get_email_case_insensitive_or_raise(email):
+    from common.errors import NotFound
+    user = get_email_case_insensitive_or_none(email)
+    if user is None:
+        raise NotFound('email', str(email))
+    return user

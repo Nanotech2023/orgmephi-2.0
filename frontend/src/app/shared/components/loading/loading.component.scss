@@ -1,0 +1,15 @@
+.loading-spinner {
+  background-color: #BEBEBE2f;
+  position: absolute;
+  width: 100%;
+  top: 0;
+  left: 0;
+  min-height: 100%;
+  align-items: center;
+  justify-content: center;
+  display: grid;
+}
+
+.loading-spinner img {
+  align-self: end;
+}

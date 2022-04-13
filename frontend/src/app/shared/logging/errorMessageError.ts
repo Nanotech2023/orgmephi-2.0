@@ -1,7 +1,10 @@
-import { ErrorElement } from '@/shared/logging'
+import { ErrorElement } from '@/shared/logging/index'
 
 
 export interface ErrorMessageError
 {
-    errors: ErrorElement[];
+    class?: string;
+    status?: number;
+    title?: string;
+    errors?: ErrorElement[];
 }

@@ -3,27 +3,39 @@
         <div class="row">
             <div class="col-md-4">
                 <div class="olymp_title_container">
+
                     <div class="olymp_title">
                         {{ contest.base_contest?.name }}
                     </div>
-                    <div class="olymp_subtitle">
+
+                    <div class="olymp_subtitle pb-2">
                         Просьба внимательно ознакомиться с регламентом олимпиады перед началом прохождения
                     </div>
 
-                    <ng-container *ngIf="!(contestStatus$ | async)">
+                    <ng-container *ngIf="contestStatus$ | async as contestStatus; else startButton">
+
+                        <div class="pt-5 pb-5">
+                            <div class="olymp_status">
+                                <span>{{ getUserResponseStatusDisplay(contestStatus) }}</span>
+                            </div>
+                        </div>
+
                         <div class="olymp_start">
-                            <button (click)="onStartClick(contest.contest_id)">Начать олимпиаду</button>
+                            <div *ngIf="inProgress(contestStatus)">
+                                <button (click)="onContinueClick(contest.contest_id)">Продолжить олимпиаду</button>
+                            </div>
+                            <div *ngIf="accepted(contestStatus)">
+                                <button (click)="onShowResultsClick(contest.contest_id)">Показать результаты</button>
+                            </div>
                         </div>
                     </ng-container>
 
-                    <ng-container *ngIf="contestStatus$ | async as contestStatus">
-                        <div class="olymp_start" *ngIf="inProgress(contestStatus)">
-                            <button (click)="onStartClick(contest.contest_id)">Продолжить олимпиаду</button>
+                    <ng-template #startButton>
+                        <div class="olymp_start">
+                            <button (click)="onStartClick(contest.contest_id)">Начать олимпиаду</button>
                         </div>
-                        <div class="olymp_start" *ngIf="finished(contestStatus)">
-                            <button disabled>На проверке</button>
-                        </div>
-                    </ng-container>
+                    </ng-template>
+
                 </div>
             </div>
             <div class="col-md-8">
@@ -79,9 +91,9 @@
                         </div>
                     </div>
                     <div class="rules_text">
-                        <p>
-                            {{ contest.base_contest.rules }}
-                        </p>
+                        <pre>
+                            {{ contest.base_contest?.rules }}
+                        </pre>
                     </div>
                 </div>
             </div>

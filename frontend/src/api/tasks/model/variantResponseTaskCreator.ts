@@ -12,7 +12,6 @@
 
 
 export interface VariantResponseTaskCreator { 
-    variant_description: string | null;
     readonly variant_id?: number;
     variant_number: number | null;
 }

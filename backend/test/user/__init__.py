@@ -22,7 +22,7 @@ test_user_info = {
         "movement": True,
         "sight": True
     },
-    "phone": "8 (800) 555 35 35",
+    "phone": "+78005553535",
     "place_of_birth": "string"
 }
 
