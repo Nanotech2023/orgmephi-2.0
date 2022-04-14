@@ -10,12 +10,18 @@ def client(client_university):
     yield client_university
 
 
-# noinspection DuplicatedCode
-def test_user_response_participant(client, create_plain_task):
-    contest_id = get_contest_id(create_plain_task, DEFAULT_INDEX)
-    user_id = get_user_id(create_plain_task, DEFAULT_INDEX)
+@pytest.fixture
+def client_tasks(client_university):
+    client_university.set_prefix('contest/tasks/participant')
+    yield client_university
 
-    contest = create_plain_task['contests'][DEFAULT_INDEX]
+
+# noinspection DuplicatedCode
+def test_user_response_participant(client, create_three_tasks):
+    contest_id = get_contest_id(create_three_tasks, DEFAULT_INDEX)
+    user_id = get_user_id(create_three_tasks, DEFAULT_INDEX)
+
+    contest = create_three_tasks['contests'][DEFAULT_INDEX]
     contest.start_date = datetime.utcnow() + timedelta(minutes=5)
     test_app.db.session.commit()
 
@@ -39,12 +45,13 @@ def test_user_response_participant(client, create_plain_task):
     assert response.work_status.value == 'InProgress'
 
 
-def test_contest_zero_duration(client, create_one_task):
-    contest_id = get_contest_id(create_one_task, DEFAULT_INDEX)
-    user_id = get_user_id(create_one_task, DEFAULT_INDEX)
-    task_id = get_plain_task_id(create_one_task, DEFAULT_INDEX)
+def test_contest_zero_duration(client, create_user_response):
+    contest_id = get_contest_id(create_user_response, DEFAULT_INDEX)
+    user_id = get_user_id(create_user_response, DEFAULT_INDEX)
+    from contest.tasks.models.tasks import TaskTypeEnum
+    task_id = get_task_id_by_variant_and_type(contest_id, user_id, TaskTypeEnum.PlainTask)
 
-    contest = create_one_task['contests'][DEFAULT_INDEX]
+    contest = create_user_response['contests'][DEFAULT_INDEX]
     contest.contest_duration = timedelta(seconds=0)
     contest.end_date = datetime.utcnow() - timedelta(minutes=5)
     test_app.db.session.commit()
@@ -59,22 +66,49 @@ def test_contest_zero_duration(client, create_one_task):
 
 
 # noinspection DuplicatedCode
-def test_user_response_offline_contest_participant(client, create_plain_task):
-    index = 1
-    contest_id = get_contest_id(create_plain_task, index)
+def test_user_response_offline_contest_participant(client, create_three_tasks):
+    index = 2
+    contest_id = get_contest_id(create_three_tasks, index)
 
     resp = client.post(f'/contest/{contest_id}/user/self/create')
     assert resp.status_code == 409
 
 
 # noinspection DuplicatedCode
-def test_plain_task_text_participant(client, create_two_tasks):
-    contest_id = get_contest_id(create_two_tasks, DEFAULT_INDEX)
-    user_id = get_user_id(create_two_tasks, DEFAULT_INDEX)
-    task_id = get_plain_task_id(create_two_tasks, DEFAULT_INDEX)
-    task_id_from_different_contest = get_plain_task_id(create_two_tasks, 2)
+def test_get_user_task_participant(client_tasks, create_user_response):
+    contest_id = get_contest_id(create_user_response, DEFAULT_INDEX)
+    user_id = get_user_id(create_user_response, DEFAULT_INDEX)
+    from contest.tasks.models.tasks import TaskTypeEnum, Task
+    task_id = get_task_id_by_variant_and_type(contest_id, user_id, TaskTypeEnum.PlainTask)
+    from common.util import db_get_one_or_none
+    task = db_get_one_or_none(Task, "task_id", task_id)
 
-    resp = client.post(f'/contest/{contest_id}/task/{task_id_from_different_contest}/user/self/plain',
+    resp = client_tasks.get(f'/contest/{contest_id}/tasks/{task_id}/image/self')
+    assert resp.status_code == 404
+
+    from common.media_types import TaskImage
+    test_app.io_to_media('TASK', task, 'image_of_task', io.BytesIO(test_image), TaskImage)
+    test_app.db.session.commit()
+
+    resp = client_tasks.get(f'/contest/{contest_id}/tasks/{task_id}/image/self')
+    assert resp.status_code == 200
+
+
+# noinspection DuplicatedCode
+def test_plain_task_text_participant(client, create_user_response):
+    contest_id = get_contest_id(create_user_response, DEFAULT_INDEX)
+    user_id = get_user_id(create_user_response, DEFAULT_INDEX)
+    from contest.tasks.models.tasks import TaskTypeEnum, PlainTask, TaskAnswerTypeEnum
+    task_id = get_task_id_by_variant_and_type(contest_id, user_id, TaskTypeEnum.PlainTask)
+    from common.util import db_get_one_or_none
+    task: PlainTask = db_get_one_or_none(PlainTask, 'task_id', task_id)
+    task.answer_type = TaskAnswerTypeEnum.Text
+    wrong_task_id = 1 if task_id + 1 > 8 else task_id + 1
+    task: PlainTask = db_get_one_or_none(PlainTask, 'task_id', wrong_task_id)
+    task.answer_type = TaskAnswerTypeEnum.Text
+    test_app.db.session.commit()
+
+    resp = client.post(f'/contest/{contest_id}/task/{wrong_task_id}/user/self/plain',
                        json={'answer_text': 'answer'})
     assert resp.status_code == 404
 
@@ -90,7 +124,7 @@ def test_plain_task_text_participant(client, create_two_tasks):
                        json={'answer_text': 'answer'})
     assert resp.status_code == 404
 
-    range_task_id = get_range_task_id(create_two_tasks, DEFAULT_INDEX)
+    range_task_id = get_task_id_by_variant_and_type(contest_id, user_id, TaskTypeEnum.RangeTask)
     resp = client.post(f'/contest/{contest_id}/task/{range_task_id}/user/self/plain',
                        json={'answer_text': 'answer'})
     assert resp.status_code == 404
@@ -107,15 +141,21 @@ def test_plain_task_text_participant(client, create_two_tasks):
 
 
 # noinspection DuplicatedCode
-def test_plain_task_file_participant(client, create_one_task):
+def test_plain_task_file_participant(client, create_user_response):
     index = 1
-    contest_id = get_contest_id(create_one_task, index)
-    user_id = get_user_id(create_one_task, index)
-    task_id = get_plain_task_id(create_one_task, index)
-    task_id_from_different_contest = get_plain_task_id(create_one_task, 3)
+    contest_id = get_contest_id(create_user_response, index)
+    user_id = get_user_id(create_user_response, index)
+    from contest.tasks.models.tasks import TaskTypeEnum, PlainTask, TaskAnswerTypeEnum
+    task_id = get_task_id_by_variant_and_type(contest_id, user_id, TaskTypeEnum.PlainTask)
+    from common.util import db_get_one_or_none
+    task: PlainTask = db_get_one_or_none(PlainTask, 'task_id', task_id)
+    task.answer_type = TaskAnswerTypeEnum.File
+    wrong_task_id = 1 if task_id + 1 > 8 else task_id + 1
+    task: PlainTask = db_get_one_or_none(PlainTask, 'task_id', wrong_task_id)
+    task.answer_type = TaskAnswerTypeEnum.File
+    test_app.db.session.commit()
 
-    resp = client.post(f'/contest/{contest_id}/task/{task_id_from_different_contest}/user/self/png',
-                       data=test_image)
+    resp = client.post(f'/contest/{contest_id}/task/{wrong_task_id}/user/self/plain/file', data=test_image)
     assert resp.status_code == 404
 
     resp = client.post(f'/contest/{contest_id}/task/{task_id}/user/self/plain/file', data=test_image)
@@ -132,10 +172,15 @@ def test_plain_task_file_participant(client, create_one_task):
 
 
 # noinspection DuplicatedCode
-def test_plain_task_get_participant(client, create_one_task):
-    contest_id = get_contest_id(create_one_task, 1)
-    user_id = get_user_id(create_one_task, 1)
-    task_id = get_plain_task_id(create_one_task, 1)
+def test_plain_task_get_participant(client, create_user_response):
+    contest_id = get_contest_id(create_user_response, 1)
+    user_id = get_user_id(create_user_response, 1)
+    from contest.tasks.models.tasks import TaskTypeEnum, PlainTask, TaskAnswerTypeEnum
+    task_id = get_task_id_by_variant_and_type(contest_id, user_id, TaskTypeEnum.PlainTask)
+    from common.util import db_get_one_or_none
+    task: PlainTask = db_get_one_or_none(PlainTask, 'task_id', task_id)
+    task.answer_type = TaskAnswerTypeEnum.File
+    test_app.db.session.commit()
 
     resp = client.post(f'/contest/{contest_id}/task/{task_id}/user/self/plain/file', data=test_image)
     assert resp.status_code == 200
@@ -150,12 +195,19 @@ def test_plain_task_get_participant(client, create_one_task):
 
 
 # noinspection DuplicatedCode
-def test_range_task_participant(client, create_two_tasks):
-    contest_id = get_contest_id(create_two_tasks, DEFAULT_INDEX)
-    user_id = get_user_id(create_two_tasks, DEFAULT_INDEX)
-    task_id = get_range_task_id(create_two_tasks, DEFAULT_INDEX)
+def test_range_task_participant(client, create_user_response):
+    contest_id = get_contest_id(create_user_response, DEFAULT_INDEX)
+    user_id = get_user_id(create_user_response, DEFAULT_INDEX)
+    from contest.tasks.models.tasks import TaskTypeEnum
+    task_id = get_task_id_by_variant_and_type(contest_id, user_id, TaskTypeEnum.RangeTask)
 
     resp = client.post(f'/contest/{100}/task/{task_id}/user/self/range',
+                       json={'answer': 0.6})
+    assert resp.status_code == 404
+
+    wrong_task_id = 9 if task_id + 1 > 16 else task_id + 1
+
+    resp = client.post(f'/contest/{contest_id}/task/{wrong_task_id}/user/self/range',
                        json={'answer': 0.6})
     assert resp.status_code == 404
 
@@ -177,7 +229,7 @@ def test_range_task_participant(client, create_two_tasks):
                        json={'answer': 0.6})
     assert resp.status_code == 404
 
-    plain_task_id = get_plain_task_id(create_two_tasks, DEFAULT_INDEX)
+    plain_task_id = get_task_id_by_variant_and_type(contest_id, user_id, TaskTypeEnum.PlainTask)
     resp = client.post(f'/contest/{contest_id}/task/{plain_task_id}/user/self/range',
                        json={'answer': 0.6})
     assert resp.status_code == 404
@@ -189,14 +241,20 @@ def test_range_task_participant(client, create_two_tasks):
 
 
 # noinspection DuplicatedCode
-def test_multiple_task_creator(client, create_three_tasks):
-    contest_id = get_contest_id(create_three_tasks, DEFAULT_INDEX)
-    user_id = get_user_id(create_three_tasks, DEFAULT_INDEX)
-    task_id = get_multiple_task_id(create_three_tasks, DEFAULT_INDEX)
+def test_multiple_task_creator(client, create_user_response):
+    contest_id = get_contest_id(create_user_response, DEFAULT_INDEX)
+    user_id = get_user_id(create_user_response, DEFAULT_INDEX)
+    from contest.tasks.models.tasks import TaskTypeEnum
+    task_id = get_task_id_by_variant_and_type(contest_id, user_id, TaskTypeEnum.MultipleChoiceTask)
+    wrong_task_id = 17 if task_id + 1 > 24 else task_id + 1
 
     resp = client.post(f'/contest/{contest_id}/task/{task_id}/user/self/multiple',
                        json={"answers": [{"answer": "1"}, {"answer": "4"}]})
     assert resp.status_code == 409
+
+    resp = client.post(f'/contest/{contest_id}/task/{wrong_task_id}/user/self/multiple',
+                       json={"answers": [{"answer": "1"}, {"answer": "3"}]})
+    assert resp.status_code == 404
 
     resp = client.post(f'/contest/{contest_id}/task/{task_id}/user/self/multiple',
                        json={"answers": [{"answer": "1"}, {"answer": "3"}]})
@@ -219,7 +277,7 @@ def test_multiple_task_creator(client, create_three_tasks):
                        json={"answers": [{"answer": "1"}, {"answer": "3"}]})
     assert resp.status_code == 404
 
-    plain_task_id = get_plain_task_id(create_three_tasks, DEFAULT_INDEX)
+    plain_task_id = get_task_id_by_variant_and_type(contest_id, user_id, TaskTypeEnum.PlainTask)
     resp = client.post(f'/contest/{contest_id}/task/{plain_task_id}/user/self/multiple',
                        json={"answers": [{"answer": "1"}, {"answer": "3"}]})
     assert resp.status_code == 404
@@ -231,8 +289,8 @@ def test_multiple_task_creator(client, create_three_tasks):
     assert '2' in resp.json['answers']
 
 
-def test_get_status_participant(client, create_one_task):
-    contest_id = get_contest_id(create_one_task, DEFAULT_INDEX)
+def test_get_status_participant(client, create_user_response):
+    contest_id = get_contest_id(create_user_response, DEFAULT_INDEX)
 
     resp = client.get(f'/contest/{contest_id}/user/self/status')
     assert resp.status_code == 200
@@ -240,15 +298,16 @@ def test_get_status_participant(client, create_one_task):
 
 
 # noinspection DuplicatedCode
-def test_mark_participant(client, create_two_tasks):
-    contest_id = get_contest_id(create_two_tasks, DEFAULT_INDEX)
-    user_id = get_user_id(create_two_tasks, DEFAULT_INDEX)
-    task_id = get_plain_task_id(create_two_tasks, DEFAULT_INDEX)
+def test_mark_participant(client, create_user_response):
+    contest_id = get_contest_id(create_user_response, DEFAULT_INDEX)
+    user_id = get_user_id(create_user_response, DEFAULT_INDEX)
+    from contest.tasks.models.tasks import TaskTypeEnum
+    task_id = get_task_id_by_variant_and_type(contest_id, user_id, TaskTypeEnum.PlainTask)
 
     resp = client.get(f'/contest/{contest_id}/task/{task_id}/user/self/mark')
     assert resp.status_code == 409
 
-    contest = create_two_tasks['contests'][DEFAULT_INDEX]
+    contest = create_user_response['contests'][DEFAULT_INDEX]
     contest.result_publication_date = datetime.utcnow() - timedelta(minutes=5)
     test_app.db.session.commit()
 
@@ -284,9 +343,9 @@ def test_mark_participant(client, create_two_tasks):
     assert resp.json['mark'] == 12
 
 
-def test_time_left_participant(client, create_one_task):
-    contest_id = get_contest_id(create_one_task, DEFAULT_INDEX)
-    user_id = get_user_id(create_one_task, DEFAULT_INDEX)
+def test_time_left_participant(client, create_user_response):
+    contest_id = get_contest_id(create_user_response, DEFAULT_INDEX)
+    user_id = get_user_id(create_user_response, DEFAULT_INDEX)
 
     resp = client.get(f'/contest/{contest_id}/user/self/time')
     assert resp.status_code == 200
@@ -298,25 +357,23 @@ def test_time_left_participant(client, create_one_task):
     user_work.start_time = datetime.utcnow() - timedelta(minutes=45)
 
     resp = client.get(f'/contest/{contest_id}/user/self/time')
-    assert resp.status_code == 200
-    assert resp.json['time'] == 0
+    assert resp.status_code == 409
 
-    contest = create_one_task['contests'][DEFAULT_INDEX]
+    contest = create_user_response['contests'][DEFAULT_INDEX]
     contest.contest_duration = timedelta(seconds=0)
     contest.start_date = datetime.utcnow() - timedelta(minutes=5)
     user_work.start_time = datetime.utcnow()
     contest.end_date = datetime.utcnow() + timedelta(minutes=5)
     resp = client.get(f'/contest/{contest_id}/user/self/time')
     assert resp.status_code == 200
-    assert resp.json['time'] > 250
-    assert resp.json['time'] < 310
 
 
 # noinspection DuplicatedCode
-def test_finish_contest_participant(client, create_one_task):
-    contest_id = get_contest_id(create_one_task, DEFAULT_INDEX)
-    user_id = get_user_id(create_one_task, DEFAULT_INDEX)
-    plain_id = get_plain_task_id(create_one_task, DEFAULT_INDEX)
+def test_finish_contest_participant(client, create_user_response):
+    contest_id = get_contest_id(create_user_response, DEFAULT_INDEX)
+    user_id = get_user_id(create_user_response, DEFAULT_INDEX)
+    from contest.tasks.models.tasks import TaskTypeEnum
+    plain_id = get_task_id_by_variant_and_type(contest_id, user_id, TaskTypeEnum.PlainTask)
 
     resp = client.post(f'/contest/{contest_id}/user/self/finish')
     assert resp.status_code == 200
@@ -356,9 +413,10 @@ def test_auto_check_participant(client, create_user_with_answers):
     index = 1
     contest_id = get_contest_id(create_user_with_answers, index)
     user_id = get_user_id(create_user_with_answers, index)
-    plain_id = get_plain_task_id(create_user_with_answers, index)
-    range_id = get_range_task_id(create_user_with_answers, index)
-    multiple_id = get_multiple_task_id(create_user_with_answers, index)
+    from contest.tasks.models.tasks import TaskTypeEnum
+    plain_id = get_task_id_by_variant_and_type(contest_id, user_id, TaskTypeEnum.PlainTask)
+    range_id = get_task_id_by_variant_and_type(contest_id, user_id, TaskTypeEnum.RangeTask)
+    multiple_id = get_task_id_by_variant_and_type(contest_id, user_id, TaskTypeEnum.MultipleChoiceTask)
 
     resp = client.post(f'/contest/{contest_id}/user/self/finish')
     assert resp.status_code == 200
@@ -373,7 +431,7 @@ def test_auto_check_participant(client, create_user_with_answers):
     range_answer = user_answer_get(user_id, contest_id, range_id)
     assert range_answer.mark == 0
     multiple_answer = user_answer_get(user_id, contest_id, multiple_id)
-    assert multiple_answer.mark == 7
+    assert multiple_answer.mark == 14
 
     resp = client.get(f'/contest/{contest_id}/user/self/mark')
     assert resp.status_code == 409
@@ -400,26 +458,26 @@ def test_auto_check_participant(client, create_user_with_answers):
     for answer in user_answers:
         if answer['answer_type'] == 'PlainAnswerText':
             assert answer['mark'] == 0
-            assert answer['task_points'] == 11
+            assert answer['task_points'] == 14
             assert answer['task_id'] == plain_id
-            assert answer['right_answer'] is None
+            assert answer['right_answer']['answer'] == 'answer'
         elif answer['answer_type'] == 'RangeAnswer':
             assert answer['mark'] == 0
-            assert answer['task_points'] == 5
+            assert answer['task_points'] == 14
             assert answer['task_id'] == range_id
             assert answer['right_answer']['start_value'] == 0.5
             assert answer['right_answer']['end_value'] == 0.7
         elif answer['answer_type'] == 'MultipleChoiceAnswer':
-            assert answer['mark'] == 7
-            assert answer['task_points'] == 7
+            assert answer['mark'] == 14
+            assert answer['task_points'] == 14
             assert answer['task_id'] == multiple_id
             assert answer['right_answer']['answers'] == ['1', '3']
 
 
 # noinspection DuplicatedCode
-def test_time_error_participant(client, create_plain_task):
-    contest_id = get_contest_id(create_plain_task, DEFAULT_INDEX)
-    contest = create_plain_task['contests'][DEFAULT_INDEX]
+def test_time_error_participant(client, create_three_tasks):
+    contest_id = get_contest_id(create_three_tasks, DEFAULT_INDEX)
+    contest = create_three_tasks['contests'][DEFAULT_INDEX]
     contest.end_date = datetime.utcnow() - timedelta(minutes=5)
     test_app.db.session.commit()
 
@@ -427,11 +485,18 @@ def test_time_error_participant(client, create_plain_task):
     assert resp.status_code == 409
 
 
-def test_answer_errors_participant(client, create_three_tasks):
+# noinspection DuplicatedCode
+def test_answer_errors_participant(client, create_user_response):
     index = 1
-    contest_id = get_contest_id(create_three_tasks, index)
-    plain_id = get_plain_task_id(create_three_tasks, index)
-    range_id = get_range_task_id(create_three_tasks, index)
+    contest_id = get_contest_id(create_user_response, index)
+    user_id = get_user_id(create_user_response, index)
+    from contest.tasks.models.tasks import TaskTypeEnum, TaskAnswerTypeEnum, PlainTask
+    plain_id = get_task_id_by_variant_and_type(contest_id, user_id, TaskTypeEnum.PlainTask)
+    range_id = get_task_id_by_variant_and_type(contest_id, user_id, TaskTypeEnum.RangeTask)
+    from common.util import db_get_one_or_none
+    task: PlainTask = db_get_one_or_none(PlainTask, 'task_id', plain_id)
+    task.answer_type = TaskAnswerTypeEnum.File
+    test_app.db.session.commit()
 
     resp = client.get(f'/contest/{contest_id}/task/{plain_id}/user/self')
     assert resp.status_code == 404
@@ -447,17 +512,23 @@ def test_answer_errors_participant(client, create_three_tasks):
     assert resp.status_code == 404
 
 
-def test_time_left_error_participant(client, create_two_tasks):
-    contest_id = get_contest_id(create_two_tasks, DEFAULT_INDEX)
-    user_id = get_user_id(create_two_tasks, DEFAULT_INDEX)
-    plain_id = get_plain_task_id(create_two_tasks, DEFAULT_INDEX)
-    range_id = get_range_task_id(create_two_tasks, DEFAULT_INDEX)
+# noinspection DuplicatedCode
+def test_time_left_error_participant(client, create_user_response):
+    contest_id = get_contest_id(create_user_response, DEFAULT_INDEX)
+    user_id = get_user_id(create_user_response, DEFAULT_INDEX)
+    from contest.tasks.models.tasks import TaskTypeEnum, TaskAnswerTypeEnum, PlainTask
+    plain_id = get_task_id_by_variant_and_type(contest_id, user_id, TaskTypeEnum.PlainTask)
+    range_id = get_task_id_by_variant_and_type(contest_id, user_id, TaskTypeEnum.RangeTask)
+    from common.util import db_get_one_or_none
+    task: PlainTask = db_get_one_or_none(PlainTask, 'task_id', plain_id)
+    task.answer_type = TaskAnswerTypeEnum.Text
+    test_app.db.session.commit()
 
     resp = client.post(f'/contest/{contest_id}/task/{range_id}/user/self/range',
                        json={'answer': 0.8})
     assert resp.status_code == 200
 
-    contest = create_two_tasks['contests'][DEFAULT_INDEX]
+    contest = create_user_response['contests'][DEFAULT_INDEX]
     contest.contest_duration = timedelta(seconds=0)
     test_app.db.session.commit()
 
@@ -477,6 +548,7 @@ def test_time_left_error_participant(client, create_two_tasks):
     assert user_work.status.value == 'NotChecked'
 
 
+# noinspection DuplicatedCode
 def test_all_user_results_participant(client, create_user_with_answers):
     resp = client.get(f'/contest/user/self/results')
     assert resp.status_code == 200
@@ -491,3 +563,83 @@ def test_all_user_results_participant(client, create_user_with_answers):
     assert results[0]['status'] == 'InProgress'
     assert results[0]['mark'] == 0
     assert results[0]['user_status'] == 'Participant'
+
+
+# noinspection DuplicatedCode
+def test_results_with_variant_self(client, create_user_with_answers_without_plain):
+    contest_id = get_contest_id(create_user_with_answers_without_plain, DEFAULT_INDEX)
+    contest = create_user_with_answers_without_plain['contests'][DEFAULT_INDEX]
+    contest.show_result_after_finish = True
+    contest.show_answer_after_contest = True
+    contest.result_publication_date = datetime.utcnow() - timedelta(minutes=15)
+    test_app.db.session.commit()
+    user_id = get_user_id(create_user_with_answers_without_plain, DEFAULT_INDEX)
+    from contest.tasks.models.tasks import TaskTypeEnum
+    plain_id = get_task_id_by_variant_and_type(contest_id, user_id, TaskTypeEnum.PlainTask)
+    range_id = get_task_id_by_variant_and_type(contest_id, user_id, TaskTypeEnum.RangeTask)
+    multiple_id = get_task_id_by_variant_and_type(contest_id, user_id, TaskTypeEnum.MultipleChoiceTask)
+
+    resp = client.get(f'/contest/{contest_id}/user/self/results')
+    assert resp.status_code == 409
+
+    resp = client.post(f'/contest/{contest_id}/user/self/finish')
+    assert resp.status_code == 200
+
+    from contest.responses.util import get_user_in_contest_work
+    user_work = get_user_in_contest_work(user_id, contest_id)
+    assert user_work.status.value == 'Accepted'
+
+    resp = client.get(f'/contest/{contest_id}/user/self/results')
+    assert resp.status_code == 200
+    assert resp.json['contest_id'] == contest_id
+    assert resp.json['user_id'] == user_id
+    tasks = resp.json['tasks_list']
+    user_answers = resp.json['user_answers']
+    assert len(user_answers) == 2
+
+    for answer in user_answers:
+        if answer['answer_type'] == 'RangeAnswer':
+            assert answer['mark'] == 14
+            assert answer['task_points'] == 14
+            assert answer['task_id'] == range_id
+            assert answer['right_answer']['start_value'] == 0.5
+            assert answer['right_answer']['end_value'] == 0.7
+        elif answer['answer_type'] == 'MultipleChoiceAnswer':
+            assert answer['mark'] == 0
+            assert answer['task_points'] == 14
+            assert answer['task_id'] == multiple_id
+            assert answer['right_answer']['answers'] == ['1', '3']
+
+    for task in tasks:
+        if task['task_type'] == 'PlainTask':
+            assert 'right_answer' not in task
+            assert task['task_id'] == plain_id
+            assert task['task_points'] == 14
+        elif task['task_type'] == 'RangeTask':
+            assert 'right_answer' not in task
+            assert task['task_id'] == range_id
+            assert task['task_points'] == 14
+        elif task['task_type'] == 'MultipleChoiceTask':
+            assert 'right_answer' not in task
+            assert task['task_id'] == multiple_id
+            assert task['task_points'] == 14
+
+    client.set_prefix('contest/tasks/participant')
+
+    from common.media_types import TaskImage
+    from contest.tasks.models.tasks import Task
+    from common.util import db_get_one_or_none
+
+    task = db_get_one_or_none(Task, "task_id", range_id)
+    test_app.io_to_media('TASK', task, 'image_of_task', io.BytesIO(test_image), TaskImage)
+
+    task = db_get_one_or_none(Task, "task_id", multiple_id)
+    test_app.io_to_media('TASK', task, 'image_of_task', io.BytesIO(test_image), TaskImage)
+    test_app.db.session.commit()
+
+    resp = client.get(f'/contest/{contest_id}/tasks/{range_id}/image/self')
+    assert resp.status_code == 200
+
+    resp = client.get(f'/contest/{contest_id}/tasks/{multiple_id}/image/self')
+    assert resp.status_code == 200
+

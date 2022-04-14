@@ -59,8 +59,8 @@ class Response(db.Model):
     work_id = db.Column(db.Integer, autoincrement=True, primary_key=True)
     user_id = db.Column(db.Integer)
     contest_id = db.Column(db.Integer)
-    start_time = db.Column(db.DateTime, default=datetime.utcnow())
-    finish_time = db.Column(db.DateTime, default=datetime.utcnow())
+    start_time = db.Column(db.DateTime, default=datetime.utcnow)
+    finish_time = db.Column(db.DateTime, default=datetime.utcnow)
     time_extension = db.Column(db.Interval, default=timedelta(seconds=0))
     work_status = db.Column(db.Enum(ResponseStatusEnum), default=ResponseStatusEnum.in_progress, nullable=False)
 
@@ -126,7 +126,6 @@ class BaseAnswer(db.Model):
     mark = db.Column(db.Float, default=0)
 
     task = db.relationship(Task, uselist=False)
-    task_points = association_proxy('task', 'task_points')
 
     __mapper_args__ = {
         'polymorphic_identity': AnswerEnum.BaseAnswer,
@@ -134,23 +133,39 @@ class BaseAnswer(db.Model):
     }
 
     @hybrid_property
+    def task_points(self):
+        from common.util import db_get_one_or_none, db_get_or_raise
+        from contest.tasks.models import ContestTaskInVariant, ContestTask
+        resp = db_get_or_raise(Response, "work_id", self.work_id)
+        user = UserInContest.query.filter_by(user_id=resp.user_id,
+                                             contest_id=resp.contest_id).one_or_none()
+        variant_id = user.variant_id
+
+        contest_task_id = ContestTaskInVariant.query.filter_by(
+           variant_id=variant_id, task_id=self.task_id
+        ).one_or_none().contest_task_id
+
+        contest_task: ContestTask = db_get_one_or_none(ContestTask, "contest_task_id", contest_task_id)
+        return contest_task.task_points
+
+    @hybrid_property
     def right_answer(self):
+        from contest.tasks.models import Contest
         from common.util import db_get_one_or_none
-        if self.answer_type.value == "PlainAnswerText" or self.answer_type.value == "PlainAnswerFile":
-            task: PlainTask = db_get_one_or_none(PlainTask, 'task_id', self.task_id)
-            if task.show_answer_after_contest:
+        contest: Contest = db_get_one_or_none(Contest, "contest_id", self.response.contest_id)
+        if contest.show_answer_after_contest:
+            if self.answer_type.value == "PlainAnswerText" or self.answer_type.value == "PlainAnswerFile":
+                task: PlainTask = db_get_one_or_none(PlainTask, 'task_id', self.task_id)
                 return {'answer': task.recommended_answer}
-        elif self.answer_type.value == "RangeAnswer":
-            task: RangeTask = db_get_one_or_none(RangeTask, 'task_id', self.task_id)
-            if task.show_answer_after_contest:
+            elif self.answer_type.value == "RangeAnswer":
+                task: RangeTask = db_get_one_or_none(RangeTask, 'task_id', self.task_id)
                 return {
                     'start_value': task.start_value,
                     'end_value': task.end_value,
                 }
-        elif self.answer_type.value == "MultipleChoiceAnswer":
-            task: MultipleChoiceTask = db_get_one_or_none(MultipleChoiceTask, 'task_id', self.task_id)
-            right_answers = [elem['answer'] for elem in task.answers if elem['is_right_answer']]
-            if task.show_answer_after_contest:
+            elif self.answer_type.value == "MultipleChoiceAnswer":
+                task: MultipleChoiceTask = db_get_one_or_none(MultipleChoiceTask, 'task_id', self.task_id)
+                right_answers = [elem['answer'] for elem in task.answers if elem['is_right_answer']]
                 return {'answers': right_answers}
 
 
@@ -231,7 +246,6 @@ class PlainAnswerFile(BaseAnswer):
     def filetype(self):
         if self.answer_content is not None:
             return self.answer_content.content_type
-
 
     __mapper_args__ = {
         'polymorphic_identity': AnswerEnum.PlainAnswerFile,

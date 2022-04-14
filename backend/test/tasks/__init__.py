@@ -1,4 +1,7 @@
+import io
 from datetime import datetime, timedelta
+
+import pytest
 
 from ..user import *
 
@@ -8,6 +11,8 @@ def create_group_for_everyone():
     from user.models.auth import Group
     everyone_group = Group(name='Everyone')
     test_app.db.session.add(everyone_group)
+    test_group = Group(name='Test Group')
+    test_app.db.session.add(test_group)
     test_app.db.session.commit()
     yield everyone_group
 
@@ -56,7 +61,7 @@ def test_olympiad_locations(test_city, test_country_native):
 
 
 @pytest.fixture
-def test_base_contests(test_olympiad_types):
+def test_base_contests(test_olympiad_types, test_certificate_type):
     from contest.tasks.models import BaseContest, OlympiadSubjectEnum, OlympiadLevelEnum
     contests = [BaseContest(name=f'Test {i}', rules=f'Test{i}', description=f'Test {i}',
                             subject=OlympiadSubjectEnum.Math,
@@ -66,13 +71,43 @@ def test_base_contests(test_olympiad_types):
                             winner_3_condition=0.8,
                             diploma_1_condition=0.7,
                             diploma_2_condition=0.6,
-                            diploma_3_condition=0.5) for i in range(8)]
+                            diploma_3_condition=0.5,
+                            certificate_type_id=test_certificate_type.certificate_type_id) for i in range(8)]
     for i in range(len(contests)):
         olympiad_type = test_olympiad_types[i % len(test_olympiad_types)]
         olympiad_type.contests.extend(contests)
     test_app.db.session.add_all(contests)
     test_app.db.session.commit()
     yield contests
+
+
+# noinspection DuplicatedCode
+@pytest.fixture
+def test_create_tasks_pool(test_base_contests):
+    from contest.tasks.models import TaskPool
+    task_pools = [TaskPool(name=f'Test tasks pool {i}',
+                           year=datetime.now().year,
+                           orig_task_points=20) for i in range(3)]
+    for test_base_contest in test_base_contests:
+        test_base_contest.task_pools = task_pools
+    test_app.db.session.add_all(task_pools)
+    test_app.db.session.commit()
+    yield task_pools
+
+
+@pytest.fixture
+def test_create_contest_tasks(test_simple_contest, test_create_tasks_pool):
+    from contest.tasks.models import ContestTask
+    contest_tasks = [ContestTask(num=i,
+                                 task_points=14
+                                 ) for i in range(3)]
+    for i in range(3):
+        contest_tasks[i].task_pools = [test_create_tasks_pool[i]]
+    test_simple_contest[0].contest_tasks = contest_tasks
+
+    test_app.db.session.add_all(contest_tasks)
+    test_app.db.session.commit()
+    yield contest_tasks
 
 
 @pytest.fixture
@@ -126,13 +161,16 @@ def test_simple_contest(test_base_contests_with_target, test_olympiad_locations)
                                      end_date=datetime.utcnow() + timedelta(hours=2),
                                      holding_type=holding_types[i % 2],
                                      regulations=f'Test {i}',
+                                     show_answer_after_contest=True,
                                      contest_duration=timedelta(minutes=30),
                                      result_publication_date=datetime.utcnow() + timedelta(hours=3),
+                                     deadline_for_appeal=datetime.utcnow() + timedelta(minutes=45),
                                      end_of_enroll_date=datetime.utcnow() + timedelta(minutes=15))
                        for i in range(7)]
     simple_contests.append(SimpleContest(
         base_contest_id=test_base_contests_with_target[7].base_contest_id,
         visibility=True,
+        show_answer_after_contest=True,
         start_date=datetime(2007, 10, 6, 16, 29, 43, 79043),
         end_date=datetime(2007, 12, 6, 16, 29, 43, 79043),
         holding_type=holding_types[7 % 2],
@@ -188,7 +226,6 @@ def test_stages_and(test_contests_composite, test_contests):
 # noinspection DuplicatedCode
 @pytest.fixture
 def test_simple_contest_in_stage_1(test_base_contests_with_target, test_stages, test_olympiad_locations):
-    from contest.tasks.models import Variant
     from contest.tasks.models.user import UserStatusEnum
     from contest.tasks.models.olympiad import SimpleContest, ContestHoldingTypeEnum
     from contest.tasks.models import UserInContest
@@ -198,9 +235,11 @@ def test_simple_contest_in_stage_1(test_base_contests_with_target, test_stages, 
                                      start_date=datetime.utcnow(),
                                      end_date=datetime.utcnow() + timedelta(hours=4),
                                      holding_type=holding_types[i % 2],
+                                     show_answer_after_contest=True,
                                      regulations=f'Test {i}',
                                      contest_duration=timedelta(minutes=30),
                                      result_publication_date=datetime.utcnow() + timedelta(hours=6),
+                                     deadline_for_appeal=datetime.utcnow() + timedelta(hours=2),
                                      end_of_enroll_date=datetime.utcnow() + timedelta(minutes=15))
                        for i in range(2)]
 
@@ -209,12 +248,14 @@ def test_simple_contest_in_stage_1(test_base_contests_with_target, test_stages, 
 
     other_stage = SimpleContest(base_contest_id=test_base_contests_with_target[0].base_contest_id,
                                 visibility=True,
+                                show_answer_after_contest=True,
                                 start_date=datetime.utcnow(),
                                 end_date=datetime.utcnow() + timedelta(hours=4),
                                 holding_type=holding_types[0],
                                 regulations=f'Test',
                                 contest_duration=timedelta(minutes=30),
                                 result_publication_date=datetime.utcnow() + timedelta(hours=6),
+                                deadline_for_appeal=datetime.utcnow() + timedelta(hours=2),
                                 end_of_enroll_date=datetime.utcnow() + timedelta(minutes=15))
     test_app.db.session.add(other_stage)
 
@@ -224,12 +265,9 @@ def test_simple_contest_in_stage_1(test_base_contests_with_target, test_stages, 
     simple_contests[1].previous_contest_id = other_stage.contest_id
     simple_contests[1].previous_participation_condition = UserStatusEnum.Participant
 
-    simple_contests[1].variants.append(Variant(variant_number=1, variant_description="3"))
-
     uic = UserInContest(user_id=1,
                         show_results_to_user=True,
                         location_id=1,
-                        variant_id=1,
                         user_status=UserStatusEnum.Participant)
     test_app.db.session.add(uic)
     other_stage.users.append(uic)
@@ -248,19 +286,20 @@ def test_simple_contest_in_stage_1(test_base_contests_with_target, test_stages, 
 @pytest.fixture
 def test_simple_contest_in_stage_2_contest_in_stage(test_base_contests_with_target, test_stages,
                                                     test_olympiad_locations):
-    from contest.tasks.models import Variant
     from contest.tasks.models.user import UserStatusEnum
     from contest.tasks.models.olympiad import SimpleContest, ContestHoldingTypeEnum
     from contest.tasks.models import UserInContest
     holding_types = [ContestHoldingTypeEnum.OnLineContest, ContestHoldingTypeEnum.OfflineContest]
     simple_contests = [SimpleContest(base_contest_id=test_base_contests_with_target[0].base_contest_id,
                                      visibility=True,
+                                     show_answer_after_contest=True,
                                      start_date=datetime.utcnow(),
                                      end_date=datetime.utcnow() + timedelta(hours=4),
                                      holding_type=holding_types[i % 2],
                                      regulations=f'Test',
                                      contest_duration=timedelta(minutes=30),
                                      result_publication_date=datetime.utcnow() + timedelta(hours=6),
+                                     deadline_for_appeal=datetime.utcnow() + timedelta(hours=2),
                                      end_of_enroll_date=datetime.utcnow() + timedelta(minutes=15))
                        for i in range(2)]
 
@@ -271,12 +310,14 @@ def test_simple_contest_in_stage_2_contest_in_stage(test_base_contests_with_targ
     contest_in_other_stage_1 = SimpleContest(base_contest_id=test_base_contests_with_target[0].base_contest_id,
                                              contest_id=999,
                                              visibility=True,
+                                             show_answer_after_contest=True,
                                              start_date=datetime.utcnow(),
                                              end_date=datetime.utcnow() + timedelta(hours=4),
                                              holding_type=holding_types[0],
                                              contest_duration=timedelta(minutes=30),
                                              regulations=f'Test',
                                              result_publication_date=datetime.utcnow() + timedelta(hours=6),
+                                             deadline_for_appeal=datetime.utcnow() + timedelta(hours=2),
                                              end_of_enroll_date=datetime.utcnow() + timedelta(minutes=15))
 
     contest_in_other_stage_2 = SimpleContest(base_contest_id=test_base_contests_with_target[0].base_contest_id,
@@ -287,7 +328,9 @@ def test_simple_contest_in_stage_2_contest_in_stage(test_base_contests_with_targ
                                              holding_type=holding_types[0],
                                              contest_duration=timedelta(minutes=30),
                                              regulations=f'Test',
+                                             show_answer_after_contest=True,
                                              result_publication_date=datetime.utcnow() + timedelta(hours=6),
+                                             deadline_for_appeal=datetime.utcnow() + timedelta(hours=2),
                                              end_of_enroll_date=datetime.utcnow() + timedelta(minutes=15),
                                              previous_contest_id=999,
                                              previous_participation_condition=UserStatusEnum.Participant)
@@ -300,12 +343,9 @@ def test_simple_contest_in_stage_2_contest_in_stage(test_base_contests_with_targ
     simple_contests[1].previous_contest_id = contest_in_other_stage_2.contest_id
     simple_contests[1].previous_participation_condition = UserStatusEnum.Participant
 
-    simple_contests[1].variants.append(Variant(variant_number=1, variant_description="3"))
-
     uic = UserInContest(user_id=1,
                         show_results_to_user=True,
                         location_id=1,
-                        variant_id=1,
                         user_status=UserStatusEnum.Participant)
     test_app.db.session.add(uic)
     contest_in_other_stage_2.users.append(uic)
@@ -323,7 +363,6 @@ def test_simple_contest_in_stage_2_contest_in_stage(test_base_contests_with_targ
 # noinspection DuplicatedCode
 @pytest.fixture
 def test_simple_contest_in_stage_and(test_base_contests_with_target, test_stages_and, test_olympiad_locations):
-    from contest.tasks.models import Variant
     from contest.tasks.models.user import UserStatusEnum
     from contest.tasks.models.olympiad import SimpleContest, ContestHoldingTypeEnum
     from contest.tasks.models import UserInContest
@@ -335,7 +374,9 @@ def test_simple_contest_in_stage_and(test_base_contests_with_target, test_stages
                                      holding_type=holding_types[i % 2],
                                      regulations=f'Test',
                                      contest_duration=timedelta(minutes=30),
+                                     show_answer_after_contest=True,
                                      result_publication_date=datetime.utcnow() + timedelta(hours=6),
+                                     deadline_for_appeal=datetime.utcnow() + timedelta(hours=2),
                                      end_of_enroll_date=datetime.utcnow() + timedelta(minutes=15))
                        for i in range(2)]
 
@@ -345,8 +386,10 @@ def test_simple_contest_in_stage_and(test_base_contests_with_target, test_stages
                                 end_date=datetime.utcnow() + timedelta(hours=4),
                                 holding_type=holding_types[0],
                                 regulations=f'Test',
+                                show_answer_after_contest=True,
                                 contest_duration=timedelta(minutes=30),
                                 result_publication_date=datetime.utcnow() + timedelta(hours=6),
+                                deadline_for_appeal=datetime.utcnow() + timedelta(hours=2),
                                 end_of_enroll_date=datetime.utcnow() + timedelta(minutes=15))
     test_app.db.session.add(other_stage)
 
@@ -358,12 +401,9 @@ def test_simple_contest_in_stage_and(test_base_contests_with_target, test_stages
     simple_contests[1].previous_contest_id = other_stage.contest_id
     simple_contests[1].previous_participation_condition = UserStatusEnum.Participant
 
-    simple_contests[1].variants.append(Variant(variant_number=1, variant_description="3"))
-
     uic = UserInContest(user_id=1,
                         show_results_to_user=True,
                         location_id=1,
-                        variant_id=1,
                         user_status=UserStatusEnum.Participant)
     test_app.db.session.add(uic)
     other_stage.users.append(uic)
@@ -382,7 +422,6 @@ def test_simple_contest_in_stage_and(test_base_contests_with_target, test_stages
 # noinspection DuplicatedCode
 @pytest.fixture
 def test_simple_contest_in_stage_2(test_base_contests_with_target, test_stages, test_olympiad_locations):
-    from contest.tasks.models import Variant
     from contest.tasks.models.user import UserStatusEnum
     from contest.tasks.models.olympiad import SimpleContest, ContestHoldingTypeEnum
     from contest.tasks.models import UserInContest
@@ -397,8 +436,10 @@ def test_simple_contest_in_stage_2(test_base_contests_with_target, test_stages, 
                                      end_date=datetime.utcnow() + timedelta(hours=4),
                                      holding_type=holding_types[i % 2],
                                      regulations=f'Test',
+                                     show_answer_after_contest=True,
                                      contest_duration=timedelta(minutes=30),
                                      result_publication_date=datetime.utcnow() + timedelta(hours=6),
+                                     deadline_for_appeal=datetime.utcnow() + timedelta(hours=2),
                                      end_of_enroll_date=datetime.utcnow() + timedelta(minutes=15))
                        for i in range(2)]
 
@@ -411,8 +452,10 @@ def test_simple_contest_in_stage_2(test_base_contests_with_target, test_stages, 
                                 end_date=datetime.utcnow() + timedelta(hours=4),
                                 holding_type=holding_types[0],
                                 regulations=f'Test',
+                                show_answer_after_contest=True,
                                 contest_duration=timedelta(minutes=30),
                                 result_publication_date=datetime.utcnow() + timedelta(hours=6),
+                                deadline_for_appeal=datetime.utcnow() + timedelta(hours=2),
                                 end_of_enroll_date=datetime.utcnow() + timedelta(minutes=15))
     test_app.db.session.add(other_stage)
 
@@ -423,12 +466,9 @@ def test_simple_contest_in_stage_2(test_base_contests_with_target, test_stages, 
     simple_contests[1].previous_contest_id = other_stage.contest_id
     simple_contests[1].previous_participation_condition = UserStatusEnum.Participant
 
-    simple_contests[1].variants.append(Variant(variant_number=1, variant_description="3"))
-
     uic = UserInContest(user_id=1,
                         show_results_to_user=True,
                         location_id=1,
-                        variant_id=1,
                         user_status=UserStatusEnum.Participant)
     test_app.db.session.add(uic)
     other_stage.users.append(uic)
@@ -447,7 +487,6 @@ def test_simple_contest_in_stage_2(test_base_contests_with_target, test_stages, 
 # noinspection DuplicatedCode
 @pytest.fixture
 def test_simple_contest_in_stage_3(test_base_contests_with_target, test_stages, test_olympiad_locations):
-    from contest.tasks.models import Variant
     from contest.tasks.models.user import UserStatusEnum
     from contest.tasks.models.olympiad import SimpleContest, ContestHoldingTypeEnum
     from contest.tasks.models import UserInContest
@@ -459,8 +498,10 @@ def test_simple_contest_in_stage_3(test_base_contests_with_target, test_stages, 
                                      end_date=datetime.utcnow() + timedelta(hours=4),
                                      holding_type=holding_types[i % 2],
                                      regulations=f'Test',
+                                     show_answer_after_contest=True,
                                      contest_duration=timedelta(minutes=30),
                                      result_publication_date=datetime.utcnow() + timedelta(hours=6),
+                                     deadline_for_appeal=datetime.utcnow() + timedelta(hours=2),
                                      end_of_enroll_date=datetime.utcnow() + timedelta(minutes=15))
                        for i in range(2)]
 
@@ -469,11 +510,13 @@ def test_simple_contest_in_stage_3(test_base_contests_with_target, test_stages, 
     other_stage = SimpleContest(base_contest_id=test_base_contests_with_target[0].base_contest_id,
                                 visibility=True,
                                 start_date=datetime.utcnow(),
+                                show_answer_after_contest=True,
                                 end_date=datetime.utcnow() + timedelta(hours=4),
                                 holding_type=holding_types[0],
                                 regulations=f'Test',
                                 contest_duration=timedelta(minutes=30),
                                 result_publication_date=datetime.utcnow() + timedelta(hours=6),
+                                deadline_for_appeal=datetime.utcnow() + timedelta(hours=2),
                                 end_of_enroll_date=datetime.utcnow() + timedelta(minutes=15))
     test_app.db.session.add(other_stage)
     other_stage.locations.append(test_olympiad_locations[0])
@@ -485,12 +528,9 @@ def test_simple_contest_in_stage_3(test_base_contests_with_target, test_stages, 
     simple_contests[1].previous_contest_id = other_stage.contest_id
     simple_contests[1].previous_participation_condition = UserStatusEnum.Participant
 
-    simple_contests[1].variants.append(Variant(variant_number=1, variant_description="3"))
-
     uic = UserInContest(user_id=1,
                         show_results_to_user=True,
                         location_id=1,
-                        variant_id=1,
                         user_status=UserStatusEnum.Participant)
     test_app.db.session.add(uic)
     other_stage.users.append(uic)
@@ -505,68 +545,46 @@ def test_simple_contest_in_stage_3(test_base_contests_with_target, test_stages, 
 
 
 @pytest.fixture
-def test_variant(test_simple_contest):
-    from contest.tasks.models.contest import Variant
-    variants = [Variant(variant_number=i,
-                        variant_description='description')
-                for i in range(8)]
-    for i in range(len(variants)):
-        test_simple_contest[0].variants.append(variants[i])
-    test_app.db.session.add_all(variants)
-    test_app.db.session.commit()
-    yield variants
-
-
-@pytest.fixture
-def create_plain_task(test_variant):
+def create_plain_task(test_create_tasks_pool):
     from contest.tasks.models.tasks import PlainTask
-    plain_tasks = [PlainTask(num_of_task=i,
+    plain_tasks = [PlainTask(name='Test',
                              image_of_task=None,
-                             show_answer_after_contest=True,
-                             task_points=10 + i,
                              recommended_answer='answer')
-                   for i in range(8)]
-    test_app.db.session.add_all(plain_tasks)
-    for i in range(7):
-        test_variant[0].tasks.append(plain_tasks[i])
+                   for _ in range(8)]
 
-    test_variant[1].tasks.append(plain_tasks[7])
+    test_create_tasks_pool[0].tasks = plain_tasks
+    test_app.db.session.add_all(plain_tasks)
+
     test_app.db.session.commit()
     yield plain_tasks
 
 
 @pytest.fixture
-def create_range_task(test_variant):
+def create_range_task(test_create_tasks_pool):
     from contest.tasks.models.tasks import RangeTask
-    range_tasks = [RangeTask(num_of_task=i,
+    range_tasks = [RangeTask(name='Test',
                              image_of_task=None,
                              start_value=0.1,
-                             end_value=0.5,
-                             task_points=10 + i,
-                             show_answer_after_contest=True, )
-                   for i in range(8)]
+                             end_value=0.5)
+                   for _ in range(8)]
+    test_create_tasks_pool[1].tasks = range_tasks
     test_app.db.session.add_all(range_tasks)
-    for i in range(8):
-        test_variant[0].tasks.append(range_tasks[i])
     test_app.db.session.commit()
     yield range_tasks
 
 
 @pytest.fixture
-def create_multiple_task(test_variant):
+def create_multiple_task(test_create_tasks_pool):
     from contest.tasks.models.tasks import MultipleChoiceTask
-    multiple_tasks = [MultipleChoiceTask(num_of_task=i,
+    multiple_tasks = [MultipleChoiceTask(name='Test',
                                          image_of_task=None,
                                          answers=[{
                                              'answer': '0',
                                              'is_right_answer': True
-                                         }],
-                                         task_points=10 + i,
-                                         show_answer_after_contest=True, )
-                      for i in range(8)]
+                                         }])
+                      for _ in range(8)]
+    test_create_tasks_pool[2].tasks = multiple_tasks
     test_app.db.session.add_all(multiple_tasks)
-    for i in range(8):
-        test_variant[0].tasks.append(multiple_tasks[i])
     test_app.db.session.commit()
     yield multiple_tasks
 
@@ -581,7 +599,7 @@ def test_user_for_student_contest(test_city, test_university, test_user_universi
     user_info = UserInfo(
         location_id=location.id,
         email="11@gmail.com",
-        phone="89999999999",
+        phone="+79999999999",
         first_name="test",
         middle_name="test",
         second_name="test",
@@ -609,12 +627,36 @@ def test_user_for_student_contest(test_city, test_university, test_user_universi
 
 
 @pytest.fixture
-def test_user_for_student_contest_none(test_city, test_university, test_user_university):
-    from user.models import StudentInfo, StudentUniversityKnown
+def test_user_for_student_contest(test_city, test_university, test_user_university):
+    from user.models import StudentInfo, UserInfo, Location, GenderEnum, Document, UserLimitations, DocumentTypeEnum, \
+        StudentUniversityKnown, LocationRussia
     student_info = StudentInfo(admission_year=datetime.utcnow() + timedelta(hours=40))
     student_info.university = StudentUniversityKnown(university=test_university)
-    user_info = None
+    location = Location()
+    user_info = UserInfo(
+        location_id=location.id,
+        email="11@gmail.com",
+        phone="+79999999999",
+        first_name="test",
+        middle_name="test",
+        second_name="test",
+        date_of_birth=datetime.utcnow(),
+        place_of_birth="test",
+        gender=GenderEnum.male
+    )
+    user_info.dwelling = LocationRussia(city=test_city)
+    user_info.document = Document(
+        document_type=DocumentTypeEnum.rf_passport,
+        series="444",
+        number="444",
+        issuer="444",
+        issue_date=datetime.utcnow() + timedelta(hours=40),
+        rf_code="4444444")
+    user_info.limitations = UserLimitations(hearing=False,
+                                            sight=False,
+                                            movement=False)
     test_app.db.session.add(student_info)
+    test_app.db.session.add(user_info)
     test_user_university.student_info = student_info
     test_user_university.user_info = user_info
     test_app.db.session.commit()
@@ -623,15 +665,14 @@ def test_user_for_student_contest_none(test_city, test_university, test_user_uni
 
 # noinspection DuplicatedCode
 @pytest.fixture
-def test_simple_contest_with_users(test_simple_contest_with_location, test_variant, test_olympiad_locations,
+def test_simple_contest_with_users(test_simple_contest_with_location, test_olympiad_locations,
                                    test_user_for_student_contest):
-    from contest.responses.models import add_user_response, ResponseStatusEnum
+    from contest.responses.models import add_user_response
     from contest.tasks.models.user import UserInContest, UserStatusEnum
     user_id = test_user_for_student_contest.id
     user_in_contest_ = UserInContest(user_id=user_id,
                                      show_results_to_user=True,
                                      user_status=UserStatusEnum.Participant.value,
-                                     variant_id=test_variant[0].variant_id,
                                      location_id=test_olympiad_locations[0].location_id)
     test_simple_contest_with_location[0].users.append(user_in_contest_)
 
@@ -646,15 +687,81 @@ def test_simple_contest_with_users(test_simple_contest_with_location, test_varia
 
 # noinspection DuplicatedCode
 @pytest.fixture
-def test_simple_contest_with_users_no_variant(test_simple_contest_with_location, test_variant, test_olympiad_locations,
+def test_simple_contest_with_users_and_proctor(test_simple_contest_with_location, test_olympiad_locations,
+                                               test_user_for_student_contest):
+    from contest.responses.models import add_user_response
+    from contest.tasks.models.user import UserInContest, UserStatusEnum
+    user_id = test_user_for_student_contest.id
+    user_in_contest_ = UserInContest(user_id=user_id,
+                                     proctoring_login="test",
+                                     proctoring_password="test_pass",
+                                     show_results_to_user=True,
+                                     user_status=UserStatusEnum.Participant.value,
+                                     location_id=test_olympiad_locations[0].location_id)
+    test_simple_contest_with_location[0].users.append(user_in_contest_)
+
+    test_app.db.session.add(user_in_contest_)
+    test_app.db.session.commit()
+    user_work = add_user_response(test_app.db.session, user_id, test_simple_contest_with_location[0].contest_id)
+    test_app.db.session.add(user_work)
+    test_app.db.session.commit()
+
+    yield test_simple_contest_with_location
+
+
+# noinspection DuplicatedCode
+@pytest.fixture
+def test_simple_contest_with_external_data(test_simple_contest_with_location, test_olympiad_locations,
+                                           test_user_for_student_contest):
+    from contest.responses.models import add_user_response
+    from contest.tasks.models.user import UserInContest, UserStatusEnum, ExternalContestResult
+    user_id = test_user_for_student_contest.id
+    user_in_contest_ = UserInContest(user_id=user_id,
+                                     proctoring_login="test",
+                                     proctoring_password="test_pass",
+                                     show_results_to_user=True,
+                                     user_status=UserStatusEnum.Participant.value,
+                                     location_id=test_olympiad_locations[0].location_id)
+    test_simple_contest_with_location[0].users.append(user_in_contest_)
+
+    external_contest_result_1 = ExternalContestResult(
+        user_id=user_id,
+        work_id=1,
+        contest_id=test_simple_contest_with_location[0].contest_id,
+        num_of_task=1,
+        task_points=1.5,
+    )
+
+    external_contest_result_2 = ExternalContestResult(
+        user_id=user_id,
+        work_id=2,
+        contest_id=test_simple_contest_with_location[0].contest_id,
+        num_of_task=2,
+        task_points=0.5,
+    )
+
+    test_app.db.session.add(external_contest_result_1)
+    test_app.db.session.add(external_contest_result_2)
+
+    test_app.db.session.add(user_in_contest_)
+    test_app.db.session.commit()
+    user_work = add_user_response(test_app.db.session, user_id, test_simple_contest_with_location[0].contest_id)
+    test_app.db.session.add(user_work)
+    test_app.db.session.commit()
+
+    yield test_simple_contest_with_location
+
+
+# noinspection DuplicatedCode
+@pytest.fixture
+def test_simple_contest_with_users_no_variant(test_simple_contest_with_location, test_olympiad_locations,
                                               test_user_for_student_contest):
-    from contest.responses.models import add_user_response, ResponseStatusEnum
+    from contest.responses.models import add_user_response
     from contest.tasks.models.user import UserInContest, UserStatusEnum
     user_id = test_user_for_student_contest.id
     user_in_contest_ = UserInContest(user_id=user_id,
                                      show_results_to_user=True,
                                      user_status=UserStatusEnum.Participant.value,
-                                     variant_id=152,
                                      location_id=test_olympiad_locations[0].location_id)
     test_simple_contest_with_location[0].users.append(user_in_contest_)
 
@@ -670,7 +777,7 @@ def test_simple_contest_with_users_no_variant(test_simple_contest_with_location,
 
 # noinspection DuplicatedCode
 @pytest.fixture
-def test_simple_contest_with_users_not_in_progress(test_simple_contest, test_variant, test_olympiad_locations,
+def test_simple_contest_with_users_not_in_progress(test_simple_contest, test_olympiad_locations,
                                                    test_user_for_student_contest):
     from contest.responses.models import add_user_response, ResponseStatusEnum
     from contest.tasks.models.user import UserInContest, UserStatusEnum
@@ -678,7 +785,6 @@ def test_simple_contest_with_users_not_in_progress(test_simple_contest, test_var
     user_in_contest_ = UserInContest(user_id=user_id,
                                      show_results_to_user=True,
                                      user_status=UserStatusEnum.Participant.value,
-                                     variant_id=test_variant[0].variant_id,
                                      location_id=test_olympiad_locations[0].location_id)
     test_simple_contest[0].users.append(user_in_contest_)
 
@@ -695,15 +801,14 @@ def test_simple_contest_with_users_not_in_progress(test_simple_contest, test_var
 
 # noinspection DuplicatedCode
 @pytest.fixture
-def test_simple_contest_with_users_ended(test_simple_contest, test_variant, test_olympiad_locations,
+def test_simple_contest_with_users_ended(test_simple_contest, test_olympiad_locations,
                                          test_user_for_student_contest):
-    from contest.responses.models import add_user_response, ResponseStatusEnum
+    from contest.responses.models import add_user_response
     from contest.tasks.models.user import UserInContest, UserStatusEnum
     user_id = test_user_for_student_contest.id
     user_in_contest_ = UserInContest(user_id=user_id,
                                      show_results_to_user=True,
                                      user_status=UserStatusEnum.Participant.value,
-                                     variant_id=test_variant[0].variant_id,
                                      location_id=test_olympiad_locations[0].location_id)
     test_simple_contest[0].users.append(user_in_contest_)
 
@@ -721,15 +826,14 @@ def test_simple_contest_with_users_ended(test_simple_contest, test_variant, test
 
 # noinspection DuplicatedCode
 @pytest.fixture
-def test_composite_contest_with_users(test_simple_contest_in_stage_1, test_variant, test_olympiad_locations,
+def test_composite_contest_with_users(test_simple_contest_in_stage_1, test_olympiad_locations,
                                       test_user_for_student_contest):
-    from contest.responses.models import add_user_response, ResponseStatusEnum
+    from contest.responses.models import add_user_response
     from contest.tasks.models.user import UserInContest, UserStatusEnum
     user_id = test_user_for_student_contest.id
     user_in_contest = UserInContest(user_id=user_id,
                                     show_results_to_user=True,
                                     user_status=UserStatusEnum.Participant.value,
-                                    variant_id=test_variant[0].variant_id,
                                     location_id=test_olympiad_locations[0].location_id)
     test_simple_contest_in_stage_1[0].users.append(user_in_contest)
 
@@ -741,3 +845,125 @@ def test_composite_contest_with_users(test_simple_contest_in_stage_1, test_varia
 
     test_app.db.session.commit()
     yield test_simple_contest_in_stage_1
+
+
+@pytest.fixture
+def test_certificate_type():
+    from contest.tasks.models.certificate import CertificateType, Certificate
+    from common.media_types import CertificateImage
+    from contest.tasks.models import UserStatusEnum
+
+    cert_type = CertificateType(name='test', description='test')
+
+    now = datetime.utcnow()
+    academic_year = now.year if now.month >= 9 else now.year - 1
+
+    certs = [Certificate(certificate_category=status, certificate_year=academic_year, text_x=0, text_y=20,
+                         text_width=100, max_lines=2)
+             for status in UserStatusEnum]
+    for cert in certs:
+        test_app.io_to_media('CERTIFICATE', cert, 'certificate_image', io.BytesIO(test_image), CertificateImage)
+
+    cert_type.certificates = certs
+    test_app.db.session.add(cert_type)
+    test_app.db.session.commit()
+
+    yield cert_type
+
+
+@pytest.fixture
+def test_generate_users_for_user_count():
+    from user.models import UserTypeEnum, UserRoleEnum
+    from .. import _generate_user
+    users = []
+    for i in range(8):
+        user = _generate_user()
+        user.username = f'university_{i}'
+        user.role = UserRoleEnum.participant
+        user.type = UserTypeEnum.university
+        user.user_info.email = f'university_{i}@example.org'
+        users.append(user)
+    test_app.db.session.commit()
+    yield users
+
+
+# noinspection DuplicatedCode
+@pytest.fixture
+def stages_for_user_count(test_contests_composite):
+    from contest.tasks.models import Stage, StageConditionEnum
+
+    stages = [Stage(stage_name=f'Test {i}', stage_num=i,
+                    condition=StageConditionEnum.And, this_stage_condition='Test')
+              for i in range(8)]
+    for i in range(len(stages)):
+        test_contests_composite[0].stages.append(stages[i])
+    test_app.db.session.add_all(stages)
+    test_app.db.session.commit()
+    dict_ = {
+        'composite_contests': test_contests_composite,
+        'stages': stages
+    }
+    yield dict_
+
+
+# noinspection DuplicatedCode
+@pytest.fixture
+def simple_contests_in_stage_for_user_count(test_base_contests_with_target, stages_for_user_count,
+                                            test_olympiad_locations, test_generate_users_for_user_count):
+    from contest.tasks.models import Variant
+    from contest.tasks.models.user import UserStatusEnum
+    from contest.tasks.models.olympiad import SimpleContest, ContestHoldingTypeEnum
+    from contest.tasks.models import UserInContest
+    simple_contest = SimpleContest(base_contest_id=test_base_contests_with_target[0].base_contest_id,
+                                   visibility=True,
+                                   start_date=datetime.utcnow(),
+                                   end_date=datetime.utcnow() + timedelta(hours=4),
+                                   holding_type=ContestHoldingTypeEnum.OnLineContest,
+                                   regulations=f'Test',
+                                   contest_duration=timedelta(minutes=30),
+                                   result_publication_date=datetime.utcnow() + timedelta(hours=6),
+                                   end_of_enroll_date=datetime.utcnow() + timedelta(minutes=15))
+
+    other_stage = SimpleContest(base_contest_id=test_base_contests_with_target[0].base_contest_id,
+                                visibility=True,
+                                start_date=datetime.utcnow(),
+                                end_date=datetime.utcnow() + timedelta(hours=4),
+                                holding_type=ContestHoldingTypeEnum.OnLineContest,
+                                regulations=f'Test',
+                                contest_duration=timedelta(minutes=30),
+                                result_publication_date=datetime.utcnow() + timedelta(hours=6),
+                                end_of_enroll_date=datetime.utcnow() + timedelta(minutes=15))
+    test_app.db.session.add(other_stage)
+    test_app.db.session.add(simple_contest)
+
+    test_app.db.session.flush()
+    simple_contest.locations.append(test_olympiad_locations[0])
+    other_stage.locations.append(test_olympiad_locations[0])
+
+    simple_contest.previous_contest_id = other_stage.contest_id
+    simple_contest.previous_participation_condition = UserStatusEnum.Participant
+
+    simple_contest.variants.append(Variant(variant_number=1))
+    stages_for_user_count['base_contests'] = test_base_contests_with_target
+    stages_for_user_count['stages'][0].contests.append(simple_contest)
+    stages_for_user_count['stages'][1].contests.append(other_stage)
+
+    test_app.db.session.commit()
+
+    stages_for_user_count['simple_contests'] = [simple_contest, other_stage]
+
+    uic = [UserInContest(user_id=test_generate_users_for_user_count[i].id,
+                         show_results_to_user=True,
+                         location_id=1,
+                         variant_id=1,
+                         user_status=UserStatusEnum.Participant,
+                         completed_the_contest=False,
+                         contest_id=stages_for_user_count['simple_contests'][i % 2].contest_id)
+           for i in range(8)]
+    test_app.db.session.add_all(uic)
+
+    test_app.db.session.commit()
+
+    stages_for_user_count['users'] = test_generate_users_for_user_count
+
+    yield stages_for_user_count

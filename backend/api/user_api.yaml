@@ -69,8 +69,7 @@ components:
           type: string
         series:
           example: "III-\u0410\u0418"
-          pattern: "^M{0,3}(CM|CD|D?C{0,3})(XC|XL|L?X{0,3})(IX|IV|V?I{0,3})-[\u0410\
-            -\u042F]{2}$"
+          pattern: "^M{0,3}(CM|CD|D?C{0,3})(XC|XL|L?X{0,3})(IX|IV|V?I{0,3})-[\u0410-\u042F]{2}$"
           type: string
         user_id:
           readOnly: true
@@ -96,11 +95,11 @@ components:
           type: string
         number:
           example: '1234567'
-          pattern: ^[0-9]{1,32}$
+          pattern: ^[a-zA-Z0-9]{1,32}$
           type: string
         series:
           example: '12'
-          pattern: ^[0-9]{1,16}$
+          pattern: ^[a-zA-Z0-9]{1,16}$
           type: string
         user_id:
           readOnly: true
@@ -125,11 +124,11 @@ components:
           type: string
         number:
           example: '1234567'
-          pattern: ^[0-9]{1,32}$
+          pattern: ^[a-zA-Z0-9]{1,32}$
           type: string
         series:
           example: '12'
-          pattern: ^[0-9]{1,16}$
+          pattern: ^[a-zA-Z0-9]{1,16}$
           type: string
         user_id:
           readOnly: true
@@ -283,9 +282,7 @@ components:
           type: string
         location_type:
           enum:
-          - Russian
           - Foreign
-          readOnly: true
           type: string
         rural:
           type: boolean
@@ -312,8 +309,6 @@ components:
         location_type:
           enum:
           - Russian
-          - Foreign
-          readOnly: true
           type: string
         rural:
           type: boolean
@@ -440,7 +435,7 @@ components:
           minimum: 1
           type: integer
         phone:
-          example: 8 (800) 555 35 35
+          example: '+78005553535'
           type: string
         university:
           $ref: '#/components/schemas/StudentUniversity'
@@ -479,7 +474,7 @@ components:
         location:
           $ref: '#/components/schemas/Location'
         name:
-          maxLength: 32
+          maxLength: 128
           type: string
         number:
           type: integer
@@ -758,7 +753,7 @@ components:
           maxLength: 32
           type: string
         phone:
-          example: 8 (800) 555 35 35
+          example: '+78005553535'
           type: string
         place_of_birth:
           maxLength: 256
@@ -769,6 +764,31 @@ components:
         user_id:
           readOnly: true
           type: integer
+      type: object
+    UserInfoSchemaPersonal:
+      properties:
+        date_of_birth:
+          format: date
+          type: string
+        document:
+          $ref: '#/components/schemas/Document'
+        first_name:
+          maxLength: 32
+          type: string
+        gender:
+          enum:
+          - Male
+          - Female
+          type: string
+        middle_name:
+          maxLength: 32
+          type: string
+        place_of_birth:
+          maxLength: 256
+          type: string
+        second_name:
+          maxLength: 32
+          type: string
       type: object
     UserLimitations:
       properties:
@@ -795,6 +815,12 @@ components:
           type: array
       required:
       - users
+      type: object
+    UserPhone:
+      properties:
+        phone:
+          example: '+78005553535'
+          type: string
       type: object
   securitySchemes:
     CSRFAccessToken:
@@ -1148,6 +1174,78 @@ paths:
               $ref: '#/components/schemas/UserInfo'
         description: Will not set 'email', 'first_name', 'middle_name', 'second_name'
           and 'date_of_birth'
+        required: true
+      responses:
+        '200':
+          description: OK
+        '403':
+          description: Invalid role of current user
+        '404':
+          description: User not found
+      security:
+      - JWTAccessToken: []
+      - CSRFAccessToken: []
+  /user/profile/personal/dwelling:
+    patch:
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Location'
+        required: true
+      responses:
+        '200':
+          description: OK
+        '403':
+          description: Invalid role of current user
+        '404':
+          description: User not found
+      security:
+      - JWTAccessToken: []
+      - CSRFAccessToken: []
+  /user/profile/personal/limitations:
+    patch:
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserLimitations'
+        required: true
+      responses:
+        '200':
+          description: OK
+        '403':
+          description: Invalid role of current user
+        '404':
+          description: User not found
+      security:
+      - JWTAccessToken: []
+      - CSRFAccessToken: []
+  /user/profile/personal/phone_number:
+    patch:
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserPhone'
+        required: true
+      responses:
+        '200':
+          description: OK
+        '403':
+          description: Invalid role of current user
+        '404':
+          description: User not found
+      security:
+      - JWTAccessToken: []
+      - CSRFAccessToken: []
+  /user/profile/personal/personal:
+    patch:
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserInfoSchemaPersonal'
         required: true
       responses:
         '200':

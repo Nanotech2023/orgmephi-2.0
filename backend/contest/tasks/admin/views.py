@@ -1,8 +1,13 @@
 from flask import request
+from marshmallow import EXCLUDE
 
 from common import get_current_module
-from common.util import db_add_if_not_exists
+from common.errors import AlreadyExists
+from common.media_types import CertificateImage
+from common.util import db_add_if_not_exists, db_exists
 from contest.tasks.admin.schemas import *
+from contest.tasks.model_schemas.certificate import CertificateTypeSchema, CertificateSchema
+from contest.tasks.models.certificate import CertificateType, Certificate
 from contest.tasks.util import *
 
 db = get_current_db()
@@ -242,3 +247,413 @@ def location_remove(id_location):
     db.session.commit()
 
     return {}, 200
+
+
+@module.route('/certificate_type', methods=['POST'], output_schema=CertificateTypeSchema)
+def add_certificate_type():
+    """
+    Add certificate type
+    ---
+    post:
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: CertificateTypeSchema
+      security:
+        - JWTAccessToken: [ ]
+        - CSRFAccessToken: [ ]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: CertificateTypeSchema
+    """
+    certificate_type = CertificateTypeSchema().load(request.json, session=db.session, partial=False, unknown=EXCLUDE)
+    db.session.add(certificate_type)
+    db.session.commit()
+    return certificate_type, 200
+
+
+@module.route('/certificate_type/<int:certificate_type_id>', methods=['PATCH'])
+def patch_certificate_type(certificate_type_id):
+    """
+    Patch certificate type
+    ---
+    patch:
+      parameters:
+        - in: path
+          description: Id of the certificate type
+          name: certificate_type_id
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: CertificateTypeSchema
+      security:
+        - JWTAccessToken: [ ]
+        - CSRFAccessToken: [ ]
+      responses:
+        '204':
+          description: OK
+        '404':
+          description: Certificate type not found
+    """
+    certificate_type = db_get_or_raise(CertificateType, 'certificate_type_id', certificate_type_id)
+    CertificateTypeSchema(load_instance=True).load(request.json, session=db.session, partial=True, unknown=EXCLUDE,
+                                                   instance=certificate_type)
+    db.session.commit()
+    return {}, 204
+
+
+@module.route('/certificate_type/<int:certificate_type_id>', methods=['DELETE'])
+def delete_certificate_type(certificate_type_id):
+    """
+    Delete certificate type
+    ---
+    delete:
+      parameters:
+        - in: path
+          description: Id of the certificate type
+          name: certificate_type_id
+          required: true
+          schema:
+            type: integer
+      security:
+        - JWTAccessToken: [ ]
+        - CSRFAccessToken: [ ]
+      responses:
+        '204':
+          description: OK
+        '404':
+          description: Certificate type not found
+    """
+    certificate_type = db_get_or_raise(CertificateType, 'certificate_type_id', certificate_type_id)
+    db.session.delete(certificate_type)
+    db.session.commit()
+    return {}, 204
+
+
+@module.route('/certificate_type/<int:certificate_type_id>/certificate', methods=['POST'],
+              output_schema=CertificateSchema)
+def add_certificate(certificate_type_id):
+    """
+    Add certificate type
+    ---
+    post:
+      parameters:
+        - in: path
+          description: Id of the certificate type
+          name: certificate_type_id
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: CertificateSchema
+      security:
+        - JWTAccessToken: [ ]
+        - CSRFAccessToken: [ ]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: CertificateSchema
+    """
+    certificate_type = db_get_or_raise(CertificateType, 'certificate_type_id', certificate_type_id)
+    certificate = CertificateSchema().load(request.json, session=db.session, partial=False, unknown=EXCLUDE)
+    category = certificate.certificate_category
+    exists = db_exists(db.session, Certificate, filters={
+        'certificate_type_id': certificate_type_id,
+        'certificate_category': category,
+        'certificate_year': certificate.certificate_year
+    })
+    if exists:
+        raise AlreadyExists(f'Certificate type', category.value)
+
+    certificate_type.certificates.append(certificate)
+    db.session.commit()
+    return certificate, 200
+
+
+@module.route('/certificate/<int:certificate_id>', methods=['PATCH'])
+def patch_certificate(certificate_id):
+    """
+    Patch certificate
+    ---
+    patch:
+      parameters:
+        - in: path
+          description: Id of the certificate
+          name: certificate_id
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: CertificateSchema
+      security:
+        - JWTAccessToken: [ ]
+        - CSRFAccessToken: [ ]
+      responses:
+        '204':
+          description: OK
+        '404':
+          description: Certificate not found
+    """
+    certificate = db_get_or_raise(Certificate, 'certificate_id', certificate_id)
+    db.session.expunge(certificate)
+
+    CertificateSchema(load_instance=True) \
+        .load(request.json, session=db.session, partial=True, unknown=EXCLUDE, instance=certificate)
+
+    category = certificate.certificate_category
+    query = Certificate.query.filter_by(certificate_type_id=certificate.certificate_type_id,
+                                        certificate_category=category,
+                                        certificate_year=certificate.certificate_year). \
+        filter(Certificate.certificate_id != certificate.certificate_id)
+    exists = db.session.query(query.exists()).scalar()
+    if exists:
+        raise AlreadyExists(f'Certificate type', category.value)
+
+    db.session.add(certificate)
+    db.session.commit()
+    return {}, 204
+
+
+@module.route('/certificate/<int:certificate_id>', methods=['DELETE'])
+def delete_certificate(certificate_id):
+    """
+    Delete certificate
+    ---
+    delete:
+      parameters:
+        - in: path
+          description: Id of the certificate
+          name: certificate_id
+          required: true
+          schema:
+            type: integer
+      security:
+        - JWTAccessToken: [ ]
+        - CSRFAccessToken: [ ]
+      responses:
+        '204':
+          description: OK
+        '404':
+          description: Certificate not found
+    """
+    certificate = db_get_or_raise(Certificate, 'certificate_id', certificate_id)
+    db.session.delete(certificate)
+    db.session.commit()
+    return {}, 204
+
+
+@module.route('/certificate/<int:certificate_id>/image', methods=['POST'])
+def post_certificate_image(certificate_id):
+    """
+    Post certificate image
+    ---
+    post:
+      parameters:
+        - in: path
+          description: Id of the certificate
+          name: certificate_id
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          image/png:
+            schema:
+              type: string
+              format: binary
+          image/jpeg:
+            schema:
+              type: string
+              format: binary
+      security:
+        - JWTAccessToken: [ ]
+        - CSRFAccessToken: [ ]
+      responses:
+        '204':
+          description: OK
+        '404':
+          description: Certificate not found
+    """
+    certificate = db_get_or_raise(Certificate, 'certificate_id', certificate_id)
+    app.store_media('CERTIFICATE', certificate, 'certificate_image', CertificateImage)
+    db.session.commit()
+    return {}, 204
+
+
+@module.route('/fonts', methods=['GET'], output_schema=FontsResponseTasksAdminSchema)
+def get_fonts():
+    """
+    List available fonts
+    ---
+    get:
+      security:
+        - JWTAccessToken: [ ]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: FontsResponseTasksAdminSchema
+    """
+    import matplotlib.font_manager
+    system_fonts = matplotlib.font_manager.findSystemFonts(fontpaths=None, fontext='ttf')
+    font_names = [font.split('/')[-1].split('.')[0] for font in system_fonts]
+    return {'fonts': font_names}, 200
+
+
+@module.route('/certificate', methods=['GET'])
+def get_certificate():
+    """
+    Get certificate for a user
+    ---
+    get:
+      parameters:
+        - in: query
+          description: Id of the user
+          name: user_id
+          required: true
+          schema:
+            type: integer
+        - in: query
+          description: Id of the contest
+          name: contest_id
+          required: true
+          schema:
+            type: integer
+      security:
+        - JWTAccessToken: [ ]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/pdf:
+              schema:
+                type: string
+                format: binary
+    """
+    args = GetCertificateArgsTasksAdminSchema().load(request.args, partial=False, unknown=EXCLUDE)
+    user_id = args['user_id']
+    contest_id = args['contest_id']
+
+    current_contest = db_get_or_raise(Contest, "contest_id", contest_id)
+    current_user = db_get_or_raise(User, "id", user_id)
+
+    certificate = find_certificate(current_user, current_contest)
+    return get_certificate_for_user(current_user.user_info, current_contest.name, certificate)
+
+
+@module.route('/certificate/<int:certificate_id>/test', methods=['GET'])
+def test_certificate(certificate_id):
+    """
+    Test certificate rendering
+    ---
+    get:
+      parameters:
+        - in: path
+          description: Id of the certificate
+          name: certificate_id
+          required: true
+          schema:
+            type: integer
+        - in: query
+          description: User first name
+          name: first_name
+          required: false
+          schema:
+            type: integer
+        - in: query
+          description: User second name
+          name: second_name
+          required: false
+          schema:
+            type: integer
+        - in: query
+          description: User middle name
+          name: middle_name
+          required: false
+          schema:
+            type: integer
+      security:
+        - JWTAccessToken: [ ]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/pdf:
+              schema:
+                type: string
+                format: binary
+    """
+    from user.models import UserInfo
+
+    args = TestCertificateArgsTasksAdminSchema().load(request.args, partial=False, unknown=EXCLUDE)
+    certificate = db_get_or_raise(Certificate, 'certificate_id', certificate_id)
+
+    test_user = UserInfo(first_name=args['first_name'], second_name=args['second_name'],
+                         middle_name=args['middle_name'])
+
+    return get_certificate_for_user(test_user, 'test contest', certificate)
+
+
+@module.route(
+    '/contest/<int:id_contest>/user/<int:id_user>/variant/generate',
+    output_schema=VariantIdResponseTaskAdminSchema,
+    methods=['POST'])
+def generate_variant_in_contest(id_contest, id_user):
+    """
+    Get variant for user in current contest (only for test)
+    ---
+    post:
+      parameters:
+        - in: path
+          description: Id of the contest
+          name: id_contest
+          required: true
+          schema:
+            type: integer
+        - in: path
+          description: Id of the user
+          name: id_user
+          required: true
+          schema:
+            type: integer
+      security:
+        - JWTAccessToken: [ ]
+        - CSRFAccessToken: [ ]
+
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: VariantIdResponseTaskAdminSchema
+        '400':
+          description: Bad request
+        '409':
+          description: Olympiad type already in use
+        '404':
+          description: User not found
+    """
+
+    variant_id = try_to_generate_variant(id_contest, id_user)
+    db.session.commit()
+    return {
+               "variant_id": variant_id
+           }, 200

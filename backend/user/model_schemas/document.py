@@ -42,8 +42,8 @@ class DocumentForeignPassportSchema(DocumentBaseSchema):
     document_type = EnumField(DocumentTypeEnum, by_value=True, required=True,
                               validate=validate.OneOf([DocumentTypeEnum.foreign_passport]))
     document_name = common_fields.CommonName(dump_only=True)
-    series = fields.String(validate=validate.Regexp('^[0-9]{1,16}$'), example='12')
-    number = fields.String(validate=validate.Regexp('^[0-9]{1,32}$'), example='1234567')
+    series = fields.String(validate=validate.Regexp('^[a-zA-Z0-9]{1,16}$'), example='12')
+    number = fields.String(validate=validate.Regexp('^[a-zA-Z0-9]{1,32}$'), example='1234567')
     issuer = common_fields.FreeDescription()
     issue_date = fields.Date()
 
@@ -63,8 +63,8 @@ class DocumentOtherSchema(DocumentBaseSchema):
     document_type = EnumField(DocumentTypeEnum, by_value=True, required=True,
                               validate=validate.OneOf([DocumentTypeEnum.other_document]))
     document_name = common_fields.CommonName(validate=validate.NoneOf(document_names.values()))
-    series = fields.String(validate=validate.Regexp('^[0-9]{1,16}$'), example='12')
-    number = fields.String(validate=validate.Regexp('^[0-9]{1,32}$'), example='1234567')
+    series = fields.String(validate=validate.Regexp('^[a-zA-Z0-9]{1,16}$'), example='12')
+    number = fields.String(validate=validate.Regexp('^[a-zA-Z0-9]{1,32}$'), example='1234567')
     issuer = common_fields.FreeDescription()
     issue_date = fields.Date()
 

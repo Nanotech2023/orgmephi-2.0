@@ -70,6 +70,7 @@ class FilterSimpleContestResponseSchema(Schema):
 class FilterOlympiadAllRequestSchema(Schema):
     base_contest_id = fields.Integer()
     location_id = fields.Integer()
+    visibility = fields.Boolean()
     target_classes = fields.Nested(TargetClassSchema, many=True, required=False)
     end_date = fields.DateTime()
     academic_year = fields.Integer()

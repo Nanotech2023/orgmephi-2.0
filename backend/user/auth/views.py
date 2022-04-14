@@ -13,6 +13,7 @@ from flask_jwt_extended import create_access_token, set_access_cookies, create_r
 from user.models import User, UserRoleEnum, UserTypeEnum
 
 from .schemas import LoginRequestUserSchema
+from ..util import get_username_case_insensitive
 
 db = get_current_db()
 module = get_current_module()
@@ -108,7 +109,7 @@ def login():
           description: Wrong credentials
     """
     values = request.marshmallow
-    user = db_get_one_or_none(User, 'username', values['username'])
+    user = get_username_case_insensitive(values['username'])
 
     if user is not None:
         app.password_policy.validate_password(values['password'], user.password_hash)
