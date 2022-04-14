@@ -518,9 +518,10 @@ components:
           type: integer
         task_pools:
           items:
-            $ref: '#/components/schemas/TaskPool'
-          readOnly: true
+            type: integer
+          minItems: 1
           type: array
+          writeOnly: true
       required:
       - num
       - task_points
@@ -1338,7 +1339,7 @@ components:
             $ref: '#/components/schemas/UserExternalSingleDataResponseTaskParticipant'
           type: array
         total_points:
-          type: integer
+          type: number
       required:
       - num_of_tasks
       - total_points
@@ -1348,7 +1349,7 @@ components:
         num_of_task:
           type: integer
         task_points:
-          type: integer
+          type: number
       required:
       - num_of_task
       - task_points
