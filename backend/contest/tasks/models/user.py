@@ -49,4 +49,4 @@ class ExternalContestResult(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey(f'{User.__table_name__}.id'))
     contest_id = db.Column(db.Integer, db.ForeignKey('contest.contest_id'))
     num_of_task = db.Column(db.Integer)
-    task_points = db.Column(db.Integer)
+    task_points = db.Column(db.Float)
