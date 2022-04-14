@@ -20,10 +20,11 @@ export class ManageContestVariantTasksComponent
             this.variantId = Number( paramMap.get( 'variantId' ) )
             if ( !!simpleContestId && !!this.variantId )
             {
-                this.tasksService.tasksCreatorContestIdContestVariantIdVariantTaskAllGet( simpleContestId, this.variantId ).subscribe( response =>
-                {
-                    this.tasks = response.tasks_list as PlainTask[]
-                } )
+                // TODO method tasksCreatorContestIdContestVariantIdVariantTaskAllGet removed
+                // this.tasksService.tasksCreatorContestIdContestVariantIdVariantTaskAllGet( simpleContestId, this.variantId ).subscribe( response =>
+                // {
+                //     this.tasks = response.tasks_list as PlainTask[]
+                // } )
             }
         } )
     }

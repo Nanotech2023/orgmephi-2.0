@@ -1,19 +1,16 @@
 import { NgModule } from '@angular/core'
 import { SharedModule } from '@/shared/shared.module'
-import { COMPONENTS, ContestsRoutingModule } from '@/contests/contests.routing.module'
-import { ContestsStore } from '@/contests/contests.store'
 import { AgGridModule } from 'ag-grid-angular'
+import { RouterModule } from '@angular/router'
+import { CONTEST_ROUTES, CONTESTS_COMPONENTS } from '@/contests/contests.module.components'
 
 
 @NgModule( {
-    declarations: COMPONENTS,
+    declarations: CONTESTS_COMPONENTS,
     imports: [
         SharedModule,
         AgGridModule,
-        ContestsRoutingModule
-    ],
-    providers: [
-        { provide: ContestsStore }
+        RouterModule.forChild( CONTEST_ROUTES )
     ]
 } )
 export class ContestsModule {}

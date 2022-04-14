@@ -21,7 +21,7 @@ export class ManageContestsComponent implements OnInit
 
     ngOnInit(): void
     {
-        this.tasksService.tasksUnauthorizedOlympiadAllGet( undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, CompositeTypeEnum.SimpleContest ).subscribe( response =>
+        this.tasksService.tasksUnauthorizedOlympiadAllGet( undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, CompositeTypeEnum.SimpleContest ).subscribe( response =>
         {
             this.simpleContests = response.contest_list! as SimpleContest[]
         } )

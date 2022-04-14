@@ -1,16 +1,4 @@
 <div class="registration-form">
-    <p class="group_label">Данные для подтверждения регистрации</p>
-    <p class="form_label">Регистрационный номер и код активации</p>
-    <div class="radio_group">
-        <div class="radio_group_item">
-            <input type="radio" [(ngModel)]="hasRegisterNumber" value="true">
-            <span>Да</span>
-        </div>
-        <div class="radio_group_item">
-            <input type="radio" [(ngModel)]="hasRegisterNumber" value="false">
-            <span>Нет</span>
-        </div>
-    </div>
     <div class="input_group">
         <p class="group_label">Данные для авторизации в системе</p>
         <div class="input_group_item">
@@ -31,7 +19,7 @@
         </div>
         <div class="input_group_item">
             <p class="form_label">Пароль</p>
-            <input type="password" required minlength="6" #password="ngModel"
+            <input type="password" required #password="ngModel" appPasswordValidator minlength="8"
                    name="password" placeholder="Придумайте пароль"
                    [(ngModel)]="registerAttempt.auth_info.password">
             <div *ngIf="password.invalid && (password.dirty || password.touched)"
@@ -40,26 +28,37 @@
                     Поле обязательно для заполнения
                 </div>
                 <div *ngIf="password.errors?.minlength">
-                    Пароль должен содержать не менее 6-ти символов
+                    Пароль должен содержать не менее 8-ти символов
+                </div>
+                <div *ngIf="password.errors?.passwordStrength">
+                    Пароль должен содержать заглавные, строчные буквы английского алфавита и цифры
                 </div>
             </div>
         </div>
         <div class="input_group_item">
-            <p class="form_label">Пароль</p>
-            <input type="password" required minlength="6" #password="ngModel"
-                   name="password" placeholder="Подтвердить пароль"
-                   [(ngModel)]="registerAttempt.auth_info.password">
-            <div *ngIf="password.invalid && (password.dirty || password.touched)"
-                 class="input_error">
-                <div *ngIf="password.errors?.required">
-                    Поле обязательно для заполнения
+            <p class="form_label">Подтвердите пароль</p>
+            <input type="password" required minlength="6" #passwordConfirm="ngModel"
+                   name="passwordConfirm" placeholder="Подтвердить пароль"
+                   [(ngModel)]="registerAttempt.passwordConfirm">
+            <div *ngIf="passwordConfirm.dirty || passwordConfirm.touched">
+                <div *ngIf="passwordConfirm.invalid"
+                     class="input_error">
+                    <div *ngIf="passwordConfirm.errors?.required">
+                        Поле обязательно для заполнения
+                    </div>
+                    <div *ngIf="passwordConfirm.errors?.minlength">
+                        Пароль должен содержать не менее 8-ти символов
+                    </div>
                 </div>
-                <div *ngIf="password.errors?.minlength">
-                    Пароль должен содержать не менее 6-ти символов
+                <div *ngIf="registerAttempt.auth_info.password !== registerAttempt.passwordConfirm" class="input_error">
+                    <div>
+                        Пароли должны совпадать
+                    </div>
                 </div>
             </div>
         </div>
     </div>
+
     <div class="input_group">
         <p class="group_label">Персональная информация</p>
         <div class="input_group_item">
@@ -120,21 +119,45 @@
             </div>
         </div>
 
-        <div class="input_group_item">
+        <div class="input_group_item ps-3">
             <div class="radio_group">
                 <div class="radio_group_item">
                     <input type="checkbox" class="checkbox" [(ngModel)]="agreementAccepted">
-                    <span class="form_label" style="margin-left: 0">Я согласен на обработку персональных данных</span>
+                    <span class="form_label" style="margin-left: 0; padding-left: 0">Согласен(на) на обработку персональных данных</span>
                 </div>
             </div>
-
         </div>
 
         <div class="input_group_item">
-            <button type="submit" [disabled]="!isValid(registerAttempt)"
+            <img [src]="captchaUrl" alt="Captcha" class="img-fluid pt-5 pb-5 px-5">
+            <button class="button-action_default" style="height: 25px; width: 25px; background: transparent; color: #0055BB" (click)="refreshToken()">
+                <svg aria-hidden="true" focusable="false" data-prefix="fas" data-icon="sync"
+                     class="svg-inline--fa fa-sync fa-w-16" role="img" xmlns="http://www.w3.org/2000/svg"
+                     viewBox="0 0 512 512">
+                    <path fill="currentColor"
+                          d="M440.65 12.57l4 82.77A247.16 247.16 0 0 0 255.83 8C134.73 8 33.91 94.92 12.29 209.82A12 12 0 0 0 24.09 224h49.05a12 12 0 0 0 11.67-9.26 175.91 175.91 0 0 1 317-56.94l-101.46-4.86a12 12 0 0 0-12.57 12v47.41a12 12 0 0 0 12 12H500a12 12 0 0 0 12-12V12a12 12 0 0 0-12-12h-47.37a12 12 0 0 0-11.98 12.57zM255.83 432a175.61 175.61 0 0 1-146-77.8l101.8 4.87a12 12 0 0 0 12.57-12v-47.4a12 12 0 0 0-12-12H12a12 12 0 0 0-12 12V500a12 12 0 0 0 12 12h47.35a12 12 0 0 0 12-12.6l-4.15-82.57A247.17 247.17 0 0 0 255.83 504c121.11 0 221.93-86.92 243.55-201.82a12 12 0 0 0-11.8-14.18h-49.05a12 12 0 0 0-11.67 9.26A175.86 175.86 0 0 1 255.83 432z"></path>
+                </svg>
+            </button>
+            <br/>
+            <input type="text" required
+                   [(ngModel)]="registerAttempt.captcha"
+                   #captcha="ngModel"
+                   name="captcha"
+                   placeholder="Captcha">
+            <div *ngIf="captcha.invalid && (captcha.dirty || captcha.touched)"
+                 class="input_error">
+                <div *ngIf="captcha.errors?.required">
+                    Поле обязательно для заполнения
+                </div>
+            </div>
+        </div>
+
+        <div class="input_group_item ps-4">
+            <button class="button-action_default button-action_save" type="submit" [disabled]="!isValid()"
                     (click)="register(registerAttempt)">
                 Зарегистрироваться
             </button>
         </div>
+
     </div>
 </div>

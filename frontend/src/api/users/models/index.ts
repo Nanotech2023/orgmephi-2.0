@@ -20,6 +20,7 @@ export * from './location';
 export * from './locationOther';
 export * from './locationRussia';
 export * from './locationRussiaCity';
+export * from './locationType';
 export * from './loginRequestUser';
 export * from './membershipRequestUser';
 export * from './passwordRequestUser';

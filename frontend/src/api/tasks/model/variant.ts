@@ -13,7 +13,6 @@
 
 export interface Variant { 
     contest_id?: number | null;
-    variant_description: string | null;
     readonly variant_id?: number;
     variant_number: number | null;
 }

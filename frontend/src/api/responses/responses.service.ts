@@ -22,16 +22,16 @@ import {
     AllUserAnswersResponse,
     AllUserMarksResponse,
     AllUserResultsResponse,
-    Answer,
     ContestResultSheetResponse,
     MultipleAnswerRequest,
     PlainAnswerRequest,
     RangeAnswerRequest,
     UserAnswerMarkResponse,
     UserResponseStatusResponse,
-    UserTimeResponseRequest
+    UserTimeResponseRequest,
+    UserAnswer,
+    UserResultForContestResponse
 } from '@api/responses/model'
-
 
 @Injectable()
 export class ResponsesService
@@ -294,9 +294,9 @@ export class ResponsesService
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
      * @param reportProgress flag to report request and response progress.
      */
-    public responsesCreatorContestContestIdTaskTaskIdUserUserIdGet( contestId: number, taskId: number, userId: number, observe?: 'body', reportProgress?: boolean, options?: { httpHeaderAccept?: 'application/json', context?: HttpContext } ): Observable<Answer>;
-    public responsesCreatorContestContestIdTaskTaskIdUserUserIdGet( contestId: number, taskId: number, userId: number, observe?: 'response', reportProgress?: boolean, options?: { httpHeaderAccept?: 'application/json', context?: HttpContext } ): Observable<HttpResponse<Answer>>;
-    public responsesCreatorContestContestIdTaskTaskIdUserUserIdGet( contestId: number, taskId: number, userId: number, observe?: 'events', reportProgress?: boolean, options?: { httpHeaderAccept?: 'application/json', context?: HttpContext } ): Observable<HttpEvent<Answer>>;
+    public responsesCreatorContestContestIdTaskTaskIdUserUserIdGet( contestId: number, taskId: number, userId: number, observe?: 'body', reportProgress?: boolean, options?: { httpHeaderAccept?: 'application/json', context?: HttpContext } ): Observable<UserAnswer>;
+    public responsesCreatorContestContestIdTaskTaskIdUserUserIdGet( contestId: number, taskId: number, userId: number, observe?: 'response', reportProgress?: boolean, options?: { httpHeaderAccept?: 'application/json', context?: HttpContext } ): Observable<HttpResponse<UserAnswer>>;
+    public responsesCreatorContestContestIdTaskTaskIdUserUserIdGet( contestId: number, taskId: number, userId: number, observe?: 'events', reportProgress?: boolean, options?: { httpHeaderAccept?: 'application/json', context?: HttpContext } ): Observable<HttpEvent<UserAnswer>>;
     public responsesCreatorContestContestIdTaskTaskIdUserUserIdGet( contestId: number, taskId: number, userId: number, observe: any = 'body', reportProgress: boolean = false, options?: { httpHeaderAccept?: 'application/json', context?: HttpContext } ): Observable<any>
     {
         if ( contestId === null || contestId === undefined )
@@ -348,7 +348,7 @@ export class ResponsesService
             responseType_ = 'text'
         }
 
-        return this.httpClient.get<Answer>( `${ this.configuration.basePath }/responses/creator/contest/${ encodeURIComponent( String( contestId ) ) }/task/${ encodeURIComponent( String( taskId ) ) }/user/${ encodeURIComponent( String( userId ) ) }`,
+        return this.httpClient.get<UserAnswer>( `${ this.configuration.basePath }/responses/creator/contest/${ encodeURIComponent( String( contestId ) ) }/task/${ encodeURIComponent( String( taskId ) ) }/user/${ encodeURIComponent( String( userId ) ) }`,
             {
                 context: localVarHttpContext,
                 responseType: <any> responseType_,
@@ -1256,6 +1256,74 @@ export class ResponsesService
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
      * @param reportProgress flag to report request and response progress.
      */
+    public responsesCreatorContestContestIdUserUserIdResultsGet( contestId: number, userId: number, observe?: 'body', reportProgress?: boolean, options?: { httpHeaderAccept?: 'application/json', context?: HttpContext } ): Observable<UserResultForContestResponse>;
+    public responsesCreatorContestContestIdUserUserIdResultsGet( contestId: number, userId: number, observe?: 'response', reportProgress?: boolean, options?: { httpHeaderAccept?: 'application/json', context?: HttpContext } ): Observable<HttpResponse<UserResultForContestResponse>>;
+    public responsesCreatorContestContestIdUserUserIdResultsGet( contestId: number, userId: number, observe?: 'events', reportProgress?: boolean, options?: { httpHeaderAccept?: 'application/json', context?: HttpContext } ): Observable<HttpEvent<UserResultForContestResponse>>;
+    public responsesCreatorContestContestIdUserUserIdResultsGet( contestId: number, userId: number, observe: any = 'body', reportProgress: boolean = false, options?: { httpHeaderAccept?: 'application/json', context?: HttpContext } ): Observable<any>
+    {
+        if ( contestId === null || contestId === undefined )
+        {
+            throw new Error( 'Required parameter contestId was null or undefined when calling responsesCreatorContestContestIdUserUserIdResultsGet.' )
+        }
+        if ( userId === null || userId === undefined )
+        {
+            throw new Error( 'Required parameter userId was null or undefined when calling responsesCreatorContestContestIdUserUserIdResultsGet.' )
+        }
+
+        let localVarHeaders = this.defaultHeaders
+
+        let localVarCredential: string | undefined
+        // authentication (JWTAccessToken) required
+        localVarCredential = this.configuration.lookupCredential( 'JWTAccessToken' )
+        if ( localVarCredential )
+        {
+        }
+
+        let localVarHttpHeaderAcceptSelected: string | undefined = options && options.httpHeaderAccept
+        if ( localVarHttpHeaderAcceptSelected === undefined )
+        {
+            // to determine the Accept header
+            const httpHeaderAccepts: string[] = [
+                'application/json'
+            ]
+            localVarHttpHeaderAcceptSelected = this.configuration.selectHeaderAccept( httpHeaderAccepts )
+        }
+        if ( localVarHttpHeaderAcceptSelected !== undefined )
+        {
+            localVarHeaders = localVarHeaders.set( 'Accept', localVarHttpHeaderAcceptSelected )
+        }
+
+        let localVarHttpContext: HttpContext | undefined = options && options.context
+        if ( localVarHttpContext === undefined )
+        {
+            localVarHttpContext = new HttpContext()
+        }
+
+
+        let responseType_: 'text' | 'json' = 'json'
+        if ( localVarHttpHeaderAcceptSelected && localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+        {
+            responseType_ = 'text'
+        }
+
+        return this.httpClient.get<UserResultForContestResponse>( `${ this.configuration.basePath }/responses/creator/contest/${ encodeURIComponent( String( contestId ) ) }/user/${ encodeURIComponent( String( userId ) ) }/results`,
+            {
+                context: localVarHttpContext,
+                responseType: <any> responseType_,
+                withCredentials: this.configuration.withCredentials,
+                headers: localVarHeaders,
+                observe: observe,
+                reportProgress: reportProgress
+            }
+        )
+    }
+
+    /**
+     * @param contestId Id of the contest
+     * @param userId Id of the user
+     * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
+     * @param reportProgress flag to report request and response progress.
+     */
     public responsesCreatorContestContestIdUserUserIdStatusGet( contestId: number, userId: number, observe?: 'body', reportProgress?: boolean, options?: { httpHeaderAccept?: 'application/json', context?: HttpContext } ): Observable<UserResponseStatusResponse>;
     public responsesCreatorContestContestIdUserUserIdStatusGet( contestId: number, userId: number, observe?: 'response', reportProgress?: boolean, options?: { httpHeaderAccept?: 'application/json', context?: HttpContext } ): Observable<HttpResponse<UserResponseStatusResponse>>;
     public responsesCreatorContestContestIdUserUserIdStatusGet( contestId: number, userId: number, observe?: 'events', reportProgress?: boolean, options?: { httpHeaderAccept?: 'application/json', context?: HttpContext } ): Observable<HttpEvent<UserResponseStatusResponse>>;
@@ -1861,9 +1929,9 @@ export class ResponsesService
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
      * @param reportProgress flag to report request and response progress.
      */
-    public responsesParticipantContestContestIdTaskTaskIdUserSelfGet( contestId: number, taskId: number, observe?: 'body', reportProgress?: boolean, options?: { httpHeaderAccept?: 'application/json', context?: HttpContext } ): Observable<Answer>;
-    public responsesParticipantContestContestIdTaskTaskIdUserSelfGet( contestId: number, taskId: number, observe?: 'response', reportProgress?: boolean, options?: { httpHeaderAccept?: 'application/json', context?: HttpContext } ): Observable<HttpResponse<Answer>>;
-    public responsesParticipantContestContestIdTaskTaskIdUserSelfGet( contestId: number, taskId: number, observe?: 'events', reportProgress?: boolean, options?: { httpHeaderAccept?: 'application/json', context?: HttpContext } ): Observable<HttpEvent<Answer>>;
+    public responsesParticipantContestContestIdTaskTaskIdUserSelfGet( contestId: number, taskId: number, observe?: 'body', reportProgress?: boolean, options?: { httpHeaderAccept?: 'application/json', context?: HttpContext } ): Observable<UserAnswer>;
+    public responsesParticipantContestContestIdTaskTaskIdUserSelfGet( contestId: number, taskId: number, observe?: 'response', reportProgress?: boolean, options?: { httpHeaderAccept?: 'application/json', context?: HttpContext } ): Observable<HttpResponse<UserAnswer>>;
+    public responsesParticipantContestContestIdTaskTaskIdUserSelfGet( contestId: number, taskId: number, observe?: 'events', reportProgress?: boolean, options?: { httpHeaderAccept?: 'application/json', context?: HttpContext } ): Observable<HttpEvent<UserAnswer>>;
     public responsesParticipantContestContestIdTaskTaskIdUserSelfGet( contestId: number, taskId: number, observe: any = 'body', reportProgress: boolean = false, options?: { httpHeaderAccept?: 'application/json', context?: HttpContext } ): Observable<any>
     {
         if ( contestId === null || contestId === undefined )
@@ -1911,7 +1979,7 @@ export class ResponsesService
             responseType_ = 'text'
         }
 
-        return this.httpClient.get<Answer>( `${ this.configuration.basePath }/responses/participant/contest/${ encodeURIComponent( String( contestId ) ) }/task/${ encodeURIComponent( String( taskId ) ) }/user/self`,
+        return this.httpClient.get<UserAnswer>( `${ this.configuration.basePath }/responses/participant/contest/${ encodeURIComponent( String( contestId ) ) }/task/${ encodeURIComponent( String( taskId ) ) }/user/self`,
             {
                 context: localVarHttpContext,
                 responseType: <any> responseType_,
@@ -2658,6 +2726,69 @@ export class ResponsesService
         }
 
         return this.httpClient.get<AllUserAnswersResponse>( `${ this.configuration.basePath }/responses/participant/contest/${ encodeURIComponent( String( contestId ) ) }/user/self/response`,
+            {
+                context: localVarHttpContext,
+                responseType: <any> responseType_,
+                withCredentials: this.configuration.withCredentials,
+                headers: localVarHeaders,
+                observe: observe,
+                reportProgress: reportProgress
+            }
+        )
+    }
+
+    /**
+     * @param contestId Id of the contest
+     * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
+     * @param reportProgress flag to report request and response progress.
+     */
+    public responsesParticipantContestContestIdUserSelfResultsGet( contestId: number, observe?: 'body', reportProgress?: boolean, options?: { httpHeaderAccept?: 'application/json', context?: HttpContext } ): Observable<UserResultForContestResponse>;
+    public responsesParticipantContestContestIdUserSelfResultsGet( contestId: number, observe?: 'response', reportProgress?: boolean, options?: { httpHeaderAccept?: 'application/json', context?: HttpContext } ): Observable<HttpResponse<UserResultForContestResponse>>;
+    public responsesParticipantContestContestIdUserSelfResultsGet( contestId: number, observe?: 'events', reportProgress?: boolean, options?: { httpHeaderAccept?: 'application/json', context?: HttpContext } ): Observable<HttpEvent<UserResultForContestResponse>>;
+    public responsesParticipantContestContestIdUserSelfResultsGet( contestId: number, observe: any = 'body', reportProgress: boolean = false, options?: { httpHeaderAccept?: 'application/json', context?: HttpContext } ): Observable<any>
+    {
+        if ( contestId === null || contestId === undefined )
+        {
+            throw new Error( 'Required parameter contestId was null or undefined when calling responsesParticipantContestContestIdUserSelfResultsGet.' )
+        }
+
+        let localVarHeaders = this.defaultHeaders
+
+        let localVarCredential: string | undefined
+        // authentication (JWTAccessToken) required
+        localVarCredential = this.configuration.lookupCredential( 'JWTAccessToken' )
+        if ( localVarCredential )
+        {
+        }
+
+        let localVarHttpHeaderAcceptSelected: string | undefined = options && options.httpHeaderAccept
+        if ( localVarHttpHeaderAcceptSelected === undefined )
+        {
+            // to determine the Accept header
+            const httpHeaderAccepts: string[] = [
+                'application/json'
+            ]
+            localVarHttpHeaderAcceptSelected = this.configuration.selectHeaderAccept( httpHeaderAccepts )
+        }
+        if ( localVarHttpHeaderAcceptSelected !== undefined )
+        {
+            localVarHeaders = localVarHeaders.set( 'Accept', localVarHttpHeaderAcceptSelected )
+        }
+
+        let localVarHttpContext: HttpContext | undefined = options && options.context
+        if ( localVarHttpContext === undefined )
+        {
+            localVarHttpContext = new HttpContext()
+        }
+
+
+        let responseType_: 'text' | 'json' = 'json'
+        if ( localVarHttpHeaderAcceptSelected && localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+        {
+            responseType_ = 'text'
+        }
+
+        return this.httpClient.get<UserResultForContestResponse>( `${ this.configuration.basePath }/responses/participant/contest/${ encodeURIComponent( String( contestId ) ) }/user/self/results`,
             {
                 context: localVarHttpContext,
                 responseType: <any> responseType_,

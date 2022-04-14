@@ -1187,6 +1187,13 @@
     merge-source-map "^1.1.0"
     schema-utils "^2.7.0"
 
+"@ng-select/ng-select@^8.1.1":
+  version "8.1.1"
+  resolved "https://registry.yarnpkg.com/@ng-select/ng-select/-/ng-select-8.1.1.tgz#1697d554970b99fc238255709655fb4dd45d1ab1"
+  integrity sha512-CP9Pve3L1aGqej38T9utdd6Waobbybwe9QIEObwicBI5fiIMAXwKT6lFT3fDLTUK/79y5nebiGtwTBfMm71Psg==
+  dependencies:
+    tslib "^2.3.1"
+
 "@ngrx/component-store@^12.4.0":
   version "12.4.0"
   resolved "https://registry.yarnpkg.com/@ngrx/component-store/-/component-store-12.4.0.tgz#92da69cb8198c0a63ab5f25eb05551c729876f1b"
@@ -8425,7 +8432,7 @@ tslib@2.3.0, tslib@^2.0.0, tslib@^2.2.0:
   resolved "https://registry.yarnpkg.com/tslib/-/tslib-2.3.0.tgz#803b8cdab3e12ba581a4ca41c8839bbb0dacb09e"
   integrity sha512-N82ooyxVNm6h1riLCoyS9e3fuJ3AMG2zIZs2Gd1ATcSFjSA23Q0fzjjZeh0jbJvWVDZ0cJT8yaNNaaXHzueNjg==
 
-tslib@2.3.1:
+tslib@2.3.1, tslib@^2.3.1:
   version "2.3.1"
   resolved "https://registry.yarnpkg.com/tslib/-/tslib-2.3.1.tgz#e8a335add5ceae51aa261d32a490158ef042ef01"
   integrity sha512-77EbyPPpMz+FRFRuAFlWMtmgUWGe9UOG2Z25NqCwiIjRhOf5iKGuzSe5P2w1laq+FkRy4p+PCuVkJSGkzTEKVw==

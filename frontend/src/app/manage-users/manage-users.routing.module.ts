@@ -1,6 +1,7 @@
 import { NgModule } from '@angular/core'
 import { RouterModule, Routes } from '@angular/router'
 import { ManageUsersComponent } from '@/manage-users/containers/manage-users/manage-users.component'
+import { AdminAuthGuardService } from '@/shared/admin.auth.guard.service'
 
 
 export const COMPONENTS = [
@@ -11,7 +12,9 @@ export const COMPONENTS = [
 const routes: Routes =
     [
         {
-            path: 'manage/users', component: ManageUsersComponent
+            path: 'manage/users',
+            component: ManageUsersComponent,
+            canActivate: [ AdminAuthGuardService ]
         }
     ]
 

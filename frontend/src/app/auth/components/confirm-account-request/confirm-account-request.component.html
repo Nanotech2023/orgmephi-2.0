@@ -1,0 +1,31 @@
+<div class="form_container">
+    <h2 class="form_title">Подтвердить аккаунт</h2>
+    <p class="form_subtitle">Используйте адрес элекстронной почты указанный вами при регистрации</p>
+    <form name="confirmAccountForm" (ngSubmit)="confirmAccountForm.form.valid && onSubmit()"
+          #confirmAccountForm="ngForm" novalidate>
+
+        <div class="form_group">
+            <p class="form_label">Email</p>
+            <input type="email" email required [(ngModel)]="emailToReset"
+                   #email="ngModel"
+                   name="email"
+                   placeholder="Введите Email">
+            <div *ngIf="email.invalid && (email.dirty || email.touched)"
+                 class="input_error">
+                <div *ngIf="email.errors?.required">
+                    Поле обязательно для заполнения
+                </div>
+                <div *ngIf="email.errors?.email">
+                    Невалидный e-mail
+                </div>
+            </div>
+        </div>
+
+        <div class="form_group">
+            <button class="button-action_default button-action_save" type="submit" [disabled]="!confirmAccountForm.form.valid">Отправить ссылку</button>
+        </div>
+
+        <app-auth-layout-links></app-auth-layout-links>
+
+    </form>
+</div>

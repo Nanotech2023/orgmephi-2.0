@@ -1,17 +1,17 @@
-<div class="form_container">
-    <div class="form_item">
-        <p class="form_label">Нуждаетесь ли вы в особых условиях участия в связи с ограниченными возможностями по
+<form class="profile-form_container" [formGroup]="userLimitationsForm">
+    <div class="profile-form_item">
+        <p class="profile-form_label">Нуждаетесь ли вы в особых условиях участия в связи с ограниченными возможностями по
             слуху?</p>
-        <app-yes-no-component radioId="hearing" [(model)]="model.hearing" (modelChange)="onModelChange()"></app-yes-no-component>
+        <input class="profile-form_input" type="checkbox" formControlName="hearing">
     </div>
-    <div class="form_item">
-        <p class="form_label">Нуждаетесь ли вы в особых условиях участия в связи с ограниченными возможностями по
+    <div class="profile-form_item">
+        <p class="profile-form_label">Нуждаетесь ли вы в особых условиях участия в связи с ограниченными возможностями по
             зрению?</p>
-        <app-yes-no-component radioId="sight" [(model)]="model.sight" (modelChange)="onModelChange()"></app-yes-no-component>
+        <input class="profile-form_input" type="checkbox" formControlName="sight">
     </div>
-    <div class="form_item">
-        <p class="form_label">Нуждаетесь ли вы в особых условиях участия в связи с ограниченными возможностями
+    <div class="profile-form_item">
+        <p class="profile-form_label">Нуждаетесь ли вы в особых условиях участия в связи с ограниченными возможностями
             опорно-двигательного аппарата?</p>
-        <app-yes-no-component radioId="movement" [(model)]="model.movement" (modelChange)="onModelChange()"></app-yes-no-component>
+        <input class="profile-form_input" type="checkbox" formControlName="movement">
     </div>
-</div>
+</form>

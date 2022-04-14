@@ -1,45 +1,68 @@
-import { Component, OnInit } from '@angular/core'
+import { Component, forwardRef, OnInit } from '@angular/core'
 import { SchoolRegistrationRequestUser } from '@api/users/models'
 import { AuthActions, AuthState } from '@/auth/store'
 import { Store } from '@ngrx/store'
+import { NG_VALIDATORS } from '@angular/forms'
+import { PasswordValidatorDirective } from '@/shared/validators/password-validator.directive'
+import { UsersService } from '@api/users/users.service'
+import { DomSanitizer, SafeUrl } from '@angular/platform-browser'
+import { Subscription } from 'rxjs'
+
+
+export interface SchoolRegistrationRequestUserAttempt extends SchoolRegistrationRequestUser
+{
+    passwordConfirm: string
+}
 
 
 @Component( {
     selector: 'app-register-school',
     templateUrl: './register-school.component.html',
-    styleUrls: [ './register-school.component.scss' ]
+    styleUrls: [ './register-school.component.scss' ],
+    providers: [
+        { provide: NG_VALIDATORS, useExisting: forwardRef( () => PasswordValidatorDirective ), multi: true }
+    ]
 } )
 export class RegisterSchoolComponent implements OnInit
 {
-    registerAttempt: SchoolRegistrationRequestUser
+    registerAttempt: SchoolRegistrationRequestUserAttempt
     hasRegisterNumber!: boolean
-    isRegistered: boolean
     agreementAccepted: boolean
+    captchaUrl!: SafeUrl
+    subscription!: Subscription
 
-    constructor( private readonly store: Store<AuthState.State> )
+    constructor( private readonly usersService: UsersService, private readonly store: Store<AuthState.State>, private sanitizer: DomSanitizer )
     {
         this.registerAttempt = {
             auth_info: { email: '', password: '' },
             register_type: SchoolRegistrationRequestUser.RegisterTypeEnum.School,
-            personal_info: { first_name: '', second_name: '', middle_name: '', date_of_birth: '' }
-            // register_confirm: { registration_number: 0, password: '' }
+            personal_info: { first_name: '', second_name: '', middle_name: '', date_of_birth: '' },
+            passwordConfirm: ''
         }
-        this.isRegistered = false
         this.agreementAccepted = false
     }
 
     ngOnInit(): void
     {
+        this.refreshToken()
     }
 
-    isValid( registration: SchoolRegistrationRequestUser ): boolean
+    isValid(): boolean
     {
         return this.agreementAccepted
     }
 
     register( registerUser: SchoolRegistrationRequestUser ): void
     {
-        this.isRegistered = true
         this.store.dispatch( AuthActions.registerRequest( { registrationRequestUser: registerUser } ) )
+    }
+
+    refreshToken(): void
+    {
+        this.usersService.userRegistrationCaptchaGet().subscribe( data =>
+        {
+            const unsafeImageUrl = URL.createObjectURL( data )
+            this.captchaUrl = this.sanitizer.bypassSecurityTrustUrl( unsafeImageUrl )
+        } )
     }
 }

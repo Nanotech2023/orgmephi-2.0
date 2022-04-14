@@ -9,6 +9,7 @@
  * https://openapi-generator.tech
  * Do not edit the class manually.
  */
+import { Answer } from './answer';
 import { RangeTask } from './rangeTask';
 import { MultipleChoiceTask } from './multipleChoiceTask';
 import { PlainTask } from './plainTask';

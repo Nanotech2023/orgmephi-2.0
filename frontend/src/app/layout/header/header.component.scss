@@ -62,67 +62,6 @@ header {
       border-left: 2px solid #171717;
     }
 
-    .header_action_profile {
-      .row{
-        margin: 0;
-        height: 62px;
-        padding-top: 7%;
-      }
-      display: flex;
-      flex-direction: row;
-      align-items: center;
-      padding: 0px 24px 0px 0px;
-      width: 290px;
-      position: static;
-      height: 62px;
-      
-      border-left: 2px solid $black;
-
-      .header_action_profile_name {
-        position: static;
-        width: 208px;
-        height: 18px;
-        left: 0px;
-        top: 0px;
-        font-family: Inter;
-        font-style: normal;
-        font-weight: 600;
-        font-size: 14px;
-        line-height: 18px;
-        letter-spacing: 0.16px;
-        color: #171717;
-        flex: none;
-        order: 0;
-        flex-grow: 0;
-        margin: 0px 0px;
-      }
-      
-      .header_action_profile_id
-      {
-        position: static;
-        width: 53px;
-        height: 16px;
-        left: 0px;
-        top: 18px;
-        font-family: Inter;
-        font-style: normal;
-        font-weight: normal;
-        font-size: 12px;
-        line-height: 16px;
-        color: #565656;
-        flex: none;
-        order: 1;
-        flex-grow: 0;
-        margin: 0px 0px;
-      }
-
-      svg {
-        color: $black;
-        fill: #FFFFFFFF;
-        stroke: $black;
-      }
-    }
-
     .header_action:hover {
       border: none;
       background-image: linear-gradient(114.44deg, #206ac4 0%, #0055BB 44.27%, #023d85 100%);

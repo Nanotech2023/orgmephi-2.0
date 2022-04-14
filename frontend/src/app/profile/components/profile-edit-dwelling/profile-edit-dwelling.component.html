@@ -1,22 +1,18 @@
-<div class="form_container">
-    <div class="form_item">
-        <p class="form_label">Страна</p>
-        <input class="form_input" type="text" readonly
-               [(ngModel)]="model.country">
+<div class="profile-form_container">
+    <div class="profile-form_item">
+        <p class="profile-form_label">Расположение</p>
+        <select class="profile-form_input" [ngModel]="this.model.location_type" (change)="onLocationTypeChange($event)">
+            <option *ngFor="let locationType of locationTypes"
+                    [value]="locationType">{{ getLocationDisplay( locationType ) }}</option>
+        </select>
     </div>
-    <div class="form_item">
-        <p class="form_label">Регион</p>
-        <input class="form_input" type="text" placeholder="Введите регион"
-               [ngModel]="model.city?.region_name ?? ''" (ngModelChange)="onRegionChange($event)">
-    </div>
-    <div class="form_item">
-        <p class="form_label">Населённый пункт</p>
-        <input class="form_input" type="text" placeholder="Введите населённый пункт"
-               [ngModel]="model.city?.name ?? ''" (ngModelChange)="onCityChange($event)">
-    </div>
-    <div class="form_item">
-        <p class="form_label">Являетесь ли вы жителем сельской местности?</p>
-        <app-yes-no-component radioId="rural" [(model)]="model.rural"
-                              (modelChange)="onModelChange()"></app-yes-no-component>
-    </div>
+    <ng-container [ngSwitch]="this.model.location_type">
+        <app-profile-edit-dwelling-russia *ngSwitchCase="'Russian'" [(model)]="model" [(city)]="city"
+                                          (modelChange)="onModelChange()" (cityChange)="onCityChange()">
+        </app-profile-edit-dwelling-russia>
+        <app-profile-edit-dwelling-other *ngSwitchCase="'Foreign'" [(model)]="model" [(country)]="country"
+                                         (modelChange)="onModelChange()" (countryChange)="onCountryChange()">
+        </app-profile-edit-dwelling-other>
+        <div *ngSwitchDefault></div>
+    </ng-container>
 </div>

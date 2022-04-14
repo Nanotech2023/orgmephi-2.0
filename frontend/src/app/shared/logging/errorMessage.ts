@@ -1,4 +1,4 @@
-import { ErrorMessageError } from '@/shared/logging'
+import { ErrorMessageError } from '@/shared/logging/index'
 
 
 export interface ErrorMessage

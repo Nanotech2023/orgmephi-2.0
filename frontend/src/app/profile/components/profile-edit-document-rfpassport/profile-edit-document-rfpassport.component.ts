@@ -12,6 +12,10 @@ export class ProfileEditDocumentRfpassportComponent
     @Input() model!: DocumentRF
     @Output() modelChange = new EventEmitter<DocumentRF>()
 
+    codePattern: string = "^[0-9]{3}-[0-9]{3}$"
+    numberPattern: string = "^[0-9]{6}$"
+    seriesPattern: string = "^[0-9]{4}$"
+
     onModelChange(): void
     {
         this.modelChange.emit( this.model )

@@ -1,0 +1,40 @@
+<div class="profile-form_container">
+    <input type="hidden" readonly [(ngModel)]="model.country">
+
+    <div class="profile-form_item">
+        <p class="profile-form_label">Регион</p>
+        <ng-select [items]="regions$ | async"
+                   bindLabel="name"
+                   bindValue="name"
+                   placeholder="Выберите регион"
+                   name="regionName"
+                   [(ngModel)]="city.region_name"
+                   (change)="onRegionChange()">
+        </ng-select>
+        <div *ngIf="!city.region_name" class="input_error">
+            Необходимо указать регион
+        </div>
+    </div>
+
+    <div class="profile-form_item">
+        <p class="profile-form_label">Населённый пункт</p>
+        <ng-select [items]="cities$ | async"
+                   bindLabel="name"
+                   bindValue="name"
+                   placeholder="Введите населённый пункт"
+                   name="cityName"
+                   [(ngModel)]="city.name"
+                   (change)="onCityChange()">
+        </ng-select>
+
+        <div *ngIf="!city.name" class="input_error">
+            Необходимо указать населённый пункт
+        </div>
+    </div>
+
+    <div class="profile-form_item">
+        <p class="profile-form_label">Являетесь ли вы жителем сельской местности?</p>
+        <input class="profile-form_input" type="checkbox" [(ngModel)]="model.rural"
+               (ngModelChange)="onModelChange()">
+    </div>
+</div>

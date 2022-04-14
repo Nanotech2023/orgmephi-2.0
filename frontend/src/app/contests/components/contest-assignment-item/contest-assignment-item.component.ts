@@ -1,26 +1,26 @@
 import { Component, Input, OnDestroy, OnInit } from '@angular/core'
 import { TaskForUserResponseTaskParticipant } from '@api/tasks/model'
-import { ResponsesService } from '@api/responses/responses.service'
-import { TasksService } from '@api/tasks/tasks.service'
-import { Subscription } from 'rxjs'
-import { DomSanitizer, SafeUrl } from '@angular/platform-browser'
-import { PlainAnswerRequest, PlainAnswerText } from '@api/responses/model'
+import { Observable, Subscription } from 'rxjs'
+import { SafeUrl } from '@angular/platform-browser'
+import { ContestAssignmentItemStore } from '@/contests/components/contest-assignment-item/contest-assignment-item.store'
 
 
 @Component( {
     selector: 'app-contest-assignment-item',
     templateUrl: './contest-assignment-item.component.html',
-    styleUrls: [ './contest-assignment-item.component.scss' ]
+    styleUrls: [ './contest-assignment-item.component.scss' ],
+    providers: [ ContestAssignmentItemStore ]
 } )
 export class ContestAssignmentItemComponent implements OnInit, OnDestroy
 {
     @Input() task!: TaskForUserResponseTaskParticipant
+    @Input() taskIndex!: number
+    answer!: number
     @Input() contestId!: number | null
-    imageUrl!: SafeUrl
+    taskImageUrl$: Observable<SafeUrl> = this.contestAssignmentItemStore.taskImageUrl$
     private subscription!: Subscription
-    answer!: string
 
-    constructor( private tasksService: TasksService, private responsesService: ResponsesService, private sanitizer: DomSanitizer )
+    constructor( private contestAssignmentItemStore: ContestAssignmentItemStore )
     {
     }
 
@@ -28,26 +28,55 @@ export class ContestAssignmentItemComponent implements OnInit, OnDestroy
     {
         if ( !!this.contestId )
         {
-            this.subscription = this.tasksService.tasksParticipantContestIdContestTasksIdTaskImageSelfGet( this.contestId, this.task.task_id ).subscribe( data =>
+            const contestTask = { contestId: this.contestId, taskId: this.task.task_id }
+            this.contestAssignmentItemStore.fetchTaskImage( contestTask )
+            this.contestAssignmentItemStore.fetchAnswer( contestTask )
+            this.subscription = this.contestAssignmentItemStore.answer$.subscribe( item =>
             {
-                const unsafeImageUrl = URL.createObjectURL( data )
-                this.imageUrl = this.sanitizer.bypassSecurityTrustUrl( unsafeImageUrl )
+                if ( !!item?.answer )
+                    this.answer = item?.answer
             } )
-            this.responsesService.responsesParticipantContestContestIdTaskTaskIdUserSelfGet( this.contestId, this.task.task_id ).subscribe( item => this.answer = ( item as PlainAnswerText ).answer_text ?? "" )
         }
     }
 
     ngOnDestroy(): void
     {
-        this.subscription?.unsubscribe()
+        this.subscription.unsubscribe()
     }
 
-    updateAnswer()
+    onSubmit()
     {
-        if ( this.answer )
+        if ( this.contestId )
         {
-            let plainAnswerRequest: PlainAnswerRequest = { answer_text: this.answer }
-            this.responsesService.responsesParticipantContestContestIdTaskTaskIdUserSelfPlainPost( this.contestId as number, this.task.task_id, plainAnswerRequest ).subscribe()
+            const contestTask: { contestId: number, taskId: number, answer: number } = {
+                contestId: this.contestId,
+                taskId: this.task.task_id,
+                answer: this.answer
+            }
+            this.contestAssignmentItemStore.updateAnswer( contestTask )
         }
+    }
+
+    numberOnly( el: HTMLInputElement ): void
+    {
+        const keyPressed = el.value.split( '' ).pop()
+        let transformedKey = keyPressed
+        console.log( el.value )
+
+        if ( el.value === "-" && keyPressed === "-" )
+        {
+            return
+        }
+
+        if ( keyPressed === "." || keyPressed === "," )
+            transformedKey = "."
+
+        const newString = el.value.substring( 0, el.value.length - 1 ) + transformedKey
+        const pattern: RegExp = /^[-]?([0-9]+\.?[0-9]*|\.[0-9]+)$/
+        if ( !pattern.test( newString ) )
+            transformedKey = ""
+
+
+        el.value = el.value.substring( 0, el.value.length - 1 ) + transformedKey
     }
 }

@@ -15,9 +15,9 @@ import { AnswersInTaskRequestTaskCreator } from './answersInTaskRequestTaskCreat
 export interface TaskResponseTaskCreator { 
     answers?: Array<AnswersInTaskRequestTaskCreator>;
     end_value?: number;
+    name: string;
     num_of_task: number;
     recommended_answer?: string;
-    show_answer_after_contest?: boolean;
     start_value?: number;
     task_id: number;
     task_points?: number;
