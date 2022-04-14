@@ -729,7 +729,7 @@ def test_simple_contest_with_external_data(test_simple_contest_with_location, te
         work_id=1,
         contest_id=test_simple_contest_with_location[0].contest_id,
         num_of_task=1,
-        task_points=4,
+        task_points=1.5,
     )
 
     external_contest_result_2 = ExternalContestResult(
@@ -737,7 +737,7 @@ def test_simple_contest_with_external_data(test_simple_contest_with_location, te
         work_id=2,
         contest_id=test_simple_contest_with_location[0].contest_id,
         num_of_task=2,
-        task_points=6,
+        task_points=0.5,
     )
 
     test_app.db.session.add(external_contest_result_1)
