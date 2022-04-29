@@ -29,6 +29,8 @@ document_names_reverse = {val: key for key, val in document_names.items()}
 class Document(db.Model):
     """
         Document ORM class
+
+        insurance_policy: snils
     """
     user_id = db.Column(db.Integer, db.ForeignKey(UserInfo.user_id), primary_key=True)
     document_type = db.Column(db.Enum(DocumentTypeEnum), nullable=False)
@@ -37,7 +39,7 @@ class Document(db.Model):
     issuer = db.Column(db.String)
     issue_date = db.Column(db.Date)
     rf_code = db.Column(db.String(7))
-    snils = db.Column(db.String)
+    insurance_policy = db.Column(db.String)
     other_document_name = db.Column(db.String)
 
     @hybrid_property
