@@ -26,6 +26,7 @@ class DocumentRFSchema(DocumentBaseSchema):
     issuer = common_fields.FreeDescription()
     issue_date = fields.Date()
     code = fields.String(validate=validate.Regexp('^[0-9]{3}-[0-9]{3}$'), example='123-456')
+    snils = fields.String(validate=validate.Regexp('^[0-9]{3}-[0-9]{3}-[0-9]{3} [0-9]{2}$'), example='123-456-789 01')
 
 
 class DocumentRFInternationalSchema(DocumentBaseSchema):
@@ -57,6 +58,7 @@ class DocumentBirthCertificateSchema(DocumentBaseSchema):
     number = fields.String(validate=validate.Regexp('^[0-9]{6}$'), example='123456')
     issuer = common_fields.FreeDescription()
     issue_date = fields.Date()
+    snils = fields.String(validate=validate.Regexp('^[0-9]{3}-[0-9]{3}-[0-9]{3} [0-9]{2}$'), example='123-456-789 01')
 
 
 class DocumentOtherSchema(DocumentBaseSchema):

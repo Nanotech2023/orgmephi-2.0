@@ -30,8 +30,24 @@ def test_auth_info_get(client, test_user_school):
 
 
 def test_user_info_patch(client, test_country_native, test_region, test_city):
+    test_user_info['document']['snils'] = '123-456-789 01'
     resp = client.patch('/personal', json=test_user_info)
     assert resp.status_code == 200
+
+    resp = client.get('/personal')
+    assert resp.status_code == 200
+    assert resp.json['document']['snils'] == '123-456-789 01'
+
+    import copy
+    test_info = copy.deepcopy(test_user_info)
+    test_info['document']['snils'] = '987-654-321 10'
+
+    resp = client.patch('/personal', json=test_info)
+    assert resp.status_code == 200
+
+    resp = client.get('/personal')
+    assert resp.status_code == 200
+    assert resp.json['document']['snils'] == '987-654-321 10'
 
 
 def test_user_info_limitations_patch(client, test_country_native, test_region, test_city):

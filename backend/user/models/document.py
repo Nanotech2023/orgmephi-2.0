@@ -37,6 +37,7 @@ class Document(db.Model):
     issuer = db.Column(db.String)
     issue_date = db.Column(db.Date)
     rf_code = db.Column(db.String(7))
+    snils = db.Column(db.String)
     other_document_name = db.Column(db.String)
 
     @hybrid_property
