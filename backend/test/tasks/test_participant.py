@@ -147,8 +147,7 @@ def test_get_task_image_self_not_in_progress(client, test_simple_contest_with_us
     assert resp.status_code == 403
 
 
-def test_get_user_certificate_self_none_user(client, test_simple_contest_with_users_ended,
-                                             test_user_for_student_contest_none):
+def test_get_user_certificate_self_none_user(client, test_simple_contest_with_users_ended):
     resp = client.get(
         f'/contest/{test_simple_contest_with_users_ended[0].contest_id}/certificate/self')
     assert resp.status_code == 409

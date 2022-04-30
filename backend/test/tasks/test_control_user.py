@@ -125,14 +125,6 @@ def test_get_all_users_in_contest(client, test_simple_contest_with_users):
     assert len(test_simple_contest_with_users[0].users.all()) == len(list(resp.json['user_list']))
 
 
-def test_get_user_certificate_in_contest_unfilled(client, test_simple_contest_with_users,
-                                                  test_user_for_student_contest_none):
-    resp = client.get(
-        f'/contest/{test_simple_contest_with_users[0].contest_id}/user/{test_user_for_student_contest_none.id}'
-        f'/certificate')
-    assert resp.status_code == 409
-
-
 def test_get_user_certificate_in_contest(client, test_simple_contest_with_users, test_user_for_student_contest):
     resp = client.get(
         f'/contest/{test_simple_contest_with_users[0].contest_id}/user/{test_user_for_student_contest.id}/certificate')
