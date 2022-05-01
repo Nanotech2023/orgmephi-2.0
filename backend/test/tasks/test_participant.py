@@ -147,12 +147,6 @@ def test_get_task_image_self_not_in_progress(client, test_simple_contest_with_us
     assert resp.status_code == 403
 
 
-def test_get_user_certificate_self_none_user(client, test_simple_contest_with_users_ended):
-    resp = client.get(
-        f'/contest/{test_simple_contest_with_users_ended[0].contest_id}/certificate/self')
-    assert resp.status_code == 409
-
-
 def test_get_user_certificate_self_error(client, test_simple_contest_with_users_ended):
     test_simple_contest_with_users_ended[0].result_publication_date = datetime.utcnow() + timedelta(hours=150)
     resp = client.get(
