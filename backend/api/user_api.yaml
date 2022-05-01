@@ -57,6 +57,10 @@ components:
           enum:
           - BirthCertificate
           type: string
+        insurance_policy:
+          example: 123-456-789 01
+          pattern: ^[0-9]{3}-[0-9]{3}-[0-9]{3} [0-9]{2}$
+          type: string
         issue_date:
           format: date
           type: string
@@ -149,6 +153,10 @@ components:
         document_type:
           enum:
           - RFPassport
+          type: string
+        insurance_policy:
+          example: 123-456-789 01
+          pattern: ^[0-9]{3}-[0-9]{3}-[0-9]{3} [0-9]{2}$
           type: string
         issue_date:
           format: date
