@@ -44,7 +44,10 @@ import {
     User,
     UserFullListResponseUser,
     UserInfo,
-    UserListResponseUser
+    UserInfoSchemaPersonal,
+    UserLimitations,
+    UserListResponseUser,
+    UserPhone
 } from '@api/users/models'
 import { environment } from '@environments/environment'
 
@@ -136,10 +139,21 @@ export class UsersService
             localVarHeaders = localVarHeaders.set( 'Content-Type', httpContentTypeSelected )
         }
 
-        let responseType_: 'text' | 'json' = 'json'
-        if ( localVarHttpHeaderAcceptSelected && localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+        let responseType_: 'text' | 'json' | 'blob' = 'json'
+        if ( localVarHttpHeaderAcceptSelected )
         {
-            responseType_ = 'text'
+            if ( localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+            {
+                responseType_ = 'text'
+            }
+            else if ( this.configuration.isJsonMime( localVarHttpHeaderAcceptSelected ) )
+            {
+                responseType_ = 'json'
+            }
+            else
+            {
+                responseType_ = 'blob'
+            }
         }
 
         return this.httpClient.post<Group>( `${ this.configuration.basePath }/user/admin/add_group`,
@@ -220,10 +234,21 @@ export class UsersService
             localVarHeaders = localVarHeaders.set( 'Content-Type', httpContentTypeSelected )
         }
 
-        let responseType_: 'text' | 'json' = 'json'
-        if ( localVarHttpHeaderAcceptSelected && localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+        let responseType_: 'text' | 'json' | 'blob' = 'json'
+        if ( localVarHttpHeaderAcceptSelected )
         {
-            responseType_ = 'text'
+            if ( localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+            {
+                responseType_ = 'text'
+            }
+            else if ( this.configuration.isJsonMime( localVarHttpHeaderAcceptSelected ) )
+            {
+                responseType_ = 'json'
+            }
+            else
+            {
+                responseType_ = 'blob'
+            }
         }
 
         return this.httpClient.post<any>( `${ this.configuration.basePath }/user/admin/add_member/${ encodeURIComponent( String( userId ) ) }`,
@@ -301,10 +326,21 @@ export class UsersService
             localVarHeaders = localVarHeaders.set( 'Content-Type', httpContentTypeSelected )
         }
 
-        let responseType_: 'text' | 'json' = 'json'
-        if ( localVarHttpHeaderAcceptSelected && localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+        let responseType_: 'text' | 'json' | 'blob' = 'json'
+        if ( localVarHttpHeaderAcceptSelected )
         {
-            responseType_ = 'text'
+            if ( localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+            {
+                responseType_ = 'text'
+            }
+            else if ( this.configuration.isJsonMime( localVarHttpHeaderAcceptSelected ) )
+            {
+                responseType_ = 'json'
+            }
+            else
+            {
+                responseType_ = 'blob'
+            }
         }
 
         return this.httpClient.post<User>( `${ this.configuration.basePath }/user/admin/internal_register`,
@@ -385,10 +421,21 @@ export class UsersService
             localVarHeaders = localVarHeaders.set( 'Content-Type', httpContentTypeSelected )
         }
 
-        let responseType_: 'text' | 'json' = 'json'
-        if ( localVarHttpHeaderAcceptSelected && localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+        let responseType_: 'text' | 'json' | 'blob' = 'json'
+        if ( localVarHttpHeaderAcceptSelected )
         {
-            responseType_ = 'text'
+            if ( localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+            {
+                responseType_ = 'text'
+            }
+            else if ( this.configuration.isJsonMime( localVarHttpHeaderAcceptSelected ) )
+            {
+                responseType_ = 'json'
+            }
+            else
+            {
+                responseType_ = 'blob'
+            }
         }
 
         return this.httpClient.post<any>( `${ this.configuration.basePath }/user/admin/password/${ encodeURIComponent( String( userId ) ) }`,
@@ -469,10 +516,21 @@ export class UsersService
             localVarHeaders = localVarHeaders.set( 'Content-Type', httpContentTypeSelected )
         }
 
-        let responseType_: 'text' | 'json' = 'json'
-        if ( localVarHttpHeaderAcceptSelected && localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+        let responseType_: 'text' | 'json' | 'blob' = 'json'
+        if ( localVarHttpHeaderAcceptSelected )
         {
-            responseType_ = 'text'
+            if ( localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+            {
+                responseType_ = 'text'
+            }
+            else if ( this.configuration.isJsonMime( localVarHttpHeaderAcceptSelected ) )
+            {
+                responseType_ = 'json'
+            }
+            else
+            {
+                responseType_ = 'blob'
+            }
         }
 
         return this.httpClient.patch<any>( `${ this.configuration.basePath }/user/admin/personal/${ encodeURIComponent( String( userId ) ) }`,
@@ -610,10 +668,21 @@ export class UsersService
             localVarHeaders = localVarHeaders.set( 'Content-Type', httpContentTypeSelected )
         }
 
-        let responseType_: 'text' | 'json' = 'json'
-        if ( localVarHttpHeaderAcceptSelected && localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+        let responseType_: 'text' | 'json' | 'blob' = 'json'
+        if ( localVarHttpHeaderAcceptSelected )
         {
-            responseType_ = 'text'
+            if ( localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+            {
+                responseType_ = 'text'
+            }
+            else if ( this.configuration.isJsonMime( localVarHttpHeaderAcceptSelected ) )
+            {
+                responseType_ = 'json'
+            }
+            else
+            {
+                responseType_ = 'blob'
+            }
         }
 
         return this.httpClient.put<any>( `${ this.configuration.basePath }/user/admin/personal/${ encodeURIComponent( String( userId ) ) }/photo`,
@@ -676,10 +745,21 @@ export class UsersService
         }
 
 
-        let responseType_: 'text' | 'json' = 'json'
-        if ( localVarHttpHeaderAcceptSelected && localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+        let responseType_: 'text' | 'json' | 'blob' = 'json'
+        if ( localVarHttpHeaderAcceptSelected )
         {
-            responseType_ = 'text'
+            if ( localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+            {
+                responseType_ = 'text'
+            }
+            else if ( this.configuration.isJsonMime( localVarHttpHeaderAcceptSelected ) )
+            {
+                responseType_ = 'json'
+            }
+            else
+            {
+                responseType_ = 'blob'
+            }
         }
 
         return this.httpClient.post<PreregisterResponseUser>( `${ this.configuration.basePath }/user/admin/preregister`,
@@ -745,10 +825,21 @@ export class UsersService
         }
 
 
-        let responseType_: 'text' | 'json' = 'json'
-        if ( localVarHttpHeaderAcceptSelected && localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+        let responseType_: 'text' | 'json' | 'blob' = 'json'
+        if ( localVarHttpHeaderAcceptSelected )
         {
-            responseType_ = 'text'
+            if ( localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+            {
+                responseType_ = 'text'
+            }
+            else if ( this.configuration.isJsonMime( localVarHttpHeaderAcceptSelected ) )
+            {
+                responseType_ = 'json'
+            }
+            else
+            {
+                responseType_ = 'blob'
+            }
         }
 
         return this.httpClient.post<any>( `${ this.configuration.basePath }/user/admin/remove_group/${ encodeURIComponent( String( groupId ) ) }`,
@@ -829,10 +920,21 @@ export class UsersService
             localVarHeaders = localVarHeaders.set( 'Content-Type', httpContentTypeSelected )
         }
 
-        let responseType_: 'text' | 'json' = 'json'
-        if ( localVarHttpHeaderAcceptSelected && localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+        let responseType_: 'text' | 'json' | 'blob' = 'json'
+        if ( localVarHttpHeaderAcceptSelected )
         {
-            responseType_ = 'text'
+            if ( localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+            {
+                responseType_ = 'text'
+            }
+            else if ( this.configuration.isJsonMime( localVarHttpHeaderAcceptSelected ) )
+            {
+                responseType_ = 'json'
+            }
+            else
+            {
+                responseType_ = 'blob'
+            }
         }
 
         return this.httpClient.post<any>( `${ this.configuration.basePath }/user/admin/remove_member/${ encodeURIComponent( String( userId ) ) }`,
@@ -913,10 +1015,21 @@ export class UsersService
             localVarHeaders = localVarHeaders.set( 'Content-Type', httpContentTypeSelected )
         }
 
-        let responseType_: 'text' | 'json' = 'json'
-        if ( localVarHttpHeaderAcceptSelected && localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+        let responseType_: 'text' | 'json' | 'blob' = 'json'
+        if ( localVarHttpHeaderAcceptSelected )
         {
-            responseType_ = 'text'
+            if ( localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+            {
+                responseType_ = 'text'
+            }
+            else if ( this.configuration.isJsonMime( localVarHttpHeaderAcceptSelected ) )
+            {
+                responseType_ = 'json'
+            }
+            else
+            {
+                responseType_ = 'blob'
+            }
         }
 
         return this.httpClient.put<any>( `${ this.configuration.basePath }/user/admin/role/${ encodeURIComponent( String( userId ) ) }`,
@@ -997,10 +1110,21 @@ export class UsersService
             localVarHeaders = localVarHeaders.set( 'Content-Type', httpContentTypeSelected )
         }
 
-        let responseType_: 'text' | 'json' = 'json'
-        if ( localVarHttpHeaderAcceptSelected && localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+        let responseType_: 'text' | 'json' | 'blob' = 'json'
+        if ( localVarHttpHeaderAcceptSelected )
         {
-            responseType_ = 'text'
+            if ( localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+            {
+                responseType_ = 'text'
+            }
+            else if ( this.configuration.isJsonMime( localVarHttpHeaderAcceptSelected ) )
+            {
+                responseType_ = 'json'
+            }
+            else
+            {
+                responseType_ = 'blob'
+            }
         }
 
         return this.httpClient.patch<any>( `${ this.configuration.basePath }/user/admin/school/${ encodeURIComponent( String( userId ) ) }`,
@@ -1081,10 +1205,21 @@ export class UsersService
             localVarHeaders = localVarHeaders.set( 'Content-Type', httpContentTypeSelected )
         }
 
-        let responseType_: 'text' | 'json' = 'json'
-        if ( localVarHttpHeaderAcceptSelected && localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+        let responseType_: 'text' | 'json' | 'blob' = 'json'
+        if ( localVarHttpHeaderAcceptSelected )
         {
-            responseType_ = 'text'
+            if ( localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+            {
+                responseType_ = 'text'
+            }
+            else if ( this.configuration.isJsonMime( localVarHttpHeaderAcceptSelected ) )
+            {
+                responseType_ = 'json'
+            }
+            else
+            {
+                responseType_ = 'blob'
+            }
         }
 
         return this.httpClient.put<any>( `${ this.configuration.basePath }/user/admin/type/${ encodeURIComponent( String( userId ) ) }`,
@@ -1165,10 +1300,21 @@ export class UsersService
             localVarHeaders = localVarHeaders.set( 'Content-Type', httpContentTypeSelected )
         }
 
-        let responseType_: 'text' | 'json' = 'json'
-        if ( localVarHttpHeaderAcceptSelected && localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+        let responseType_: 'text' | 'json' | 'blob' = 'json'
+        if ( localVarHttpHeaderAcceptSelected )
         {
-            responseType_ = 'text'
+            if ( localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+            {
+                responseType_ = 'text'
+            }
+            else if ( this.configuration.isJsonMime( localVarHttpHeaderAcceptSelected ) )
+            {
+                responseType_ = 'json'
+            }
+            else
+            {
+                responseType_ = 'blob'
+            }
         }
 
         return this.httpClient.patch<any>( `${ this.configuration.basePath }/user/admin/university/${ encodeURIComponent( String( userId ) ) }`,
@@ -1236,10 +1382,21 @@ export class UsersService
         }
 
 
-        let responseType_: 'text' | 'json' = 'json'
-        if ( localVarHttpHeaderAcceptSelected && localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+        let responseType_: 'text' | 'json' | 'blob' = 'json'
+        if ( localVarHttpHeaderAcceptSelected )
         {
-            responseType_ = 'text'
+            if ( localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+            {
+                responseType_ = 'text'
+            }
+            else if ( this.configuration.isJsonMime( localVarHttpHeaderAcceptSelected ) )
+            {
+                responseType_ = 'json'
+            }
+            else
+            {
+                responseType_ = 'blob'
+            }
         }
 
         return this.httpClient.post<CSRFPairUser>( `${ this.configuration.basePath }/user/auth/impersonate/${ encodeURIComponent( String( userId ) ) }`,
@@ -1303,10 +1460,21 @@ export class UsersService
             localVarHeaders = localVarHeaders.set( 'Content-Type', httpContentTypeSelected )
         }
 
-        let responseType_: 'text' | 'json' = 'json'
-        if ( localVarHttpHeaderAcceptSelected && localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+        let responseType_: 'text' | 'json' | 'blob' = 'json'
+        if ( localVarHttpHeaderAcceptSelected )
         {
-            responseType_ = 'text'
+            if ( localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+            {
+                responseType_ = 'text'
+            }
+            else if ( this.configuration.isJsonMime( localVarHttpHeaderAcceptSelected ) )
+            {
+                responseType_ = 'json'
+            }
+            else
+            {
+                responseType_ = 'blob'
+            }
         }
 
         return this.httpClient.post<CSRFPairUser>( `${ this.configuration.basePath }/user/auth/login`,
@@ -1367,10 +1535,21 @@ export class UsersService
         }
 
 
-        let responseType_: 'text' | 'json' = 'json'
-        if ( localVarHttpHeaderAcceptSelected && localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+        let responseType_: 'text' | 'json' | 'blob' = 'json'
+        if ( localVarHttpHeaderAcceptSelected )
         {
-            responseType_ = 'text'
+            if ( localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+            {
+                responseType_ = 'text'
+            }
+            else if ( this.configuration.isJsonMime( localVarHttpHeaderAcceptSelected ) )
+            {
+                responseType_ = 'json'
+            }
+            else
+            {
+                responseType_ = 'blob'
+            }
         }
 
         return this.httpClient.post<any>( `${ this.configuration.basePath }/user/auth/logout`,
@@ -1433,10 +1612,21 @@ export class UsersService
         }
 
 
-        let responseType_: 'text' | 'json' = 'json'
-        if ( localVarHttpHeaderAcceptSelected && localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+        let responseType_: 'text' | 'json' | 'blob' = 'json'
+        if ( localVarHttpHeaderAcceptSelected )
         {
-            responseType_ = 'text'
+            if ( localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+            {
+                responseType_ = 'text'
+            }
+            else if ( this.configuration.isJsonMime( localVarHttpHeaderAcceptSelected ) )
+            {
+                responseType_ = 'json'
+            }
+            else
+            {
+                responseType_ = 'blob'
+            }
         }
 
         return this.httpClient.post<CSRFPairUser>( `${ this.configuration.basePath }/user/auth/refresh`,
@@ -1499,10 +1689,21 @@ export class UsersService
         }
 
 
-        let responseType_: 'text' | 'json' = 'json'
-        if ( localVarHttpHeaderAcceptSelected && localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+        let responseType_: 'text' | 'json' | 'blob' = 'json'
+        if ( localVarHttpHeaderAcceptSelected )
         {
-            responseType_ = 'text'
+            if ( localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+            {
+                responseType_ = 'text'
+            }
+            else if ( this.configuration.isJsonMime( localVarHttpHeaderAcceptSelected ) )
+            {
+                responseType_ = 'json'
+            }
+            else
+            {
+                responseType_ = 'blob'
+            }
         }
 
         return this.httpClient.post<CSRFPairUser>( `${ this.configuration.basePath }/user/auth/unimpersonate`,
@@ -1558,10 +1759,21 @@ export class UsersService
         }
 
 
-        let responseType_: 'text' | 'json' = 'json'
-        if ( localVarHttpHeaderAcceptSelected && localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+        let responseType_: 'text' | 'json' | 'blob' = 'json'
+        if ( localVarHttpHeaderAcceptSelected )
         {
-            responseType_ = 'text'
+            if ( localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+            {
+                responseType_ = 'text'
+            }
+            else if ( this.configuration.isJsonMime( localVarHttpHeaderAcceptSelected ) )
+            {
+                responseType_ = 'json'
+            }
+            else
+            {
+                responseType_ = 'blob'
+            }
         }
 
         return this.httpClient.get<GroupListResponseUser>( `${ this.configuration.basePath }/user/creator/group/all`,
@@ -1621,10 +1833,21 @@ export class UsersService
         }
 
 
-        let responseType_: 'text' | 'json' = 'json'
-        if ( localVarHttpHeaderAcceptSelected && localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+        let responseType_: 'text' | 'json' | 'blob' = 'json'
+        if ( localVarHttpHeaderAcceptSelected )
         {
-            responseType_ = 'text'
+            if ( localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+            {
+                responseType_ = 'text'
+            }
+            else if ( this.configuration.isJsonMime( localVarHttpHeaderAcceptSelected ) )
+            {
+                responseType_ = 'json'
+            }
+            else
+            {
+                responseType_ = 'blob'
+            }
         }
 
         return this.httpClient.get<Group>( `${ this.configuration.basePath }/user/creator/group/${ encodeURIComponent( String( groupId ) ) }`,
@@ -1684,10 +1907,21 @@ export class UsersService
         }
 
 
-        let responseType_: 'text' | 'json' = 'json'
-        if ( localVarHttpHeaderAcceptSelected && localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+        let responseType_: 'text' | 'json' | 'blob' = 'json'
+        if ( localVarHttpHeaderAcceptSelected )
         {
-            responseType_ = 'text'
+            if ( localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+            {
+                responseType_ = 'text'
+            }
+            else if ( this.configuration.isJsonMime( localVarHttpHeaderAcceptSelected ) )
+            {
+                responseType_ = 'json'
+            }
+            else
+            {
+                responseType_ = 'blob'
+            }
         }
 
         return this.httpClient.get<GroupListResponseUser>( `${ this.configuration.basePath }/user/creator/membership/${ encodeURIComponent( String( userId ) ) }`,
@@ -1747,10 +1981,21 @@ export class UsersService
         }
 
 
-        let responseType_: 'text' | 'json' = 'json'
-        if ( localVarHttpHeaderAcceptSelected && localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+        let responseType_: 'text' | 'json' | 'blob' = 'json'
+        if ( localVarHttpHeaderAcceptSelected )
         {
-            responseType_ = 'text'
+            if ( localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+            {
+                responseType_ = 'text'
+            }
+            else if ( this.configuration.isJsonMime( localVarHttpHeaderAcceptSelected ) )
+            {
+                responseType_ = 'json'
+            }
+            else
+            {
+                responseType_ = 'blob'
+            }
         }
 
         return this.httpClient.get<UserInfo>( `${ this.configuration.basePath }/user/creator/personal/${ encodeURIComponent( String( userId ) ) }`,
@@ -1810,10 +2055,21 @@ export class UsersService
         }
 
 
-        let responseType_: 'text' | 'json' = 'json'
-        if ( localVarHttpHeaderAcceptSelected && localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+        let responseType_: 'text' | 'json' | 'blob' = 'json'
+        if ( localVarHttpHeaderAcceptSelected )
         {
-            responseType_ = 'text'
+            if ( localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+            {
+                responseType_ = 'text'
+            }
+            else if ( this.configuration.isJsonMime( localVarHttpHeaderAcceptSelected ) )
+            {
+                responseType_ = 'json'
+            }
+            else
+            {
+                responseType_ = 'blob'
+            }
         }
 
         return this.httpClient.get<SchoolInfo>( `${ this.configuration.basePath }/user/creator/school/${ encodeURIComponent( String( userId ) ) }`,
@@ -1873,10 +2129,21 @@ export class UsersService
         }
 
 
-        let responseType_: 'text' | 'json' = 'json'
-        if ( localVarHttpHeaderAcceptSelected && localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+        let responseType_: 'text' | 'json' | 'blob' = 'json'
+        if ( localVarHttpHeaderAcceptSelected )
         {
-            responseType_ = 'text'
+            if ( localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+            {
+                responseType_ = 'text'
+            }
+            else if ( this.configuration.isJsonMime( localVarHttpHeaderAcceptSelected ) )
+            {
+                responseType_ = 'json'
+            }
+            else
+            {
+                responseType_ = 'blob'
+            }
         }
 
         return this.httpClient.get<StudentInfo>( `${ this.configuration.basePath }/user/creator/university/${ encodeURIComponent( String( userId ) ) }`,
@@ -1931,10 +2198,21 @@ export class UsersService
         }
 
 
-        let responseType_: 'text' | 'json' = 'json'
-        if ( localVarHttpHeaderAcceptSelected && localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+        let responseType_: 'text' | 'json' | 'blob' = 'json'
+        if ( localVarHttpHeaderAcceptSelected )
         {
-            responseType_ = 'text'
+            if ( localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+            {
+                responseType_ = 'text'
+            }
+            else if ( this.configuration.isJsonMime( localVarHttpHeaderAcceptSelected ) )
+            {
+                responseType_ = 'json'
+            }
+            else
+            {
+                responseType_ = 'blob'
+            }
         }
 
         return this.httpClient.get<UserListResponseUser>( `${ this.configuration.basePath }/user/creator/user/all`,
@@ -1994,10 +2272,21 @@ export class UsersService
         }
 
 
-        let responseType_: 'text' | 'json' = 'json'
-        if ( localVarHttpHeaderAcceptSelected && localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+        let responseType_: 'text' | 'json' | 'blob' = 'json'
+        if ( localVarHttpHeaderAcceptSelected )
         {
-            responseType_ = 'text'
+            if ( localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+            {
+                responseType_ = 'text'
+            }
+            else if ( this.configuration.isJsonMime( localVarHttpHeaderAcceptSelected ) )
+            {
+                responseType_ = 'json'
+            }
+            else
+            {
+                responseType_ = 'blob'
+            }
         }
 
         return this.httpClient.get<UserListResponseUser>( `${ this.configuration.basePath }/user/creator/user/by-group/${ encodeURIComponent( String( groupId ) ) }`,
@@ -2052,10 +2341,21 @@ export class UsersService
         }
 
 
-        let responseType_: 'text' | 'json' = 'json'
-        if ( localVarHttpHeaderAcceptSelected && localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+        let responseType_: 'text' | 'json' | 'blob' = 'json'
+        if ( localVarHttpHeaderAcceptSelected )
         {
-            responseType_ = 'text'
+            if ( localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+            {
+                responseType_ = 'text'
+            }
+            else if ( this.configuration.isJsonMime( localVarHttpHeaderAcceptSelected ) )
+            {
+                responseType_ = 'json'
+            }
+            else
+            {
+                responseType_ = 'blob'
+            }
         }
 
         return this.httpClient.get<UserFullListResponseUser>( `${ this.configuration.basePath }/user/creator/user_full/all`,
@@ -2115,10 +2415,21 @@ export class UsersService
         }
 
 
-        let responseType_: 'text' | 'json' = 'json'
-        if ( localVarHttpHeaderAcceptSelected && localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+        let responseType_: 'text' | 'json' | 'blob' = 'json'
+        if ( localVarHttpHeaderAcceptSelected )
         {
-            responseType_ = 'text'
+            if ( localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+            {
+                responseType_ = 'text'
+            }
+            else if ( this.configuration.isJsonMime( localVarHttpHeaderAcceptSelected ) )
+            {
+                responseType_ = 'json'
+            }
+            else
+            {
+                responseType_ = 'blob'
+            }
         }
 
         return this.httpClient.get<User>( `${ this.configuration.basePath }/user/creator/user/${ encodeURIComponent( String( userId ) ) }`,
@@ -2225,10 +2536,21 @@ export class UsersService
         }
 
 
-        let responseType_: 'text' | 'json' = 'json'
-        if ( localVarHttpHeaderAcceptSelected && localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+        let responseType_: 'text' | 'json' | 'blob' = 'json'
+        if ( localVarHttpHeaderAcceptSelected )
         {
-            responseType_ = 'text'
+            if ( localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+            {
+                responseType_ = 'text'
+            }
+            else if ( this.configuration.isJsonMime( localVarHttpHeaderAcceptSelected ) )
+            {
+                responseType_ = 'json'
+            }
+            else
+            {
+                responseType_ = 'blob'
+            }
         }
 
         return this.httpClient.get<SelfGroupsResponseUser>( `${ this.configuration.basePath }/user/profile/groups`,
@@ -2303,14 +2625,115 @@ export class UsersService
             localVarHeaders = localVarHeaders.set( 'Content-Type', httpContentTypeSelected )
         }
 
-        let responseType_: 'text' | 'json' = 'json'
-        if ( localVarHttpHeaderAcceptSelected && localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+        let responseType_: 'text' | 'json' | 'blob' = 'json'
+        if ( localVarHttpHeaderAcceptSelected )
         {
-            responseType_ = 'text'
+            if ( localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+            {
+                responseType_ = 'text'
+            }
+            else if ( this.configuration.isJsonMime( localVarHttpHeaderAcceptSelected ) )
+            {
+                responseType_ = 'json'
+            }
+            else
+            {
+                responseType_ = 'blob'
+            }
         }
 
         return this.httpClient.post<any>( `${ this.configuration.basePath }/user/profile/password`,
             selfPasswordRequestUser,
+            {
+                context: localVarHttpContext,
+                responseType: <any> responseType_,
+                withCredentials: this.configuration.withCredentials,
+                headers: localVarHeaders,
+                observe: observe,
+                reportProgress: reportProgress
+            }
+        )
+    }
+
+    /**
+     * @param location
+     * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
+     * @param reportProgress flag to report request and response progress.
+     */
+    public userProfilePersonalDwellingPatch( location: Location, observe?: 'body', reportProgress?: boolean, options?: { httpHeaderAccept?: undefined, context?: HttpContext } ): Observable<any>;
+    public userProfilePersonalDwellingPatch( location: Location, observe?: 'response', reportProgress?: boolean, options?: { httpHeaderAccept?: undefined, context?: HttpContext } ): Observable<HttpResponse<any>>;
+    public userProfilePersonalDwellingPatch( location: Location, observe?: 'events', reportProgress?: boolean, options?: { httpHeaderAccept?: undefined, context?: HttpContext } ): Observable<HttpEvent<any>>;
+    public userProfilePersonalDwellingPatch( location: Location, observe: any = 'body', reportProgress: boolean = false, options?: { httpHeaderAccept?: undefined, context?: HttpContext } ): Observable<any>
+    {
+        if ( location === null || location === undefined )
+        {
+            throw new Error( 'Required parameter location was null or undefined when calling userProfilePersonalDwellingPatch.' )
+        }
+
+        let localVarHeaders = this.defaultHeaders
+
+        let localVarCredential: string | undefined
+        // authentication (CSRFAccessToken) required
+        localVarCredential = this.configuration.lookupCredential( 'CSRFAccessToken' )
+        if ( localVarCredential )
+        {
+            localVarHeaders = localVarHeaders.set( 'X-CSRF-TOKEN', localVarCredential )
+        }
+
+        // authentication (JWTAccessToken) required
+        localVarCredential = this.configuration.lookupCredential( 'JWTAccessToken' )
+        if ( localVarCredential )
+        {
+        }
+
+        let localVarHttpHeaderAcceptSelected: string | undefined = options && options.httpHeaderAccept
+        if ( localVarHttpHeaderAcceptSelected === undefined )
+        {
+            // to determine the Accept header
+            const httpHeaderAccepts: string[] = []
+            localVarHttpHeaderAcceptSelected = this.configuration.selectHeaderAccept( httpHeaderAccepts )
+        }
+        if ( localVarHttpHeaderAcceptSelected !== undefined )
+        {
+            localVarHeaders = localVarHeaders.set( 'Accept', localVarHttpHeaderAcceptSelected )
+        }
+
+        let localVarHttpContext: HttpContext | undefined = options && options.context
+        if ( localVarHttpContext === undefined )
+        {
+            localVarHttpContext = new HttpContext()
+        }
+
+
+        // to determine the Content-Type header
+        const consumes: string[] = [
+            'application/json'
+        ]
+        const httpContentTypeSelected: string | undefined = this.configuration.selectHeaderContentType( consumes )
+        if ( httpContentTypeSelected !== undefined )
+        {
+            localVarHeaders = localVarHeaders.set( 'Content-Type', httpContentTypeSelected )
+        }
+
+        let responseType_: 'text' | 'json' | 'blob' = 'json'
+        if ( localVarHttpHeaderAcceptSelected )
+        {
+            if ( localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+            {
+                responseType_ = 'text'
+            }
+            else if ( this.configuration.isJsonMime( localVarHttpHeaderAcceptSelected ) )
+            {
+                responseType_ = 'json'
+            }
+            else
+            {
+                responseType_ = 'blob'
+            }
+        }
+
+        return this.httpClient.patch<any>( `${ this.configuration.basePath }/user/profile/personal/dwelling`,
+            location,
             {
                 context: localVarHttpContext,
                 responseType: <any> responseType_,
@@ -2362,13 +2785,114 @@ export class UsersService
         }
 
 
-        let responseType_: 'text' | 'json' = 'json'
-        if ( localVarHttpHeaderAcceptSelected && localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+        let responseType_: 'text' | 'json' | 'blob' = 'json'
+        if ( localVarHttpHeaderAcceptSelected )
         {
-            responseType_ = 'text'
+            if ( localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+            {
+                responseType_ = 'text'
+            }
+            else if ( this.configuration.isJsonMime( localVarHttpHeaderAcceptSelected ) )
+            {
+                responseType_ = 'json'
+            }
+            else
+            {
+                responseType_ = 'blob'
+            }
         }
 
         return this.httpClient.get<UserInfo>( `${ this.configuration.basePath }/user/profile/personal`,
+            {
+                context: localVarHttpContext,
+                responseType: <any> responseType_,
+                withCredentials: this.configuration.withCredentials,
+                headers: localVarHeaders,
+                observe: observe,
+                reportProgress: reportProgress
+            }
+        )
+    }
+
+    /**
+     * @param userLimitations
+     * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
+     * @param reportProgress flag to report request and response progress.
+     */
+    public userProfilePersonalLimitationsPatch( userLimitations: UserLimitations, observe?: 'body', reportProgress?: boolean, options?: { httpHeaderAccept?: undefined, context?: HttpContext } ): Observable<any>;
+    public userProfilePersonalLimitationsPatch( userLimitations: UserLimitations, observe?: 'response', reportProgress?: boolean, options?: { httpHeaderAccept?: undefined, context?: HttpContext } ): Observable<HttpResponse<any>>;
+    public userProfilePersonalLimitationsPatch( userLimitations: UserLimitations, observe?: 'events', reportProgress?: boolean, options?: { httpHeaderAccept?: undefined, context?: HttpContext } ): Observable<HttpEvent<any>>;
+    public userProfilePersonalLimitationsPatch( userLimitations: UserLimitations, observe: any = 'body', reportProgress: boolean = false, options?: { httpHeaderAccept?: undefined, context?: HttpContext } ): Observable<any>
+    {
+        if ( userLimitations === null || userLimitations === undefined )
+        {
+            throw new Error( 'Required parameter userLimitations was null or undefined when calling userProfilePersonalLimitationsPatch.' )
+        }
+
+        let localVarHeaders = this.defaultHeaders
+
+        let localVarCredential: string | undefined
+        // authentication (CSRFAccessToken) required
+        localVarCredential = this.configuration.lookupCredential( 'CSRFAccessToken' )
+        if ( localVarCredential )
+        {
+            localVarHeaders = localVarHeaders.set( 'X-CSRF-TOKEN', localVarCredential )
+        }
+
+        // authentication (JWTAccessToken) required
+        localVarCredential = this.configuration.lookupCredential( 'JWTAccessToken' )
+        if ( localVarCredential )
+        {
+        }
+
+        let localVarHttpHeaderAcceptSelected: string | undefined = options && options.httpHeaderAccept
+        if ( localVarHttpHeaderAcceptSelected === undefined )
+        {
+            // to determine the Accept header
+            const httpHeaderAccepts: string[] = []
+            localVarHttpHeaderAcceptSelected = this.configuration.selectHeaderAccept( httpHeaderAccepts )
+        }
+        if ( localVarHttpHeaderAcceptSelected !== undefined )
+        {
+            localVarHeaders = localVarHeaders.set( 'Accept', localVarHttpHeaderAcceptSelected )
+        }
+
+        let localVarHttpContext: HttpContext | undefined = options && options.context
+        if ( localVarHttpContext === undefined )
+        {
+            localVarHttpContext = new HttpContext()
+        }
+
+
+        // to determine the Content-Type header
+        const consumes: string[] = [
+            'application/json'
+        ]
+        const httpContentTypeSelected: string | undefined = this.configuration.selectHeaderContentType( consumes )
+        if ( httpContentTypeSelected !== undefined )
+        {
+            localVarHeaders = localVarHeaders.set( 'Content-Type', httpContentTypeSelected )
+        }
+
+        let responseType_: 'text' | 'json' | 'blob' = 'json'
+        if ( localVarHttpHeaderAcceptSelected )
+        {
+            if ( localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+            {
+                responseType_ = 'text'
+            }
+            else if ( this.configuration.isJsonMime( localVarHttpHeaderAcceptSelected ) )
+            {
+                responseType_ = 'json'
+            }
+            else
+            {
+                responseType_ = 'blob'
+            }
+        }
+
+        return this.httpClient.patch<any>( `${ this.configuration.basePath }/user/profile/personal/limitations`,
+            userLimitations,
             {
                 context: localVarHttpContext,
                 responseType: <any> responseType_,
@@ -2440,14 +2964,205 @@ export class UsersService
             localVarHeaders = localVarHeaders.set( 'Content-Type', httpContentTypeSelected )
         }
 
-        let responseType_: 'text' | 'json' = 'json'
-        if ( localVarHttpHeaderAcceptSelected && localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+        let responseType_: 'text' | 'json' | 'blob' = 'json'
+        if ( localVarHttpHeaderAcceptSelected )
         {
-            responseType_ = 'text'
+            if ( localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+            {
+                responseType_ = 'text'
+            }
+            else if ( this.configuration.isJsonMime( localVarHttpHeaderAcceptSelected ) )
+            {
+                responseType_ = 'json'
+            }
+            else
+            {
+                responseType_ = 'blob'
+            }
         }
 
         return this.httpClient.patch<any>( `${ this.configuration.basePath }/user/profile/personal`,
             userInfo,
+            {
+                context: localVarHttpContext,
+                responseType: <any> responseType_,
+                withCredentials: this.configuration.withCredentials,
+                headers: localVarHeaders,
+                observe: observe,
+                reportProgress: reportProgress
+            }
+        )
+    }
+
+    /**
+     * @param userInfoSchemaPersonal
+     * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
+     * @param reportProgress flag to report request and response progress.
+     */
+    public userProfilePersonalPersonalPatch( userInfoSchemaPersonal: UserInfoSchemaPersonal, observe?: 'body', reportProgress?: boolean, options?: { httpHeaderAccept?: undefined, context?: HttpContext } ): Observable<any>;
+    public userProfilePersonalPersonalPatch( userInfoSchemaPersonal: UserInfoSchemaPersonal, observe?: 'response', reportProgress?: boolean, options?: { httpHeaderAccept?: undefined, context?: HttpContext } ): Observable<HttpResponse<any>>;
+    public userProfilePersonalPersonalPatch( userInfoSchemaPersonal: UserInfoSchemaPersonal, observe?: 'events', reportProgress?: boolean, options?: { httpHeaderAccept?: undefined, context?: HttpContext } ): Observable<HttpEvent<any>>;
+    public userProfilePersonalPersonalPatch( userInfoSchemaPersonal: UserInfoSchemaPersonal, observe: any = 'body', reportProgress: boolean = false, options?: { httpHeaderAccept?: undefined, context?: HttpContext } ): Observable<any>
+    {
+        if ( userInfoSchemaPersonal === null || userInfoSchemaPersonal === undefined )
+        {
+            throw new Error( 'Required parameter userInfoSchemaPersonal was null or undefined when calling userProfilePersonalPersonalPatch.' )
+        }
+
+        let localVarHeaders = this.defaultHeaders
+
+        let localVarCredential: string | undefined
+        // authentication (CSRFAccessToken) required
+        localVarCredential = this.configuration.lookupCredential( 'CSRFAccessToken' )
+        if ( localVarCredential )
+        {
+            localVarHeaders = localVarHeaders.set( 'X-CSRF-TOKEN', localVarCredential )
+        }
+
+        // authentication (JWTAccessToken) required
+        localVarCredential = this.configuration.lookupCredential( 'JWTAccessToken' )
+        if ( localVarCredential )
+        {
+        }
+
+        let localVarHttpHeaderAcceptSelected: string | undefined = options && options.httpHeaderAccept
+        if ( localVarHttpHeaderAcceptSelected === undefined )
+        {
+            // to determine the Accept header
+            const httpHeaderAccepts: string[] = []
+            localVarHttpHeaderAcceptSelected = this.configuration.selectHeaderAccept( httpHeaderAccepts )
+        }
+        if ( localVarHttpHeaderAcceptSelected !== undefined )
+        {
+            localVarHeaders = localVarHeaders.set( 'Accept', localVarHttpHeaderAcceptSelected )
+        }
+
+        let localVarHttpContext: HttpContext | undefined = options && options.context
+        if ( localVarHttpContext === undefined )
+        {
+            localVarHttpContext = new HttpContext()
+        }
+
+
+        // to determine the Content-Type header
+        const consumes: string[] = [
+            'application/json'
+        ]
+        const httpContentTypeSelected: string | undefined = this.configuration.selectHeaderContentType( consumes )
+        if ( httpContentTypeSelected !== undefined )
+        {
+            localVarHeaders = localVarHeaders.set( 'Content-Type', httpContentTypeSelected )
+        }
+
+        let responseType_: 'text' | 'json' | 'blob' = 'json'
+        if ( localVarHttpHeaderAcceptSelected )
+        {
+            if ( localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+            {
+                responseType_ = 'text'
+            }
+            else if ( this.configuration.isJsonMime( localVarHttpHeaderAcceptSelected ) )
+            {
+                responseType_ = 'json'
+            }
+            else
+            {
+                responseType_ = 'blob'
+            }
+        }
+
+        return this.httpClient.patch<any>( `${ this.configuration.basePath }/user/profile/personal/personal`,
+            userInfoSchemaPersonal,
+            {
+                context: localVarHttpContext,
+                responseType: <any> responseType_,
+                withCredentials: this.configuration.withCredentials,
+                headers: localVarHeaders,
+                observe: observe,
+                reportProgress: reportProgress
+            }
+        )
+    }
+
+    /**
+     * @param userPhone
+     * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
+     * @param reportProgress flag to report request and response progress.
+     */
+    public userProfilePersonalPhoneNumberPatch( userPhone: UserPhone, observe?: 'body', reportProgress?: boolean, options?: { httpHeaderAccept?: undefined, context?: HttpContext } ): Observable<any>;
+    public userProfilePersonalPhoneNumberPatch( userPhone: UserPhone, observe?: 'response', reportProgress?: boolean, options?: { httpHeaderAccept?: undefined, context?: HttpContext } ): Observable<HttpResponse<any>>;
+    public userProfilePersonalPhoneNumberPatch( userPhone: UserPhone, observe?: 'events', reportProgress?: boolean, options?: { httpHeaderAccept?: undefined, context?: HttpContext } ): Observable<HttpEvent<any>>;
+    public userProfilePersonalPhoneNumberPatch( userPhone: UserPhone, observe: any = 'body', reportProgress: boolean = false, options?: { httpHeaderAccept?: undefined, context?: HttpContext } ): Observable<any>
+    {
+        if ( userPhone === null || userPhone === undefined )
+        {
+            throw new Error( 'Required parameter userPhone was null or undefined when calling userProfilePersonalPhoneNumberPatch.' )
+        }
+
+        let localVarHeaders = this.defaultHeaders
+
+        let localVarCredential: string | undefined
+        // authentication (CSRFAccessToken) required
+        localVarCredential = this.configuration.lookupCredential( 'CSRFAccessToken' )
+        if ( localVarCredential )
+        {
+            localVarHeaders = localVarHeaders.set( 'X-CSRF-TOKEN', localVarCredential )
+        }
+
+        // authentication (JWTAccessToken) required
+        localVarCredential = this.configuration.lookupCredential( 'JWTAccessToken' )
+        if ( localVarCredential )
+        {
+        }
+
+        let localVarHttpHeaderAcceptSelected: string | undefined = options && options.httpHeaderAccept
+        if ( localVarHttpHeaderAcceptSelected === undefined )
+        {
+            // to determine the Accept header
+            const httpHeaderAccepts: string[] = []
+            localVarHttpHeaderAcceptSelected = this.configuration.selectHeaderAccept( httpHeaderAccepts )
+        }
+        if ( localVarHttpHeaderAcceptSelected !== undefined )
+        {
+            localVarHeaders = localVarHeaders.set( 'Accept', localVarHttpHeaderAcceptSelected )
+        }
+
+        let localVarHttpContext: HttpContext | undefined = options && options.context
+        if ( localVarHttpContext === undefined )
+        {
+            localVarHttpContext = new HttpContext()
+        }
+
+
+        // to determine the Content-Type header
+        const consumes: string[] = [
+            'application/json'
+        ]
+        const httpContentTypeSelected: string | undefined = this.configuration.selectHeaderContentType( consumes )
+        if ( httpContentTypeSelected !== undefined )
+        {
+            localVarHeaders = localVarHeaders.set( 'Content-Type', httpContentTypeSelected )
+        }
+
+        let responseType_: 'text' | 'json' | 'blob' = 'json'
+        if ( localVarHttpHeaderAcceptSelected )
+        {
+            if ( localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+            {
+                responseType_ = 'text'
+            }
+            else if ( this.configuration.isJsonMime( localVarHttpHeaderAcceptSelected ) )
+            {
+                responseType_ = 'json'
+            }
+            else
+            {
+                responseType_ = 'blob'
+            }
+        }
+
+        return this.httpClient.patch<any>( `${ this.configuration.basePath }/user/profile/personal/phone_number`,
+            userPhone,
             {
                 context: localVarHttpContext,
                 responseType: <any> responseType_,
@@ -2571,10 +3286,21 @@ export class UsersService
             localVarHeaders = localVarHeaders.set( 'Content-Type', httpContentTypeSelected )
         }
 
-        let responseType_: 'text' | 'json' = 'json'
-        if ( localVarHttpHeaderAcceptSelected && localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+        let responseType_: 'text' | 'json' | 'blob' = 'json'
+        if ( localVarHttpHeaderAcceptSelected )
         {
-            responseType_ = 'text'
+            if ( localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+            {
+                responseType_ = 'text'
+            }
+            else if ( this.configuration.isJsonMime( localVarHttpHeaderAcceptSelected ) )
+            {
+                responseType_ = 'json'
+            }
+            else
+            {
+                responseType_ = 'blob'
+            }
         }
 
         return this.httpClient.put<any>( `${ this.configuration.basePath }/user/profile/photo`,
@@ -2630,10 +3356,21 @@ export class UsersService
         }
 
 
-        let responseType_: 'text' | 'json' = 'json'
-        if ( localVarHttpHeaderAcceptSelected && localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+        let responseType_: 'text' | 'json' | 'blob' = 'json'
+        if ( localVarHttpHeaderAcceptSelected )
         {
-            responseType_ = 'text'
+            if ( localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+            {
+                responseType_ = 'text'
+            }
+            else if ( this.configuration.isJsonMime( localVarHttpHeaderAcceptSelected ) )
+            {
+                responseType_ = 'json'
+            }
+            else
+            {
+                responseType_ = 'blob'
+            }
         }
 
         return this.httpClient.get<SchoolInfo>( `${ this.configuration.basePath }/user/profile/school`,
@@ -2708,10 +3445,21 @@ export class UsersService
             localVarHeaders = localVarHeaders.set( 'Content-Type', httpContentTypeSelected )
         }
 
-        let responseType_: 'text' | 'json' = 'json'
-        if ( localVarHttpHeaderAcceptSelected && localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+        let responseType_: 'text' | 'json' | 'blob' = 'json'
+        if ( localVarHttpHeaderAcceptSelected )
         {
-            responseType_ = 'text'
+            if ( localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+            {
+                responseType_ = 'text'
+            }
+            else if ( this.configuration.isJsonMime( localVarHttpHeaderAcceptSelected ) )
+            {
+                responseType_ = 'json'
+            }
+            else
+            {
+                responseType_ = 'blob'
+            }
         }
 
         return this.httpClient.patch<any>( `${ this.configuration.basePath }/user/profile/school`,
@@ -2767,10 +3515,21 @@ export class UsersService
         }
 
 
-        let responseType_: 'text' | 'json' = 'json'
-        if ( localVarHttpHeaderAcceptSelected && localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+        let responseType_: 'text' | 'json' | 'blob' = 'json'
+        if ( localVarHttpHeaderAcceptSelected )
         {
-            responseType_ = 'text'
+            if ( localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+            {
+                responseType_ = 'text'
+            }
+            else if ( this.configuration.isJsonMime( localVarHttpHeaderAcceptSelected ) )
+            {
+                responseType_ = 'json'
+            }
+            else
+            {
+                responseType_ = 'blob'
+            }
         }
 
         return this.httpClient.get<SelfUnfilledResponse>( `${ this.configuration.basePath }/user/profile/unfilled`,
@@ -2825,10 +3584,21 @@ export class UsersService
         }
 
 
-        let responseType_: 'text' | 'json' = 'json'
-        if ( localVarHttpHeaderAcceptSelected && localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+        let responseType_: 'text' | 'json' | 'blob' = 'json'
+        if ( localVarHttpHeaderAcceptSelected )
         {
-            responseType_ = 'text'
+            if ( localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+            {
+                responseType_ = 'text'
+            }
+            else if ( this.configuration.isJsonMime( localVarHttpHeaderAcceptSelected ) )
+            {
+                responseType_ = 'json'
+            }
+            else
+            {
+                responseType_ = 'blob'
+            }
         }
 
         return this.httpClient.get<StudentInfo>( `${ this.configuration.basePath }/user/profile/university`,
@@ -2903,10 +3673,21 @@ export class UsersService
             localVarHeaders = localVarHeaders.set( 'Content-Type', httpContentTypeSelected )
         }
 
-        let responseType_: 'text' | 'json' = 'json'
-        if ( localVarHttpHeaderAcceptSelected && localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+        let responseType_: 'text' | 'json' | 'blob' = 'json'
+        if ( localVarHttpHeaderAcceptSelected )
         {
-            responseType_ = 'text'
+            if ( localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+            {
+                responseType_ = 'text'
+            }
+            else if ( this.configuration.isJsonMime( localVarHttpHeaderAcceptSelected ) )
+            {
+                responseType_ = 'json'
+            }
+            else
+            {
+                responseType_ = 'blob'
+            }
         }
 
         return this.httpClient.patch<any>( `${ this.configuration.basePath }/user/profile/university`,
@@ -2962,10 +3743,21 @@ export class UsersService
         }
 
 
-        let responseType_: 'text' | 'json' = 'json'
-        if ( localVarHttpHeaderAcceptSelected && localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+        let responseType_: 'text' | 'json' | 'blob' = 'json'
+        if ( localVarHttpHeaderAcceptSelected )
         {
-            responseType_ = 'text'
+            if ( localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+            {
+                responseType_ = 'text'
+            }
+            else if ( this.configuration.isJsonMime( localVarHttpHeaderAcceptSelected ) )
+            {
+                responseType_ = 'json'
+            }
+            else
+            {
+                responseType_ = 'blob'
+            }
         }
 
         return this.httpClient.get<User>( `${ this.configuration.basePath }/user/profile/user`,
@@ -3061,10 +3853,21 @@ export class UsersService
         }
 
 
-        let responseType_: 'text' | 'json' = 'json'
-        if ( localVarHttpHeaderAcceptSelected && localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+        let responseType_: 'text' | 'json' | 'blob' = 'json'
+        if ( localVarHttpHeaderAcceptSelected )
         {
-            responseType_ = 'text'
+            if ( localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+            {
+                responseType_ = 'text'
+            }
+            else if ( this.configuration.isJsonMime( localVarHttpHeaderAcceptSelected ) )
+            {
+                responseType_ = 'json'
+            }
+            else
+            {
+                responseType_ = 'blob'
+            }
         }
 
         return this.httpClient.post<any>( `${ this.configuration.basePath }/user/registration/confirm/${ encodeURIComponent( String( token ) ) }`,
@@ -3116,10 +3919,21 @@ export class UsersService
         }
 
 
-        let responseType_: 'text' | 'json' = 'json'
-        if ( localVarHttpHeaderAcceptSelected && localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+        let responseType_: 'text' | 'json' | 'blob' = 'json'
+        if ( localVarHttpHeaderAcceptSelected )
         {
-            responseType_ = 'text'
+            if ( localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+            {
+                responseType_ = 'text'
+            }
+            else if ( this.configuration.isJsonMime( localVarHttpHeaderAcceptSelected ) )
+            {
+                responseType_ = 'json'
+            }
+            else
+            {
+                responseType_ = 'blob'
+            }
         }
 
         return this.httpClient.post<any>( `${ this.configuration.basePath }/user/registration/forgot/${ encodeURIComponent( String( email ) ) }`,
@@ -3173,10 +3987,21 @@ export class UsersService
         }
 
 
-        let responseType_: 'text' | 'json' = 'json'
-        if ( localVarHttpHeaderAcceptSelected && localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+        let responseType_: 'text' | 'json' | 'blob' = 'json'
+        if ( localVarHttpHeaderAcceptSelected )
         {
-            responseType_ = 'text'
+            if ( localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+            {
+                responseType_ = 'text'
+            }
+            else if ( this.configuration.isJsonMime( localVarHttpHeaderAcceptSelected ) )
+            {
+                responseType_ = 'json'
+            }
+            else
+            {
+                responseType_ = 'blob'
+            }
         }
 
         return this.httpClient.get<InfoCitiesResponseUser>( `${ this.configuration.basePath }/user/registration/info/cities/${ encodeURIComponent( String( region ) ) }`,
@@ -3224,10 +4049,21 @@ export class UsersService
         }
 
 
-        let responseType_: 'text' | 'json' = 'json'
-        if ( localVarHttpHeaderAcceptSelected && localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+        let responseType_: 'text' | 'json' | 'blob' = 'json'
+        if ( localVarHttpHeaderAcceptSelected )
         {
-            responseType_ = 'text'
+            if ( localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+            {
+                responseType_ = 'text'
+            }
+            else if ( this.configuration.isJsonMime( localVarHttpHeaderAcceptSelected ) )
+            {
+                responseType_ = 'json'
+            }
+            else
+            {
+                responseType_ = 'blob'
+            }
         }
 
         return this.httpClient.get<InfoCountriesResponseUser>( `${ this.configuration.basePath }/user/registration/info/countries`,
@@ -3275,10 +4111,21 @@ export class UsersService
         }
 
 
-        let responseType_: 'text' | 'json' = 'json'
-        if ( localVarHttpHeaderAcceptSelected && localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+        let responseType_: 'text' | 'json' | 'blob' = 'json'
+        if ( localVarHttpHeaderAcceptSelected )
         {
-            responseType_ = 'text'
+            if ( localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+            {
+                responseType_ = 'text'
+            }
+            else if ( this.configuration.isJsonMime( localVarHttpHeaderAcceptSelected ) )
+            {
+                responseType_ = 'json'
+            }
+            else
+            {
+                responseType_ = 'blob'
+            }
         }
 
         return this.httpClient.get<InfoRegionsResponseUser>( `${ this.configuration.basePath }/user/registration/info/regions`,
@@ -3326,10 +4173,21 @@ export class UsersService
         }
 
 
-        let responseType_: 'text' | 'json' = 'json'
-        if ( localVarHttpHeaderAcceptSelected && localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+        let responseType_: 'text' | 'json' | 'blob' = 'json'
+        if ( localVarHttpHeaderAcceptSelected )
         {
-            responseType_ = 'text'
+            if ( localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+            {
+                responseType_ = 'text'
+            }
+            else if ( this.configuration.isJsonMime( localVarHttpHeaderAcceptSelected ) )
+            {
+                responseType_ = 'json'
+            }
+            else
+            {
+                responseType_ = 'blob'
+            }
         }
 
         return this.httpClient.get<InfoUniversitiesResponseUser>( `${ this.configuration.basePath }/user/registration/info/universities`,
@@ -3395,10 +4253,21 @@ export class UsersService
             localVarHeaders = localVarHeaders.set( 'Content-Type', httpContentTypeSelected )
         }
 
-        let responseType_: 'text' | 'json' = 'json'
-        if ( localVarHttpHeaderAcceptSelected && localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+        let responseType_: 'text' | 'json' | 'blob' = 'json'
+        if ( localVarHttpHeaderAcceptSelected )
         {
-            responseType_ = 'text'
+            if ( localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+            {
+                responseType_ = 'text'
+            }
+            else if ( this.configuration.isJsonMime( localVarHttpHeaderAcceptSelected ) )
+            {
+                responseType_ = 'json'
+            }
+            else
+            {
+                responseType_ = 'blob'
+            }
         }
 
         return this.httpClient.post<any>( `${ this.configuration.basePath }/user/registration/recover/${ encodeURIComponent( String( token ) ) }`,
@@ -3450,10 +4319,21 @@ export class UsersService
         }
 
 
-        let responseType_: 'text' | 'json' = 'json'
-        if ( localVarHttpHeaderAcceptSelected && localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+        let responseType_: 'text' | 'json' | 'blob' = 'json'
+        if ( localVarHttpHeaderAcceptSelected )
         {
-            responseType_ = 'text'
+            if ( localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+            {
+                responseType_ = 'text'
+            }
+            else if ( this.configuration.isJsonMime( localVarHttpHeaderAcceptSelected ) )
+            {
+                responseType_ = 'json'
+            }
+            else
+            {
+                responseType_ = 'blob'
+            }
         }
 
         return this.httpClient.post<any>( `${ this.configuration.basePath }/user/registration/resend/${ encodeURIComponent( String( email ) ) }`,
@@ -3514,10 +4394,21 @@ export class UsersService
         }
 
 
-        let responseType_: 'text' | 'json' = 'json'
-        if ( localVarHttpHeaderAcceptSelected && localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+        let responseType_: 'text' | 'json' | 'blob' = 'json'
+        if ( localVarHttpHeaderAcceptSelected )
         {
-            responseType_ = 'text'
+            if ( localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+            {
+                responseType_ = 'text'
+            }
+            else if ( this.configuration.isJsonMime( localVarHttpHeaderAcceptSelected ) )
+            {
+                responseType_ = 'json'
+            }
+            else
+            {
+                responseType_ = 'blob'
+            }
         }
 
         return this.httpClient.post<any>( `${ this.configuration.basePath }/user/registration/resend`,
@@ -3582,10 +4473,21 @@ export class UsersService
             localVarHeaders = localVarHeaders.set( 'Content-Type', httpContentTypeSelected )
         }
 
-        let responseType_: 'text' | 'json' = 'json'
-        if ( localVarHttpHeaderAcceptSelected && localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+        let responseType_: 'text' | 'json' | 'blob' = 'json'
+        if ( localVarHttpHeaderAcceptSelected )
         {
-            responseType_ = 'text'
+            if ( localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+            {
+                responseType_ = 'text'
+            }
+            else if ( this.configuration.isJsonMime( localVarHttpHeaderAcceptSelected ) )
+            {
+                responseType_ = 'json'
+            }
+            else
+            {
+                responseType_ = 'blob'
+            }
         }
 
         return this.httpClient.post<User>( `${ this.configuration.basePath }/user/registration/school`,
@@ -3649,10 +4551,21 @@ export class UsersService
             localVarHeaders = localVarHeaders.set( 'Content-Type', httpContentTypeSelected )
         }
 
-        let responseType_: 'text' | 'json' = 'json'
-        if ( localVarHttpHeaderAcceptSelected && localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+        let responseType_: 'text' | 'json' | 'blob' = 'json'
+        if ( localVarHttpHeaderAcceptSelected )
         {
-            responseType_ = 'text'
+            if ( localVarHttpHeaderAcceptSelected.startsWith( 'text' ) )
+            {
+                responseType_ = 'text'
+            }
+            else if ( this.configuration.isJsonMime( localVarHttpHeaderAcceptSelected ) )
+            {
+                responseType_ = 'json'
+            }
+            else
+            {
+                responseType_ = 'blob'
+            }
         }
 
         return this.httpClient.post<User>( `${ this.configuration.basePath }/user/registration/university`,

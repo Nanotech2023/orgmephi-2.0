@@ -46,6 +46,17 @@
     </ng-container>
 </div>
 
+<div class="profile-form_item">
+    <p class="profile-form_label">Номер СНИЛС</p>
+    <input class="profile-form_input" placeholder="Введите номер СНИЛС" type="text" name="insurance_policy"
+           #insurance_policy="ngModel"
+           [(ngModel)]="model.insurance_policy" [pattern]="insurancePolicyPattern" required>
+    <small class="form-text text-muted">Пример: 123-456-789 01</small>
+    <ng-container [ngTemplateOutlet]="validationTemplate"
+                  [ngTemplateOutletContext]="{fieldName:insurance_policy}">
+    </ng-container>
+</div>
+
 <ng-template #validationTemplate let-fieldName='fieldName'>
     <div *ngIf="fieldName.invalid" class="input_error">
         <div *ngIf="fieldName.errors?.required">

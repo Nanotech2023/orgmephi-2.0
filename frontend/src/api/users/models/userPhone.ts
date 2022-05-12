@@ -9,19 +9,9 @@
  * https://openapi-generator.tech
  * Do not edit the class manually.
  */
-import { DocumentTypeEnum } from "./documentType"
 
 
-export interface DocumentRF { 
-    code?: string;
-    readonly document_name?: string;
-    document_type: DocumentTypeEnum;
-    insurance_policy?: string;
-    issue_date?: string;
-    issuer?: string;
-    number?: string;
-    series?: string;
-    readonly user_id?: number;
+export interface UserPhone { 
+    phone?: string;
 }
-
 

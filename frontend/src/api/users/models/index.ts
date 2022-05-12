@@ -50,5 +50,7 @@ export * from './user';
 export * from './userFull';
 export * from './userFullListResponseUser';
 export * from './userInfo';
+export * from './userInfoSchemaPersonal';
 export * from './userLimitations';
 export * from './userListResponseUser';
+export * from './userPhone';

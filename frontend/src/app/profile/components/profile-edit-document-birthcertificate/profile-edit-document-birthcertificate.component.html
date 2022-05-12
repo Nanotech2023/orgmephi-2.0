@@ -1,6 +1,7 @@
 <div class="profile-form_item">
     <p class="profile-form_label">Серия свидетельства</p>
-    <input class="profile-form_input" placeholder="Введите серию свидетельства" type="text" name="series" #series="ngModel"
+    <input class="profile-form_input" placeholder="Введите серию свидетельства" type="text" name="series"
+           #series="ngModel"
            [(ngModel)]="model.series" (ngModelChange)="onModelChange()" [pattern]="seriesPattern" required>
     <small class="form-text text-muted">Пример: IV-БЮ</small>
     <ng-container [ngTemplateOutlet]="validationTemplate"
@@ -10,7 +11,8 @@
 
 <div class="profile-form_item">
     <p class="profile-form_label">Номер свидетельства</p>
-    <input class="profile-form_input" placeholder="Введите номер свидетельства" type="text" name="number" #number="ngModel"
+    <input class="profile-form_input" placeholder="Введите номер свидетельства" type="text" name="number"
+           #number="ngModel"
            [(ngModel)]="model.number" (ngModelChange)="onModelChange()" [pattern]="numberPattern" required>
     <small class="form-text text-muted">Пример: 123456</small>
     <ng-container [ngTemplateOutlet]="validationTemplate"
@@ -31,9 +33,20 @@
     <p class="profile-form_label">Когда выдан</p>
     <input class="profile-form_input" placeholder="Введите дату выдачи свидетельства" type="date" name="issue_date"
            #issue_date="ngModel"
-           [(ngModel)]="model.issue_date" (ngModelChange)="onModelChange()"required>
+           [(ngModel)]="model.issue_date" (ngModelChange)="onModelChange()" required>
     <ng-container [ngTemplateOutlet]="validationTemplate"
                   [ngTemplateOutletContext]="{fieldName:issue_date}">
+    </ng-container>
+</div>
+
+<div class="profile-form_item">
+    <p class="profile-form_label">Номер СНИЛС</p>
+    <input class="profile-form_input" placeholder="Введите номер СНИЛС" type="text" name="insurance_policy"
+           #insurance_policy="ngModel"
+           [(ngModel)]="model.insurance_policy" [pattern]="insurancePolicyPattern" required>
+    <small class="form-text text-muted">Пример: 123-456-789 01</small>
+    <ng-container [ngTemplateOutlet]="validationTemplate"
+                  [ngTemplateOutletContext]="{fieldName:insurance_policy}">
     </ng-container>
 </div>
 
