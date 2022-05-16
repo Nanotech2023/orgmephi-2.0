@@ -15,6 +15,7 @@ export class ProfileEditDocumentRfpassportComponent
     codePattern: string = "^[0-9]{3}-[0-9]{3}$"
     numberPattern: string = "^[0-9]{6}$"
     seriesPattern: string = "^[0-9]{4}$"
+    insurancePolicyPattern: string = "^[0-9]{3}-[0-9]{3}-[0-9]{3} [0-9]{2}$"
 
     onModelChange(): void
     {

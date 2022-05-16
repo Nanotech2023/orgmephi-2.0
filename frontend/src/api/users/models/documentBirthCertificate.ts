@@ -15,6 +15,7 @@ import { DocumentTypeEnum } from "./documentType"
 export interface DocumentBirthCertificate { 
     readonly document_name?: string;
     document_type: DocumentTypeEnum;
+    insurance_policy?: string;
     issue_date?: string;
     issuer?: string;
     number?: string;

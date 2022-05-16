@@ -16,7 +16,7 @@ import { LocationTypeEnum } from './locationType'
 export interface LocationOther {
     country: string;
     location?: string;
-    readonly location_type?: LocationTypeEnum;
+    location_type?: LocationTypeEnum;
     rural?: boolean;
 }
 
